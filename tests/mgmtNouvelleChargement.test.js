@@ -31,7 +31,8 @@ test('Chargement — la partie attend le bouton : G.mgmt reste null, Entrée ouv
   assert.equal(win.eval('G.mgmt'),null,'rien ne s’ouvre tout seul');
   assert.equal(win.eval('G.screen'),'mgmt_nouvelle');
   const html=win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Prêt. Six ans d’histoire sont écrits.'));
+  /* Monde lot 12 T1, écart 3 : libellé de fin porté de la planche. */
+  assert.ok(html.includes('Six ans sont écrits'));
   assert.ok(/Entrer dans /.test(html)&&html.includes('mf-bouton jaune'),'le bouton jaune est là');
   win.eval(`keysHandle({key:'Enter',code:'Enter',preventDefault(){}})`);
   assert.notEqual(win.eval('G.screen'),'mgmt_nouvelle');
@@ -119,7 +120,8 @@ test('Chargement — états debut, chargement, fin et erreur', () => {
   const debut=win.eval(`(()=>{const g={n:2,k:0,annee:mgmtPasseAnnee(2,0),org:'Test',m:null,aff:0,detenteurs:{},vus:0,champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
   assert.match(debut,/mf-genese debut/);
   assert.doesNotMatch(debut,/Entrer dans/);
-  assert.match(debut,/Six années à vivre/);
+  /* Monde lot 12 T1, écart 2 : phrase de la planche. */
+  assert.match(debut,/Six années se jouent avant ton arrivée/);
   assert.deepEqual([...debut.matchAll(/<b>(\d+)<\/b><span>([^<]+)/g)].map(x=>[x[2],+x[1]]),[['soirées jouées',0],['combats',0],['champions couronnés',0],['blessures',0]]);
   const charge=win.eval(`(()=>{const g={n:2,k:1,annee:mgmtPasseAnnee(2,1),org:'Test',m:{hist:[{}],facts:[]},aff:50,vus:0,detenteurs:{},champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
   assert.match(charge,/mf-genese chargement/);
@@ -138,7 +140,8 @@ test('Chargement — états debut, chargement, fin et erreur', () => {
   assert.match(erreur,/width:35.00%/); /* Planche : barre figée où l erreur est survenue, pas ramenée à zéro. */
   win.eval(`CL.mgmtNouvelle(3); MGMT_NOUVELLE.gen={slot:3,orgId:'test',org:'Test',n:2,k:1,annee:2031,erreur:true,erreurAnnee:2031,erreurMessage:'incident contrôlé',aff:35,m:null,vus:0,detenteurs:{},champions:0,blessures:0};`);
   const detail=win.eval('mgmtNouvelleGenHtml(MGMT_NOUVELLE.gen)');
-  assert.match(detail,/2031/); assert.match(detail,/emplacement 3/); assert.match(detail,/incident contrôlé/);
+  /* Monde lot 12 T1 : état erreur de la planche, sans détail technique affiché. */
+  assert.match(detail,/2031/); assert.match(detail,/emplacement 3/); assert.match(detail,/Rien n’a été enregistré/);
   assert.match(detail,/Entrée/);
   win.eval(`keysHandle({key:'Enter',code:'Enter',preventDefault(){}})`);
   assert.equal(win.eval('MGMT_NOUVELLE.gen.erreur'),undefined);
@@ -175,4 +178,60 @@ test('Chargement — une progression conserve les nœuds de l’écran', () => {
   assert.equal(win.document.querySelector('.mf-genese'),racine);
   assert.equal(win.document.querySelector('.mf-genese-barre'),barre);
   win.eval('CL.mgmtNouvelleAbandonner()');
+});
+
+/* ==== [ANCRE: TEST_MONDE_LOT12_T1_PLANCHE] — Monde lot 12 T1 ==== */
+test('Monde lot 12 T1 — la dernière retraite est lue une fois et les noms sont échappés', () => {
+  const win=newGameWindow({runMain:true});
+  const r=JSON.parse(win.eval(`JSON.stringify((()=>{
+    const g={orgId:'split',m:{facts:[{k:'retired',a:'f1',c:3}],hist:[]},vus:0,detenteurs:{},blessures:0};
+    mgmtFighterById=()=>({name:'<img src=x>',div:'H-fly'});
+    mgmtNouvelleLireFaits(g);mgmtNouvelleLireFaits(g);
+    return {vus:g.vus,dernier:g.dernier,html:mgmtNouvelleFaitHtml(g),vide:mgmtNouvelleFaitHtml({})};
+  })())`));
+  assert.equal(r.vus,1);
+  assert.equal(r.dernier.retraite,true);
+  assert.equal(r.vide,'');
+  assert.match(r.html,/&lt;img src=x&gt;/);
+  assert.doesNotMatch(r.html,/<img/);
+  assert.match(r.html,/Retraite/);
+});
+
+test('Monde lot 12 T1 — le chargement montre l’année, le prédécesseur, la barre en six années et le dernier fait', async () => {
+  const win=lancer(2);
+  try{
+    /* Les deux pas sont réellement simulés ; aucun résultat de combat fabriqué. */
+    win.eval('mgmtNouvelleGenSuite=()=>false; mgmtNouvelleGenPas(); mgmtNouvelleGenPas();');
+    const g=win.eval('MGMT_NOUVELLE.gen'), ident=win.eval('mgmtOrgIdentite(MGMT_NOUVELLE.gen.orgId)');
+    const rac=win.document.querySelector('.mf-genese'), barre=rac.querySelector('.mf-genese-barre');
+    assert.match(win.document.body.textContent,/Nouvelle partie · six ans avant ton arrivée/);
+    assert.match(win.document.body.textContent,/Emplacement 2/);
+    assert.equal(rac.querySelector('.mf-genese-annee').textContent,String(g.annee));
+    assert.equal(rac.querySelector('.mf-genese-soiree').textContent,ident.soirees+' 1');
+    assert.equal(rac.querySelector('.mf-genese-predecesseur').textContent,`${ident.predecesseur.prenom} ${ident.predecesseur.nom} compose les cartes`);
+    assert.match(rac.textContent,/Le dernier fait marquant/);
+    assert.ok(rac.querySelector('.mf-genese-dernier-fait').textContent.includes(g.dernier.nom));
+    win.eval('CL.mgmtNouvelleLecture(1)');
+    assert.equal(win.document.querySelector('.mf-genese-barre'),barre,'lire ne reconstruit pas la barre');
+    assert.equal(rac.querySelector('.mf-lecture-titre').textContent,ident.adjointe.prenom+' t’aide.');
+    assert.match(rac.textContent,/Carton 2 sur 5/);
+    /* Même calcul pur que pour la partie complète : six repères, à leur vrai indice. */
+    const h=win.eval(`(()=>{const g={...MGMT_NOUVELLE.gen,n:62,reperes:null};return mgmtNouvelleGenHtml(g)})()`);
+    const bloc=win.document.createElement('div');bloc.innerHTML=h;
+    const ans=[...bloc.querySelectorAll('.mf-genese-an')];
+    assert.equal(ans.length,6);
+    assert.equal(bloc.querySelectorAll('.mf-genese-barre i').length,5);
+    for(const el of ans){
+      const idx=win.eval(`Array.from({length:62},(_,i)=>i).find(i=>mgmtPasseAnnee(62,i)===${+el.dataset.year})`);
+      assert.ok(el.getAttribute('style').includes(String(100*idx/62)+'%'));
+    }
+    win.eval('mgmtNouvelleGenPas()');
+    await attendrePret(win);
+    const fin=win.document.querySelector('.mf-genese');
+    assert.match(fin.textContent,/Six ans sont écrits/);
+    assert.match(fin.textContent,/a composé les 2 cartes/);
+    assert.ok(fin.querySelector('.mf-genese-dernier-fait').textContent.includes(win.eval('MGMT_NOUVELLE.gen.dernier.nom')));
+    assert.equal(win.document.activeElement,fin.querySelector('.mf-genese-entree button'));
+    assert.equal(fin.querySelector('.mf-genese-barre b').style.width,'100%');
+  }finally{win.eval('CL.mgmtNouvelleAbandonner()');}
 });
