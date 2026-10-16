@@ -21,3 +21,11 @@ Décision d'Anthony du 15/10/2026 (« prends une mesure logique, la meilleure »
 
 ## Vérification
 `node --test --test-name-pattern="T3|T4" tests/mgmtNiveauxOrg.test.js`. Pas de `check:rapide`. Commit `Monde lot 9 T3b : la notoriété qui départage`.
+
+## Compte rendu
+- `mgmt-organisations.js` : calcul pur du renom (victoires et titres gagnés), nouvelle somme des cinq meilleurs et détail `notoriete5` ; version de cache montée.
+- `tests/mgmtNiveauxOrg.test.js` : deux tests ajoutés — « Monde lot 9 T3b — la notoriété départage les huit organisations » et « Monde lot 9 T3b — le renom compte les victoires et les titres ».
+- Sauvegarde : aucune modification ni migration.
+- Vérification ciblée T3/T4 : 9 tests réussis. `node tools/verif-versions.js origin/main` : aucun écart.
+- Écarts à la fiche : aucun. Questions pour Anthony : aucune.
+- Relecture par agent indisponible (sous-agent non appelable) ; relecture manuelle effectuée.

@@ -47,6 +47,18 @@ function mgmtOrgDecalageNiveau(profil,divId){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_MONDE_LOT9_T3B_RENOM] — Monde lot 9 T3b ==== */
+/** Renom d'un combattant : victoires et bonus de prestige des titres gagnés dans sa partie. */
+function mgmtRenom(sous,f){
+  if(!f) return 0;
+  const titres=(sous&&Array.isArray(sous.facts)?sous.facts:[]).reduce((n,fait)=>{
+    if(!fait||fait.k!=='title_fight'||!Number.isSafeInteger(fait.fight)) return n;
+    const trace=sous.hist&&sous.hist[fait.fight];
+    return trace&&trace.winner==='A'&&trace.a&&trace.a.id===f.id||trace&&trace.winner==='B'&&trace.b&&trace.b.id===f.id?n+1:n;
+  },0);
+  return (Number.isSafeInteger(f.W)?f.W:0)+2*titres;
+}
+
 /* ==== [ANCRE: MGMT_MONDE_LOT9_T3_NIVEAUX] — Monde lot 9 T3 ==== */
 /** Niveaux dérivés de l'état courant ; aucune donnée n'est persistée. */
 function mgmtOrgNiveaux(m,orgId){
@@ -62,7 +74,7 @@ function mgmtOrgNiveaux(m,orgId){
   const remplies=new Set(comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=0.8).map(c=>c.salleId||c.salle));
   let salle=salles.filter(s=>remplies.has(s.id)||remplies.has(s.nom)).sort((a,b)=>b.capacite-a.capacite)[0];
   if(!salle) salle=salles.slice().sort((a,b)=>a.capacite-b.capacite)[0]||null;
-  const renom=roster.map(mgmtStar).sort((a,b)=>b-a).slice(0,5);
+  const renom=roster.map(f=>({f,renom:mgmtRenom(partie,f)})).sort((a,b)=>b.renom-a.renom||((b.f.W||0)+(b.f.L||0)+(b.f.D||0))-((a.f.W||0)+(a.f.L||0)+(a.f.D||0))||String(a.f.id).localeCompare(String(b.f.id))).slice(0,5);
   let puissance=0;
   /* Le classement mondial se lit dans la partie du joueur (il réunit toutes les organisations) ; le rang est la position dans la liste
      (les lignes ne portent pas de champ rang). Superviseur, 15/10/2026. */
@@ -73,7 +85,7 @@ function mgmtOrgNiveaux(m,orgId){
       if(partie===m?chezMoi.has(r.id):(()=>{ const f=mgmtExteriorCombattant(m,r.id); return !!f&&f.orgId===orgId; })()) puissance+=11-rang;
     });
   }
-  return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.length?renom.reduce((a,b)=>a+b,0)/renom.length:0,puissance};
+  return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.reduce((s,x)=>s+x.renom,0),notoriete5:renom.map(x=>({id:x.f.id,nom:x.f.name,W:x.f.W,titres:x.renom-(Number.isSafeInteger(x.f.W)?x.f.W:0)})),puissance};
 }
 /** Rangs décroissants, égalités départagées par l'ordre canonique des organisations. */
 function mgmtOrgNiveauxRangs(m){
