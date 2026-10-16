@@ -224,8 +224,10 @@ test('Monde lot 9 T2e — une victoire vivante et une victoire Split sont évalu
   const win=creer(true),r=win.eval(`(function(){const m=G.mgmt,org=mgmtMondeVivantIds(m)[0],s=m.orgs[org],div=allDivisions()[0].id;
     const cible=x=>x.roster.find(f=>f.div===div&&!mgmtIsRetired(f));
     const vivant=cible(s),split=cible(m);
-    function victoire(partie,f){const rival=partie.roster.find(x=>x.div===f.div&&x.id!==f.id&&!mgmtIsRetired(x));const avant=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);f.W++;partie.hist.push({c:partie.cycle-1,winner:'A',a:{id:f.id},b:{id:rival.id}});const apres=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);f.W--;partie.hist.pop();return {avant,apres};}
+    function victoire(partie,f){const rival=partie.roster.find(x=>x.div===f.div&&x.id!==f.id&&!mgmtIsRetired(x));const avant=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);const scoresAvant=mgmtRangScores(partie,[f],partie.cycle).get(f.id);const combat={c:partie.cycle-1,winner:'B',a:{id:rival.id},b:{id:f.id}};partie.hist.push(combat);f.W++;const apres=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);const scoresApres=mgmtRangScores(partie,[f],partie.cycle).get(f.id);f.W--;partie.hist.pop();return {avant,apres,variation:scoresApres-scoresAvant,gagnant:combat.winner==='B'&&combat.b.id===f.id};}
     return {vivant:victoire(s,vivant,'v'),split:victoire(m,split,'s')};})()`);
+  assert.ok(r.vivant.gagnant&&r.split.gagnant,'le combattant testé est bien le vainqueur dans chaque partie');
   assert.ok(r.vivant.apres<=r.vivant.avant,'la victoire vivante ne fait pas reculer');
   assert.ok(r.split.apres<=r.split.avant,'la victoire Split ne fait pas reculer');
+  assert.equal(r.vivant.variation,r.split.variation,'la victoire ajoute le même score sous-partie pour les deux organisations');
 });
