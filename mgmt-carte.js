@@ -710,7 +710,15 @@ function mgmtDivisionRankingCalcule(m,divId,scope,cycle){
       cands.push(Object.assign({},historique,{orgId:f.orgId}));
     }
   }
-  const scores=mgmtRangScores(m,cands,passe?c:undefined);
+  let scores;
+  if(scope==='world'&&m.mondeVivant===true){
+    scores=mgmtRangScores(m,cands.filter(o=>!o.orgId),passe?c:undefined);
+    for(const orgId of mgmtMondeVivantIds(m)){
+      const sous=m.orgs[orgId], lignes=cands.filter(o=>o.orgId===orgId);
+      if(!sous||!lignes.length) continue;
+      for(const [id,score] of mgmtRangScores(sous,lignes,passe?c:undefined)) scores.set(id,score);
+    }
+  }else scores=mgmtRangScores(m,cands,passe?c:undefined);
   cands.sort((x,y)=>mgmtRankingCompare(x,y,scores));
   return cands;
 }

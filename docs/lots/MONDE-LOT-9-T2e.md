@@ -29,3 +29,9 @@ au cycle 63, alors qu'un combattant de Split garde un score de forme. La loi de 
 ## Vérification
 `node --test --test-name-pattern="T2e|T2d" tests/mgmtMondeVivant.test.js`, `node tools/verif-versions.js origin/main`. Pas de `check:rapide`.
 Commit `Monde lot 9 T2e : un classement mondial juste pour les huit organisations`.
+
+## Compte rendu
+- `mgmt-carte.js` : scores mondiaux désormais calculés par `mgmtRangScores` sur l'historique et le cycle propres à chaque organisation vivante ; Split conserve son calcul existant. Version de cache montée.
+- `tests/mgmtMondeVivant.test.js` : ajout des tests « Monde lot 9 T2e — le top 10 mondial mêle les organisations vivantes sans domination de Split » et « Monde lot 9 T2e — une victoire vivante et une victoire Split sont évaluées par la même loi ».
+- Sauvegarde : aucune migration (format inchangé). Écart : aucun.
+- Questions pour Anthony : aucune.
