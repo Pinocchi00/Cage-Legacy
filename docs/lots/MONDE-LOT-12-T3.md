@@ -29,3 +29,6 @@ Combat : la plaque « Combat principal · léger · 5 rounds » sous le VS ; « 
 - Audit : `node tools/verif-versions.js origin/main`, aucun écart. `check:rapide` non lancé conformément à la consigne du superviseur.
 - Relecture : effectuée localement sur ce constat ; aucun sous-agent appelé conformément au repli imposé. Aucune migration de sauvegarde.
 - Questions pour Anthony : pas de remise en question de l'autorisation des lectures pures ; élément manquant pour reprendre : l'implémentation de `mgmtLectureStyle(f).lignes` désignée par la décision, ou sa règle exacte de sélection des phrases depuis le profil.
+
+## REPRISE (17/10/2026) — la source manquante existe maintenant
+La branche a reçu `main` : `mgmtLectureStyle(f)` existe dans `mgmt-soiree-show.js` (elle renvoie `{profil, lignes, zones}`, lecture pure du profil de combat, sans moteur ni mutation). Applique la décision ci-dessus telle quelle, sans question. Le commit précédent (« inachevé ») n’est qu’un constat : termine la tranche avec le commit `Monde lot 12 T3 : les présentations comme leurs planches`.
