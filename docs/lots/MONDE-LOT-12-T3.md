@@ -18,3 +18,14 @@ Combat : la plaque « Combat principal · léger · 5 rounds » sous le VS ; « 
 - **Sont autorisées** les lectures pures, sans moteur ni mutation : `mgmtCombatProfile`, `mgmtLectureStyle` (`mgmt-soiree-show.js`), `mgmtSaFaille`, `mgmtCommentIlCombat`, et les résultats de `m.hist` (qui a battu qui, comment). Le test du lot 3 T5 est **révisé** pour n’interdire que le rejeu, le moteur et la mutation ; cite cette décision dans le test.
 - **« Ses points forts »** = les forces lues sur le profil (`mgmtLectureStyle(f).lignes`, une à trois phrases, ex. « Frappe de loin et touche juste ») **plus**, s’il y en a, ses victoires par KO ou soumission (une ligne chacune, « KO contre X, 2e round ») ; **jamais** les combats gagnés aux points, jamais l’histoire. Sans aucune force lisible, le panneau n’est pas affiché.
 - Ne remets pas de question : applique.
+
+## Compte rendu
+
+- État : tranche non implémentée ; arrêt sur la source de données désignée, absente du dépôt au commit `102c767` sur `monde-lot-12-fidelite`. Aucun changement au moteur, aux écrans ou aux tests existants.
+- Fichier modifié : cette fiche uniquement, pour consigner le constat. Les modifications préexistantes de configuration restent hors commit.
+- Blocage constaté : aucune définition ni occurrence de `mgmtLectureStyle` dans les fichiers JavaScript. Dans `mgmt-soiree-show.js`, les phrases de `MGMT_AVANT_TEXTES.lignes` sont sélectionnées par `mgmtObservation` (lignes 153–215), via `mgmtObsResume`, qui appelle `mgmtReplayFight` (ligne 128). Cette porte demeure interdite par la décision ci-dessus. `mgmtCommentIlCombat` renvoie seulement la discipline et la garde ; `mgmtSaFaille` renvoie le nom de l'attribut le plus faible, pas les forces demandées.
+- Écart : la décision autorise bien la lecture du profil, mais la fonction pure qu'elle demande de reprendre n'est pas présente. Aucun seuil ni règle de conversion du profil en phrases n'a été inventé pour la remplacer.
+- Tests ajoutés : aucun. Vérification de référence : `node --test tests/mgmtPresentationEntrees.test.js`, 7 tests réussis ; cela ne valide pas T3, qui reste à coder.
+- Audit : `node tools/verif-versions.js origin/main`, aucun écart. `check:rapide` non lancé conformément à la consigne du superviseur.
+- Relecture : effectuée localement sur ce constat ; aucun sous-agent appelé conformément au repli imposé. Aucune migration de sauvegarde.
+- Questions pour Anthony : pas de remise en question de l'autorisation des lectures pures ; élément manquant pour reprendre : l'implémentation de `mgmtLectureStyle(f).lignes` désignée par la décision, ou sa règle exacte de sélection des phrases depuis le profil.
