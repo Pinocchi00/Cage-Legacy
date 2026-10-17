@@ -825,6 +825,10 @@ function mgmtDivisionRanking(m,divId,scope,cycle){
 function mgmtOfferBulk(m,selectWhenIdle){
   if(!m||!Array.isArray(m.pile)) return false;
   if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
+  /* ==== [ANCRE: MONDE_LOT14_T5_POSE_DIRECTE] — Monde lot 14 T5 ====
+     Décision T2 : hors rejeu du prédécesseur, composer directement les
+     préliminaires manquants plutôt que créer une affaire devenue fantôme. */
+  if(!MGMT_PREDECESSEUR_EN_COURS) return mgmtComposerPrelims(m);
   /* §T3 : la carte principale est complète, les préliminaires manquent. */
   if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length<m.card.sizeMain) return false;
   if(Number.isSafeInteger(m.card.sizePrelims)&&m.card.prelims.length>=m.card.sizePrelims) return false;
