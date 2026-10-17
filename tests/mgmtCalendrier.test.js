@@ -128,16 +128,14 @@ test('Agenda — préparation à la demande : le joueur désigne un combattant, 
     const rg=mgmtDivisionRank(m,f)||0; const meme=mgmtCartRows(m).filter(x=>x.id!==f.id&&x.div===f.div&&mgmtSelectable(m,x,f.id)).map(x=>Math.abs((mgmtDivisionRank(m,x)||0)-rg));
     return {o:!!o,div:o&&o.div===f.div,proche:o&&Math.abs((mgmtDivisionRank(m,o)||0)-rg)===Math.min(...meme),autre:o&&o.id!==f.id};`);
   assert.ok(r.o&&r.div&&r.proche&&r.autre);
+  /* Décision d'Anthony du 17/10/2026 : Leïla ne touche qu'aux préliminaires, la touche « Proposer » (D) de la composition est retirée : elle ne servait à rien. */
   win.eval(`CL.go('mgmt_carte'); CL.mgmtCarteEntree();`);
-  const curseurAvant=win.eval('MGMT_CART.cursor');
   const mainAvant=win.eval('G.mgmt.card.main.length');
+  const curseurAvant=win.eval('MGMT_CART.cursor');
+  assert.equal(win.eval(`[...document.querySelectorAll('.mf-bouton')].some(b=>/Proposer/.test(b.textContent))`),false,'plus de bouton Proposer sur la carte');
   touche(win,'d');
   assert.equal(win.eval('G.mgmt.card.main.length'),mainAvant,'D ne booke aucun combat');
-  assert.equal(win.eval('MGMT_CART.cursor'),curseurAvant,'D ne déplace plus le curseur');
-  const dossiersJson=win.eval('JSON.stringify(Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers.map(d=>d.adversaire.id):[])');
-  const pileJson=win.eval('JSON.stringify(mgmtDossiersAdversaires(G.mgmt,MGMT_CART.pick).map(d=>d.adversaire.id))');
-  assert.equal(dossiersJson,pileJson,'D expose réellement la pile d’adversaires proposée');
-  assert.ok(JSON.parse(dossiersJson).length>=1,'D expose au moins un dossier');
+  assert.equal(win.eval('MGMT_CART.cursor'),curseurAvant,'D ne déplace pas le curseur');
 });
 
 test('Une soirée est toujours posée : l’ouverture pose la première, à cinq semaines, et la suivante se pose après une soirée jouée (demande d’Anthony du 08/10/2026 : les planches montrent la date sur chaque écran)', () => {
