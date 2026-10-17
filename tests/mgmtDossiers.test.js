@@ -12,8 +12,11 @@ function ev(code){ return JSON.parse(win.eval(`JSON.stringify((()=>{${code}})())
 /* ==== [ANCRE: MONDE_LOT4_T8_TESTS] — Monde lot 4 T8 ==== */
 test('Monde lot 4 T8 — le dossier montre la bannière, la raison de Leïla et les trois colonnes',()=>{
   const w=ouvreCible(0);
-  try{const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;MGMT_CART.index=0;MGMT_CART.etape=1;const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(m);const d=MGMT_CART.dossiers[MGMT_CART.index],rs=mgmtRaisonLignes(m,d.raison,[d.combattant,d.adversaire]);return JSON.stringify({text:e.textContent,last:d.combattant.last||d.combattant.name,l1:rs&&rs.l1,n:MGMT_CART.dossiers.length})})()`));
-    for(const t of [r.last,'PALMARÈS','POURQUOI LEÏLA VOUS LE PROPOSE',r.l1,'CE QUI LE DISTINGUE','SON HISTOIRE ICI',`DOSSIER 1 SUR ${r.n}`]) assert.ok(r.text.toLocaleLowerCase().includes(String(t).toLocaleLowerCase()),t);
+  try{const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;MGMT_CART.index=0;MGMT_CART.etape=1;const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(m);const d=MGMT_CART.dossiers[MGMT_CART.index],rs=mgmtRaisonLignes(m,d.raison,[d.combattant,d.adversaire]);return JSON.stringify({text:e.textContent,last:d.combattant.last||d.combattant.name,l1:rs&&rs.l1,n:MGMT_CART.dossiers.length,titres:mgmtPresentationLignes(m,{mode:'combattant',ids:[d.combattant.id]}).panneaux.slice(0,3).map(p=>p.titre)})})()`));
+    for(const t of [r.last,'PALMARÈS','POURQUOI LEÏLA VOUS LE PROPOSE',r.l1,...r.titres,`DOSSIER 1 SUR ${r.n}`]) assert.ok(r.text.toLocaleLowerCase().includes(String(t).toLocaleLowerCase()),t);
+    /* Monde lot 12 T3 (charte R4) : les panneaux sans ligne sont retirés ; chaque colonne porte le titre de son panneau (jamais celui de sa position) et il y en a au moins une. */
+    assert.ok(r.titres.length>=1,'au moins une colonne');
+    assert.ok(!/SA FORCE · SA FAILLE/i.test(r.text)||r.titres.includes('SA FORCE · SA FAILLE'),'aucun titre de position périmé');
   }finally{w.close();}
 });
 test('Monde lot 4 T8 — aucun identifiant interne n\'est affiché',()=>{
