@@ -1,0 +1,17 @@
+# Monde lot 14 T1 — Leïla ne propose plus de choix
+
+Branche : `monde-lot-14-leila`. **Décision d’Anthony du 17/10/2026** : « enlever les choix de Leïla ». Le joueur ne reçoit plus d’affaires à accepter ou refuser (« D’accord, je vous fais confiance » / « Non, désolé »). **Règles communes du lot 14** : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; **la graine et les tirages ne bougent pas** (garde chaque appel `rnd()`/`pick()` à sa place, pour que les parties et les six ans générés restent identiques) ; un test existant n’est réécrit que pour cette décision, citée (`décision d’Anthony du 17/10/2026`) ; `node tools/_bump.js` sur chaque fichier touché ; pas de `check:rapide` ; la version de sauvegarde ne change pas ; commit `Monde lot 14 T1 : Leïla ne propose plus de choix`.
+
+## Ce qui disparaît
+Les affaires de types `leila_propose`, `leila_react`, `leila_react_swap`, `leila_react_crush` n’arrivent plus jamais devant le joueur : ni sur **l’Accueil** (lignes « affaire »), ni sur **Les affaires** (`mgmt_bureau`, `mgmt-ecran-semaine.js` : colonne de dialogue, boutons de réponse, « Ignorer l’affaire »), ni dans les **pastilles** de la barre.
+
+## Comment (sans toucher aux tirages ni à la sauvegarde)
+1. `mgmtNewPile` (`mgmt-bureau.js`) construit la pile **exactement comme avant** (mêmes tirages), puis marque chaque affaire de ces quatre types `status:'closed', decision:'ignored'` **sans écrire de fait** `ignored` (aucun `mgmtAddFact`). Un test vérifie que deux parties de même graine ont la même suite de faits avant et après le lot (hors l’absence de faits `ignored`).
+2. `mgmtValidAffair` (`mgmt-save.js`) continue d’accepter ces types : une ancienne sauvegarde se charge. À l’ouverture d’une partie (`mgmtRepair` ou équivalent), toute affaire de ces types encore `open` est fermée de la même façon.
+3. **Les dossiers de Leïla** de la Carte (choix d’un combattant puis d’un adversaire parmi six dossiers) **restent** : c’est l’outil de composition du joueur, pas une affaire à trancher.
+4. Les textes d’échange (`MGMT_EXCHANGES` : `leila_propose`, réactions) restent dans les données (additif) mais ne sont plus lus à l’écran.
+5. **Les affaires de la carte préliminaire (`leila_bulk`) sont traitées par la tranche T2**, ne les touche pas.
+6. Les écrans **Accueil** et **Les affaires** : si plus rien n’est à régler, le panneau « Demandes et affaires ouvertes » n’affiche que les demandes de combattants (`mgmtDemandesOuvertes`) ; « Les affaires » devient « Le monde autour de Split » (carte, monde, classement) sans colonne vide.
+
+## Tests
+`Monde lot 14 T1 — <point>` : (a) après `mgmtNewPile`, aucune affaire de ces types n’est `open` ; (b) l’Accueil n’affiche aucune ligne d’affaire de Leïla ; (c) « Les affaires » n’affiche ni « D’accord » ni « Non, désolé » ni « Ignorer l’affaire » ; (d) une sauvegarde d’avant ce lot avec une affaire `leila_propose` ouverte se charge et l’affaire est fermée ; (e) mêmes faits, même graine. Corrige les tests existants (`tests/mgmtBureau.test.js`, `tests/mgmtCard.test.js`, `tests/mgmtEconomie.test.js`, `tests/mgmtSoiree.test.js`, etc.) qui répondaient à ces affaires : ils testaient une mécanique retirée ; remplace-les par des tests de la composition directe (`mgmtBookMain`) en citant la décision.
