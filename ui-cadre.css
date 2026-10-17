@@ -1521,6 +1521,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-evp{font-size:25px;line-height:1.05}
 .mf-ac-rs{font-size:22px;line-height:1;color:var(--mf-texte2)}
 .mf-ac-nom{background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;text-align:left;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+/* ==== [ANCRE: ACCUEIL_NOMS_ENTIERS] — Monde lot 12 T2 ==== */
+.mf-ac .mf-ac-nom{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%}
 .mf-ac-menu{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;border:2px solid var(--mf-sep);padding:5px 8px}
 .mf-ac-aide{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:22px;line-height:1;color:var(--mf-texte2);flex:none}
 .mf-ac-jaune{flex:none;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
@@ -1535,17 +1537,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-ligne.sel{outline:2px solid var(--mf-jaune)}
 .mf-ac-rt{display:flex;flex-direction:column;gap:6px;min-width:0}
 .mf-ac-rp{font-size:24px;line-height:1.05}
-.mf-ac-ra{display:flex;gap:10px;flex:none}
-.mf-ac-ra .mf-bouton{height:48px}
-.mf-ac-ra .mf-bouton-t{font-size:24px}
 .mf-ac-act,.mf-ac-lien{background:none;border:0;padding:0;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune)}
-.mf-ac-ech{display:flex;flex-direction:column;gap:10px;padding:4px 0 8px;flex:none}
-.mf-ac-dit{font-size:24px;line-height:1.1}
-.mf-ac-fc{display:flex;justify-content:space-between;gap:14px;font-size:24px;line-height:1.1}
-.mf-ac-fc.sel{color:var(--mf-jaune)}
-.mf-ac-reps{display:flex;gap:10px;flex-wrap:wrap}
-.mf-ac-reps .mf-bouton{height:48px}
-.mf-ac-reps .mf-bouton-t{font-size:24px}
 .mf-ac-retrait,.mf-ac-retrait *{font-size:22px;line-height:1.15}
 .mf-ac-retrait .mgmt-retrait{margin:0;padding:8px 12px}
 .mf-ac-retrait .mgmt-retrait-sortie{padding:6px 10px;font-size:22px}

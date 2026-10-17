@@ -191,16 +191,28 @@ test('Monde lot 12 T2 — reprise 2 — listes limitées et Voir tout sans nom c
     for(const f of m.roster.filter(x=>!mgmtIsRetired(x)).slice(0,7)){
       m.facts.push({k:'injury',a:f.id,c:m.cycle},{k:'demande',a:f.id,want:'carte-principale',c:m.cycle});
     }
+    const nomLong='Alexandre & Jean-Baptiste de La Roche';
+    m.roster.filter(x=>!mgmtIsRetired(x)).slice(0,7).forEach(f=>{f.name=nomLong;});
+    const [a,b]=m.roster;
+    m.pile=[{id:'debordement',kind:'leila_propose',status:'open',a:a.id,b:b.id}];
     render(); const c=mgmtAccueilContenu(m);
     const liens=[...document.querySelectorAll('.mf-ac-lien')].filter(x=>x.textContent==='Voir tout ›');
     MGMT_ACCUEIL.cur=4; CL.mgmtAccueilDeplacer(1);
     return {total:c.passe.length,passe:document.querySelectorAll('.mf-ac-ev').length,
-      affaires:document.querySelectorAll('.mf-ac-ligne').length,liens:liens.map(x=>x.getAttribute('onclick')),cur:MGMT_ACCUEIL.cur};`);
+      affaires:document.querySelectorAll('.mf-ac-ligne').length,
+      liens:liens.map(x=>({famille:x.dataset.famille,go:x.getAttribute('onclick'),attend:!!x.closest('.mf-ac-haut')})),
+      noms:[...document.querySelectorAll('.mf-ac-ev .mf-ac-nom,.mf-ac-ligne .mf-ac-nom')].map(x=>x.textContent),
+      nomLong,cur:MGMT_ACCUEIL.cur};`);
   assert.ok(r.total>5); assert.equal(r.passe,5); assert.equal(r.affaires,4);
-  assert.deepEqual(r.liens,["CL.go('mgmt_effectif')","CL.go('mgmt_effectif')"]); assert.equal(r.cur,0);
+  assert.deepEqual(r.liens.find(x=>x.famille==='passe'),{famille:'passe',go:"CL.go('mgmt_effectif')",attend:false});
+  assert.deepEqual(r.liens.find(x=>x.famille==='demande'),{famille:'demande',go:"CL.go('mgmt_effectif')",attend:true});
+  assert.deepEqual(r.liens.find(x=>x.famille==='affaire'),{famille:'affaire',go:"CL.go('mgmt_bureau')",attend:true});
+  assert.equal(r.liens.length,3); assert.equal(r.cur,0);
+  assert.ok(r.noms.length>=9); assert.ok(r.noms.every(n=>n===r.nomLong),'les noms complets restent dans chaque bouton');
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.match(css,/\.mf-ac\{[^}]*overflow:visible/);
   assert.match(css,/\.mf-ac-p>\.mf-p2>\.mf-p3\{[^}]*overflow:visible/);
+  assert.match(css,/\.mf-ac \.mf-ac-nom\{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%\}/);
 });
 
 test('Monde lot 12 T2 — reprise 2 — bloc jaune en casse phrase et action à droite',()=>{
@@ -213,4 +225,36 @@ test('Monde lot 12 T2 — reprise 2 — bloc jaune en casse phrase et action à 
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.match(css,/\.mf-ac-jp\{display:flex;justify-content:space-between;align-items:center;gap:12px\}/);
   assert.doesNotMatch(css,/[^{}]*\.mf-ac-jp[^{}]*\{[^}]*flex-wrap:wrap/);
+});
+
+/* ==== [ANCRE: ACCUEIL_CORRECTIONS_RELECTURE_TESTS] — Monde lot 12 T2 ==== */
+test('Monde lot 12 T2 — reprise — bloc jaune conserve Leïla depuis Continuer',()=>{
+  const w=ouverte();
+  const r=res(w,`mgmtAgendaBlocages=()=>[]; mgmtAgendaActif=()=>false;
+    const m=G.mgmt; m.pile=[{id:'leila',kind:'leila_propose',status:'open'}];
+    render(); return {source:mgmtContinuerRaison(m).libelle,titre:document.querySelector('.mf-ac-jt').textContent};`);
+  assert.equal(r.source,'Répondre à Leïla'); assert.equal(r.titre,r.source);
+});
+
+test('Monde lot 12 T2 — reprise — dossiers sur le premier emplacement libre',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster; m.card.main=new Array(2); m.card.main[1]={a:a.id,b:b.id};
+    /* La presse ne fait pas partie du choix de l'emplacement testé. */
+    mgmtMediasLignes=()=>[];
+    let cible=null; CL.mgmtCarteDossiersOuvrir=i=>{cible=i;};
+    render(); const titre=document.querySelector('.mf-ac-jt').textContent;
+    document.querySelector('.mf-ac-jb').click(); return {titre,cible};`);
+  assert.equal(r.titre,'Finir la carte'); assert.equal(r.cible,0);
+});
+
+test('Monde lot 12 T2 — reprise — Voir tout est exporté parmi les textes à relire',()=>{
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'cage-accueil-textes-'));
+  try{
+    const out=path.join(dir,'textes.md');
+    require('node:child_process').execFileSync(process.execPath,['tools/exporter-textes.js','--out',out],{cwd:path.join(__dirname,'..'),stdio:'pipe'});
+    const texte=fs.readFileSync(out,'utf8');
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.voirTout[^\n]*Voir tout ›/);
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.finir[^\n]*Finir la carte/);
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.resumes\.leila_propose[^\n]*Leïla propose/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

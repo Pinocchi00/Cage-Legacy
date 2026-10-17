@@ -14,7 +14,18 @@ const MGMT_ACCUEIL_JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendred
 /** La puce de menu d'un événement : le menu où il se retrouve. */
 const MGMT_ACCUEIL_MENUS={vie:'Effectif',demande:'Presse',attente:'Contrats',corps:'Effectif',resultat:'Résultats',titre:'Ceintures'};
 const MGMT_ACCUEIL_MAX_PASSE=5;
-const MGMT_ACCUEIL_MAX_ATTEND=3;
+/* ==== [ANCRE: ACCUEIL_TEXTES_EXPORTABLES] — Monde lot 12 T2 ==== */
+const MGMT_ACCUEIL_TEXTES={
+  voirTout:{texte:'Voir tout ›',relu:false},
+  finir:{texte:'Finir la carte',relu:false},
+  dossiers:{texte:'Ouvrir les dossiers',relu:false},
+  resumes:{
+    leila_propose:{texte:'Leïla propose ',relu:false},
+    leila_react:{texte:'Leïla revient sur ',relu:false},
+    leila_react_swap:{texte:'Leïla propose un échange pour ',relu:false},
+    leila_react_crush:{texte:'Leïla revient sur ',relu:false},
+  },
+};
 
 /** Le nom d'un combattant (de l'organisation ou extérieur), ou '' s'il est inconnu. Pur. */
 function mgmtAccueilNom(m,id){
@@ -78,8 +89,9 @@ function mgmtAccueilContenu(m){
   let prochaine=null;
   const b=mgmtAgendaBlocages(m)[0];
   /* ==== [ANCRE: ACCUEIL_ACTION_UNIQUE] — Monde lot 12 T2 ==== */
+  const libre=m.card.main.findIndex(x=>!x);
   if(b) prochaine=b.k==='main'
-    ?{titre:'Finir la carte',relu:false,detail:b.texte,bouton:'Ouvrir les dossiers',onclick:`CL.mgmtCarteDossiersOuvrir(${m.card.main.length})`}
+    ?{titre:MGMT_ACCUEIL_TEXTES.finir.texte,relu:false,detail:b.texte,bouton:MGMT_ACCUEIL_TEXTES.dossiers.texte,onclick:`CL.mgmtCarteDossiersOuvrir(${libre<0?m.card.main.length:libre})`}
     :{titre:b.texte,detail:'',bouton:b.label,onclick:b.onclick};
   else if(mgmtAgendaActif(m)&&!mgmtDemoTerminee(m)) prochaine={titre:'La soirée est prête',detail:MGMT_PRISE_TEXTES.prete.texte,bouton:'Ouvrir le calendrier',onclick:"CL.go('mgmt_calendrier')"};
   else{ const s=mgmtContinuerRaison(m); prochaine={titre:s.libelle,detail:'',bouton:'Ouvrir',relu:false,onclick:'CL.mgmtContinuer()'}; }
@@ -90,11 +102,11 @@ function mgmtAccueilContenu(m){
     ouvertes.push({kind:'demande',i:d.i,id:d.a,parts:[n,mgmtAccueilT(' demande : '+def.libelle.toLowerCase())].concat(cible?[mgmtAccueilT(' — '),cible]:[])});
   }
   /* ==== [ANCRE: ACCUEIL_RESUMES_REPRISE] — Monde lot 12 T2 ==== */
-  const resumes={leila_propose:'Leïla propose ',leila_react:'Leïla revient sur ',leila_react_swap:'Leïla propose un échange pour ',leila_react_crush:'Leïla revient sur '};
+  const resumes=MGMT_ACCUEIL_TEXTES.resumes;
   for(const a of m.pile.filter(x=>x.status==='open'&&(x.kind==='leila_bulk'||resumes[x.kind]))){
     if(a.kind==='leila_bulk'){ ouvertes.push({kind:'affaire',id:a.id,bulk:true,relu:false,parts:[mgmtAccueilT('Carte proposée — '+(Array.isArray(a.fights)?a.fights.length:0)+' combats')],sous:mgmtBulkSubject(m,a)}); continue; }
     const A=mgmtAccueilN(m,a.a), B=mgmtAccueilN(m,a.b);
-    ouvertes.push({kind:'affaire',id:a.id,bulk:false,relu:false,parts:(A&&B)?[mgmtAccueilT(resumes[a.kind]),A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
+    ouvertes.push({kind:'affaire',id:a.id,bulk:false,relu:false,parts:(A&&B)?[mgmtAccueilT(resumes[a.kind].texte),A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
@@ -165,27 +177,11 @@ function mgmtAccueilBandeau(c,m){
     +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
     +`<div class="mf-ac-tuiles">${tuiles}</div></div>`;
 }
-/** Une affaire dépliée : qui parle, ce qu'il dit, les réponses (clic ou 1 à 3). */
-function mgmtAccueilEchange(m,a){
-  const ex=MGMT_EXCHANGES[a.exchange], spk=MGMT_SPEAKERS[a.speaker]||{name:'?',role:''};
-  const lines=(ex?ex.lines:[]).filter(t=>typeof t==='string').map(t=>`<div class="mf-ac-dit">${esc(t)}</div>`).join('');
-  const combats=a.kind==='leila_bulk'&&Array.isArray(a.fights)?a.fights.map((f,i)=>{
-    const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b); if(!fa||!fb) return '';
-    return `<div class="mf-ac-fc${a.marked===i?' sel':''}"><span>${mgmtAccueilParts(m,[{id:fa.id,nom:fa.name},{t:' contre '},{id:fb.id,nom:fb.name}])}</span>`
-      +`<button type="button" class="mf-ac-lien" onclick="CL.mgmtMark('${esc(a.id)}',${i})">${a.marked===i?'Reposer':'Échanger'}</button></div>`;
-  }).join(''):'';
-  const reps=mgmtVisibleReplies(m,a).map((r,i)=>{
-    const lib=r.text||MGMT_ACTION_LABELS[r.action];
-    const go=r.action==='__ignore'?`CL.mgmtIgnore('${esc(a.id)}')`:`CL.mgmtReply('${esc(a.id)}','${esc(r.id)}')`;
-    return mfBouton(lib,{touche:String(i+1),jaune:i===0,onclick:go});
-  }).join('');
-  return `<div class="mf-ac-ech"><div class="mf-ac-l">${esc((spk.name+(spk.role?' · '+spk.role:'')).toUpperCase())}</div>${lines}${combats}<div class="mf-ac-reps">${reps}</div></div>`;
-}
 function mgmtAccueilAttend(m,c,extra=''){
   const p=c.attend.prochaine;
   const retrait=typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):'';
   /* ==== [ANCRE: ACCUEIL_JAUNE_REPRISE] — Monde lot 12 T2 ==== */
-  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(p.titre.charAt(0).toUpperCase()+p.titre.slice(1).toLowerCase())}</div>`
+  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(p.titre.charAt(0).toUpperCase()+p.titre.slice(1))}</div>`
     +`<div class="mf-ac-jp"><div class="mf-ac-jd">${esc(p.detail)}</div><button type="button" class="mf-ac-jb" onclick="${p.onclick}">${mfTouche('Entrée')}<span>${esc(mfNet(p.bouton))}</span></button></div></div>`;
   let rows='';
   const liste=c.attend.ouvertes;
@@ -199,7 +195,7 @@ function mgmtAccueilAttend(m,c,extra=''){
   }
   /* ==== [ANCRE: ACCUEIL_VOIR_TOUT_REPRISE] — Monde lot 12 T2 ==== */
   for(const kind of ['demande','affaire']){
-    if(liste.slice(4).some(r=>r.kind===kind)) rows+=`<button type="button" class="mf-ac-lien" data-relu="false" onclick="CL.go('${kind==='demande'?'mgmt_effectif':'mgmt_bureau'}')">Voir tout ›</button>`;
+    if(liste.slice(4).some(r=>r.kind===kind)) rows+=`<button type="button" class="mf-ac-lien" data-famille="${kind}" onclick="CL.go('${kind==='demande'?'mgmt_effectif':'mgmt_bureau'}')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`;
   }
   return mfPanneau(mgmtAccueilTitre('CE QUI T’ATTEND')+boite
     +(retrait?`<div class="mf-ac-retrait">${retrait}</div>`:'')
@@ -211,11 +207,10 @@ function mgmtAccueilPasse(m,c){
   const rows=c.passe.slice(0,MGMT_ACCUEIL_MAX_PASSE).map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
     +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('');
-  const vide=`<div class="mf-ac-rs">Rien de neuf depuis ta dernière visite.</div>`;
   const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
   /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
-  const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-relu="false" onclick="CL.go('mgmt_effectif')">Voir tout ›</button>`:'';
-  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(rows||vide)+suite+touches,'normal','mf-ac-p mf-ac-c5');
+  const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-famille="passe" onclick="CL.go('mgmt_effectif')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`:'';
+  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
 }
 function mgmtAccueilAilleurs(m,c){
   /* ==== [ANCRE: ACCUEIL_AILLEURS_R4] — Monde lot 12 T2 ==== */
