@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())`));
 /* La génération des six ans dure ~55 s : elle n’a lieu qu’une fois (graine 20261008), puis chaque test reçoit une copie de la partie. */
 let PARTIE_JSON=null;
@@ -84,10 +85,16 @@ test('Arrivée — après la première soirée, l’arrivée n’est plus prése
 });
 
 /* MONDE-LOT-10-DECISIONS §2 : l’Accueil ne garde plus que son bloc héritage retiré ; ses autres blocs restent (Échap depuis l’arrivée). */
-test('Accueil — seul le bloc héritage est retiré, les autres blocs restent', () => {
+test('Accueil — seul le bloc héritage est retiré, les autres blocs restent (« Ce qui s’est passé » dès qu’il y a un événement)', () => {
+  /* Monde lot 12 T2 (charte R4, ancre ACCUEIL_PASSE_R4) : un bloc sans donnée n'est pas affiché ; la partie neuve sans passé n'a encore rien à raconter.
+     Le test garde sa garantie (aucun bloc « ORGANISATION », les trois blocs de l'Accueil existent) : « Ce qui s'est passé » se lit dès qu'une soirée a été jouée. */
   const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_accueil');`);
-  const r=res(w,`const t=document.getElementById('app').textContent; return {accueil:G.screen, noOrg:!t.includes('ORGANISATION'), passe:t.includes('CE QUI S’EST PASSÉ'), attend:t.includes('CE QUI T’ATTEND'), ailleurs:t.includes('ET AILLEURS')};`);
-  assert.deepEqual(r,{accueil:'mgmt_accueil',noOrg:true,passe:true,attend:true,ailleurs:true});
+  const lire=`const t=document.getElementById('app').textContent; return {accueil:G.screen, noOrg:!t.includes('ORGANISATION'), passe:t.includes('CE QUI S’EST PASSÉ'), attend:t.includes('CE QUI T’ATTEND'), ailleurs:t.includes('ET AILLEURS')};`;
+  const neuve=res(w,lire);
+  assert.deepEqual(neuve,{accueil:'mgmt_accueil',noOrg:true,passe:false,attend:true,ailleurs:neuve.ailleurs});
+  jouerSoirees(w,1); w.eval(`CL.go('mgmt_accueil');`);
+  const jouee=res(w,lire);
+  assert.deepEqual(jouee,{accueil:'mgmt_accueil',noOrg:true,passe:true,attend:true,ailleurs:true});
 });
 
 /* Monde lot 10 : l'écran produit des classes que la feuille du jeu doit styler (il apparaissait vide) ; tout est sous .mf-arr. */
