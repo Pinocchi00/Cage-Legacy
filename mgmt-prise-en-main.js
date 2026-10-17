@@ -251,8 +251,7 @@ function scr_mgmt_arrivee(){
     </div></div></div>`;
 
   /* Col2 champions. */
-  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : ${mgmtArriveeNom(plusLongReigne.id,plusLongReigne.nom)}</div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>` :
-    `<div class="carte-l"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>`;
+  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : ${mgmtArriveeNom(plusLongReigne.id,plusLongReigne.nom)}</div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>` : '';
 
   const htmlCol2=`
     <div class="pan ar-c2"><div class="p2"><div class="p3">

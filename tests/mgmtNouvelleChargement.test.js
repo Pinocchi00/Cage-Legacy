@@ -40,6 +40,12 @@ test('Chargement — la partie attend le bouton : G.mgmt reste null, Entrée ouv
   assert.equal(win.eval('MGMT_GEN_TIMERS.lecture===null&&MGMT_GEN_TIMERS.barre===null'),true);
 });
 
+test('Monde lot 12 T4 — la caisse de départ s’écrit avec l’espace des milliers', () => {
+  const win=newGameWindow({runMain:true});
+  const html=win.eval(`mgmtNouvelleApercuHtml(MGMT_ORGANISATIONS[0])`);
+  assert.match(html,/50 000 €/);
+});
+
 test('Chargement — Échap pendant la génération abandonne proprement', () => {
   const win=lancer(2);
   win.eval(`keysHandle({key:'Escape',code:'Escape',preventDefault(){}})`);

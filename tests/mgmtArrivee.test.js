@@ -22,6 +22,17 @@ test('Arrivée — état premiere : l\'héritage affiche les données de la part
   assert.equal(r.header,true);
 });
 
+test('Monde lot 12 T4 — l’arrivée donne le plus long règne', () => {
+  const w=premier();
+  const r=res(w,`const t=document.querySelector('.ar-c2').textContent;
+    const lien=[...document.querySelectorAll('.ar-c2 button')].find(b=>b.textContent.includes('Ceintures'));
+    return {ligne:t.includes('Le plus long règne :'),lien:!!lien};`);
+  assert.deepEqual(r,{ligne:true,lien:true});
+  const absent=res(w,`const m=G.mgmt; m.facts=[]; render();
+    return {ligne:document.querySelector('.ar-c2').textContent.includes('Le plus long règne :'),lien:[...document.querySelectorAll('.ar-c2 button')].some(b=>b.textContent.includes('Ceintures'))};`);
+  assert.deepEqual(absent,{ligne:false,lien:false});
+});
+
 test('Arrivée — état sans-passe : aucun chiffre ni rivalité de passé, champions sans « depuis », trois pas affichés', () => {
   const w=neuve();
   const r=res(w,`const t=document.getElementById('app').textContent;

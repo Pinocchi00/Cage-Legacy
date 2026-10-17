@@ -15,3 +15,10 @@ Branche : `monde-lot-12-fidelite`. Commun à toutes les tranches du lot 12 : **r
 - **Nouvelle partie** : « 50000 € » → « 50 000 € » (espace insécable fine comme ailleurs dans le jeu : réutilise le formateur d'argent existant).
 - **Test à corriger au passage** (échec présent avant ta tranche, déjà réglé par le superviseur) : `tests/mgmtArrivee.test.js` « Accueil — seul le bloc héritage… » est réparé et commité ; ne le touche plus.
 - Commite en fin de tranche. S'il reste du rouge, « (inachevé) » dans le message : jamais de travail non commité.
+
+## Compte rendu
+- `mgmt-cadre.js` : seuil du nom de salle relevé à 24 caractères ; la plaque garde `white-space:nowrap` dans `.mf-tete-boite`.
+- `mgmt-prise-en-main.js` : le bloc du plus long règne et son lien Ceintures sont affichés uniquement si un champion en titre existe.
+- `tests/mgmtArrivee.test.js` : test « Monde lot 12 T4 — l’arrivée donne le plus long règne » (présence du règne/lien, omission sans champion).
+- `tests/mgmtNouvelleChargement.test.js` : test « Monde lot 12 T4 — la caisse de départ s’écrit avec l’espace des milliers » ; l’aperçu existant utilise déjà `mgmtEuros` et affiche `50 000 €`, donc aucun changement de code supplémentaire nécessaire.
+- Migration de sauvegarde : aucune. Écart à la fiche : aucun. Questions pour Anthony : aucune.
