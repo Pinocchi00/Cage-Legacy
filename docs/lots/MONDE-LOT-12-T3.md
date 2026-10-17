@@ -12,3 +12,9 @@ Combat : la plaque « Combat principal · léger · 5 rounds » sous le VS ; « 
 
 ## Tests (`tests/mgmtPresentation*.test.js`)
 `Monde lot 12 T3 — « Ses points forts » ne répète pas l’histoire` ; `Monde lot 12 T3 — le cartouche donne le rang mondial et le contrat` ; `Monde lot 12 T3 — un panneau sans donnée n’est pas affiché`. Commit `Monde lot 12 T3 : les présentations comme leurs planches`.
+
+## DÉCISION du superviseur (17/10/2026) — lève le blocage « portes interdites »
+- **Le rejeu de combat et le moteur restent interdits** dans les présentations (`mgmtReplayFight`, `mgmtObservation` avec rejeu, `simulateFight` : le test « Monde lot 3 T5 — présentation sans moteur ni mutation » garde cette partie).
+- **Sont autorisées** les lectures pures, sans moteur ni mutation : `mgmtCombatProfile`, `mgmtLectureStyle` (`mgmt-soiree-show.js`), `mgmtSaFaille`, `mgmtCommentIlCombat`, et les résultats de `m.hist` (qui a battu qui, comment). Le test du lot 3 T5 est **révisé** pour n’interdire que le rejeu, le moteur et la mutation ; cite cette décision dans le test.
+- **« Ses points forts »** = les forces lues sur le profil (`mgmtLectureStyle(f).lignes`, une à trois phrases, ex. « Frappe de loin et touche juste ») **plus**, s’il y en a, ses victoires par KO ou soumission (une ligne chacune, « KO contre X, 2e round ») ; **jamais** les combats gagnés aux points, jamais l’histoire. Sans aucune force lisible, le panneau n’est pas affiché.
+- Ne remets pas de question : applique.
