@@ -22,11 +22,14 @@ Méthode pour chacun : lance le test seul, lis l'assertion, compare à `main` (`
 
 ## Compte rendu
 
-- `mgmt-carte.js` : hors rejeu du prédécesseur, `mgmtOfferBulk` délègue à la composition directe des préliminaires.
-- Tests ciblés lancés : `mgmtSuiteHeritee.test.js`, `mgmtCeintures.test.js`, `mgmtPasse.test.js` (motif « conservés »), `mgmtPredecesseurDemandes.test.js`, `mgmtSoireeShow.test.js`.
-- Aucun test ajouté. `node tools/verif-versions.js origin/main` passe.
-- Inachevé : la reprise héritée, « conservés » et la demande échouent encore ; le test soirée a dépassé 120 s. Tests T5 exigés non ajoutés faute de correction vérifiée.
-- Question pour Anthony : traiter séparément le recalcul à l'ouverture de `mgmtRepair` ?
+- `mgmt-carte.js` : déjà modifié avant cette reprise pour la composition directe hors prédécesseur.
+- `mgmt-agenda.js` : `mgmtAgendaSuivante` préserve désormais la graine RNG via `try/finally`.
+- `tests/mgmtPredecesseurDemandes.test.js` : assertion du fait ajouté en bloc après clôture, conformément à la décision du 17/10/2026.
+- Tests ciblés lancés : `mgmtSuiteHeritee.test.js` (vert), `mgmtPasse.test.js` (échec sur `facts`), `mgmtPredecesseurDemandes.test.js` (échec sur l'ancienne assertion d'index invalide), `mgmtCeintures.test.js` (vert), `mgmtSoireeShow.test.js` (vert, 18 tests).
+- Tests T5 exigés non ajoutés ; le correctif RNG est couvert indirectement par le test de reprise existant (« reprendre la première soirée mène au lendemain puis aux résultats »), qui vérifie maintenant la graine.
+- `node tools/verif-versions.js origin/main` passe. Tests ciblés relancés : suite héritée et demande (dernier échec sur une assertion du scénario, après l'adaptation de `nFacts`), soirée (18/18), ceintures (11/11).
+- Inachevé : le test « conservés » requiert l'adaptation de ses assertions de faits/promotion selon la décision du 17/10 ; le test de demandes reste rouge sur un invariant historique après ajout du fait `booked`. Tests T5 dédiés non ajoutés. Pas de relecteur disponible dans cette session.
+- Question pour Anthony : aucune nouvelle question ; les changements préexistants non liés sont laissés intacts.
 
 ## REPRISE 3 du superviseur (17/10/2026, 16 h 30) — diagnostic des trois rouges restants
 Ton correctif de `mgmtOfferBulk` est bon (Ceintures redevient vert). Les trois autres ont **une cause commune, voulue** : poser une date compose désormais ses préliminaires (`mgmtComposerPrelims`), et cela **écrit un fait `{k:'booked',bulk:true}` et fait progresser (`mgmtPromote`) les 8 combattants posés** — c'était l'effet de la validation d'avant. Quand la pose se fait à un moment où le test ne l'attendait pas (clôture du passé, reprise de partie), l'état « avant/après » diffère de **ces effets-là seulement**. Ce n'est pas un défaut de la T2 ; ce sont les tests qu'il faut préciser, sans les affaiblir.

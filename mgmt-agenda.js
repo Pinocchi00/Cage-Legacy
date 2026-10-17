@@ -34,9 +34,12 @@ function mgmtAgendaInit(m){
  *  @returns {boolean} vrai si une soirée vient d'être posée. */
 function mgmtAgendaSuivante(m){
   if(!mgmtAgendaActif(m)||m.cal.prochaines.length) return false;
-  const base=m.cal.jour+MGMT_EVENT_WEEKS*7;
-  for(let j=base;j<base+14;j++){ if(mgmtAgendaPoser(m,j,'petite').ok) return true; }
-  return false;
+  const graine=SEED;
+  try{
+    const base=m.cal.jour+MGMT_EVENT_WEEKS*7;
+    for(let j=base;j<base+14;j++){ if(mgmtAgendaPoser(m,j,'petite').ok) return true; }
+    return false;
+  }finally{ setSeed(graine); }
 }
 
 /** Une partie d'avant : l'agenda attend la fin de sa soirée en cours (actif:false), puis prend le relais. */
