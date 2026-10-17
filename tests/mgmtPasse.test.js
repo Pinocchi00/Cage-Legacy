@@ -40,11 +40,12 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
   /* Décision du lot 8 T4a/T4b (14/10/2026) : les événements de coût petit écrivent de nouveaux faits (top15, challenger, caps de règne, nom de la blessure…) à la création et pendant les soirées : les empreintes de l'état complet sont recalculées ; la propriété gardée est inchangée (déterminisme, aucun état annexe). */
   /* Décision du lot 6 T3 (raison enregistrée sur chaque combat proposé) : empreintes de soirées recalculées le 15/10/2026. */
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T1, « enlever les choix de Leïla ») : les affaires de Leïla sont fermées dès la création ; empreintes recalculées. Vérifié par comparaison JSON avec main : seuls changent pile[i].status (open→closed), pile[i].decision (null→ignored) et open ; roster, faits, tirages et monde extérieur sont identiques. Les parties split ne changent pas (aucune affaire de Leïla ouverte à la création). */
   const AVANT = {
     'split|20261008': '853ffd0a41fb91f6', 'split|20261009': 'e031a248be4f7ea3',
-    'ultimate-rim|20261008': '2b299a6ce8056e79', 'ultimate-rim|20261009': '28813c0732d8c60e',
-    'fighting-pacific-championship|20261008': '25c5ad7b370e4a27', 'fighting-pacific-championship|20261009': '81b03d5ea9f0de38',
-    jouee3: 'a5105862846049d8',
+    'ultimate-rim|20261008': '60234bce97f19181', 'ultimate-rim|20261009': '5b6e716e6c7993de',
+    'fighting-pacific-championship|20261008': '7fdd0214a982c992', 'fighting-pacific-championship|20261009': 'b9d23a641682627b',
+    jouee3: '48b3557352e0f52b',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -290,7 +291,8 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
-  const AVANT = { 20261008: '3ad02e15f1ac0145', 20261009: '6a6c8c853a025804' };
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T1, « enlever les choix de Leïla ») : les affaires de Leïla sont fermées dès la création ; empreintes recalculées. Vérifié par comparaison JSON avec main : seuls changent pile[i].status (open→closed), pile[i].decision (null→ignored) et open ; roster, faits, tirages et monde extérieur sont identiques. */
+  const AVANT = { 20261008: 'daeccc7630d6c390', 20261009: '389c6415bbff8bb4' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

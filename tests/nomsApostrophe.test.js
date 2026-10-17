@@ -195,7 +195,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   const win = newGameWindow();
   watchErrors(win);
   enterMgmt(win,404); win.eval(`CL.go('mgmt_bureau')`);
-  win.eval(`for(let c=0;c<30&&mgmtOpenCount(G.mgmt)===0;c++) mgmtNewPile(G.mgmt);`);
+  /* Décision d'Anthony du 17/10/2026 (lot 14) : Leïla ne propose plus d'affaire ; la boucle qui relançait mgmtNewPile jusqu'à en trouver une ouverte ne trouvait plus rien et déréglait le monde (plus personne de disponible). Retirée. */
 
   /* Monde lot 14 T2 ferme les propositions bulk : le test passe par la carte, pas par une affaire retirée. */
   win.eval(`CL.mgmtCarte(); render();`);
@@ -203,6 +203,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
 
   /* Écran de composition : deux clics posent le combat des deux O'Connor. */
   win.eval(`G.mgmt.card.prelims=[]; CL.mgmtCarte(); render();`);
+  oconnorizeRoster(win);   /* décision d'Anthony du 17/10/2026 (lot 14) : plus d'affaire de Leïla au bureau, les noms sont posés avant la composition */
   assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'le nom s’affiche à la composition');
   const [a, b] = ctlPair(win);
   assert.ok(a !== 'no-a' && b !== 'no-b', 'fixture : une paire posable existe');
