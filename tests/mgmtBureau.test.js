@@ -32,7 +32,7 @@ const LEILA_REFUSED="Pas de souci. Retenez ces deux noms : ils vont monter au cl
 test('Monde lot 14 T1 — après mgmtNewPile, aucune affaire retirée ouverte',()=>{
   const w=newGameWindow(); enterMgmt(w,11);
   assert.equal(w.eval(`G.mgmt.pile.length>0`),true);
-  assert.equal(w.eval(`G.mgmt.pile.every(a=>a.status==='closed'&&a.decision==='ignored')`),true);
+  assert.equal(w.eval(`G.mgmt.pile.filter(a=>['leila_propose','leila_react','leila_react_swap','leila_react_crush'].includes(a.kind)).every(a=>a.status==='closed'&&a.decision==='ignored')`),true);
   assert.equal(w.eval(`mgmtOpenCount(G.mgmt)`),0);
 });
 test('Monde lot 14 T1 — l’Accueil n’affiche aucune ligne d’affaire de Leïla',()=>{
@@ -367,7 +367,7 @@ test('MGMT accepter — les deux combattants passent en dossier avec une raison 
 
 const MGMT_IDS = ['necessite','passion','hasard','addiction','reconversion'];
 
-test('MGMT refuser — affaire de réaction créée, texte verbatim, fait mémorisé', () => {
+test('MGMT refuser — réponse périmée : aucune réaction, aucun fait ignoré, état inchangé', () => {
   const win = newGameWindow();
   // Décision d’Anthony du 17/10/2026 : une réponse périmée ne crée rien.
   enterMgmtFull(win,17);
@@ -377,7 +377,7 @@ test('MGMT refuser — affaire de réaction créée, texte verbatim, fait mémor
   assert.equal(win.eval(`JSON.stringify(G.mgmt)`),before);
 });
 
-test('MGMT ignorer — clôt sans réaction, fait mémorisé, ne revient jamais', () => {
+test('MGMT ignorer — réponse périmée : aucune réaction, aucun fait ignoré écrit', () => {
   const win = newGameWindow();
   enterMgmtFull(win,18);
   // Décision d’Anthony du 17/10/2026 : clôture silencieuse, sans fait ignored.
@@ -532,10 +532,11 @@ test('MGMT titres — chaque affaire porte un titre qui dit qui parle et de quoi
     assert.ok(t.length>12, 'le titre dit de quoi il s\u2019agit, pas un libellé vide');
   }
   assert.equal(new Set(titles).size, titles.length, 'pas un libellé de type répété à l\u2019identique');
-  // Décision d’Anthony du 17/10/2026 : aucune réaction ne suit une affaire fermée.
+  /* Décision d'Anthony du 17/10/2026 : les quatre types de choix de Leïla sont retirés ;
+     une réponse sur une affaire déjà fermée ne crée plus d'affaire de réaction. */
+  const n=win.eval(`G.mgmt.pile.length`);
   win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.kind==='leila_propose').id,'refuse')`);
-  const rt = win.eval(`G.mgmt.pile[G.mgmt.pile.length-1].title`);
-  assert.ok(typeof rt==='string'&&rt.includes('Leïla'), 'l\u2019affaire de réaction est titrée elle aussi');
+  assert.equal(win.eval(`G.mgmt.pile.length`),n,'aucune réaction de Leïla ne suit une affaire fermée');
 });
 
 test('MGMT ouverture — la première affaire de la pile est sélectionnée d\u2019office', () => {
