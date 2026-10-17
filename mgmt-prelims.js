@@ -143,7 +143,7 @@ Object.assign(CL,{
   /** Un trou en préliminaires se règle ici, en une action : Leïla propose le remplaçant, qu'on valide ensuite. */
   mgmtPrelimsRemplacer(){
     const m=G.mgmt;
-    if(!mgmtOfferBulk(m,true)){ MGMT_PRELIMS.aide=m.shortfall?'Aucun remplaçant disponible pour l’instant.':''; }
+    if(!mgmtLeilaPrelims(m,true,false)){ MGMT_PRELIMS.aide=m.shortfall?'Aucun remplaçant disponible pour l’instant.':''; }
     else MGMT_PRELIMS.aide='';
     saveMgmt(); CL.go('mgmt_prelims');
   },

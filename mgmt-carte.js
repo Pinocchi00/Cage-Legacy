@@ -470,7 +470,7 @@ function mgmtBookMain(m,aid,bid){
      préliminaires — en fin de pile, jamais avant la carte principale
      complète (mgmtOfferBulk garde tout elle-même : no-op tant que la carte
      principale est incomplète). */
-  mgmtOfferBulk(m,false);
+  mgmtLeilaPrelims(m,false,true);
   return fight;
 }
 
@@ -825,10 +825,6 @@ function mgmtDivisionRanking(m,divId,scope,cycle){
 function mgmtOfferBulk(m,selectWhenIdle){
   if(!m||!Array.isArray(m.pile)) return false;
   if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
-  /* ==== [ANCRE: MONDE_LOT14_T5_POSE_DIRECTE] — Monde lot 14 T5 ====
-     Décision T2 : hors rejeu du prédécesseur, composer directement les
-     préliminaires manquants plutôt que créer une affaire devenue fantôme. */
-  if(!MGMT_PREDECESSEUR_EN_COURS) return mgmtComposerPrelims(m);
   /* §T3 : la carte principale est complète, les préliminaires manquent. */
   if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length<m.card.sizeMain) return false;
   if(Number.isSafeInteger(m.card.sizePrelims)&&m.card.prelims.length>=m.card.sizePrelims) return false;
@@ -854,6 +850,19 @@ function mgmtOfferBulk(m,selectWhenIdle){
      au détriment d'une affaire que le joueur regarde. */
   if(selectWhenIdle||!m.pile.some(a=>a.id===m.open&&a.status==='open')) m.open=bulk.id;
   return true;
+}
+
+/* ==== [ANCRE: MONDE_LOT14_T5_POSE_DIRECTE] — Monde lot 14 T5 ====
+   Décision d'Anthony du 17/10/2026 : dans une partie jouée avec l'agenda, Leïla ne propose plus rien à valider, elle pose les préliminaires qui manquent.
+   La proposition en bloc (mgmtOfferBulk) ne reste que pour l'outil du prédécesseur (MGMT_PREDECESSEUR_EN_COURS) et les parties d'avant l'agenda.
+   @param {boolean} cartePrincipaleComplete exiger la carte principale complète avant d'agir (déclencheur de la cinquième place)
+   @returns {boolean} vrai si des préliminaires ont été posés ou proposés. */
+function mgmtLeilaPrelims(m,selectWhenIdle,cartePrincipaleComplete){
+  if(!MGMT_PREDECESSEUR_EN_COURS&&typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)){
+    if(cartePrincipaleComplete&&(!m||!m.card||!Array.isArray(m.card.main)||!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length<m.card.sizeMain)) return false;
+    return mgmtComposerPrelims(m);
+  }
+  return mgmtOfferBulk(m,selectWhenIdle);
 }
 
 /** Fin de pile (§5) : la reproposition de Leïla quand le cycle ne se ferme
