@@ -171,13 +171,15 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
     mgmtPasseCloturer(m);
     /* Monde lot 1 T5 (fiche MONDE-LOT-1-T5 §3) : à la clôture les combats s'allègent (mêmes combattants, même issue) et les faits perdus (contrats, départs, attentes) sont écartés ; tout le reste est conservé. */
     const resume=h=>JSON.stringify(h.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L]));
-    const engages=new Set(m.card.main.flatMap(cf=>[cf.a,cf.b]));
+    /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : la clôture pose la première date du joueur, donc Leïla compose aussitôt ses préliminaires : ses combattants gagnent une interaction comme ceux de la carte principale, et un fait « booked » en bloc s'ajoute à la fin. */
+    const engages=new Set(m.card.main.concat(m.card.prelims).flatMap(cf=>[cf.a,cf.b]));
+    const ajoute=m.facts.length===faitsAttendus.length+1&&m.facts.at(-1).k==='booked'&&m.facts.at(-1).bulk===true?m.facts.pop():null;
     const promotion=promotions.every(p=>{const f=mgmtFighterById(m,p.id);
       if(!engages.has(p.id)) return f.level===p.level&&f.raison===p.raison&&f.interactions===p.interactions;
       const interactions=(Number.isSafeInteger(p.interactions)?p.interactions:0)+1;
       return f.interactions===interactions&&f.level===(interactions>=3?3:Math.max(2,p.level))&&
         (p.level<2?MGMT_RAISONS.some(r=>r.id===f.raison):f.raison===p.raison);});
-    return {corps:corps()===avant.corps,hist:resume(m.hist)===avant.histResume,facts:JSON.stringify(m.facts)===avant.factsGardes,
+    return {corps:corps()===avant.corps,hist:resume(m.hist)===avant.histResume,facts:JSON.stringify(m.facts)===avant.factsGardes,ajoute:ajoute===null||typeof ajoute.a==='string',
       promotion,
       titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null))===avant.titres,pile:JSON.stringify(m.pile)===avant.pile,
       cycle:m.cycle===avant.cycle,fil:(m.fil?m.fil.length:0)===avant.fil,nbHist:m.hist.length,nbFacts:m.facts.length,

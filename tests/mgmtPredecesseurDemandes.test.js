@@ -85,7 +85,7 @@ test('Monde lot 5 T2 — alléger recale les références des promesses et des r
       const avant=JSON.stringify(m); mgmtPasseCloturer(m);
       return {atomique,p,demande:m.facts[p.d],ref,demandeRef:m.facts[ref.d],n:m.passe.nFacts,total:m.facts.length,dernier:m.facts.at(-1),
         perdus:m.facts.some(x=>MGMT_PASSE_FAITS_PERDUS.includes(x.k)),invalide:m.facts.some(x=>x.d===999999),
-        ordre:JSON.stringify(ordre)===JSON.stringify(m.facts.map(x=>{const y={...x};delete y.d;return y;})),idem:avant===JSON.stringify(m)};`);
+        ordre:JSON.stringify(ordre)===JSON.stringify(m.facts.slice(0,m.passe.nFacts).map(x=>{const y={...x};delete y.d;return y;})),idem:avant===JSON.stringify(m)};`);
     assert.equal(r.demande.k,'demande'); for(const k of ['a','want','target']) assert.equal(r.p[k],r.demande[k]);
     assert.equal(r.demandeRef.k,'demande'); assert.equal(r.ref.a,r.demandeRef.a);
     assert.equal(r.total,r.n+1); assert.equal(r.dernier.k,'booked'); assert.equal(r.dernier.bulk,true); assert.equal(r.invalide,true); assert.equal(r.perdus,false); assert.equal(r.ordre,true); assert.equal(r.idem,true); assert.equal(r.atomique,true);
