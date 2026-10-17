@@ -106,6 +106,15 @@ function mgmtAgendaPoser(m,jour,taille,salle){
   c.prochaines.push(lieu?{jour,taille,salle:lieu}:{jour,taille});
   c.prochaines.sort((a,b)=>a.jour-b.jour);
   mgmtAgendaSynchroCarte(m);
+  /* ==== [ANCRE: MONDE_LOT14_T2_POSE] — Monde lot 14 T2 ====
+     Décision d'Anthony du 17/10/2026 : dès qu'une soirée est posée, Leïla
+     compose immédiatement ses préliminaires et les pose directement — plus
+     d'affaire leila_bulk, plus de validation par le joueur. La composition
+     couvre la carte principale vide ou partielle ; si elle aboutit, la carte
+     d'une soirée neuve est déjà complète côté préliminaires (aucun autre
+     appel ne refait rien : n<=0). L'outil du prédécesseur garde son flux :
+     MGMT_PREDECESSEUR_EN_COURS est vérifié à l'intérieur. ==== */
+  if(mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
   return {ok:true};
 }
 
@@ -197,6 +206,9 @@ function mgmtAgendaJouer(m){
   const c=m.cal, p=c.prochaines[0];
   const avant=c.jour;
   c.jour=Math.max(c.jour,p.jour);
+  /* Monde lot 14 T2 (décision du 17/10/2026) : des préliminaires vides au moment de jouer (ancienne sauvegarde, remplacement introuvable libéré entre-temps)
+     se composent juste avant — jamais d'erreur ; avec l'agenda actif seulement, la lecture d'une partie au calendrier hors jeu reste inchangée. */
+  if(mgmtAgendaActif(m)&&mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
   const ev=mgmtRunEvent(m);
   if(!ev){ c.jour=avant; return null; }
   mgmtAdvanceRosterAges(m);

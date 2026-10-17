@@ -112,9 +112,10 @@ function mgmtRecGap(A,B){ return Math.abs((A.W+A.L)-(B.W+B.L)); }
  *   seedé garde la variété.
  * @param {string} [famille] Famille obligatoire pour ce tirage.
  * @param {Map<string,Array<Object>>} [raisonsIndex] Preuves locales précalculées.
+ * @param {Set<string>} [exclusion] Monde lot 14 T2 : identifiants réservés à la carte principale (haut du classement, mgmtRangsHaut) — jamais candidats aux préliminaires.
  * @returns {Object|null} Paire existante, avec raison {famille,fait} seulement si une famille est demandée. */
 /* ==== [ANCRE: MONDE_LOT6_T2_SELECTION] — Monde lot 6 T2 ==== */
-function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex,seulMode){
+function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex,seulMode,exclusion){
   if(famille&&!MGMT_RAISON_FAMILLES.includes(famille)) return null;
   const totals=stats||{total:0,streak:0};
   /* Fusion du lot 6 (15/10/2026) : seulMode ('clean'|'sloppy') = le bâclage est tiré une fois par combat par l'appelant
@@ -150,7 +151,9 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsI
     /* §T3 : les prélims se construisent hors carte principale — un combattant déjà engagé (principale comme prélims) n'est jamais candidat. */
     &&!mgmtEngaged(m,o)
     /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
-    &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o)));
+    &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o))
+    /* Monde lot 14 T2 : le haut du classement reste pour la carte principale. */
+    &&!(exclusion&&exclusion.has(o.id)));
   const sexes=aptes.map(genderOf);
   if(famille&&!raisonsIndex) raisonsIndex=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
   const collect=mode=>{
@@ -215,11 +218,13 @@ function mgmtBulkReasonPairs(aptes){
 
 /** Choisit les familles puis leurs paires pour un bloc neuf. @param {Object} m Partie. @param {Set<string>} used Prénoms à exclure. @param {Set<string>} seen Paires à exclure. @param {number} n Nombre de combats. @param {Object} stats Écrasements. @param {boolean} relaxed Assouplissement existant. @returns {Array<Object>|null} n résultats du picker avec raison, ou null ; ensembles fournis inchangés en cas d'échec. */
 /* ==== [ANCRE: MONDE_LOT6_T3_CONTEXTE] — Monde lot 6 T3 ==== */
-/** @param {Array<Object>} [contexte=[]] Combats déjà conservés sur cette carte, dans leur ordre ; leurs raisons enregistrées initialisent les usages. */
-function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
+/** @param {Array<Object>} [contexte=[]] Combats déjà conservés sur cette carte, dans leur ordre ; leurs raisons enregistrées initialisent les usages.
+ *  @param {Set<string>} [exclusion] Monde lot 14 T2 : identifiants réservés à la carte principale (mgmtRangsHaut), transmis au picker. */
+function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[],exclusion){
   const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
   const aptes=m.roster.filter(f=>mgmtAvailable(m,f)&&!champions.has(f.id)
-    &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f)));
+    &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f))
+    &&!(exclusion&&exclusion.has(f.id)));
   const index=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
   const localUsed=new Set(used), localSeen=new Set(seen), familles=new Map(), result=[];
   for(const f of contexte) if(f.raison) familles.set(f.raison.famille,(familles.get(f.raison.famille)||0)+1);
@@ -235,7 +240,7 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
     for(const mode of [voulu,voulu==='sloppy'?'clean':'sloppy']){
       for(const famille of MGMT_RAISON_FAMILLES){
         if(familles.has(famille)) continue;
-        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
+        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode,exclusion);
         if(p) break;
       }
       /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
@@ -246,10 +251,10 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
         const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
           .sort((a,b)=>familles.get(a)-familles.get(b));
         for(const famille of reprises){
-          p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
+          p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode,exclusion);
           if(p) break;
         }
-        if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index,mode);
+        if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index,mode,exclusion);
       }
       if(p) break;
     }
@@ -853,6 +858,159 @@ function mgmtOfferBulk(m,selectWhenIdle){
 function mgmtRefillBulk(m){
   return mgmtOfferBulk(m,true);
 }
+
+/* ==== [ANCRE: MONDE_LOT14_T2_COMPOSITION] — Monde lot 14 T2 ====
+ * Décision d'Anthony du 17/10/2026 : dès qu'une soirée est posée (mgmtAgendaPoser,
+ * ou la clôture du passé qui pose la première soirée d'une partie neuve),
+ * Leïla compose elle-même les préliminaires et les pose directement dans
+ * m.card.prelims — plus d'affaire leila_bulk ouverte, plus de validation par
+ * le joueur. La composition se fait carte principale vide ou partielle : les
+ * combattants déjà posés sur la carte restent réservés (mgmtEngaged), et le
+ * haut du classement de chaque catégorie reste pour la carte principale
+ * (mgmtRangsHaut). Un retrait dans les préliminaires est remplacé aussitôt ;
+ * un trou impossible à combler reste un shortfall, jamais un combat bâclé
+ * d'office ni une carte partielle posée. ====
+ */
+
+/** Le haut du classement (portée organisation) reste réservé à la carte principale : les huit premiers rangs de chaque catégorie ne sont jamais candidats
+ *  aux préliminaires — champions et vacant compris — sauf si la catégorie compte moins de deux combattants éligibles hors des huit : elle revient dans le pot
+ *  commun. Éligible : disponible, pas déjà engagé sur la carte, pas réservé au cercle — exactement le pot du picker. Pur.
+ *  @returns {Set<string>} les identifiants exclus des préliminaires. */
+function mgmtRangsHaut(m){
+  const out=new Set();
+  if(!m||!Array.isArray(m.roster)) return out;
+  const divs=[...new Set(m.roster.filter(f=>f&&f.div&&!mgmtIsRetired(f)).map(f=>f.div))];
+  const apte=f=>f&&mgmtAvailable(m,f)&&!mgmtEngaged(m,f)
+    &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f));
+  for(const d of divs){
+    const ranking=mgmtDivisionRanking(m,d,'organization');
+    let n=0;
+    for(const o of ranking.slice(8)){ const f=mgmtFighterById(m,o.id); if(apte(f)) n++; }
+    if(n>=2) for(const o of ranking.slice(0,8)) out.add(o.id);
+  }
+  return out;
+}
+
+/** Les ensembles d'exclusion de Leïla : les prénoms et paires qu'elle a déjà servis (affaires de la pile) et les paires déjà posées sur la carte —
+ *  sauf le combat qu'on est en train de remplacer. Pur.
+ *  @param {Object} sauf Le combat de la carte qu'on remplace, exclu des paires vues. */
+function mgmtLeilaEnsembles(m,sauf){
+  const used=new Set(), seen=new Set();
+  for(const a of m.pile||[]){
+    if(a.kind!=='leila_propose'&&a.kind!=='leila_bulk') continue;
+    const list=a.kind==='leila_bulk'&&Array.isArray(a.fights)?a.fights:[a];
+    for(const x of list){
+      const fa=mgmtFighterById(m,x.a), fb=mgmtFighterById(m,x.b);
+      if(fa) used.add(fa.first);
+      if(fb) used.add(fb.first);
+      seen.add([x.a,x.b].sort().join('|'));
+    }
+  }
+  for(const x of mgmtCardFights(m)){
+    if(sauf&&x===sauf) continue;
+    seen.add([x.a,x.b].sort().join('|'));
+  }
+  return {used,seen};
+}
+
+/** Des combats de préliminaires manquent-ils à la carte posée ? (Monde lot 14 T2 : la lecture des branchements de la composition.) Pur. */
+function mgmtCardPrelimsShort(m){
+  return !!(m&&m.card&&Array.isArray(m.card.prelims)&&Number.isSafeInteger(m.card.sizePrelims)
+    &&m.card.prelims.length<m.card.sizePrelims);
+}
+
+/** Leïla pose elle-même les préliminaires manquants de la soirée posée : de 1 à sizePrelims combats de rangs bas, jamais deux fois la même personne dans
+ *  la soirée, jamais le haut du classement si la catégorie a assez de monde. Chaque pose compte comme un booking (promotion), un fait k:'booked' bulk:true
+ *  reste dans la partie. Pendant une soirée du prédécesseur (MGMT_PREDECESSEUR_EN_COURS) : ne touche à rien — son outil garde le flux d'avant.
+ *  @returns {boolean} vrai si les préliminaires sont complets (ou l'étaient déjà). */
+function mgmtComposerPrelims(m){
+  if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
+  const taille=Number.isSafeInteger(m.card.sizePrelims)&&m.card.sizePrelims>0?m.card.sizePrelims:MGMT_PRELIM_SIZE;
+  const n=taille-m.card.prelims.length;
+  if(n<=0) return true;
+  /* L'outil du prédécesseur garde son flux : affaire leila_bulk validée par mgmtDecide (MONDE_LOT6_PREDECESSEUR_SANS_RAISON). */
+  if(MGMT_PREDECESSEUR_EN_COURS) return false;
+  const {used,seen}=mgmtLeilaEnsembles(m,null);
+  const exclusion=mgmtRangsHaut(m);
+  const stats=mgmtCrushStats(m);
+  /* D'abord dans le pot commun, strict ; assoupli ensuite (variété déjà vue, repos) — et seulement si le haut du classement est exclu, celui-ci
+     revient en dernier recours, comme le prévoit mgmtRangsHaut : jamais un combat bâclé d'office, jamais une carte partielle posée. */
+  let selection=mgmtBulkSelection(m,used,seen,n,stats,false,[],exclusion);
+  if(!selection) selection=mgmtBulkSelection(m,used,seen,n,stats,true,[],exclusion);
+  if(!selection&&exclusion.size) selection=mgmtBulkSelection(m,used,seen,n,stats,false,[]);
+  if(!selection&&exclusion.size) selection=mgmtBulkSelection(m,used,seen,n,stats,true,[]);
+  if(!selection){ m.shortfall=true; return false; }
+  for(const p of selection){
+    mgmtPromote(m,mgmtFighterById(m,p.a.id));
+    mgmtPromote(m,mgmtFighterById(m,p.b.id));
+    m.card.prelims.push({a:p.a.id,b:p.b.id,cycle:m.cycle,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))});
+  }
+  mgmtAddFact(m,{c:m.cycle,k:'booked',bulk:true,a:selection[0].a.id,b:selection[0].b.id});
+  return true;
+}
+
+/** Le joueur échange le combat posé choisi (écran Préliminaires, touche C) : Leïla le remplace par une paire fraîche, dans les mêmes règles de variété
+ *  que l'échange d'une proposition, et réagit dans une affaire à part (motif lot 1). Pas un écrasement : aucun coût, aucune trace dans l'historique
+ *  des écrasements. @param {number} idx L'indice du préliminaire posé. @returns {boolean} */
+function mgmtPrelimChanger(m,idx){
+  if(!m||!Array.isArray(m.card.prelims)) return false;
+  if(!Number.isSafeInteger(idx)||idx<0||idx>=m.card.prelims.length) return false;
+  const old=m.card.prelims[idx];
+  const {used,seen}=mgmtLeilaEnsembles(m,old);
+  seen.add([old.a,old.b].sort().join('|'));
+  const stats=mgmtCrushStats(m);
+  /* Le contexte porte toute la carte posée (rangs des familles déjà prises) sauf le combat remplacé. */
+  const contexte=mgmtCardFights(m).filter(x=>x!==old);
+  const p=mgmtBulkSelection(m,used,seen,1,stats,false,contexte)?.[0];
+  if(!p) return false;
+  m.card.prelims[idx]={a:p.a.id,b:p.b.id,cycle:m.cycle,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))};
+  /* R3 : la réaction concerne les combattants retirés, jamais les remplaçants. */
+  mgmtAddFact(m,{c:m.cycle,k:'swapped',a:old.a,b:old.b,na:p.a.id,nb:p.b.id});
+  const react={
+    id:mgmtNextId(m),kind:'leila_react_swap',exchange:'leila_react_swap',
+    speaker:'leila',a:old.a,b:old.b,
+    status:'open',decision:null,
+  };
+  react.title=mgmtAffairTitle(m,react);
+  m.pile.push(react);
+  /* ==== [ANCRE: LEILA_SWAP_FERME] — Monde lot 14 T1 ==== */
+  mgmtFermeChoixLeila(m);
+  return true;
+}
+
+/** Le joueur fait refaire le combat posé choisi (écran Préliminaires, touche R) : un écrasement, comme sur la proposition d'avant — compté
+ *  (m.leila.crushes, fait k:'crushed'), et la paire suivante sera plus bâclée, le coût de l'écrasement (proposition plus bâclée, addendum §12).
+ *  Si Leïla ne peut rien proposer, l'ancien combat reste posé. @param {number} idx L'indice du préliminaire posé.
+ *  @returns {boolean} */
+function mgmtPrelimRefaire(m,idx){
+  if(!m||!Array.isArray(m.card.prelims)) return false;
+  if(!Number.isSafeInteger(idx)||idx<0||idx>=m.card.prelims.length) return false;
+  const old=m.card.prelims[idx];
+  const {used,seen}=mgmtLeilaEnsembles(m,old);
+  seen.add([old.a,old.b].sort().join('|'));
+  const stats=mgmtCrushStats(m);
+  /* Le coût de l'écrasement : la refonte part des ensembles ouverts (prénoms déjà vu exclus), puis s'assouplit — comme le re-proposition d'après
+     un écrasement (mgmtOfferBulk : strict, puis assoupli avec les ensembles à neuf). */
+  let p=mgmtBulkSelection(m,used,seen,1,stats,false,mgmtCardFights(m).filter(x=>x!==old))?.[0];
+  if(!p) p=mgmtBulkSelection(m,new Set(),new Set(),1,stats,true,mgmtCardFights(m).filter(x=>x!==old))?.[0];
+  if(!p) return false;
+  if(!m.leila||typeof m.leila!=='object'||Array.isArray(m.leila)) m.leila={crushes:[]};
+  if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
+  m.leila.crushes.push(m.cycle);
+  m.card.prelims[idx]={a:p.a.id,b:p.b.id,cycle:m.cycle,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))};
+  mgmtAddFact(m,{c:m.cycle,k:'crushed',a:old.a,b:old.b});
+  const react={
+    id:mgmtNextId(m),kind:'leila_react_crush',exchange:'leila_react_crush',
+    speaker:'leila',a:old.a,b:old.b,
+    status:'open',decision:null,
+  };
+  react.title=mgmtAffairTitle(m,react);
+  m.pile.push(react);
+  /* ==== [ANCRE: LEILA_CRUSH_FERME] — Monde lot 14 T1 ==== */
+  mgmtFermeChoixLeila(m);
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */
 
 /** Une place de carte principale est-elle encore composable ? (T5) : un
  *  emplacement libre et une paire posable — deux combattants disponibles

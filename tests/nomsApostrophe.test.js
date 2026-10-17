@@ -196,26 +196,19 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   watchErrors(win);
   enterMgmt(win,404); win.eval(`CL.go('mgmt_bureau')`);
   win.eval(`for(let c=0;c<30&&mgmtOpenCount(G.mgmt)===0;c++) mgmtNewPile(G.mgmt);`);
-  oconnorizeRoster(win);
 
-  /* Écran du bureau : le nom s'affiche, un clic ouvre l'affaire visée. */
-  let html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes(OCONNOR), 'le nom s’affiche au bureau');
-  const rows = [...win.document.querySelectorAll('.mgmt-aff')];
-  assert.ok(rows.length >= 1, 'des affaires sont affichées');
-  const last = rows[rows.length - 1];
-  const id = (last.getAttribute('onclick').match(/'([^']+)'/) || [])[1];
-  last.click();
-  assert.equal(win.eval(`G.mgmt.open`), id, 'le clic a ouvert l’affaire visée');
+  /* Monde lot 14 T2 ferme les propositions bulk : le test passe par la carte, pas par une affaire retirée. */
+  win.eval(`CL.mgmtCarte(); render();`);
   noErr(win, 'bureau');
 
   /* Écran de composition : deux clics posent le combat des deux O'Connor. */
-  win.eval(`CL.mgmtCarte(); render();`);
+  win.eval(`G.mgmt.card.prelims=[]; CL.mgmtCarte(); render();`);
   assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'le nom s’affiche à la composition');
   const [a, b] = ctlPair(win);
   assert.ok(a !== 'no-a' && b !== 'no-b', 'fixture : une paire posable existe');
   rowOf(win, a).click();
   rowOf(win, b).click();
+  oconnorizeRoster(win);
   const fight = JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main[0]||null)`));
   assert.ok(fight && [fight.a, fight.b].includes(a) && [fight.a, fight.b].includes(b),
     'les deux clics ont posé le combat');

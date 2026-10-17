@@ -1336,16 +1336,15 @@ function carteIncomplete(win){
    simulation — chaque test reste marqué skip tant que le comportement
    n'est pas écrit, et chacun a son entrée dans docs/QUESTIONS-OUVERTES.md.
    Toute réplique éventuelle de ces écrans est [EMPLACEMENT AUTEUR]. */
-test('MGMT sortie carte incomplète — remonter un combat des préliminaires', () => {
-  /* Lot 5 T6 (QO-1) : depuis une carte incomplète, un combat des préliminaires monte en carte principale — gratuit ;
-     la carte principale est de nouveau pleine et les préliminaires se reproposent (Leïla se débrouille). */
+test('Monde lot 14 T2 — remonter un combat conserve la place des préliminaires et remplit le trou aussitôt', () => {
+  /* Décision d'Anthony du 17/10/2026 : les préliminaires sont posés directement, sans proposition/validation en bloc. */
   const win = newGameWindow(); carteIncomplete(win);
   assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), false, 'la carte est incomplète après le retrait');
   assert.equal(win.eval(`mgmtRetraitOptions(G.mgmt).remonter`), true, 'un prélim peut monter');
   assert.equal(win.eval(`mgmtRetraitRemonter(G.mgmt)`), true);
   assert.equal(win.eval(`G.mgmt.card.main.length`), 5, 'la carte principale est complète');
-  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 6, 'un combat de moins en préliminaires');
-  assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk')`), true, 'Leïla repropose les préliminaires');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 7, 'la place préliminaire est aussitôt remplacée');
+  assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')`), false, 'aucune validation en bloc');
 });
 
 test('MGMT sortie carte incomplète — short notice : combattant de Split ou d\u2019une autre organisation', () => {

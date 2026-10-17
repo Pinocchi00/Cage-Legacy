@@ -700,6 +700,22 @@ function mgmtRepair(m){
     }
     /* ==== [ANCRE: LEILA_ANCIENNE_PILE_FERMEE] — Monde lot 14 T1 ==== */
     mgmtFermeChoixLeila(m);
+    /* ==== [ANCRE: MONDE_LOT14_T2_REPRISE] — Monde lot 14 T2 ====
+       Décision d'Anthony du 17/10/2026 : une sauvegarde ancienne garde une
+       affaire leila_bulk ouverte — elle est validée à l'ouverture de la
+       partie (mgmtBulkPoser : combats posés aux préliminaires, affaire close
+       « validated », fait booked). Plus de proposition à valider au joueur,
+       à l'écran comme à la reprise ; les affaires sans combats se ferment
+       comme les autres (mgmtFermeChoixLeila ne les touche pas : elles se
+       ferment ici, sans fait). ==== */
+    for(const a of m.pile){
+      if(a&&a.kind==='leila_bulk'&&a.status==='open'&&(!Array.isArray(a.fights)||!a.fights.length)){
+        a.status='closed'; a.decision='ignored';
+      }
+    }
+    for(const a of m.pile){
+      if(a&&a.kind==='leila_bulk'&&a.status==='open') mgmtBulkPoser(m,a);
+    }
     const cur=m.open!==null?m.pile.find(a=>a.id===m.open):null;
     if(!cur||cur.status!=='open'){
       const first=Array.isArray(m.pile)?m.pile.find(a=>a.status==='open'):null;
