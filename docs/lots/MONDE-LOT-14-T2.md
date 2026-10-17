@@ -49,3 +49,23 @@ Pas de sous-agent disponible. Auto-relecture limitée ; verdict formel non obten
 
 ### Questions pour Anthony
 Confirmer les empreintes attendues après isolation du seul changement de statut et des préliminaires T2 ; le fixture d'apostrophe management doit être réadapté à la nouvelle carte.
+
+## REPRISE 2 du superviseur (17/10/2026, 15 h 50) — 18 tests rouges à la vérification complète (copie propre du commit 62dc3de)
+Le contrôle rapide ne les voit pas ; la vérification complète les voit. **Pour chacun : lis le test, décide s'il est (A) périmé** — il décrit la validation en bloc / la proposition `leila_bulk` / les « Autres choix » / « Faire monter » retirés par décision d'Anthony du 17/10/2026 → réécris-le pour la pose directe en citant la décision, sans affaiblir ce qu'il garantit ; **ou (B) la révélation d'un vrai défaut de ton code** → corrige le code. Ne jamais supprimer un test pour retrouver du vert. Mène-les **fichier par fichier** : `node --test tests/<fichier>.test.js`.
+
+Rouges (fichier : test) :
+- `mgmtCalendrier.test.js` : « Agenda — aucune soirée sans validation : rien de posé, carte vide, proposition non validée : on ne joue pas » ; « Agenda — réservation : Leïla ne place jamais un combattant du cercle ou des suivis » (**B probable** : la composition automatique doit exclure le cercle et les suivis, comme `mgmtSelectable`)
+- `mgmtCeintures.test.js` : « T1 ceintures — cinq rounds en combat principal et titre ailleurs, vrai rejeu fidèle et rechargement »
+- `mgmtCorrectionsLot1.test.js` : « 1.2 — Un forfait en préliminaires se règle depuis Préliminaires, en une action, sans passer par la fiche » ; « 1.3 — Le calendrier liste ce qui empêche la soirée, une ligne par blocage… »
+- `mgmtCorrectionsLot11.test.js` : « 11 — Un champion n’est jamais un préliminaire : Leïla ne le propose pas » (**B probable** : un champion de ceinture ne doit jamais être posé en préliminaire, composition automatique comprise)
+- `mgmtFinances.test.js` : « Finances — six cartes, la caisse au départ, les bourses engagées suivent la carte en cours de composition »
+- `mgmtMarque.test.js` : « Marque — la marque est dessinée dans chaque liste où le nom figure »
+- `mgmtPasse.test.js` : « Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et historique sont conservés »
+- `mgmtPredecesseurDemandes.test.js` : « Monde lot 5 T2 — alléger recale les références des promesses et des refus »
+- `mgmtPrelimsMaquette.test.js` (3) : « remplacer le second combattant par un autre choix… » ; « faire monter un préliminaire proposé sur la carte principale… » ; « l’écran montre les autres choix, les raisons de Leïla et le bloc de la carte principale sous la liste » → **A** (écrans retirés) : remplace par des tests de l'écran Préliminaires tel qu'il est maintenant (combats posés, Changer, Refaire, raison de Leïla lue, bloc carte principale)
+- `mgmtRetoursMaquettes.test.js` : « Préliminaires — on remplace au choix le premier ou le second combattant du préliminaire proposé » (A probable)
+- `mgmtRetraits.test.js` : « T6 — un combattant booké peut se retirer à la veille : un fait, son combat tombe, son adversaire reste libre, la carte est incomplète » ; « T6 — sortie 1 (QO-1) : remonter un combat des préliminaires complète le trou, Leïla propose B1 la première fois, B2 répond »
+- `mgmtSoireeShow.test.js` : « Le commentaire et les coins — datés dans le combat, jamais l'un sur l'autre, textes marqués relu:false »
+- `mgmtSuiteHeritee.test.js` : « Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis aux résultats »
+
+Ensuite : `node tools/_bump.js` sur tout .js touché, `node tools/verif-versions.js origin/main`, puis relance **tous ces fichiers** : `node --test tests/mgmtCalendrier.test.js tests/mgmtCeintures.test.js tests/mgmtCorrectionsLot1.test.js tests/mgmtCorrectionsLot11.test.js tests/mgmtFinances.test.js tests/mgmtMarque.test.js tests/mgmtPasse.test.js tests/mgmtPredecesseurDemandes.test.js tests/mgmtPrelimsMaquette.test.js tests/mgmtRetoursMaquettes.test.js tests/mgmtRetraits.test.js tests/mgmtSoireeShow.test.js tests/mgmtSuiteHeritee.test.js` (les tests longs de `mgmtPasse` : filtre `--test-name-pattern "conservés"`). Commit `Monde lot 14 T2 : reprise 2 (tests de la pose directe)`. S'il reste du rouge, dis lequel et commite avec « (inachevé) ».
