@@ -698,6 +698,8 @@ function mgmtRepair(m){
         if(a.marked!==null&&(!Number.isSafeInteger(a.marked)||a.marked<0||a.marked>=Math.max(a.fights.length,1))) a.marked=null;
       }
     }
+    /* ==== [ANCRE: LEILA_ANCIENNE_PILE_FERMEE] — Monde lot 14 T1 ==== */
+    mgmtFermeChoixLeila(m);
     const cur=m.open!==null?m.pile.find(a=>a.id===m.open):null;
     if(!cur||cur.status!=='open'){
       const first=Array.isArray(m.pile)?m.pile.find(a=>a.status==='open'):null;

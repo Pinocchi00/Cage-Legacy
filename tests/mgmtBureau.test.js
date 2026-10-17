@@ -27,6 +27,46 @@ const { newGameWindow } = require('./helpers/loadGame');
 const LEILA_PROPOSE="Patron, j'ai un très bon combat à vous proposer. Pouvez-vous le placer dans la carte principale ?";
 const LEILA_REFUSED="Pas de souci. Retenez ces deux noms : ils vont monter au classement.";
 
+/* ==== [ANCRE: TESTS_LEILA_CHOIX_RETIRES] — Monde lot 14 T1 ==== */
+// Décision d’Anthony du 17/10/2026 : les propositions restent générées, jamais ouvertes.
+test('Monde lot 14 T1 — après mgmtNewPile, aucune affaire retirée ouverte',()=>{
+  const w=newGameWindow(); enterMgmt(w,11);
+  assert.equal(w.eval(`G.mgmt.pile.length>0`),true);
+  assert.equal(w.eval(`G.mgmt.pile.every(a=>a.status==='closed'&&a.decision==='ignored')`),true);
+  assert.equal(w.eval(`mgmtOpenCount(G.mgmt)`),0);
+});
+test('Monde lot 14 T1 — l’Accueil n’affiche aucune ligne d’affaire de Leïla',()=>{
+  const w=newGameWindow(); enterMgmt(w,11);
+  w.eval(`CL.go('mgmt_accueil')`);
+  assert.equal(w.document.querySelectorAll('[onclick*="CL.mgmtOpen"]').length,0);
+});
+test('Monde lot 14 T1 — Les affaires sans réponses ni colonne vide',()=>{
+  const w=newGameWindow(); enterMgmt(w,11); w.eval(`CL.go('mgmt_bureau')`);
+  const html=w.document.getElementById('app').innerHTML;
+  for(const text of ["D'accord",'D’accord','Non, désolé',"Ignorer l'affaire",'Ignorer l’affaire']) assert.ok(!html.includes(text));
+  assert.equal(w.document.querySelectorAll('.mgmt-week-talk,.mgmt-week-affairs').length,0);
+  assert.ok(html.includes('Le monde autour de'));
+});
+test('Monde lot 14 T1 — ancienne sauvegarde ouverte chargée et fermée',()=>{
+  const w=newGameWindow(); enterMgmt(w,11);
+  w.eval(`G.mgmt.pile[0].status='open'; G.mgmt.pile[0].decision=null; G.mgmt.open=G.mgmt.pile[0].id; saveMgmt(); G.mgmt=null; loadMgmt();`);
+  assert.equal(w.eval(`G.mgmt.pile[0].status`),'closed');
+  assert.equal(w.eval(`G.mgmt.pile[0].decision`),'ignored');
+  assert.equal(w.eval(`G.mgmt.facts.some(f=>f.k==='ignored')`),false);
+});
+test('Monde lot 14 T1 — mêmes faits, même graine avant et après',()=>{
+  const avant=newGameWindow(), apres=newGameWindow();
+  // Rejoue exactement la génération antérieure, sans le crochet de clôture.
+  avant.eval(`mgmtNewPile=eval('('+mgmtNewPile.toString().replace('mgmtFermeChoixLeila(m);','')+')')`);
+  for(const w of [avant,apres]){
+    enterMgmt(w,11);
+    w.eval(`for(let i=0;i<4;i++) mgmtNewPile(G.mgmt)`);
+  }
+  for(const expr of ['G.mgmt.facts','G.mgmt.roster','G.mgmt.exterieur','rnd()']){
+    assert.equal(apres.eval(`JSON.stringify(${expr})`),avant.eval(`JSON.stringify(${expr})`),expr);
+  }
+});
+
 function enterMgmt(win,seed){
   win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
 }
@@ -41,10 +81,11 @@ function enterMgmtFull(win,seed){
    ciblent les singles ; la proposition en bloc n'arrive qu'une fois la
    carte principale complète, §T3). */
 function enterMgmtSingles(win,seed){
-  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
+  // Décision d’Anthony du 17/10/2026 : les singles historiques sont fermées.
+  enterMgmtFull(win,seed);
 }
 function mgmtFirstSingle(win){
-  return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id`);
+  return win.eval(`G.mgmt.pile.find(a=>a.kind==='leila_propose').id`);
 }
 
 /* Lot 3 T4, décision 3 du 21/09 : la soirée ne se saute plus par Continuer.
@@ -99,7 +140,8 @@ test('MGMT entrée — roster de 40 à 60 noms, singles 0-2 sans bloc tant que l
     total:G.mgmt.pile.length})`));
   assert.ok(st.singles>=0&&st.singles<=2, `singles entre 0 et 2, vus ${st.singles}`);
   assert.equal(st.bulk, 0, '§T3 : la proposition en bloc n\u2019arrive qu\u2019une fois la carte principale complète — carte vide, rien');
-  assert.equal(st.open, st.total, 'pile fraîche entièrement ouverte');
+  // Décision d’Anthony du 17/10/2026 : singles générées mais fermées.
+  assert.equal(st.open, 0, 'aucun choix de Leïla ouvert');
   assert.equal(win.eval(`G.mgmt.cycle`), 1);
   assert.equal(win.eval(`G.mgmt.org`), 'Split');
   /* §T1 : carte {main,prelims} vide au départ — aucun combat posé. */
@@ -266,7 +308,8 @@ test('MGMT voix — les répliques de référence de Leïla figurent verbatim da
   assert.equal(win.eval(`MGMT_EXCHANGES.leila_refused.lines[0]`), LEILA_REFUSED);
   win.eval(`CL.mgmtOpen(G.mgmt.pile[0].id)`);
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Leïla Malika'), 'le nom de la voix doit s\u2019afficher');
+  // Décision d’Anthony du 17/10/2026 : données conservées, échange retiré.
+  assert.ok(!html.includes(LEILA_PROPOSE));
 });
 
 const LEILA_ACCEPT="D'accord. Je vous fais confiance.";
@@ -286,29 +329,22 @@ test('MGMT réponses-joueur — deux répliques d\u2019auteur verbatim, une vide
 
 test('MGMT échanges — répliques écrites affichées, bouton neutre en repli sur le vide', () => {
   const win = newGameWindow();
-  enterMgmtSingles(win,15);
-  const id = mgmtFirstSingle(win);
-  win.eval(`CL.mgmtOpen('${id}')`);
+  // Décision d’Anthony du 17/10/2026 : les échanges retirés ne sont plus lus.
+  enterMgmtFull(win,15);
+  win.eval(`CL.mgmtOpen(G.mgmt.pile[0].id)`);
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes(LEILA_ACCEPT), 'la réplique accepter s\u2019affiche telle quelle');
-  assert.ok(html.includes(LEILA_REFUSE), 'la réplique refuser s\u2019affiche telle quelle');
-  assert.ok(!html.includes('Accepter le combat'), 'plus de libellé neutre là où une réplique existe');
-  assert.ok(html.includes("Ignorer l'affaire"), 'ignorer est la troisième réponse, même niveau');
-  const nRep = (html.match(/class="mgmt-rep"/g)||[]).length;
-  assert.equal(nRep, 3, 'proposition : deux répliques + ignorer, même traitement');
-  win.eval(`CL.mgmtReply('${id}','refuse')`);
-  win.eval(`CL.mgmtOpen(G.mgmt.pile[G.mgmt.pile.length-1].id)`);
-  const html2 = win.document.getElementById('app').innerHTML;
-  assert.ok(html2.includes(LEILA_REFUSED), 'la réaction de Leïla s\u2019affiche');
-  assert.ok(html2.includes('Fermer'), 'l\u2019emplacement vide garde un bouton d\u2019interface neutre');
+  assert.ok(!html.includes(LEILA_ACCEPT));
+  assert.ok(!html.includes(LEILA_REFUSE));
+  assert.ok(!html.includes("Ignorer l'affaire"));
 });
 
 test('MGMT accepter — les deux combattants passent en dossier avec une raison des cinq', () => {
   const win = newGameWindow();
-  enterMgmtSingles(win,16);
-  const o = JSON.parse(win.eval(`JSON.stringify((()=>{ const a=G.mgmt.pile.find(x=>x.status==='open'&&x.kind==='leila_propose'); return {id:a.id,a:a.a,b:a.b,cycle:G.mgmt.cycle}; })())`));
-  const ok = win.eval(`CL.mgmtReply('${o.id}','accept'), true`);
-  assert.equal(ok, true);
+  // Décision d’Anthony du 17/10/2026 : composition directe, sans réponse.
+  enterMgmtFull(win,16);
+  const o = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[0])`));
+  const ok = win.eval(`mgmtBookMain(G.mgmt,'${o.a}','${o.b}')`);
+  assert.ok(ok);
   const st = win.eval(`JSON.stringify({a:G.mgmt.roster.find(x=>x.id==='${o.a}'),b:G.mgmt.roster.find(x=>x.id==='${o.b}'),facts:G.mgmt.facts})`);
   const s = JSON.parse(st);
   for(const f of [s.a,s.b]){
@@ -317,12 +353,14 @@ test('MGMT accepter — les deux combattants passent en dossier avec une raison 
     assert.equal(f.interactions, 1, 'le booking compte comme interaction');
   }
   /* Lot 5 T1, décision du 02/10 : douze attributions initiales précèdent
-     les interactions ; le booking laisse toujours exactement un fait. */
+     les interactions. Monde lot 14 T1 (décision d'Anthony du 17/10/2026) :
+     la composition directe (mgmtBookMain) n'écrit jamais de fait — le fait
+     `booked` était propre au chemin d'acceptation d'une affaire, retiré. */
   /* Monde lot 8 T4b : N5 écrit un fait `challenger` par catégorie à la première ouverture de cycle (décision du superviseur du 14/10/2026) ; ce test compte les faits hors `challenger`. */
   const horsChallenger=s.facts.filter(f=>f.k!=='challenger');
-  assert.equal(horsChallenger.length, 13);
+  assert.equal(horsChallenger.length, 12);
   assert.equal(s.facts.filter(f=>f.k==='title_initial').length,12);
-  assert.equal(horsChallenger.at(-1).k, 'booked');
+  assert.equal(horsChallenger.at(-1).k, 'title_initial');
   const after = win.eval(`(function(){ const x=G.mgmt.pile.find(a=>a.id==='${o.id}'); return x?x.status:'cycle-suivant'; })()`);
   assert.ok(after==='closed'||win.eval(`G.mgmt.cycle`)===o.cycle+1, 'affaire clôturée ou cycle auto-ouvert');
 });
@@ -331,33 +369,23 @@ const MGMT_IDS = ['necessite','passion','hasard','addiction','reconversion'];
 
 test('MGMT refuser — affaire de réaction créée, texte verbatim, fait mémorisé', () => {
   const win = newGameWindow();
-  enterMgmtSingles(win,17);
-  const id = mgmtFirstSingle(win);
+  // Décision d’Anthony du 17/10/2026 : une réponse périmée ne crée rien.
+  enterMgmtFull(win,17);
+  const id = win.eval(`G.mgmt.pile[0].id`);
+  const before=win.eval(`JSON.stringify(G.mgmt)`);
   win.eval(`CL.mgmtReply('${id}','refuse')`);
-  const aff = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile.find(a=>a.id==='${id}'))`));
-  assert.equal(aff.status, 'closed');
-  assert.equal(win.eval(`G.mgmt.pile.length`), win.eval(`G.mgmt.pile.filter(a=>a.status==='open').length+1`));
-  const react = win.eval(`JSON.stringify(G.mgmt.pile[G.mgmt.pile.length-1])`);
-  const r = JSON.parse(react);
-  assert.equal(r.kind, 'leila_react');
-  assert.equal(r.exchange, 'leila_refused');
-  assert.equal(win.eval(`MGMT_EXCHANGES.leila_refused.lines[0]`), LEILA_REFUSED);
-  win.eval(`CL.mgmtReply('${r.id}','close')`);
-  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${r.id}').status`), 'closed');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt)`),before);
 });
 
 test('MGMT ignorer — clôt sans réaction, fait mémorisé, ne revient jamais', () => {
   const win = newGameWindow();
   enterMgmtFull(win,18);
-  /* Lot 3a §5 : la tête de pile peut être la proposition en bloc, qui ne
-     s'ignore plus tant que la carte est incomplète — viser une single. */
-  win.eval(`for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
-  const o = JSON.parse(win.eval(`JSON.stringify((()=>{ const a=G.mgmt.pile.find(x=>x.status==='open'&&x.kind==='leila_propose'); return {id:a.id,a:a.a,b:a.b}; })())`));
+  // Décision d’Anthony du 17/10/2026 : clôture silencieuse, sans fait ignored.
+  const o = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[0])`));
+  const before=win.eval(`JSON.stringify(G.mgmt.facts)`);
   win.eval(`CL.mgmtIgnore('${o.id}')`);
   assert.ok(!win.eval(`G.mgmt.pile.some(a=>a.after==='${o.id}')`), 'ignorer ne crée aucune affaire');
-  const last = JSON.parse(win.eval(`JSON.stringify(G.mgmt.facts[G.mgmt.facts.length-1])`));
-  assert.equal(last.k, 'ignored', 'fait mémorisé');
-  assert.equal(last.a, o.a, 'fait rattaché aux bons combattants');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.facts)`),before);
 });
 
 test('MGMT attaché — trois bookings du même combattant, niveau 3', () => {
@@ -504,7 +532,8 @@ test('MGMT titres — chaque affaire porte un titre qui dit qui parle et de quoi
     assert.ok(t.length>12, 'le titre dit de quoi il s\u2019agit, pas un libellé vide');
   }
   assert.equal(new Set(titles).size, titles.length, 'pas un libellé de type répété à l\u2019identique');
-  win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id,'refuse')`);
+  // Décision d’Anthony du 17/10/2026 : aucune réaction ne suit une affaire fermée.
+  win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.kind==='leila_propose').id,'refuse')`);
   const rt = win.eval(`G.mgmt.pile[G.mgmt.pile.length-1].title`);
   assert.ok(typeof rt==='string'&&rt.includes('Leïla'), 'l\u2019affaire de réaction est titrée elle aussi');
 });
@@ -513,11 +542,12 @@ test('MGMT ouverture — la première affaire de la pile est sélectionnée d\u2
   const win = newGameWindow();
   enterMgmt(win,24);
   win.eval(`for(let c=0;c<20&&G.mgmt.pile.length===0;c++) mgmtNewPile(G.mgmt);`);
-  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`));
+  // Décision d’Anthony du 17/10/2026 : seules les affaires ouvertes sont sélectionnées.
+  assert.equal(win.eval(`G.mgmt.open`), null);
   win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); CL.mgmtNextCycle();
     for(let c=0;c<20&&G.mgmt.pile.length===0;c++) mgmtNewPile(G.mgmt); render();`);
   if(win.eval(`G.mgmt.pile.length`)>0){
-    assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`), 'pareil à chaque nouveau cycle non vide');
+    assert.equal(win.eval(`G.mgmt.open`), null, 'les singles restent fermées');
   }
 });
 
@@ -528,7 +558,8 @@ test('MGMT réparation — une sauvegarde sans titres se recharge, titres recalc
   win.eval(`G.mgmt.pile.forEach(a=>{delete a.title;}); G.mgmt.open=null; saveMgmt(); G.mgmt=null;`);
   assert.equal(win.eval(`loadMgmt()`), true);
   assert.equal(win.eval(`G.mgmt.pile.every(a=>typeof a.title==='string'&&a.title.includes('Leïla'))`), true);
-  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile.find(a=>a.status==='open').id`));
+  // Décision d’Anthony du 17/10/2026 : ne pas rouvrir une proposition ancienne.
+  assert.equal(win.eval(`G.mgmt.open`), null);
 });
 /* ==== [FIN ANCRE] ==== */
 
@@ -560,7 +591,8 @@ test('MGMT hiérarchie — une affaire non sélectionnée n\u2019affiche que A c
   const expected = JSON.parse(names);
   const html = win.document.getElementById('app').innerHTML;
   for(const vs of expected){
-    assert.ok(html.includes(vs), `l\u2019affaire affiche son combat : ${vs}`);
+    // Décision d’Anthony du 17/10/2026 : la ligne de proposition disparaît.
+    assert.ok(!html.includes(vs), `l'affaire retirée ne s'affiche pas : ${vs}`);
   }
   assert.ok(html.includes('Carte — 4 combats'), 'la proposition en bloc a sa ligne');
   assert.ok(!html.includes('Leïla propose'), 'qui parle n\u2019est pas rappelé dans la pile');
@@ -740,7 +772,8 @@ test('MGMT compteur accordé — zéro, un et plusieurs', () => {
   win.eval(`G.mgmt.pile=[]; G.mgmt.open=null; render();`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Aucune affaire ouverte'), 'pile vide : compteur accordé');
-  assert.ok(html.includes('La pile est vide.'), 'pile vide : colonne d\u2019échange explicite');
+  // Décision d’Anthony du 17/10/2026 : aucune colonne vide.
+  assert.ok(!html.includes('mgmt-week-talk'));
   /* §4 bis, décision 4 du 20/09/2026 + charte S6 (docs/CHARTE-INTERFACE-
      MANAGEMENT.md) : carte principale incomplète et composable, le
      déclencheur ne ferait rien — il n'est pas proposé ; l'état de la carte
@@ -752,7 +785,8 @@ test('MGMT compteur accordé — zéro, un et plusieurs', () => {
 
 test('MGMT paroles — les réponses sont des paroles, pas des boutons', () => {
   const win = newGameWindow();
-  enterMgmtFull(win,30);
+  // Décision d’Anthony du 17/10/2026 : seul le bloc préliminaire garde ses réponses en T1.
+  enterMgmtWithBulk(win,30);
   win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open').id)`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('class="mgmt-rep"'), 'réponses en classe paroles');
@@ -923,7 +957,8 @@ test('MGMT mémoire — seuls écrasements et revirements, en phrases', () => {
   assert.ok(lines.some(t=>t==='Leïla — tu as écrasé sa carte.'), 'l\u2019écrasement se retient');
   assert.ok(lines.some(t=>t==='Leïla — tu as échangé un de ses combats.'), 'le revirement se retient');
   assert.ok(!lines.some(t=>t.includes('accepté')||t.includes('sa proposition')), 'valider ne se mémorise pas');
-  win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open').id); render();`);
+  // Décision d’Anthony du 17/10/2026 : mémoire consultable sans affaire ouverte.
+  win.eval(`render();`);
   const html = win.document.getElementById('app').innerHTML;
   /* QO-9, lot 4 T2 : l'écran montre les faits, pas la voix ni son compteur seul. */
   assert.ok(html.includes('Combat booké')&&html.includes('Combat échangé'),
@@ -934,7 +969,8 @@ test('MGMT mémoire — seuls écrasements et revirements, en phrases', () => {
 test('MGMT mémoire — un refus simple ne se retient plus', () => {
   const win = newGameWindow();
   enterMgmtSingles(win,41);
-  win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id,'refuse')`);
+  // Décision d’Anthony du 17/10/2026 : les réponses périmées ne sont pas jouées.
+  win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.kind==='leila_propose').id,'refuse')`);
   assert.deepEqual(win.eval(`JSON.stringify(mgmtMemoryLines(G.mgmt))`), '[]', 'refuser n\u2019est pas notable');
 });
 
@@ -987,9 +1023,10 @@ test('MGMT lot 4 T2 — la semaine mène au booking, compose explique, monde fac
   win.eval(`CL.mgmtFicheRetour()`);
   win.eval(`G.mgmt.pile=[]; G.mgmt.open=null; render();`);
   const compose=win.document.getElementById('app').innerHTML;
-  assert.match(compose,/La pile est vide\. Il reste des places en carte principale/);
+  // Décision d’Anthony du 17/10/2026 : composer depuis la carte, sans dialogue vide.
+  assert.match(compose,/Le monde autour de Split/);
   assert.match(compose,/CL\.mgmtCarte\(\)/);
-  win.document.querySelector('.mgmt-week-instruction+.mgmt-week-book').click();
+  win.document.querySelector('.mgmt-week-free').click();
   assert.equal(win.eval(`G.screen`),'mgmt_carte','le bouton de l’état compose ouvre la carte');
   win.eval(`CL.mgmtCarteLeave()`);
   win.eval(`G.mgmt.roster[0].name='<img src=x onerror=alert(1)>'; render();`);
@@ -1176,7 +1213,8 @@ test('MGMT auto-cycle — pile vidée avec carte complète : la soirée s\u2019o
   mgmtFinishEvent(win);
   assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'après la soirée puis le lendemain, le cycle vaut 2');
   assert.equal(win.eval(`G.screen`), 'mgmt_accueil', 'l’Accueil rouvre (décision du 12/10/2026 : l’Accueil est la première section (lot 7) ; avant, décision du 08/10/2026 : la carte)');
-  assert.ok(win.eval(`G.mgmt.pile.every(a=>a.status==='open')`), 'nouvelle pile fraîche');
+  // Décision d’Anthony du 17/10/2026 : nouvelle pile générée puis fermée.
+  assert.ok(win.eval(`G.mgmt.pile.every(a=>a.kind==='leila_bulk'||a.status==='closed')`), 'nouvelle pile sans choix retirés');
 });
 
 test('MGMT bouton discret — carte principale incomplète : le déclencheur n\u2019est pas proposé, le calendrier attend', () => {
@@ -1678,10 +1716,11 @@ test('MGMT mémoire — formes singulier, pluriel et suites', () => {
 test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () => {
   const win = newGameWindow();
   win.eval(`setSeed(11); mgmtEntrerAvantH4();`);
-  win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id)`);
-  const id = win.eval(`G.mgmt.open`);
-  win.eval(`CL.mgmtReply('${id}','accept')`);
-  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'accepted');
+  // Décision d’Anthony du 17/10/2026 : la composition directe est persistée.
+  const id = win.eval(`G.mgmt.pile[0].id`);
+  assert.ok(win.eval(`mgmtBookMain(G.mgmt,G.mgmt.pile[0].a,G.mgmt.pile[0].b)`));
+  win.eval(`saveMgmt()`);
+  const booked=win.eval(`JSON.stringify(G.mgmt.card.main)`);
   /* La sauvegarde carrière n'embarque plus le bureau. */
   win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
   assert.equal(win.eval(`'mgmt' in JSON.parse(localStorage.getItem('cage-legacy-v3'))`), false, 'save() ne persiste plus G.mgmt');
@@ -1694,11 +1733,11 @@ test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () =>
   win.eval(`CL.cont()`);
   assert.equal(win.eval(`G.mgmt`), undefined, 'aucune copie embarquée ne survit au chargement');
   win.eval(`CL.go('title'); mgmtEntrerAvantH4();`);
-  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'accepted', 'le bureau dédié gagne sur la copie embarquée');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.card.main)`),booked, 'le bureau dédié gagne sur la copie embarquée');
   /* Traiter une autre affaire persiste sans écraser la décision. */
   win.eval(`G.mgmt.pile.push({id:'k-r1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtIgnore('k-r1');`);
   const after = JSON.parse(win.eval(`localStorage.getItem('cage-legacy-mgmt')`));
-  assert.equal(after.pile.find(a=>a.id===`${id}`).decision, 'accepted', 'décision toujours persistée après reprise et action suivante');
+  assert.equal(after.pile.find(a=>a.id===`${id}`).decision, 'ignored', 'clôture toujours persistée après reprise');
 });
 
 test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
@@ -1720,6 +1759,8 @@ test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
   win.prompt = () => data;
   win.eval(`CL.importSave()`);
   win.eval(`CL.go('title'); mgmtEntrerAvantH4();`);
+  // Décision d’Anthony du 17/10/2026 : clic sur une affaire préliminaire, pas un choix retiré.
+  enterMgmtWithBulk(win,11);
   const row = win.document.querySelector('.mgmt-aff');
   assert.ok(row, 'une affaire saine est affichée');
   row.click();

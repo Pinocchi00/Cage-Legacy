@@ -408,6 +408,20 @@ function mgmtEligiblePairs(m,usedFirsts,seen,lastDiv,run){
  * shortfall=true le signale au lieu de contourner. La première affaire est
  * sélectionnée d'office quand la pile n'est pas vide.
  */
+/* ==== [ANCRE: LEILA_CHOIX_RETIRES] — Monde lot 14 T1 ==== */
+function mgmtFermeChoixLeila(m){
+  for(const a of m.pile||[]){
+    if(a.status==='open'&&['leila_propose','leila_react','leila_react_swap','leila_react_crush'].includes(a.kind)){
+      a.status='closed';
+      a.decision='ignored';
+    }
+  }
+  if(!(m.pile||[]).some(a=>a.id===m.open&&a.status==='open')){
+    const next=(m.pile||[]).find(a=>a.status==='open');
+    m.open=next?next.id:null;
+  }
+}
+
 function mgmtNewPile(m){
   if(!Array.isArray(m.roster)||m.roster.length<2) mgmtNewRoster(m);
   /* Lot 2B T1 bis : la cohorte et les remplaçants complètent le cycle
@@ -476,6 +490,8 @@ function mgmtNewPile(m){
     else if(m.pile.length===0) m.shortfall=true;
   }
   if(m.pile.length>0) m.open=m.pile[0].id;
+  /* ==== [ANCRE: LEILA_PILE_FERMEE] — Monde lot 14 T1 ==== */
+  mgmtFermeChoixLeila(m);
   mgmtRangsInvalider(m);   /* Monde lot 1 T1 : mgmtNewPile mute plusieurs fois, invalidation de fin de livraison. */
   return m.pile;
 }
@@ -592,6 +608,8 @@ function mgmtDecide(m,affairId,replyId){
     };
     react.title=mgmtAffairTitle(m,react);
     m.pile.push(react);
+    /* ==== [ANCRE: LEILA_REFUS_FERME] — Monde lot 14 T1 ==== */
+    mgmtFermeChoixLeila(m);
   }else if(rep.action==='close'){
     aff.status='closed'; aff.decision='noted';
     fact={c:m.cycle,k:'reaction_seen',a:aff.a,b:aff.b};
@@ -630,6 +648,8 @@ function mgmtDecide(m,affairId,replyId){
     };
     react.title=mgmtAffairTitle(m,react);
     m.pile.push(react);
+    /* ==== [ANCRE: LEILA_CRUSH_FERME] — Monde lot 14 T1 ==== */
+    mgmtFermeChoixLeila(m);
   }else{
     return false;
   }

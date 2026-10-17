@@ -242,5 +242,5 @@ test('MGMT T4 — sans soirée en mémoire, l\'écran rend la main à la semaine
   freshMgmt(win,506);
   win.eval(`G.screen='mgmt_lendemain'; render();`);
   const html=win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('La semaine'),'le fallback de sécurité reste le bureau');
+  assert.ok(html.includes('La semaine')||html.includes('Le monde autour de Split'),'le fallback de sécurité reste le bureau'); /* décision d'Anthony du 17/10/2026 : sans affaire ouverte, la semaine porte le titre du monde */
 });

@@ -367,6 +367,8 @@ function mgmtSwapFight(m,affairId){
   };
   react.title=mgmtAffairTitle(m,react);
   m.pile.push(react);
+  /* ==== [ANCRE: LEILA_SWAP_FERME] — Monde lot 14 T1 ==== */
+  mgmtFermeChoixLeila(m);
   return true;
 }
 /** Demande d'Anthony du 08/10/2026 (planche « Préliminaires », « Autres choix ») : le joueur remplace lui-même le second combattant d'un préliminaire que Leïla propose, par un

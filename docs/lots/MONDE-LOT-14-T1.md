@@ -15,3 +15,42 @@ Les affaires de types `leila_propose`, `leila_react`, `leila_react_swap`, `leila
 
 ## Tests
 `Monde lot 14 T1 — <point>` : (a) après `mgmtNewPile`, aucune affaire de ces types n’est `open` ; (b) l’Accueil n’affiche aucune ligne d’affaire de Leïla ; (c) « Les affaires » n’affiche ni « D’accord » ni « Non, désolé » ni « Ignorer l’affaire » ; (d) une sauvegarde d’avant ce lot avec une affaire `leila_propose` ouverte se charge et l’affaire est fermée ; (e) mêmes faits, même graine. Corrige les tests existants (`tests/mgmtBureau.test.js`, `tests/mgmtCard.test.js`, `tests/mgmtEconomie.test.js`, `tests/mgmtSoiree.test.js`, etc.) qui répondaient à ces affaires : ils testaient une mécanique retirée ; remplace-les par des tests de la composition directe (`mgmtBookMain`) en citant la décision.
+
+## Compte rendu
+
+### Fichiers modifiés et rôle
+- `mgmt-bureau.js` : `mgmtFermeChoixLeila(m)` (ancre `LEILA_CHOIX_RETIRES`) ferme sans fait toute affaire des quatre types `open` ; appelée en fin de `mgmtNewPile` (ancre `LEILA_PILE_FERMEE`) — la pile se construit exactement comme avant (mêmes tirages) — et après chaque création de réaction dans `mgmtDecide` (ancres `LEILA_REFUS_FERME`, `LEILA_CRUSH_FERME`). `m.open` recalé sur la première affaire réellement ouverte (le bloc, sinon `null`).
+- `mgmt-carte.js` : idem après la réaction `leila_react_swap` de `mgmtSwapFight` (ancre `LEILA_SWAP_FERME`). Les dossiers de la Carte ne bougent pas.
+- `mgmt-save.js` : `mgmtRepair` ferme toute affaire des quatre types encore `open` à l'ouverture d'une partie (ancre `LEILA_ANCIENNE_PILE_FERME`), sans écrire de fait `ignored`. `MGMT_SAVE_VERSION` inchangée (aucun format nouveau ; une sauvegarde d'avant se charge).
+- `mgmt-ecran-semaine.js` : `scr_mgmt_bureau` (ancre `LEILA_MONDE_SANS_CHOIX`) sans affaire ouverte : titre « Le monde autour de {org} », colonnes « Échange » et « Affaires » supprimées ; la carte, le monde et le classement restent seuls. Pas de colonne vide.
+- `mgmt-cadre.js` : la plaque de `mfAncien` pour `mgmt_bureau` devient « Le monde autour de {org} » quand `mgmtOpenCount===0` (ancre `LEILA_PLAQUE_MONDE`) ; `l'Accueil` filtrait déjà sur `status==='open'`, rien à changer.
+- `index.html` : `?v=` remontés sur les cinq fichiers ci-dessus (`node tools/_bump.js`).
+
+### Tests ajoutés (`tests/mgmtBureau.test.js`)
+- « Monde lot 14 T1 — après mgmtNewPile, aucune affaire retirée ouverte » (point a)
+- « Monde lot 14 T1 — l’Accueil n’affiche aucune ligne d’affaire de Leïla » (point b)
+- « Monde lot 14 T1 — Les affaires sans réponses ni colonne vide » (point c)
+- « Monde lot 14 T1 — ancienne sauvegarde ouverte chargée et fermée » (point d, sans fait `ignored`)
+- « Monde lot 14 T1 — mêmes faits, même graine avant et après » (point e : `mgmtNewPile` re-joué sans le crochet de clôture, `facts`/`roster`/`exterieur`/`rnd()` identiques)
+
+### Tests existants corrigés (décision d'Anthony du 17/10/2026 citée dans chaque fichier)
+- `tests/mgmtBureau.test.js` : entrée (« aucun choix de Leïla ouvert »), voix, échanges, accepter (composition directe `mgmtBookMain` — le fait `booked` était propre au chemin `accept`, le compte attendu passe de 13 à 12 faits hors `challenger`), refuser/ignorer (réponse périmée ne crée rien), titres, ouverture (`m.open===null` quand tout est fermé), réparation, hiérarchie, compteur zéro (plus de colonne d'échange vide), paroles (bloc préliminaire uniquement), mémoire, auto-cycle, L1-R1 (décision persistée via la carte), L1-R2.
+- `tests/mgmtCard.test.js` : « écraser — réaction » vérifie désormais la réaction fermée `status:'closed'`/`decision:'ignored'` au lieu de l'ouverture.
+- `tests/mgmtSoiree.test.js` : « corps » — le titre de la semaine est « Le monde autour de Split ».
+- `tests/mgmtEcranLendemain.test.js` : le fallback de sécurité rend la semaine, dont le titre peut être celui du monde.
+- `tests/mgmtEconomie.test.js`, `tests/mgmtAttention.test.js`, `tests/mgmtCategoriesFeminines.test.js`, `tests/mgmtCorrectionsLot1.test.js`, `tests/mgmtDefautsDemo.test.js`, `tests/mgmtAccueil.test.js` : verts sans modification (construisent leurs affaires à la main ou ne touchent pas les choix retirés).
+
+### Migration de sauvegarde
+Aucune : la version de sauvegarde ne change pas. La fermeture des quatre types se fait en lecture (`mgmtRepair`), sans perte de donnée et sans fait écrit.
+
+### Écarts à la fiche
+Aucun point ignoré. Le titre « Le monde autour de {org} » est celui cité par la fiche elle-même (`relu:false`), posé en chaîne dans le code avec commentaire.
+
+### Vérification
+`node tools/verif-versions.js origin/main` : aucun écart (22 fichiers examinés). Tests ciblés verts : `mgmtBureau` 74/74, `mgmtCard` 48/48, `mgmtEconomie` 18/18, `mgmtSoiree` 14/14, `mgmtAccueil`+`mgmtEcranLendemain` 16/16, `mgmtAttention`+`mgmtCategoriesFeminines` 15/15, `mgmtCorrectionsLot1`+`mgmtDefautsDemo` 16/16. `check:rapide` non lancé (délai 120 s, règle du superviseur).
+
+### Relecture
+Auto-relecture (REPLI SANS SOUS-AGENT) : tirages inchangés (dates/exterieur/reaction testés) ; pas de `Math.random` ; `esc()` sur les deux injections nouvelles ; ancres fines vérifiées ; `leila_bulk` épargné ; dossiers de la Carte intacts.
+
+### Questions pour Anthony
+Aucune — la fiche était complète. Le comportement exact de la réponse périmée (`mgmtReply` sur une affaire fermée) reste no-op silencieuse pour robustesse, à confirmer en jeu pour éviter toute surprise à l'ancien clavier 1-3.
