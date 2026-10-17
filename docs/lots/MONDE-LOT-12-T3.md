@@ -21,14 +21,15 @@ Combat : la plaque « Combat principal · léger · 5 rounds » sous le VS ; « 
 
 ## Compte rendu
 
-- État : tranche non implémentée ; arrêt sur la source de données désignée, absente du dépôt au commit `102c767` sur `monde-lot-12-fidelite`. Aucun changement au moteur, aux écrans ou aux tests existants.
-- Fichier modifié : cette fiche uniquement, pour consigner le constat. Les modifications préexistantes de configuration restent hors commit.
-- Blocage constaté : aucune définition ni occurrence de `mgmtLectureStyle` dans les fichiers JavaScript. Dans `mgmt-soiree-show.js`, les phrases de `MGMT_AVANT_TEXTES.lignes` sont sélectionnées par `mgmtObservation` (lignes 153–215), via `mgmtObsResume`, qui appelle `mgmtReplayFight` (ligne 128). Cette porte demeure interdite par la décision ci-dessus. `mgmtCommentIlCombat` renvoie seulement la discipline et la garde ; `mgmtSaFaille` renvoie le nom de l'attribut le plus faible, pas les forces demandées.
-- Écart : la décision autorise bien la lecture du profil, mais la fonction pure qu'elle demande de reprendre n'est pas présente. Aucun seuil ni règle de conversion du profil en phrases n'a été inventé pour la remplacer.
-- Tests ajoutés : aucun. Vérification de référence : `node --test tests/mgmtPresentationEntrees.test.js`, 7 tests réussis ; cela ne valide pas T3, qui reste à coder.
-- Audit : `node tools/verif-versions.js origin/main`, aucun écart. `check:rapide` non lancé conformément à la consigne du superviseur.
-- Relecture : effectuée localement sur ce constat ; aucun sous-agent appelé conformément au repli imposé. Aucune migration de sauvegarde.
-- Questions pour Anthony : pas de remise en question de l'autorisation des lectures pures ; élément manquant pour reprendre : l'implémentation de `mgmtLectureStyle(f).lignes` désignée par la décision, ou sa règle exacte de sélection des phrases depuis le profil.
+- Fichiers modifiés : `mgmt-presentation-ecrans.js` — lectures pures du profil et de l'histoire, panneaux conditionnels, rang/contrat, histoire et rendu de combat ; `tests/mgmtPresentationEntrees.test.js` — trois tests T3 et adaptation des assertions d'écran selon la décision ; cette fiche — compte rendu.
+- Tests ajoutés : « Monde lot 12 T3 — Ses points forts ne répète pas l’histoire », « Monde lot 12 T3 — le cartouche donne le rang mondial et le contrat », « Monde lot 12 T3 — un panneau sans donnée n’est pas affiché ».
+- Vérification : `node tools/verif-versions.js origin/main` sans écart ; les quatre fichiers ciblés passent (33 tests). `npm run check:rapide` non lancé conformément à la consigne.
+- Relecture : aucun sous-agent appelé (repli imposé) ; revue locale après tests, sans verdict agent.
+- Migration : aucune. Écarts à la fiche : aucun connu.
+- Questions pour Anthony : aucune.
 
 ## REPRISE (17/10/2026) — la source manquante existe maintenant
 La branche a reçu `main` : `mgmtLectureStyle(f)` existe dans `mgmt-soiree-show.js` (elle renvoie `{profil, lignes, zones}`, lecture pure du profil de combat, sans moteur ni mutation). Applique la décision ci-dessus telle quelle, sans question. Le commit précédent (« inachevé ») n’est qu’un constat : termine la tranche avec le commit `Monde lot 12 T3 : les présentations comme leurs planches`.
+
+## REPRISE du superviseur (17/10/2026, 15 h 10) — ne t'arrête pas sur des tests rouges, corrige-les
+Le code est écrit (`mgmt-presentation-ecrans.js`, non commité). **Trois tests échouent parce qu'ils décrivaient l'ancienne structure** (`tests/mgmtPresentationEntrees.test.js` : « présentation sans moteur ni mutation », « voix, pourcentage et sources affichées », « échappement, absents et pagination »). La tranche **change** cette structure par décision (planches validées) : **mets ces tests à jour** pour la nouvelle structure, en citant la décision (fiche T3, section DÉCISION) dans un commentaire, sans assouplir ce qu'ils garantissent (pas de mutation, échappement `esc()`, pagination, absents). Puis : les trois intitulés du § Tests de cette fiche (`tests/mgmtPresentationEntrees.test.js`, `tests/mgmtPresentationCombattant.test.js`), `node tools/_bump.js` sur chaque .js touché, `node tools/verif-versions.js origin/main`, tests ciblés `node --test tests/mgmtPresentationEntrees.test.js tests/mgmtPresentationCombattant.test.js tests/mgmtPresentationCombat.test.js tests/mgmtPresentationFaits.test.js`, et **commite** (`Monde lot 12 T3 : …`). S'il reste du rouge, dis lequel dans le compte rendu et commite quand même avec « (inachevé) » dans le message : ne laisse jamais le travail non commité.

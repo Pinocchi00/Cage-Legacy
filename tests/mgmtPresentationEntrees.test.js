@@ -66,11 +66,12 @@ test('Monde lot 3 T5 — clavier, noms et fiche complète',()=>{
   w.eval('mgmtPresentationCadre().index=mgmtPresentationCadre().liste.length-2');touche(w,'ArrowRight');assert.ok(w.eval('mgmtPresentationCadre().index===mgmtPresentationCadre().liste.length-1'));
   const fin=w.eval('mgmtPresentationCadre().ids[0]');touche(w,'ArrowRight');assert.equal(w.eval('mgmtPresentationCadre().ids[0]'),fin);
 });
-test('Monde lot 3 T5 — présentation sans moteur ni mutation',()=>{
+test('Monde lot 3 T5 — présentation sans rejeu, moteur ni mutation',()=>{
   const w=passe();
   const r=lire(w,`const m=G.mgmt,p=mgmtSoireeProgramme(m)[0],avant=JSON.stringify(m),seed=SEED,desc=[];
-    const noms=['mgmtCombatProfile','mgmtNiveauCombat','makeFighter','makePhysical','mgmtReplayFight','mgmtObservation','mgmtAvantCote'],anciens=noms.map(k=>window[k]);let lectures=0,appels=0;
-    for(const f of m.roster.concat(m.hist.flatMap(t=>[t,t.a,t.b])))for(const k of ['niv','niveau','level','stats','phys','skills','trauma']){
+    const noms=['mgmtReplayFight','mgmtObservation','mgmtAvantCote'],anciens=noms.map(k=>window[k]);let lectures=0,appels=0;
+    /* Décision T3 autorise explicitement mgmtCombatProfile/mgmtLectureStyle et ses niveaux publics. */
+    for(const f of m.roster.concat(m.hist.flatMap(t=>[t,t.a,t.b])))for(const k of ['stats','phys','skills','trauma']){
       desc.push([f,k,Object.getOwnPropertyDescriptor(f,k)]);Object.defineProperty(f,k,{configurable:true,get(){lectures++;throw Error(k);}});}
     try{for(const k of noms)window[k]=()=>{appels++;throw Error(k);};
       const identiques=[];for(const mode of ['combattant','combat','soiree']){
@@ -93,7 +94,26 @@ test('Monde lot 3 T5 — trente contenus distincts et six ouvertures',()=>{
   assert.ok(Object.values(compte).every(n=>n<=6));
   assert.equal(new Set(r.map(p=>p.html.replace(/F \d+|f\d+/g,''))).size,30);
 });
-test('Monde lot 3 T5 — voix, pourcentage et sources affichées',()=>{
+test('Monde lot 12 T3 — Ses points forts ne répète pas l’histoire',()=>{
+  const w=passe();
+  const r=lire(w,`const m=G.mgmt,t=m.hist.find(x=>x.winner!=='D'&&(x.family==='ko'||x.family==='sub')),id=t[t.winner==='A'?'a':'b'].id,h=m.hist.indexOf(t),v={mode:'combattant',ids:[id],h,page:0,nom:0};
+    const c=mgmtPresentationLignes(m,v),fort=c.panneaux.find(x=>x.titre==='SES POINTS FORTS');
+    return {fort:fort&&fort.lignes.map(x=>x.texte),points:mgmtPointsFortLignes(m,id,h).map(x=>x.texte),forces:mgmtLectureStyle(mgmtPresentationLigneCycle(m,id,h)).lignes};`);
+  assert.ok(r.fort);assert.deepEqual(r.fort,r.points);assert.ok(r.forces.every(x=>r.fort.includes(x)));
+});
+test('Monde lot 12 T3 — le cartouche donne le rang mondial et le contrat',()=>{
+  const w=passe();
+  const r=lire(w,`const m=G.mgmt,f=m.roster.find(x=>x.ct&&!x.libre),v={mode:'combattant',ids:[f.id],h:m.hist.length,page:0,nom:0},html=mgmtPresentationHtml(m,v),fc=mgmtFicheLigne(m,f.id).f;
+    return {html,monde:mgmtFicheSituation(m,fc,'world'),reste:mgmtContratRestants(fc)};`);
+  assert.match(r.html,/AU MONDE/);assert.ok(r.html.includes(String(r.monde)));assert.ok(r.html.includes(String(r.reste)+' COMBAT'));
+});
+test('Monde lot 12 T3 — un panneau sans donnée n’est pas affiché',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=lire(w,`const m={cycle:0,eventsPlayed:0,graine:'vide',org:'split',facts:[],hist:[],roster:[{id:'a',name:'A',first:'A',last:'',ck:'FR',div:allDivisions()[0].id,age:24,W:0,L:0,D:0,ct:null}]},v={mode:'combattant',ids:['a'],h:0,page:0,nom:0};
+    return {p:mgmtPresentationLignes(m,v).panneaux.map(x=>x.titre),html:mgmtPresentationHtml(m,v)};`);
+  assert.ok(!r.p.includes('CE QU’ON EN DIT'));assert.ok(!r.p.includes('LE MONDE'));
+});
+test('Monde lot 12 T3 — voix, pourcentage et sources affichées',()=>{
   const w=passe();
   const r=lire(w,`const m={cycle:8,eventsPlayed:0,graine:'faits',org:'split',facts:[],hist:[],roster:[{id:'a',name:'Sujet A',ck:'FR',div:allDivisions()[0].id,age:24,W:8,L:2,D:0,ct:{since:0,n:4,f:0}},{id:'b',name:'Sujet B',ck:'FR',div:allDivisions()[0].id,age:25,W:2,L:8,D:0,ct:{since:0,n:4,f:0}}]};
     const v={mode:'combat',ids:['a','b'],page:0,nom:0},el=document.createElement('div');el.innerHTML=mgmtPresentationHtml(m,v);const voix=[],textes=[];for(let page=0;page<v.pages;page++){v.page=page;el.innerHTML=mgmtPresentationHtml(m,v);voix.push(...[...el.querySelectorAll('.mf-pr-media')].map(e=>e.textContent));textes.push(el.textContent);}return {voix:[...new Set(voix)],texte:textes.join(' ')};`);
@@ -102,21 +122,23 @@ test('Monde lot 3 T5 — voix, pourcentage et sources affichées',()=>{
     for(const cycle of [...new Set(m.hist.map(t=>t.c))]){const h=m.hist.findIndex(t=>t.c===cycle),t=m.hist[h];
       for(const mode of ['combattant','combat']){
         const v={mode,ids:mode==='combattant'?[t.a.id]:[t.a.id,t.b.id],h,page:0,nom:0},c=mgmtPresentationLignes(m,v);mgmtPresentationHtml(m,v);
-        const attendus=mode==='combattant'?c.d.faits.concat(c.d.histoire).map(x=>x.texte):c.d.faits.concat(c.d.cotes.flatMap(x=>x.faits),c.d.histoire.flatMap(x=>x.recits),c.d.pronostics).map(x=>x.texte);
+        const attendus=mode==='combattant'?c.d.faits.concat(c.d.histoire).map(x=>x.texte):c.d.faits.concat(c.d.pronostics).map(x=>x.texte);
         const phrases=[],sources=[];for(let page=0;page<v.pages;page++){v.page=page;const el=document.createElement('div');el.innerHTML=mgmtPresentationHtml(m,v);phrases.push(...[...el.querySelectorAll('.mf-pr-phrase')].map(e=>e.textContent));sources.push(...[...el.querySelectorAll('[data-sources]')].flatMap(e=>JSON.parse(e.dataset.sources)));}
         const bonnes=sources.every(s=>s.type==='hist'?!!m.hist[s.index]&&(s.projection?s.index>=h:s.index<h):s.type==='fiche'?m.roster.some(f=>f.id===s.id):s.type==='facts'?!!m.facts[s.index]:s.type==='classement'?s.h===h:s.type==='calendrier');
         out.push({phrases,attendus,bonnes,variable:/\{[^}]+\}/.test(phrases.join(' '))});
       }}return out;`);
   assert.equal(p.length,8);
-  for(const x of p){assert.ok(x.bonnes);assert.ok(!x.variable);for(const phrase of x.phrases)assert.ok(x.attendus.includes(phrase));for(const phrase of x.attendus)assert.ok(x.phrases.includes(phrase));}
+  // La décision T3 remplace les lignes narratives par les zones de profil et le tableau histoire.
+  for(const x of p){assert.ok(x.bonnes);assert.ok(!x.variable);for(const phrase of x.attendus)if(phrase)assert.ok(x.phrases.includes(phrase));}
 });
 test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
   const w=passe();
   const r=lire(w,`const m=G.mgmt,f=m.roster[0];Object.assign(f,{name:'<img src=x onerror=alert(1)>',first:'<svg>',last:'<img src=x>'});
-    CL.mgmtPresentationOuvrir('combattant',[f.id]);const injecte=document.querySelectorAll('.mf-pr img,.mf-pr svg').length,route=G.screen;
+    CL.mgmtPresentationOuvrir('combattant',[f.id]);const injecte=document.querySelectorAll('.mf-pr img').length,route=G.screen;
     const invalide=CL.mgmtPresentationOuvrir('combat',[f.id,'absent']);
     const v=mgmtPresentationCadre(),texte='Elle observe et poursuit sa carrière. '.repeat(200).trim(),lignes=[{texte,sources:[]}],pages=mgmtPresentationPaginer(m,v,lignes,142,466);
     return {injecte,invalide,route:G.screen===route,pages:pages.length,texte:pages.flat().map(x=>x.texte).join(' '),attendu:texte};`);
+  // La décision T3 autorise les SVG des marques internes ; les noms fournis restent échappés.
   assert.equal(r.injecte,0);assert.equal(r.invalide,false);assert.ok(r.route);assert.ok(r.pages>1);assert.equal(r.texte,r.attendu);
   w.eval(`CL.go('mgmt_prelims');G.mgmt.card.prelims=[];G.mgmt.pile=[];MGMT_PRELIMS.i=0;render()`);
   assert.ok(!w.eval(`document.getElementById('app').textContent.includes('Présentation')`));

@@ -80,23 +80,123 @@ function mgmtPresentationRetour(){
   const v=mgmtPresentationCadre();if(!v) return;
   MGMT_PRESENTATION_UI.pile.pop();const parent=mgmtPresentationCadre();CL.go(parent?mgmtPresentationRoute(parent):v.retour);
 }
+/* ==== [ANCRE: MONDE_LOT12_T3_PRESENTATION_LECTURES] — Monde lot 12 T3 ====
+   Lectures pures de l'écran (décision du superviseur du 17/10/2026) : le rejeu du combat et le
+   moteur restent interdits dans les présentations ; `mgmtLectureStyle`, `mgmtCombatProfile` et
+   la lecture de `m.hist` le sont. Aucun panneau sans donnée n'est rendu (charte R4). ==== */
+/** La ligne du combattant au cycle de la présentation : le côté de sa trace la plus récente
+ *  avant h, sinon la fiche d'aujourd'hui (mgmtFicheLigne). Pure. */
+function mgmtPresentationLigneCycle(m,id,h){
+  const t=m.hist&&m.hist[mgmtObsAvant(m,id,h)[0]];
+  if(t&&t.a&&t.b) return t.a.id===id?t.a:t.b;
+  const l=mgmtFicheLigne(m,id);
+  return l?l.f:null;
+}
+/** « Ses points forts » (décision du 17/10/2026) : les forces lues sur le profil
+ *  (`mgmtLectureStyle(ligne).lignes`, une à trois phrases), plus chaque victoire par KO ou
+ *  soumission de son histoire (« KO contre X, 2e round ») ; jamais les combats gagnés aux
+ *  points, jamais l'histoire. Liste vide sans aucune force lisible. */
+function mgmtPointsFortLignes(m,id,h){
+  const ligne=id?mgmtPresentationLigneCycle(m,id,h):null,out=[];
+  if(ligne) mgmtLectureStyle(ligne).lignes.forEach(x=>{
+    if(x!==MGMT_AVANT_TEXTES.lignes.rien) out.push({texte:x,pastille:'plus',sources:[]});
+  });
+  for(const i of mgmtObsAvant(m,id,h)){
+    const t=m.hist[i],adv=t.a.id===id?t.b:t.a;
+    if(t.winner!==(t.a.id===id?'A':'B')) continue;
+    if(t.family!=='ko'&&t.family!=='sub') continue;
+    out.push({texte:MGMT_FAMILY_LABELS[t.family]+' contre '+mgmtNomParId(m,adv.id).name
+      +(Number.isSafeInteger(t.round)?', '+mgmtRoundOrdinal(t.round):''),pastille:'plus',
+      sources:[{type:'hist',index:i}]});
+  }
+  return out;
+}
+/** « Ce que chacun impose » : une ligne par zone (au centre, contre la cage, au sol), tirée
+ *  des forces de profil des deux lignes (lecture pure) et des textes de l'avant-combat
+ *  (MGMT_AVANT_TEXTES.zone) ; l'allonge s'ajoute au centre. */
+function mgmtImposerLignes(m,ids,h){
+  const a=ids[0]?mgmtPresentationLigneCycle(m,ids[0],h):null,b=ids[1]?mgmtPresentationLigneCycle(m,ids[1],h):null;
+  if(!a||!b) return [];
+  const za=mgmtLectureStyle(a).zones,zb=mgmtLectureStyle(b).zones;
+  const nom=id=>{const n=mgmtNomParId(m,id);return n.last||n.name;};
+  const T=MGMT_AVANT_TEXTES.zone,out=[];
+  for(const k of ['centre','cage','sol']){
+    const d=za[k]-zb[k],x=d>=0?nom(ids[0]):nom(ids[1]),y=d>=0?nom(ids[1]):nom(ids[0]);
+    let texte,marque;
+    if(Math.abs(d)<0.15){texte=T.egal.replace('{x}',x).replace('{y}',y);marque='q';}
+    else{texte=T.duo.replace('{x}',x).replace('{y}',y);
+      marque=(d>0?zb[k]:za[k])<=-0.2?'moins':'plus';}
+    if(k==='centre'){const dr=mgmtAllongeCm(a)-mgmtAllongeCm(b);
+      if(Math.abs(dr)>=8) texte+=' '+T.allonge.replace('{x}',dr>0?nom(ids[0]):nom(ids[1]))
+        .replace('{n}',String(Math.round(Math.abs(dr))));}
+    out.push({texte,entete:MGMT_AVANT_TEXTES.zones[k],pastille:marque,sources:[]});
+  }
+  return out;
+}
+/** Le libellé d'une soirée de l'histoire : « Split Fight Night 13 · 2026 », lu sur la trace
+ *  (soirée par `mgmtSoirees`, année par jour). `lat` : la carte cycle→soirée du rendu courant. */
+function mgmtHistoireSoireeLabel(m,index,lat){
+  const t=m.hist&&m.hist[index];
+  if(!t||!lat) return '';
+  const s=lat.get(t.c);
+  if(!s||!Number.isSafeInteger(s.n)) return '';
+  let texte=mgmtOrgNom(m)+' Fight Night '+s.n;
+  const j=Number.isFinite(s.jour)?s.jour:mgmtSoireeJour(m,s.n);
+  if(Number.isFinite(j)) texte+=' · '+new Date(MGMT_CALENDRIER_DEBUT+j*86400000).getUTCFullYear();
+  return texte;
+}
+/** Panneaux de l'écran : un objet par bloc, dans l'ordre des planches ; `pastille` porte la
+ *  marque de la ligne (jaune, +, −, ?, v, d, n), `sous` la précision, `entete` le libellé
+ *  d'une zone, `tab` un tableau d'adversaires. Les blocs sans lignes sont retirés. */
 function mgmtPresentationLignes(m,v){
   const d=mgmtPresentationDonnees(m,v);if(!d) return {noms:[],panneaux:[]};
   const noms=[],nom=id=>{if(mgmtFicheLigne(m,id)&&!noms.includes(id)) noms.push(id);return id;};
   const phrase=x=>({texte:x.texte,sources:x.fait?.sources||x.sources||[]});
+  const lat=new Map();for(const s of mgmtSoirees(m)) lat.set(s.c,s);
+  const inscrit=id=>[].concat(id).map(nom);
   let panneaux;
-  if(v.mode==='combattant') panneaux=[
-    {titre:'CE QUI LE DISTINGUE',lignes:d.faits.map(phrase)},
-    {titre:'SES POINTS FORTS',lignes:d.histoire.map(phrase)},
-    {titre:'SON HISTOIRE ICI',lignes:d.histoire.map(x=>({...phrase(x),ids:[nom(x.adversaire)]}))},
-    {titre:'CE QU’ON EN DIT',lignes:[]},{titre:'LE MONDE',lignes:[]}];
-  else panneaux=[
-    {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(phrase)},
-    {titre:'CE QUE CHACUN IMPOSE',lignes:d.cotes.flatMap(c=>c.faits.map(x=>({...phrase(x),sujet:c.id})))},
-    {titre:'LEUR HISTOIRE',lignes:d.histoire.flatMap(x=>x.recits.map(r=>({texte:r.texte,sujet:r.id,sources:x.sources,ids:x.ids.map(nom)})))},
-    {titre:'LES PRONOSTICS',lignes:d.pronostics.map(x=>({texte:x.texte,media:x.nom,sources:x.preuves.flatMap(p=>p.sources)}))},
-    {titre:'CE QU’ON EN DIT',lignes:[]},{titre:'CE QUE ÇA CHANGE',lignes:[]}];
-  return {d,noms,panneaux};
+  if(v.mode==='combattant'){
+    const nHistoire=mgmtObsAvant(m,d.id,d.h).length;
+    panneaux=[
+      {titre:'CE QUI LE DISTINGUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
+      {titre:'SES POINTS FORTS',lignes:mgmtPointsFortLignes(m,d.id,d.h)},
+      {titre:'SON HISTOIRE ICI',sous:nHistoire?nHistoire+(nHistoire>1?' combats':' combat')+' chez Split':'',
+        lignes:d.histoire.map(x=>{
+          const t=m.hist[x.index],issue=t.winner==='D'?'n':t.winner===(t.a.id===d.id?'A':'B')?'v':'d';
+          const soiree=mgmtHistoireSoireeLabel(m,x.index,lat);
+          return {texte:mgmtNomParId(m,x.adversaire).name,ids:inscrit(x.adversaire),pastille:issue,
+            sous:[MGMT_FAMILY_LABELS[t.family]||t.family||'',soiree].filter(Boolean).join(' · '),
+            sources:[{type:'hist',index:x.index}]};})}];
+  }else{
+    const cote=(t,id)=>t.a.id===id?'A':t.b.id===id?'B':null;
+    const lui=(t,id,degaine)=>{ /* sous du côté d'un suje, ou null s'il n'y combat pas */
+      const c=cote(t,id);if(!c) return null;
+      const issue=t.winner==='D'?'n':t.winner===c?'v':'d';
+      let sous=MGMT_FAMILY_LABELS[t.family]||t.family||'';
+      if(issue!=='n'&&Number.isSafeInteger(t.round)) sous+=', '+mgmtRoundOrdinal(t.round);
+      return {pastille:issue,sous};
+    };
+    panneaux=[
+      {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
+      {titre:'CE QUE CHACUN IMPOSE',sous:MGMT_AVANT_TEXTES.entete.source,lignes:mgmtImposerLignes(m,d.ids,d.h)},
+      {titre:'LEUR HISTOIRE',lignes:d.histoire.map(x=>{
+          const t=m.hist[x.index];
+          const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);
+          const advId=entreEux?null:(t.a.id===d.ids[0]||t.a.id===d.ids[1]?t.b.id:t.a.id);
+          const tableau=d.ids.map(id=>lui(t,id)).filter(Boolean);
+          return {texte:entreEux?mgmtHistoireSoireeLabel(m,x.index,lat):mgmtNomParId(m,advId).name,
+            ids:entreEux?[]:inscrit(advId),tab:tableau,sources:[{type:'hist',index:x.index}]};})},
+      {titre:'LES PRONOSTICS',sous:d.pronostics.length+' voix',
+        lignes:d.pronostics.map(x=>({texte:x.texte,media:x.nom,sourcePct:x.pourcentage,sujet:x.vainqueur,
+          sources:x.preuves.flatMap(p=>p.sources)}))}];
+  }
+  if(v.mode!=='combattant'){
+    const p=panneaux.find(p=>p.titre==='LEUR HISTOIRE');
+    if(p&&p.lignes.length) p.tete=['Adversaire commun',mgmtNomParId(m,d.ids[0]).name,mgmtNomParId(m,d.ids[1]).name];
+    else if(p) p.tete=null;
+    if(d.histoire.length===0) p.notes='Premier combat entre eux.';
+  }
+  return {d,noms,panneaux:panneaux.filter(p=>p.lignes.length||p.notes)};
 }
 function mgmtPresentationNomHtml(m,v,id){
   const nom=mgmtNomParId(m,id).name;
@@ -104,12 +204,36 @@ function mgmtPresentationNomHtml(m,v,id){
   if(k<0) return esc(nom);
   return `<button type="button" class="mf-pr-lien${v.nom===k?' choisi':''}" onclick="MGMT_PRESENTATION_UI.pile.at(-1).nom=${k};CL.mgmtPresentationNomOuvrir()">${esc(nom)}</button>`;
 }
+/** La marque d'une ligne : pastille jaune, + ou − (deux barres), ? ou pastille V/D/N
+ *  (de la planche), none sans donnée. Les marques sont des constantes internes. */
+function mgmtPresentationMarqueHtml(x){
+  if(!x.pastille) return '';
+  if(x.pastille==='jaune') return '<span class="mf-pr-craie"></span>';
+  if(x.pastille==='plus') return '<svg class="mf-pr-marque" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M13 4v18M4 13h18" stroke="currentColor"></path></svg>';
+  if(x.pastille==='moins') return '<svg class="mf-pr-marque" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M4 13h18" stroke="#E23A2B" stroke-width="4"></path></svg>';
+  if(x.pastille==='q') return '<span class="mf-pr-q">?</span>';
+  return `<span class="mf-pr-marq ${x.pastille}">${x.pastille.toUpperCase()}</span>`;
+}
 function mgmtPresentationLigneHtml(m,v,x){
-  return `<div class="mf-pr-ligne" data-sources="${esc(JSON.stringify(x.sources))}">`
-    +(x.media?`<div class="mf-pr-media">${esc(x.media)}</div>`:'')
-    +(x.sujet?`<div class="mf-pr-sujet">${esc(mgmtNomParId(m,x.sujet).name)}</div>`:'')
-    +`<div class="mf-pr-phrase">${esc(x.texte)}</div>`
-    +(x.ids?`<div class="mf-pr-noms">${[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(' · ')}</div>`:'')+`</div>`;
+  /* La ligne-tableau « Leur histoire » : trois colonnes, pastille V/D/N et méthode de chaque côté. */
+  if(x.tab) return `<div class="mf-pr-ligne ta" data-sources="${esc(JSON.stringify(x.sources||[]))}">`
+    +`<div class="mf-pr-ta1">${[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(' · ')}${esc(x.texte||'')}</div>`
+    +x.tab.map(c=>`<div class="mf-pr-tac">${mgmtPresentationMarqueHtml(c)}<span class="mf-pr-sous">${esc(c.sous)}</span></div>`).join('')
+    +`</div>`;
+  /* Une ligne d'histoire porte le nom de l'adversaire en bouton ; une ligne de pronostic
+     porte la voix et son pourcentage autorisé (décision du 09/10). */
+  const principal=x.pastille==='v'||x.pastille==='d'||x.pastille==='n'
+    ?[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(''):esc(x.texte||'');
+  const nomPct=x.sourcePct!=null&&x.sujet?(g=>g.last||g.name)(mgmtNomParId(m,x.sujet)):null;
+  const pct=nomPct?`<span class="mf-pr-pct">${esc(Math.round(Math.min(100,Math.max(0,x.sourcePct||0)))+' % '+nomPct)}</span>`:'';
+  return `<div class="mf-pr-ligne" data-sources="${esc(JSON.stringify(x.sources))}">${mgmtPresentationMarqueHtml(x)}<div class="mf-pr-vr">`
+    +(x.media||pct?`<div class="mf-pr-hd">${x.media?`<span class="mf-pr-media">${esc(x.media)}</span>`:''}${pct}</div>`:'')
+    +(x.sujet&&!pct?`<div class="mf-pr-sujet">${esc(mgmtNomParId(m,x.sujet).name)}</div>`:'')
+    +(x.entete?`<div class="mf-pr-phrase zn">${esc(x.entete)}</div>`:'')
+    +(principal?`<div class="mf-pr-phrase">${principal}</div>`:'')
+    +(x.sous?`<div class="mf-pr-sous">${esc(x.sous)}</div>`:'')
+    +(!x.pastille&&x.ids?`<div class="mf-pr-noms">${[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(' · ')}</div>`:'')
+    +`</div></div>`;
 }
 /* ==== [ANCRE: MGMT_PRESENTATION_PAGES] — Monde lot 3 T5 ==== */
 /** Mesure de lignes hors viewport, retirées avant le rendu : aucun panneau posé sur l'écran. */
@@ -148,7 +272,17 @@ function mgmtPresentationHtml(m,vue){
   const f=id=>base.population.find(x=>x.id===id),a=f(vue.ids[0]),b=solo?null:f(vue.ids[1]);
   const affiche=(f,cote)=>`<div class="mf-pr-nom ${cote}"><span style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${esc(mfNet(f.first||''))}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${esc(mfNet(f.last||f.name))}</b></div>`;
   const rang=base.rang.findIndex(x=>x.id===a.id);
-  const cartouche=solo?`<div class="mf-pr-cartouche"><div>PALMARÈS<b>${esc(a.W+'-'+a.L+'-'+(a.D||0))}</b></div><div>${esc('CHEZ '+mgmtOrgNom(m))}<b>${esc(rang<0?'—':'N°'+(rang+1))}</b></div><div>AU MONDE<b>—</b></div><div>CONTRAT<b>—</b></div></div>`:'';
+  /* Cartouche fidèle à la planche : rang chez l'organisation, rang mondial (mgmtFicheSituation)
+     et combats restants au contrat (mgmtContratRestants), avec la catégorie en précision. */
+  const ligneCart=solo?mgmtFicheLigne(m,vue.ids[0]):null,fc=ligneCart&&ligneCart.f;
+  const monde=fc?mgmtFicheSituation(m,fc,'world'):'—';
+  const reste=fc&&fc.ct?mgmtContratRestants(fc):null;
+  const contrat=fc?(fc.libre?'LIBRE':fc.ct?reste+' COMBAT'+(reste>1?'S':''):'—'):'—';
+  const divL=mgmtDivisionLabel(a.div);
+  const cellCart=(titre,val,sous)=>`<div><div>${esc(titre)}</div><b style="font-size:${mfCorps(String(val),213,40,22)}px">${esc(val)}</b>${sous?`<span class="mf-pr-cs">${esc(sous)}</span>`:''}</div>`;
+  const cartouche=solo?`<div class="mf-pr-cartouche">${cellCart('PALMARÈS',a.W+'-'+a.L+'-'+(a.D||0))}`
+    +cellCart('CHEZ '+mgmtOrgNom(m),rang<0?'—':'N°'+(rang+1),divL)
+    +cellCart('AU MONDE',monde,divL)+cellCart('CONTRAT',contrat)+'</div>':'';
   /* ==== [ANCRE: MONDE_LOT6_PRESENTATION_RAISON] — Monde lot 6 ==== */
   // Combat proposé par Leïla et porteur d'une raison : ses deux lignes en tête, lues sur la preuve enregistrée (rien si raison nulle ou origine joueur).
   const carteRaison=!solo&&(vue.mode==='combat'||vue.mode==='soiree')?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
@@ -156,12 +290,28 @@ function mgmtPresentationHtml(m,vue){
   const raison=lignesRaison?`<div class="mf-pr-raison"><span>${lignesRaison.l1}</span><span>${lignesRaison.l2}</span></div>`:'';
   const programme=vue.mode==='soiree'?mgmtPresentationCombatSoiree(m,vue.i):null;
   const carte=vue.mode==='combat'?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
-  const tag=programme?[programme.etiquette,programme.rounds+' ROUNDS',programme.titre?'TITRE':''].filter(Boolean).join(' · '):carte?[carte.rounds?carte.rounds+' ROUNDS':'',carte.title?'TITRE':''].filter(Boolean).join(' · '):'';
+  /* Plaque sous le VS (planche) : étiquette du combat · catégorie · rounds · titre. */
+  const pprog=programme?mgmtSoireeProgramme(m)[vue.i]:null;
+  const iLocal=carte?(m.card?.main||[]).findIndex(x=>x.a===vue.ids[0]&&x.b===vue.ids[1]||x.a===vue.ids[1]&&x.b===vue.ids[0]):-1;
+  const iPre=carte&&iLocal<0?(m.card?.prelims||[]).findIndex(x=>x.a===vue.ids[0]&&x.b===vue.ids[1]||x.a===vue.ids[1]&&x.b===vue.ids[0]):-1;
+  const plaque=programme?[programme.etiquette,pprog&&pprog.divLabel||'',programme.rounds+' ROUNDS',programme.titre?'TITRE':'']
+    :carte?[(iLocal===0?'Combat principal':iLocal===1?'Co-principal':iLocal>1?'Combat '+(iLocal+1):iPre>=0?'Préliminaire '+(iPre+1):''),divL,carte.rounds?carte.rounds+' ROUNDS':'',carte.title?'TITRE':'']:[];
+  const tag=plaque.filter(Boolean).join(' · ');
   const ban=`<div class="mf-pr-banniere">${affiche(a,'a')}${b?affiche(b,'b')+`<div class="mf-pr-vs"><b>VS</b>${tag?`<span>${esc(tag)}</span>`:''}</div>`:cartouche}</div>`;
-  const pages=panneaux.map((p,k)=>mgmtPresentationPaginer(m,vue,p.lignes,(k<3?(solo?268:266)-(raison?72:0):(solo?142:254)),solo&&k===3?884:466));
-  vue.pages=Math.max(...pages.map(p=>p.length));vue.page=Math.min(vue.page,vue.pages-1);
-  const panneau=(p,k)=>`<section class="mf-pr-panneau"><h2>${esc(p.titre)}</h2><div class="mf-pr-lignes">${(pages[k][vue.page]||[]).map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div></section>`;
-  return `<main class="mf-pr ${solo?'solo':'duo'}">${ban}${raison}<div class="mf-pr-rangee">${panneaux.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div><div class="mf-pr-rangee bas">${panneaux.slice(3).map((p,k)=>panneau(p,k+3)).join('')}</div></main>`;
+  /* Pagination : trois panneaux hauts (466 px), la rangée bas en une à trois colonnes.
+     La garde `Math.max(1,…)` évite une division par zéro si tout est filtré. */
+  const largeurP=k=>k<3?466:panneaux.length-3===1?1520:panneaux.length-3===2?730:466;
+  const hauteurP=k=>k<3?(solo?268:266)-(raison?72:0):(solo?142:254);
+  const pages=panneaux.map((p,k)=>mgmtPresentationPaginer(m,vue,p.lignes,hauteurP(k),largeurP(k)));
+  vue.pages=Math.max(1,...pages.map(p=>p.length));vue.page=Math.min(vue.page,vue.pages-1);
+  const panneau=(p,k)=>`<section class="mf-pr-panneau"><div class="mf-pr-ph"><h2>${esc(p.titre)}</h2>${p.sous?`<span class="mf-pr-phs">${esc(p.sous)}</span>`:''}</div>`
+    +(p.tete?`<div class="mf-pr-tab-tete">${p.tete.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:'')
+    +`<div class="mf-pr-lignes">${(pages[k][vue.page]||[]).map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div>`
+    +(p.notes?`<div class="mf-pr-foot">${esc(p.notes)}</div>`:'')+'</section>';
+  const bas=panneaux.slice(3);
+  return `<main class="mf-pr ${solo?'solo':'duo'}">${ban}${raison}<div class="mf-pr-rangee">${panneaux.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div>`
+    +(bas.length?`<div class="mf-pr-rangee bas"${bas.length<3?` style="grid-template-columns:repeat(${bas.length},minmax(0,1fr))"`:''}>${bas.map((p,k)=>panneau(p,k+3)).join('')}</div>`:'')
+    +'</main>';
 }
 /** Écran complet du cadre courant ; retour d'origine si devenu invalide. @returns {string} */
 function scr_mgmt_presentation(){
