@@ -53,14 +53,14 @@ test('Agenda — le joueur peut laisser passer un mois sans soirée : le temps a
   assert.equal(stop.j,10,'jamais au-delà de la prochaine soirée posée'); assert.equal(stop.j2,0);
 });
 
-test('Agenda — aucune soirée sans validation : rien de posé, carte vide, proposition non validée : on ne joue pas', () => {
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : dès qu'une soirée est posée, Leïla compose et pose ses préliminaires ; il n'y a plus de proposition à valider. La garantie reste : on ne joue jamais une soirée dont la carte principale n'est pas faite. */
+test('Agenda — aucune soirée sans carte principale : rien de posé, carte principale vide (même avec les préliminaires de Leïla) : on ne joue pas', () => {
   const win=neuve();
   assert.equal(win.eval(`mgmtAgendaJouer(G.mgmt)`),null,'rien de posé');
   win.eval(`mgmtAgendaPoser(G.mgmt,10,'petite')`);
-  assert.equal(win.eval(`mgmtAgendaJouer(G.mgmt)`),null,'carte vide');
-  win.eval(COMPOSE);
-  assert.ok(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')`),'la proposition de Leïla attend le joueur');
-  assert.equal(win.eval(`mgmtAgendaJouer(G.mgmt)`),null,'la proposition n’est pas validée');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`),win.eval(`G.mgmt.card.sizePrelims`),'Leïla a posé les préliminaires dès la pose');
+  assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')`),false,'plus aucune proposition à valider');
+  assert.equal(win.eval(`mgmtAgendaJouer(G.mgmt)`),null,'carte principale vide : on ne joue pas');
   assert.equal(win.eval(`G.mgmt.hist.length`),0,'aucun combat n’a été joué');
 });
 
@@ -109,17 +109,17 @@ test('Agenda — migration : une partie d’avant joue sa soirée en cours, puis
   assert.equal(win.eval('G.mgmt.cal.jour'),win.eval('G.mgmt.eventsPlayed*35'));
 });
 
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla compose les préliminaires à la pose ; les réservés (cercle, suivis) sont donc désignés avant la pose et aucun ne figure dans les préliminaires qu'elle pose. */
 test('Agenda — réservation : Leïla ne place jamais un combattant du cercle ou des suivis', () => {
   const win=neuve();
-  const r=res(win,`const m=G.mgmt; mgmtAgendaPoser(m,10,'petite');
+  const r=res(win,`const m=G.mgmt;
     const reserves=mgmtCartRows(m).slice(0,4);
     m.cercle=[reserves[0].id,reserves[1].id]; m.suivis=[reserves[2].id,reserves[3].id];
-    m.pile=[]; m.open=null;
-    const principal=[]; for(let k=0;k<40&&m.card.main.length<m.card.sizeMain;k++){ const rows=mgmtCartRows(m).filter(f=>mgmtSelectable(m,f,null)&&!mgmtAgendaReserve(m,f)); let ok=false;
-      for(const a of rows){ const b=rows.find(x=>x.id!==a.id&&x.div===a.div&&mgmtSelectable(m,x,a.id)); if(b&&mgmtBookMain(m,a.id,b.id)){ ok=true; break; } } if(!ok) break; }
-    const bulk=m.pile.find(a=>a.kind==='leila_bulk'); const ids=new Set(reserves.map(f=>f.id));
-    return {bulk:!!bulk,touche:bulk?bulk.fights.some(f=>ids.has(f.a)||ids.has(f.b)):null,res:reserves.every(f=>mgmtAgendaReserve(m,f))};`);
-  assert.ok(r.res); assert.ok(r.bulk,'Leïla propose les préliminaires'); assert.equal(r.touche,false,'aucun réservé dans sa proposition');
+    m.pile=[]; m.open=null; m.card.prelims=[];
+    mgmtAgendaPoser(m,10,'petite');
+    const ids=new Set(reserves.map(f=>f.id));
+    return {poses:m.card.prelims.length,taille:m.card.sizePrelims,touche:m.card.prelims.some(f=>ids.has(f.a)||ids.has(f.b)),res:reserves.every(f=>mgmtAgendaReserve(m,f))};`);
+  assert.ok(r.res); assert.equal(r.poses,r.taille,'Leïla pose les préliminaires'); assert.equal(r.touche,false,'aucun réservé dans ses préliminaires');
 });
 
 test('Agenda — préparation à la demande : le joueur désigne un combattant, l’assistante propose l’adversaire le plus proche', () => {
