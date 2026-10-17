@@ -82,6 +82,6 @@ keysRegister('mgmt_finances',{
   ArrowUp(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesBouge(-3); },
   ArrowDown(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesBouge(3); },
   Enter(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesDetail(); },
-  Escape(){ if(MGMT_FINANCES.detail) CL.mgmtFinancesFerme(); else CL.go('mgmt_carte'); },
+  Escape(){ if(MGMT_FINANCES.detail) CL.mgmtFinancesFerme(); else CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */

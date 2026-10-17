@@ -285,20 +285,20 @@ keysRegister('mgmt_fiche',{
    exclusive : le bouton de la navigation et celui de l'en-tête font le
    même chemin. ==== */
 keysRegister('mgmt_organisation',{
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements
    au clavier — échap ramène à la semaine, comme à la souris. Aucune
    exclusive : le bouton de la navigation fait le même chemin. ==== */
 keysRegister('mgmt_classements',{
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_vestiaire',{
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* Lot 5 T5 : le recrutement au clavier — flèches pour la ligne, Entrée la fiche, R recrute, échap ramène. */
 keysRegister('mgmt_recrutement',{
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
   ArrowDown(){ CL.mgmtRecrutementCurseur(1); },
   ArrowUp(){ CL.mgmtRecrutementCurseur(-1); },
   Enter(){ const x=mgmtRecrutables(G.mgmt,mgmtRecrutementDiv())[MGMT_RECRUTEMENT.page*MGMT_RECRUTEMENT_PAGE+MGMT_RECRUTEMENT.curseur]; if(x) CL.mgmtFiche(x.id); },

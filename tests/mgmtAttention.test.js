@@ -83,9 +83,9 @@ test('H6 — connaissance progressive : rien, puis « Comment il combat », puis
     const deux=mgmtConnaissance(m,f), pageDeux=mgmtFicheConnaissance(m,f);
     return {sans,un,deux,pageSans,pageUn,pageDeux,faille:mgmtSaFaille(f),style:mgmtCommentIlCombat(f).style};
   `);
-  assert.deepEqual([r.sans.combat,r.sans.faille],[false,false]); assert.match(r.pageSans,/On ne sait pas encore[\s\S]*On ne sait pas encore/);
-  assert.deepEqual([r.un.combat,r.un.faille],[true,false]); assert.ok(r.pageUn.includes(r.style));
-  assert.match(r.pageUn,/Sa faille<\/h3><p>On ne sait pas encore/);
+  /* Décision d'Anthony du 16/10/2026 : tout se sait d'un combattant, sans l'avoir vu combattre sous l'affiche. */
+  assert.deepEqual([r.sans.combat,r.sans.faille],[true,true]); assert.ok(r.pageSans.includes(r.style)&&!/On ne sait pas encore/.test(r.pageSans));
+  assert.deepEqual([r.un.combat,r.un.faille],[true,true]); assert.ok(r.pageUn.includes(r.style));
   assert.deepEqual([r.deux.combat,r.deux.faille],[true,true]); assert.ok(r.pageDeux.includes(r.faille)&&r.faille.length>0);
   assert.equal(/%|\/100/.test(r.pageDeux),false,'ni pourcentage ni note');
 });

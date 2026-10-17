@@ -166,7 +166,7 @@ function mgmtSuiviToggle(m,id){
  *  @returns {{vus:number,combat:boolean,faille:boolean,vie:boolean}} */
 function mgmtConnaissance(m,f){
   const vus=mgmtResultats(m,f).length;
-  return {vus,combat:vus>=1,faille:vus>=2,vie:mgmtVieRelayes(m,f).length>0};
+  return {vus,combat:true,faille:true,vie:mgmtVieRelayes(m,f).length>0};   /* décision d'Anthony du 16/10/2026 : tout se sait d'un combattant */
 }
 
 /** « Comment il combat » : la discipline et la garde, lues sur son profil. */

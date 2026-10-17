@@ -1089,13 +1089,12 @@ test('MGMT lot 4 — palette et fond exacts de la maquette 02', () => {
 
 /* ==== [ANCRE: LOT4_T8A_ACCUEIL_TESTS] — accueil 01, décision du 28/09 :
    données réelles, lecture sans mutation, reprise avec la porte de validation. ==== */
-test('T8a accueil — partie absente : quatre entrées, aucune soirée ni attente inventée',()=>{
+test('T8a accueil — partie absente : Management seul (décision d’Anthony du 16/10/2026 : plus de Carrière, Duel ni Panthéon), aucune soirée ni attente inventée',()=>{
   const win=newGameWindow({runMain:true});
   const html=win.scr_title();
   /* Brief du 06/10/2026, lot 1 (décision d'Anthony) : le bouton Management ouvre « Choisis une partie » (CL.mgmtParties) au lieu de lancer la partie. */
-  for(const action of ["CL.mgmtParties()","CL.go('intro')","CL.duelEnter()","CL.go('hof')"]){
-    assert.ok(html.includes(action));
-  }
+  assert.ok(html.includes('CL.mgmtParties()'));
+  for(const action of ["CL.go('intro')","CL.duelEnter()","CL.go('hof')"]) assert.ok(!html.includes(action),'plus de lien : '+action);
   assert.ok(!html.includes('title-aside'));
   assert.ok(!html.includes('title-last'));
   assert.ok(!html.includes('title-upcoming'));
