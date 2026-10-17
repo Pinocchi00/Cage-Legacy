@@ -79,9 +79,11 @@ test('T6 — une affaire ouverte se règle depuis l’Accueil', () => {
   const r=res(w,`const m=G.mgmt; ${apres} render();
     const n0=m.pile.filter(a=>a.status==='open').length; const ligne=document.querySelector('.mf-ac-act');
     if(!ligne) return {n0,sans:true};
-    ligne.click(); const avant=document.querySelectorAll('.mf-ac-reps .mf-bouton').length; document.querySelector('.mf-ac-reps .mf-bouton').click();
+    /* REPRISE 2 : l'échange est désormais ouvert dans Les affaires. */
+    ligne.click(); const boutons=[...document.querySelectorAll('button')].filter(b=>/CL.mgmtReply/.test(b.getAttribute('onclick')||''));
+    const avant=boutons.length; boutons[0].click();
     return {n0,avant,ecran:G.screen};`);
-  assert.ok(r.sans||(r.avant>=1&&r.ecran==='mgmt_accueil'));
+  assert.ok(r.sans||(r.avant>=1&&r.ecran==='mgmt_bureau'));
 });
 
 test('Lot 7 — le lien des affaires mène à l’Accueil ; aucune minuterie ni surimpression dans l’Accueil', () => {
@@ -125,7 +127,7 @@ test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochai
   assert.match(r.bandeau,/Prochaine soirée.*Le lieu.*La carte/);
   assert.doesNotMatch(r.bandeau,/prédécesseur|adjointe|première soirée/);
   assert.ok(r.date.includes(r.mois));
-  assert.equal(r.lignes,r.attend);
+  assert.equal(r.lignes,Math.min(4,r.attend));
   assert.ok(r.actions.every(n=>n===1));
   assert.equal(r.decisions,0);
   assert.equal(r.prochaine,0);
@@ -133,6 +135,82 @@ test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochai
   assert.equal((r.jaune.match(/Finir la carte/gi)||[]).length,1);
   assert.equal((r.jaune.match(/Ouvrir les dossiers/gi)||[]).length,1);
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
-  assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:1 1 0;min-width:0\}/);
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:5 1 0;min-width:0\}/);
   assert.doesNotMatch(css,/\.mf-ac-haut[^{}]*\{[^}]*overflow-y:auto/);
+});
+
+/* ==== [ANCRE: ACCUEIL_REPRISE_2_TESTS] — Monde lot 12 T2 ==== */
+test('Monde lot 12 T2 — reprise 2 — colonnes 5 / 5 / 3',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:5 1 0;min-width:0\}/);
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-c3\{flex:3 1 0\}/);
+  assert.match(css,/\.mf-ac-cols\{display:flex;align-items:stretch;gap:18px;min-height:700px/);
+});
+
+test('Monde lot 12 T2 — reprise 2 — seulement demandes et affaires de Leïla',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster;
+    m.facts=[{k:'demande',a:a.id,want:'carte-principale',c:m.cycle}];
+    const kinds=['leila_propose','leila_react','leila_bulk','leila_react_swap','leila_react_crush'];
+    m.pile=kinds.map((kind,i)=>({id:'r'+i,kind,status:'open',a:a.id,b:b.id,fights:[]}));
+    m.pile.push({id:'fermee',kind:'leila_propose',status:'closed'},{id:'contrat',kind:'contrat',status:'open'});
+    return mgmtAccueilContenu(m).attend.ouvertes.map(x=>({id:x.id,kind:x.kind,relu:x.relu}));`);
+  assert.equal(r.length,6);
+  assert.deepEqual(r.slice(1).map(x=>x.id),['r0','r1','r2','r3','r4']);
+  assert.ok(r.slice(1).every(x=>x.kind==='affaire'&&x.relu===false));
+});
+
+test('Monde lot 12 T2 — reprise 2 — actions et résumé sans échange développé',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster;
+    m.facts=[]; m.pile=[{id:'reprise',kind:'leila_propose',status:'open',a:a.id,b:b.id}]; m.open='reprise'; render();
+    const ligne=document.querySelector('.mf-ac-ligne');
+    const texte=ligne.querySelector('.mf-ac-rp').textContent, sous=ligne.querySelector('.mf-ac-rs').textContent;
+    const action=ligne.querySelector('.mf-ac-act').textContent, echanges=document.querySelectorAll('.mf-ac-ech').length;
+    document.querySelector('.mf-ac-act').click();
+    return {texte,sous,action,echanges,ecran:G.screen,open:m.open,a:a.name,b:b.name,record:a.W+'-'+a.L+'-'+a.D};`);
+  assert.equal(r.texte,`Leïla propose ${r.a} contre ${r.b}`);
+  assert.ok(r.sous.includes(r.record)); assert.equal(r.action,'Décider ›');
+  assert.equal(r.echanges,0); assert.equal(r.ecran,'mgmt_bureau'); assert.equal(r.open,'reprise');
+});
+
+test('Monde lot 12 T2 — reprise 2 — lieu en majuscules et mois en minuscules',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, c=mgmtAccueilContenu(m), infos=mfSoireeInfos(m);
+    const salle=mgmtSalleParId(m,m.cal.prochaines[0].salle);
+    return {lieu:c.ou.lieu,nom:salle.nom,ville:salle.ville,date:infos.date};`);
+  assert.equal(r.lieu.nom,r.nom.toUpperCase());
+  assert.equal(r.lieu.sous,r.ville+', '+r.date.toLowerCase());
+});
+
+test('Monde lot 12 T2 — reprise 2 — listes limitées et Voir tout sans nom coupé',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt; m.facts=[]; m.pile=[]; m.visites={};
+    /* Le budget du conteur reste indépendant de la limite de rendu testée. */
+    mgmtMarqueBudget=()=>7;
+    for(const f of m.roster.filter(x=>!mgmtIsRetired(x)).slice(0,7)){
+      m.facts.push({k:'injury',a:f.id,c:m.cycle},{k:'demande',a:f.id,want:'carte-principale',c:m.cycle});
+    }
+    render(); const c=mgmtAccueilContenu(m);
+    const liens=[...document.querySelectorAll('.mf-ac-lien')].filter(x=>x.textContent==='Voir tout ›');
+    MGMT_ACCUEIL.cur=4; CL.mgmtAccueilDeplacer(1);
+    return {total:c.passe.length,passe:document.querySelectorAll('.mf-ac-ev').length,
+      affaires:document.querySelectorAll('.mf-ac-ligne').length,liens:liens.map(x=>x.getAttribute('onclick')),cur:MGMT_ACCUEIL.cur};`);
+  assert.ok(r.total>5); assert.equal(r.passe,5); assert.equal(r.affaires,4);
+  assert.deepEqual(r.liens,["CL.go('mgmt_effectif')","CL.go('mgmt_effectif')"]); assert.equal(r.cur,0);
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac\{[^}]*overflow:visible/);
+  assert.match(css,/\.mf-ac-p>\.mf-p2>\.mf-p3\{[^}]*overflow:visible/);
+});
+
+test('Monde lot 12 T2 — reprise 2 — bloc jaune en casse phrase et action à droite',()=>{
+  const w=ouverte();
+  const r=res(w,`const titre=document.querySelector('.mf-ac-jt').textContent;
+    const ligne=document.querySelector('.mf-ac-jp');
+    return {titre,classes:[...ligne.children].map(x=>x.className),entree:ligne.querySelector('.mf-ac-jb').textContent};`);
+  assert.equal(r.titre,'Finir la carte'); assert.deepEqual(r.classes,['mf-ac-jd','mf-ac-jb']);
+  assert.match(r.entree,/Entrée/);
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac-jp\{display:flex;justify-content:space-between;align-items:center;gap:12px\}/);
+  assert.doesNotMatch(css,/[^{}]*\.mf-ac-jp[^{}]*\{[^}]*flex-wrap:wrap/);
 });

@@ -58,13 +58,13 @@ function mgmtAccueilContenu(m){
     org, ville:ident?ident.ville:'', annee:ident?ident.annee:null, date:mgmtAccueilDate(m),
     semaine:Number.isSafeInteger(m.cycle)?m.cycle:1,
     soiree:{nom:org+' Fight Night '+((m.eventsPlayed||0)+1),dans:rest===null?'—':(rest===0?'CE SOIR':'DANS '+rest+' J')},
-    lieu:{nom:salle?salle.nom:(infos.lieu||'—'),sous:[salle&&salle.ville?salle.ville:'',infos.date].filter(Boolean).join(', ')},
+    /* ==== [ANCRE: ACCUEIL_LIEU_REPRISE] — Monde lot 12 T2 ==== */
+    lieu:{nom:(salle?salle.nom:(infos.lieu||'—')).toUpperCase(),sous:[salle&&salle.ville?salle.ville:'',(infos.date||'').toLowerCase()].filter(Boolean).join(', ')},
     carte:{valeur:carte.main+' / '+carte.sm,sous:carte.sm-carte.main>0?(carte.sm-carte.main===1?'Une place à finir':(carte.sm-carte.main)+' places à finir'):'Carte complète'},
   };
   /* Que s'est-il passé ? Les marques allumées du lot 8, une phrase chacune. */
   const passe=[];
   for(const id of mgmtMarquesAllumees(m)){
-    if(passe.length>=MGMT_ACCUEIL_MAX_PASSE) break;
     const ev=mgmtDepuisVisite(m,id)[0]; if(!ev) continue;
     const nom=mgmtAccueilN(m,id); if(!nom) continue;
     let parts=[nom,mgmtAccueilT(' · '+ev.phrase)];
@@ -89,10 +89,12 @@ function mgmtAccueilContenu(m){
     if(!def||!n) continue;
     ouvertes.push({kind:'demande',i:d.i,id:d.a,parts:[n,mgmtAccueilT(' demande : '+def.libelle.toLowerCase())].concat(cible?[mgmtAccueilT(' — '),cible]:[])});
   }
-  for(const a of m.pile.filter(x=>x.status==='open')){
-    if(a.kind==='leila_bulk'){ ouvertes.push({kind:'affaire',id:a.id,bulk:true,parts:[mgmtAccueilT('Carte proposée — '+(Array.isArray(a.fights)?a.fights.length:0)+' combats')],sous:mgmtBulkSubject(m,a)}); continue; }
+  /* ==== [ANCRE: ACCUEIL_RESUMES_REPRISE] — Monde lot 12 T2 ==== */
+  const resumes={leila_propose:'Leïla propose ',leila_react:'Leïla revient sur ',leila_react_swap:'Leïla propose un échange pour ',leila_react_crush:'Leïla revient sur '};
+  for(const a of m.pile.filter(x=>x.status==='open'&&(x.kind==='leila_bulk'||resumes[x.kind]))){
+    if(a.kind==='leila_bulk'){ ouvertes.push({kind:'affaire',id:a.id,bulk:true,relu:false,parts:[mgmtAccueilT('Carte proposée — '+(Array.isArray(a.fights)?a.fights.length:0)+' combats')],sous:mgmtBulkSubject(m,a)}); continue; }
     const A=mgmtAccueilN(m,a.a), B=mgmtAccueilN(m,a.b);
-    ouvertes.push({kind:'affaire',id:a.id,bulk:false,parts:(A&&B)?[A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
+    ouvertes.push({kind:'affaire',id:a.id,bulk:false,relu:false,parts:(A&&B)?[mgmtAccueilT(resumes[a.kind]),A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
@@ -182,19 +184,22 @@ function mgmtAccueilEchange(m,a){
 function mgmtAccueilAttend(m,c,extra=''){
   const p=c.attend.prochaine;
   const retrait=typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):'';
-  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(mfNet(p.titre))}</div>`
+  /* ==== [ANCRE: ACCUEIL_JAUNE_REPRISE] — Monde lot 12 T2 ==== */
+  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(p.titre.charAt(0).toUpperCase()+p.titre.slice(1).toLowerCase())}</div>`
     +`<div class="mf-ac-jp"><div class="mf-ac-jd">${esc(p.detail)}</div><button type="button" class="mf-ac-jb" onclick="${p.onclick}">${mfTouche('Entrée')}<span>${esc(mfNet(p.bouton))}</span></button></div></div>`;
-  const sel=m.open?m.pile.find(a=>a.id===m.open&&a.status==='open'):null;
   let rows='';
   const liste=c.attend.ouvertes;
-  for(const r of liste){
-    const ouverte=r.kind==='affaire'&&sel&&sel.id===r.id;
+  for(const r of liste.slice(0,4)){
     /* ==== [ANCRE: ACCUEIL_AFFAIRES_LIGNES] — Monde lot 12 T2 ==== */
     const texte=`<div class="mf-ac-rt"><div class="mf-ac-rp">${mgmtAccueilParts(m,r.parts)}</div>${r.sous?`<div class="mf-ac-rs">${esc(r.sous)}</div>`:''}</div>`;
     const actions=r.kind==='demande'
       ?`<button type="button" class="mf-ac-lien mf-ac-demande" onclick="CL.mgmtFiche('${esc(r.id)}');CL.mgmtFicheOnglet('ondit')">Répondre ›</button>`
-      :`<button type="button" class="mf-ac-act" onclick="CL.mgmtOpen('${esc(r.id)}')">${ouverte?'Ouverte':'Répondre ›'}</button>`;
-    rows+=`<div class="mf-ac-ligne${ouverte?' sel':''}">${texte}${actions}</div>`+(ouverte?mgmtAccueilEchange(m,sel):'');
+      :`<button type="button" class="mf-ac-act" onclick="CL.mgmtOpen('${esc(r.id)}');CL.go('mgmt_bureau')">Décider ›</button>`;
+    rows+=`<div class="mf-ac-ligne">${texte}${actions}</div>`;
+  }
+  /* ==== [ANCRE: ACCUEIL_VOIR_TOUT_REPRISE] — Monde lot 12 T2 ==== */
+  for(const kind of ['demande','affaire']){
+    if(liste.slice(4).some(r=>r.kind===kind)) rows+=`<button type="button" class="mf-ac-lien" data-relu="false" onclick="CL.go('${kind==='demande'?'mgmt_effectif':'mgmt_bureau'}')">Voir tout ›</button>`;
   }
   return mfPanneau(mgmtAccueilTitre('CE QUI T’ATTEND')+boite
     +(retrait?`<div class="mf-ac-retrait">${retrait}</div>`:'')
@@ -203,12 +208,14 @@ function mgmtAccueilAttend(m,c,extra=''){
 function mgmtAccueilPasse(m,c){
   /* ==== [ANCRE: ACCUEIL_PASSE_R4] — Monde lot 12 T2 ==== */
   if(!c.passe.length) return '';
-  const rows=c.passe.map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
+  const rows=c.passe.slice(0,MGMT_ACCUEIL_MAX_PASSE).map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
     +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('');
   const vide=`<div class="mf-ac-rs">Rien de neuf depuis ta dernière visite.</div>`;
   const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
-  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(rows||vide)+touches,'normal','mf-ac-p mf-ac-c5');
+  /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
+  const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-relu="false" onclick="CL.go('mgmt_effectif')">Voir tout ›</button>`:'';
+  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(rows||vide)+suite+touches,'normal','mf-ac-p mf-ac-c5');
 }
 function mgmtAccueilAilleurs(m,c){
   /* ==== [ANCRE: ACCUEIL_AILLEURS_R4] — Monde lot 12 T2 ==== */
@@ -232,7 +239,7 @@ function mgmtAccueilHeritage(m,c){
 function scr_mgmt_accueil(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, c=mgmtAccueilContenu(m);
-  if(MGMT_ACCUEIL.cur>=c.passe.length) MGMT_ACCUEIL.cur=c.passe.length-1;
+  if(MGMT_ACCUEIL.cur>=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)) MGMT_ACCUEIL.cur=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)-1;
   /* ==== [ANCRE: ACCUEIL_TROIS_COLONNES] — Monde lot 12 T2 ==== */
   const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
@@ -248,7 +255,7 @@ Object.assign(CL,{
   /** Le curseur des événements de la semaine. */
   mgmtAccueilDeplacer(dir){
     if(!G||!G.mgmt) return;
-    const n=mgmtAccueilContenu(G.mgmt).passe.length;
+    const n=Math.min(MGMT_ACCUEIL_MAX_PASSE,mgmtAccueilContenu(G.mgmt).passe.length);
     if(!n) return;
     MGMT_ACCUEIL.cur=(MGMT_ACCUEIL.cur+dir+n)%n;
     render();
@@ -268,9 +275,6 @@ keysRegister('mgmt_accueil',{
   ArrowUp(){ CL.mgmtAccueilDeplacer(-1); },
   ArrowDown(){ CL.mgmtAccueilDeplacer(1); },
   Enter(){ CL.mgmtAccueilOuvrir(); },
-  '1'(){ mgmtKeyReply(0); },
-  '2'(){ mgmtKeyReply(1); },
-  '3'(){ mgmtKeyReply(2); },
   Escape(){ CL.mgmtMenuPrincipal(); },
 });
 /* ==== [FIN ANCRE] ==== */
