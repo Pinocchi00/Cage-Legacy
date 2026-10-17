@@ -50,6 +50,26 @@ Pas de sous-agent disponible. Auto-relecture limitée ; verdict formel non obten
 ### Questions pour Anthony
 Confirmer les empreintes attendues après isolation du seul changement de statut et des préliminaires T2 ; le fixture d'apostrophe management doit être réadapté à la nouvelle carte.
 
+## Compte rendu — reprise 2 (17/10/2026)
+
+### Fichiers modifiés et leur rôle
+- Aucun fichier de code ou de test modifié pendant cette reprise : le premier passage ciblé a révélé plusieurs échecs à diagnostiquer individuellement avant de réécrire des garanties existantes.
+- `docs/lots/MONDE-LOT-14-T2.md` : consignation du résultat de la reprise et des échecs à traiter.
+
+### Tests ajoutés / remplacés
+- Aucun. La commande ciblée prescrite pour la reprise a commencé, mais son exécution groupée a dépassé le délai de l'outil ; les résultats imprimés avant coupure comprennent des échecs dans les tests de calendrier, ceintures, corrections lot 1, corrections lot 11, finances, marque, passé, prédécesseur, maquette préliminaires et retraits.
+
+### Vérification
+- `node tools/verif-versions.js origin/main` : aucun écart (30 fichiers examinés).
+- Tests ciblés de la reprise 2 : incomplets, commande interrompue par le délai de 120 s. Le test `mgmtPasse` empreinte est vert ; les autres tests n'ont pas tous pu être observés.
+- `npm run check:rapide` non lancé, conformément à la consigne du superviseur.
+
+### Relecture
+- Pas de sous-agent disponible ; verdict formel non obtenu.
+
+### Écarts et questions pour Anthony
+- La reprise 2 n'est pas achevée : aucune des erreurs observées n'a été modifiée ou supprimée. Il faut traiter chacune fichier par fichier comme demandé dans la reprise du superviseur, en préservant ses garanties. L'empreinte `mgmtPasse` est déjà verte ici ; aucune nouvelle empreinte n'a été calculée.
+
 ## REPRISE 2 du superviseur (17/10/2026, 15 h 50) — 18 tests rouges à la vérification complète (copie propre du commit 62dc3de)
 Le contrôle rapide ne les voit pas ; la vérification complète les voit. **Pour chacun : lis le test, décide s'il est (A) périmé** — il décrit la validation en bloc / la proposition `leila_bulk` / les « Autres choix » / « Faire monter » retirés par décision d'Anthony du 17/10/2026 → réécris-le pour la pose directe en citant la décision, sans affaiblir ce qu'il garantit ; **ou (B) la révélation d'un vrai défaut de ton code** → corrige le code. Ne jamais supprimer un test pour retrouver du vert. Mène-les **fichier par fichier** : `node --test tests/<fichier>.test.js`.
 
