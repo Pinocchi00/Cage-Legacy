@@ -320,7 +320,7 @@ Object.assign(CL,{
     if(MGMT_NOUVELLE.soirees===0){ CL.mgmtNouvelleCreer(); return; }   /* soirees:0 = une partie sans passé (tests, outils) */
     const n=Number.isSafeInteger(MGMT_NOUVELLE.soirees)&&MGMT_NOUVELLE.soirees>0?MGMT_NOUVELLE.soirees:MGMT_PASSE_SOIREES;
     MGMT_NOUVELLE.gen={slot:MGMT_NOUVELLE.slot,orgId:o.id,org:o.nom,n,k:0,annee:mgmtPasseAnnee(n,0),m:null,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null,
-      avecMonde:MGMT_NOUVELLE.monde===true||(MGMT_NOUVELLE.monde!==false&&MGMT_NOUVELLE.soirees===undefined)};   /* Monde lot 9 T2a : les sept organisations vivantes accompagnent la création réelle */
+      avecMonde:!!MGMT_NOUVELLE.duo||MGMT_NOUVELLE.monde===true||(MGMT_NOUVELLE.monde!==false&&MGMT_NOUVELLE.soirees===undefined),duo:MGMT_NOUVELLE.duo||null};
     render();
     mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);
     mgmtNouvelleBarreBoucle(MGMT_NOUVELLE.gen);
@@ -335,7 +335,7 @@ Object.assign(CL,{
   },
   mgmtNouvelleLectureDelta(d){ const g=MGMT_NOUVELLE.gen; if(g) CL.mgmtNouvelleLecture((g.lec||0)+d); },
   /** Recommence une génération interrompue en conservant l'organisation choisie. @returns {void} Relance l'écran de création. */
-  mgmtNouvelleRecommencer(){ const g=MGMT_NOUVELLE.gen;if(!g||!g.erreur)return;mgmtNouvelleGenNettoyer();MGMT_NOUVELLE.gen={slot:g.slot,orgId:g.orgId,org:g.org,n:g.n,k:0,annee:mgmtPasseAnnee(g.n,0),m:null,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};render();mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);mgmtNouvelleBarreBoucle(MGMT_NOUVELLE.gen);mgmtNouvelleGenSuite(MGMT_NOUVELLE.gen); },
+  mgmtNouvelleRecommencer(){ const g=MGMT_NOUVELLE.gen;if(!g||!g.erreur)return;mgmtNouvelleGenNettoyer();MGMT_NOUVELLE.gen={slot:g.slot,orgId:g.orgId,org:g.org,n:g.n,k:0,annee:mgmtPasseAnnee(g.n,0),m:null,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null,duo:g.duo||null};render();mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);mgmtNouvelleBarreBoucle(MGMT_NOUVELLE.gen);mgmtNouvelleGenSuite(MGMT_NOUVELLE.gen); },
   /** La partie est prête : le bouton (ou Entrée) l'ouvre. */
   mgmtNouvelleEntrer(){
     const g=MGMT_NOUVELLE.gen;
@@ -343,13 +343,16 @@ Object.assign(CL,{
     const m=g.m, slot=g.slot;
     mgmtNouvelleGenNettoyer();
     MGMT_NOUVELLE.gen=null; G.mgmt=null;
+    if(g.duo) mgmtDuoCreer(m,g.duo.b,g.duo.noms);
     CL.mgmtEnter(slot,undefined,{partie:m});
   },
   /** Échap pendant la création (ou une fois prête) : abandon propre, retour au choix des organisations. */
   mgmtNouvelleAbandonner(){
     if(!MGMT_NOUVELLE.gen) return;
+    const duo=MGMT_NOUVELLE.gen.duo,orgId=MGMT_NOUVELLE.gen.orgId,slot=MGMT_NOUVELLE.slot;
     mgmtNouvelleGenNettoyer();
     MGMT_NOUVELLE.gen=null; if(G) G.mgmt=null;
+    if(duo){CL.mgmtDuoNouvelle(slot);MGMT_DUO_NOUVELLE.etape='b';MGMT_DUO_NOUVELLE.noms={...duo.noms};MGMT_DUO_NOUVELLE.a=MGMT_ORGANISATIONS.findIndex(o=>o.id===orgId);MGMT_DUO_NOUVELLE.i=MGMT_DUO_NOUVELLE.a===0?1:0;return;}
     render();
   },
 });

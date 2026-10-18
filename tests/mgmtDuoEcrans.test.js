@@ -9,11 +9,27 @@ test('Duo T3 — le menu Duo existe hors démo et reste masqué en démo',()=>{
   assert.equal(w.eval("CL_DEMO=true; mfMenu().some(x=>x.id==='duo')"),false);
 });
 
-test('Duo T3 — emplacement vide en mode Duo ouvre la création temporaire',()=>{
+test('Duo T8 — création : l’emplacement vide ouvre la saisie des deux noms',()=>{
   const w=newGameWindow();
   w.eval('CL.mgmtDuoParties(); CL.mgmtPartieOuvrir();');
   assert.equal(w.eval('G.screen'),'mgmt_duo_nouvelle');
-  assert.match(w.document.body.textContent,/Bientôt/);
+  assert.match(w.document.body.textContent,/Joueur 1/);
+  assert.match(w.document.body.textContent,/Joueur 2/);
+});
+
+test('Duo T8 — création : J1 choisit puis J2 ne peut pas reprendre son organisation',()=>{
+  const w=newGameWindow();
+  w.eval('CL.mgmtDuoNouvelle(1); CL.mgmtDuoNouvelleContinuer(); CL.mgmtDuoNouvelleChoisir(0); CL.mgmtDuoNouvelleValider();');
+  assert.equal(w.eval('MGMT_DUO_NOUVELLE.etape'),'b');
+  w.eval('CL.mgmtDuoNouvelleChoisir(MGMT_DUO_NOUVELLE.a);');
+  assert.notEqual(w.eval('MGMT_DUO_NOUVELLE.i'),0);
+});
+
+test('Duo T8 — création : un nom injecté est échappé et les noms restent en texte',()=>{
+  const w=newGameWindow();
+  w.eval('CL.mgmtDuoNouvelle(1); MGMT_DUO_NOUVELLE.noms.a="<b>O\'Neil</b>"; MGMT_DUO_NOUVELLE.etape="a"; render();');
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
 });
 
 test('Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe',()=>{

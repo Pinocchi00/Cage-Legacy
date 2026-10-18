@@ -13,3 +13,12 @@ Points (3) noms, J1 choisit, J2 ne peut pas choisir la même organisation, (4) u
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T8 : la création à deux`.
 
+## Compte rendu
+
+- `mgmt-duo-ecrans.js` : écran à trois étapes, saisie sans raccourci clavier durant les champs, sélection des deux organisations et lancement du chemin de création existant.
+- `mgmt-nouvelle.js` : conserve la configuration Duo pendant la génération, force le monde vivant et pose `m.duo` avant l'entrée ; abandon revient au choix de J2.
+- `ui-cadre.css` : styles `mf-duo-` de la création.
+- `tests/mgmtDuoEcrans.test.js` : « Duo T8 — création : l’emplacement vide ouvre la saisie des deux noms », « Duo T8 — création : J1 choisit puis J2 ne peut pas reprendre son organisation », « Duo T8 — création : un nom injecté est échappé et les noms restent en texte ».
+- Sauvegarde inchangée. `node tools/verif-versions.js origin/main` signale uniquement un écart préexistant hors tranche (`mgmt-salles.js`, bump absent). Aucun écran de capture visuelle joint.
+- Questions pour Anthony : aucune.
+
