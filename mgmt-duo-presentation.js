@@ -1,6 +1,10 @@
 "use strict";
 /* ==== [ANCRE: DUO_T58_PRESENTATION] — Monde lot 19 T58 ==== */
 var MGMT_DUO_PRESENTATION={partie:null,index:0};
+/** Vrai pendant qu'une présentation Duo est ouverte (G.mgmt est alors la vue fusionnée) : la barre des sections reste grisée, la seule sortie est le retour. @returns {boolean} */
+function mgmtDuoPresentationActive(){
+  return !!MGMT_DUO_PRESENTATION.partie;
+}
 
 function mgmtDuoVueMonde(m,carte){
   if(!mgmtDuoActif(m)||!m.orgs||!carte||!Array.isArray(carte.combats)) return null;

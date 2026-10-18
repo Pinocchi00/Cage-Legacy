@@ -12,6 +12,13 @@ function mgmtPresentationDonnees(m,v){
   return v.mode==='combattant'?mgmtPresentationCombattant({m,h:v.h},v.ids[0]):mgmtPresentationCombat({m,h:v.h},...v.ids);
 }
 function mgmtPresentationRoute(v){ return v.mode==='soiree'?'mgmt_soiree_avant':'mgmt_presentation_'+v.mode; }
+/* ==== [ANCRE: MONDE_LOT21_SOIREE_SANS_SORTIE] — Monde lot 21 (retour d'Anthony du 18/10/2026 : « dans l'avant-combat, un clic sur un combattant nous sort de la soirée et elle se joue sans nous »).
+   La présentation d'un combattant ouverte depuis l'avant-combat d'une soirée (et la fiche qui s'ouvre depuis elle) garde la barre des sections GRISÉE, comme les écrans de la soirée :
+   la seule sortie est le retour, jamais une section. ==== */
+/** Vrai si une présentation de la soirée est dans la pile (un combattant ou une fiche ouverts depuis l'avant-combat). @returns {boolean} */
+function mgmtPresentationDansSoiree(){
+  return MGMT_PRESENTATION_UI.pile.some(x=>x&&x.mode==='soiree');
+}
 /** Ouvre sans mutation métier ; false si présentation indisponible.
  * @param {'combattant'|'combat'|'soiree'} mode @param {string[]} ids
  * @param {{h?:number,i?:number,liste?:Array<{ids:string[],h?:number,i?:number}>,retour?:string}} [opts]
@@ -66,6 +73,7 @@ function mgmtPresentationNomOuvrir(){
   const parents=MGMT_PRESENTATION_UI.pile.slice();
   if(mgmtPresentationOuvrir('combattant',[id],{h:v.h,retour:mgmtPresentationRoute(v)})){
     MGMT_PRESENTATION_UI.pile=parents.concat(MGMT_PRESENTATION_UI.pile);
+    render();   /* Monde lot 21 : le rendu fait par l'ouverture ne voyait pas encore le parent (la soirée) : on le refait avec la pile complète. */
   }else CL.mgmtFiche(id);
 }
 /** Ouvre la fiche complète du sujet (premier côté pour une paire), retour au cadre conservé. */
@@ -329,7 +337,7 @@ function scr_mgmt_presentation(){
     {ks:['F'],t:'Fiche complète',onclick:'CL.mgmtPresentationFiche()'}];
   if(!soir||regarder) touches.push({ks:['Entrée'],t:soir?'Regarder le combat':'Ouvrir le nom choisi',jaune:true,onclick:soir?'CL.mgmtPresentationRegarder()':'CL.mgmtPresentationNomOuvrir()'});
   if(v.pages>1) touches.push({ks:['⇤'],t:'',onclick:'CL.mgmtPresentationPage(-1)'},{ks:['⇥'],t:(v.page+1)+' / '+v.pages,onclick:'CL.mgmtPresentationPage(1)'});
-  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir,plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
+  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree()||(typeof mgmtDuoPresentationActive==='function'&&mgmtDuoPresentationActive()),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
 }
 Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
 SCREENS.mgmt_presentation_combattant=scr_mgmt_presentation;
