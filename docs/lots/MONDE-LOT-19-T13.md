@@ -1,0 +1,15 @@
+# Monde lot 19 T13 — mode Duo : l'écran de la soirée de la super carte
+
+Branche : `mode-duo`. **Spécification : `docs/lots/DUO-T4.md` (lis-la en entier ; cette fiche en retient UNE PART) ; planches validées par Anthony : `maquettes/duo/` (elles priment pour tout ce qui se voit ; valeurs dans `maquettes/duo/src/duo.css`).** Le moteur `mgmt-duo.js` (T0 à T6, T2 enchères) et le QG (T9) sont livrés. Tout va dans `mgmt-duo-ecrans.js`, CSS dans `ui-cadre.css` sous l'ancre `DUO_T4_ECRANS`, classes `mf-duo-`. Règle des deux joueurs : l'écran dit en haut, en grand, à qui c'est (J1 `#E23A2B`, J2 `#1B8C8F` / texte `#3FB7BA`). `esc()` sur tout nom. Aucun texte sous 22 px.
+Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
+**Tu écris le code en lisible (une instruction par ligne), tu ne t'arrêtes pas au premier obstacle : si un test échoue, tu le corriges ; tu ne rends « inachevé » qu'après avoir réellement essayé et seulement avec le blocage précis.**
+
+## Ce que tu fais (DUO-T4 §3)
+L'écran `mgmt_duo_soiree` (`MGMT_DUO_UI.vu`, avant-combat avec le bilan d'AVANT combat lu sur la trace, `Regarder` / `Résultat` (P), après-combat, `Combat suivant` → `CL.mgmtDuoSuivant()`, `Le bilan` après le combat principal) et les **deux paramètres facultatifs additifs** de `mgmtCombatOuvrir` (`mgmt-combat.js` : `org`, `num` ; sans eux rien ne change). Piège capital : le résultat n'apparaît JAMAIS dans l'avant-combat (ni score, ni carte, ni attribut HTML). Branche le bouton `Reprendre la soirée` du QG.
+
+## Tests
+**Un monde coûte 40 à 90 s : n'en crée qu'un par test** (voir `tests/mgmtDuo.test.js`, helpers `AVANCER` et `DRAFT`). Un fichier à la fois, délai 590 s. Complète `tests/mgmtDuoEcrans.test.js`, intitulés `Duo T4 — <point>`. Points (5) le bilan d'avant combat vient de la trace ; `P` montre le résultat sans ouvrir l'écran de combat ; `Regarder` ouvre `mgmt_combat` avec l'étiquette `SUPER CARTE` et l'organisation `{org J1} × {org J2}` ; au retour le résultat est montré ; (6) une partie rechargée au milieu de la soirée reprend au même combat ; (8) `mgmtCombatOuvrir` sans `org` ni `num` affiche comme avant ; le HTML de l'avant-combat ne contient pas le vainqueur.
+
+## Fin
+`node tools/_bump.js`, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T13 : l'écran de la soirée de la super carte`.
+
