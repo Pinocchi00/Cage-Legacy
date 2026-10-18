@@ -203,7 +203,6 @@ function scr_mgmt_carte_liste(){
     +(peutConf?mfBouton('Confirmer le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(etat.vise.id)}')`})
       :(!pickF&&vise&&mgmtSelectable(m,vise,null)&&!plein?mfBouton('Choisir ce combattant',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(vise.id)}')`}):''))
     +(pickF?mfBouton('Retour',{touche:'Échap',onclick:'CL.mgmtCarteLeave()'}):'')
-    +(pickF&&mgmtAgendaActif(m)?mfBouton('Proposer',{touche:'D',onclick:'CL.mgmtCarteProposer()'}):'')
     /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_VISE] — Monde lot 3 T5 ==== */
     +(A?mfBouton('Présentation',{onclick:'CL.mgmtCartePresentation()'})+mfBouton('Sa fiche',{touche:'F',onclick:`CL.mgmtCarteFiche()`}):'')+`</div>`;
   const centre=`<div class="mf-car-c">${mgmtCarteBanniere(A,B,A?A.div:mgmtCarteDiv(m),rounds,pickF?'CL.mgmtCarteLeave()':'')}`
@@ -408,14 +407,8 @@ Object.assign(CL,{
   /** La préparation à la demande. En mode dossier, D demande une nouvelle pile selon l’étape. */
   mgmtCarteProposer(){
     const m=G.mgmt; if(!mgmtAgendaActif(m)) return;
-    if(MGMT_CART.mode!=='dossiers'){
-      if(!MGMT_CART.pick) return;
-      const combattant=mgmtFighterById(m,MGMT_CART.pick); if(!combattant) return;
-      const pile=mgmtDossiersAdversaires(m,MGMT_CART.pick); if(!pile||!pile.length) return;
-      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
-      return;
-    }
-    MGMT_CART.mode='dossiers';
+    /* Décision d'Anthony du 17/10/2026 : Leïla ne touche qu'aux préliminaires ; la touche « Proposer » (D) de la liste n'existe plus. D ne demande de nouveaux dossiers que dans les dossiers. */
+    if(MGMT_CART.mode!=='dossiers') return;
     if(MGMT_CART.etape===1){
       const vus=Array.isArray(MGMT_CART.vusCombattants)?MGMT_CART.vusCombattants:[];
       const pile=mgmtDossiersCombattants(m,null,vus);

@@ -48,11 +48,12 @@ test('1.1 — Une carte de 12 combats ne bloque plus rien, et une sauvegarde dé
   assert.equal(win.eval(`mgmtAgendaTailleCarte(G.mgmt)`),'petite','la carte retrouve la taille d’une soirée au chargement');
 });
 
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose les préliminaires dès la pose de la soirée et remplace elle-même un forfait ; plus de proposition ni de « Valider la carte ». La garantie reste : un forfait se règle depuis Préliminaires, en une action. */
 test('1.2 — Un forfait en préliminaires se règle depuis Préliminaires, en une action, sans passer par la fiche', () => {
   const win=neuve();
   composer(win);
-  win.eval(`const m=G.mgmt; mgmtAgendaPoser(m,m.cal.jour+10,'petite'); mgmtOfferBulk(m,true); const b=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(b) mgmtDecide(m,b.id,'validate'); m.pile.forEach(x=>{x.status='closed';});`);
-  assert.ok(win.eval(`mgmtCardFull(G.mgmt)`),'fixture : la carte est pleine');
+  win.eval(`const m=G.mgmt; mgmtAgendaPoser(m,m.cal.jour+10,'petite'); m.pile.forEach(x=>{x.status='closed';});`);
+  assert.ok(win.eval(`mgmtCardFull(G.mgmt)`),'fixture : la carte est pleine, les préliminaires posés par Leïla');
   /* Le forfait : un préliminaire tombe, son combattant est suspendu. */
   win.eval(`(function(){ const m=G.mgmt, f=m.card.prelims.pop(); mgmtAddFact(m,{c:m.cycle,k:'retrait',a:f.a,adv:f.b,slot:'prelim'}); })()`);
   assert.equal(win.eval(`mgmtCardFull(G.mgmt)`),false);
@@ -62,23 +63,26 @@ test('1.2 — Un forfait en préliminaires se règle depuis Préliminaires, en u
   assert.match(app(win).textContent,/Trouver un remplaçant/,'le bouton est sur l’écran Préliminaires');
   win.eval(`CL.mgmtPrelimsRemplacer()`);
   assert.equal(win.eval(`G.screen`),'mgmt_prelims');
-  assert.ok(win.eval(`!!G.mgmt.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open')`),'Leïla propose le remplaçant');
-  win.eval(`CL.mgmtPrelimsValider()`);
-  assert.ok(win.eval(`mgmtCardFull(G.mgmt)`),'validé, le trou est comblé');
+  assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')`),false,'plus aucune proposition à valider');
+  assert.ok(win.eval(`mgmtCardFull(G.mgmt)`),'Leïla a posé le remplaçant, le trou est comblé en une action');
 });
 
 test('1.3 — Le calendrier liste ce qui empêche la soirée, une ligne par blocage, chacune menant à l’écran qui la règle', () => {
   const win=neuve();
   win.eval(`mgmtAgendaPoser(G.mgmt,G.mgmt.cal.jour+10,'petite'); CL.go('mgmt_calendrier');`);
   const lignes=win.eval(`[...document.querySelectorAll('.mf-cal-bloc')].map(x=>x.textContent)`);
-  assert.ok(lignes.length>=2,'carte principale et préliminaires manquent : deux lignes');
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : les préliminaires sont posés dès la pose ; seule la carte principale manque, une ligne. Un forfait en préliminaires fait revenir sa ligne. */
+  assert.equal(lignes.length,1,'les préliminaires sont posés : seule la carte principale manque, une ligne');
   assert.ok(lignes.some(t=>/carte principale/.test(t)));
-  assert.ok(lignes.some(t=>/préliminaire/.test(t)));
+  assert.ok(!lignes.some(t=>/préliminaire/.test(t)),'aucune ligne préliminaires : Leïla les a posés');
   assert.ok(win.eval(`[...document.querySelectorAll('.mf-cal-bloc button')].every(b=>/CL\\./.test(b.getAttribute('onclick')))`),'chaque ligne a son action');
   composer(win);
   win.eval(`G.mgmt.pile.forEach(x=>{x.status='closed';}); CL.go('mgmt_calendrier')`);
   const apres=win.eval(`[...document.querySelectorAll('.mf-cal-bloc')].map(x=>x.textContent)`);
   assert.ok(!apres.some(t=>/carte principale/.test(t)),'la ligne de la carte principale disparaît une fois la carte composée');
+  win.eval(`G.mgmt.card.prelims.pop(); CL.go('mgmt_calendrier')`);
+  const forfait=win.eval(`[...document.querySelectorAll('.mf-cal-bloc')].map(x=>x.textContent)`);
+  assert.ok(forfait.some(t=>/préliminaire/.test(t)),'un préliminaire manquant fait revenir sa ligne');
   /* Une affaire ouverte bloque aussi, et le dit. */
   win.eval(`const m=G.mgmt; m.pile.push({id:'aff-test',kind:'leila_propose',status:'open',a:m.roster[0].id,b:m.roster[1].id,exchange:'leila_propose'});`);
   assert.ok(win.eval(`mgmtAgendaBlocages(G.mgmt).some(b=>b.k==='affaires')`));

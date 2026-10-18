@@ -39,8 +39,9 @@ test('T6 — un combattant booké peut se retirer à la veille : un fait, son co
     return {avant,fait,complete:mgmtCardFull(m),adversaireLibre:!mgmtEngaged(m,adv),retireIndispo:!mgmtAvailable(m,mgmtFighterById(m,fait.a)),actif:!!mgmtRetraitActif(m),
       encore:mgmtRetraitsAvantSoiree(m),valide:(function(){ const c=JSON.parse(JSON.stringify(m)); c.hist=[]; return validateMgmt(c); })()};
   `);
-  assert.ok(!r.rien,'un retrait arrive sur quatre cents veilles'); assert.ok(r.avant.full); assert.equal(r.complete,false); assert.ok(r.adversaireLibre); assert.ok(r.retireIndispo);
-  assert.ok(r.actif); assert.equal(r.encore,null,'au plus un retrait par cycle'); assert.ok(r.valide); assert.ok(['main','prelim'].includes(r.fait.slot));
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : un combat des préliminaires qui saute est remplacé aussitôt par Leïla (la carte reste complète) ; seule la carte principale se retrouve incomplète. */
+  assert.ok(!r.rien,'un retrait arrive sur quatre cents veilles'); assert.ok(r.avant.full); assert.equal(r.complete,r.fait.slot==='prelim','carte principale : incomplète ; préliminaire : Leïla remplace aussitôt'); if(r.fait.slot==='main') assert.ok(r.adversaireLibre); assert.ok(r.retireIndispo);
+  if(r.fait.slot==='main') assert.ok(r.actif,'la carte principale reste à compléter par le joueur'); assert.equal(r.encore,null,'au plus un retrait par cycle'); assert.ok(r.valide); assert.ok(['main','prelim'].includes(r.fait.slot));
 });
 
 test('T6 — la chance de retrait vient de la charge ; hors partie neuve, personne ne se retire', () => {
@@ -76,8 +77,9 @@ test('T6 — sortie 1 (QO-1) : remonter un combat des préliminaires complète l
       pile:m.pile.some(a=>a.kind==='leila_bulk'),adv:mgmtEngaged(m,mgmtFighterById(m,fait.adv)),
       apresOptions:apres?apres.premiereFois:null};
   `);
-  assert.ok(r.remonter&&r.b1&&r.bouton); assert.deepEqual(r.main,[4,5],'la carte principale est de nouveau pleine'); assert.deepEqual(r.prel,[7,6]);
-  assert.ok(r.monte); assert.ok(r.b2); assert.ok(r.faitSortie); assert.ok(r.pile,'Leïla se débrouille : elle repropose les préliminaires');
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla ne propose plus d'affaire, elle repose aussitôt un préliminaire à la place de celui qui est monté. */
+  assert.ok(r.remonter&&r.b1&&r.bouton); assert.deepEqual(r.main,[4,5],'la carte principale est de nouveau pleine'); assert.deepEqual(r.prel,[7,7],'Leïla repose aussitôt un préliminaire à la place de celui qui est monté');
+  assert.ok(r.monte); assert.ok(r.b2); assert.ok(r.faitSortie); assert.equal(r.pile,false,'aucune proposition en bloc : Leïla pose directement');
 });
 
 test('T6 — le prélim n’est remonté que s’il en reste ; un trou dans les préliminaires est repris par Leïla, sans sortie à choisir', () => {

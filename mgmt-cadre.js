@@ -331,7 +331,11 @@ function mfAncien(html,screen){
   /* ==== [ANCRE: MGMT_FIDELITE_ANCIEN_ENTETE] — Reprise de fidélité du 07/10/2026 : la plaque dit ce qu'est l'écran (« Les affaires », « Le lendemain »…) et non la
      section de la barre qui l'éclaire ; la droite de l'en-tête est celle des planches (décompte, date, soirée). ==== */
   const PLAQUES={mgmt_bureau:'Les affaires',mgmt_organisation:'Organisation',mgmt_lendemain:'Le lendemain',mgmt_vestiaire:'Le vestiaire',mgmt_recrutement:'Recrutement',mgmt_soiree:'Soirée'};
-  const lib=PLAQUES[screen]||(courant?(MF_SECTIONS.find(s=>s.id===courant)||{}).libelle:'');
+  /* ==== [ANCRE: LEILA_PLAQUE_MONDE] — Monde lot 14 T1 ==== */
+  /* Le libellé est celui cité par la fiche T1 : plate quand rien n'est ouvert, la plaque devient « Le monde autour de Split » (relu:false). */
+  const lib=screen==='mgmt_bureau'&&m&&mgmtOpenCount(m)===0
+    ?`Le monde autour de ${mgmtOrgNom(m)}`
+    :PLAQUES[screen]||(courant?(MF_SECTIONS.find(s=>s.id===courant)||{}).libelle:'');
   const droite=m?`${mgmtOrgNom(m)} Fight Night ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
   /* ==== [FIN ANCRE] ====*/
   return mfEcran(`<main class="mf-contenu"><div class="mf-ancien">${html}</div></main>`,

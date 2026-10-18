@@ -181,7 +181,8 @@ test('Le temps de combat — un round de 300 s tient en une quarantaine de secon
 });
 
 test('Les coups — le nom du coup est celui que le moteur donne déjà (byType), les gestes ont leur mot', () => {
-  const win=neuve(7); touche(win,'Enter'); win.eval(`MGMT_SOIREE.index=8; CL.mgmtSoRegarder()`);   /* retours du 09/10 : les palmarès réels changent les premiers combats ; le principal (cinq rounds) est toujours assez long */
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose les préliminaires à l'ouverture, la soirée jouée n'est plus la même et son dernier combat peut finir tôt ; le test prend le combat le plus long de la carte (les coins parlent entre les rounds). */
+  const win=neuve(7); touche(win,'Enter'); const longest=win.eval(`(function(){ const p=mgmtSoireeProgramme(G.mgmt); let b=0; p.forEach((x,i)=>{ if((x.trace&&x.trace.rounds||0)>(p[b].trace&&p[b].trace.rounds||0)) b=i; }); return b; })()`); win.eval(`MGMT_SOIREE.index=${longest}; CL.mgmtSoRegarder()`);
   const r=res(win,`const S=MGMT_COMBAT.session, noms=MGMT_COUP_NOMS, cles=Object.keys(S.res.stats.A.byType);
     const typed=S.coups.filter(c=>c.type), gestes=S.coups.filter(c=>!c.type);
     return {n:S.coups.length,typed:typed.length,ok:typed.every(c=>cles.includes(c.type)&&c.k===noms[c.type]),gestes:[...new Set(gestes.map(c=>c.k))],tri:S.coups.every((c,i)=>i===0||c.t>=S.coups[i-1].t),
@@ -192,7 +193,8 @@ test('Les coups — le nom du coup est celui que le moteur donne déjà (byType)
 });
 
 test('Le commentaire et les coins — datés dans le combat, jamais l\'un sur l\'autre, textes marqués relu:false', () => {
-  const win=neuve(7); touche(win,'Enter'); win.eval(`MGMT_SOIREE.index=8; CL.mgmtSoRegarder()`);   /* retours du 09/10 : les palmarès réels changent les premiers combats ; le principal (cinq rounds) est toujours assez long */
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose les préliminaires à l'ouverture, la soirée jouée n'est plus la même et son dernier combat peut finir tôt ; le test prend le combat le plus long de la carte (les coins parlent entre les rounds). */
+  const win=neuve(7); touche(win,'Enter'); const longest=win.eval(`(function(){ const p=mgmtSoireeProgramme(G.mgmt); let b=0; p.forEach((x,i)=>{ if((x.trace&&x.trace.rounds||0)>(p[b].trace&&p[b].trace.rounds||0)) b=i; }); return b; })()`); win.eval(`MGMT_SOIREE.index=${longest}; CL.mgmtSoRegarder()`);
   const r=res(win,`const S=MGMT_COMBAT.session;
     return {voix:S.voix.length,coins:S.coins.length,niv:[...new Set(S.voix.map(v=>v.l))].sort(),tri:S.voix.every((v,i)=>i===0||v.t>=S.voix[i-1].t),ecart:S.voix.every((v,i)=>i===0||v.t-S.voix[i-1].t>=1.5||(v.horloge&&S.voix[i-1].horloge)),
       coinsOk:['A','B'].every(w=>S.coins.filter(c=>c.w===w).every((c,i,l)=>i===0||c.t-l[i-1].t>=ARENE_COIN_ECART-1e-9)),

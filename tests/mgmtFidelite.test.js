@@ -67,7 +67,9 @@ test('Camps, Presse, Résultats : les libellés de l\'en-tête sont ceux des pla
 test('Les écrans sans planche propre sont dessinés en panneaux du cadre, avec leur plaque', () => {
   const win=neuve(3);
   const lire=sc=>{ win.eval(`CL.go('${sc}')`); return res(win,`return {plaque:document.querySelector('.mf-plaque').textContent,panneaux:document.querySelectorAll('.mf-ancien .mf-panneau.mf-sem-p').length,hors:!!document.querySelector('.mf-ancien .scr.mgmt-wrap')};`); };
-  let r=lire('mgmt_bureau'); assert.equal(r.plaque,'Les affaires'); assert.equal(r.panneaux,3);
+  /* Décision d'Anthony du 17/10/2026 : les choix de Leïla sont retirés (lot 14 T1) ;
+     à l'ouverture, plus rien n'est à régler et la plaque devient « Le monde autour de Split ». */
+  let r=lire('mgmt_bureau'); assert.equal(r.plaque,'Le monde autour de Split'); assert.equal(r.panneaux,3);
   /* Brief démo, lot 6 T3 : le lendemain est recomposé en panneaux du cadre (mgmt-lendemain-cadre.js), il n'est plus un écran ancien. */
   r=lire('mgmt_lendemain'); assert.equal(r.plaque,'Le lendemain'); assert.equal(r.panneaux,0);
   r=lire('mgmt_organisation'); assert.equal(r.plaque,'Organisation'); assert.equal(r.panneaux,2);

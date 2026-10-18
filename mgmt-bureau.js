@@ -408,6 +408,20 @@ function mgmtEligiblePairs(m,usedFirsts,seen,lastDiv,run){
  * shortfall=true le signale au lieu de contourner. La première affaire est
  * sélectionnée d'office quand la pile n'est pas vide.
  */
+/* ==== [ANCRE: LEILA_CHOIX_RETIRES] — Monde lot 14 T1 ==== */
+function mgmtFermeChoixLeila(m){
+  for(const a of m.pile||[]){
+    if(a.status==='open'&&['leila_propose','leila_react','leila_react_swap','leila_react_crush'].includes(a.kind)){
+      a.status='closed';
+      a.decision='ignored';
+    }
+  }
+  if(!(m.pile||[]).some(a=>a.id===m.open&&a.status==='open')){
+    const next=(m.pile||[]).find(a=>a.status==='open');
+    m.open=next?next.id:null;
+  }
+}
+
 function mgmtNewPile(m){
   if(!Array.isArray(m.roster)||m.roster.length<2) mgmtNewRoster(m);
   /* Lot 2B T1 bis : la cohorte et les remplaçants complètent le cycle
@@ -463,19 +477,25 @@ function mgmtNewPile(m){
     m.pile.push(aff);
   }
   if(m.pile.length<n) m.shortfall=true;
-  /* Lot 2 T3 : la proposition en bloc n'arrive qu'une fois la carte
-     principale complète (docs/LOT-2-CARTE-PRINCIPALE.md §T3, décision du
-     19/09 ; LOT-3B §2 : le joueur compose d'abord la main card) — et elle
-     part après les autres affaires, jamais en tête. Mêmes ensembles que
-     les singles (paires de la carte incluses) : ni doublon avec la carte,
-     ni doublon avec les singles du cycle. */
+  /* ==== [ANCRE: MONDE_LOT14_T2_EMPCOMPLET] — Monde lot 14 T2 ====
+     Décision d'Anthony du 17/10/2026 : Leïla compose les préliminaires elle-même.
+     Carte principale complète et préliminaires manquants à l'ouverture d'un
+     cycle : elle pose les manquants, sans plus ouvrir d'affaire leila_bulk.
+     L'outil du prédécesseur garde l'ancien flux (affaire proposée puis
+     validée par mgmtDecide, MONDE_LOT6_PREDECESSEUR_SANS_RAISON). ==== */
   if(Array.isArray(m.card.main)&&Number.isSafeInteger(m.card.sizeMain)&&m.card.main.length>=m.card.sizeMain
     &&Array.isArray(m.card.prelims)&&Number.isSafeInteger(m.card.sizePrelims)&&m.card.prelims.length<m.card.sizePrelims){
-    const bulk=mgmtNewBulkAffair(m,usedFirsts,seen);
-    if(bulk) m.pile.push(bulk);
-    else if(m.pile.length===0) m.shortfall=true;
+    if(MGMT_PREDECESSEUR_EN_COURS){
+      const bulk=mgmtNewBulkAffair(m,usedFirsts,seen);
+      if(bulk) m.pile.push(bulk);
+      else if(m.pile.length===0) m.shortfall=true;
+    }else if(!mgmtComposerPrelims(m)&&m.pile.length===0){
+      m.shortfall=true;
+    }
   }
   if(m.pile.length>0) m.open=m.pile[0].id;
+  /* ==== [ANCRE: LEILA_PILE_FERMEE] — Monde lot 14 T1 ==== */
+  mgmtFermeChoixLeila(m);
   mgmtRangsInvalider(m);   /* Monde lot 1 T1 : mgmtNewPile mute plusieurs fois, invalidation de fin de livraison. */
   return m.pile;
 }
@@ -505,6 +525,38 @@ function mgmtAddFact(m,fact){
   if(!m||!fact) return;
   if(!Array.isArray(m.facts)) m.facts=[];
   m.facts.push(fact);
+}
+
+/* ==== [ANCRE: MONDE_LOT14_T2_VALIDATION] — Monde lot 14 T2 ====
+ * La pose commune des combats d'une proposition en bloc : promotions
+ * (chaque booking compte comme une interaction, addendum 1 §5), emplacements
+ * remplis sans jamais déborder la capacité, affaire close « validated », fait
+ * k:'booked' bulk:true. Sert à la validation du joueur (mgmtDecide) et à la
+ * validation d'une affaire ouverte d'avant la reprise (mgmtRepair) — la
+ * décision d'Anthony du 17/10/2026 : Leïla compose seule les préliminaires,
+ * l'affaire ouverte d'une sauvegarde ancienne est validée à l'ouverture
+ * de la partie. ==== */
+/** @returns {boolean} vrai si les combats ont été posés. */
+function mgmtBulkPoser(m,aff){
+  if(!m||!aff||aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)) return false;
+  if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
+  for(const f of aff.fights){ mgmtPromote(m,mgmtFighterById(m,f.a)); mgmtPromote(m,mgmtFighterById(m,f.b)); }
+  /* Lot 2 T1 : chaque combat entre dans son emplacement (slot), sans
+     jamais déborder la capacité — aucun combat perdu, aucun ajouté. */
+  for(const f of aff.fights){
+    const slot=f.slot==='main'?'main':'prelim';
+    const key=slot==='main'?'main':'prelims';
+    const cap=slot==='main'?m.card.sizeMain:m.card.sizePrelims;
+    if(Number.isSafeInteger(cap)&&m.card[key].length<cap){
+      /* ==== [ANCRE: MONDE_LOT6_T3_VALIDATION_BLOC] — Monde lot 6 T3 ==== */
+      const pose={a:f.a,b:f.b,cycle:m.cycle,slot,raison:JSON.parse(JSON.stringify(f.raison))};
+      if(f.origine!==undefined) pose.origine=f.origine;
+      m.card[key].push(pose);
+    }
+  }
+  aff.status='closed'; aff.decision='validated';
+  if(aff.fights.length) mgmtAddFact(m,{c:m.cycle,k:'booked',bulk:true,a:aff.fights[0].a,b:aff.fights[0].b});
+  return true;
 }
 
 /**
@@ -592,31 +644,13 @@ function mgmtDecide(m,affairId,replyId){
     };
     react.title=mgmtAffairTitle(m,react);
     m.pile.push(react);
+    /* ==== [ANCRE: LEILA_REFUS_FERME] — Monde lot 14 T1 ==== */
+    mgmtFermeChoixLeila(m);
   }else if(rep.action==='close'){
     aff.status='closed'; aff.decision='noted';
     fact={c:m.cycle,k:'reaction_seen',a:aff.a,b:aff.b};
   }else if(rep.action==='validate'){
-    if(aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)) return false;
-    if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
-    /* R1 : chaque booking compte comme interaction (addendum 1 §5) — les
-       combattants progressent comme après une acceptation individuelle,
-       une seule fois par validation (statut open refusé ci-dessus). */
-    for(const f of aff.fights){ mgmtPromote(m,mgmtFighterById(m,f.a)); mgmtPromote(m,mgmtFighterById(m,f.b)); }
-    /* Lot 2 T1 : chaque combat entre dans son emplacement (slot), sans
-       jamais déborder la capacité — aucun combat perdu, aucun ajouté. */
-    for(const f of aff.fights){
-      const slot=f.slot==='main'?'main':'prelim';
-      const key=slot==='main'?'main':'prelims';
-      const cap=slot==='main'?m.card.sizeMain:m.card.sizePrelims;
-      if(Number.isSafeInteger(cap)&&m.card[key].length<cap){
-        /* ==== [ANCRE: MONDE_LOT6_T3_VALIDATION_BLOC] — Monde lot 6 T3 ==== */
-        const pose={a:f.a,b:f.b,cycle:m.cycle,slot,raison:JSON.parse(JSON.stringify(f.raison))};
-        if(f.origine!==undefined) pose.origine=f.origine;
-        m.card[key].push(pose);
-      }
-    }
-    aff.status='closed'; aff.decision='validated';
-    fact={c:m.cycle,k:'booked',bulk:true,a:aff.fights[0].a,b:aff.fights[0].b};
+    if(!mgmtBulkPoser(m,aff)) return false;
   }else if(rep.action==='crush'){
     if(aff.kind!=='leila_bulk') return false;
     if(!m.leila||!Array.isArray(m.leila.crushes)) m.leila={crushes:[]};
@@ -630,6 +664,8 @@ function mgmtDecide(m,affairId,replyId){
     };
     react.title=mgmtAffairTitle(m,react);
     m.pile.push(react);
+    /* ==== [ANCRE: LEILA_CRUSH_FERME] — Monde lot 14 T1 ==== */
+    mgmtFermeChoixLeila(m);
   }else{
     return false;
   }

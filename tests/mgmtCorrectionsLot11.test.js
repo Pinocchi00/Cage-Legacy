@@ -26,15 +26,18 @@ test('11 — Au plus deux combats de titre par carte : le troisième champion ne
   assert.ok(r.champs>=3); assert.deepEqual(r.res,[true,true,false]); assert.equal(r.titres,2);
 });
 
-test('11 — Un champion n’est jamais un préliminaire : Leïla ne le propose pas', () => {
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose elle-même les préliminaires (à la pose de la soirée, ou quand ils manquent) ; la garantie reste : aucun champion n'y figure. */
+test('11 — Un champion n’est jamais un préliminaire : Leïla ne le pose pas', () => {
   const win=neuve();
   const r=res(win,`${CHAMPS} const ids=new Set(champs.map(c=>c.id)); m.pile.forEach(x=>{x.status='closed';}); m.open=null;
+    const compte=()=>{ let champ=0; for(const f of m.card.prelims) if(ids.has(f.a)||ids.has(f.b)) champ++; return champ; };
+    const aLaPose={poses:m.card.prelims.length,champ:compte()};
     const lib=()=>m.roster.filter(f=>!ids.has(f.id)&&mgmtSelectable(m,f,null)&&!mgmtEngaged(m,f));
     for(let k=0;k<60&&m.card.main.length<m.card.sizeMain;k++){ const rows=lib(); let ok=false; for(const a of rows){ const b=rows.find(x=>x.id!==a.id&&x.div===a.div&&mgmtSelectable(m,x,a.id)); if(b&&mgmtBookMain(m,a.id,b.id)){ ok=true; break; } } if(!ok) break; }
-    mgmtOfferBulk(m,true); const aff=m.pile.find(a=>a.kind==='leila_bulk');
-    const fights=aff?(aff.fights||[]):[]; let champ=0; for(const f of fights) if(ids.has(f.a)||ids.has(f.b)) champ++;
-    return {principale:m.card.main.length,propose:fights.length,champ};`);
-  assert.equal(r.principale,5); assert.ok(r.propose>0,'Leïla propose des préliminaires'); assert.equal(r.champ,0);
+    m.card.prelims=[]; mgmtLeilaPrelims(m,true,false);
+    return {principale:m.card.main.length,aLaPose,remplaces:m.card.prelims.length,champ:compte(),affaire:m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')};`);
+  assert.equal(r.principale,5); assert.ok(r.aLaPose.poses>0,'Leïla a posé des préliminaires à la pose'); assert.equal(r.aLaPose.champ,0);
+  assert.ok(r.remplaces>0,'Leïla repose des préliminaires quand ils manquent'); assert.equal(r.champ,0); assert.equal(r.affaire,false,'plus aucune proposition à valider');
 });
 
 test('11 — Un combat de titre ajoute à l’attrait de la carte', () => {
