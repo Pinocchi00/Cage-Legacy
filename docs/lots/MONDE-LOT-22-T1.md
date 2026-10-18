@@ -18,3 +18,12 @@ Un monde vivant coûte 40 à 90 s à créer : n'en crée qu'un par test (`setSee
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 22 T1 : les combattants des organisations vivantes se lisent partout` (le numéro T1 est obligatoire dans le message).
+
+## Compte rendu
+- `mgmt-ecran-fiche.js` : ajoute la recherche non mutante d'un combattant dans les sept rosters vivants et renvoie une copie annotée par son organisation.
+- `mgmt-ecran-classements.js` : affiche le nom de l'organisation correcte et ne marque pas les combattants vivants comme Split ; les ceintures utilisaient déjà `mgmtExteriorTitles`, qui lit les organisations vivantes.
+- `tests/mgmtMondeHuit.test.js` : tests « Monde lot 22 T1 — mgmtFicheLigne trouve les sept organisations vivantes sans mutation », « Monde lot 22 T1 — une partie sans monde vivant garde son résultat extérieur historique », « Monde lot 22 T1 — une ligne de classement affiche l’organisation du combattant vivant », « Monde lot 22 T1 — la fiche d’un combattant vivant s’ouvre et les lectures ne mutent rien ».
+- `package.json` : ajoute les scripts ciblés `test:monde22` et `test:watch:monde22`. Écart : les longues listes `test` et `test:watch` n'ont pas été réécrites ; le test ciblé est exposé sous ses propres scripts.
+- Migration de sauvegarde : aucune ; aucune règle ni donnée persistée n'est modifiée.
+- Écarts à la fiche : contrôle de sérialisation sur les lectures de lignes ; ouverture de fiche vérifiée séparément car elle enregistre normalement la visite.
+- Questions pour Anthony : aucune.

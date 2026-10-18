@@ -117,8 +117,8 @@ function mgmtClassementsRowHtml(m,rank,row,tr){
   const nom=f?f.f.name:'Combattant';
   const d=(row.D===undefined)?0:row.D;
   const rec=`${row.W}-${row.L}${d>0?'-'+d:''}`;
-  const split=!!(f&&!f.trace);
-  const org=f?(f.trace?(f.trace.orgs.length?(f.trace.orgs[f.trace.orgs.length-1].name||''):''):mgmtOrgNom(m)):'';
+  const split=!!(f&&!f.trace&&!f.orgId);
+  const org=f?(f.orgId?(f.f.org||''):f.trace?(f.trace.orgs.length?(f.trace.orgs[f.trace.orgs.length-1].name||''):''):mgmtOrgNom(m)):'';
   return `<div class="mgmt-cl-row" onclick="CL.mgmtFiche('${escJsAttr(row.id)}')">`
     +`<span class="mgmt-cl-rank">${esc(rank)}</span>`
     +`<span class="mgmt-cl-nm">${esc(nom)}${(()=>{ const s=mgmtSurnomDe(m,row.id); return s?` <i class="mgmt-cl-sur">« ${esc(s)} »</i>`:''; })()}</span>`
