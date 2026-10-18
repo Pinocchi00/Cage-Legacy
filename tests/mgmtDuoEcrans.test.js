@@ -149,3 +149,29 @@ test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du
   assert.match(w.document.body.textContent,/À <J1'/);
   assert.doesNotMatch(w.document.body.innerHTML,/<J1'/);
 });
+
+test('Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:'Anthony',b:'François'},cartes:[],etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]} };
+    m.orgs=m.orgs||{}; m.orgs['mma-korner']={treasury:10000}; m.treasury=5000;
+    mgmtDuoPartie=(m,c)=>c==='a'?m:m.orgs['mma-korner']; mgmtExteriorCombattant=()=>({name:'Combattant',W:2,L:1,D:0,age:25,libre:true}); mgmtDivisionLabel=()=> 'Poids plume'; mgmtOrgNom=()=> 'Organisation';
+    G.screen='mgmt_duo_encheres'; render();`);
+  assert.match(w.document.body.innerHTML,/class="duo-s"/);
+  assert.match(w.document.body.innerHTML,/class="tour j1"/);
+  assert.match(w.document.body.innerHTML,/Combattant 1 sur 1/);
+  assert.match(w.document.body.innerHTML,/class="T en-prix"/);
+  assert.match(w.document.body.innerHTML,/class="pan en-caisse j1"/);
+  assert.match(w.document.body.innerHTML,/class="pan en-caisse j2"/);
+  assert.match(w.document.body.textContent,/En caisse/);
+  assert.match(w.document.body.textContent,/Peut miser/);
+  assert.match(w.document.body.textContent,/Peut miserjusqu’à 5 000 000 €/);
+  w.eval('G.mgmt.duo.encheres.lots[0].fini=true; G.mgmt.duo.encheres.lots[0].gagnant=null; G.mgmt.duo.encheres.lots[0].prix=1000; render();');
+  assert.match(w.document.body.textContent,/Adjugé/);
+  assert.match(w.document.body.textContent,/a passé/);
+  assert.match(w.document.body.textContent,/ANTHONY A PASSÉ/);
+  w.eval('G.mgmt.duo.encheres.lots[0].gagnant="a"; render();');
+  assert.match(w.document.body.textContent,/SIGNE/);
+  w.eval('G.mgmt.duo.encheres.lots[0].fini=false; MGMT_DUO_UI.refus=true; render();');
+  assert.match(w.document.body.textContent,/Pas assez en caisse/);
+  assert.match(w.document.body.innerHTML,/class="en-refus l1"/);
+});
