@@ -178,7 +178,7 @@ function mgmtPresentationLignes(m,v){
     };
     panneaux=[
       {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
-      {titre:'CE QUE CHACUN IMPOSE',sous:MGMT_AVANT_TEXTES.entete.source,lignes:mgmtImposerLignes(m,d.ids,d.h)},
+      {titre:'CE QUE CHACUN IMPOSE',sous:'D’après leurs combats',lignes:mgmtImposerLignes(m,d.ids,d.h)},
       {titre:'LEUR HISTOIRE',lignes:d.histoire.map(x=>{
           const t=m.hist[x.index];
           const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);
@@ -224,8 +224,8 @@ function mgmtPresentationLigneHtml(m,v,x){
      porte la voix et son pourcentage autorisé (décision du 09/10). */
   const principal=x.pastille==='v'||x.pastille==='d'||x.pastille==='n'
     ?[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(''):esc(x.texte||'');
-  const nomPct=x.sourcePct!=null&&x.sujet?(g=>g.last||g.name)(mgmtNomParId(m,x.sujet)):null;
-  const pct=nomPct?`<span class="mf-pr-pct">${esc(Math.round(Math.min(100,Math.max(0,x.sourcePct||0)))+' % '+nomPct)}</span>`:'';
+  /* Monde lot 20 (retour d'Anthony du 18/10/2026) : le pourcentage se lit seul, sans le nom du combattant collé à la voix. */
+  const pct=x.sourcePct!=null&&x.sujet?`<span class="mf-pr-pct">${esc(Math.round(Math.min(100,Math.max(0,x.sourcePct||0)))+' %')}</span>`:'';
   return `<div class="mf-pr-ligne" data-sources="${esc(JSON.stringify(x.sources))}">${mgmtPresentationMarqueHtml(x)}<div class="mf-pr-vr">`
     +(x.media||pct?`<div class="mf-pr-hd">${x.media?`<span class="mf-pr-media">${esc(x.media)}</span>`:''}${pct}</div>`:'')
     +(x.sujet&&!pct?`<div class="mf-pr-sujet">${esc(mgmtNomParId(m,x.sujet).name)}</div>`:'')
@@ -270,7 +270,11 @@ function mgmtPresentationHtml(m,vue){
   vue.noms=contenu.noms;
   const solo=vue.mode==='combattant',base=mgmtFaitsBase({m,h:d.h},vue.ids[0]);
   const f=id=>base.population.find(x=>x.id===id),a=f(vue.ids[0]),b=solo?null:f(vue.ids[1]);
-  const affiche=(f,cote)=>`<div class="mf-pr-nom ${cote}"><span style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${esc(mfNet(f.first||''))}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${esc(mfNet(f.last||f.name))}</b></div>`;
+  /* Monde lot 20 (retour d'Anthony du 18/10/2026) : le rang actuel chez l'organisation s'affiche à côté du prénom de chaque combattant d'un combat ; pendant la soirée, c'est le rang d'avant la soirée. */
+  const rgOrg=f=>{ if(solo||!f||typeof mgmtLendemainRangs!=='function') return '';
+    const r=mgmtLendemainRangs(m,f.id); const n=r?(vue.mode==='soiree'?(r.avant||r.apres):r.apres):null;
+    return n?`<em class="mf-pr-rg">N°${esc(n)}</em>`:''; };
+  const affiche=(f,cote)=>`<div class="mf-pr-nom ${cote}"><span class="mf-pr-l1" style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${cote==='b'?rgOrg(f):''}${esc(mfNet(f.first||''))}${cote==='a'?rgOrg(f):''}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${esc(mfNet(f.last||f.name))}</b></div>`;
   const rang=base.rang.findIndex(x=>x.id===a.id);
   /* Cartouche fidèle à la planche : rang chez l'organisation, rang mondial (mgmtFicheSituation)
      et combats restants au contrat (mgmtContratRestants), avec la catégorie en précision. */

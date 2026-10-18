@@ -210,7 +210,7 @@ test('Monde lot 12 T1 — le chargement montre l’année, le prédécesseur, la
     win.eval('mgmtNouvelleGenSuite=()=>false; mgmtNouvelleGenPas(); mgmtNouvelleGenPas();');
     const g=win.eval('MGMT_NOUVELLE.gen'), ident=win.eval('mgmtOrgIdentite(MGMT_NOUVELLE.gen.orgId)');
     const rac=win.document.querySelector('.mf-genese'), barre=rac.querySelector('.mf-genese-barre');
-    assert.match(win.document.body.textContent,/Nouvelle partie · six ans avant ton arrivée/);
+    assert.match(win.document.body.textContent,/Nouvelle partie.*Six ans avant ton arrivée/);
     assert.match(win.document.body.textContent,/Emplacement 2/);
     assert.equal(rac.querySelector('.mf-genese-annee').textContent,String(g.annee));
     assert.equal(rac.querySelector('.mf-genese-soiree').textContent,ident.soirees+' 1');

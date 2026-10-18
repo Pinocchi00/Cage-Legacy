@@ -67,15 +67,21 @@ function mgmtSoApresHtml(prog,i){
 }
 /** Le surnom d'un côté, après le prénom (« Prénom · « Surnom »), vide si le combattant n'en a pas. */
 function mgmtSoSurnom(side){ const s=G&&G.mgmt&&side?mgmtSurnomDe(G.mgmt,side.id):''; return s?` · « ${esc(mfNet(s))} »`:''; }
+/** Le rang d'avant la soirée chez l'organisation (« N°11 »), à côté du nom — Monde lot 20, retour d'Anthony du 18/10/2026. */
+function mgmtSoRang(side){
+  if(!G||!G.mgmt||!side||typeof mgmtLendemainRangs!=='function') return '';
+  const r=mgmtLendemainRangs(G.mgmt,side.id), n=r&&(r.avant||r.apres);
+  return n?` <i class="mf-so-rang">N°${esc(n)}</i>`:'';
+}
 /** La bannière d'un combat : les deux noms de part et d'autre de la diagonale, le VS, le poids et la distance. */
 function mgmtSoBanniereHtml(av){
   const a=av.a, b=av.b;
   const fa=mfCorps(a.last,500,96,40), fb=mfCorps(b.last,500,96,40);
   return `<div class="mf-so-ban"><i class="mf-so-diag r"></i><i class="mf-so-diag c"></i>`
-    +`<div class="mf-so-nom g"><b style="font-size:${fa}px">${esc(mfNet(a.last))}</b><span>${esc(mfNet(a.first))}${mgmtSoSurnom(a)}</span></div>`
+    +`<div class="mf-so-nom g"><b style="font-size:${fa}px">${esc(mfNet(a.last))}</b><span>${esc(mfNet(a.first))}${mgmtSoSurnom(a)}${mgmtSoRang(a)}</span></div>`
     +`<div class="mf-so-eti">${esc(av.etiquette)}</div>`
     +`<div class="mf-so-poids"><div>${esc(mfNet(av.divLabel))}</div><div>${esc(soRounds(av.rounds))}</div></div>`
-    +`<div class="mf-so-nom d"><span>${esc(mfNet(b.first))}${mgmtSoSurnom(b)}</span><b style="font-size:${fb}px">${esc(mfNet(b.last))}</b></div>`
+    +`<div class="mf-so-nom d"><span>${esc(mfNet(b.first))}${mgmtSoSurnom(b)}${mgmtSoRang(b)}</span><b style="font-size:${fb}px">${esc(mfNet(b.last))}</b></div>`
     +`<div class="mf-so-vs">VS</div></div>`;
 }
 function soLigne(g,lib,d){ return `<div class="mf-so-r"><div class="mf-so-rg">${g}</div><div class="mf-so-rl">${esc(lib)}</div><div class="mf-so-rd">${d}</div></div>`; }

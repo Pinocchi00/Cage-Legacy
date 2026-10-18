@@ -16,7 +16,9 @@ test('Monde lot 14 T2 — la soirée neuve pose ses préliminaires directement, 
   assert.equal(win.eval('G.screen'),'mgmt_prelims');
   assert.equal(win.eval('G.mgmt.card.prelims.length'),win.eval('G.mgmt.card.sizePrelims'));
   assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')`),false);
-  assert.ok(win.document.getElementById('app').textContent.includes('Posé'));
+  /* Décision d'Anthony du 17/10/2026 (lot 18) : « Management » est le seul mode, la plaque dit l'écran ; plus de coche « Posé » sur les préliminaires. */
+  assert.ok(!win.document.getElementById('app').textContent.includes('Posé'));
+  assert.equal(win.document.querySelectorAll('.mf-pre-slot.valide').length,win.eval('G.mgmt.card.sizePrelims'),'tous les préliminaires sont posés');
   assert.ok(!win.document.getElementById('app').textContent.includes('Valider la carte'));
   assert.equal(win.eval(`document.querySelector('.mf-barre-item.cur').dataset.section`),'preliminaires');
 });

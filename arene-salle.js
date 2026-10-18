@@ -132,7 +132,7 @@ function areneSalleCreer(cv){
   const aff=typeof cv.getBoundingClientRect==='function'?cv.getBoundingClientRect():null;
   if(!((aff&&aff.width>=10)||cv.clientWidth>=10)) return null;
   const W=SAL_W, H=SAL_H, CY=SAL_CY, C=SAL_C, FX=SAL_FX, FC=SAL_FC, TAU=SAL_TAU, SEG=SAL_SEG, VTX=SAL_VTX;
-  const V={cv:cv,ctx:ctx,k:1,decal:null,decalCle:'',camS:null,tPrec:-1,trail:{A:[],B:[]}};
+  const V={cv:cv,ctx:ctx,k:1,echelle:1,decal:null,decalCle:'',camS:null,tPrec:-1,trail:{A:[],B:[]}};
   const cam={x:0,y:0,zoom:300,az:0.3,ky:0.5,kz:0.86,c:1,s:0};
 
   /** Recale la résolution du canvas sur sa taille d'affichage (la planche reste en 1920 × 1080 logiques). */
@@ -142,7 +142,7 @@ function areneSalleCreer(cv){
     const w=(r&&r.width)||cv.clientWidth||W;  // la garde de areneSalleCreer assure une largeur réelle
     const dpr=(typeof window!=='undefined'&&window.devicePixelRatio)||1;
     const kmax=typeof MGMT_REGLAGES!=='undefined'?MGMT_REGLAGES.affichage.taille/W:2;  // la taille de l'image choisie (lot 12) borne la résolution
-    V.k=clamp(w*dpr/W,0.5,kmax);
+    V.k=clamp(w*dpr/W*V.echelle,0.4,kmax);   /* Monde lot 20 : `echelle` (0,5 à 1) baisse seule quand l'ordinateur n'arrive pas à tenir les images par seconde (mgmtCombatAdapter) */
     cv.width=Math.round(W*V.k); cv.height=Math.round(H*V.k);
   };
   V.redim();

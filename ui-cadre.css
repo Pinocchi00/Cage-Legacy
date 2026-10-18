@@ -735,7 +735,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-ca-pin{flex:1;display:flex;flex-direction:column}
 .mf-su-ca-ptete{height:120px;background:var(--mf-ligne);padding:0 22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .mf-su-ca-ptete span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap}
-.mf-su-ca-ptete b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-su-ca-ptete b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.9;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}   /* Monde lot 18 (L4) : un nom long passe sur deux lignes au lieu d'être coupé (« BOXING CLUB DE … ») */
 .mf-su-ca-pcorps{flex:1;padding:22px;display:flex;flex-direction:column;gap:14px}
 .mf-su-ca-pn{display:flex;align-items:baseline;gap:12px}
 .mf-su-ca-pn b{font-family:var(--mf-titre);font-weight:800;font-size:150px;line-height:.75}
@@ -1166,8 +1166,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-vs{position:absolute;left:632px;width:300px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .mf-pr-vs b{font:800 92px/.69 var(--mf-titre)}
 .mf-pr-vs span{font-size:22px;line-height:1.1;text-align:center;background:#0D0B0B;border:2px solid #E9E6E1;padding:6px 10px}
-.mf-pr-cartouche{position:absolute;left:1094px;top:20px;width:470px;height:220px;box-sizing:border-box;border:2px solid #E9E6E1;background:#0D0B0B;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;font-size:22px;line-height:1.1}
-.mf-pr-cartouche b{display:block;margin-top:9px;font:800 40px/.8 var(--mf-titre)}
+.mf-pr-cartouche{position:absolute;left:1094px;top:20px;width:470px;height:220px;box-sizing:border-box;border:2px solid #E9E6E1;background:#0D0B0B;padding:16px 22px;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;font-size:22px;line-height:1.1}
+.mf-pr-cartouche b{display:block;margin-top:4px;font:800 40px/.8 var(--mf-titre)}
 .mf-pr-raison{flex:none;height:56px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:0 16px;background:#0D0B0B;border-left:4px solid #E9E6E1;font:500 22px/1.1 var(--mf-texte);color:#E9E6E1}
 .mf-pr-raison span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mf-pr-rangee{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;flex:1;min-height:0}
@@ -1180,8 +1180,37 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-ligne{box-sizing:border-box;padding:7px 16px;background:#252121;font:500 25px/1.05 var(--mf-texte);overflow-wrap:anywhere}
 .mf-pr-media,.mf-pr-sujet,.mf-pr-noms{font-size:22px;line-height:1.1;margin-bottom:5px}
 .mf-pr-media{font-weight:600;color:#F0B220}
-.mf-pr-lien{padding:0;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:underline;cursor:pointer;overflow-wrap:anywhere}
-.mf-pr-lien.choisi{color:#F0B220;outline:2px solid #F0B220;outline-offset:2px}
+/* Monde lot 20 (retour d'Anthony du 18/10/2026) : un nom cliquable est un simple nom blanc ; il se met en surbrillance au survol (et à la sélection au clavier), sans encadré jaune. */
+.mf-pr-lien{padding:0 4px;margin:0 -4px;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:none;cursor:pointer;overflow-wrap:anywhere}
+.mf-pr-lien:hover,.mf-pr-lien.choisi{background:rgba(233,230,225,.22)}
+/* Monde lot 18 — les lignes des panneaux de présentation (planches MondePresentationCombat / Combattant) : marques, lignes à deux niveaux, tableau « Leur histoire », en-têtes. L'écart `--mf-ecart` sépare deux textes voisins (règle L5). */
+.mf-pr-ph{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--mf-ecart)}
+.mf-pr-panneau .mf-pr-ph h2{white-space:nowrap;flex:none}
+.mf-pr-phs{font:500 22px/1.05 var(--mf-texte);color:rgba(233,230,225,.74);text-align:right;min-width:0}
+.mf-pr-ligne{display:flex;align-items:center;gap:14px;min-height:60px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-pr-vr{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.mf-pr-phrase{font:500 25px/1.05 var(--mf-texte)}
+.mf-pr-phrase.zn{font:800 25px/1 var(--mf-titre);text-transform:uppercase}
+.mf-pr-sous{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.mf-pr-hd{display:flex;justify-content:space-between;align-items:baseline;gap:var(--mf-ecart)}
+.mf-pr-hd .mf-pr-media{text-transform:uppercase;letter-spacing:.04em;color:rgba(233,230,225,.74);white-space:nowrap}
+.mf-pr-pct{font:800 30px/.8 var(--mf-titre);text-transform:uppercase;color:#F0B220;white-space:nowrap}
+.mf-pr-craie,.mf-pr-marq{flex:none;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-pr-craie{width:22px;height:22px;background:#F0B220}
+.mf-pr-marq{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:800 24px/1 var(--mf-titre);color:#0D0B0B;background:#E9E6E1}
+.mf-pr-marq.v{background:#E23A2B}
+.mf-pr-marq.n{background:#9C968E}
+.mf-pr-marque{flex:none;width:26px;height:26px;color:#E9E6E1}
+.mf-pr-marque path{stroke-width:4}
+.mf-pr-q{flex:none;width:26px;text-align:center;font:800 30px/1 var(--mf-titre);color:#F0B220}
+.mf-pr-tab-tete{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+.mf-pr-tab-tete span{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;text-transform:uppercase;color:rgba(233,230,225,.74);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-pr-ligne.ta{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px;align-items:center;min-height:0;padding:9px 0;background:none;clip-path:none;border-bottom:2px solid rgba(233,230,225,.16)}
+.mf-pr-ta1{font:500 25px/1 var(--mf-texte);display:flex;flex-wrap:wrap;column-gap:var(--mf-ecart)}
+.mf-pr-tac{display:flex;align-items:center;gap:8px;min-width:0}
+.mf-pr-tac .mf-pr-sous{overflow-wrap:anywhere}
+.mf-pr-foot{margin-top:auto;padding-top:10px;font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.mf-pr-cs{display:block;margin-top:2px;font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
 .mf-stage:has(.mf-pr){background:#0D0B0B url('images/cendre.jpg?v=b29') 0 0/1920px 1080px no-repeat}
 .mf-stage:has(.mf-pr) .mf-touches{gap:14px;width:1564px}
 .mf-stage:has(.mf-pr) .mf-touche-g{gap:6px}
@@ -1210,7 +1239,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fb-rang{width:84px;height:84px;background:var(--mf-blanc);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:46px;line-height:1}
 .mf-fb-rang.or{background:var(--mf-jaune)}
 /* ==== [ANCRE: MONDE_LOT9_T5_FICHE_MONDIAL_CSS] — Monde lot 9 T5 ==== */
-.mf-fb-monde{margin-top:-6px;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;letter-spacing:.02em;color:var(--mf-blanc);text-transform:uppercase;white-space:nowrap}
+.mf-fb-monde{max-width:230px;text-align:center;margin-top:-6px;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;letter-spacing:.02em;color:var(--mf-blanc);text-transform:uppercase;white-space:normal}
 .mf-fb-cat{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1.1;text-align:center}
 .mf-fi-onglets{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center}
 .mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
@@ -1602,7 +1631,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-arr .ar-chiffres .v{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
 .mf-arr .bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
 .mf-arr .bloc .l1{font-size:24px;line-height:1.1}
-.mf-arr .ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
+.mf-arr .ch-l{display:flex;align-items:center;column-gap:var(--mf-ecart);border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
 .mf-arr .ch-l .div{width:176px;flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
 .mf-arr .ch-l .n{flex:1;min-width:0;overflow:hidden;padding-bottom:6px;margin-bottom:-6px;text-overflow:ellipsis;font-size:24px;line-height:1;white-space:nowrap}
 .mf-arr .ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
@@ -1633,3 +1662,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-duo-qg-recent{font-size:22px;line-height:1.2;overflow:hidden}.mf-duo-qg-combat{padding:7px 0;border-bottom:1px solid #393434}
 .mf-duo-qg-effectif{margin-top:auto;min-height:60px;background:#252121;color:#E9E6E1;font-size:26px;padding:12px;text-align:left}
 .mf-duo-qg-centre{align-items:center;text-align:center;justify-content:center}.mf-duo-qg-centre>strong{font-size:104px}.mf-duo-qg-centre p{font-size:26px}.mf-duo-qg-centre button{background:#F0B220;color:#0D0B0B;padding:18px;font-size:28px}.mf-duo-qg-progress{font-size:22px;width:100%}.mf-duo-qg-progress progress{width:100%;height:26px}
+
+/* Monde lot 20 : le mouvement de classement de chaque combattant sur les résultats du lendemain (deux textes voisins séparés par l'écart L5). */
+.mgmt-ld-rangs{display:flex;flex-wrap:wrap;column-gap:var(--mf-ecart);row-gap:2px;font-size:22px;line-height:1.1;color:rgba(233,230,225,.74)}
+.mf-pr-l1{display:flex;align-items:center;height:1em;column-gap:var(--mf-ecart)}
+.mf-pr-nom.b .mf-pr-l1{justify-content:flex-end}
+.mf-pr-rg{font:600 22px/22px var(--mf-texte);font-style:normal;padding:0 8px;border:2px solid rgba(233,230,225,.6);background:#0D0B0B;white-space:nowrap}
+.mf-so-rang{font-style:normal;margin-left:var(--mf-ecart);padding:2px 8px;border:2px solid rgba(233,230,225,.6);white-space:nowrap}

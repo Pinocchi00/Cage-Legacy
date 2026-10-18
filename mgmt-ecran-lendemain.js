@@ -114,6 +114,28 @@ function mgmtLendemainMethode(t){
  *  conservent l'ordre, mgmtSoireeTrace). « X bat Y » — l'issue stockée de
  *  la trace, jamais un rejeu contradictoire (ancre ARENE_T2_GARDE_REJEU).
  *  @returns {string} */
+/* ==== [ANCRE: MONDE_LOT20_RANGS_LENDEMAIN] — Monde lot 20 (retour d'Anthony du 18/10/2026) : « le nouveau classement par rapport à l'ancien sur les
+   résultats finaux de toute la soirée ». Le rang chez l'organisation d'avant la soirée est celui du cycle précédent (la comparaison de la colonne
+   Évolution des Classements) ; celui d'après est le rang courant. Lecture pure. ==== */
+/** Le rang chez l'organisation d'un combattant avant et après la soirée : {avant,apres} (null = hors classement). @returns {?{avant:?number,apres:?number}} */
+function mgmtLendemainRangs(m,id){
+  const f=mgmtFighterById(m,id);
+  if(!f||!f.div) return null;
+  const apres=mgmtDivisionRank(m,f,'organization');
+  const ancien=Number.isSafeInteger(m.cycle)&&m.cycle>0?mgmtDivisionRanking(m,f.div,'organization',m.cycle-1):[];
+  const k=ancien.findIndex(x=>x.id===id);
+  return {avant:k>=0?k+1:null,apres:Number.isSafeInteger(apres)&&apres>0?apres:null};
+}
+/** « Gomes 12ᵉ → 9ᵉ » : le mouvement d'un combattant au classement de l'organisation. @returns {string} */
+function mgmtLendemainRangTexte(m,id,nom){
+  const r=mgmtLendemainRangs(m,id);
+  if(!r) return '';
+  const lib=x=>x===null?'hors classement':mgmtRankLabel(x,mgmtFighterById(m,id).div);
+  if(r.avant===r.apres) return `${nom} ${lib(r.apres)} (inchangé)`;
+  return `${nom} ${lib(r.avant)} → ${lib(r.apres)}`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 function mgmtLendemainResultatsHtml(m){
   const e=m.lastEvent;
   let html='', mains=0, prelimVu=false;
@@ -143,6 +165,7 @@ function mgmtLendemainResultatsHtml(m){
       +(slot?`<span class="mgmt-ld-slot${slot===MGMT_LD_LABELS.coMain?' gold':''}">${esc(slot)}</span>`:'')
       +`<div class="mgmt-ld-title">${titre}</div>`
       +(meth?`<div class="mgmt-ld-sub">${esc(meth)}</div>`:'')
+      +(()=>{const g=[mgmtLendemainRangTexte(m,f.a,t?t.a.last||t.a.name:'?'),mgmtLendemainRangTexte(m,f.b,t?t.b.last||t.b.name:'?')].filter(Boolean);return g.length?`<div class="mgmt-ld-rangs">${g.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:'';})()
       +(t?`<button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${i})">${esc(MGMT_LD_LABELS.revoir)}</button>`:'')
       +`</div>`;
   }

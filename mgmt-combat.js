@@ -165,6 +165,25 @@ function mgmtCombatSon(cx){
   for(const e of S.coups){ if(e.t>C.sonT&&e.t<=cx.t&&e.r===1) mgmtSonCoup(e.big?1:e.p); }
   C.sonT=cx.t;
 }
+/* ==== [ANCRE: MONDE_LOT20_FLUIDITE] — Monde lot 20 (retour d'Anthony du 18/10/2026 : « très peu d'images par seconde et ça lag »). Mesuré le 18/10 : le
+   temps d'une image est proportionnel au nombre de pixels (1920 : 55 ms, 1280 : 28 ms, 960 : 16 ms sur le banc de mesure). Quand l'écart moyen entre
+   deux images dépasse de moitié la période visée, la résolution du canvas baisse de 15 % (jusqu'à la moitié) ; l'image reste affichée plein cadre (le canvas est
+   mis à l'échelle par la page). Elle remonte lentement quand l'ordinateur suit de nouveau. Aucun effet sur la simulation ni sur la trace. ==== */
+const MGMT_COMBAT_ADAPT={ema:0,n:0,bons:0};
+/** Ajuste la résolution du canvas d'après l'écart mesuré entre deux images (ms ; 0 = première image). */
+function mgmtCombatAdapter(ecart){
+  const C=MGMT_COMBAT, A=MGMT_COMBAT_ADAPT, V=C.vue;
+  if(!V||!(ecart>0)||ecart>500){ A.ema=0; A.n=0; A.bons=0; return; }
+  const cible=typeof mgmtReglagesPasImage==='function'?mgmtReglagesPasImage()+2:16.7;
+  A.ema=A.ema?A.ema*0.9+ecart*0.1:ecart; A.n++;
+  if(A.n<20) return;
+  if(A.ema>cible*1.5&&V.echelle>0.5){
+    V.echelle=Math.max(0.5,V.echelle*0.85); V.redim(); A.ema=cible; A.n=0; A.bons=0;
+  }else if(A.ema<cible*1.1){
+    A.bons++;
+    if(A.bons>=240&&V.echelle<1){ V.echelle=Math.min(1,V.echelle*1.1); V.redim(); A.n=0; A.bons=0; }
+  }else A.bons=0;
+}
 function mgmtCombatBoucle(now){
   const C=MGMT_COMBAT; C.raf=0;
   if(!G||G.screen!=='mgmt_combat'||!C.session) return;
@@ -187,6 +206,7 @@ function mgmtCombatBoucle(now){
     if(typeof requestAnimationFrame!=='undefined') C.raf=requestAnimationFrame(mgmtCombatBoucle);
     return;
   }
+  mgmtCombatAdapter(C.last?now-C.last:0);
   const dt=C.last?Math.min(0.05,Math.max(0,(now-C.last)/1000)):0; C.last=now;
   mgmtCombatAvancer(dt);
   if(C.vue){

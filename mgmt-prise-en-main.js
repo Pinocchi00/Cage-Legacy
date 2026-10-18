@@ -302,7 +302,7 @@ function scr_mgmt_arrivee(){
   </div>`;
 
   const contenu=`<main class="ar mf-arr">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
-  return mfEcran(contenu,{barre:'logo',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeOuvrir()"}]});
+  return mfEcran(contenu,{barre:'logo',m,plaque:'Ton arrivée',libelle:'',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeOuvrir()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
 
