@@ -39,8 +39,9 @@ test('Duo T3 — une création courte se termine sur mgmt_duo avec m.duo posé',
 test('Duo T8 — création : un nom injecté est échappé et les noms restent en texte',()=>{
   const w=newGameWindow();
   w.eval('CL.mgmtDuoNouvelle(1); MGMT_DUO_NOUVELLE.noms.a="<b>O\'Neil</b>"; MGMT_DUO_NOUVELLE.etape="a"; render();');
-  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
-  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/i);
+  /* Décision d'Anthony du 18/10/2026 (planches Duo) : les noms de joueur s'écrivent en capitales ; le texte reste échappé. */
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O(&#39;|')Neil&lt;\/b&gt;/i);
 });
 
 test('Duo T13 — l’écran de soirée est enregistré',()=>{
@@ -84,9 +85,12 @@ test('Duo T9 — le QG montre les deux organisations, les deux noms échappés e
   w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:"<b>O'Neil</b>",b:'François'}); G.screen='mgmt_duo'; render();`);
   assert.match(w.document.body.textContent,/Split/);
   assert.match(w.document.body.textContent,/MMA Korner/);
-  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
-  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
-  assert.match(w.document.body.textContent,/Avancer jusqu’à la super carte/);
+  /* Décision d'Anthony du 18/10/2026 (planches Duo) : les noms de joueur s'écrivent en capitales ; le texte reste échappé. */
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O(&#39;|')Neil&lt;\/b&gt;/i);
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/i);
+  /* Décision d'Anthony du 18/10/2026 (planche DuoQG) : le bouton de l'étape s'écrit « AVANCER — Jusqu'à la super carte du … ». */
+  assert.match(w.document.body.textContent,/AVANCER/);
+  assert.match(w.document.body.textContent,/Jusqu’à la super carte du/);
 });
 
 test('Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suivante',async()=>{
