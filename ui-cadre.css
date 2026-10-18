@@ -1182,6 +1182,34 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-media{font-weight:600;color:#F0B220}
 .mf-pr-lien{padding:0;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:underline;cursor:pointer;overflow-wrap:anywhere}
 .mf-pr-lien.choisi{color:#F0B220;outline:2px solid #F0B220;outline-offset:2px}
+/* Monde lot 18 — les lignes des panneaux de présentation (planches MondePresentationCombat / Combattant) : marques, lignes à deux niveaux, tableau « Leur histoire », en-têtes. L'écart `--mf-ecart` sépare deux textes voisins (règle L5). */
+.mf-pr-ph{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--mf-ecart)}
+.mf-pr-panneau .mf-pr-ph h2{white-space:nowrap;flex:none}
+.mf-pr-phs{font:500 22px/1.05 var(--mf-texte);color:rgba(233,230,225,.74);text-align:right;min-width:0}
+.mf-pr-ligne{display:flex;align-items:center;gap:14px;min-height:60px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-pr-vr{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.mf-pr-phrase{font:500 25px/1.05 var(--mf-texte)}
+.mf-pr-phrase.zn{font:800 25px/1 var(--mf-titre);text-transform:uppercase}
+.mf-pr-sous{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.mf-pr-hd{display:flex;justify-content:space-between;align-items:baseline;gap:var(--mf-ecart)}
+.mf-pr-hd .mf-pr-media{text-transform:uppercase;letter-spacing:.04em;color:rgba(233,230,225,.74);white-space:nowrap}
+.mf-pr-pct{font:800 30px/.8 var(--mf-titre);text-transform:uppercase;color:#F0B220;white-space:nowrap}
+.mf-pr-craie,.mf-pr-marq{flex:none;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-pr-craie{width:22px;height:22px;background:#F0B220}
+.mf-pr-marq{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font:800 24px/1 var(--mf-titre);color:#0D0B0B;background:#E9E6E1}
+.mf-pr-marq.v{background:#E23A2B}
+.mf-pr-marq.n{background:#9C968E}
+.mf-pr-marque{flex:none;width:26px;height:26px;color:#E9E6E1}
+.mf-pr-marque path{stroke-width:4}
+.mf-pr-q{flex:none;width:26px;text-align:center;font:800 30px/1 var(--mf-titre);color:#F0B220}
+.mf-pr-tab-tete{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px;margin-bottom:8px}
+.mf-pr-tab-tete span{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;text-transform:uppercase;color:rgba(233,230,225,.74);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-pr-ligne.ta{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:10px;align-items:center;min-height:0;padding:9px 0;background:none;clip-path:none;border-bottom:2px solid rgba(233,230,225,.16)}
+.mf-pr-ta1{font:500 25px/1 var(--mf-texte);display:flex;flex-wrap:wrap;column-gap:var(--mf-ecart)}
+.mf-pr-tac{display:flex;align-items:center;gap:8px;min-width:0}
+.mf-pr-tac .mf-pr-sous{overflow-wrap:anywhere}
+.mf-pr-foot{margin-top:auto;padding-top:10px;font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.mf-pr-cs{display:block;margin-top:4px;font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
 .mf-stage:has(.mf-pr){background:#0D0B0B url('images/cendre.jpg?v=b29') 0 0/1920px 1080px no-repeat}
 .mf-stage:has(.mf-pr) .mf-touches{gap:14px;width:1564px}
 .mf-stage:has(.mf-pr) .mf-touche-g{gap:6px}
