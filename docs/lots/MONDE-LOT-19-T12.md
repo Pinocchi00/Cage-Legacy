@@ -13,3 +13,12 @@ L'écran `mgmt_duo_draft` : la carte (six combats, `COMBAT PRINCIPAL · 5 ROUNDS
 ## Fin
 `node tools/_bump.js`, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T12 : l'écran du draft`.
 
+## Compte rendu
+
+- `mgmt-duo-draft.js` : écran du draft, liste catégorisée, carte, réponses, annulation, lancement et clavier.
+- `ui-duo-draft.css` : mise en page responsive et styles des éléments `mf-duo-`.
+- `index.html` : chargement de la feuille et du script du draft.
+- `tests/mgmtDuoDraft.test.js` : test « Duo T4 — draft : catégorie de réponse, annulation et six combats prêts ».
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : l'écran soirée n'étant pas livré, le lancement retombe au QG si son écran est absent.
+- Questions pour Anthony : aucune.
