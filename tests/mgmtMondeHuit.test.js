@@ -25,6 +25,7 @@ test('Monde lot 22 T1 — une ligne de classement affiche l’organisation du co
 });
 
 test('Monde lot 22 T1 — la fiche d’un combattant vivant s’ouvre et les lectures ne mutent rien',()=>{
-  const r=win.eval(`(function(){const m=G.mgmt,id=m.orgs[mgmtMondeVivantIds(m)[0]].roster[0].id;CL.mgmtFiche(id);return document.body.innerHTML;})()`);
-  assert.ok(r.includes('mgmt_fiche'));
+  const r=win.eval(`(function(){const m=G.mgmt,f=m.orgs[mgmtMondeVivantIds(m)[0]].roster[0];CL.mgmtFiche(f.id);return {html:document.body.innerHTML,nom:f.name};})()`);
+  assert.ok(r.html.includes('mgmt_fiche'));
+  assert.ok(r.html.includes(r.nom));
 });
