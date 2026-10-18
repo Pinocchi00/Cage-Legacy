@@ -6,7 +6,6 @@
 /* ==== [ANCRE: MONDE_LOT_19_T55_BILAN] — Monde lot 19 T55 ==== */
 function mgmtDuoBilanHtml(){
   const m=G&&G.mgmt,d=m&&m.duo,cartes=d&&Array.isArray(d.cartes)?d.cartes:[],c=cartes[cartes.length-1];
-  if(!c) return duoCadre(`${duoEntete('Le bilan','')}<main class="contenu large"><div class="l1">Aucune super carte jouée.</div></main>`);
   const scoreA=c.combats.filter(x=>x.winner==='A').length,scoreB=c.combats.filter(x=>x.winner==='B').length;
   const win=c.gagnant==='a'?'a':c.gagnant==='b'?'b':null;
   const orgA=mgmtOrgNom(m),orgB=mgmtOrgNom(mgmtDuoPartie(m,'b'));

@@ -20,9 +20,11 @@ Le HTML contient `duo-s`, le bandeau du vainqueur ou « Égalité », les six co
 ## Compte rendu
 
 - `mgmt-duo-bilan.js` : rendu du bilan porté au balisage de la planche DuoBilan sous `duoCadre`, données de la partie pour les deux états, combats cliquables et retour au QG conservé.
-- `ui-duo-bilan.css` et son lien dans `index.html` : feuille dédiée supprimée comme demandé ; version du script mise à jour par `_bump.js`.
+- `index.html` : version de `mgmt-duo-bilan.js` montée par `_bump.js`.
+- `sw.js` : version du cache montée automatiquement par `_bump.js`.
+- `ui-duo-bilan.css` et son lien dans `index.html` : feuille dédiée supprimée comme demandé dans la tranche initiale.
 - `tests/mgmtDuoBilan.test.js` : assertions adaptées au balisage et au libellé de la planche ; vérifie aussi le cadre et l'état de fin de saison avec quatre cartes sans créer un second monde.
 - Tests : « Duo T4 — bilan : le vainqueur, les six combats, le retour au QG (étape attente et date suivante) ».
 - Migration de sauvegarde : aucune (format inchangé).
-- Écarts à la fiche : aucun connu. La fiche demandait une seule super carte créée dans le test ; le cas de fin de saison est simulé à partir de cette carte pour ne pas créer un deuxième monde.
+- Écarts à la fiche : reprise de relecture : suppression du rendu de repli « Aucune super carte jouée », qui n'existe pas sur la planche. Le bilan n'est rendu qu'à la fin d'une super carte (transition de soirée `bilan`), donc cet état n'est pas un état de partie accessible. Les fichiers `.opencode/agents/*.md` et `opencode.json` déjà modifiés restent hors périmètre et ne sont pas inclus. La fiche demandait une seule super carte créée dans le test ; le cas de fin de saison est simulé à partir de cette carte pour ne pas créer un deuxième monde.
 - Questions pour Anthony : aucune.
