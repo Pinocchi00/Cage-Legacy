@@ -66,7 +66,7 @@ function scr_mgmt_fiche_cadre(){
   const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(m,f,champion)}`
     +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
     +`<div class="mf-fi-corps">${corps}</div></main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',grise:typeof mgmtPresentationDansSoiree==='function'&&mgmtPresentationDansSoiree(),m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
+  return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',grise:(typeof mgmtPresentationDansSoiree==='function'&&mgmtPresentationDansSoiree())||(typeof mgmtDuoFicheActive==='function'&&mgmtDuoFicheActive()),m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtFicheRetour()'},{ks:['←','→'],t:'Autre combattant'},{ks:['Tab'],t:'Onglet',onclick:'CL.mgmtFicheOnglet(1)'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:onglet==='combats'?(mgmtCombatRevoyable(mgmtFightHistory(m,f).slice().reverse()[MGMT_FICHE.cursor||0])?'Revoir le combat':'Ouvrir son adversaire'):'Préparer son combat',jaune:true,onclick:'CL.mgmtFicheEntree()'}]});

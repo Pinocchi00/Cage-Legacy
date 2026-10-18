@@ -7,7 +7,7 @@
    flèches choisissent, Suppr efface après confirmation, Échap revient à
    l'accueil. Composants de la charte actuelle : le lot 4 portera l'habillage
    du canvas. La mécanique des clés vit dans mgmt-save.js. ==== */
-let MGMT_PARTIES={curseur:1,effacer:0};
+let MGMT_PARTIES={curseur:1,effacer:0,duo:false};
 
 /** Remet à zéro les dix états d'interface du mode : ils vivent au niveau des
  *  modules et ne doivent jamais passer d'une partie à l'autre. */
@@ -55,8 +55,11 @@ function mgmtPartieHtml(n,curseur,reg,maintenant){
       +`<div class="mf-partie-note">Chaque partie crée un effectif neuf :<br>les noms, les palmarès, les classements.</div>`+pied('Nouvelle partie')+`</div>`;
   }else{
     const date=mgmtPartieDate(reg.dates[n],maintenant);
-    corps=tete(m.org)+`<div class="mf-partie-corps"><div style="display:flex;flex-direction:column;gap:12px"><div class="mf-partie-sur">La prochaine soirée</div>`
-      +`<div class="mf-partie-soiree"><span>${esc(m.org)} Fight Night</span><b>${esc(m.eventsPlayed+1)}</b></div></div>`
+    const duo=typeof mgmtDuoActif==='function'&&mgmtDuoActif(m);
+    const titre=duo?`DUO · ${mgmtOrgParNom(m.org).nom} × ${mgmtOrgParId(m.duo.b).nom}`:m.org;
+    const prochaine=duo?`Super carte ${mgmtDuoScore(m).numero}`:`La prochaine soirée`;
+    corps=tete(titre)+`<div class="mf-partie-corps"><div style="display:flex;flex-direction:column;gap:12px"><div class="mf-partie-sur">${prochaine}</div>`
+      +`<div class="mf-partie-soiree"><span>${duo?esc(`Super carte ${mgmtDuoScore(m).numero}`):esc(m.org+' Fight Night')}</span><b>${esc(m.eventsPlayed+1)}</b></div></div>`
       +`<div class="mf-partie-lignes">`+mfLigne('Soirées jouées',m.eventsPlayed)
       +mfLigne('En caisse',mgmtEuros(Number.isSafeInteger(m.treasury)?m.treasury:0))
       +(date?mfLigne('Jouée pour la dernière fois',date):'')+`</div>`+pied('Reprendre')+`</div>`;
@@ -99,7 +102,7 @@ Object.assign(CL,{
       const app=document.getElementById('app'); if(app&&app.classList) app.classList.add('mgmt');
       if(document.body&&document.body.classList) document.body.classList.add('mgmt');
     }catch(e){}
-    MGMT_PARTIES={curseur:mgmtSlotDernier()||1,effacer:0};
+    MGMT_PARTIES={curseur:mgmtSlotDernier()||1,effacer:0,duo:false};
     CL.go('mgmt_parties');
   },
   mgmtPartieCurseur(delta){
@@ -117,6 +120,7 @@ Object.assign(CL,{
   mgmtPartieOuvrir(){
     if(MGMT_PARTIES.effacer) return;
     if(mgmtSlotPeek(MGMT_PARTIES.curseur)) CL.mgmtEnter(MGMT_PARTIES.curseur);
+    else if(MGMT_PARTIES.duo) CL.mgmtDuoNouvelle(MGMT_PARTIES.curseur);
     else CL.mgmtNouvelle(MGMT_PARTIES.curseur);
   },
   mgmtPartieEffacer(){
@@ -128,6 +132,14 @@ Object.assign(CL,{
     if(!MGMT_PARTIES.effacer) return;
     mgmtSlotEffacer(MGMT_PARTIES.effacer);
     MGMT_PARTIES.effacer=0; render();
+  },
+});
+/* ==== [ANCRE: MONDE_LOT_19_T7_PARTIES_DUO] — Monde lot 19 T7 ==== */
+Object.assign(CL,{
+  mgmtDuoParties(){
+    CL.mgmtParties();
+    MGMT_PARTIES.duo=true;
+    render();
   },
 });
 keysRegister('mgmt_parties',{

@@ -86,7 +86,7 @@ function mgmtCombatOuvrir(o){
   C.salle=salle;
   C.room=areneSalleRoom(Number.isFinite(salle.taux)?salle.taux:0.65,salle.prog);
   const soir=mgmtSoirees(m).find(x=>x.c===t.c);
-  C.org=mfNet(mgmtOrgNom(m)); C.num=String(soir?soir.n:(m.eventsPlayed||1));
+  C.org=mfNet(o.org||mgmtOrgNom(m)); C.num=o.num||String(soir?soir.n:(m.eventsPlayed||1));
   const divLib=mfNet(mgmtDivisionLabel(t.a.div));
   const et=o.etiquette||(t.slot==='main'?'CARTE PRINCIPALE':'PRÉLIMINAIRE');
   C.carte={a:mfNet(S.noms.a.court),b:mfNet(S.noms.b.court),ra:mgmtCombatBilan(t.a),rb:mgmtCombatBilan(t.b),

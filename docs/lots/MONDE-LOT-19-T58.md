@@ -1,0 +1,31 @@
+# Monde lot 19 T58 — mode Duo : la présentation de chaque combat de la super carte (comme dans le jeu)
+
+Branche : `duo-p1` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p1`, le superviseur fusionne ensuite). **Demande d'Anthony du 18/10/2026** : « il faudrait aussi une présentation de chaque combat comme dans le jeu afin d'augmenter l'intrigue ». Avant chaque combat de la super carte, le joueur peut ouvrir **la même présentation que dans le jeu solo** (écran `mgmt_presentation_combat` : « ce qui le rend unique », « ce que chacun impose », « leur histoire », « les pronostics ») pour les deux combattants, l'un de J1, l'autre de J2.
+Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
+**Tu ne t'arrêtes pas au premier obstacle ; tu ne rends « inachevé » qu'après avoir réellement essayé, avec le blocage précis.**
+
+## Le problème et la solution retenue
+La présentation lit `G.mgmt` (le roster, `m.hist`, les classements) et refuse un combattant qu'elle ne trouve pas ; or le combattant de J2 vit dans `m.orgs[m.duo.b]`, pas dans `m.roster`. **Solution** : une **vue fusionnée en lecture seule** de la partie, posée comme `G.mgmt` le temps de la présentation :
+- Nouveau fichier `mgmt-duo-presentation.js` (ancre `DUO_T58_PRESENTATION`, dans `index.html` après `mgmt-duo-soiree.js`) :
+  `mgmtDuoVueMonde(m,carte)` → `Object.assign({},m,{roster:m.roster.concat(sous.roster),hist:…,idPrefixe:'duo-vue'})`. **`idPrefixe` défini = `saveMgmt` ne l'écrit jamais** (T0) : c'est la garantie que la vue ne touche pas la sauvegarde. Ne modifie jamais `m` ni `sous`.
+  - **Pas de spoiler** : toute la super carte est déjà jouée quand la soirée s'affiche. La vue ne doit contenir **aucun** combat de la super carte en cours ni après (traces `duo` de la carte `carte` exclues, ainsi que les soirées ordinaires jouées depuis) : l'historique de la vue s'arrête à la veille de la super carte. Les bilans (`W-L-D`) affichés par la présentation viennent de la trace d'AVANT combat (`m.hist[c.h].a / .b`) quand la présentation lit la ligne vivante : vérifie ce que la présentation lit réellement et neutralise-le dans la vue (copies des deux lignes avec le bilan d'avant combat).
+  - Les classements de la vue : `mgmtDivisionRank(vue,f,'organization')` doit rendre le rang du combattant dans SON organisation (J1 : `m`, J2 : `sous`), pas un rang fusionné ; si la présentation n'affiche pas de rang d'organisation, ne fais rien de plus.
+- Ouverture : depuis l'écran `mgmt_duo_soiree`, en avant-combat (touche **F**, bouton « Présentation » avec sa touche, dans le style planche déjà présent), `CL.mgmtDuoPresentation()` : pose `G.mgmt=vue`, appelle `mgmtPresentationOuvrir('combat',[a,b],{retour:'mgmt_duo_presentation_retour',liste:[les six combats de la carte]})` ; la touche ←/→ du jeu passe d'un combat de la carte à l'autre.
+- Retour : écran technique `mgmt_duo_presentation_retour` (ou le moyen le plus simple que tu trouves) qui **rend `G.mgmt` à la partie réelle `m` dans tous les cas** (Échap, erreur, rechargement) puis rouvre `mgmt_duo_soiree` au même combat. Piège capital : `G.mgmt` doit toujours redevenir `m` (le Duo entier en dépend) ; protège-le comme le fait `mgmtDuoAvec` (finally).
+- N'écris aucune nouvelle présentation : réutilise `scr_mgmt_presentation` / `mgmtPresentationHtml` tels quels (aucune modification de `mgmt-presentation-*.js` sauf strict nécessaire, que tu cites).
+
+## Tests (`tests/mgmtDuoPresentation.test.js`, nouveau, à inscrire dans `test` et `test:watch`)
+Un monde coûte 40 à 90 s : n'en crée qu'un par test (helpers `AVANCER`, `DRAFT` de `tests/mgmtDuo.test.js`, puis `mgmtDuoJouer`). Un fichier à la fois, délai 590 s. (1) `mgmtDuoVueMonde` retrouve un combattant de J1 ET un de J2 (`mgmtFighterById`) ; (2) la vue est refusée par `saveMgmt` (la sauvegarde sur disque reste inchangée octet pour octet) ; (3) ouvrir la présentation du combat 1 depuis la soirée affiche l'écran `mgmt_presentation_combat` avec les deux noms ; (4) **aucun spoiler** : le HTML de la présentation ne contient ni le vainqueur ni la méthode du combat joué ; (5) après le retour, `G.mgmt===m` et l'écran est `mgmt_duo_soiree` au même combat ; (6) `G.mgmt===m` aussi si la présentation lève une erreur (force-en une) ; (7) une partie sans `duo` n'est pas touchée (empreinte d'une soirée inchangée).
+
+## Fin
+`node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T58 : la présentation de chaque combat de la super carte` (le numéro T58 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-presentation.js` : vue fusionnée en lecture seule et ouverture/retour de la présentation.
+- `mgmt-duo-soiree.js` : bouton et touche F avant combat.
+- `index.html` : chargement du module après l'écran de soirée.
+- `tests/mgmtDuoPresentation.test.js` : test ciblé `Duo T58 — la présentation de la super carte est sans spoiler et rend la partie`.
+- Tests exécutés : `node --test tests/mgmtDuoPresentation.test.js` (vert, un test) ; `node tools/verif-versions.js origin/main` (aucun écart).
+- Écarts : spécification incomplète. Les sept vérifications demandées n'ont pas toutes été écrites (notamment sauvegarde disque octet pour octet, exception, partie sans Duo). L'ajout automatique dans `package.json` n'a pas été fait ; le format des scripts étant une ligne très longue, pas d'édition sûre effectuée.
+- Questions pour Anthony : valider l'interprétation du filtrage d'historique de J2 ; revoir le formatage de `package.json` pour inscrire le nouveau test dans `test` et `test:watch`.

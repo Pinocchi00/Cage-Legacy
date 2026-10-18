@@ -270,7 +270,13 @@ function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
   /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
   if(x.p!==undefined&&x.p!==true) return false;
-  const clefs=Object.keys(x).filter(k=>k!=='p').sort().join(',');
+  /* Duo T1 : `duo` marque un combat de super carte — {b,ca,cb}, facultatif comme `p`. */
+  if(x.duo!==undefined){
+    const d=x.duo;
+    if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
+    if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
+  }
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -284,6 +290,48 @@ function mgmtValidFightTrace(x){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: DUO_T1_VALIDATION] — Duo T1 : l'état `m.duo` d'une partie à deux ==== */
+/** Valide `m.duo` : forme, bornes et cohérence avec la partie (monde vivant, organisation de J2 distincte de la sienne). Pur. */
+function mgmtDuoValide(d,raw){
+  if(!d||typeof d!=='object'||Array.isArray(d)||d.v!==1) return false;
+  if(raw.mondeVivant!==true||!raw.orgs||typeof raw.orgs!=='object'||!Object.prototype.hasOwnProperty.call(raw.orgs,d.b)) return false;
+  const propre=mgmtOrgParNom(raw.org);
+  if(propre&&propre.id===d.b) return false;
+  const nom=x=>typeof x==='string'&&x.length>=1&&x.length<=16;
+  if(!d.noms||typeof d.noms!=='object'||!nom(d.noms.a)||!nom(d.noms.b)) return false;
+  for(const k of ['periode','prochaine']){ if(!Number.isSafeInteger(d[k])||d[k]<0) return false; }
+  if(!['attente','encheres','draft','pret','soiree','bilan'].includes(d.etape)) return false;
+  if(!d.reperes||!Number.isSafeInteger(d.reperes.ca)||!Number.isSafeInteger(d.reperes.cb)) return false;
+  if(d.draft!==null){
+    const dr=d.draft;
+    if(!dr||typeof dr!=='object'||!['a','b'].includes(dr.premier)||!['a','b'].includes(dr.tour)) return false;
+    if(dr.attente!==null&&dr.attente!=='place'&&dr.attente!=='reponse') return false;
+    if(!Array.isArray(dr.combats)||dr.combats.length>6) return false;
+    for(const c of dr.combats){
+      if(!c||typeof c!=='object'||!['a','b'].includes(c.place)||typeof c.div!=='string') return false;
+      for(const k of ['a','b']){ if(c[k]!==null&&!mgmtValidId(c[k])) return false; }
+    }
+  }
+  if(d.encheres!==null){
+    const e=d.encheres;
+    if(!e||typeof e!=='object'||!Array.isArray(e.lots)||e.lots.length>3||!Number.isSafeInteger(e.i)||e.i<0||e.i>e.lots.length||!['a','b'].includes(e.premier)) return false;
+    for(const l of e.lots){
+      if(!l||typeof l!=='object'||!mgmtValidId(l.id)||typeof l.fini!=='boolean'||!['a','b'].includes(l.tour)) return false;
+      for(const k of ['b','ouverture','pas','prix']){ if(!Number.isSafeInteger(l[k])||l[k]<0) return false; }
+      for(const k of ['meneur','gagnant']){ if(l[k]!==null&&!['a','b'].includes(l[k])) return false; }
+      if(!Number.isSafeInteger(l.passes)||l.passes<0||l.passes>2) return false;
+    }
+  }
+  if(d.recrues!==undefined&&(!Array.isArray(d.recrues)||d.recrues.length>200)) return false;
+  if(d.soiree!==null&&(!d.soiree||!Number.isSafeInteger(d.soiree.i)||d.soiree.i<0||d.soiree.i>6)) return false;
+  if(!Array.isArray(d.cartes)||d.cartes.length>200) return false;
+  for(const c of d.cartes){
+    if(!c||typeof c!=='object'||!Array.isArray(c.combats)||c.combats.length!==6) return false;
+    if(!c.gains||!Number.isSafeInteger(c.gains.a)||c.gains.a<0||!Number.isSafeInteger(c.gains.b)||c.gains.b<0) return false;
+  }
+  return true;
+}
+
 /** Validation structurelle d'une sauvegarde du bureau, en lecture seule.
  *  Lot 3b T1 : l'argent s'ajoute — trésorerie entière (le découvert est
  *  permis, c'est T sous zéro), les deux dernières recettes, l'audience
@@ -292,6 +340,7 @@ function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
+  if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
   if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
@@ -814,6 +863,8 @@ function saveMgmt(){
   if(!G||!G.mgmt) return false;
   /* Monde lot 1 T3 : un passé en cours de génération ne s'écrit jamais — rien d'une partie à moitié née ne touche l'emplacement. */
   if(G.mgmt.passe&&G.mgmt.passe.enCours===true) return true;
+  /* Duo T0 : une organisation vivante ne s'écrit jamais à la place de la partie du joueur (elle s'écrit DANS m.orgs, avec elle). */
+  if(G.mgmt.idPrefixe!==undefined) return true;
   try{
     /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant

@@ -1,0 +1,219 @@
+/* Mode Duo — ce qui s'ajoute au socle (commun.css). Deux couleurs de joueur, prises dans la palette des affiches du jeu
+   (mfAfficheDonnees, mgmt-cadre.js) : le rouge vif de la direction visuelle pour le joueur 1, le bleu-vert #1B8C8F pour le joueur 2.
+   Le jaune reste celui de l'action principale, jamais d'un joueur. */
+:root{--j1:#E23A2B;--j2:#1B8C8F;--j2-clair:#3FB7BA}
+.j1{--c:var(--j1)} .j2{--c:var(--j2)}
+.j1c{color:var(--j1)} .j2c{color:var(--j2-clair)}
+.j1t{color:var(--blanc)} .j2t{color:var(--blanc)}
+.tag{display:inline-block;background:var(--c);color:var(--blanc);font-family:var(--titre);font-weight:800;font-size:24px;line-height:1;padding:4px 10px 3px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);white-space:nowrap}
+.tour-mini{display:inline-block;background:var(--c);color:var(--blanc);font-family:var(--titre);font-weight:800;font-size:30px;line-height:1;padding:6px 14px 4px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);white-space:nowrap;vertical-align:middle}
+.bande{height:10px;flex:none;background:var(--c);margin:-15px -15px 0;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%,0 14px)}
+.lab.noir{color:var(--noir)}
+.sep{height:2px;background:var(--sep);flex:none;width:100%}
+.vide{padding:12px 0}
+.forme{display:flex;gap:6px;flex:none;width:120px}
+.forme i{font-style:normal;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--titre);font-weight:800;font-size:24px;line-height:1;background:var(--ligne)}
+.forme .f-v{background:var(--blanc);color:var(--noir)} .forme .f-d{background:var(--rouge);color:var(--blanc)}
+.forme.lab{display:block}
+
+/* Le bandeau du tour : à qui c'est, en grand, dans sa couleur */
+.tour{flex:none;height:92px;background:var(--c);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);display:flex;align-items:center;gap:22px;padding:0 26px;color:var(--blanc);min-width:0}
+.tour .T{font-size:64px;line-height:.7}
+.tour .l1{font-size:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tour.pret{background:var(--ligne)}
+
+/* Les onglets de catégorie */
+.onglets{display:flex;gap:6px;flex:none}
+.ong{height:48px;padding:0 14px;display:flex;align-items:center;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:26px;line-height:1;white-space:nowrap;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.ong.on{background:var(--blanc);color:var(--noir)}
+.onglets.petits .ong{font-size:24px;padding:0 12px}
+
+/* ---- 1. La création ---- */
+.cr-noms{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.cr-carte{width:1100px;height:560px}
+.cr-carte .p3{padding:28px 32px;gap:28px}
+.cr-champs{display:flex;gap:24px;flex:none}
+.champ{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.champ .lab{color:var(--c)}
+.saisie{height:92px;border:3px solid var(--c);background:var(--noir);display:flex;align-items:center;padding:0 22px;font-family:var(--titre);font-weight:800;font-size:64px;line-height:1;white-space:nowrap;overflow:hidden}
+.curseur{display:inline-block;width:4px;height:58px;background:var(--blanc);margin-left:6px}
+.cr-regle{display:flex;flex-direction:column;gap:14px;border-top:2px solid var(--sep);border-bottom:2px solid var(--sep);padding:20px 0;flex:none}
+.cr-regle .l1{font-size:28px;line-height:1.15}
+.cr-bas{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.org-grille{display:grid;grid-template-columns:repeat(4,440px);grid-template-rows:repeat(2,322px);gap:16px;position:absolute;left:0;top:0}
+.org{height:322px}
+.org .p3{padding:0;gap:0}
+.org-tete{height:60px;flex:none;padding:0 16px;background:var(--ligne);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.org-tete .T{line-height:.8;min-width:0;overflow:hidden}
+.org-tete.on{background:var(--rouge)}
+.org-corps{padding:10px 16px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.org-rep{font-size:22px;line-height:1.1;height:50px;flex:none;overflow:hidden}
+.org-l{height:32px;flex:none;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--sep);font-size:22px;line-height:1;white-space:nowrap}
+.org-l .plus,.org-l .moins{font-family:var(--titre);font-weight:800;font-size:30px;width:20px;text-align:center}
+.org-l .plus{color:var(--blanc)} .org-l .moins{color:var(--rouge-vif)}
+.org.prise{opacity:.45}
+.org.prise .org-tete .tag{font-size:24px}
+.cr-pied{position:absolute;left:0;top:684px;width:1808px;height:96px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-top:2px solid var(--sep);padding-top:16px}
+.cr-pied .l1{font-size:30px;white-space:nowrap}
+
+/* ---- 2. Le QG ---- */
+.qg-cols{position:absolute;inset:0;display:flex;gap:16px}
+.qg-cote{flex:0 0 676px}
+.qg-cote .p3{gap:14px}
+.qg-tete{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex:none}
+.qg-org{font-size:76px;line-height:.72}
+.qg-tete .col{gap:14px;min-width:0}
+.qg-score{font-size:120px;line-height:.7;color:var(--c)}
+.qg-tuiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:none}
+.qg-tuiles .tuile{height:100px}
+.qg-tuiles .T{font-size:44px}
+.qg-tuiles small{font-family:var(--texte);font-weight:600;font-size:22px;text-transform:none;color:var(--t2);margin-left:4px}
+.qg-lignes{display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden}
+.qg-lignes .ligne{padding:8px 0}
+.qg-eff{flex:none;justify-content:space-between}
+.qg-centre{flex:1}
+.qg-centre .p3{align-items:center;text-align:center;gap:16px;padding:22px}
+.qg-c-lab{margin-top:6px}
+.qg-gros{display:flex;align-items:center;gap:26px;flex:none;height:150px}
+.qg-gros .T{font-size:200px;line-height:.7}
+.qg-c-sous{flex:none}
+.qg-date{font-size:72px;line-height:.75}
+.qg-action{width:100%;margin-top:auto;flex:none}
+.qg-action .jaune-bloc{text-align:left}
+.jb-l{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.jb-l .T{font-size:56px;line-height:.75}
+.jb-t{font-size:24px;line-height:1.15;white-space:normal}
+.qg-centre>.p2>.p3>.bouton{flex:none;width:100%;justify-content:space-between}
+.prog{display:flex;flex-direction:column;gap:12px;text-align:left;background:var(--ligne);padding:16px 18px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.prog-date{font-size:56px;line-height:.75}
+.prog-barre{height:26px;background:var(--noir);border:2px solid var(--bord);position:relative;overflow:hidden}
+.prog-barre b{position:absolute;left:0;top:0;bottom:0;background:var(--blanc) repeating-linear-gradient(-45deg,transparent 0 14px,rgba(13,11,11,.10) 14px 28px)}
+.prog .l2{white-space:normal}
+
+/* ---- 3. L'effectif ---- */
+.ef{position:absolute;inset:0;display:flex;flex-direction:column;gap:16px}
+.ef-tete{display:flex;align-items:center;gap:22px;flex:none;height:64px}
+.ef-org{font-size:64px;line-height:.72}
+.ef-tete .l2{margin-left:auto}
+.ef-pan{flex:1;min-height:0}
+.ef-pan .p3{gap:0;padding:6px 18px}
+.ef-l{display:flex;align-items:center;gap:18px;height:62px;border-bottom:2px solid var(--sep);flex:none;min-width:0}
+.ef-h{height:48px}
+.ef-h .ef-r,.dr-h .ef-r{font-family:var(--texte);font-size:22px}
+.ef-r{width:70px;flex:none;font-size:36px}
+.ef-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:26px}
+.ef-b{width:110px;flex:none;white-space:nowrap}
+.ef-a{width:90px;flex:none;white-space:nowrap}
+.ef-e{width:250px;flex:none;white-space:nowrap}
+.ef-e.blesse,.ef-e.refuse{color:var(--rouge-vif)} .ef-e.libre{color:var(--jaune)}
+.ef-c{width:280px;flex:none;white-space:nowrap}
+.ef-mini{display:flex;justify-content:space-between;align-items:center;height:44px;border-bottom:2px solid var(--sep);flex:none;gap:10px}
+.ef-mini .l2{white-space:nowrap;overflow:hidden}
+.ef-mini b{font-family:var(--titre);font-weight:800;font-size:30px}
+.ef-mini.zero{opacity:.45}
+
+/* ---- 4. Les enchères ---- */
+.en{position:absolute;inset:0;display:flex;gap:16px}
+.en-caisse{flex:0 0 300px;align-self:center;height:420px}
+.en-caisse .p3{gap:14px}
+.en-nom{font-size:56px;line-height:.75;color:var(--c)}
+.en-v{font-size:44px;line-height:.75}
+.en-centre{flex:1}
+.en-centre .p3{gap:20px;padding:24px 30px;align-items:center;justify-content:center;text-align:center}
+.en-lots{display:flex;align-items:center;gap:10px;flex:none}
+.en-pt{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:28px}
+.en-pt.on{background:var(--blanc);color:var(--noir)}
+.en-cb{font-size:124px;line-height:.72;max-width:100%;overflow:hidden}
+.en-tuiles{display:flex;gap:10px;flex:none}
+.en-tuiles .tuile{width:220px;height:96px;text-align:left}
+.en-prixbloc{display:flex;flex-direction:column;align-items:center;gap:12px;flex:none;padding:10px 0}
+.en-prix{font-size:96px;line-height:.72}
+.en-prixbloc .l2{display:flex;align-items:center;gap:10px}
+.en-centre .tour{width:100%;justify-content:center}
+.en-boutons{display:flex;gap:16px;flex:none}
+.en-refus{color:var(--rouge-vif);flex:none}
+.en-sous{flex:none}
+
+/* ---- 5. Le draft ---- */
+.dr{position:absolute;inset:0;display:flex;gap:16px}
+.dr-carte{flex:0 0 470px}
+.dr-carte .p3{gap:10px}
+.dr-slot{flex:none;height:104px;background:var(--ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:10px 14px 10px 22px;display:flex;flex-direction:column;justify-content:center;gap:8px;position:relative;min-width:0}
+.dr-slot::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--c,transparent)}
+.dr-slot.vide{background:transparent;border:2px dashed var(--sep)}
+.dr-slot.actif{outline:3px solid var(--jaune);outline-offset:-3px}
+.dr-noms{display:flex;flex-direction:column;gap:4px;min-width:0}
+.dr-noms .l1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-milieu{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.dr-liste{flex:1;min-height:0}
+.dr-liste .p3{gap:0;padding:12px 18px}
+.dr-filtre{height:48px;display:flex;align-items:center;flex:none;font-size:26px}
+.dr-l{display:flex;align-items:center;gap:18px;height:62px;border-bottom:2px solid var(--sep);flex:none;min-width:0;padding:0 8px}
+.dr-l.on{background:var(--blanc);color:var(--noir)}
+.dr-l.on .t2,.dr-l.on .l2{color:var(--noir)}
+.dr-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:26px}
+.dr-d{width:230px;flex:none;white-space:nowrap}
+.dr-face{flex:0 0 300px}
+.dr-face .p3{gap:0}
+.dr-face .l2{margin-bottom:6px}
+.dr-pret{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;text-align:center}
+.dr-pret>.T{font-size:96px;line-height:.75}
+.dr-pret .l1{font-size:28px;max-width:760px}
+
+/* ---- 6. La soirée ---- */
+.so{position:absolute;inset:0;display:flex;flex-direction:column;gap:18px}
+.so-haut{display:flex;justify-content:space-between;align-items:flex-end;flex:none;height:120px}
+.so-haut .col{gap:12px}
+.so-num{font-size:96px;line-height:.72}
+.so-score{display:flex;align-items:center;gap:18px}
+.so-score .T{font-size:110px;line-height:.7}
+.so-face{flex:1;min-height:0;display:flex;align-items:stretch;gap:0}
+.so-cote{flex:1;min-width:0;background:var(--pan);border:2px solid var(--bord);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);padding:15px 28px 24px;display:flex;flex-direction:column;gap:16px;position:relative}
+.so-cote .bande{margin:-15px -28px 0;align-self:stretch}
+.so-cote.j2{align-items:flex-end;text-align:right}
+.so-nom{font-size:150px;line-height:.72;max-width:100%;overflow:hidden}
+.so-prenom{font-size:34px;margin-top:-4px}
+.so-tuiles{display:flex;gap:10px;margin-top:auto}
+.so-tuiles .tuile{width:280px;height:96px;text-align:left}
+.so-rec{display:flex;flex-direction:column;gap:14px;margin-top:auto}
+.so-rec .T{font-size:128px;line-height:.72}
+.so-rec i{font-style:normal;color:var(--t2);margin:0 10px}
+.so-cote .so-tuiles{margin-top:0}
+.so-cote.gagne{border-color:var(--c)}
+.so-cote.perd{opacity:.55}
+.so-verdict{position:absolute;top:44px;right:28px;font-size:44px;color:var(--c)}
+.so-cote.j2 .so-verdict{right:auto;left:28px}
+.so-vs{flex:0 0 120px;display:flex;align-items:center;justify-content:center;font-size:72px;color:var(--t2)}
+.so-pied{flex:none;height:120px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.so-res{display:flex;flex-direction:column;gap:12px;min-width:0}
+.so-res .T{font-size:56px;line-height:.75}
+.so-res .l1{font-size:28px}
+.so-boutons{display:flex;gap:16px;margin-left:auto;flex:none}
+
+/* ---- 7. Le bilan ---- */
+.bi{position:absolute;inset:0;display:flex;flex-direction:column;gap:16px}
+.bi-bandeau{flex:none;height:110px;background:var(--c);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);display:flex;align-items:center;justify-content:space-between;padding:0 30px;color:var(--blanc)}
+.bi-bandeau.nul{background:var(--ligne)}
+.bi-bandeau .T{font-size:72px;line-height:.72}
+.bi-cols{flex:1;min-height:0;display:flex;gap:16px}
+.bi-liste{flex:1;min-width:0}
+.bi-liste .p3{gap:0}
+.bi-l{display:flex;align-items:center;gap:16px;height:72px;border-bottom:2px solid var(--sep);flex:none;min-width:0}
+.bi-h{height:44px}
+.bi-num{width:130px;flex:none}
+.bi-n{width:270px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:10px;color:var(--t2)}
+.bi-n.gagne{color:var(--blanc);font-weight:600}
+.bi-n.gagne::after{content:'✓';font-family:var(--titre);font-weight:800;font-size:26px}
+.pt{width:12px;height:12px;flex:none;background:var(--c)}
+.bi-m{flex:1;min-width:0;line-height:1.1}
+.bi-l .aller{flex:none}
+.bi-saison{flex:0 0 560px}
+.bi-saison .p3{gap:14px}
+.bi-gros{display:flex;align-items:center;gap:22px;justify-content:center;height:150px;flex:none}
+.bi-gros .T{font-size:180px;line-height:.7}
+.bi-sw{font-size:44px;line-height:.8;text-align:center;flex:none;white-space:normal}
+.bi-rec{flex:none;margin-top:auto}
+.bi-bas{flex:none;display:flex;justify-content:flex-end}
+
+.bi-argent{display:flex;flex-direction:column;flex:none}
+.bi-g{font-size:36px;line-height:.8}

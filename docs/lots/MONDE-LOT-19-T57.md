@@ -1,0 +1,18 @@
+# Monde lot 19 T57 — mode Duo : les super cartes passées, au balisage exact de la planche
+
+Branche : `duo-p3` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p3`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
+Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
+**Tu ne t'arrêtes pas au premier obstacle ; tu ne rends « inachevé » qu'après avoir réellement essayé, avec le blocage précis.**
+
+## Ce que tu fais
+1. Lis le bloc de la planche **DuoBilan (panneau « LES SIX COMBATS », il n'y a pas de planche dédiée)** dans `maquettes/duo/src/construire.js` (lignes 292 à 322) : c'est le balisage exact de chaque état. Lis aussi `maquettes/duo/LISEZ-MOI.md`.
+2. Réécris `l'écran `mgmt_duo_histo` (`mgmtDuoHistoHtml`)` (mgmt-duo-ecrans.js (région de l'historique ; ne touche NI `mgmtDuoQGHtml` NI `mgmtDuoNouvelleHtml`)) pour qu'elle émette **exactement ce balisage** (mêmes éléments, mêmes classes, mêmes textes fixes, même ordre) avec les données du jeu à la place de `donnees.json`, enveloppé par `duoCadre(...)`. Un seul état est émis à la fois (celui de la partie) : pas d'attribut `data-etat`, pas de `.vis` nécessaire.
+3. Supprime ce qui devient inutile : les classes `mf-duo-*` de cet écran et le fichier `(aucun fichier CSS propre)` (retire sa balise `<link>` d'`index.html`). **N'ajoute aucun CSS.**
+4. Garde les fonctions `CL.*` et les touches (`keysRegister`) existantes ; rends cliquables (`onclick`) les éléments que la planche montre comme boutons ou touches. Tout nom affiché passe par `duoEsc`.
+5. Si la planche montre une donnée que le jeu ne fournit pas encore (champ absent), calcule-la avec les fonctions de `mgmt-duo.js` (jamais d'invention) ; sinon note-le dans le compte rendu.
+
+## Tests
+Un monde coûte 40 à 90 s : n'en crée qu'un par test. Un fichier à la fois, délai 590 s. Il n'existe pas de planche dédiée aux super cartes passées : l'écran reprend le balisage du bilan (planche DuoBilan, panneau « LES SIX COMBATS », lignes de combat, colonne « Revoir ») pour chaque carte de `m.duo.cartes`, la plus récente en haut ; `duo-s`, aucune classe `mf-duo-` ; `Revoir` ouvre `mgmtCombatOuvrir` avec `retour:'mgmt_duo_histo'` ; Échap revient au QG.
+
+## Fin
+`node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T57 : <titre court>` (le numéro T57 est obligatoire dans le message).

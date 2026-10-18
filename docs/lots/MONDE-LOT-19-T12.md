@@ -1,0 +1,24 @@
+# Monde lot 19 T12 — mode Duo : l'écran du draft
+
+Branche : `duo-encheres` (copie de travail parallèle de `mode-duo` ; les commits se font ICI, sur `duo-encheres`, le superviseur fusionne ensuite). **Spécification : `docs/lots/DUO-T4.md` (lis-la en entier ; cette fiche en retient UNE PART) ; planches validées par Anthony : `maquettes/duo/` (elles priment pour tout ce qui se voit ; valeurs dans `maquettes/duo/src/duo.css`).** Le moteur `mgmt-duo.js` (T0 à T6, T2 enchères) et le QG (T9) sont livrés. **TRAVAIL EN PARALLÈLE (d'autres tranches s'écrivent en même temps dans d'autres dossiers) : ne touche NI `mgmt-duo-ecrans.js` NI `ui-cadre.css` NI `package.json`'s test-lists autrement que pour ajouter TON fichier de test. Ton code va dans un fichier neuf `mgmt-duo-encheres.js (T11) / mgmt-duo-draft.js (T12)` (ancre `DUO_T4_ECRANS`), ton CSS dans un fichier neuf `ui-duo-encheres.css (T11) / ui-duo-draft.css (T12)` (classes `mf-duo-`), lié dans `index.html` juste après la balise du script correspondant, ton fichier de test est `tests/mgmtDuoEncheres.test.js (T11) / tests/mgmtDuoDraft.test.js (T12)`. Le QG (en cours d'écriture ailleurs) affiche le bouton de ton écran dès que `SCREENS.<ton écran>` existe : tu n'as pas à le toucher. Pour essayer ton écran, ouvre-le directement (`CL.go('mgmt_duo_...')`) sur une partie Duo préparée par les helpers de `tests/mgmtDuo.test.js`. Règle des deux joueurs : l'écran dit en haut, en grand, à qui c'est (J1 `#E23A2B`, J2 `#1B8C8F` / texte `#3FB7BA`). `esc()` sur tout nom. Aucun texte sous 22 px.
+Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
+**Tu écris le code en lisible (une instruction par ligne), tu ne t'arrêtes pas au premier obstacle : si un test échoue, tu le corriges ; tu ne rends « inachevé » qu'après avoir réellement essayé et seulement avec le blocage précis.**
+
+## Ce que tu fais (DUO-T4 §2)
+L'écran `mgmt_duo_draft` : la carte (six combats, `COMBAT PRINCIPAL · 5 ROUNDS` en bas, couleur du joueur qui a placé), la liste du joueur dont c'est le tour (placement : `mgmtDuoPlacables` avec onglets de catégorie ← → ; réponse : `mgmtDuoDisponibles` filtrés sur la catégorie, sans onglets ; ↑ ↓ Entrée ou clic → `CL.mgmtDuoPlacer(id)` / `CL.mgmtDuoRepondre(id)`), la colonne « en face » (`{n} disponibles` par catégorie chez l'autre), `Backspace` / `Annuler le dernier choix` → `CL.mgmtDuoAnnuler()`. À l'étape `pret` : bouton jaune `Lancer la super carte` → `mgmtDuoJouer(G.mgmt)` puis `mgmt_duo_soiree` (si l'écran n'existe pas encore, reste au QG) ; si `null` : message `Un combat ne peut plus se jouer : annule-le et refais-le.`. Branche les boutons `Composer la super carte` / `Lancer la super carte` du QG.
+
+## Tests
+**Un monde coûte 40 à 90 s : n'en crée qu'un par test** (voir `tests/mgmtDuo.test.js`, helpers `AVANCER` et `DRAFT`). Un fichier à la fois, délai 590 s. Complète `tests/mgmtDuoEcrans.test.js`, intitulés `Duo T4 — <point>`. Points (3) en réponse la liste ne montre que la catégorie du combattant placé ; `Backspace` défait ; (4) six combats → `Lancer la super carte`.
+
+## Fin
+`node tools/_bump.js`, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T12 : l'écran du draft`.
+
+## Compte rendu
+
+- `mgmt-duo-draft.js` : écran du draft, liste catégorisée, carte, réponses, annulation, lancement et clavier.
+- `ui-duo-draft.css` : mise en page responsive et styles des éléments `mf-duo-`.
+- `index.html` : chargement de la feuille et du script du draft.
+- `tests/mgmtDuoDraft.test.js` : test « Duo T4 — draft : catégorie de réponse, annulation et six combats prêts ».
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : l'écran soirée n'étant pas livré, le lancement retombe au QG si son écran est absent.
+- Questions pour Anthony : aucune.

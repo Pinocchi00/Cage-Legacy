@@ -59,6 +59,9 @@ brief, l'ancienne règle s'applique toujours.
 - `docs/PLAN-OPENCODE-MONDE.md` — l'ordre des lots, les branches, les agents.
 - `docs/lots/MONDE-LOT-<N>-T<K>.md` — la fiche de chaque tranche : la seule spécification
   du codeur.
+- **Mode Duo (18/10/2026, branche `mode-duo`)** : `docs/BRIEF-18-10-MODE-DUO.md`, fiches
+  `docs/lots/DUO-T0.md` à `DUO-T4.md`, dans l'ordre (T0 corrige deux défauts du monde vivant
+  dont le Duo dépend).
 
 ## Documents de référence
 

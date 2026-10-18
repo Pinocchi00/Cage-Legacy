@@ -337,7 +337,7 @@ function scr_mgmt_presentation(){
     {ks:['F'],t:'Fiche complète',onclick:'CL.mgmtPresentationFiche()'}];
   if(!soir||regarder) touches.push({ks:['Entrée'],t:soir?'Regarder le combat':'Ouvrir le nom choisi',jaune:true,onclick:soir?'CL.mgmtPresentationRegarder()':'CL.mgmtPresentationNomOuvrir()'});
   if(v.pages>1) touches.push({ks:['⇤'],t:'',onclick:'CL.mgmtPresentationPage(-1)'},{ks:['⇥'],t:(v.page+1)+' / '+v.pages,onclick:'CL.mgmtPresentationPage(1)'});
-  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree(),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
+  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree()||(typeof mgmtDuoPresentationActive==='function'&&mgmtDuoPresentationActive()),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
 }
 Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
 SCREENS.mgmt_presentation_combattant=scr_mgmt_presentation;

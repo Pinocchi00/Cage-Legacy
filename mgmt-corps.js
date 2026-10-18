@@ -401,6 +401,7 @@ function mgmtTraceLine(t){
 function mgmtReplayFight(t){
   if(!t||!t.a||!t.b) return null;
   if(t.p===true) return null;   /* Monde lot 1 T5 : un combat du passé ne se rejoue pas (il n'en garde ni l'état de la RNG ni les corps) */
+  if(t.duo&&typeof mgmtDuoRejouer==='function') return mgmtDuoRejouer(t);   /* Duo T1 : un combat de super carte se rejoue avec les deux organisations */
   const saved=SEED;
   let res;
   try{

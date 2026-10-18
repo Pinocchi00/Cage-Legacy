@@ -151,10 +151,12 @@ test('Accueil — au clavier : ↑ ↓ choisissent en sautant le grisé, Entrée
   const win=newGameWindow({runMain:true});
   win.eval(`G.screen='title'; render();`);
   assert.equal(win.eval('MF_ACCUEIL.i'),0);
-  /* Décision d'Anthony du 16/10/2026 : le menu se réduit à Management, Options et Quitter (grisé). */
-  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','le curseur passe de Management à Options');
+  /* Décision d'Anthony du 16/10/2026 : le menu se réduit à Management, Options et Quitter (grisé) ; décision du 18/10/2026 : le mode Duo s'insère après Management. */
+  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'duo','le curseur passe de Management à Duo');
+  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','puis à Options');
   touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'management','Quitter, grisé, est sauté : on revient au début');
   touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','en remontant depuis le début, le curseur s’arrête sur Options');
+  touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'duo');
   touche(win,'ArrowUp'); assert.equal(win.eval('MF_ACCUEIL.i'),0);
   win.eval(`G.screen='title'; MF_ACCUEIL.i=0; render();`);
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_parties','Entrée sur Management ouvre « Choisis une partie »');
