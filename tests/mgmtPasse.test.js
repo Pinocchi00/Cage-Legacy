@@ -254,7 +254,8 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
   win.eval('CL.mgmtNouvelleLancer()');
   const html0 = win.document.getElementById('app').innerHTML;
   assert.ok(html0.includes('mf-genese-barre'), 'la barre est là dès le lancement');
-  assert.ok(html0.includes('Six années à vivre'));
+  /* Monde lot 12 T1 : l'écran de chargement reprend sa planche validée ; la phrase de l'en-tête est « Six années se jouent avant ton arrivée. ». */
+  assert.ok(html0.includes('Six années se jouent avant ton arrivée'));
   assert.ok(/SPLIT/i.test(html0) && /Année 20\d\d/.test(html0), 'le nom de l\'organisation et l\'année');
   assert.ok(!html0.includes('mf-voile') && !html0.includes('mf-dialogue'), 'aucune fenêtre par-dessus');
   win.eval('CL.mgmtNouvelleChoisir(3); CL.mgmtNouvelleDeplacer(1,0); CL.mgmtNouvelleRetour(); CL.mgmtNouvelleLancer();');
