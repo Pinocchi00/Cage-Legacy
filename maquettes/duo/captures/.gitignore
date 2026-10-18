@@ -1,0 +1,3 @@
+# Seules les captures à 1440 sont versionnées ; 1280 et 1920 se refont avec node src/capturer.js
+*-1280.png
+*-1920.png
