@@ -16,3 +16,13 @@ Le HTML contient `duo-s` et les classes du bandeau « À {nom} de miser » (`tou
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T52 : <titre court>` (le numéro T52 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-encheres.js` : écran des enchères porté au balisage de la planche DuoEncheres, enveloppe `duoCadre`, noms échappés, actions et touches conservées ; version bumpée.
+- `tests/mgmtDuoEcrans.test.js` : ajout du test « Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge ».
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : aucun connu. `node --test tests/mgmtDuoEcrans.test.js` garde un échec préexistant hors de cette tranche dans le test QG T9 (attend « Avancer jusqu’à la super carte », alors que le QG affiche « Jusqu’à la super carte du… ») ; assertion préexistante laissée intacte. Test T52 ciblé vert.
+- Vérification versions : `node tools/verif-versions.js origin/main` passe sans écart.
+- Relecteur : indisponible (limite de profondeur des sous-agents) ; vérification effectuée localement.
+- Questions pour Anthony : aucune.

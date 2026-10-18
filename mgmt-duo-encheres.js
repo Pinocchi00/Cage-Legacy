@@ -1,5 +1,6 @@
 "use strict";
 /* ==== [ANCRE: DUO_T4_ECRANS] — Monde lot 19 T11 ==== */
+/* ==== [ANCRE: MONDE_LOT_19_T52_ENCHERES] — Monde lot 19 T52 ==== */
 function mgmtDuoEncheresHtml(){
   const m=G.mgmt;
   const e=m&&m.duo&&m.duo.encheres;
@@ -8,21 +9,36 @@ function mgmtDuoEncheresHtml(){
   const tour=L.tour;
   const partieA=mgmtDuoPartie(m,'a');
   const partieB=mgmtDuoPartie(m,'b');
+  const sc=mgmtDuoScore(m);
   const nomA=m.duo.noms.a;
   const nomB=m.duo.noms.b;
   const joueur= tour==='a'?nomA:nomB;
-  const gagnant=L.gagnant==='a'?nomA:L.gagnant==='b'?nomB:'';
+  const autre=tour==='a'?'b':'a';
   const prochain=L.meneur===null?L.ouverture:L.prix+L.pas;
   const prix=L.prix||L.ouverture;
   const combattant=mgmtExteriorCombattant(m,L.id)||{};
   const origine=mgmtOrgParId(combattant.orgId);
-  const nom=esc(combattant.name||L.name||'');
+  const nom=duoEsc(duoMaj(combattant.name||L.name||''));
   const bilan=`${combattant.W||0}-${combattant.L||0}-${combattant.D||0}`;
-  const caisseA=mgmtEuros(partieA.treasury);
-  const caisseB=mgmtEuros(partieB.treasury);
-  const refus=MGMT_DUO_UI.refus?`<p class="mf-duo-refus">Pas assez en caisse pour miser ${esc(mgmtEuros(prochain))}.</p>`:'';
-  const adjudication=L.fini?`<div class="mf-duo-adjuge">${gagnant?`${esc(gagnant)} signe ${nom} pour ${esc(mgmtEuros(L.prix))}`:`Personne ne mise : ${nom} reste libre`}</div>`:'';
-  return `<main class="mf-duo-encheres"><header><h1>Enchères · combattant ${e.i+1} sur ${e.lots.length}</h1><p class="mf-duo-tour ${tour==='a'?'j1':'j2'}">À ${esc(joueur)} de miser</p></header><section class="mf-duo-combattant"><h2>${nom}</h2><p>${esc(mgmtDivisionLabel(L.div))} · ${esc(bilan)} · ${esc(String(combattant.age||''))} ans · ${esc(String(L.rang))}e mondial</p><p>Libre · vient de ${esc(origine?origine.nom:'')}</p><strong>${L.meneur===null?'Ouverture à':'Prix actuel'} ${esc(mgmtEuros(prix))}</strong><p>${L.meneur===null?`${esc(mgmtEuros(L.ouverture))}`:`${esc(L.meneur==='a'?nomA:nomB)} mène`}</p></section><div class="mf-duo-caisses"><p>${esc(nomA)} · ${caisseA}</p><p>${esc(nomB)} · ${caisseB}</p></div>${adjudication}${refus}<div class="mf-duo-actions">${L.fini?'<button class="mf-duo-action" onclick="CL.mgmtDuoEncheresSuivant()">Combattant suivant · Entrée</button>':`<button class="mf-duo-action" onclick="CL.mgmtDuoMiser()">Miser ${esc(mgmtEuros(prochain))} · Entrée / M</button><button class="mf-duo-action" onclick="CL.mgmtDuoPasser()">Passer · P</button>`}</div></main>`;
+  const caisse=c=>{const p=c==='a'?partieA:partieB, id=c==='a'?m.duo.noms.a:m.duo.noms.b, o=c==='a'?MGMT_ORGANISATIONS.find(x=>x.id===mgmtPredecesseurOrgId(m)):MGMT_ORGANISATIONS.find(x=>x.id===m.duo.b), disponible=p?p.treasury:0;
+    return duoPan(`en-caisse ${c==='a'?'j1':'j2'}`,`<div class="bande"></div><div class="lab">${duoEsc(duoMaj(o&&o.nom||''))}</div><div class="T en-nom">${duoEsc(duoMaj(id))}</div>
+      <div class="sep"></div><div class="lab">En caisse</div><div class="T en-v">${duoEuros(p?p.treasury:0)}</div>
+      <div class="sep"></div><div class="lab">Peut miser</div><div class="l1">${disponible>0?`jusqu’à ${duoEuros(disponible)}`:'rien : la caisse est à découvert'}</div>`);};
+  const libellePrix=L.fini?'Adjugé':L.meneur===null?'Ouverture':'Prix actuel';
+  const prixBloc=`<div class="lab">${libellePrix}</div><div class="T en-prix">${duoEuros(prix)}</div>${L.fini?`<div class="l2">${duoEsc(duoMaj(L.gagnant==='a'?nomA:L.gagnant==='b'?nomB:nom))} ${L.gagnant?'signe '+duoEsc(duoMaj(L.name||combattant.name||''))+' pour '+duoEuros(L.prix):'a passé'}</div>`:`<div class="l2">${L.meneur===null?`Personne n’a encore misé · palier ${duoEuros(L.pas)}`:`${duoTag(m,autre)} mène · palier ${duoEuros(L.pas)}`}</div>`}`;
+  const tourHtml=L.fini?`<div class="tour ${L.gagnant==='a'?'j1':'j2'}"><span class="T">${duoEsc(duoMaj(L.gagnant==='a'?nomA:nomB))} SIGNE ${duoEsc(duoMaj(L.name||combattant.name||''))}</span></div>`:`<div class="tour ${tour==='a'?'j1':'j2'}"><span class="T">À ${duoEsc(duoMaj(joueur))} DE MISER</span></div>`;
+  const orgSignee=L.gagnant==='a'?MGMT_ORGANISATIONS.find(x=>x.id===mgmtPredecesseurOrgId(m)):MGMT_ORGANISATIONS.find(x=>x.id===m.duo.b);
+  const boutons=L.fini?`<div class="en-boutons"><div class="bouton jaune" onclick="CL.mgmtDuoEncheresSuivant()"><span class="T">COMBATTANT SUIVANT</span><span class="k">Entrée</span></div></div><div class="l1 t2 en-sous">Contrat de 3 combats chez ${duoEsc(orgSignee&&orgSignee.nom||'')}.</div>`:`<div class="en-boutons"><div class="bouton jaune" onclick="CL.mgmtDuoMiser()"><span class="T">MISER ${duoEuros(prochain)}</span><span class="k">Entrée</span></div><div class="bouton" onclick="CL.mgmtDuoPasser()"><span class="T">PASSER</span><span class="k">P</span></div></div>${MGMT_DUO_UI.refus?`<div class="en-refus l1">Pas assez en caisse pour miser ${duoEuros(prochain)}.</div>`:''}`;
+  const versus=`${duoEsc(duoMaj(nomA))} <span class="t2">×</span> ${duoEsc(duoMaj(nomB))}`;
+  const contenu=`${duoEntete(versus,duoDroiteSaison(sc.saison,sc.numero))}
+    <main class="contenu large"><div class="en">${caisse('a')}
+      ${duoPan('en-centre',`<div class="en-lots">${e.lots.map((_,i)=>`<span class="en-pt${i===e.i?' on':''}">${i+1}</span>`).join('')}<span class="lab">Combattant ${e.i+1} sur ${e.lots.length}</span></div>
+        <div class="lab">${duoEsc(duoMaj(mgmtDivisionLabel(L.div)))} · LIBRE · VIENT DE ${duoEsc(duoMaj(origine&&origine.nom||''))}</div>
+        <div class="T en-cb">${nom}</div>
+        <div class="en-tuiles"><div class="tuile"><div class="lab">Bilan</div><div class="T">${duoEsc(bilan)}</div></div><div class="tuile"><div class="lab">Âge</div><div class="T">${duoEsc(combattant.age||'')} ANS</div></div><div class="tuile"><div class="lab">Mondial</div><div class="T">${L.rang===1?'1er':`${duoEsc(L.rang)}e`}</div></div></div>
+        <div class="en-prixbloc">${prixBloc}</div>${tourHtml}${boutons}`)}${caisse('b')}</div></main>
+    ${duoTouches([[['Entrée'],L.fini?'Combattant suivant':'Miser',true], [['P'],'Passer'],[['Échap'],'Retour au QG',false,"CL.go('mgmt_duo')"]])}`;
+  return duoCadre(contenu);
 }
 SCREENS.mgmt_duo_encheres=mgmtDuoEncheresHtml;
 /* État d'interface commun aux écrans Duo (non sauvegardé) : un seul objet, chaque écran y ajoute sa clé. */
