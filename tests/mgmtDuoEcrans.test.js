@@ -53,20 +53,32 @@ test('Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainque
   const w=newGameWindow();
   const html=w.eval(`(()=>{const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:3}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:0},cartes:[{combats:[{h:'duo-t54',div:'plume'}]}]}}; G={mgmt:m};
     mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; return SCREENS.mgmt_duo_soiree();})()`);
-  assert.match(html,/class="duo-s"/);
-  assert.match(html,/DUVAL/);
-  assert.doesNotMatch(html,/VAINQUEUR|gagne|perd/);
-  assert.match(html,/class="so"/);
+  assert.match(html,/<div class="duo-s"><div class="logo-seul">/);
+  assert.match(html,/<main class="contenu large"><div class="so">/);
+  assert.match(html,/<div class="so-haut"><div class="col"><div class="lab">Super carte 2 · /);
+  assert.match(html,/<div class="T so-num">COMBAT 6<\/div><div class="l2"> · 3 rounds<\/div>/);
+  assert.match(html,/<div class="so-score"><span class="lab">ANTHONY<\/span><span class="T j1c">0<\/span><span class="T t2">–<\/span><span class="T j2c">0<\/span><span class="lab">FRANÇOIS<\/span><\/div>/);
+  assert.match(html,/<div class="so-face"><div class="so-cote j1"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="T so-nom">DUVAL<\/div><div class="so-prenom l1">Ada<\/div>/);
+  assert.match(html,/<div class="so-vs T">VS<\/div><div class="so-cote j2"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-pied"><div class="so-boutons"><div class="bouton jaune" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REGARDER<\/span><span class="k">Entrée<\/span><\/div><div class="bouton" onclick="CL\.mgmtDuoSoireeResultat\(\)"><span class="T">RÉSULTAT<\/span><span class="k">P<\/span><\/div><\/div><\/div><\/div><\/main>/);
+  assert.match(html,/<div class="touches large">/);
+  assert.doesNotMatch(html,/VAINQUEUR|class="[^"]*(?:gagne|perd)|data-etat=/i);
 });
 
 test('Duo T54 — le résultat révèle le vainqueur et reprend le balisage de la planche',()=>{
   const w=newGameWindow();
   const html=w.eval(`(()=>{const cs=Array.from({length:6},(_,i)=>({h:i===5?'duo-t54':'unused',div:'plume'})); const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:5}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:5},cartes:[{combats:cs}]}}; G={mgmt:m};
     mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; MGMT_DUO_UI.vu=true; return SCREENS.mgmt_duo_soiree();})()`);
-  assert.match(html,/VAINQUEUR/);
-  assert.match(html,/COMBAT PRINCIPAL/);
-  assert.match(html,/LE BILAN/);
-  assert.match(html,/class="so-res"/);
+  assert.match(html,/<div class="duo-s"><div class="logo-seul">/);
+  assert.match(html,/<main class="contenu large"><div class="so">/);
+  assert.match(html,/<div class="T so-num">COMBAT PRINCIPAL<\/div><div class="l2"> · 5 rounds<\/div>/);
+  assert.match(html,/<div class="so-cote j1 gagne"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-verdict T">VAINQUEUR<\/div>/);
+  assert.match(html,/<div class="so-cote j2 perd"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-res"><div class="T">ADA DUVAL BAT ÈVE MARTIN<\/div><div class="l1">/);
+  assert.match(html,/<div class="so-boutons"><div class="bouton jaune" onclick="CL\.mgmtDuoSoireeSuivant\(\)"><span class="T">LE BILAN<\/span><span class="k">Entrée<\/span><\/div><div class="bouton" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REVOIR<\/span><span class="k">R<\/span><\/div><\/div>/);
+  assert.doesNotMatch(html,/data-etat=/);
 });
 
 test('Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe',()=>{

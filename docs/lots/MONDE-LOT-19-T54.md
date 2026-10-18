@@ -26,3 +26,9 @@ Le HTML de l'avant-combat contient `duo-s` et NE contient PAS le vainqueur (ni c
 - Écart : date affichée fournie par `mgmtJourDateTexte(m.cal.jour)` ; aucune date de super carte distincte n’est enregistrée sur la carte jouée.
 - Les deux tests T54 passent. Le fichier entier a un échec indépendant préexistant : « Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape » (assertion attend « Avancer jusqu’à la super carte », libellé non rendu). Audit `node tools/verif-versions.js origin/main` : aucun écart.
 - Relecteur indisponible (limite de profondeur des sous-agents). Questions pour Anthony : aucune.
+
+### Reprise après relecture
+
+- `tests/mgmtDuoEcrans.test.js` : assertions T54 renforcées sur l’enveloppe `duo-s`, la structure et l’ordre du combat principal, ses libellés/actions, les classes gagnant/perdant à l’état résultat et l’absence de ces classes, de `data-etat` et de verdict avant le combat.
+- `index.html` : aucun nouveau changement. Le diff de T54 par rapport au parent ne contient que le retrait du lien vers l’ancienne feuille soirée et la montée de version du script `mgmt-duo-soiree.js`, ressources directement nécessaires à la tranche.
+- Vérification ciblée : `node --test --test-name-pattern="Duo T54" tests/mgmtDuoEcrans.test.js` — 2 tests passés. `Duo T9` reste l’échec préexistant documenté ci-dessus.
