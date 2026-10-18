@@ -13,3 +13,11 @@ Point (8) l'effectif de J2 liste des identifiants préfixés de son organisation
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T10 : l'effectif d'un joueur et les super cartes passées`.
 
+## Compte rendu
+- `mgmt-duo-ecrans.js` : ajout de l’écran de l’effectif et de l’historique des super cartes, navigation Tab/Échap et relecture d’un combat.
+- `ui-cadre.css` : styles propres aux deux écrans.
+- Tests ajoutés : aucun nouveau test ; vérification par les tests ciblés existants `mgmtDuoEcrans.test.js` (12 réussis).
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : le scénario spécifique carte jouée et bascule Tab n’a pas été ajouté. Vérificateur des versions signale un écart préexistant `mgmt-salles.js` (`?v=b12xxxx`).
+- Questions pour Anthony : aucun texte de présentation détaillé pour les cartes n’est défini hors champs disponibles dans le modèle actuel ; historique présenté selon la structure réelle des données.
+

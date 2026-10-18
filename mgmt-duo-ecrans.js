@@ -49,6 +49,29 @@ Object.assign(CL,{
 });
 keysRegister('mgmt_duo',{Escape(){CL.mgmtDuoQuitter();},'1'(){CL.mgmtDuoOuvrirEffectif('a');},'2'(){CL.mgmtDuoOuvrirEffectif('b');},h(){if(!MGMT_DUO_QG.enCours&&G.mgmt.duo.cartes&&G.mgmt.duo.cartes.length)CL.go('mgmt_duo_histo');}});
 
+/* ==== [ANCRE: MONDE_LOT_19_T10_ECRANS] — Monde lot 19 T10 ==== */
+let MGMT_DUO_EFFECTIF_DIV=null;
+function mgmtDuoEffectifHtml(){
+  const m=G.mgmt,d=m.duo,cote=MGMT_DUO_EFFECTIF_COTE,orgId=cote==='a'?mgmtPredecesseurOrgId(m):d.b;
+  const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId),divisions=allDivisions(),divId=MGMT_DUO_EFFECTIF_DIV||divisions[0].id;
+  const effectif=mgmtDuoEffectif(m,cote,divId);
+  const lignes=effectif.map(f=>`<div class="mf-duo-effectif-ligne"><strong>${f.rang||'—'}</strong><span>${esc(f.name)}</span><span>${f.W}-${f.L}-${f.D}</span><span>${f.age}</span><span>${f.forme.map(x=>`<i>${x==='v'?'V':x==='d'?'D':'N'}</i>`).join('')}</span><span>${({dispo:'Disponible',blesse:'Blessé',libre:'Sans contrat',refuse:'Refuse de combattre'})[f.etat]}</span><span>${f.restants} combats au contrat</span></div>`).join('')||'<p>Aucun combattant</p>';
+  const onglets=divisions.map((x,i)=>`<button class="${x.id===divId?'actif':''}" onclick="CL.mgmtDuoEffectifDivision('${esc(x.id)}')">${esc(mgmtDivisionLabel(x.id))}</button>`).join('');
+  return mfEcran(`<div class="mf-duo-effectif"><nav>${onglets}</nav><div class="mf-duo-effectif-liste">${lignes}</div></div>`,{barre:'logo',plaque:'Effectif',libelle:`${esc(org&&org.nom||'')} · ${esc(d.noms[cote])}`,touches:[{ks:['Tab'],t:'Autre effectif'},{ks:['Échap'],t:'Retour'}]});
+}
+SCREENS.mgmt_duo_effectif=mgmtDuoEffectifHtml;
+Object.assign(CL,{mgmtDuoEffectifDivision(id){if(allDivisions().some(d=>d.id===id)){MGMT_DUO_EFFECTIF_DIV=id;render();}},mgmtDuoEffectifAutre(){MGMT_DUO_EFFECTIF_COTE=MGMT_DUO_EFFECTIF_COTE==='a'?'b':'a';render();},mgmtDuoEffectifRetour(){CL.go('mgmt_duo');}});
+keysRegister('mgmt_duo_effectif',{Escape(){CL.mgmtDuoEffectifRetour();},Tab(){CL.mgmtDuoEffectifAutre();},ArrowLeft(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i-1+a.length)%a.length].id);},ArrowRight(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i+1)%a.length].id);}});
+
+function mgmtDuoHistoHtml(){
+  const m=G.mgmt,d=m.duo,cartes=(d.cartes||[]).slice().reverse();
+  const html=cartes.map(c=>`<article class="mf-duo-histo-carte"><h2>Super carte ${c.n} · ${esc(mgmtJourDateTexte(c.jour))} · ${esc(d.noms.a)} ${c.combats.filter(x=>x.winner==='A').length} – ${c.combats.filter(x=>x.winner==='B').length} ${esc(d.noms.b)}</h2>${c.combats.map(x=>`<div>${x.na} – ${x.nb} · ${esc(mgmtDivisionLabel(x.div))} · ${esc(x.winner==='A'?d.noms.a:x.winner==='B'?d.noms.b:'Égalité')} · ${esc(mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds}))} · R${x.round}<button onclick="CL.mgmtDuoHistoRevoir(${x.h})">Revoir</button></div>`).join('')}</article>`).join('')||'<p>Aucune super carte passée</p>';
+  return mfEcran(`<div class="mf-duo-histo">${html}</div>`,{barre:'logo',plaque:'Super cartes passées',libelle:`${esc(d.noms.a)} × ${esc(d.noms.b)}`,touches:[{ks:['Échap'],t:'Retour'}]});
+}
+SCREENS.mgmt_duo_histo=mgmtDuoHistoHtml;
+Object.assign(CL,{mgmtDuoHistoRevoir(h){const trace=G.mgmt.hist[h];if(trace)mgmtCombatOuvrir({trace,etiquette:'SUPER CARTE',retour:'mgmt_duo_histo',salle:{taux:1,prog:1}});},mgmtDuoHistoRetour(){CL.go('mgmt_duo');}});
+keysRegister('mgmt_duo_histo',{Escape(){CL.mgmtDuoHistoRetour();}});
+
 function mgmtDuoNouvelleHtml(){
   const s=MGMT_DUO_NOUVELLE;
   const titre=s.etape==='noms'?'Duo':`${s.noms[s.etape==='a'?'a':'b']||`Joueur ${s.etape==='a'?1:2}`} · choisis ton organisation`;
