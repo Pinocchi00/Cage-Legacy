@@ -96,8 +96,9 @@ test('Monde lot 1 T2 — deux soirées de la graine 20261008 : compte rendu comp
   assert.ok(Number.isInteger(s0.prolonges) && s0.prolonges >= 0);
   assert.equal(typeof s0.decouvert, 'boolean');
   assert.equal(s1.k, 1);
-  assert.equal(s1.reclames, 1);
-  assert.equal(s1.tetes, 4);
+  /* Monde lot 16 — décision d'Anthony du 17/10/2026 (palmarès réalistes : bilans, âges et classement changent) : la deuxième soirée de cette graine compte 2 combats réclamés (avant : 1). */
+  assert.equal(s1.reclames, 2);
+  assert.equal(s1.tetes, 3);
   /* la garde : G.mgmt doit être la partie jouée */
   const leve = win.eval(`(function(){ const m=G.mgmt, autre=mgmtDefault('split'); G.mgmt=autre;
     try{ mgmtPredecesseurSoiree(m,2); return 'rien'; }catch(e){ return e instanceof Error?'erreur':'autre'; }finally{ G.mgmt=m; } })()`);

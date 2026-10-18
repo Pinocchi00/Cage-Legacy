@@ -26,9 +26,9 @@ const MGMT_PASSE_JOURS_MAX=20000;
 const MGMT_PASSE_FENETRE_RECRUES=4;
 const MGMT_PASSE_RECRUES_PAS=1;
 const MGMT_PASSE_RECRUES_PAR_SOIREE=4;
-const MGMT_PASSE_RECRUES_AGE_MAX=23;
+const MGMT_PASSE_RECRUES_AGE_MAX=25;   /* Monde lot 16 : 23 → 25 (les effectifs sont plus âgés : le vivier de jeunes de 23 ans et moins ne suffit plus à remplir le plan) */
 const MGMT_PASSE_RECRUES_FIN=2;
-const MGMT_PASSE_RECRUES_FIN_AGE_MAX=27;
+const MGMT_PASSE_RECRUES_FIN_AGE_MAX=29;   /* Monde lot 16 : 27 → 29 */
 
 /** Les soirées jouées par le joueur : celles de la partie moins celles du passé. Pur. @returns {number} */
 function mgmtSoireesJoueur(m){
