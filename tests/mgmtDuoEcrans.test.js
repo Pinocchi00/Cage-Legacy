@@ -73,7 +73,6 @@ test('Duo T3 — aucun texte de travail dans les écrans ajoutés',()=>{
   assert.equal(w.eval("String(SCREENS.mgmt_duo_nouvelle()).includes('TODO')"),false);
 });
 
-<<<<<<< HEAD
 test('Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape',()=>{
   const w=newGameWindow();
   w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:"<b>O'Neil</b>",b:'François'}); G.screen='mgmt_duo'; render();`);
@@ -95,7 +94,6 @@ test('Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suiva
 test('Duo T9 — le QG ne contient aucun texte de travail',()=>{
   const w=newGameWindow();
   assert.doesNotMatch(w.eval("String(SCREENS.mgmt_duo)").toUpperCase(),/EMPLACEMENT AUTEUR|TODO/);
-=======
 test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du texte',()=>{
   const w=newGameWindow({runMain:true});
   w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:"<J1'",b:'J2'},etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]}};
@@ -106,5 +104,4 @@ test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du
     CL.go('mgmt_duo_encheres');`);
   assert.match(w.document.body.textContent,/À <J1'/);
   assert.doesNotMatch(w.document.body.innerHTML,/<J1'/);
->>>>>>> duo-encheres
 });
