@@ -9,7 +9,7 @@ Sept planches, une par écran du mode Duo (brief `docs/BRIEF-18-10-MODE-DUO.md`,
 | `DuoCreation.html` | `mgmt_duo_nouvelle` (DUO-T3 §2) | `noms` · `j1` · `j2` |
 | `DuoQG.html` | `mgmt_duo` (DUO-T3 §3) | `attente` · `progression` · `arrivee` |
 | `DuoEffectif.html` | `mgmt_duo_effectif` (DUO-T3 §4) | `j1` · `j2` |
-| `DuoEncheres.html` | `mgmt_duo_encheres` (DUO-T4 §1) | `ouverture` · `mise` · `caisse` · `adjuge` |
+| `DuoEncheres.html` | `mgmt_duo_encheres` (DUO-T4 §1) | `ouverture` · `mise` · `adjuge` (+ `caisse` si un joueur ne peut pas miser) |
 | `DuoDraft.html` | `mgmt_duo_draft` (DUO-T4 §2) | `place` · `reponse` · `pret` |
 | `DuoSoiree.html` | `mgmt_duo_soiree` (DUO-T4 §3) | `avant` · `resultat` · `principal` |
 | `DuoBilan.html` | `mgmt_duo_bilan` (DUO-T4 §4) | `carte` · `saison` |
@@ -49,17 +49,17 @@ planches de la refonte (valeurs de `ui-cadre.css`) ; `src/duo.css` ajoute ce qui
   rang dans son organisation, âge ; le score de la soirée en haut à droite. Résultat : le vainqueur garde son panneau cerclé de sa couleur
   avec `VAINQUEUR`, le perdant s'estompe, la ligne `X BAT Y` et la méthode en bas.
 - **Bilan** : bandeau de la couleur du vainqueur (gris pour une égalité), les six combats avec une coche au vainqueur et `Revoir`, la
-  saison à droite (score, prochaine date, recrues des enchères ; à la 4e carte, le vainqueur de la saison et les quatre scores).
+  saison à droite (score, prochaine date, **l'argent de la super carte pour chacun**, recrues des enchères ; à la 4e carte, le vainqueur
+  de la saison, les quatre scores et l'argent gagné sur la saison).
 
 ## Écarts et questions relevés en faisant les planches
 
-1. **Les enchères sont presque gratuites, et le joueur 1 ne peut jamais miser.** Le brief (DUO-T2) fixe le prix d'ouverture à la prime de
-   signature (`mgmtContratPrime(3, bourse)`) : dans la partie relevée, **5 000 € à 8 000 €**, même pour le n° 1 mondial d'une catégorie.
-   Surtout, **la caisse de Split est à découvert à chacune des quatre super cartes** (−106 000 €, −223 000 €, −300 000 €, −228 000 €),
-   avec un découvert permis nul ou presque : `mgmtCanAfford` refuse toute mise, Anthony ne peut rien acheter de la saison (c'est l'état
-   `caisse` de la planche). Garden of Blood passe de +45 000 € à −50 000 €. Ce n'est pas propre au Duo : **le matchmaker automatique fait
-   plonger la caisse de Split** (dans le solo, c'est lui qui joue les six ans du passé). **À trancher par Anthony** : prix d'ouverture = la
-   valeur du contrat (3 × la bourse) plutôt que la prime ? Mises permises dans le découvert ? Et faut-il regarder l'économie du matchmaker
-   automatique avant tout ?
+1. **L'argent — tranché par Anthony le 18/10 (15 h 54)** : « le matchmaker automatique reste toujours stable et ce sont les super
+   cartes qui génèrent le plus de bénéfices pour le vainqueur ». La première version de ces planches montrait la caisse de Split à
+   découvert à chaque super carte (−106 000 € à −300 000 €) : le matchmaker automatique la faisait plonger, et Anthony ne pouvait plus
+   miser. Les planches sont refaites avec la règle décidée (DUO-T1) : **les soirées des adjoints ne font plus bouger la caisse**, la
+   super carte rapporte **200 000 € au vainqueur, 50 000 € au perdant** (125 000 € chacun sur égalité). Le bilan montre ces gains.
+   **Reste ouvert** : le prix d'ouverture des enchères (la prime de signature, 5 000 à 8 000 € ici) — passer à la valeur du contrat
+   (3 × la bourse) pour que l'argent des super cartes ait un usage ?
 2. **L'écran « Nouvelle partie » du jeu coupe déjà certaines réputations** (hauteur de 48 px pour deux lignes) : la planche garde 50 px et
    resserre les marges ; à revoir dans `ui-cadre.css` en même temps que DUO-T3.

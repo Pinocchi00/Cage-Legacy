@@ -16,6 +16,7 @@ const C1=D.cartes[0], C2=D.cartes[1], C4=D.cartes[3], DIVS=C1.divisions;
 const cote=c=>c==='a'?{org:A,nom:NA,cls:'j1'}:{org:B,nom:NB,cls:'j2'};
 const DIV=id=>(DIVS.find(d=>d.id===id)||{}).label||id;
 const rec=f=>`${f.W}-${f.L}-${f.D}`;
+const euros=k=>{ const v=Math.round(k*1000), t=String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f'); return (v<0?'−':'')+t+'\u00a0€'; };
 const ord=n=>n===1?'1er':n+'e';
 const rangTxt=r=>r?(r===1?'N° 1':'N° '+r):'—';
 const scoreSaison=k=>{ let a=0,b=0; for(const c of D.cartes.slice(0,k)){ if(c.score.a>c.score.b) a++; else if(c.score.b>c.score.a) b++; } return {a,b}; };
@@ -173,7 +174,6 @@ ${lire('commun.js')}
 {
   const c=C2, L=c.lots[0], premier=C1.score.a>C1.score.b?'b':(C1.score.b>C1.score.a?'a':'b');
   const second=premier==='a'?'b':'a';
-  const euros=k=>{ const v=Math.round(k*1000), t=String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f'); return (v<0?'−':'')+t+'\u00a0€'; };
   const caisse=k=>{ const s=cote(k), dispo=(k==='a'?c.caisses.aK+c.caisses.capA:c.caisses.bK+c.caisses.capB);
     return pan(`en-caisse ${s.cls}`,`<div class="bande"></div><div class="lab">${esc(MAJ(s.org.nom))}</div><div class="T en-nom">${esc(MAJ(s.nom))}</div>
       <div class="sep"></div><div class="lab">En caisse</div><div class="T en-v">${esc(c.caisses[k])}</div>
@@ -200,10 +200,12 @@ ${lire('commun.js')}
         <div class="en-prixbloc">${x.prix}</div>
         ${bandeau}${boutons}`)}
       ${caisse('b')}</div>`; };
+  const ETATS_EN=['ouverture'].concat(peut(premier)&&peut(second)?[]:['caisse'],['mise','adjuge']);
   const corps=`${entete(`Enchères · ${versus}`,droiteSaison(1,2))}
-  <main class="contenu large">${['ouverture','caisse','mise','adjuge'].map(vue).join('')}</main>
+  <main class="contenu large">${ETATS_EN.map(vue).join('')}</main>
   ${touches([[['Entrée'],'Miser',true],[['P'],'Passer'],[['Échap'],'Retour au QG']])}`;
-  page('DuoEncheres','Duo — les enchères','ouverture caisse mise adjuge',corps);
+  page('DuoEncheres','Duo — les enchères',ETATS_EN.join(' '),corps);
+  fs.writeFileSync(path.join(ICI,'etats-encheres.txt'),ETATS_EN.join(' '));
 }
 
 /* ======================================================================================
@@ -294,10 +296,16 @@ ${lire('commun.js')}
     const saison=etat==='saison'?pan('bi-saison',`${titre('LA SAISON 1','4 SUPER CARTES')}
       <div class="bi-gros"><span class="T j1c">${s4.a}</span><span class="T t2">–</span><span class="T j2c">${s4.b}</span></div>
       <div class="T bi-sw ${gs?cote(gs).cls+'c':''}">${gs?esc(MAJ(cote(gs).nom))+' REMPORTE LA SAISON 1':'SAISON 1 : ÉGALITÉ'}</div>
-      ${D.cartes.map((k,i)=>`<div class="ligne"><div class="l1">Super carte ${i+1} · ${esc(k.superDate.toLowerCase())}</div><div class="l1">${k.score.a} – ${k.score.b}</div></div>`).join('')}`)
+      ${D.cartes.map((k,i)=>`<div class="ligne"><div class="l1">Super carte ${i+1} · ${esc(k.superDate.toLowerCase())}</div><div class="l1">${k.score.a} – ${k.score.b}</div></div>`).join('')}
+      <div class="bi-argent"><div class="sous">Gagné sur la saison</div>
+        <div class="ligne"><div class="l1">${tag('a')} ${esc(A.nom)}</div><div class="T bi-g">+ ${euros(D.cartes.reduce((t,k)=>t+k.gains.aK,0))}</div></div>
+        <div class="ligne"><div class="l1">${tag('b')} ${esc(B.nom)}</div><div class="T bi-g">+ ${euros(D.cartes.reduce((t,k)=>t+k.gains.bK,0))}</div></div></div>`)
       :pan('bi-saison',`${titre('LA SAISON 1',`APRÈS ${n} SUPER CARTE${n>1?'S':''}`)}
       <div class="bi-gros"><span class="T j1c">${scoreSaison(n).a}</span><span class="T t2">–</span><span class="T j2c">${scoreSaison(n).b}</span></div>
       <div class="l1 t2">Prochaine super carte : ${esc(c.superProchaine.toLowerCase())}</div>
+      <div class="bi-argent"><div class="sous">L’argent de la super carte</div>
+        <div class="ligne"><div class="l1">${tag('a')} ${esc(A.nom)}</div><div class="T bi-g">+ ${esc(c.gains.a)}</div></div>
+        <div class="ligne"><div class="l1">${tag('b')} ${esc(B.nom)}</div><div class="T bi-g">+ ${esc(c.gains.b)}</div></div></div>
       ${pan('bi-rec',`<div class="sous">Recrues des enchères</div><div class="l1">${(()=>{ const L=c.lots[0], pr=C1.score.a>C1.score.b?'b':(C1.score.b>C1.score.a?'a':'b'), w=pr==='a'?'b':'a'; return `${tag(w)} signe <span class="nom">${esc(L.name)}</span> · ${esc(L.ouvertureTxt)}`; })()}</div>`)}`);
     return `<div class="bi" data-etat="${etat}">
       <div class="bi-bandeau ${g?cote(g).cls:'nul'}"><span class="T">${g?esc(MAJ(cote(g).nom))+' REMPORTE LA SUPER CARTE '+n:'ÉGALITÉ À LA SUPER CARTE '+n}</span><span class="T bi-sc">${c.score.a} – ${c.score.b}</span></div>

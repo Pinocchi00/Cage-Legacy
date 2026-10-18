@@ -26,6 +26,7 @@ const MGMT_DUO_PERIODE=91;          // décision d'Anthony du 18/10 : tous les 3
 const MGMT_DUO_COMBATS=6;           // 6 combats principaux
 const MGMT_DUO_CARTES_SAISON=4;     // une saison = un an = 4 super cartes
 const MGMT_DUO_NOM_MAX=16;          // longueur d'un nom de joueur
+const MGMT_DUO_GAIN={vainqueur:200,perdant:50,nul:125};   // k€ — décision du 18/10 : la super carte rapporte le plus au vainqueur
 ```
 
 ### L'état `m.duo` (seul champ ajouté à la partie)
@@ -66,6 +67,10 @@ m.duo={
      `mgmtPredecesseurSoiree(m,m.eventsPlayed,mgmtPredecesseurReglages(mgmtPredecesseurOrgId(m)))` (elle ouvre le cycle
      suivant, qui fait jouer les sept organisations, dont celle de J2). Rend `{termine:false,jour:m.cal.jour,cible:m.duo.prochaine}`.
      **Si elle ne se joue pas** (`jouee:false`), passe au point suivant au lieu de boucler.
+     **La caisse reste stable** (décision d'Anthony du 18/10) : note `m.treasury` et `mgmtDuoPartie(m,'b').treasury` avant
+     l'appel, et remets-les tels quels après (la soirée de J1 **et** celle de J2, jouée pendant l'ouverture du cycle, ne
+     changent jamais la caisse des joueurs ; recettes, cachets, primes de renouvellement compris). Rien d'autre n'est
+     neutralisé : popularité, salles, contrats et résultats suivent leur cours. Les six autres organisations ne changent pas.
    - Sinon : `m.cal.jour=Math.max(m.cal.jour,m.duo.prochaine)`, puis `mgmtAdvanceRosterAges(m)` ; `m.duo.etape='draft'`
      (DUO-T2 y insérera `'encheres'`) ; `mgmtDuoDraftOuvrir(m)` ; `saveMgmt()` ; rend `{termine:true}`.
 7. `mgmtDuoAvancer(m)` → les pas jusqu'au bout (tests, outils). Garde-fou : 20 pas au plus.
@@ -122,6 +127,9 @@ puis l'archive, les repères, l'étape :
 m.duo.cartes.push({n:m.duo.cartes.length+1,jour:m.cal.jour,
   combats:[{a,b,na:fa.name,nb:fb.name,div,winner,family,round,rounds,h:<index de t dans m.hist>}],   // ×6
   gagnant:'a'|'b'|'nul'});   // le plus de combats gagnés ; un nul ne compte pour personne
+// L'argent de la super carte : la seule grande recette du Duo
+const g=x=>gagnant==='nul'?MGMT_DUO_GAIN.nul:(gagnant===x?MGMT_DUO_GAIN.vainqueur:MGMT_DUO_GAIN.perdant);
+m.treasury+=g('a'); sous.treasury+=g('b');   // et carte.gains={a:g('a'),b:g('b')} dans l'archive
 m.duo.reperes={ca:m.cycle,cb:sous.cycle}; m.duo.prochaine+=m.duo.periode;
 m.duo.draft=null; m.duo.etape='soiree'; m.duo.soiree={i:0};
 saveMgmt();
@@ -169,7 +177,7 @@ refus existant s'affiche : jamais un faux combat.
 `b` clé de `raw.orgs` et différente de l'organisation de la partie ; `noms.a`/`noms.b` chaînes de 1 à 16 caractères ;
 `periode`, `prochaine` entiers ≥ 0 ; `etape` dans la liste ; `reperes.ca`/`cb` entiers ; `draft` `null` ou de la forme
 ci-dessus (au plus 6 combats, identifiants `mgmtValidId` ou `null`) ; `encheres` `null` (DUO-T2 l'élargira) ; `soiree` `null`
-ou `{i}` entier de 0 à 6 ; `cartes` tableau (au plus 200) d'objets à 6 combats. `mgmtRepair` ne touche pas `m.duo`.
+ou `{i}` entier de 0 à 6 ; `cartes` tableau (au plus 200) d'objets à 6 combats, chacun avec `gains:{a,b}` entiers ≥ 0. `mgmtRepair` ne touche pas `m.duo`.
 
 **La trace d'un combat de super carte porte une clé de plus, `duo` — deux validateurs existants la refusent aujourd'hui**
 (vérifié par Claude le 18/10 : avec une trace `duo` dans `m.hist`, `validateMgmt(m)` rend `false`) :
@@ -207,6 +215,9 @@ Intitulés `Duo T1 — <point>` :
 13. après une super carte, `validateMgmt(G.mgmt)` est vrai et un `saveMgmt`/`loadMgmt` garde les 6 traces `duo` dans `m.hist` (aucune jetée par `mgmtRepair`) ;
 14. après une super carte puis une soirée ordinaire, la partie de J2 s'est allégée (`mgmtPasseAlleger` rend `true` sur elle ; sa copie de trace `duo` est devenue une entrée `p:true`) ;
 15. un combattant recruté hors d'une organisation vivante (`mgmtRecruterVivant`) n'empêche plus cette organisation de s'alléger.
+16. **caisse stable** : après `mgmtDuoAvancer` (plusieurs soirées des deux côtés), `m.treasury` et la caisse de J2 sont exactement
+    celles d'avant ; la popularité ou les comptes, eux, ont bougé (preuve que les soirées ont eu lieu) ;
+17. **gains** : après `mgmtDuoJouer`, le vainqueur a +200 (k€), le perdant +50, chacun +125 sur égalité, et `carte.gains` le dit.
 
 ## Vérification
 

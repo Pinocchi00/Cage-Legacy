@@ -14,6 +14,11 @@ perdu la dernière super carte commence (J2 à la première, comme le draft).
 Où l'on recrute dans le jeu solo, pour mémoire : **Contrats → onglet Recrutement** (`mgmt-contrats-ecran.js`), qui liste
 les sans-contrat du monde. Le Duo lit **la même liste** (`mgmtRecrutables`) : pas de second marché.
 
+**Depuis la décision du 18/10** (caisse stable pendant les soirées des adjoints, gains de la super carte : DUO-T1), une caisse
+ne plonge plus en dehors des enchères : la mise reste bornée par `mgmtCanAfford`. **Question encore ouverte pour Anthony** : le
+prix d'ouverture (aujourd'hui la prime de signature, 5 000 à 8 000 € dans la partie des planches) — passer à la valeur du
+contrat (3 × la bourse) ? Tant qu'il n'a pas répondu, code la prime, comme écrit ci-dessous.
+
 ## Ce qui change
 
 ### `mgmt-duo.js` (ancre `/* ==== [ANCRE: DUO_T2_ENCHERES] — Duo T2, docs/lots/DUO-T2.md ==== */`)

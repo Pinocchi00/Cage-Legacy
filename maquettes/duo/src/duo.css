@@ -214,3 +214,6 @@
 .bi-sw{font-size:44px;line-height:.8;text-align:center;flex:none;white-space:normal}
 .bi-rec{flex:none;margin-top:auto}
 .bi-bas{flex:none;display:flex;justify-content:flex-end}
+
+.bi-argent{display:flex;flex-direction:column;flex:none}
+.bi-g{font-size:36px;line-height:.8}

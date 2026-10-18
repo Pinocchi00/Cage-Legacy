@@ -63,6 +63,7 @@ Lit `m.duo.soiree.i` et la dernière carte de `m.duo.cartes` (tout est déjà jo
 
 - bandeau : `{nom} remporte la super carte {n}` (couleur du joueur) ou `Égalité` ; le score `{x} – {y}` ;
 - les 6 combats en lignes (`combat`, les deux noms, vainqueur, méthode, round, `Revoir` comme l'écran `mgmt_duo_histo`) ;
+- `L'argent de la super carte` : `+{gains}` pour chaque joueur (`carte.gains`, DUO-T1), et à la 4e carte `Gagné sur la saison` ;
 - `Recrues des enchères` : les lignes de `m.duo.recrues` dont `n` est cette carte (`{nom} signe {combattant} · {prix}`), sinon rien ;
 - si c'était la 4e carte de la saison : `{nom} remporte la saison {s}` (ou `Saison {s} : égalité`) avec le score de saison ;
 - bouton jaune `Retour au QG` (Entrée) → `mgmtDuoTerminer(G.mgmt)`, `CL.go('mgmt_duo')`.

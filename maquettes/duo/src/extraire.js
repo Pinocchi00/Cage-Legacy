@@ -33,7 +33,9 @@ const out=win.eval(`(function(){
   D.avant={caisse:{a:mgmtEuros(m.treasury),b:mgmtEuros(sous.treasury)},rang:{a:rangOrg('split'),b:rangOrg('${J2}')},champions:{a:champ(m),b:champ(sous)},fnA:m.eventsPlayed,fnB:sous.eventsPlayed,jour:m.cal.jour};
   const pas=[];
   for(let i=0;i<20;i++){ const p=m.cal.prochaines[0], jp=p?p.jour:m.cal.jour+MGMT_EVENT_WEEKS*7; if(jp>prochaine) break;
+    const tA=m.treasury, tB=sous.treasury;   /* décision du 18/10 : les soirées des adjoints laissent la caisse stable */
     mgmtPredecesseurSoiree(m,m.eventsPlayed,mgmtPredecesseurReglages('split'));
+    m.treasury=tA; sous.treasury=tB;
     pas.push({jour:m.cal.jour,date:mgmtJourDateTexte(m.cal.jour),fnA:m.eventsPlayed,fnB:sous.eventsPlayed}); }
   m.cal.jour=Math.max(m.cal.jour,prochaine); mgmtAdvanceRosterAges(m);
   D.pas=pas; D.superDate=mgmtJourDateTexte(m.cal.jour); D.superProchaine=mgmtJourDateTexte(m.cal.jour+91);
@@ -93,6 +95,11 @@ const out=win.eval(`(function(){
     const fine=(!(r.winner==='D')&&fam==='dec')?(r.method+' après '+rounds+' rounds'):mgmtSuMethodeFamille({nul:r.winner==='D',family:fam,round,rounds});
     res.push({i,winner:r.winner,methode:fine,round,rounds,sa,sb}); });
   D.resultats=res; D.score={a:sa,b:sb};
+  /* décision du 18/10 : la super carte rapporte le plus au vainqueur (DUO-T1 : 200 000 € au vainqueur, 50 000 € au perdant, 125 000 € chacun sur égalité) */
+  const gA=sa>sb?200:(sb>sa?50:125), gB=sb>sa?200:(sa>sb?50:125);
+  D.gainsAvant={a:mgmtEuros(m.treasury),b:mgmtEuros(sous.treasury)};
+  m.treasury+=gA; sous.treasury+=gB;
+  D.gains={a:mgmtEuros(gA),b:mgmtEuros(gB),aK:gA,bK:gB,apresA:mgmtEuros(m.treasury),apresB:mgmtEuros(sous.treasury)};
   cartes.push(D); reperes={ca:m.cycle,cb:sous.cycle}; prochaine+=91; premier=sa>sb?'b':(sb>sa?'a':'b'); }
   const T=D0; T.cartes=cartes;
   return JSON.stringify(T);
