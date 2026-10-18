@@ -13,3 +13,11 @@ Point (8) l'effectif de J2 liste des identifiants préfixés de son organisation
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T10 : l'effectif d'un joueur et les super cartes passées`.
 
+## Compte rendu — reprise après À REPRENDRE
+- `mgmt-duo-ecrans.js` : échappement des champs effectif/historique, ancre `DUO_T3_ECRANS`, retrait des phrases de présentation inventées, en-têtes de colonnes et données historique.
+- `ui-cadre.css` : effectif calé sur les champs et tailles lisibles de DuoEffectif ; navigation catégories et lignes adaptables sans superposition déclarée, historique ajusté.
+- Tests ajoutés : « Duo T10 — effectif : Tab bascule de J2 à J1 puis revient à J2 » et « Duo T10 — une super carte jouée apparaît en tête de l’historique avec ses combats ». Fichier ciblé : `node --test tests/mgmtDuoEcrans.test.js` — 14/14 réussis.
+- Maquettes : vérification des valeurs DuoEffectif (rang, combattant, bilan W-L-D, âge, forme, état, contrat, rangée 62 px, texte minimum 22 px) et de sa composition ; aucun écran/maquette historique dédié n’est présent dans `maquettes/duo/`. Contrôle de débordement/superposition aux largeurs 1280, 1440 et 1920 et captures navigateur non réalisés dans cet environnement : cette validation visuelle reste à faire.
+- Cache : `node tools/_bump.js` exécuté pour `mgmt-duo-ecrans.js` et `ui-cadre.css`, entrée `index.html` montée par l’outil. `node tools/verif-versions.js origin/main` détecte encore l’écart préexistant `mgmt-salles.js` (`?v=b12xxxx`) — laissé intact car hors tranche ; audit non entièrement vert.
+- Migration de sauvegarde : aucune. Questions pour Anthony : aucune nouvelle question ; validation visuelle des trois largeurs à compléter.
+
