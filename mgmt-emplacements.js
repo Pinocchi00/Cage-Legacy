@@ -86,7 +86,8 @@ function scr_mgmt_parties(){
       .concat([{ks:['Entrée'],t:occupe?'Reprendre':'Nouvelle partie',jaune:true,onclick:'CL.mgmtPartieOuvrir()'}]);
   }
   return mfEcran(`<div class="mf-parties mgmt-parties">${cartes}</div>${dialogue}`,
-    {barre:'demarrage',plaque:'Management',libelle:'Choisis une partie',droite:MGMT_SLOTS+' emplacements',touches});
+    /* Monde lot 17 — décision d'Anthony du 17/10/2026 : « Management » est le seul mode, donc rien à annoncer ; « 3 emplacements » ne sert à rien ; la barre des sections n'a pas de sens avant d'entrer dans une partie (le logo seul). */
+    {barre:'logo',plaque:'Choisis une partie',touches});
 }
 SCREENS.mgmt_parties=scr_mgmt_parties;
 

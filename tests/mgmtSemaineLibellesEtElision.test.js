@@ -38,8 +38,8 @@ test('Semaine — carte posée, effectif et invaincu portent le libellé fémini
     m.card.prelims=[{a:'p1',b:'p2',cycle:m.cycle,slot:'prelim'}];
     /* Les graines 56 et 64 dérivent des bilans 7-0 et 3-0 (sondés) sur la
        catégorie plume : la ligne invaincu vient de la première. */
-    m.exterieur=[{id:'ext-plume1',seed:56,div:'F-feather',ck:'BR',born:m.cycle},
-                 {id:'ext-plume2',seed:64,div:'F-feather',ck:'BR',born:m.cycle}];
+    /* Monde lot 16 — décision d'Anthony du 17/10/2026 : un combattant de moins de 6 combats ne monte pas dans le haut du classement ; la seconde ligne (3-0) en bas du classement mondial faisait passer la catégorie par une ligne « voisinage » et masquait « invaincu ». Seule la première ligne (7-0) reste. */
+    m.exterieur=[{id:'ext-plume1',seed:56,div:'F-feather',ck:'BR',born:m.cycle}];
   })()`);
   /* Ligne stockée inchangée : le « féminin » n'est qu'un affichage dérivé. */
   const avant = win.eval(`JSON.stringify(G.mgmt.roster)`);

@@ -94,7 +94,8 @@ test('Emplacements — l’accueil : Management ouvre « Choisis une partie », 
       texte:document.getElementById('app').textContent};`);
   assert.ok(r.reprendre); assert.equal(r.etat,30); assert.deepEqual(r.repris,['mgmt_accueil',3,30]);
   assert.equal(r.ecran,'mgmt_parties'); assert.equal(r.curseur,3,'le curseur part de la dernière partie jouée');
-  assert.ok(r.texte.includes('Choisis une partie')&&r.texte.includes('3 emplacements'));
+  /* Décision d'Anthony du 17/10/2026 (lot 17) : plus de plaque « Management » (seul mode) ni de « 3 emplacements » ; le titre est « Choisis une partie ». */
+  assert.ok(r.texte.includes('Choisis une partie')&&!r.texte.includes('3 emplacements')&&!/MANAGEMENT/i.test(r.texte.replace(/Choisis une partie/i,'')));
 });
 
 test('Emplacements — l’écran : un occupé montre l’organisation, la prochaine soirée, les soirées jouées, la caisse ; un vide ne propose que la nouvelle partie', () => {

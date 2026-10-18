@@ -77,7 +77,7 @@ function mfPriseHtml(m,ecran,grise){
   /* ==== [ANCRE: ACCUEIL_SANS_PROCHAINE_ETAPE] — Monde lot 12 T2 ==== */
   const p=(grise||ecran==='mgmt_resultats'||ecran==='mgmt_accueil')?null:mgmtProchaineChose(m), id=mgmtPriseMoment(m,ecran);
   const leila=id?`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(MGMT_PRISE_TEXTES.moments[id].texte)}</span></div>`:'';
-  const suite=p?`<button type="button" class="mf-prise-suite" onclick="${p.onclick}"><span>Prochaine étape</span><b>${esc(p.texte)}</b></button>`:'';
+  const suite=p?`<button type="button" class="mf-prise-suite" onclick="${p.onclick}"><span class="mf-prise-lib">Prochaine étape</span><b>${esc(p.texte)}</b></button>`:'';
   /* Une seule ligne à la fois dans le bas de l'écran : la parole de Leïla quand un moment est à dire, sinon la prochaine étape. */
   return (leila||suite)?`<div class="mf-prise">${leila||suite}</div>`:'';
 }

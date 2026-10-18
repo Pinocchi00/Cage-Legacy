@@ -15,7 +15,10 @@ function mgmtInitTitles(m){
   if(!m||!Array.isArray(m.roster)||!Array.isArray(m.facts)) return;
   for(const div of allDivisions()){
     if(m.facts.some(x=>x&&x.k==='title_initial'&&x.div===div.id)) continue;
-    const first=mgmtDivisionRanking(m,div.id,'organization')[0];
+    /* Monde lot 16 — décision d'Anthony du 17/10/2026 : un champion réel a 12 à 32 combats et 1 à 7 défaites ; on prend le premier des six premiers qui y répond. */
+    const classement=mgmtDivisionRanking(m,div.id,'organization');
+    const reel=o=>{ const W=Number.isSafeInteger(o.W)?o.W:0, L=Number.isSafeInteger(o.L)?o.L:0, D=Number.isSafeInteger(o.D)?o.D:0; const n=W+L+D; return n>=12&&n<=32&&L>=1&&L<=7; };
+    const first=classement.slice(0,6).find(reel)||classement[0];
     mgmtAddFact(m,{c:m.cycle,k:'title_initial',div:div.id,a:first?first.id:null});
   }
 }

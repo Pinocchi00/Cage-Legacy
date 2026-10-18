@@ -17,14 +17,15 @@ test('T1 ceintures — attribution initiale stable, indépendante du rang vivant
   const r=JSON.parse(win.eval(`JSON.stringify((()=>{
     const m=G.mgmt, seed=SEED, before=JSON.stringify(m);
     const belts=allDivisions().map(d=>mgmtSplitTitle(m,d.id));
-    const ranked=allDivisions().map(d=>mgmtDivisionRanking(m,d.id,'organization')[0]?.id??null);
+    const ranked=allDivisions().map(d=>mgmtDivisionRanking(m,d.id,'organization').slice(0,6).map(f=>f.id));
     mgmtInitTitles(m);
     const unchanged=JSON.stringify(m)===before;
     const belt=belts.find(x=>x.id),f=mgmtFighterById(m,belt.id);
     f.W=0; f.L=100;
     return {belts,ranked,unchanged,rng:seed===SEED,after:mgmtSplitTitle(m,belt.div),belt};
   })())`));
-  assert.deepEqual(r.belts.map(b=>b.id),r.ranked);
+  /* Monde lot 16 — décision d'Anthony du 17/10/2026 : le champion initial n'est plus le seul « premier du classement » mais le premier des six premiers qui a un palmarès de champion (12 à 32 combats, 1 à 7 défaites). */
+  assert.ok(r.belts.every((b,i)=>b.id===null?r.ranked[i].length===0:r.ranked[i].includes(b.id)),'chaque champion initial est parmi les six premiers de sa catégorie');
   assert.ok(r.belts.every(b=>b.defenses===0));
   assert.ok(r.unchanged&&r.rng,'idempotence et lecture sans tirage');
   assert.deepEqual(r.after,r.belt,'un recul au classement ne perd pas la ceinture');
