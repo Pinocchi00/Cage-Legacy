@@ -25,6 +25,17 @@ test('Duo T8 — création : J1 choisit puis J2 ne peut pas reprendre son organi
   assert.notEqual(w.eval('MGMT_DUO_NOUVELLE.i'),0);
 });
 
+test('Duo T3 — une création courte se termine sur mgmt_duo avec m.duo posé',()=>{
+  const w=newGameWindow({runMain:true});
+  /* passé court réel, comme les tests de création existants ; la partie prête est remise à `mgmtNouvelleEntrer` comme le fait la génération */
+  w.eval("setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6});");
+  w.eval("MGMT_NOUVELLE.gen={slot:1,pret:true,m:G.mgmt,duo:{b:'mma-korner',noms:{a:'Anthony',b:'François'}}}; CL.mgmtNouvelleEntrer();");
+  /* le QG (T9) n'est pas encore là : tant qu'il manque, l'entrée retombe sur l'écran existant ; il suffit que la partie soit à deux */
+  if(w.eval("typeof SCREENS.mgmt_duo==='function'")) assert.equal(w.eval('G.screen'),'mgmt_duo');
+  assert.equal(w.eval("G.mgmt.duo&&G.mgmt.duo.b"),'mma-korner');
+  assert.equal(w.eval("G.mgmt.duo.noms.a"),'Anthony');
+});
+
 test('Duo T8 — création : un nom injecté est échappé et les noms restent en texte',()=>{
   const w=newGameWindow();
   w.eval('CL.mgmtDuoNouvelle(1); MGMT_DUO_NOUVELLE.noms.a="<b>O\'Neil</b>"; MGMT_DUO_NOUVELLE.etape="a"; render();');

@@ -5,10 +5,10 @@ let MGMT_DUO_QG={};
 
 function mgmtDuoNouvelleHtml(){
   const s=MGMT_DUO_NOUVELLE;
-  const titre=s.etape==='noms'?'Nouvelle partie à deux':`${s.noms[s.etape==='a'?'a':'b']||`Joueur ${s.etape==='a'?1:2}`} · choisis ton organisation`;
+  const titre=s.etape==='noms'?'Duo':`${s.noms[s.etape==='a'?'a':'b']||`Joueur ${s.etape==='a'?1:2}`} · choisis ton organisation`;
   let contenu;
   if(s.etape==='noms'){
-    contenu=`<div class="mf-duo-noms"><h2>Qui joue ?</h2><div class="mf-duo-champs"><label>Joueur 1<input id="mf-duo-nom-a" maxlength="16" value="${esc(s.noms.a)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label><label>Joueur 2<input id="mf-duo-nom-b" maxlength="16" value="${esc(s.noms.b)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label></div><p>16 caractères au plus. Vide : « Joueur 1 », « Joueur 2 ».</p>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtDuoNouvelleContinuer()'})}</div>`;
+    contenu=`<div class="mf-duo-noms"><h2>Deux joueurs, un PC</h2><div class="mf-duo-champs"><label>Joueur 1<input id="mf-duo-nom-a" maxlength="16" value="${esc(s.noms.a)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label><label>Joueur 2<input id="mf-duo-nom-b" maxlength="16" value="${esc(s.noms.b)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label></div><div class="mf-duo-regles"><p>Chacun son organisation. Vos adjoints jouent les soirées ordinaires.</p><p>Tous les 3 mois, une super carte : six combats, tes combattants contre les siens.</p></div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtDuoNouvelleContinuer()'})}</div>`;
   }else{
     const cartes=MGMT_ORGANISATIONS.map((o,i)=>{
       const prise=s.etape==='b'&&i===s.a;
