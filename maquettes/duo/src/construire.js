@@ -13,6 +13,10 @@ const MAJ=s=>String(s).toUpperCase();
 const ORG=id=>D.orgs.find(o=>o.id===id);
 const A=ORG(D.j1), B=ORG(D.j2), NA=D.noms.a, NB=D.noms.b;
 const C1=D.cartes[0], C2=D.cartes[1], C4=D.cartes[3], DIVS=C1.divisions;
+/* Décision du 18/10 (16 h 08) : l'ouverture des enchères = la valeur du contrat, 3 × la bourse ; palier de 10 %. */
+const eurosK=k=>{ const v=Math.round(k*1000), t=String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f'); return (v<0?'−':'')+t+'\u00a0€'; };
+for(const c of D.cartes) for(const l of c.lots){ l.ouverture=3*l.b; l.pas=Math.max(1,Math.ceil(l.ouverture*0.1));
+  l.ouvertureTxt=eurosK(l.ouverture); l.pasTxt=eurosK(l.pas); l.deux=eurosK(l.ouverture+l.pas); l.trois=eurosK(l.ouverture+2*l.pas); }
 const cote=c=>c==='a'?{org:A,nom:NA,cls:'j1'}:{org:B,nom:NB,cls:'j2'};
 const DIV=id=>(DIVS.find(d=>d.id===id)||{}).label||id;
 const rec=f=>`${f.W}-${f.L}-${f.D}`;

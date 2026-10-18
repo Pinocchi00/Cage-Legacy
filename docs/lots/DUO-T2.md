@@ -14,10 +14,11 @@ perdu la dernière super carte commence (J2 à la première, comme le draft).
 Où l'on recrute dans le jeu solo, pour mémoire : **Contrats → onglet Recrutement** (`mgmt-contrats-ecran.js`), qui liste
 les sans-contrat du monde. Le Duo lit **la même liste** (`mgmtRecrutables`) : pas de second marché.
 
-**Depuis la décision du 18/10** (caisse stable pendant les soirées des adjoints, gains de la super carte : DUO-T1), une caisse
-ne plonge plus en dehors des enchères : la mise reste bornée par `mgmtCanAfford`. **Question encore ouverte pour Anthony** : le
-prix d'ouverture (aujourd'hui la prime de signature, 5 000 à 8 000 € dans la partie des planches) — passer à la valeur du
-contrat (3 × la bourse) ? Tant qu'il n'a pas répondu, code la prime, comme écrit ci-dessous.
+**Décisions du 18/10** : caisse stable pendant les soirées des adjoints et gains de la super carte (DUO-T1) ; et, à 16 h 08,
+Anthony retient la recommandation de Claude : **le prix d'ouverture est la valeur du contrat, 3 × la bourse demandée**
+(ex. : bourse de 23 000 € → ouverture à 69 000 €, palier de 7 000 €), et non plus la prime de signature (7 000 € pour le même
+combattant). L'argent des super cartes (200 000 € au vainqueur) sert ainsi à quelque chose : une recrue de premier plan coûte
+le tiers d'une victoire. La mise reste bornée par `mgmtCanAfford`.
 
 ## Ce qui change
 
@@ -26,16 +27,16 @@ contrat (3 × la bourse) ? Tant qu'il n'a pas répondu, code la prime, comme éc
 ```js
 const MGMT_DUO_LOTS=3;            // combattants mis aux enchères par super carte
 const MGMT_DUO_CONTRAT=3;         // combats du contrat signé
-const MGMT_DUO_PALIER=0.10;       // le palier = 10 % du prix d'ouverture, arrondi au-dessus, au moins 1 k$
+const MGMT_DUO_PALIER=0.10;       // le palier = 10 % du prix d'ouverture, arrondi au-dessus, au moins 1 k€
 ```
 
 1. `mgmtDuoLots(m)` → les combattants mis aux enchères. Pour chaque catégorie de `allDivisions()`, le **premier** de
    `mgmtRecrutables(m,div.id)` (ordre du classement mondial) dont l'organisation (`mgmtExteriorCombattant(m,id).orgId`)
    n'est **pas** celle de J2 (`m.duo.b`) ; puis tri par `rang` croissant, `mgmtStar` décroissant, `id` ; les
    `MGMT_DUO_LOTS` premiers (`mgmtStar` lu sur la ligne rendue par `mgmtExteriorCombattant`). Lu avec `G.mgmt===m`. Pour chacun :
-   - `b = mgmtBourseSouhaitee(m, mgmtExteriorPourOffre(m,id), false)` — sert **seulement** à fixer le prix d'ouverture, le même pour les deux joueurs
+   - `b = mgmtBourseSouhaitee(m, mgmtExteriorPourOffre(m,id), false)` — la bourse par combat ; sert **seulement** à fixer le prix d'ouverture, le même pour les deux joueurs
      (la bourse dépend de la popularité et du profil de l'organisation qui la lit : on la lit chez J1 pour l'ouverture, puis chez le gagnant pour son contrat) ;
-   - `ouverture = mgmtContratPrime(MGMT_DUO_CONTRAT,b)` ; `pas = Math.max(1,Math.ceil(ouverture*MGMT_DUO_PALIER))`.
+   - `ouverture = MGMT_DUO_CONTRAT*b` (la valeur du contrat, décision du 18/10) ; `pas = Math.max(1,Math.ceil(ouverture*MGMT_DUO_PALIER))`.
    Rend `[{id,name,div,orgId,rang,b,ouverture,pas}]`.
 2. **Branchement dans `mgmtDuoAvancerPas`** (DUO-T1) : à l'arrivée à la date, si `mgmtDuoLots(m)` n'est pas vide,
    `etape='encheres'` et

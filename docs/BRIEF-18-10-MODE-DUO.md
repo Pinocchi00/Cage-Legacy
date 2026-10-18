@@ -21,6 +21,7 @@ Réponses aux questions du 18/10 :
 | Formation des 6 combats | **« Je place, tu réponds »** : un joueur place un de ses combattants, l'autre choisit son adversaire dans la même catégorie, puis on inverse (3 placements chacun) |
 | Enchères sur les combattants libres | **Ouvertes, à tour de rôle** : chacun surenchérit ou abandonne, à la vue de l'autre |
 | Qui code | OpenCode (agents sur ChatGPT), d'après les fiches |
+| Prix des enchères (18/10, 16 h 08) | **Recommandation de Claude retenue** : le prix d'ouverture est la valeur du contrat, **3 × la bourse demandée** (≈ 60 000 à 95 000 € pour les meilleurs libres), palier de 10 % |
 | L'argent (décision du 18/10, 15 h 54) | **« Le matchmaker automatique reste toujours stable et ce sont les super cartes qui génèrent le plus de bénéfices pour le vainqueur. »** Les soirées ordinaires jouées par les adjoints ne font plus bouger la caisse des deux joueurs ; la super carte rapporte gros au vainqueur, moins au perdant |
 
 ## 2. Le mode en une page
@@ -40,7 +41,7 @@ Réponses aux questions du 18/10 :
   pas, quoi que fasse le matchmaker automatique. **La super carte est la grande source d'argent** : 200 000 € au vainqueur,
   50 000 € au perdant, 125 000 € chacun sur égalité (montants proposés par Claude, réglables : une petite soirée ordinaire
   encaisse environ 270 000 à 420 000 € de billetterie et de droits pour un bénéfice net de −50 000 à +70 000 €, mesuré sur
-  8 soirées de Split le 18/10). Les dépenses du Duo sont les enchères.
+  8 soirées de Split le 18/10). Les dépenses du Duo sont les enchères, ouvertes à la valeur du contrat (3 × la bourse).
 
 ## 3. Pourquoi c'est faisable vite (ce qui existe déjà)
 

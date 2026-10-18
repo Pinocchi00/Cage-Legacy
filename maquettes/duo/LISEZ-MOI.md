@@ -59,7 +59,7 @@ planches de la refonte (valeurs de `ui-cadre.css`) ; `src/duo.css` ajoute ce qui
    découvert à chaque super carte (−106 000 € à −300 000 €) : le matchmaker automatique la faisait plonger, et Anthony ne pouvait plus
    miser. Les planches sont refaites avec la règle décidée (DUO-T1) : **les soirées des adjoints ne font plus bouger la caisse**, la
    super carte rapporte **200 000 € au vainqueur, 50 000 € au perdant** (125 000 € chacun sur égalité). Le bilan montre ces gains.
-   **Reste ouvert** : le prix d'ouverture des enchères (la prime de signature, 5 000 à 8 000 € ici) — passer à la valeur du contrat
-   (3 × la bourse) pour que l'argent des super cartes ait un usage ?
+   **Prix des enchères — tranché le 18/10 (16 h 08)** : Anthony retient la recommandation de Claude, le prix d'ouverture est **la
+   valeur du contrat, 3 × la bourse** (Julius Hoffman : 69 000 € au lieu de 7 000 €, palier 7 000 €). Les planches le montrent.
 2. **L'écran « Nouvelle partie » du jeu coupe déjà certaines réputations** (hauteur de 48 px pour deux lignes) : la planche garde 50 px et
    resserre les marges ; à revoir dans `ui-cadre.css` en même temps que DUO-T3.
