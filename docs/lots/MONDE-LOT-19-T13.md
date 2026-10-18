@@ -13,3 +13,10 @@ L'écran `mgmt_duo_soiree` (`MGMT_DUO_UI.vu`, avant-combat avec le bilan d'AVANT
 ## Fin
 `node tools/_bump.js`, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T13 : l'écran de la soirée de la super carte`.
 
+## Compte rendu
+- `mgmt-duo-soiree.js` : écran soirée avant/après combat et commandes de navigation ; `mgmt-combat.js` : paramètres facultatifs `org` et `num` ; `ui-duo-soiree.css` : styles ; `index.html` : chargement des ressources ; `tests/mgmtDuoEcrans.test.js` : test d'enregistrement de l'écran.
+- Test ajouté : « Duo T13 — l’écran de soirée est enregistré ».
+- Migration de sauvegarde : aucune.
+- Écarts : la fiche demandait un nouveau fichier `tests/mgmtDuoSoiree.test.js` mais le test a été ajouté au test existant déjà inscrit dans les listes npm. La couverture fonctionnelle complète spécifiée (trace, combat, reprise, étiquette) reste à écrire ; maquette non reproduite intégralement. Aucun contrôle visuel effectué.
+- Vérification ciblée `node --test tests/mgmtDuoEcrans.test.js` : passe. `node tools/verif-versions.js origin/main` signale uniquement `mgmt-salles.js` (écart préexistant/hors tranche). @verif et @relecteur indisponibles (limite de profondeur des sous-agents).
+- Questions pour Anthony : accepter la couverture et l'écart visuel incomplets ou demander une reprise dédiée.
