@@ -312,7 +312,17 @@ function mgmtDuoValide(d,raw){
       for(const k of ['a','b']){ if(c[k]!==null&&!mgmtValidId(c[k])) return false; }
     }
   }
-  if(d.encheres!==null) return false;
+  if(d.encheres!==null){
+    const e=d.encheres;
+    if(!e||typeof e!=='object'||!Array.isArray(e.lots)||e.lots.length>3||!Number.isSafeInteger(e.i)||e.i<0||e.i>e.lots.length||!['a','b'].includes(e.premier)) return false;
+    for(const l of e.lots){
+      if(!l||typeof l!=='object'||!mgmtValidId(l.id)||typeof l.fini!=='boolean'||!['a','b'].includes(l.tour)) return false;
+      for(const k of ['b','ouverture','pas','prix']){ if(!Number.isSafeInteger(l[k])||l[k]<0) return false; }
+      for(const k of ['meneur','gagnant']){ if(l[k]!==null&&!['a','b'].includes(l[k])) return false; }
+      if(!Number.isSafeInteger(l.passes)||l.passes<0||l.passes>2) return false;
+    }
+  }
+  if(d.recrues!==undefined&&(!Array.isArray(d.recrues)||d.recrues.length>200)) return false;
   if(d.soiree!==null&&(!d.soiree||!Number.isSafeInteger(d.soiree.i)||d.soiree.i<0||d.soiree.i>6)) return false;
   if(!Array.isArray(d.cartes)||d.cartes.length>200) return false;
   for(const c of d.cartes){

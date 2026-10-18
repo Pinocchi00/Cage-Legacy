@@ -61,7 +61,8 @@ function mgmtDuoCreer(m,orgIdB,noms){
     draft:null,
     encheres:null,
     soiree:null,
-    cartes:[]
+    cartes:[],
+    recrues:[]
   };
   return true;
 }
@@ -73,12 +74,16 @@ function mgmtDuoProchaineSoiree(m){
   return m.cal.jour+MGMT_EVENT_WEEKS*7;
 }
 
-/** Ouvre le draft : le perdant de la dernière carte place le premier ; à la première carte ou après une égalité, J2. */
-function mgmtDuoDraftOuvrir(m){
+/** Qui commence : le perdant de la dernière super carte ; à la première carte ou après une égalité, J2 (J1 a choisi son organisation en premier). @returns {string} */
+function mgmtDuoPremier(m){
   const derniere=m.duo.cartes[m.duo.cartes.length-1];
-  let premier='b';
-  if(derniere&&derniere.gagnant==='a') premier='b';
-  else if(derniere&&derniere.gagnant==='b') premier='a';
+  if(derniere&&derniere.gagnant==='b') return 'a';
+  return 'b';
+}
+
+/** Ouvre le draft : le perdant de la dernière carte place le premier. */
+function mgmtDuoDraftOuvrir(m){
+  const premier=mgmtDuoPremier(m);
   m.duo.draft={premier,tour:premier,attente:'place',combats:[]};
 }
 
@@ -97,8 +102,15 @@ function mgmtDuoAvancerPas(m){
   }
   m.cal.jour=Math.max(m.cal.jour,m.duo.prochaine);
   mgmtAdvanceRosterAges(m);
-  m.duo.etape='draft';
-  mgmtDuoDraftOuvrir(m);
+  const lots=mgmtDuoLots(m);
+  if(lots.length>0){
+    const premier=mgmtDuoPremier(m);
+    m.duo.etape='encheres';
+    m.duo.encheres={i:0,premier,lots:lots.map(l=>Object.assign(l,{prix:0,meneur:null,tour:premier,passes:0,fini:false,gagnant:null}))};
+  }else{
+    m.duo.etape='draft';
+    mgmtDuoDraftOuvrir(m);
+  }
   saveMgmt();
   return {termine:true};
 }
@@ -328,4 +340,111 @@ function mgmtDuoResume(m,cote){
     });
     return {soirees:new Set(traces.map(t=>t.c)).size,combats,champions};
   });
+}
+
+/* ==== [ANCRE: DUO_T2_ENCHERES] — Duo T2, docs/lots/DUO-T2.md ==== */
+const MGMT_DUO_LOTS=3;            // combattants mis aux enchères par super carte
+const MGMT_DUO_CONTRAT=3;         // combats du contrat signé
+const MGMT_DUO_PALIER=0.10;       // le palier = 10 % du prix d'ouverture, arrondi au-dessus, au moins 1 k€
+
+/** Les combattants mis aux enchères : le premier recrutable (ordre du classement mondial) de chaque catégorie qui n'est pas de l'organisation de J2, les
+ *  meilleurs d'abord ; le prix d'ouverture est la valeur du contrat (3 × la bourse demandée, décision du 18/10/2026). Exige G.mgmt===m.
+ *  @returns {Array<{id:string,name:string,div:string,orgId:string,rang:number,b:number,ouverture:number,pas:number}>} */
+function mgmtDuoLots(m){
+  const retenus=[];
+  for(const d of allDivisions()){
+    for(const r of mgmtRecrutables(m,d.id)){
+      const f=mgmtExteriorCombattant(m,r.id);
+      if(!f||f.orgId===m.duo.b) continue;
+      retenus.push({id:f.id,name:f.name,div:d.id,orgId:f.orgId,rang:r.rang,star:mgmtStar(f)});
+      break;
+    }
+  }
+  retenus.sort((x,y)=>x.rang-y.rang||y.star-x.star||(x.id<y.id?-1:x.id>y.id?1:0));
+  return retenus.slice(0,MGMT_DUO_LOTS).map(l=>{
+    const b=mgmtBourseSouhaitee(m,mgmtExteriorPourOffre(m,l.id),false);
+    const ouverture=MGMT_DUO_CONTRAT*b;
+    return {id:l.id,name:l.name,div:l.div,orgId:l.orgId,rang:l.rang,b,ouverture,pas:Math.max(1,Math.ceil(ouverture*MGMT_DUO_PALIER))};
+  });
+}
+
+/** Le lot courant des enchères, ou null. @returns {?object} */
+function mgmtDuoLotCourant(m){
+  const e=mgmtDuoActif(m)&&m.duo.etape==='encheres'?m.duo.encheres:null;
+  return e&&e.lots[e.i]?e.lots[e.i]:null;
+}
+
+/** Le joueur dont c'est le tour mise : l'ouverture d'abord, puis un palier de plus que le meneur. Refusé si sa caisse ne peut pas suivre.
+ *  @returns {{ok:boolean,prix?:number,raison?:string}} */
+function mgmtDuoMiser(m){
+  const L=mgmtDuoLotCourant(m);
+  if(!L) return {ok:false,raison:'etape'};
+  const prix=L.meneur===null?L.ouverture:L.prix+L.pas;
+  const peut=mgmtDuoAvec(m,L.tour,partie=>mgmtCanAfford(partie,prix));
+  if(!peut) return {ok:false,raison:'caisse'};
+  L.prix=prix;
+  L.meneur=L.tour;
+  L.passes=0;
+  L.tour=mgmtDuoAutre(L.tour);
+  saveMgmt();
+  return {ok:true,prix};
+}
+
+/** Le joueur dont c'est le tour passe : si l'autre mène, il signe le combattant ; deux passes sans mise laissent le combattant libre. */
+function mgmtDuoPasser(m){
+  const L=mgmtDuoLotCourant(m);
+  if(!L) return;
+  if(L.meneur!==null){
+    mgmtDuoAdjuger(m,L);
+  }else{
+    L.passes++;
+    if(L.passes<2){
+      L.tour=mgmtDuoAutre(L.tour);
+      saveMgmt();
+      return;
+    }
+    L.fini=true;
+  }
+  mgmtDuoLotSuivant(m);
+}
+
+/** Passe au lot suivant ; après le dernier, le draft s'ouvre. */
+function mgmtDuoLotSuivant(m){
+  const e=m.duo.encheres;
+  e.i++;
+  if(e.i>=e.lots.length){
+    m.duo.etape='draft';
+    m.duo.encheres=null;
+    mgmtDuoDraftOuvrir(m);
+  }
+  saveMgmt();
+}
+
+/** Le meneur gagne le lot au prix mené ; si le transfert échoue (plus libre, plus là), le lot finit sans gagnant et rien n'est payé. */
+function mgmtDuoAdjuger(m,L){
+  L.fini=true;
+  if(mgmtDuoTransferer(m,L.id,L.meneur,L.prix)) L.gagnant=L.meneur;
+}
+
+/** Le combattant libre entre dans la partie du côté, avec un contrat de trois combats à la bourse qu'il demande à son nouvel employeur ; le prix sort
+ *  de la caisse de cette organisation. Réutilise mgmtRecruterVivant (jamais un second marché). @returns {boolean} */
+function mgmtDuoTransferer(m,id,cote,prix){
+  const cible=mgmtDuoPartie(m,cote);
+  const f=mgmtExteriorCombattant(m,id);
+  if(!cible||!f||f.libre!==true) return false;
+  if(cote==='b'&&f.orgId===m.duo.b) return false;
+  const ligne=mgmtRecruterVivant(m,id,cible);
+  if(!ligne) return false;
+  mgmtDuoAvec(m,cote,partie=>{
+    const bourse=mgmtBourseSouhaitee(partie,ligne,false);
+    ligne.ct={n:MGMT_DUO_CONTRAT,f:0,b:bourse,since:partie.cycle};
+    delete ligne.libre;
+    partie.treasury-=prix;
+    mgmtAddFact(partie,{c:partie.cycle,k:'contrat',a:id});
+    mgmtRangsInvalider(partie);
+  });
+  if(!Array.isArray(m.duo.recrues)) m.duo.recrues=[];
+  m.duo.recrues.push({n:m.duo.cartes.length+1,id,name:ligne.name,cote,prix});
+  if(m.duo.recrues.length>200) m.duo.recrues.shift();
+  return true;
 }

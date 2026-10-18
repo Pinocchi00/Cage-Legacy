@@ -59,17 +59,19 @@ function mgmtRecrutablesVivants(m,ranking,chezSplit){
   return out;
 }
 /** Monde vivant : il quitte l'effectif de son organisation et entre chez le joueur avec sa ligne (bilan, âge, niveau). */
-function mgmtRecruterVivant(m,id){
+function mgmtRecruterVivant(m,id,cible){
+  /* Duo T2 : `cible` (facultative, la partie de J1 par défaut) est la partie qui reçoit la ligne — l'organisation de J2 dans une partie à deux. */
+  const dest=cible||m;
   const f=mgmtExteriorCombattant(m,id), sous=f&&m.orgs[f.orgId], div=f&&divById(f.div);
   if(!f||!sous||!div) return null;
   const i=sous.roster.findIndex(x=>x&&x.id===id); if(i<0) return null;
   const ligne=JSON.parse(JSON.stringify(sous.roster[i]));
   sous.roster.splice(i,1); if(typeof mgmtRangsInvalider==='function') mgmtRangsInvalider(sous);
   delete ligne.libre; delete ligne.ct;
-  Object.assign(ligne,{divName:div.name,org:mgmtOrgNom(m),interactions:0});
-  m.roster.push(ligne);
-  mgmtRangsInvalider(m);
-  mgmtAddFact(m,{c:m.cycle,k:'recrue',a:ligne.id});
+  Object.assign(ligne,{divName:div.name,org:mgmtOrgNom(dest),interactions:0});
+  dest.roster.push(ligne);
+  mgmtRangsInvalider(dest);
+  mgmtAddFact(dest,{c:dest.cycle,k:'recrue',a:ligne.id});
   return ligne;
 }
 

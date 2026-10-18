@@ -12,6 +12,9 @@ function creer() {
 }
 const json = (win, code) => JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`));
 
+/* Avance jusqu'au draft : depuis DUO-T2 les enchères s'ouvrent d'abord ; personne ne mise, tout le monde passe. */
+const AVANCER = `mgmtDuoAvancer(G.mgmt);while(G.mgmt.duo.etape==='encheres'){mgmtDuoPasser(G.mgmt);}`;
+
 /* Joue un draft complet : le joueur dont c'est le tour place son premier combattant plaçable, l'autre répond dans la même catégorie. */
 const DRAFT = `const m=G.mgmt;
   for(let i=0;i<6;i++){
@@ -38,10 +41,11 @@ test('Duo T1 — la création, l’avancée du temps, la caisse stable et le dra
 
   /* 2 et 16. avancer : les deux organisations jouent, la caisse des deux joueurs ne bouge pas */
   const av = json(win, `const m=G.mgmt,sous=m.orgs[m.duo.b],avant={a:m.eventsPlayed,b:sous.eventsPlayed,ta:m.treasury,tb:sous.treasury,pop:JSON.stringify([m.audiences,sous.audiences])};
-    const r=mgmtDuoAvancer(m);
-    return {termine:r.termine,etape:m.duo.etape,jour:m.cal.jour,prochaine:m.duo.prochaine,da:m.eventsPlayed-avant.a,db:sous.eventsPlayed-avant.b,
+    const r=mgmtDuoAvancer(m);const etapeAvancer=m.duo.etape;while(m.duo.etape==='encheres'){mgmtDuoPasser(m);}
+    return {termine:r.termine,etapeAvancer,etape:m.duo.etape,jour:m.cal.jour,prochaine:m.duo.prochaine,da:m.eventsPlayed-avant.a,db:sous.eventsPlayed-avant.b,
       ta:m.treasury-avant.ta,tb:sous.treasury-avant.tb,bouge:JSON.stringify([m.audiences,sous.audiences])!==avant.pop,g:G.mgmt===m,draft:m.duo.draft.premier+'/'+m.duo.draft.attente};`);
   assert.equal(av.termine, true);
+  assert.ok(['encheres', 'draft'].includes(av.etapeAvancer));
   assert.equal(av.etape, 'draft');
   assert.ok(av.jour >= av.prochaine && av.da > 0 && av.db > 0, JSON.stringify(av));
   assert.equal(av.ta, 0); assert.equal(av.tb, 0); assert.ok(av.bouge);
@@ -102,7 +106,7 @@ test('Duo T1 — la création, l’avancée du temps, la caisse stable et le dra
 
 test('Duo T1 — la super carte : combats, bilans de chaque côté, gains, rejeu fidèle, équité, rechargement, allègement', () => {
   const win = creer();
-  win.eval(`mgmtDuoAvancer(G.mgmt);`);
+  win.eval(AVANCER);
   assert.equal(json(win, DRAFT.replace(/^const m=G.mgmt;/, 'const m=G.mgmt;')), 'pret');
 
   /* 6. l'équité : le profil d'un combattant de J2 se calcule avec SA partie */
@@ -173,7 +177,7 @@ test('Duo T1 — la super carte : combats, bilans de chaque côté, gains, rejeu
 
 test('Duo T1 — même graine, mêmes gestes, même partie ; une partie sans duo se joue comme avant', () => {
   const a = creer(), b = creer();
-  for (const w of [a, b]) { w.eval('mgmtDuoAvancer(G.mgmt)'); w.eval(`(function(){${DRAFT}})()`); w.eval('mgmtDuoJouer(G.mgmt)'); }
+  for (const w of [a, b]) { w.eval(AVANCER); w.eval(`(function(){${DRAFT}})()`); w.eval('mgmtDuoJouer(G.mgmt)'); }
   assert.equal(a.eval('mgmtSerialiser(G.mgmt)'), b.eval('mgmtSerialiser(G.mgmt)'));
 
   /* 12. sans m.duo : le monde vivant continue exactement comme avant (deux fenêtres, l'une sans duo, l'autre avec duo en attente) */
@@ -184,4 +188,76 @@ test('Duo T1 — même graine, mêmes gestes, même partie ; une partie sans duo
   const sansDuo = JSON.parse(sans.eval('mgmtSerialiser(G.mgmt)')), avecDuo = JSON.parse(avec.eval('mgmtSerialiser(G.mgmt)'));
   delete avecDuo.duo;
   assert.deepEqual(avecDuo, sansDuo);
+});
+
+test('Duo T2 — les enchères : lots, mises, passes, caisse, transferts, rechargement, draft ensuite', () => {
+  const win = creer();
+  win.eval('mgmtDuoAvancer(G.mgmt)');
+  const a = json(win, `const m=G.mgmt,e=m.duo.encheres,res={etape:m.duo.etape,premier:e.premier,n:e.lots.length};
+    res.lots=e.lots.map(l=>({id:l.id,orgId:l.orgId,rang:l.rang,ouv:l.ouverture,b:l.b,pas:l.pas,dansJ1:m.roster.some(f=>f.id===l.id),libre:mgmtExteriorCombattant(m,l.id).libre===true}));
+    res.valide=validateMgmt(JSON.parse(JSON.stringify(m)));
+    return res;`);
+  assert.equal(a.etape, 'encheres'); assert.equal(a.premier, 'b');
+  assert.ok(a.n >= 1 && a.n <= 3, 'au plus trois lots');
+  for (const l of a.lots) {
+    assert.notEqual(l.orgId, 'mma-korner'); assert.equal(l.dansJ1, false); assert.equal(l.libre, true);
+    assert.equal(l.ouv, 3 * l.b); assert.equal(l.pas, Math.max(1, Math.ceil(l.ouv * 0.1)));
+  }
+  assert.deepEqual(a.lots.map(l => l.rang), a.lots.map(l => l.rang).slice().sort((x, y) => x - y));
+  assert.ok(a.valide);
+  /* des caisses de 400 k€ (deux gains de super carte) : une ouverture à la valeur d'un contrat s'y paie */
+  win.eval('G.mgmt.treasury=400;G.mgmt.orgs[G.mgmt.duo.b].treasury=400;');
+
+  /* mises : J2 commence, l'ouverture puis un palier ; une mise au-delà de la caisse est refusée sans rien changer */
+  const b = json(win, `const m=G.mgmt,L=m.duo.encheres.lots[0],res={};
+    res.m1=mgmtDuoMiser(m); res.apres1={prix:L.prix,meneur:L.meneur,tour:L.tour};
+    const sauve=m.treasury; m.treasury=-1e9; res.refus=mgmtDuoMiser(m); m.treasury=sauve; res.apresRefus={prix:L.prix,meneur:L.meneur,tour:L.tour};
+    res.m2=mgmtDuoMiser(m); res.pas=L.pas; res.ouv=L.ouverture;
+    /* rechargement au milieu de l'enchère : même lot, même prix, même tour */
+    saveMgmt(); const c=mgmtParseAndValidate(stockageLire(mgmtSlotKey(MGMT_SLOT)));
+    res.recharge=!!c&&JSON.stringify(c.duo.encheres)===JSON.stringify(m.duo.encheres);
+    res.g=G.mgmt===m; return res;`);
+  assert.deepEqual(b.m1.ok, true); assert.equal(b.m1.prix, a.lots[0].ouv); assert.deepEqual(b.apres1, { prix: a.lots[0].ouv, meneur: 'b', tour: 'a' });
+  assert.deepEqual(b.refus, { ok: false, raison: 'caisse' }); assert.deepEqual(b.apresRefus, { prix: a.lots[0].ouv, meneur: 'b', tour: 'a' }.prix === b.apresRefus.prix ? b.apresRefus : {});
+  assert.equal(b.apresRefus.meneur, 'b'); assert.equal(b.apresRefus.tour, 'a');
+  assert.equal(b.m2.prix, a.lots[0].ouv + b.pas);
+  assert.ok(b.recharge, 'l’enchère reprend au même point'); assert.ok(b.g);
+
+  /* J2 (tour courant : 'b') passe : J1 mène, elle signe le combattant — il quitte sa sous-partie et entre chez J1 avec 3 combats */
+  const c = json(win, `const m=G.mgmt,L=m.duo.encheres.lots[0],id=L.id,prix=L.prix,avant=m.treasury,org=L.orgId;
+    const res={tour:L.tour,meneur:L.meneur};
+    mgmtDuoPasser(m);
+    const f=m.roster.find(x=>x.id===id);
+    res.entre=!!f; res.ct=f&&{n:f.ct.n,f:f.ct.f,libre:f.libre===true}; res.quitte=!(m.orgs[org].roster||[]).some(x=>x.id===id);
+    res.caisse=avant-m.treasury===prix; res.prix=prix; res.gagnant=L.gagnant; res.i=m.duo.encheres.i; res.recrues=m.duo.recrues.map(r=>r.id===id&&r.cote);
+    return res;`);
+  assert.equal(c.tour, 'b'); assert.equal(c.meneur, 'a');
+  assert.ok(c.entre); assert.deepEqual(c.ct, { n: 3, f: 0, libre: false }); assert.ok(c.quitte); assert.ok(c.caisse);
+  assert.equal(c.gagnant, 'a'); assert.equal(c.i, 1); assert.deepEqual(c.recrues, ['a']);
+
+  /* lot suivant : personne ne mise (deux passes), le combattant reste libre ; puis, s'il y a un troisième, J2 le gagne et rien n'entre chez J1 */
+  const d = json(win, `const m=G.mgmt,e=m.duo.encheres,res={restants:e.lots.length-e.i};
+    if(e.lots[e.i]){ const L=e.lots[e.i],id=L.id; mgmtDuoPasser(m); mgmtDuoPasser(m); res.libre=mgmtExteriorCombattant(m,id)&&mgmtExteriorCombattant(m,id).libre===true; res.fini=L.fini; res.gagnant=L.gagnant; }
+    const suite=m.duo.encheres&&m.duo.encheres.lots[m.duo.encheres.i];
+    if(suite){ const id=suite.id,sous=m.orgs[m.duo.b],avantB=sous.treasury,avantA=m.treasury,nR=m.roster.length;
+      mgmtDuoMiser(m); mgmtDuoPasser(m);   // J2 mise (elle commence), J1 passe : J2 signe
+      res.b={chez:!!sous.roster.find(x=>x.id===id),rienChezJ1:m.roster.length===nR&&!m.roster.some(x=>x.id===id),caisseB:avantB-sous.treasury===suite.prix,caisseA:m.treasury===avantA}; }
+    res.etape=m.duo.etape; res.encheres=m.duo.encheres; res.draft=!!m.duo.draft&&m.duo.draft.attente==='place';
+    res.disponible=m.duo.recrues.filter(r=>r.cote==='a').every(r=>mgmtDuoDisponibles(m,'a').some(f=>f.id===r.id)||true);
+    res.g=G.mgmt===m; return res;`);
+  if (d.libre !== undefined) { assert.equal(d.libre, true); assert.equal(d.fini, true); assert.equal(d.gagnant, null); }
+  if (d.b) { assert.ok(d.b.chez); assert.ok(d.b.rienChezJ1); assert.ok(d.b.caisseB); assert.ok(d.b.caisseA); }
+  assert.equal(d.etape, 'draft'); assert.equal(d.encheres, null); assert.ok(d.draft); assert.ok(d.g);
+  /* 6. la recrue des enchères de J1 est disponible au draft qui suit (si elle n'est pas indisponible) */
+  const e = json(win, `const m=G.mgmt,r=m.duo.recrues.find(x=>x.cote==='a');return {a:!!r,dispo:r?mgmtDuoDisponibles(m,'a').some(f=>f.id===r.id)||!mgmtAvailable(m,mgmtFighterById(m,r.id),null):null};`);
+  assert.ok(e.a); assert.ok(e.dispo);
+  /* 10. le perdant de la carte précédente commence */
+  const f = json(win, `const m=G.mgmt,sauve=m.duo.cartes;const r={};for(const g of ['a','b','nul']){m.duo.cartes=[{gagnant:g}];r[g]=mgmtDuoPremier(m);}m.duo.cartes=[];r.aucune=mgmtDuoPremier(m);m.duo.cartes=sauve;return r;`);
+  assert.deepEqual(f, { a: 'b', b: 'a', nul: 'b', aucune: 'b' });
+  /* 8. la validation accepte ce nouvel état et refuse une enchère abîmée */
+  const g = json(win, `const m=G.mgmt,base=JSON.parse(JSON.stringify(m));base.duo.etape='encheres';
+    const lot={id:m.roster[0].id,b:1,ouverture:3,pas:1,prix:0,meneur:null,gagnant:null,tour:'a',passes:0,fini:false};
+    const essai=(f)=>{const x=JSON.parse(JSON.stringify(base));x.duo.encheres={i:0,premier:'b',lots:[Object.assign({},lot)]};f(x.duo.encheres);return validateMgmt(x);};
+    return {sain:essai(()=>{}),passes:essai(e=>{e.lots[0].passes=3;}),tour:essai(e=>{e.lots[0].tour='z';}),quatre:essai(e=>{e.lots=[lot,lot,lot,lot];}),prix:essai(e=>{e.lots[0].prix=-1;})};`);
+  assert.deepEqual(g, { sain: true, passes: false, tour: false, quatre: false, prix: false });
 });
