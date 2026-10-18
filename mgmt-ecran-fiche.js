@@ -31,6 +31,18 @@ function mgmtFicheRejeu(t){
 function mgmtFicheLigne(m,id){
   const f=mgmtFighterById(m,id);
   if(f) return {f,trace:null};
+  /* ==== [ANCRE: MONDE_LOT22_T1_FICHE_ORG] — Monde lot 22 T1 ==== */
+  if(m&&m.mondeVivant===true){
+    for(const orgId of mgmtMondeVivantIds(m)){
+      const sous=m.orgs&&m.orgs[orgId];
+      const combattant=(sous&&Array.isArray(sous.roster)?sous.roster:[]).find(x=>x&&x.id===id);
+      if(combattant){
+        const org=mgmtOrgParId(orgId);
+        return {f:Object.assign({},combattant,{orgId,org:org?org.nom:''}),trace:null,orgId};
+      }
+    }
+    return null;
+  }
   const line=Array.isArray(m.exterieur)&&m.exterieur.find(o=>o.id===id);
   if(!line) return null;
   const trace=mgmtExteriorTrace(line,m.cycle);
