@@ -207,7 +207,13 @@ function mgmtSallesValide(raw){
   if(raw.pop!==undefined&&(!Number.isSafeInteger(raw.pop)||raw.pop<MGMT_POP_MIN||raw.pop>MGMT_POP_MAX)) return false;
   if(raw.comptes!==undefined){
     if(!Array.isArray(raw.comptes)||raw.comptes.length>MGMT_COMPTES_MAX) return false;
-    for(const c of raw.comptes){ if(!c||!Number.isSafeInteger(c.n)||!Number.isSafeInteger(c.recette)) return false; }
+    /* Monde lot 20 : un compte allégé d'une organisation vivante ({salle,salleId,taux}, mgmtMondeVivantAlleger) est valide ; sans cela la partie sauvegardée après une soirée du monde vivant était refusée au chargement. */
+    for(const c of raw.comptes){
+      if(!c||typeof c!=='object') return false;
+      const complet=Number.isSafeInteger(c.n)&&Number.isSafeInteger(c.recette);
+      const allege=c.n===undefined&&c.recette===undefined&&typeof c.salleId==='string'&&Number.isFinite(c.taux);
+      if(!complet&&!allege) return false;
+    }
   }
   return true;
 }
