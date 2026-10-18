@@ -5,28 +5,89 @@ let MGMT_DUO_QG={};
 let MGMT_DUO_EFFECTIF_COTE='a';
 
 /* ==== [ANCRE: MONDE_LOT_19_T9_QG] — Monde lot 19 T9 ==== */
+/** « d’Anthony » devant une voyelle, « de François » sinon. @returns {string} */
+function mgmtDuoDe(nom){
+  const t=String(nom||'');
+  return /^[aeiouyhàâäéèêëîïôöùûü]/i.test(t)?'d’'+t:'de '+t;
+}
+/** Le QG, au balisage exact de la planche DuoQG (maquettes/duo) : deux colonnes de joueur, le score de la saison au centre, l'action de l'étape. */
 function mgmtDuoQGHtml(){
-  const m=G.mgmt,d=m.duo,score=mgmtDuoScore(m);
-  const nomOrg=cote=>MGMT_ORGANISATIONS.find(o=>o.id===(cote==='a'?mgmtPredecesseurOrgId(m):d.b))?.nom||'';
-  const coteHtml=cote=>{
-    const partie=mgmtDuoPartie(m,cote),resume=mgmtDuoResume(m,cote),rang=mgmtOrgClassement(m).find(x=>x.id===(cote==='a'?mgmtPredecesseurOrgId(m):d.b))?.rang;
-    const combats=resume.combats.slice(0,6).map(c=>{
-      const vainqueur=c.winner==='D'?'Égalité':(c.winner==='a'?c.a:c.b),perdant=c.winner==='a'?c.b:c.a;
-      const methode=mgmtSuMethodeFamille({nul:c.winner==='D',family:c.family,round:c.round,rounds:c.rounds});
-      return `<div class="mf-duo-qg-combat">${esc(vainqueur)} ${c.winner==='D'?'fait match nul contre':'bat'} ${esc(perdant)} · ${esc(mgmtDivisionLabel(c.div))} · ${esc(methode)}</div>`;
-    }).join('')||'<div class="mf-duo-qg-combat">Rien encore</div>';
+  const m=G.mgmt,d=m.duo,sc=mgmtDuoScore(m);
+  const idDe=cote=>cote==='a'?mgmtPredecesseurOrgId(m):d.b;
+  const nomOrg=id=>(MGMT_ORGANISATIONS.find(o=>o.id===id)||{}).nom||'';
+  const classement=mgmtOrgClassement(m);
+  const etat=MGMT_DUO_QG.enCours?'progression':(d.etape==='attente'?'attente':'arrivee');
+  const nCartes=d.cartes.length;
+  const colonne=cote=>{
+    const id=idDe(cote), ident=(typeof mgmtOrgIdentite==='function'&&mgmtOrgIdentite(id))||{};
+    const resume=mgmtDuoResume(m,cote);
+    const caisse=duoEuros(mgmtDuoPartie(m,cote).treasury);
+    const rang=(classement.find(x=>x.id===id)||{}).rang||'—';
     const champions=resume.champions.filter(x=>x.id).length;
-      return `<section class="mf-duo-qg-cote"><h2>${esc(nomOrg(cote))}</h2><div class="mf-duo-qg-joueur">${esc(d.noms[cote])}</div><div class="mf-duo-qg-score">${score[cote]}</div><div class="mf-duo-qg-tuiles"><div>En caisse<strong>${esc(mgmtEuros(partie.treasury))}</strong></div><div>Classement des organisations<strong>${rang||'—'}</strong></div><div>Champions<strong>${champions}</strong></div></div><div class="mf-duo-qg-recent">Depuis la dernière super carte · ${resume.soirees} soirées${combats}</div><button class="mf-duo-qg-effectif" onclick="CL.mgmtDuoOuvrirEffectif('${cote}')">Effectif de ${esc(d.noms[cote])}</button></section>`;
+    const lignes=resume.combats.length===0
+      ?`<div class="vide l1 t2">${nCartes?`Rien encore depuis la super carte ${nCartes}.`:'Rien encore.'}</div>`
+      :resume.combats.slice(0,6).map(x=>{
+        const gagnant=x.winner==='A'?x.a:x.b, perdant=x.winner==='A'?x.b:x.a;
+        const methode=mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds});
+        return `<div class="ligne"><div class="col"><div class="l1">${x.winner==='D'?`${duoEsc(x.a)} et ${duoEsc(x.b)}`:`<span class="nom">${duoEsc(gagnant)}</span> bat ${duoEsc(perdant)}`}</div><div class="l2">${duoEsc(mgmtDivisionLabel(x.div))} · ${duoEsc(methode)}</div></div></div>`;
+      }).join('');
+    const n=resume.soirees;
+    return duoPan(`qg-cote ${cote==='a'?'j1':'j2'}`,`<div class="bande"></div>
+      <div class="qg-tete"><div class="col"><div class="T qg-org">${duoEsc(duoMaj(nomOrg(id)))}</div><div class="lab">${duoEsc(duoMaj(d.noms[cote]))}${ident.ville?` · ${duoEsc(duoMaj(ident.ville))} · DEPUIS ${duoEsc(ident.annee)}`:''}</div></div><div class="qg-score T">${sc[cote]}</div></div>
+      <div class="qg-tuiles">
+        <div class="tuile"><div class="lab">En caisse</div><div class="T">${caisse}</div></div>
+        <div class="tuile"><div class="lab">Organisations</div><div class="T">${duoEsc(rang)}<small>e sur ${classement.length}</small></div></div>
+        <div class="tuile"><div class="lab">Champions</div><div class="T">${champions}<small> sur ${allDivisions().length}</small></div></div>
+      </div>
+      <div class="sous">Depuis la dernière super carte · ${n} soirée${n>1?'s':''}</div>
+      <div class="qg-lignes">${lignes}</div>
+      <div class="bouton qg-eff" onclick="CL.mgmtDuoOuvrirEffectif('${cote}')"><span class="T">EFFECTIF ${cote==='a'?'D’':'DE '}${duoEsc(duoMaj(d.noms[cote]))}</span><span class="k">${cote==='a'?'1':'2'}</span></div>`);
   };
-  const actions={attente:['Avancer jusqu’à la super carte','CL.mgmtDuoAvancer()'],encheres:['Ouvrir les enchères',"CL.go('mgmt_duo_encheres')"],draft:['Composer la super carte',"CL.go('mgmt_duo_draft')"],pret:['Lancer la super carte',"CL.go('mgmt_duo_draft')"],soiree:['Reprendre la soirée',"CL.go('mgmt_duo_soiree')"],bilan:['Voir le bilan',"CL.go('mgmt_duo_bilan')"]};
-  const action=actions[d.etape],cible=SCREENS[action&&d.etape==='attente'?'__absent__':({encheres:'mgmt_duo_encheres',draft:'mgmt_duo_draft',pret:'mgmt_duo_draft',soiree:'mgmt_duo_soiree',bilan:'mgmt_duo_bilan'}[d.etape]||'__absent__')];
-  const bouton=action&&(!cible||d.etape==='attente')?mfBouton(action[0],{touche:'Entrée',jaune:true,onclick:action[1]}):'';
-  const progression=MGMT_DUO_QG.enCours?`<div class="mf-duo-qg-progress"><div>Les soirées des adjoints se jouent · ${esc(mgmtJourDateTexte(m.cal.jour))}</div><progress max="${Math.max(1,d.prochaine-MGMT_DUO_QG.depart)}" value="${Math.max(0,m.cal.jour-MGMT_DUO_QG.depart)}"></progress></div>`:'';
-  const erreur=MGMT_DUO_QG.erreur?`<div>La progression s'est arrêtée. ${mfBouton('Réessayer',{jaune:true,onclick:'CL.mgmtDuoAvancerReessayer()'})}</div>`:'';
-  const centre=`<div class="mf-duo-qg-centre"><div>Score de la saison</div><strong>${score.a} – ${score.b}</strong><p>Prochaine super carte : ${esc(mgmtJourDateTexte(d.prochaine))}</p><div>${esc(action?action[0]:d.etape)}</div>${MGMT_DUO_QG.enCours||MGMT_DUO_QG.erreur?'':bouton}${progression}${erreur}</div>`;
-  const touches=[{ks:['Échap'],t:'Quitter'},{ks:['1'],t:`Effectif de ${esc(d.noms.a)}`},{ks:['2'],t:`Effectif de ${esc(d.noms.b)}`}];
-  if(d.cartes&&d.cartes.length){touches.push({ks:['H'],t:'Super cartes passées'});}
-  return mfEcran(`<div class="mf-duo-qg">${coteHtml('a')}${centre}${coteHtml('b')}${d.cartes&&d.cartes.length?'<button class="mf-duo-qg-histo" onclick="CL.go(\'mgmt_duo_histo\')">Super cartes passées</button>':''}</div>`,{barre:'logo',plaque:'Duo',libelle:`${esc(d.noms.a)} × ${esc(d.noms.b)}`,droite:`Saison ${score.saison} · super carte ${score.numero} sur 4`,touches});
+  const dernier=nCartes?d.cartes[nCartes-1]:null;
+  const lectureDernier=(()=>{
+    if(!dernier) return 'Aucune super carte jouée';
+    const a=dernier.combats.filter(c=>c.winner==='A').length, b=dernier.combats.filter(c=>c.winner==='B').length;
+    return a===b?`Super carte ${dernier.n} : égalité ${a}–${b}`:`Super carte ${dernier.n} : ${a}–${b}`;
+  })();
+  const jours=Math.max(0,d.prochaine-m.cal.jour);
+  const date=mgmtJourDateTexte(d.prochaine);
+  const ecrans={encheres:'mgmt_duo_encheres',draft:'mgmt_duo_draft',pret:'mgmt_duo_draft',soiree:'mgmt_duo_soiree',bilan:'mgmt_duo_bilan'};
+  const textes={
+    encheres:['C’est le jour','LES ENCHÈRES',`${d.encheres?d.encheres.lots.length:0} combattants libres, puis la composition de la carte.`],
+    draft:['La carte','COMPOSER','Six combats : l’un place, l’autre répond.'],
+    pret:['La carte est prête','LANCER','Les six combats vont se jouer.'],
+    soiree:['La soirée','REPRENDRE',`Combat ${d.soiree?Math.min(6,d.soiree.i+1):1} sur 6.`],
+    bilan:['Le bilan','VOIR','La super carte est jouée.']};
+  const bloc=(lab,gros,txt,onclick)=>`<div class="jaune-bloc focus"${onclick?` onclick="${onclick}" style="cursor:pointer"`:''}><div class="lab">${lab}</div><div class="jb-l"><div class="T">${gros}</div><div class="k">Entrée</div></div><div class="jb-t">${txt}</div></div>`;
+  let action;
+  if(etat==='progression'){
+    const depart=MGMT_DUO_QG.depart, total=Math.max(1,d.prochaine-depart);
+    const pct=Math.max(0,Math.min(100,Math.round(100*(m.cal.jour-depart)/total)));
+    action=`<div class="prog"><div class="lab">Les soirées des adjoints se jouent</div><div class="T prog-date">${duoEsc(mgmtJourDateTexte(m.cal.jour))}</div>
+        <div class="prog-barre"><b style="width:${pct}%"></b></div>
+        <div class="l2">${duoEsc(nomOrg(idDe('a')))} Fight Night ${m.eventsPlayed+1} · ${duoEsc(nomOrg(idDe('b')))} Fight Night ${mgmtDuoPartie(m,'b').eventsPlayed+1}</div></div>`;
+  }else if(MGMT_DUO_QG.erreur){
+    action=bloc('La progression s’est arrêtée','RÉESSAYER','Rien n’est perdu : la partie est sauvegardée.','CL.mgmtDuoAvancerReessayer()');
+  }else if(d.etape==='attente'){
+    action=bloc('La suite','AVANCER',`Jusqu’à la super carte du ${duoEsc(date.toLowerCase())}. Vos adjoints jouent les soirées.`,'CL.mgmtDuoAvancer()');
+  }else{
+    const t=textes[d.etape]||['','',''];
+    action=bloc(t[0],t[1],t[2],SCREENS[ecrans[d.etape]]?`CL.go('${ecrans[d.etape]}')`:'');
+  }
+  const centre=duoPan('qg-centre',`<div class="lab qg-c-lab">Saison ${sc.saison}${nCartes?` · après la super carte ${nCartes}`:' · avant la première super carte'}</div>
+      <div class="qg-gros"><span class="T j1c">${sc.a}</span><span class="T t2">–</span><span class="T j2c">${sc.b}</span></div>
+      <div class="l2 qg-c-sous">${lectureDernier}</div>
+      <div class="sep"></div>
+      <div class="lab">Prochaine super carte</div><div class="T qg-date">${duoEsc(date)}</div>
+      <div class="l2">${etat==='progression'||d.etape==='attente'?`Dans ${jours} jour${jours>1?'s':''}`:'Aujourd’hui'}</div>
+      <div class="qg-action">${action}</div>
+      ${nCartes?'<div class="bouton" onclick="CL.go(\'mgmt_duo_histo\')"><span class="T">SUPER CARTES PASSÉES</span><span class="k">H</span></div>':''}`);
+  const versus=`${duoEsc(duoMaj(d.noms.a))} <span class="t2">×</span> ${duoEsc(duoMaj(d.noms.b))}`;
+  const touches=duoTouches([[['1'],'Effectif '+duoEsc(mgmtDuoDe(d.noms.a)),false,"CL.mgmtDuoOuvrirEffectif('a')"],[['2'],'Effectif '+duoEsc(mgmtDuoDe(d.noms.b)),false,"CL.mgmtDuoOuvrirEffectif('b')"],
+    [['H'],'Super cartes passées',false,nCartes?"CL.go('mgmt_duo_histo')":''],[['Échap'],'Menu principal',false,'CL.mgmtDuoQuitter()'],[['Entrée'],'Continuer',true,'CL.mgmtDuoQGAction()']]);
+  return duoCadre(`${duoEntete(versus,duoDroiteSaison(sc.saison,sc.numero))}
+  <main class="contenu large qg"><div class="qg-cols vis">${colonne('a')}${centre}${colonne('b')}</div></main>
+  ${touches}`);
 }
 SCREENS.mgmt_duo=mgmtDuoQGHtml;
 Object.assign(CL,{
@@ -45,9 +106,18 @@ Object.assign(CL,{
     render();requestAnimationFrame(()=>setTimeout(pas,0));
   },
   mgmtDuoAvancerReessayer(){MGMT_DUO_QG={};CL.mgmtDuoAvancer();},
-  mgmtDuoQuitter(){if(!MGMT_DUO_QG.enCours)CL.mgmtLeave();}
+  mgmtDuoQuitter(){if(!MGMT_DUO_QG.enCours)CL.mgmtLeave();},
+  /** Entrée au QG : l'action de l'étape en cours. */
+  mgmtDuoQGAction(){
+    const d=G.mgmt.duo;
+    if(MGMT_DUO_QG.enCours) return;
+    if(MGMT_DUO_QG.erreur){CL.mgmtDuoAvancerReessayer();return;}
+    if(d.etape==='attente'){CL.mgmtDuoAvancer();return;}
+    const ecrans={encheres:'mgmt_duo_encheres',draft:'mgmt_duo_draft',pret:'mgmt_duo_draft',soiree:'mgmt_duo_soiree',bilan:'mgmt_duo_bilan'};
+    if(ecrans[d.etape]&&SCREENS[ecrans[d.etape]]) CL.go(ecrans[d.etape]);
+  }
 });
-keysRegister('mgmt_duo',{Escape(){CL.mgmtDuoQuitter();},'1'(){CL.mgmtDuoOuvrirEffectif('a');},'2'(){CL.mgmtDuoOuvrirEffectif('b');},h(){if(!MGMT_DUO_QG.enCours&&G.mgmt.duo.cartes&&G.mgmt.duo.cartes.length)CL.go('mgmt_duo_histo');}});
+keysRegister('mgmt_duo',{Enter(){CL.mgmtDuoQGAction();},Escape(){CL.mgmtDuoQuitter();},'1'(){CL.mgmtDuoOuvrirEffectif('a');},'2'(){CL.mgmtDuoOuvrirEffectif('b');},h(){if(!MGMT_DUO_QG.enCours&&G.mgmt.duo.cartes&&G.mgmt.duo.cartes.length)CL.go('mgmt_duo_histo');}});
 
 function mgmtDuoNouvelleHtml(){
   const s=MGMT_DUO_NOUVELLE;
