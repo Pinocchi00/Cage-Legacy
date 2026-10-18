@@ -28,26 +28,34 @@ test('Duo T4 — bilan : le vainqueur, les six combats, le retour au QG (étape 
 
   /* le bandeau : le vainqueur nommé, ou Égalité */
   const txt=win.document.body.textContent;
+  assert.ok(win.document.querySelector('.duo-s'),'le bilan reprend le cadre des planches Duo');
   if(carte.gagnant==='nul') assert.match(txt,/Égalité/);
   else assert.ok(txt.includes(win.eval('G.mgmt.duo.noms.'+carte.gagnant)),'le vainqueur est nommé : '+txt);
 
   /* six lignes, une par combat, chacune avec son bouton Revoir */
   assert.equal(win.eval(`document.querySelectorAll('[data-duo-combat]').length`),6,'six lignes de combat');
-  assert.equal(win.eval(`document.querySelectorAll('.mf-duo-bi-aller').length`),6,'un Revoir par combat');
+  assert.equal(win.eval(`document.querySelectorAll('.bi-l .aller').length`),6,'un Revoir par combat');
 
   /* le score du bandeau : les combats gagnés par chaque côté dans cette carte */
   const vA=carte.combats.filter(c=>c.winner==='A').length, vB=carte.combats.filter(c=>c.winner==='B').length;
-  assert.match(win.eval(`document.querySelector('.mf-duo-bi-sc').textContent`),new RegExp(vA+'\\s*–\\s*'+vB),'le score de la carte');
+  assert.match(win.eval(`document.querySelector('.bi-sc').textContent`),new RegExp(vA+'\\s*–\\s*'+vB),'le score de la carte');
 
   /* l'argent de la super carte pour chaque joueur */
-  assert.match(txt,/L'argent de la super carte/);
+  assert.match(txt,/L’argent de la super carte/,'libellé conforme à la planche DuoBilan');
   assert.match(txt,new RegExp('\\+\\s*'+carte.gains.a),'le gain de J1');
   assert.match(txt,new RegExp('\\+\\s*'+carte.gains.b),'le gain de J2');
 
   /* un nom injecté reste du texte */
   win.eval(`G.mgmt.duo.noms.a="<b>O'Neil</b>"; render();`);
   assert.doesNotMatch(win.document.body.innerHTML,/<b>O'Neil<\/b>/,"un nom injecté n'est pas du HTML");
-  assert.match(win.document.body.innerHTML,/&lt;b&gt;/,'le nom est échappé');
+  assert.match(win.document.body.innerHTML,/&lt;b&gt;/i,'le nom est échappé');
+
+  /* Le quatrième bilan montre la saison et ses quatre cartes sans fabriquer de monde supplémentaire. */
+  win.eval(`(function(){const d=G.mgmt.duo,c=d.cartes[d.cartes.length-1];window.__duoSavedCards=d.cartes;d.cartes=[1,2,3].map(n=>Object.assign({},c,{n})).concat([Object.assign({},c,{n:4})]);render();})()`);
+  assert.match(win.document.body.textContent,/LA SAISON 1/,'la quatrième super carte montre le bilan de saison');
+  assert.match(win.document.body.textContent,/Gagné sur la saison/,'la saison affiche les gains cumulés');
+  assert.equal(win.document.querySelectorAll('.bi-l[data-duo-combat]').length,6,'le bilan de saison garde les six combats');
+  win.eval(`G.mgmt.duo.cartes=window.__duoSavedCards; render(); delete window.__duoSavedCards;`);
 
   /* le retour au QG : Entrée referme le bilan (étape attente, plus de soirée, date suivante). Le QG (T9) vit dans une autre
      tranche : ici on pose un écran témoin pour prouver que le retour va jusqu'au RENDU du QG, et non sur le repli de `render`
