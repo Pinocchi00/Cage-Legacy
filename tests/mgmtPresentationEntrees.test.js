@@ -151,3 +151,28 @@ test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
   // La fiche extérieure est exercée par la porte existante quand la population en contient une.
   if(w.eval('!!exterieur')){w.eval('CL.mgmtAccueilNom(exterieur.id)');assert.equal(w.eval('G.screen'),'mgmt_fiche');}
 });
+
+/* Monde lot 21 (retour d'Anthony du 18/10/2026 : « dans l'avant-combat, cliquer sur un combattant nous sort de la soirée, qui se joue sans nous ») :
+   la présentation d'un combattant ouverte depuis l'avant-combat — et la fiche qui s'ouvre depuis elle — gardent la barre des sections grisée. */
+test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
+  require('./helpers/jouerSoirees.js')(w,6);
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+    MGMT_SOIREE.index=1;MGMT_SOIREE_UI.focus=2;MGMT_PRESENTATION_UI.pile=[];CL.go('mgmt_soiree');CL.mgmtSoAvant();
+    const lien=document.querySelector('#app .mf-pr-lien');if(!lien) return {sansLien:true};
+    lien.click();
+    const enfant={screen:G.screen,grisees:[...document.querySelectorAll('.mf-barre-item')].filter(b=>!/mgmtMenuPrincipal/.test(b.getAttribute('onclick')||'')).every(b=>b.disabled)};
+    document.querySelectorAll('.mf-barre-item')[0].click();
+    const apresClic=G.screen;
+    CL.mgmtPresentationFiche();
+    const fiche={screen:G.screen,grisees:[...document.querySelectorAll('.mf-barre-item')].filter(b=>!/mgmtMenuPrincipal/.test(b.getAttribute('onclick')||'')).every(b=>b.disabled)};
+    return {enfant,apresClic,fiche,index:MGMT_SOIREE.index};})())`));
+  assert.ok(!r.sansLien,'la soirée de contrôle porte au moins un nom cliquable');
+  assert.equal(r.enfant.screen,'mgmt_presentation_combattant');
+  assert.equal(r.enfant.grisees,true,'barre grisée dans la présentation du combattant');
+  assert.equal(r.apresClic,'mgmt_presentation_combattant','un clic sur une section ne fait rien');
+  assert.equal(r.fiche.screen,'mgmt_fiche');
+  assert.equal(r.fiche.grisees,true,'barre grisée aussi sur la fiche ouverte depuis l’avant-combat');
+  assert.equal(r.index,1,'la soirée est restée au même combat');
+});
