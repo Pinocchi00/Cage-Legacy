@@ -75,6 +75,8 @@ test('T1 ceintures — cinq rounds en combat principal et titre ailleurs, vrai r
     const winner=m.hist[1].winner;
     const expected=winner==='A'?m.hist[1].a.id:(winner==='B'?m.hist[1].b.id:mgmtSplitTitle(m,groups[1][0].div).id);
     const belt=mgmtSplitTitle(m,groups[1][0].div);
+    /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : une partie qui porte une proposition en bloc ouverte la voit validée à l'ouverture ; cette partie d'avant l'agenda en a une, on la valide avant de sauvegarder pour juger le rechargement seul. */
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk) mgmtDecide(m,bulk.id,'validate');
     const valid=validateMgmt(m),before=JSON.stringify(m);
     saveMgmt(); G.mgmt=null;
     const loaded=loadMgmt(),same=JSON.stringify(G.mgmt)===before;

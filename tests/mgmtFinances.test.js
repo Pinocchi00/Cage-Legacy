@@ -19,10 +19,12 @@ test('Finances — six cartes, la caisse au départ, les bourses engagées suive
   assert.equal(win.eval(`document.querySelectorAll('.mf-fin-p').length`),6);
   const txt=win.eval(`document.getElementById('app').textContent`);
   assert.ok(txt.includes('50\u202f000'),'la caisse de départ'); assert.ok(txt.includes('Avant la première soirée'));
-  const r=JSON.parse(win.eval(`JSON.stringify((function(){ const m=G.mgmt; const a=mgmtFinancesEngagees(m).k;
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : l'ouverture pose la première soirée et Leïla compose aussitôt ses préliminaires : leurs bourses sont déjà engagées avant le premier combat principal du joueur. */
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){ const m=G.mgmt; const base=mgmtFinancesEngagees(m); const nPre=m.card.prelims.length;
     const rows=mgmtCartRows(m).filter(f=>mgmtSelectable(m,f,null)); const A=rows[0]; const B=rows.find(x=>x.id!==A.id&&x.div===A.div&&mgmtSelectable(m,x,A.id)); mgmtBookMain(m,A.id,B.id);
-    const e=mgmtFinancesEngagees(m); return {a,b:e.k,n:e.n,attendu:mgmtPurse(A,'main')+mgmtPurse(B,'main')}; })())`));
-  assert.equal(r.a,0); assert.equal(r.n,1); assert.equal(r.b,r.attendu,'le cachet des deux combattants du combat posé');
+    const e=mgmtFinancesEngagees(m); return {a:base.k,aN:base.n,nPre,b:e.k,n:e.n,attendu:mgmtPurse(A,'main')+mgmtPurse(B,'main')}; })())`));
+  assert.ok(r.nPre>0&&r.aN===r.nPre,'les préliminaires posés par Leïla engagent déjà leurs bourses'); assert.ok(r.a>0);
+  assert.equal(r.n,r.aN+1); assert.equal(r.b,r.a+r.attendu,'le cachet des deux combattants du combat posé s’ajoute');
 });
 
 test('Finances — ← → choisissent, Entrée montre le détail, Échap le ferme puis revient', () => {

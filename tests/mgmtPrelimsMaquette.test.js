@@ -6,7 +6,9 @@ const {newGameWindow}=require('./helpers/loadGame');
 const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())`));
 const PREPARE=`const m=G.mgmt; const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))]; let k=0;
   while(m.card.main.length<m.card.sizeMain&&k++<60){ const d=divs[k%divs.length]; const rows=mgmtCartRows(m).filter(f=>f.div===d&&mgmtSelectable(m,f,null)); const a=rows[0], b=a&&rows.find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); if(a&&b) mgmtBookMain(m,a.id,b.id); }
-  if(!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')) mgmtOfferBulk(m,true);
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose les préliminaires elle-même, la proposition en bloc n'existe plus pour le joueur. Ces tests gardent les opérations de la proposition en bloc, que l'outil du prédécesseur et les anciennes sauvegardes utilisent encore : le test la construit explicitement. */
+  m.card.prelims=[];
+  if(!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')){ const b=mgmtNewBulkAffair(m,new Set(),new Set(),false)||mgmtNewBulkAffair(m,new Set(),new Set(),true); if(b) m.pile.push(b); }
   const bloc=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');`;
 const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1);`); return w; };
 
@@ -31,11 +33,14 @@ test('Préliminaires — faire monter un préliminaire proposé sur la carte pri
   assert.equal(r.avantRefus,false,'carte principale pleine : refusé'); assert.equal(r.ok,true); assert.equal(r.main,5); assert.equal(r.reste,r.n0-1); assert.equal(r.surCarte,true);
 });
 
-test('Préliminaires — l’écran montre les autres choix, les raisons de Leïla et le bloc de la carte principale sous la liste', () => {
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : les préliminaires sont posés par Leïla dès la pose de la soirée ; l'écran n'a plus de « Autres choix » ni de « Valider la carte » : il montre les combats posés, pourquoi Leïla les a posés, la carte principale, et permet de Changer, Refaire et voir les fiches. */
+test('Préliminaires — l’écran montre les combats posés, les raisons de Leïla et le bloc de la carte principale, sans « Autres choix » ni validation', () => {
   const win=neuve();
-  const r=res(win,`${PREPARE} CL.go('mgmt_prelims'); const t=document.getElementById('app').textContent;
-    return {autres:/AUTRES CHOIX/.test(t),pourquoi:/pourquoi elle le propose/i.test(t),pc:!!document.querySelector('.mf-pre-pc'),fiches:/Fiches/.test(t),clics:document.querySelectorAll('.mf-car-adv[onclick*="mgmtPrelimsRemplace"]').length>0};`);
-  assert.deepEqual(r,{autres:true,pourquoi:true,pc:true,fiches:true,clics:true});
+  const r=res(win,`CL.go('mgmt_prelims'); const t=document.getElementById('app').textContent;
+    return {poses:document.querySelectorAll('.mf-pre-slot.valide').length,autres:/AUTRES CHOIX/.test(t),valider:/Valider la carte/.test(t),pourquoi:/pourquoi elle l.a posé/i.test(t),ouvrir:!!document.querySelector('.mf-pre-ouvrir'),
+      fiches:/Fiches/.test(t),changer:/Changer/.test(t),refaire:/Refaire/.test(t)};`);
+  assert.ok(r.poses>0,'des préliminaires sont posés');
+  assert.deepEqual({...r,poses:undefined},{poses:undefined,autres:false,valider:false,pourquoi:true,ouvrir:true,fiches:true,changer:true,refaire:true});
 });
 
 test('Booking — la note d’un combattant dit ce que l’on sait de lui : l’attente en mois, la dernière défaite ou victoire, sa carte', () => {

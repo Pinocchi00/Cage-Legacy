@@ -42,17 +42,14 @@ test('Booking — la bannière sépare les deux combattants en diagonale (pas un
   assert.ok(r.tailles.every(t=>t>=22&&t<96),'les noms longs rétrécissent, jamais sous 22 px : '+r.tailles);
 });
 
-test('Préliminaires — on remplace au choix le premier ou le second combattant du préliminaire proposé', () => {
+/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : les préliminaires sont posés par Leïla ; le choix du côté remplacé (« Autres choix ») disparaît. Le joueur peut Changer un combat posé : Leïla le remplace par une paire fraîche, les autres restent, personne n'est deux fois sur la carte. */
+test('Préliminaires — Changer remplace un seul combat posé ; les autres restent et personne n’est deux fois sur la carte', () => {
   const w=neuve();
-  const r=res(w,`${remplir} CL.go('mgmt_prelims'); const {slots,bloc}=mgmtPrelimsEmplacements(m); if(!bloc) return {saute:true};
-    const s=slots.find(x=>x.etat==='avalider'), f=s.fight, idx=s.idxBloc;
-    const altA=mgmtPrelimsAlternatives(m,f,bloc,'a'), altB=mgmtPrelimsAlternatives(m,f,bloc,'b');
-    const A0=f.a, B0=f.b; const ok=altA.length&&mgmtBulkRemplacer(m,bloc.id,idx,altA[0].id,'a');
-    const apresA={a:bloc.fights[idx].a!==A0,b:bloc.fights[idx].b===B0,memeCat:mgmtFighterById(m,bloc.fights[idx].a).div===mgmtFighterById(m,B0).div};
-    CL.mgmtPrelimsCote('a'); const cote=MGMT_PRELIMS.cote; CL.mgmtPrelimsCote('b');
-    return {ok:!!ok,apresA,cote,coteApres:MGMT_PRELIMS.cote,alts:[altA.length>0,altB.length>0]};`);
-  assert.ok(!r.saute,'la carte complète fait proposer les préliminaires');
-  assert.equal(r.ok,true); assert.deepEqual(r.apresA,{a:true,b:true,memeCat:true}); assert.equal(r.cote,'a'); assert.equal(r.coteApres,'b');
+  const r=res(w,`${remplir} CL.go('mgmt_prelims'); const cle=x=>[x.a,x.b].join('|');
+    const avant=m.card.prelims.map(cle); const i=1; const ok=mgmtPrelimChanger(m,i); const apres=m.card.prelims.map(cle);
+    const ids=m.card.main.concat(m.card.prelims).flatMap(x=>[x.a,x.b]);
+    return {ok:!!ok,n:avant.length,m:apres.length,change:avant[i]!==apres[i],autres:avant.every((v,k)=>k===i||v===apres[k]),uniques:new Set(ids).size===ids.length};`);
+  assert.equal(r.ok,true); assert.ok(r.n>=2,'des préliminaires sont posés'); assert.equal(r.m,r.n); assert.equal(r.change,true); assert.equal(r.autres,true); assert.equal(r.uniques,true);
 });
 
 test('Soirée — un combat déjà passé se revoit : ← y mène, Entrée le rouvre, la soirée ne recule pas', () => {

@@ -100,7 +100,9 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.equal(r.bureau.filter(x=>x.cur).length,0,'brief du 08/10, 1.5 : l’écran de la semaine n’est aucune section de la barre, donc aucune n’est allumée');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');
   assert.ok(r.soir.filter(x=>x.sec!=='menu').every(x=>x.grise),'le soir, la barre est grisée, sauf « Menu principal » (brief démo, lot 1 T3 : on peut quitter proprement pendant la soirée)');
-  assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct,'des affaires attendent Leïla : l’octogone jaune');
+  /* Décision d'Anthony du 17/10/2026 (lot 14 T1) : les quatre affaires de choix de Leïla ne sont jamais ouvertes,
+     donc l'octogone jaune disparaît des pastilles de la barre. */
+  assert.ok(!r.carte.find(x=>x.sec==='preliminaires').oct,'plus aucun choix de Leïla n’attend, l’octogone reste éteint');
 });
 
 test('Écrans anciens — posés dans le cadre sous la barre, avec leur navigation d’origine intacte dans le HTML', () => {

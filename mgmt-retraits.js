@@ -57,6 +57,12 @@ function mgmtRetraitsAvantSoiree(m){
         f.susp=Math.max(Number.isSafeInteger(f.susp)?f.susp:0,m.cycle);
         const fait={c:m.cycle,k:'retrait',a:id,adv,slot:slot==='main'?'main':'prelim'};
         mgmtAddFact(m,fait);
+        /* ==== [ANCRE: MONDE_LOT14_T2_RETRAITE_REMPLACE] — Monde lot 14 T2 ====
+           Décision d'Anthony du 17/10/2026 : un combat des préliminaires qui
+           saute est remplacé aussitôt par une paire valide. Leïla pose elle-même ;
+           si aucun remplaçant n'existe, m.shortfall reste posé et le message du
+           bureau le dit — la carte attend. ==== */
+        if(slot==='prelims'&&mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
         return fait;
       }
     }
@@ -121,7 +127,9 @@ function mgmtRetraitOptions(m){
 }
 
 /** Sortie 1 : un combat des préliminaires monte en carte principale — gratuit ;
- *  Leïla se débrouille pour les préliminaires. @returns {boolean} */
+ *  Leïla repose aussitôt les préliminaires manquants (Monde lot 14 T2 : la
+ *  composition directe prend la place de la proposition à valider).
+ *  @returns {boolean} */
 function mgmtRetraitRemonter(m){
   const o=mgmtRetraitOptions(m);
   if(!o||!o.remonter) return false;
@@ -129,7 +137,7 @@ function mgmtRetraitRemonter(m){
   m.card.prelims=m.card.prelims.slice(1);
   m.card.main.push({a:fight.a,b:fight.b,cycle:m.cycle,slot:'main'});
   mgmtAddFact(m,{c:m.cycle,k:'retrait_sortie',s:'remonter'});
-  mgmtOfferBulk(m,false);
+  mgmtComposerPrelims(m);
   return true;
 }
 

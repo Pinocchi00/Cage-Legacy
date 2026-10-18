@@ -109,16 +109,17 @@ test('Marque — la marque est dessinée dans chaque liste où le nom figure', (
     }
     assert.ok(win.eval(`[...document.querySelectorAll('.mf-oct-nom')].every(o=>!!o.getAttribute('aria-label'))`),'aria-label non vide ('+e.nom+')');
   }
-  /* La carte composée : deux noms marqués par combat confirmé ; les préliminaires à valider. */
+  /* La carte composée : deux noms marqués par combat confirmé ; les préliminaires posés. */
   win.eval(`(()=>{ const m=G.mgmt; for(let k=0;k<40&&m.card.main.length<m.card.sizeMain;k++){ const rows=mgmtCartRows(m).filter(f=>mgmtSelectable(m,f,null)); let ok=false;
     for(const a of rows){ const b=rows.find(x=>x.id!==a.id&&x.div===a.div&&mgmtSelectable(m,x,a.id)); if(b&&mgmtBookMain(m,a.id,b.id)){ ok=true; break; } } if(!ok) break; } })(); CL.go('mgmt_carte');`);
   const confirme=win.eval(`document.querySelectorAll('.mf-car-slot.confirme').length`);
   assert.ok(confirme>0,'la carte principale est confirmée');
   assert.equal(win.eval(`document.querySelectorAll('.mf-car-slot .mf-oct-nom').length`),2*confirme,'deux noms marqués par combat confirmé (carte)');
   win.eval(`CL.go('mgmt_prelims');`);
-  const avalider=win.eval(`document.querySelectorAll('.mf-pre-slot.avalider').length`);
-  assert.ok(avalider>0,'des préliminaires attendent la validation');
-  assert.equal(win.eval(`document.querySelectorAll('.mf-pre-slot .mf-oct-nom').length`),2*avalider,'deux noms marqués par combat à valider (préliminaires)');
+  /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla pose les préliminaires ; ce sont des combats « posés », plus des combats « à valider ». */
+  const poses=win.eval(`document.querySelectorAll('.mf-pre-slot.valide').length`);
+  assert.ok(poses>0,'Leïla a posé des préliminaires');
+  assert.equal(win.eval(`document.querySelectorAll('.mf-pre-slot .mf-oct-nom').length`),2*poses,'deux noms marqués par combat posé (préliminaires)');
   /* Et quand tout devient « vu », plus une seule marque, sur aucun écran. */
   win.eval(`const m=G.mgmt; mgmtVisitesInit(m);`);
   for(const e of ecrans){

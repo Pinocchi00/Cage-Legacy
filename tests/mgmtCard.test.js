@@ -215,8 +215,11 @@ test('MGMT écraser — carte intacte, coût horodaté, réaction', () => {
   assert.equal(win.eval(`G.mgmt.card.prelims.length`), 0, 'les préliminaires restent vides : le coût de l\u2019écrasement applique, rien d\u2019office');
   assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.leila.crushes)`)), [c0], 'écrasement horodaté au cycle');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'crushed');
-  const r = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[G.mgmt.pile.length-1])`));
-  assert.equal(r.kind, 'leila_react_crush', 'réaction à l\u2019écrasement');
+  /* ==== [ANCRE: TEST_REACTION_CRUSH_RETIREE] — Monde lot 14 T1 ==== */
+  // Décision d’Anthony du 17/10/2026 : réaction conservée mais silencieusement fermée.
+  const r = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile.find(a=>a.kind==='leila_react_crush'))`));
+  assert.equal(r.status, 'closed');
+  assert.equal(r.decision, 'ignored');
   assert.equal(win.eval(`G.mgmt.facts[G.mgmt.facts.length-1].k`), 'crushed', 'fait mémorisé');
 });
 

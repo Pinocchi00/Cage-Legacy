@@ -424,8 +424,10 @@ test('MGMT corps — aucune valeur de traumatisme dans le DOM des écrans bureau
   enterMgmt(win,211);
   win.eval(`G.mgmt.roster.forEach(o=>{o.trauma=${TRAUMA_PLANTÉ};}); render();`);
   let html = win.document.getElementById('app').innerHTML;
-  /* Lot 4 T2 : la semaine remplace le bureau, le traumatisme reste caché. */
-  assert.ok(html.includes('La semaine'),'l\'écran de la semaine est rendu');
+  /* Lot 4 T2 : la semaine remplace le bureau, le traumatisme reste caché.
+     Décision d'Anthony du 17/10/2026 : la pile générée n'a plus d'affaires
+     ouvertes, l'écran de la semaine porte le titre du monde. */
+  assert.ok(html.includes('Le monde autour de Split'),'l\'écran de la semaine est rendu');
   assertSansTrauma(html,'bureau');
   win.eval(`(function(){
     const m=G.mgmt;

@@ -110,6 +110,14 @@ test('Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis 
    assert.equal(apresReprise.cal.prochaines.at(-1).jour, 70);
    delete avantReprise.lastEvent.vu; delete apresReprise.lastEvent.vu;
    delete avantReprise.cal.prochaines; delete apresReprise.cal.prochaines;
+   /* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : poser une date, c'est composer aussitôt ses préliminaires ; la préparation de la date suivante à la reprise pose donc aussi ses préliminaires dans la carte. */
+   /* Poser une date compose ses préliminaires comme le faisait la validation : le fait « booked » en bloc s'ajoute, et les combattants posés progressent d'une interaction. Seuls ces effets-là sont admis. */
+   const posesIds = new Set(apresReprise.card.prelims.map(x => [x.a, x.b]).flat());
+   assert.equal(apresReprise.facts.length, avantReprise.facts.length + 1);
+   const ajoute = apresReprise.facts.pop();
+   assert.ok(ajoute.k === 'booked' && ajoute.bulk === true && posesIds.has(ajoute.a), 'le seul fait ajouté est la pose en bloc des préliminaires');
+   assert.deepEqual(apresReprise.roster.filter(f => !posesIds.has(f.id)), avantReprise.roster.filter(f => !posesIds.has(f.id)), 'seuls les combattants posés changent');
+   delete avantReprise.card.prelims; delete apresReprise.card.prelims; delete avantReprise.roster; delete apresReprise.roster;
    assert.deepEqual(apresReprise, avantReprise, 'seuls lastEvent.vu et la prochaine date sont admis après reprise');
   assert.equal(win.eval('SEED'), seed);
   const traces = lire(win, 'return mgmtSoireeProgramme(G.mgmt).map(p=>p.trace);');
