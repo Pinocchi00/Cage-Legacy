@@ -43,7 +43,7 @@ Object.assign(CL,{
     const m=MGMT_DUO_PRESENTATION.partie;
     if(m) G.mgmt=m;
     MGMT_DUO_PRESENTATION.partie=null;
-    if(m&&mgmtDuoActif(m)&&m.duo.soiree){m.duo.soiree.i=MGMT_DUO_PRESENTATION.index;MGMT_DUO_UI.vu=true;CL.go('mgmt_duo_soiree');}
+    if(m&&mgmtDuoActif(m)&&m.duo.soiree){m.duo.soiree.i=MGMT_DUO_PRESENTATION.index;CL.go('mgmt_duo_soiree');}
     else CL.go('mgmt_duo');
   }
 });

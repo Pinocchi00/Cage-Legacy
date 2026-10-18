@@ -37,7 +37,7 @@ function mgmtDuoEncheresHtml(){
         <div class="T en-cb">${nom}</div>
         <div class="en-tuiles"><div class="tuile"><div class="lab">Bilan</div><div class="T">${duoEsc(bilan)}</div></div><div class="tuile"><div class="lab">Âge</div><div class="T">${duoEsc(combattant.age||'')} ANS</div></div><div class="tuile"><div class="lab">Mondial</div><div class="T">${L.rang===1?'1er':`${duoEsc(L.rang)}e`}</div></div></div>
         <div class="en-prixbloc">${prixBloc}</div>${tourHtml}${boutons}`)}${caisse('b')}</div></main>
-    ${duoTouches([[['Entrée'],L.fini?'Combattant suivant':'Miser',true], [['P'],'Passer'],[['Échap'],'Retour au QG',false,"CL.go('mgmt_duo')"]])}`;
+    ${duoTouches([[['F'],'Fiche',false,'CL.mgmtDuoEncheresFiche()'],[['Entrée'],L.fini?'Combattant suivant':'Miser',true], [['P'],'Passer'],[['Échap'],'Retour au QG',false,"CL.go('mgmt_duo')"]])}`;
   return duoCadre(contenu);
 }
 SCREENS.mgmt_duo_encheres=mgmtDuoEncheresHtml;
@@ -48,6 +48,7 @@ Object.assign(CL,{
   mgmtDuoEncheres(){MGMT_DUO_UI.refus=false;CL.go('mgmt_duo_encheres');},
   mgmtDuoMiser(){const r=mgmtDuoMiser(G.mgmt);MGMT_DUO_UI.refus=!r.ok&&r.raison==='caisse';if(G.mgmt.duo.etape!=='encheres')CL.go('mgmt_duo_draft');else render();},
   mgmtDuoPasser(){mgmtDuoPasser(G.mgmt);MGMT_DUO_UI.refus=false;if(G.mgmt.duo.etape!=='encheres')CL.go('mgmt_duo_draft');else render();},
-  mgmtDuoEncheresSuivant(){const e=G.mgmt.duo.encheres;if(!e||!e.lots[e.i]||!e.lots[e.i].fini)return;e.i++;if(e.i>=e.lots.length){G.mgmt.duo.etape='draft';G.mgmt.duo.encheres=null;mgmtDuoDraftOuvrir(G.mgmt);CL.go('mgmt_duo_draft');}else render();}
+  mgmtDuoEncheresSuivant(){const e=G.mgmt.duo.encheres;if(!e||!e.lots[e.i]||!e.lots[e.i].fini)return;e.i++;if(e.i>=e.lots.length){G.mgmt.duo.etape='draft';G.mgmt.duo.encheres=null;mgmtDuoDraftOuvrir(G.mgmt);CL.go('mgmt_duo_draft');}else render();},
+  mgmtDuoEncheresFiche(){const m=G.mgmt,e=m&&m.duo&&m.duo.encheres,L=e&&e.lots[e.i];if(L)CL.mgmtDuoFiche(L.id,'mgmt_duo_encheres');}
 });
-keysRegister('mgmt_duo_encheres',{Enter(){const e=G.mgmt.duo.encheres;if(e&&e.lots[e.i]&&e.lots[e.i].fini)CL.mgmtDuoEncheresSuivant();else CL.mgmtDuoMiser();},KeyM(){CL.mgmtDuoMiser();},KeyP(){CL.mgmtDuoPasser();},Escape(){CL.go('mgmt_duo');}});
+keysRegister('mgmt_duo_encheres',{Enter(){const e=G.mgmt.duo.encheres;if(e&&e.lots[e.i]&&e.lots[e.i].fini)CL.mgmtDuoEncheresSuivant();else CL.mgmtDuoMiser();},KeyF(){CL.mgmtDuoEncheresFiche();},KeyM(){CL.mgmtDuoMiser();},KeyP(){CL.mgmtDuoPasser();},Escape(){CL.go('mgmt_duo');}});
