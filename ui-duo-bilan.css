@@ -1,0 +1,57 @@
+/* ==== [ANCRE: DUO_T4_ECRANS] — Monde lot 19 T14 : le bilan de la super carte (docs/lots/DUO-T4.md §4) ==== */
+/* Valeurs portées de la planche validée maquettes/duo/DuoBilan.html (src/duo.css, classes .bi-*), préfixées mf-duo-.
+   Le cadre (mf-stage 1920 × 1080) est celui de ui-cadre.css ; aucun texte sous 22 px. Les deux joueurs : J1 le rouge
+   de la direction visuelle #E23A2B, J2 le bleu-vert #1B8C8F (texte #3FB7BA) ; le jaune reste l'action principale. */
+.mf-duo-bi{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:16px;color:var(--mf-blanc)}
+.mf-duo-bi-bandeau{flex:none;height:110px;background:var(--mf-duo-c,var(--mf-ligne));clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 30px;color:var(--mf-blanc)}
+.mf-duo-bi-bandeau.j1{--mf-duo-c:var(--mf-rouge-vif)}
+.mf-duo-bi-bandeau.j2{--mf-duo-c:#1B8C8F}
+.mf-duo-bi-bandeau.nul{--mf-duo-c:var(--mf-ligne)}
+.mf-duo-bi-t{font-family:var(--mf-titre);font-weight:800;font-size:72px;line-height:.72;white-space:nowrap;text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mf-duo-bi-sc{font-family:var(--mf-titre);font-weight:800;font-size:72px;line-height:.72;white-space:nowrap;flex:none}
+.mf-duo-bi-cols{flex:1;min-height:0;display:flex;gap:16px}
+.mf-duo-bi-liste{flex:1;min-width:0}
+.mf-duo-bi-liste>.mf-p2>.mf-p3{gap:0;padding:15px;overflow:hidden}
+.mf-duo-bi-saison{flex:0 0 560px}
+.mf-duo-bi-saison>.mf-p2>.mf-p3{gap:14px;padding:15px;overflow:hidden}
+.mf-duo-bi-tete{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex:none}
+.mf-duo-bi-titre{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mf-duo-bi-titre>.mf-duo-bi-t{font-size:40px;line-height:.75}
+.mf-duo-bi-trait{width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-duo-bi-lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+.mf-duo-bi-sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;flex:none}
+.mf-duo-bi-l{display:flex;align-items:center;gap:16px;height:72px;border-bottom:2px solid var(--mf-sep);flex:none;min-width:0}
+.mf-duo-bi-h{height:44px}
+.mf-duo-bi-num{width:130px;flex:none;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);text-transform:uppercase;white-space:nowrap}
+.mf-duo-bi-n{width:270px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:10px;color:var(--mf-texte2);font-size:24px;line-height:1.05;min-width:0}
+.mf-duo-bi-n.gagne{color:var(--mf-blanc);font-weight:600}
+.mf-duo-bi-n.gagne::after{content:'✓';font-family:var(--mf-titre);font-weight:800;font-size:26px;flex:none}
+.mf-duo-bi-pt{width:12px;height:12px;flex:none;background:var(--mf-duo-pc,var(--mf-ligne))}
+.mf-duo-bi-pt.j1{--mf-duo-pc:var(--mf-rouge-vif)}
+.mf-duo-bi-pt.j2{--mf-duo-pc:#1B8C8F}
+.mf-duo-bi-m{flex:1;min-width:0;font-size:22px;line-height:1.1;color:var(--mf-texte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-duo-bi-aller{font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune);flex:none}
+.mf-duo-bi-gros{display:flex;align-items:center;gap:22px;justify-content:center;height:150px;flex:none}
+.mf-duo-bi-gros>.mf-duo-bi-t{font-size:180px;line-height:.7;flex:none;overflow:visible}
+.mf-duo-bi-sw{font-family:var(--mf-titre);font-weight:800;font-size:44px;line-height:.8;text-align:center;flex:none;white-space:normal;text-transform:uppercase;color:var(--mf-blanc)}
+.mf-duo-bi-sw.j1{color:var(--mf-rouge-vif)}
+.mf-duo-bi-sw.j2{color:#3FB7BA}
+.mf-duo-bi-j1{color:var(--mf-rouge-vif)}
+.mf-duo-bi-j2{color:#3FB7BA}
+.mf-duo-bi-t2{color:var(--mf-texte2)}
+.mf-duo-bi-l1{font-size:24px;line-height:1.05;min-width:0}
+.mf-duo-bi-t2.mf-duo-bi-l1{color:var(--mf-texte2)}
+.mf-duo-bi-ligne{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--mf-sep);padding:9px 0;flex:none;min-width:0}
+.mf-duo-bi-argent{display:flex;flex-direction:column;flex:none}
+.mf-duo-bi-g{font-family:var(--mf-titre);font-weight:800;font-size:36px;line-height:.8;white-space:nowrap;flex:none}
+.mf-duo-bi-rec{margin-top:auto;flex:none}
+.mf-duo-bi-rec>.mf-p2>.mf-p3{gap:10px;padding:12px 15px;overflow:hidden}
+.mf-duo-bi-bas{flex:none;display:flex;justify-content:flex-end}
+/* Les deux plaques de droite de l'en-tête (planche DuoBilan) : SAISON n, SUPER CARTE k SUR 4. Portées dans `droiteHtml` par
+   mfEcran (mgmt-cadre.js), jamais dans `droite` (échappé). */
+.mf-duo-bi-plaques{display:flex;align-items:center;gap:16px}
+.mf-duo-bi-k{color:var(--mf-rouge-vif)}
+.mf-duo-bi-sur{font-size:24px;font-weight:600;letter-spacing:.06em}
+.mf-duo-tag{display:inline-block;background:var(--mf-duo-tc,var(--mf-ligne));color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;padding:4px 10px 3px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);white-space:nowrap;text-transform:uppercase}
+.mf-duo-tag.j1{--mf-duo-tc:var(--mf-rouge-vif)}
+.mf-duo-tag.j2{--mf-duo-tc:#1B8C8F}
