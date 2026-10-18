@@ -348,7 +348,8 @@ function mgmtMondeVivantSemaine(m){
   try{
     for(const orgId of mgmtMondeVivantIds(m)){
       const sous=m.orgs[orgId], prochaine=sous&&sous.cal&&Array.isArray(sous.cal.prochaines)?sous.cal.prochaines[0]:null;
-      if(!prochaine||!Number.isFinite(prochaine.jour)||prochaine.jour>m.cal.jour) continue;
+      const jour=prochaine&&Number.isFinite(prochaine.jour)?prochaine.jour:(sous&&sous.cal&&Number.isFinite(sous.cal.jour)?sous.cal.jour+MGMT_EVENT_WEEKS*7:Infinity);
+      if(jour>m.cal.jour) continue;
       setSeed(((mgmtIdentiteStream(orgId,'semaine|'+m.cycle,m)()*4294967296)>>>0)||1);
       G.mgmt=sous;
       mgmtPredecesseurSoiree(sous,sous.eventsPlayed||0,mgmtPredecesseurReglages(orgId));

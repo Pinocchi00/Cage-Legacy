@@ -2,4 +2,13 @@
 
 Branche : `mode-duo`. **Ta spécification complète est `docs/lots/DUO-T0.md` : lis-la en entier, c'est elle qui fait foi pour le code** ; le brief est `docs/BRIEF-18-10-MODE-DUO.md` (le pourquoi) ; les planches validées par Anthony sont dans `maquettes/duo/` (elles priment sur la fiche pour tout ce qui se voit).
 Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
-**Commit** : `Monde lot 19 T0 : <le message de commit donné par DUO-T0, sans le préfixe « Duo T0 : »>`.
+**Commit** : `Monde lot 19 T0 : le monde vivant continue après sa première soirée, et la sauvegarde n'écrit plus une autre organisation`.
+
+## Compte rendu
+
+- `mgmt-passe.js` : échéance par défaut calculée depuis le calendrier de la sous-partie.
+- `mgmt-save.js` : une sous-partie `idPrefixe` ne peut remplacer la sauvegarde du joueur.
+- `tests/mgmtDuoMonde.test.js` : les trois intitulés exigés par DUO-T0.
+- Test ciblé non terminé en 120 s puis 300 s ; versions vérifiées : aucun écart.
+- Écart : tests non inscrits dans `test` et `test:watch`. Aucune migration de sauvegarde.
+- Question pour Anthony : réduire la durée du test de création du monde ?

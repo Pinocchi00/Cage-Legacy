@@ -814,6 +814,8 @@ function saveMgmt(){
   if(!G||!G.mgmt) return false;
   /* Monde lot 1 T3 : un passé en cours de génération ne s'écrit jamais — rien d'une partie à moitié née ne touche l'emplacement. */
   if(G.mgmt.passe&&G.mgmt.passe.enCours===true) return true;
+  /* Duo T0 : une organisation vivante ne s'écrit jamais à la place de la partie du joueur (elle s'écrit DANS m.orgs, avec elle). */
+  if(G.mgmt.idPrefixe!==undefined) return true;
   try{
     /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
