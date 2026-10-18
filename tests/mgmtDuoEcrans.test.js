@@ -43,6 +43,12 @@ test('Duo T8 — création : un nom injecté est échappé et les noms restent e
   assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
 });
 
+test('Duo T13 — l’écran de soirée est enregistré',()=>{
+  const w=newGameWindow();
+  assert.equal(w.eval("typeof SCREENS.mgmt_duo_soiree"),'function');
+  assert.equal(w.eval("typeof CL.mgmtDuoSoireeRegarder"),'function');
+});
+
 test('Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe',()=>{
   const w=newGameWindow({runMain:true});
   w.eval('SCREENS.mgmt_duo=()=>"Duo";');
