@@ -49,6 +49,26 @@ test('Duo T13 — l’écran de soirée est enregistré',()=>{
   assert.equal(w.eval("typeof CL.mgmtDuoSoireeRegarder"),'function');
 });
 
+test('Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainqueur',()=>{
+  const w=newGameWindow();
+  const html=w.eval(`(()=>{const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:3}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:0},cartes:[{combats:[{h:'duo-t54',div:'plume'}]}]}}; G={mgmt:m};
+    mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; return SCREENS.mgmt_duo_soiree();})()`);
+  assert.match(html,/class="duo-s"/);
+  assert.match(html,/DUVAL/);
+  assert.doesNotMatch(html,/VAINQUEUR|gagne|perd/);
+  assert.match(html,/class="so"/);
+});
+
+test('Duo T54 — le résultat révèle le vainqueur et reprend le balisage de la planche',()=>{
+  const w=newGameWindow();
+  const html=w.eval(`(()=>{const cs=Array.from({length:6},(_,i)=>({h:i===5?'duo-t54':'unused',div:'plume'})); const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:5}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:5},cartes:[{combats:cs}]}}; G={mgmt:m};
+    mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; MGMT_DUO_UI.vu=true; return SCREENS.mgmt_duo_soiree();})()`);
+  assert.match(html,/VAINQUEUR/);
+  assert.match(html,/COMBAT PRINCIPAL/);
+  assert.match(html,/LE BILAN/);
+  assert.match(html,/class="so-res"/);
+});
+
 test('Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe',()=>{
   const w=newGameWindow({runMain:true});
   w.eval('SCREENS.mgmt_duo=()=>"Duo";');

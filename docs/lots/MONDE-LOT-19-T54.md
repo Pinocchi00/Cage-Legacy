@@ -16,3 +16,13 @@ Le HTML de l'avant-combat contient `duo-s` et NE contient PAS le vainqueur (ni c
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T54 : <titre court>` (le numéro T54 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-soiree.js` : écran remaquetté selon la planche DuoSoiree, avec un état à la fois et les actions existantes reliées ; version de cache montée.
+- `index.html` et suppression de `ui-duo-soiree.css` : retrait du chargement et des styles propres à l’ancien écran.
+- `tests/mgmtDuoEcrans.test.js` : « Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainqueur » et « Duo T54 — le résultat révèle le vainqueur et reprend le balisage de la planche ». Déjà référencé dans les scripts `test` et `test:watch`.
+- Sauvegarde : format inchangé. Rang provenant de `mgmtDuoEffectif`.
+- Écart : date affichée fournie par `mgmtJourDateTexte(m.cal.jour)` ; aucune date de super carte distincte n’est enregistrée sur la carte jouée.
+- Les deux tests T54 passent. Le fichier entier a un échec indépendant préexistant : « Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape » (assertion attend « Avancer jusqu’à la super carte », libellé non rendu). Audit `node tools/verif-versions.js origin/main` : aucun écart.
+- Relecteur indisponible (limite de profondeur des sous-agents). Questions pour Anthony : aucune.
