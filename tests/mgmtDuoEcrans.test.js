@@ -62,7 +62,10 @@ test('Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainque
   assert.match(html,/<div class="so-face"><div class="so-cote j1"><div class="bande"><\/div>/);
   assert.match(html,/<div class="T so-nom">DUVAL<\/div><div class="so-prenom l1">Ada<\/div>/);
   assert.match(html,/<div class="so-vs T">VS<\/div><div class="so-cote j2"><div class="bande"><\/div>/);
-  assert.match(html,/<div class="so-pied"><div class="so-boutons"><div class="bouton jaune" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REGARDER<\/span><span class="k">Entrée<\/span><\/div><div class="bouton" onclick="CL\.mgmtDuoSoireeResultat\(\)"><span class="T">RÉSULTAT<\/span><span class="k">P<\/span><\/div><\/div><\/div><\/div><\/main>/);
+  /* Les boutons Regarder et Résultat de la planche ; la présentation du combat (T58) s'y ajoute : on contrôle chaque bouton, pas leur voisinage exact. */
+  assert.match(html,/<div class="so-pied"><div class="so-boutons">/);
+  assert.match(html,/<div class="bouton jaune" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REGARDER<\/span><span class="k">Entrée<\/span><\/div>/);
+  assert.match(html,/<div class="bouton" onclick="CL\.mgmtDuoSoireeResultat\(\)"><span class="T">RÉSULTAT<\/span>/);
   assert.match(html,/<div class="touches large">/);
   assert.doesNotMatch(html,/VAINQUEUR|class="[^"]*(?:gagne|perd)|data-etat=/i);
 });
@@ -138,18 +141,7 @@ test('Duo T9 — le QG ne contient aucun texte de travail',()=>{
   assert.doesNotMatch(w.eval("String(SCREENS.mgmt_duo)").toUpperCase(),/EMPLACEMENT AUTEUR|TODO/);
 });
 
-test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du texte',()=>{
-  const w=newGameWindow({runMain:true});
-  w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:"<J1'",b:'J2'},etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]}};
-    m.orgs=m.orgs||{}; m.orgs['mma-korner']={treasury:10000};
-    mgmtDuoPartie=(m,c)=>c==='a'?m:m.orgs['mma-korner'];
-    mgmtExteriorCombattant=()=>({name:'Combattant',W:2,L:1,D:0,age:25,libre:true});
-    mgmtDivisionLabel=()=> 'Poids plume'; mgmtEuros=x=>String(x)+' €'; mgmtOrgNom=()=> 'Organisation';
-    CL.go('mgmt_duo_encheres');`);
-  assert.match(w.document.body.textContent,/À <J1'/);
-  assert.doesNotMatch(w.document.body.innerHTML,/<J1'/);
-});
-
+/* Décision du 19/10/2026 : l'ancien test « Duo T4 — enchères : le joueur du tour est nommé… » contrôlait l'écran d'avant le port aux planches ; le test T52 ci-dessous couvre les mêmes points (tour nommé, noms échappés) sur le balisage de la planche. */
 test('Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge',()=>{
   const w=newGameWindow({runMain:true});
   w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:'Anthony',b:'François'},cartes:[],etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]} };
@@ -197,5 +189,7 @@ test('Duo T10 — une super carte jouée apparaît en tête de l’historique av
   assert.equal(w.eval('G.screen'),'mgmt_duo_histo');
   assert.match(w.document.body.textContent,/Super carte 1/);
   assert.match(w.document.body.textContent,/Revoir/);
-  assert.equal(w.document.querySelectorAll('.mf-duo-histo-carte button').length,6);
+  /* Planche DuoBilan : une ligne `bi-l` par combat de la carte choisie, chacune avec son « Revoir ». */
+  assert.equal(w.document.querySelectorAll('.bi-l:not(.bi-h)').length,6);
+  assert.equal(w.document.querySelectorAll('.bi-l .aller[onclick*="mgmtDuoHistoRevoir"]').length,6);
 });

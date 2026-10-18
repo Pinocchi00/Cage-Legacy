@@ -62,4 +62,4 @@ Object.assign(CL,{
   },
   mgmtDuoSoireeEchapper(){CL.go('mgmt_duo');}
 });
-keysRegister('mgmt_duo_soiree',{Enter(){if(MGMT_DUO_UI.vu)CL.mgmtDuoSoireeSuivant();else CL.mgmtDuoSoireeRegarder();},KeyF(){if(!MGMT_DUO_UI.vu)CL.mgmtDuoPresentation();},KeyP(){CL.mgmtDuoSoireeResultat();},Escape(){CL.mgmtDuoSoireeEchapper();}});
+keysRegister('mgmt_duo_soiree',{Enter(){if(MGMT_DUO_UI.vu)CL.mgmtDuoSoireeSuivant();else CL.mgmtDuoSoireeRegarder();},f(){if(!MGMT_DUO_UI.vu)CL.mgmtDuoPresentation();},F(){if(!MGMT_DUO_UI.vu)CL.mgmtDuoPresentation();},p(){CL.mgmtDuoSoireeResultat();},P(){CL.mgmtDuoSoireeResultat();},Escape(){CL.mgmtDuoSoireeEchapper();}});
