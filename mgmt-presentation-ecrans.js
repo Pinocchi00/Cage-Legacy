@@ -178,7 +178,7 @@ function mgmtPresentationLignes(m,v){
     };
     panneaux=[
       {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
-      {titre:'CE QUE CHACUN IMPOSE',sous:MGMT_AVANT_TEXTES.entete.source,lignes:mgmtImposerLignes(m,d.ids,d.h)},
+      {titre:'CE QUE CHACUN IMPOSE',sous:'D’après leurs combats',lignes:mgmtImposerLignes(m,d.ids,d.h)},
       {titre:'LEUR HISTOIRE',lignes:d.histoire.map(x=>{
           const t=m.hist[x.index];
           const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);

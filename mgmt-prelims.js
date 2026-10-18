@@ -25,7 +25,8 @@ function mgmtPrelimsEmplacements(m){
 function mgmtPrelimsLigne(m,s,i,choisi){
   const f=s.fight, fa=f&&mgmtFighterById(m,f.a), fb=f&&mgmtFighterById(m,f.b);
   const early=i<(m.card.sizeEarly||0), nom=early?`EARLY PRELIM ${i+1}`:`PRÉLIM ${i+1}`;
-  const etat=s.etat==='valide'?MF_SVG_CONFIRME:'';
+  /* Monde lot 18 — décision d'Anthony du 17/10/2026 (la coche « validation » à droite des combats est retirée, comme sur la Carte) : un préliminaire posé n'a plus de coche. */
+  const etat='';
   const corps=f&&fa&&fb
     ?`<div class="mf-car-slot-t"><span>${esc(nom)}</span><em>${esc(mgmtCarteCourt(fa.div))}</em></div>`
       +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa.last||fa.name))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb.last||fb.name))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`
@@ -62,7 +63,7 @@ function scr_mgmt_prelims(){
   if(!Number.isSafeInteger(P.i)||P.i<0||P.i>=slots.length) P.i=0;
   const s=slots[P.i], f=s.fight;
   const lignes=slots.map((x,i)=>mgmtPrelimsLigne(m,x,i,i===P.i)).join('');
-  const legende=`<div class="mf-car-legende"><span>${MF_SVG_CONFIRME}Posé</span>${slots.some(x=>x.etat==='atrouver')?'<span><i class="mf-eff-q">?</i>À trouver</span>':''}</div>`;
+  const legende=slots.some(x=>x.etat==='atrouver')?`<div class="mf-car-legende"><span><i class="mf-eff-q">?</i>À trouver</span></div>`:'';
   const gaucheHtml=(petit)=>mfPanneau(`<div class="mf-car-t">LA CARTE DE LEÏLA</div><div class="mf-car-slots mf-pre-slots">${lignes}</div>${legende}${petit||''}`,'normal','mf-car-g');
 
   const fa=f&&mgmtFighterById(m,f.a), fb=f&&mgmtFighterById(m,f.b);
