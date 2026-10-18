@@ -1,6 +1,6 @@
 # Monde lot 19 T54 — mode Duo : la soirée de la super carte, au balisage exact de la planche
 
-Branche : `duo-p1` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p1`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
+Branche : `duo-p3` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p3`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
 Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
 **Tu ne t'arrêtes pas au premier obstacle ; tu ne rends « inachevé » qu'après avoir réellement essayé, avec le blocage précis.**
 
@@ -16,3 +16,19 @@ Le HTML de l'avant-combat contient `duo-s` et NE contient PAS le vainqueur (ni c
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T54 : <titre court>` (le numéro T54 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-soiree.js` : écran remaquetté selon la planche DuoSoiree, avec un état à la fois et les actions existantes reliées ; version de cache montée.
+- `index.html` et suppression de `ui-duo-soiree.css` : retrait du chargement et des styles propres à l’ancien écran.
+- `tests/mgmtDuoEcrans.test.js` : « Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainqueur » et « Duo T54 — le résultat révèle le vainqueur et reprend le balisage de la planche ». Déjà référencé dans les scripts `test` et `test:watch`.
+- Sauvegarde : format inchangé. Rang provenant de `mgmtDuoEffectif`.
+- Écart : date affichée fournie par `mgmtJourDateTexte(m.cal.jour)` ; aucune date de super carte distincte n’est enregistrée sur la carte jouée.
+- Les deux tests T54 passent. Le fichier entier a un échec indépendant préexistant : « Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape » (assertion attend « Avancer jusqu’à la super carte », libellé non rendu). Audit `node tools/verif-versions.js origin/main` : aucun écart.
+- Relecteur indisponible (limite de profondeur des sous-agents). Questions pour Anthony : aucune.
+
+### Reprise après relecture
+
+- `tests/mgmtDuoEcrans.test.js` : assertions T54 renforcées sur l’enveloppe `duo-s`, la structure et l’ordre du combat principal, ses libellés/actions, les classes gagnant/perdant à l’état résultat et l’absence de ces classes, de `data-etat` et de verdict avant le combat.
+- `index.html` : aucun nouveau changement. Le diff de T54 par rapport au parent ne contient que le retrait du lien vers l’ancienne feuille soirée et la montée de version du script `mgmt-duo-soiree.js`, ressources directement nécessaires à la tranche.
+- Vérification ciblée : `node --test --test-name-pattern="Duo T54" tests/mgmtDuoEcrans.test.js` — 2 tests passés. `Duo T9` reste l’échec préexistant documenté ci-dessus.

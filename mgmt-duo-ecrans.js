@@ -119,22 +119,65 @@ Object.assign(CL,{
 });
 keysRegister('mgmt_duo',{Enter(){CL.mgmtDuoQGAction();},Escape(){CL.mgmtDuoQuitter();},'1'(){CL.mgmtDuoOuvrirEffectif('a');},'2'(){CL.mgmtDuoOuvrirEffectif('b');},h(){if(!MGMT_DUO_QG.enCours&&G.mgmt.duo.cartes&&G.mgmt.duo.cartes.length)CL.go('mgmt_duo_histo');}});
 
+/* ==== [ANCRE: DUO_T3_ECRANS] — Monde lot 19 T10 ==== */
+let MGMT_DUO_EFFECTIF_DIV=null;
+function mgmtDuoEffectifHtml(){
+  const m=G.mgmt,d=m.duo,cote=MGMT_DUO_EFFECTIF_COTE,orgId=cote==='a'?mgmtPredecesseurOrgId(m):d.b;
+  const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId),divisions=allDivisions(),divId=MGMT_DUO_EFFECTIF_DIV||divisions[0].id;
+  const effectif=mgmtDuoEffectif(m,cote,divId);
+  const lignes=effectif.map(f=>`<div class="mf-duo-effectif-ligne"><strong>${esc(f.rang||'—')}</strong><span>${esc(f.name)}</span><span>${esc(`${f.W}-${f.L}-${f.D}`)}</span><span>${esc(`${f.age} ans`)}</span><span>${f.forme.map(x=>`<i>${esc(x==='v'?'V':x==='d'?'D':'N')}</i>`).join('')}</span><span>${esc(({dispo:'Disponible',blesse:'Blessé',libre:'Sans contrat',refuse:'Refuse de combattre'})[f.etat]||'')}</span><span>${esc(`${f.restants} combats au contrat`)}</span></div>`).join('')||'<p>Aucun combattant</p>';
+  const onglets=divisions.map((x,i)=>`<button class="${x.id===divId?'actif':''}" onclick="CL.mgmtDuoEffectifDivision('${esc(x.id)}')">${esc(mgmtDivisionLabel(x.id))}</button>`).join('');
+  return mfEcran(`<div class="mf-duo-effectif"><div class="mf-duo-effectif-tete"><strong>${esc(d.noms[cote])}</strong><span>${esc(org&&org.nom||'')}</span></div><nav>${onglets}</nav><div class="mf-duo-effectif-liste"><div class="mf-duo-effectif-ligne mf-duo-effectif-entete"><strong>Rang</strong><strong>Combattant</strong><strong>Bilan</strong><strong>Âge</strong><strong>Forme</strong><strong>État</strong><strong>Contrat</strong></div>${lignes}</div></div>`,{barre:'logo',plaque:'Effectif',libelle:`${esc(org&&org.nom||'')} · ${esc(d.noms[cote])}`,touches:[{ks:['Tab'],t:'Autre effectif'},{ks:['Échap'],t:'Retour'}]});
+}
+SCREENS.mgmt_duo_effectif=mgmtDuoEffectifHtml;
+Object.assign(CL,{mgmtDuoEffectifDivision(id){if(allDivisions().some(d=>d.id===id)){MGMT_DUO_EFFECTIF_DIV=id;render();}},mgmtDuoEffectifAutre(){MGMT_DUO_EFFECTIF_COTE=MGMT_DUO_EFFECTIF_COTE==='a'?'b':'a';render();},mgmtDuoEffectifRetour(){CL.go('mgmt_duo');}});
+keysRegister('mgmt_duo_effectif',{Escape(){CL.mgmtDuoEffectifRetour();},Tab(){CL.mgmtDuoEffectifAutre();},ArrowLeft(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i-1+a.length)%a.length].id);},ArrowRight(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i+1)%a.length].id);}});
+
+function mgmtDuoHistoHtml(){
+  const m=G.mgmt,d=m.duo,cartes=(d.cartes||[]).slice().reverse();
+  const html=cartes.map(c=>`<article class="mf-duo-histo-carte"><h2>Super carte ${esc(c.n)} · ${esc(mgmtJourDateTexte(c.jour))} · ${esc(d.noms.a)} ${esc(c.combats.filter(x=>x.winner==='A').length)} – ${esc(c.combats.filter(x=>x.winner==='B').length)} ${esc(d.noms.b)}</h2>${c.combats.map(x=>`<div>${esc(x.na)} – ${esc(x.nb)} · ${esc(mgmtDivisionLabel(x.div))} · ${esc(x.winner==='A'?d.noms.a:x.winner==='B'?d.noms.b:'Égalité')} · ${esc(mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds}))} · R${esc(x.round)}<button onclick="CL.mgmtDuoHistoRevoir(${esc(x.h)})">Revoir</button></div>`).join('')}</article>`).join('')||'<p>Aucune super carte passée</p>';
+  return mfEcran(`<div class="mf-duo-histo">${html}</div>`,{barre:'logo',plaque:'Super cartes passées',libelle:`${esc(d.noms.a)} × ${esc(d.noms.b)}`,touches:[{ks:['Échap'],t:'Retour'}]});
+}
+SCREENS.mgmt_duo_histo=mgmtDuoHistoHtml;
+Object.assign(CL,{mgmtDuoHistoRevoir(h){const trace=G.mgmt.hist[h];if(trace)mgmtCombatOuvrir({trace,etiquette:'SUPER CARTE',retour:'mgmt_duo_histo',salle:{taux:1,prog:1}});},mgmtDuoHistoRetour(){CL.go('mgmt_duo');}});
+keysRegister('mgmt_duo_histo',{Escape(){CL.mgmtDuoHistoRetour();}});
+
+/** La création à deux, au balisage exact de la planche DuoCreation (maquettes/duo) : les noms, puis le choix de J1, puis celui de J2. */
 function mgmtDuoNouvelleHtml(){
   const s=MGMT_DUO_NOUVELLE;
-  const titre=s.etape==='noms'?'Duo':`${s.noms[s.etape==='a'?'a':'b']||`Joueur ${s.etape==='a'?1:2}`} · choisis ton organisation`;
+  const nomJ=cote=>s.noms[cote]||(cote==='a'?'Joueur 1':'Joueur 2');
+  const carte=(o,i)=>{
+    const ident=mgmtOrgIdentite(o.id)||{}, atouts=mgmtOrgAtouts(o.profil);
+    const choisie=s.i===i&&!(s.etape==='b'&&i===s.a), prise=s.etape==='b'&&i===s.a;
+    const lignes=[...atouts.plus.map(t=>['plus',t]),...atouts.moins.map(t=>['moins',t])]
+      .map(([k,t])=>`<div class="org-l"><span class="${k}">${k==='plus'?'+':'−'}</span><span>${duoEsc(t)}</span></div>`).join('');
+    return duoPan(`org${choisie?' choisi':''}${prise?' prise':''}`,`<div class="org-tete${choisie?' on':''}"><div class="T" style="font-size:${o.nom.length>18?30:44}px">${duoEsc(duoMaj(o.nom))}</div>${choisie?'<div class="lab noir">CHOISIE</div>':''}${prise?`<span class="tag j1">${duoEsc(duoMaj(nomJ('a')))}</span>`:''}</div>
+      <div class="org-corps"><div class="lab">${duoEsc(duoMaj(ident.ville||''))} · DEPUIS ${duoEsc(ident.annee||'')}</div><div class="org-rep">${duoEsc(ident.reputation||'')}</div><div>${lignes}</div></div>`,
+      ` role="button" aria-label="${duoEsc(o.nom)}"${prise?' aria-disabled="true"':` onclick="CL.mgmtDuoNouvelleChoisir(${i})"`}`);
+  };
+  const champ=(cote,lab,sous)=>`<label class="champ ${cote==='a'?'j1':'j2'}"><span class="lab">${lab}</span><span class="saisie"><input id="mf-duo-nom-${cote}" maxlength="16" value="${duoEsc(s.noms[cote])}" placeholder="${cote==='a'?'Joueur 1':'Joueur 2'}" style="all:unset;width:100%;font:inherit;color:inherit" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></span><span class="l2">${sous}</span></label>`;
+  const pied=(qui,bouton)=>`<div class="cr-pied"><div class="l1">${qui}</div><div class="bouton jaune" onclick="CL.mgmtDuoNouvelleValider()"><span class="T">${bouton}</span><span class="k">Entrée</span></div></div>`;
   let contenu;
   if(s.etape==='noms'){
-    contenu=`<div class="mf-duo-noms"><h2>Deux joueurs, un PC</h2><div class="mf-duo-champs"><label>Joueur 1<input id="mf-duo-nom-a" maxlength="16" value="${esc(s.noms.a)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label><label>Joueur 2<input id="mf-duo-nom-b" maxlength="16" value="${esc(s.noms.b)}" onkeydown="if(event.key==='Enter'){event.preventDefault();CL.mgmtDuoNouvelleContinuer()}else if(event.key==='Escape'){event.preventDefault();CL.mgmtDuoNouvelleEchapper()}"></label></div><div class="mf-duo-regles"><p>Chacun son organisation. Vos adjoints jouent les soirées ordinaires.</p><p>Tous les 3 mois, une super carte : six combats, tes combattants contre les siens.</p></div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtDuoNouvelleContinuer()'})}</div>`;
+    contenu=duoPan('cr-carte',`${duoTitre('QUI JOUE ?','DEUX JOUEURS, UN PC')}
+        <div class="cr-champs">${champ('a','JOUEUR 1','Choisit son organisation en premier')}${champ('b','JOUEUR 2','Choisit parmi les sept autres')}</div>
+        <div class="cr-regle">
+          <div class="l1">Chacun son organisation. Vos adjoints jouent les soirées ordinaires.</div>
+          <div class="l1">Tous les 3 mois, une super carte : six combats, tes combattants contre les siens.</div>
+        </div>
+        <div class="cr-bas"><div class="l2">16 caractères au plus. Vide : « Joueur 1 », « Joueur 2 ».</div><div class="bouton jaune" onclick="CL.mgmtDuoNouvelleContinuer()"><span class="T">CONTINUER</span><span class="k">Entrée</span></div></div>`);
+    contenu=`<div class="cr-noms vis">${contenu}</div>`;
   }else{
-    const cartes=MGMT_ORGANISATIONS.map((o,i)=>{
-      const prise=s.etape==='b'&&i===s.a;
-      const html=mgmtNouvelleOrgHtml(o,i,s.i===i&&!prise).replace(`onclick="CL.mgmtNouvelleChoisir(${i})"`,`onclick="CL.mgmtDuoNouvelleChoisir(${i})"`);
-      return `<div class="mf-duo-org ${prise?'mf-duo-prise':''}" ${prise?'aria-disabled="true" tabindex="-1"':''} data-duo-index="${i}">${html}${prise?`<span class="mf-duo-prise-nom">${esc(s.noms.a||'Joueur 1')}</span>`:''}</div>`;
-    }).join('');
-    contenu=`<div class="mf-nouvelle mf-duo-grille"><div class="mf-org-grille">${cartes}</div>${mgmtNouvelleApercuHtml(MGMT_ORGANISATIONS[s.i])}<div class="mf-duo-pied">${mfBouton(s.etape==='a'?`Choisir ${esc(MGMT_ORGANISATIONS[s.i].nom)}`:'Créer la partie',{touche:'Entrée',jaune:true,onclick:'CL.mgmtDuoNouvelleValider()'})}</div></div>`;
+    const orgChoisie=MGMT_ORGANISATIONS[s.i];
+    const grille=`<div class="org-grille">${MGMT_ORGANISATIONS.map((o,i)=>carte(o,i)).join('')}</div>`;
+    const cote=s.etape==='a'?'a':'b';
+    const qui=`<span class="tour-mini ${cote==='a'?'j1':'j2'}">${duoEsc(duoMaj(nomJ(cote)))}</span> choisis ton organisation${s.etape==='b'?` · ${duoEsc(MGMT_ORGANISATIONS[s.a].nom)} est prise par ${duoEsc(nomJ('a'))}`:''}`;
+    contenu=`<div class="vis">${grille}${pied(qui,s.etape==='a'?`CHOISIR ${duoEsc(duoMaj(orgChoisie.nom))}`:'CRÉER LA PARTIE')}</div>`;
   }
-  const ecran=mfEcran(contenu,{barre:'logo',plaque:'Duo',libelle:titre,droite:`Emplacement ${s.slot}`,touches:[{ks:['Échap'],t:'Retour'},{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['Entrée'],t:s.etape==='noms'?'Continuer':'Valider',jaune:true}]});
-  return ecran;
+  const touches=duoTouches([[['↑','↓','←','→'],'Choisir'],[['Échap'],'Retour',false,'CL.mgmtDuoNouvelleEchapper()'],[['Entrée'],'Valider',true,s.etape==='noms'?'CL.mgmtDuoNouvelleContinuer()':'CL.mgmtDuoNouvelleValider()']]);
+  return duoCadre(`${duoEntete('Nouvelle partie à deux',`<div class="plaque"><span class="lab">EMPLACEMENT ${duoEsc(s.slot)}</span></div>`)}
+  <main class="contenu large">${contenu}</main>
+  ${touches}`);
 }
 SCREENS.mgmt_duo_nouvelle=mgmtDuoNouvelleHtml;
 Object.assign(CL,{

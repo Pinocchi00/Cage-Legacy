@@ -1,168 +1,39 @@
 "use strict";
 /* ==== [ANCRE: DUO_T4_ECRANS] — Monde lot 19 T14, docs/lots/DUO-T4.md §4 ==== */
-/* Le bilan d'une super carte : le bandeau du vainqueur (ou l'égalité), le score des six combats, ce qu'a rapporté la
-   carte à chaque joueur, les recrues des enchères et, à la quatrième carte, la saison. Tout vient de mgmt-duo.js ;
-   cet écran ne mute rien : seul le retour au QG passe par mgmtDuoTerminer (l'étape repasse à `attente`).
-   Les planches maquettes/duo/DuoBilan.html priment pour tout ce qui se voit ; les valeurs sont portées dans
-   ui-duo-bilan.css sous l'ancre DUO_T4_ECRANS. Aucun texte sous 22 px, esc() sur tout nom.
-   Tous les textes visibles sont relu:false (à relire par Anthony). */
+/* Bilan au balisage exact de la planche maquettes/duo/DuoBilan.html. Les textes fixes
+   de la planche sont relu:false ; les noms et chiffres viennent de la partie Duo. */
 
-/** La classe de couleur d'un côté : J1 le rouge vif, J2 le bleu-vert. @returns {string} */
-function mgmtDuoBilanCote(cote){
-  return cote==='a'?'j1':cote==='b'?'j2':'';
-}
-
-/** Le libellé d'une place dans la soirée : le premier joué en haut (COMBAT 6) jusqu'au principal (i = 5). @returns {string} */
-function mgmtDuoBilanPlace(i){
-  const n=MGMT_DUO_COMBATS;
-  return i===n-1?'COMBAT PRINCIPAL':'COMBAT '+(n-i);
-}
-
-/** Le nombre de combats gagnés par un côté dans une carte. @returns {number} */
-function mgmtDuoBilanVictoires(carte,cote){
-  const g=cote==='a'?'A':cote==='b'?'B':null;
-  return carte&&Array.isArray(carte.combats)?carte.combats.filter(c=>c.winner===g).length:0;
-}
-
-/** L'argent d'une carte pour un côté. @returns {number} */
-function mgmtDuoBilanGain(carte,cote){
-  return carte&&carte.gains&&Number.isFinite(carte.gains[cote])?carte.gains[cote]:0;
-}
-
-/** Une ligne d'argent : le joueur (étiquette), son organisation et la somme. @returns {string} */
-function mgmtDuoBilanLigneArgent(m,cote,montant){
-  const nom=cote==='a'?m.duo.noms.a:m.duo.noms.b;
-  const org=mgmtOrgNom(cote==='a'?m:mgmtDuoPartie(m,'b'));
-  return `<div class="mf-duo-bi-ligne"><div class="mf-duo-bi-l1"><span class="mf-duo-tag ${mgmtDuoBilanCote(cote)}">${esc(nom)}</span> ${esc(org)}</div><div class="mf-duo-bi-t mf-duo-bi-g">+ ${esc(mgmtEuros(montant))}</div></div>`;
-}
-
-/** Une ligne de combat du bilan, six fois. La méthode vient du rejeu fidèle de la trace (mgmtResultatDetail, comme
- *  les écrans de résultats et la soirée) : « Décision unanime après 3 rounds » ; à défaut la famille. @returns {string} */
-function mgmtDuoBilanCombatHtml(m,i,c){
-  const gain=c.winner==='A'?' gagne':'', gagnb=c.winner==='B'?' gagne':'';
-  const d=mgmtResultatDetail(m,c.h);
-  const meth=d?mgmtSuMethodeFine(d):mgmtSuMethodeFamille({nul:c.winner==='D',family:c.family,round:c.round,rounds:c.rounds});
-  return `<div class="mf-duo-bi-l" data-duo-combat="${i}">`
-    +`<div class="mf-duo-bi-num">${mgmtDuoBilanPlace(i)}</div>`
-    +`<div class="mf-duo-bi-n${gain}"><span class="mf-duo-bi-pt j1"></span>${esc(c.na)}</div>`
-    +`<div class="mf-duo-bi-n${gagnb}"><span class="mf-duo-bi-pt j2"></span>${esc(c.nb)}</div>`
-    +`<div class="mf-duo-bi-m">${esc(mgmtDivisionLabel(c.div))} · ${esc(meth)}</div>`
-    +`<button type="button" class="mf-duo-bi-aller" onclick="CL.mgmtDuoBilanRevoir(${i})">Revoir ›</button>`
-    +`</div>`;
-}
-
-/** Le panneau des six combats. @returns {string} */
-function mgmtDuoBilanListeHtml(m,carte){
-  const noms=m.duo.noms, orgA=mgmtOrgNom(m), orgB=mgmtOrgNom(mgmtDuoPartie(m,'b'));
-  const tete=`<div class="mf-duo-bi-tete"><div class="mf-duo-bi-titre"><div class="mf-duo-bi-t">Les six combats</div><div class="mf-duo-bi-trait"></div></div><div class="mf-duo-bi-lab">${esc(mgmtJourDateTexte(carte.jour))}</div></div>`;
-  const entete=`<div class="mf-duo-bi-l mf-duo-bi-h"><div class="mf-duo-bi-num"></div>`
-    +`<div class="mf-duo-bi-n mf-duo-bi-lab">${esc(noms.a)} · ${esc(orgA)}</div>`
-    +`<div class="mf-duo-bi-n mf-duo-bi-lab">${esc(noms.b)} · ${esc(orgB)}</div>`
-    +`<div class="mf-duo-bi-m mf-duo-bi-lab">Comment</div><div class="mf-duo-bi-num"></div></div>`;
-  const lignes=carte.combats.map((c,i)=>mgmtDuoBilanCombatHtml(m,i,c)).join('');
-  return mfPanneau(tete+entete+lignes,'normal','mf-duo-bi-liste');
-}
-
-/** Les recrues des enchères de cette carte, ou rien. @returns {string} */
-function mgmtDuoBilanRecruesHtml(m,carte){
-  const noms={a:m.duo.noms.a,b:m.duo.noms.b};
-  const lignes=(m.duo.recrues||[]).filter(r=>r&&r.n===carte.n);
-  if(!lignes.length) return '';
-  const corps=lignes.map(r=>`<div class="mf-duo-bi-l1"><span class="mf-duo-tag ${mgmtDuoBilanCote(r.cote)}">${esc(noms[r.cote]||'')}</span> signe ${esc(r.name)} · ${esc(mgmtEuros(r.prix))}</div>`).join('');
-  return mfPanneau(`<div class="mf-duo-bi-sous">Recrues des enchères</div>${corps}`,'normal','mf-duo-bi-rec');
-}
-
-/** Le bloc de la quatrième carte : la saison, son vainqueur et les quatre cartes. @returns {string} */
-function mgmtDuoBilanSaisonHtml(m,carte){
-  const score=mgmtDuoScore(m);
-  const titre=score.a===score.b?`Saison ${score.saison} : égalité`:`${esc(m.duo.noms[score.a>score.b?'a':'b'])} remporte la saison ${score.saison}`;
-  const cls=score.a===score.b?'':mgmtDuoBilanCote(score.a>score.b?'a':'b');
-  const debut=Math.max(0,carte.n-MGMT_DUO_CARTES_SAISON);
-  const cartes=m.duo.cartes.slice(debut).map(c=>`<div class="mf-duo-bi-ligne"><div class="mf-duo-bi-l1">Super carte ${c.n} · ${esc(mgmtJourDateTexte(c.jour))}</div><div class="mf-duo-bi-l1">${mgmtDuoBilanVictoires(c,'a')} – ${mgmtDuoBilanVictoires(c,'b')}</div></div>`).join('');
-  return `<div class="mf-duo-bi-sw ${cls}">${titre}</div>${cartes}`;
-}
-
-/** Le panneau de droite : le score de saison, l'argent, les recrues. @returns {string} */
-function mgmtDuoBilanSaison(m,carte){
-  const score=mgmtDuoScore(m);
-  const derniere=carte.n%MGMT_DUO_CARTES_SAISON===0;
-  const gros=`<div class="mf-duo-bi-gros"><span class="mf-duo-bi-t mf-duo-bi-j1">${score.a}</span><span class="mf-duo-bi-t mf-duo-bi-t2">–</span><span class="mf-duo-bi-t mf-duo-bi-j2">${score.b}</span></div>`;
-  const milieu=derniere
-    ?mgmtDuoBilanSaisonHtml(m,carte)
-    :`<div class="mf-duo-bi-l1 mf-duo-bi-t2">Prochaine super carte : ${esc(mgmtJourDateTexte(m.duo.prochaine))}</div>`;
-  let argentA,argentB,titre;
-  if(derniere){
-    const debut=Math.max(0,carte.n-MGMT_DUO_CARTES_SAISON);
-    const saison=m.duo.cartes.slice(debut);
-    argentA=saison.reduce((s,c)=>s+mgmtDuoBilanGain(c,'a'),0);
-    argentB=saison.reduce((s,c)=>s+mgmtDuoBilanGain(c,'b'),0);
-    titre='Gagné sur la saison';
-  }else{
-    argentA=mgmtDuoBilanGain(carte,'a');
-    argentB=mgmtDuoBilanGain(carte,'b');
-    titre="L'argent de la super carte";
-  }
-  const argent=`<div class="mf-duo-bi-argent"><div class="mf-duo-bi-sous">${titre}</div>`
-    +mgmtDuoBilanLigneArgent(m,'a',argentA)+mgmtDuoBilanLigneArgent(m,'b',argentB)+`</div>`;
-  return mfPanneau(gros+milieu+argent+mgmtDuoBilanRecruesHtml(m,carte),'normal','mf-duo-bi-saison');
-}
-
-/** L'écran du bilan : le bandeau, les six combats, la saison, le retour au QG. @returns {string} */
+/* ==== [ANCRE: MONDE_LOT_19_T55_BILAN] — Monde lot 19 T55 ==== */
 function mgmtDuoBilanHtml(){
-  const m=G&&G.mgmt;
-  const cartes=mgmtDuoActif(m)&&Array.isArray(m.duo.cartes)?m.duo.cartes:[];
-  const carte=cartes[cartes.length-1];
-  const opts={barre:'logo',plaque:'Duo',libelle:`${m&&m.duo?m.duo.noms.a:'Joueur 1'} × ${m&&m.duo?m.duo.noms.b:'Joueur 2'}`,droite:'',touches:[{ks:['Entrée'],t:'Retour au QG',jaune:true,onclick:'CL.mgmtDuoBilanRetour()'}]};
-  if(!carte){
-    return mfEcran(`<main class="mf-duo-bi"><div class="mf-duo-bi-l1">Aucune super carte jouée.</div></main>`,opts);
+  const m=G&&G.mgmt,d=m&&m.duo,cartes=d&&Array.isArray(d.cartes)?d.cartes:[],c=cartes[cartes.length-1];
+  const scoreA=c.combats.filter(x=>x.winner==='A').length,scoreB=c.combats.filter(x=>x.winner==='B').length;
+  const win=c.gagnant==='a'?'a':c.gagnant==='b'?'b':null;
+  const orgA=mgmtOrgNom(m),orgB=mgmtOrgNom(mgmtDuoPartie(m,'b'));
+  const lignes=c.combats.map((x,i)=>{
+    const detail=mgmtResultatDetail(m,x.h),meth=detail?mgmtSuMethodeFine(detail):mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds});
+    return `<div class="bi-l" data-duo-combat="${i}"><div class="lab bi-num">${i===5?'PRINCIPAL':'COMBAT '+(6-i)}</div><div class="bi-n l1 ${x.winner==='A'?'gagne':''}"><span class="pt j1"></span>${duoEsc(x.na)}</div><div class="bi-n l1 ${x.winner==='B'?'gagne':''}"><span class="pt j2"></span>${duoEsc(x.nb)}</div><div class="bi-m l2">${duoEsc(mgmtDivisionLabel(x.div))} · ${duoEsc(meth)}</div><div class="aller" onclick="CL.mgmtDuoBilanRevoir(${i})" style="cursor:pointer">Revoir ›</div></div>`;
+  }).join('');
+  const n=c.n, saison=mgmtDuoScore(m),fin=n%MGMT_DUO_CARTES_SAISON===0;
+  let saisonHtml;
+  if(fin){
+    const debut=Math.max(0,cartes.length-MGMT_DUO_CARTES_SAISON),saisonCartes=cartes.slice(debut);
+    const saisonA=saisonCartes.filter(k=>k.gagnant==='a').length,saisonB=saisonCartes.filter(k=>k.gagnant==='b').length,saisonNo=Math.ceil(n/MGMT_DUO_CARTES_SAISON);
+    const g=saisonA===saisonB?null:saisonA>saisonB?'a':'b';
+    saisonHtml=`${duoTitre('LA SAISON '+saisonNo,'4 SUPER CARTES')}<div class="bi-gros"><span class="T j1c">${saisonA}</span><span class="T t2">–</span><span class="T j2c">${saisonB}</span></div><div class="T bi-sw ${g?g==='a'?'j1c':'j2c':''}">${g?`${duoEsc(duoMaj(d.noms[g]))} REMPORTE LA SAISON ${saisonNo}`:`SAISON ${saisonNo} : ÉGALITÉ`}</div>${saisonCartes.map(k=>`<div class="ligne"><div class="l1">Super carte ${k.n} · ${duoEsc(mgmtJourDateTexte(k.jour).toLowerCase())}</div><div class="l1">${k.combats.filter(x=>x.winner==='A').length} – ${k.combats.filter(x=>x.winner==='B').length}</div></div>`).join('')}<div class="bi-argent"><div class="sous">Gagné sur la saison</div><div class="ligne"><div class="l1">${duoTag(m,'a')} ${duoEsc(orgA)}</div><div class="T bi-g">+ ${duoEuros(saisonCartes.reduce((t,k)=>t+(k.gains.a||0),0))}</div></div><div class="ligne"><div class="l1">${duoTag(m,'b')} ${duoEsc(orgB)}</div><div class="T bi-g">+ ${duoEuros(saisonCartes.reduce((t,k)=>t+(k.gains.b||0),0))}</div></div></div>`;
+  }else{
+    saisonHtml=`${duoTitre('LA SAISON '+saison.saison,`APRÈS ${n} SUPER CARTE${n>1?'S':''}`)}<div class="bi-gros"><span class="T j1c">${saison.a}</span><span class="T t2">–</span><span class="T j2c">${saison.b}</span></div><div class="l1 t2">Prochaine super carte : ${duoEsc(mgmtJourDateTexte(d.prochaine).toLowerCase())}</div><div class="bi-argent"><div class="sous">L’argent de la super carte</div><div class="ligne"><div class="l1">${duoTag(m,'a')} ${duoEsc(orgA)}</div><div class="T bi-g">+ ${duoEuros(c.gains.a||0)}</div></div><div class="ligne"><div class="l1">${duoTag(m,'b')} ${duoEsc(orgB)}</div><div class="T bi-g">+ ${duoEuros(c.gains.b||0)}</div></div></div>`;
+    const recrues=(d.recrues||[]).filter(r=>r&&r.n===n);
+    if(recrues.length) saisonHtml+=duoPan('bi-rec',`<div class="sous">Recrues des enchères</div>${recrues.map(r=>`<div class="l1">${duoTag(m,r.cote)} signe <span class="nom">${duoEsc(r.name)}</span> · ${duoEuros(r.prix)}</div>`).join('')}`);
   }
-  const scoreA=mgmtDuoBilanVictoires(carte,'a'), scoreB=mgmtDuoBilanVictoires(carte,'b');
-  const bandeau=carte.gagnant==='nul'
-    ?`<span class="mf-duo-bi-t">Égalité</span>`
-    :`<span class="mf-duo-bi-t">${esc(m.duo.noms[carte.gagnant])} remporte la super carte ${carte.n}</span>`;
-  const cls=carte.gagnant==='nul'?'nul':mgmtDuoBilanCote(carte.gagnant);
-  const sc=mgmtDuoScore(m), k=(carte.n-1)%MGMT_DUO_CARTES_SAISON+1;
-  opts.droiteHtml=`<span class="mf-duo-bi-plaques"><span class="mf-plaque">Saison ${sc.saison}</span><span class="mf-plaque">Super carte <b class="mf-duo-bi-k">${k}</b><span class="mf-duo-bi-sur">sur ${MGMT_DUO_CARTES_SAISON}</span></span></span>`;
-  const contenu=`<main class="mf-duo-bi">`
-    +`<div class="mf-duo-bi-bandeau ${cls}">${bandeau}<span class="mf-duo-bi-sc">${scoreA} – ${scoreB}</span></div>`
-    +`<div class="mf-duo-bi-cols">${mgmtDuoBilanListeHtml(m,carte)}${mgmtDuoBilanSaison(m,carte)}</div>`
-    +`<div class="mf-duo-bi-bas">${mfBouton('Retour au QG',{touche:'Entrée',jaune:true,onclick:'CL.mgmtDuoBilanRetour()'})}</div>`
-    +`</main>`;
-  return mfEcran(contenu,opts);
+  const corps=`${duoEntete(`Le bilan · ${duoEsc(duoMaj(d.noms.a))} <span class="t2">×</span> ${duoEsc(duoMaj(d.noms.b))}`,duoDroiteSaison(saison.saison,(n-1)%MGMT_DUO_CARTES_SAISON+1))}
+  <main class="contenu large bi"><div class="bi-bandeau ${win?win==='a'?'j1':'j2':'nul'}"><span class="T">${win?`${duoEsc(duoMaj(d.noms[win]))} REMPORTE LA SUPER CARTE ${n}`:`ÉGALITÉ À LA SUPER CARTE ${n}`}</span><span class="T bi-sc">${scoreA} – ${scoreB}</span></div><div class="bi-cols">${duoPan('bi-liste',`${duoTitre('LES SIX COMBATS',duoEsc(mgmtJourDateTexte(c.jour)))}<div class="bi-l bi-h"><div class="lab bi-num"></div><div class="bi-n lab">${duoEsc(duoMaj(orgA))} · ${duoEsc(duoMaj(d.noms.a))}</div><div class="bi-n lab">${duoEsc(duoMaj(orgB))} · ${duoEsc(duoMaj(d.noms.b))}</div><div class="bi-m lab">Comment</div><div></div></div>${lignes}`)}${duoPan('bi-saison',saisonHtml)}</div><div class="bi-bas"><div class="bouton jaune" onclick="CL.mgmtDuoBilanRetour()" style="cursor:pointer"><span class="T">RETOUR AU QG</span><span class="k">Entrée</span></div></div></main>${duoTouches([[['↑','↓'],'Combat'],[['R'],'Revoir'],[['Entrée'],'Retour au QG',true,'CL.mgmtDuoBilanRetour()']])}`;
+  return duoCadre(corps);
 }
-
 SCREENS.mgmt_duo_bilan=mgmtDuoBilanHtml;
 
+/* ==== [ANCRE: MONDE_LOT_19_T55_COMMANDES] — Monde lot 19 T55 ==== */
 Object.assign(CL,{
-  /** Revoir un des six combats de la carte affichée : le même rejeu que les écrans de résultats (l'arène d'avant pour
-   *  une trace sans agenda, l'écran animé sinon). */
-  mgmtDuoBilanRevoir(i){
-    const m=G&&G.mgmt;
-    const cartes=mgmtDuoActif(m)&&Array.isArray(m.duo.cartes)?m.duo.cartes:[];
-    const carte=cartes[cartes.length-1];
-    const c=carte&&carte.combats[i];
-    const t=c&&m.hist?m.hist[c.h]:null;
-    if(t) mgmtRevoirCombat(t,'mgmt_duo_bilan',null);
-  },
-  /** Le retour au QG : referme le bilan (l'étape repasse à `attente`) puis ouvre le QG. */
-  mgmtDuoBilanRetour(){ mgmtDuoTerminer(G.mgmt); CL.go('mgmt_duo'); }
+  mgmtDuoBilanRevoir(i){const m=G&&G.mgmt,d=m&&m.duo,c=d&&d.cartes[d.cartes.length-1],x=c&&c.combats[i],t=x&&m.hist?m.hist[x.h]:null;if(t) mgmtRevoirCombat(t,'mgmt_duo_bilan',null);},
+  mgmtDuoBilanRetour(){mgmtDuoTerminer(G.mgmt);CL.go('mgmt_duo');}
 });
-
-/* Le clavier du bilan : Entrée seulement (récapitulatif de DUO-T4). */
 keysRegister('mgmt_duo_bilan',{Enter(){CL.mgmtDuoBilanRetour();}});
-
-/* ==== [ANCRE: DUO_T4_CLAVIER] — Monde lot 19 T14 : le clavier des quatre écrans de la super carte, au même endroit
-   (récapitulatif de DUO-T4). Les écrans eux-mêmes sont écrits dans mgmt-duo-ecrans.js (tranches voisines) : leur
-   clavier dépend de leur état d'interface (curseur de liste, onglet de catégorie, combattant déjà regardé), que je
-   ne peux pas atteindre d'ici. Je ne pose donc une carte de secours que là où elle est libre et où DUO-T4 nomme les
-   méthodes : les enchères. Le draft et la soirée gardent la leur, posée par leur propre écran. ==== */
-if(!KEYS.maps['mgmt_duo_encheres']){
-  keysRegister('mgmt_duo_encheres',{
-    Enter(){CL.mgmtDuoMiser();},
-    m(){CL.mgmtDuoMiser();},
-    M(){CL.mgmtDuoMiser();},
-    p(){CL.mgmtDuoPasser();},
-    P(){CL.mgmtDuoPasser();},
-    Escape(){CL.go('mgmt_duo');}
-  });
-}

@@ -39,14 +39,47 @@ test('Duo T3 — une création courte se termine sur mgmt_duo avec m.duo posé',
 test('Duo T8 — création : un nom injecté est échappé et les noms restent en texte',()=>{
   const w=newGameWindow();
   w.eval('CL.mgmtDuoNouvelle(1); MGMT_DUO_NOUVELLE.noms.a="<b>O\'Neil</b>"; MGMT_DUO_NOUVELLE.etape="a"; render();');
-  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
-  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/i);
+  /* Décision d'Anthony du 18/10/2026 (planches Duo) : les noms de joueur s'écrivent en capitales ; le texte reste échappé. */
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O(&#39;|')Neil&lt;\/b&gt;/i);
 });
 
 test('Duo T13 — l’écran de soirée est enregistré',()=>{
   const w=newGameWindow();
   assert.equal(w.eval("typeof SCREENS.mgmt_duo_soiree"),'function');
   assert.equal(w.eval("typeof CL.mgmtDuoSoireeRegarder"),'function');
+});
+
+test('Duo T54 — l’avant-combat suit la planche et ne révèle pas le vainqueur',()=>{
+  const w=newGameWindow();
+  const html=w.eval(`(()=>{const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:3}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:0},cartes:[{combats:[{h:'duo-t54',div:'plume'}]}]}}; G={mgmt:m};
+    mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; return SCREENS.mgmt_duo_soiree();})()`);
+  assert.match(html,/<div class="duo-s"><div class="logo-seul">/);
+  assert.match(html,/<main class="contenu large"><div class="so">/);
+  assert.match(html,/<div class="so-haut"><div class="col"><div class="lab">Super carte 2 · /);
+  assert.match(html,/<div class="T so-num">COMBAT 6<\/div><div class="l2"> · 3 rounds<\/div>/);
+  assert.match(html,/<div class="so-score"><span class="lab">ANTHONY<\/span><span class="T j1c">0<\/span><span class="T t2">–<\/span><span class="T j2c">0<\/span><span class="lab">FRANÇOIS<\/span><\/div>/);
+  assert.match(html,/<div class="so-face"><div class="so-cote j1"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="T so-nom">DUVAL<\/div><div class="so-prenom l1">Ada<\/div>/);
+  assert.match(html,/<div class="so-vs T">VS<\/div><div class="so-cote j2"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-pied"><div class="so-boutons"><div class="bouton jaune" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REGARDER<\/span><span class="k">Entrée<\/span><\/div><div class="bouton" onclick="CL\.mgmtDuoSoireeResultat\(\)"><span class="T">RÉSULTAT<\/span><span class="k">P<\/span><\/div><\/div><\/div><\/div><\/main>/);
+  assert.match(html,/<div class="touches large">/);
+  assert.doesNotMatch(html,/VAINQUEUR|class="[^"]*(?:gagne|perd)|data-etat=/i);
+});
+
+test('Duo T54 — le résultat révèle le vainqueur et reprend le balisage de la planche',()=>{
+  const w=newGameWindow();
+  const html=w.eval(`(()=>{const cs=Array.from({length:6},(_,i)=>({h:i===5?'duo-t54':'unused',div:'plume'})); const m={cal:{jour:0},hist:{'duo-t54':{a:{id:'a',name:'Ada Duval',W:3,L:1,D:0,age:27,div:'plume'},b:{id:'b',name:'Ève Martin',W:2,L:2,D:0,age:29,div:'plume'},winner:'A',family:'ko',round:2,rounds:5}},duo:{a:'split',b:'mma-korner',noms:{a:'Anthony',b:'François'},soiree:{i:5},cartes:[{combats:cs}]}}; G={mgmt:m};
+    mgmtDuoActif=()=>true; mgmtDuoScore=()=>({numero:2,saison:1,a:0,b:0}); mgmtDuoEffectif=()=>[{id:'a',rang:1},{id:'b',rang:2}]; MGMT_DUO_UI.vu=true; return SCREENS.mgmt_duo_soiree();})()`);
+  assert.match(html,/<div class="duo-s"><div class="logo-seul">/);
+  assert.match(html,/<main class="contenu large"><div class="so">/);
+  assert.match(html,/<div class="T so-num">COMBAT PRINCIPAL<\/div><div class="l2"> · 5 rounds<\/div>/);
+  assert.match(html,/<div class="so-cote j1 gagne"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-verdict T">VAINQUEUR<\/div>/);
+  assert.match(html,/<div class="so-cote j2 perd"><div class="bande"><\/div>/);
+  assert.match(html,/<div class="so-res"><div class="T">ADA DUVAL BAT ÈVE MARTIN<\/div><div class="l1">/);
+  assert.match(html,/<div class="so-boutons"><div class="bouton jaune" onclick="CL\.mgmtDuoSoireeSuivant\(\)"><span class="T">LE BILAN<\/span><span class="k">Entrée<\/span><\/div><div class="bouton" onclick="CL\.mgmtDuoSoireeRegarder\(\)"><span class="T">REVOIR<\/span><span class="k">R<\/span><\/div><\/div>/);
+  assert.doesNotMatch(html,/data-etat=/);
 });
 
 test('Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe',()=>{
@@ -84,9 +117,12 @@ test('Duo T9 — le QG montre les deux organisations, les deux noms échappés e
   w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:"<b>O'Neil</b>",b:'François'}); G.screen='mgmt_duo'; render();`);
   assert.match(w.document.body.textContent,/Split/);
   assert.match(w.document.body.textContent,/MMA Korner/);
-  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
-  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
-  assert.match(w.document.body.textContent,/Avancer jusqu’à la super carte/);
+  /* Décision d'Anthony du 18/10/2026 (planches Duo) : les noms de joueur s'écrivent en capitales ; le texte reste échappé. */
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O(&#39;|')Neil&lt;\/b&gt;/i);
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/i);
+  /* Décision d'Anthony du 18/10/2026 (planche DuoQG) : le bouton de l'étape s'écrit « AVANCER — Jusqu'à la super carte du … ». */
+  assert.match(w.document.body.textContent,/AVANCER/);
+  assert.match(w.document.body.textContent,/Jusqu’à la super carte du/);
 });
 
 test('Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suivante',async()=>{
@@ -112,4 +148,52 @@ test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du
     CL.go('mgmt_duo_encheres');`);
   assert.match(w.document.body.textContent,/À <J1'/);
   assert.doesNotMatch(w.document.body.innerHTML,/<J1'/);
+});
+
+test('Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:'Anthony',b:'François'},cartes:[],etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]} };
+    m.orgs=m.orgs||{}; m.orgs['mma-korner']={treasury:10000}; m.treasury=5000;
+    mgmtDuoPartie=(m,c)=>c==='a'?m:m.orgs['mma-korner']; mgmtExteriorCombattant=()=>({name:'Combattant',W:2,L:1,D:0,age:25,libre:true}); mgmtDivisionLabel=()=> 'Poids plume'; mgmtOrgNom=()=> 'Organisation';
+    G.screen='mgmt_duo_encheres'; render();`);
+  assert.match(w.document.body.innerHTML,/class="duo-s"/);
+  assert.match(w.document.body.innerHTML,/class="tour j1"/);
+  assert.match(w.document.body.innerHTML,/Combattant 1 sur 1/);
+  assert.match(w.document.body.innerHTML,/class="T en-prix"/);
+  assert.match(w.document.body.innerHTML,/class="pan en-caisse j1"/);
+  assert.match(w.document.body.innerHTML,/class="pan en-caisse j2"/);
+  assert.match(w.document.body.textContent,/En caisse/);
+  assert.match(w.document.body.textContent,/Peut miser/);
+  assert.match(w.document.body.textContent,/Peut miserjusqu’à 5 000 000 €/);
+  w.eval('G.mgmt.duo.encheres.lots[0].fini=true; G.mgmt.duo.encheres.lots[0].gagnant=null; G.mgmt.duo.encheres.lots[0].prix=1000; render();');
+  assert.match(w.document.body.textContent,/Adjugé/);
+  assert.match(w.document.body.textContent,/a passé/);
+  assert.match(w.document.body.textContent,/ANTHONY A PASSÉ/);
+  w.eval('G.mgmt.duo.encheres.lots[0].gagnant="a"; render();');
+  assert.match(w.document.body.textContent,/SIGNE/);
+  w.eval('G.mgmt.duo.encheres.lots[0].fini=false; MGMT_DUO_UI.refus=true; render();');
+  assert.match(w.document.body.textContent,/Pas assez en caisse/);
+  assert.match(w.document.body.innerHTML,/class="en-refus l1"/);
+test('Duo T10 — effectif : Tab bascule de J2 à J1 puis revient à J2',()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'}); CL.mgmtDuoOuvrirEffectif('b');`);
+  assert.match(w.document.body.textContent,/François/);
+  w.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}))");
+  assert.equal(w.eval('MGMT_DUO_EFFECTIF_COTE'),'a');
+  assert.match(w.document.body.textContent,/Anthony/);
+  w.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}))");
+  assert.equal(w.eval('MGMT_DUO_EFFECTIF_COTE'),'b');
+  assert.match(w.document.body.textContent,/François/);
+});
+
+test('Duo T10 — une super carte jouée apparaît en tête de l’historique avec ses combats',()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'});`);
+  w.eval(`mgmtDuoAvancer(G.mgmt); while(G.mgmt.duo.etape==='encheres')mgmtDuoPasser(G.mgmt); const m=G.mgmt; for(let i=0;i<6;i++){const t=m.duo.draft.tour,p=mgmtDuoPlacables(m,t)[0]; if(!p||!mgmtDuoPlacer(m,p.id))throw Error('placement '+i); const r=mgmtDuoDisponibles(m,m.duo.draft.tour).find(f=>f.div===p.div); if(!r||!mgmtDuoRepondre(m,r.id))throw Error('réponse '+i);} mgmtDuoJouer(m); CL.go('mgmt_duo'); render();`);
+  assert.equal(w.eval('G.mgmt.duo.cartes.length'),1);
+  w.eval("CL.go('mgmt_duo_histo'); render();");
+  assert.equal(w.eval('G.screen'),'mgmt_duo_histo');
+  assert.match(w.document.body.textContent,/Super carte 1/);
+  assert.match(w.document.body.textContent,/Revoir/);
+  assert.equal(w.document.querySelectorAll('.mf-duo-histo-carte button').length,6);
 });

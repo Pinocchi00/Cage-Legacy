@@ -1,6 +1,6 @@
 # Monde lot 19 T55 — mode Duo : le bilan de la super carte, au balisage exact de la planche
 
-Branche : `duo-p1` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p1`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
+Branche : `duo-p3` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p3`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
 Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
 **Tu ne t'arrêtes pas au premier obstacle ; tu ne rends « inachevé » qu'après avoir réellement essayé, avec le blocage précis.**
 
@@ -16,3 +16,15 @@ Le HTML contient `duo-s`, le bandeau du vainqueur ou « Égalité », les six co
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T55 : <titre court>` (le numéro T55 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-bilan.js` : rendu du bilan porté au balisage de la planche DuoBilan sous `duoCadre`, données de la partie pour les deux états, combats cliquables et retour au QG conservé.
+- `index.html` : version de `mgmt-duo-bilan.js` montée par `_bump.js`.
+- `sw.js` : version du cache montée automatiquement par `_bump.js`.
+- `ui-duo-bilan.css` et son lien dans `index.html` : feuille dédiée supprimée comme demandé dans la tranche initiale.
+- `tests/mgmtDuoBilan.test.js` : assertions adaptées au balisage et au libellé de la planche ; vérifie aussi le cadre et l'état de fin de saison avec quatre cartes sans créer un second monde.
+- Tests : « Duo T4 — bilan : le vainqueur, les six combats, le retour au QG (étape attente et date suivante) ».
+- Migration de sauvegarde : aucune (format inchangé).
+- Écarts à la fiche : reprise de relecture : suppression du rendu de repli « Aucune super carte jouée », qui n'existe pas sur la planche. Le bilan n'est rendu qu'à la fin d'une super carte (transition de soirée `bilan`), donc cet état n'est pas un état de partie accessible. Les fichiers `.opencode/agents/*.md` et `opencode.json` déjà modifiés restent hors périmètre et ne sont pas inclus. La fiche demandait une seule super carte créée dans le test ; le cas de fin de saison est simulé à partir de cette carte pour ne pas créer un deuxième monde.
+- Questions pour Anthony : aucune.
