@@ -608,9 +608,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ct-pips i.fait{background:currentColor}
 .mf-eff-sit.jaune{color:var(--mf-jaune)}
 .mf-ct-ligne.choisie .mf-eff-sit.jaune{color:var(--mf-noir)}
-.mf-ct-fiche .mf-p3{padding:13px;gap:8px}
+.mf-ct-fiche .mf-p3{padding:13px;gap:4px}   /* Monde lot 17 : le panneau débordait de 53 px sur la barre des touches (gap 8 → 4, citation sur une ligne, grand chiffre plus petit) */
 .mf-ct-offre{display:flex;flex-direction:column;gap:2px}
-.mf-ct-n{display:flex;gap:6px;margin:6px 0}
+.mf-ct-n{display:flex;gap:6px;margin:2px 0}
 .mf-ct-n button{width:44px;height:48px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important;line-height:48px}
 .mf-ct-n button.on{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-ct-msg{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-jaune)}
@@ -641,7 +641,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-champ-box span,.mf-su-rang-box span{font-family:var(--mf-texte);font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);text-transform:none;letter-spacing:normal}
 .mf-su-rang-evo{position:absolute;left:18px;top:18px}
 .mf-su-rang-n{position:absolute;left:18px;top:0;bottom:0;display:flex;align-items:center;font-size:200px;line-height:.69}
-.mf-su-rang-nom{position:absolute;left:118px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:12px;white-space:nowrap}
+.mf-su-rang-nom{position:absolute;left:118px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-top:60px;gap:12px;white-space:nowrap}   /* Monde lot 17 (règle L5) : le nom passe sous la boîte du palmarès et de la série — « CHUKWUEMEKA » recouvrait « 2 victoires de suite » */
 .mf-su-rang-box{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;gap:12px;align-items:flex-end;text-align:right}
 .mf-su-rang-box b{font-size:44px;line-height:.8}
 .mf-su-rang.sel .mf-p3{background:var(--mf-blanc);color:var(--mf-noir)}
@@ -815,7 +815,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 .mf-ct-dit{display:flex;flex-direction:column;gap:4px;margin-top:8px}
 .mf-ct-dit b{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);text-transform:uppercase}
-.mf-ct-dit span{font-size:22px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mf-ct-dit span{font-size:22px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT11_CSS] — Brief du 06/10/2026, lot 11 : la soirée (planches « Soirée 1 » à « Soirée 5 ») et la barre du
    combat animé (planche « Le combat animé »). Valeurs portées des planches : colonnes de 320 / 880 / 320, bannière de 250, bande de
@@ -1357,7 +1357,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* Planche « Contrats » : le contrat en cours en grand. */
 .mf-ct-cours{margin-bottom:6px}
 .mf-ct-cours-l{display:flex;align-items:center;gap:14px}
-.mf-ct-cours-l b{font-family:var(--mf-titre);font-weight:800;font-size:72px;line-height:.9}
+.mf-ct-cours-l b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.9}
 .mf-ct-cours-l span{font-family:var(--mf-titre);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase;letter-spacing:var(--mf-titre-ls)}
 .mf-ct-cours-l em{margin-left:auto;font-style:normal;font-size:22px;color:var(--mf-texte2)}
 .mf-fi-co{grid-template-columns:44px 340px minmax(0,1fr) 52px}
