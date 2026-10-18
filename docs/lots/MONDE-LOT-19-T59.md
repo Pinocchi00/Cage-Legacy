@@ -17,9 +17,9 @@ Un monde coûte 40 à 90 s : n'en crée qu'un par test (helpers `AVANCER`, `DRAF
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T59 : la fiche complète des combattants du draft et des enchères` (le numéro T59 est obligatoire dans le message).
 
 ## Compte rendu
-- `mgmt-duo-fiche.js` : recherche de la partie contenant un combattant, ouverture de la fiche complète et restauration de la partie Duo au retour.
+- `mgmt-duo-fiche.js` : correction du retour pour restaurer la partie Duo mémorisée et nettoyage de l'état de navigation en cas d'erreur à l'ouverture.
 - `mgmt-duo-draft.js`, `mgmt-duo-encheres.js` : touche F et commande Fiche dans la barre ; `mgmt-duo-presentation.js` : préserve `MGMT_DUO_UI.vu`.
 - `index.html` : chargement du nouveau script après la présentation ; `package.json` : ajout du test aux scripts test et test:watch.
-- `tests/mgmtDuoFiche.test.js` : « Duo T59 — mgmtDuoPartieDe trouve une partie contenant le combattant » ; « Duo T59 — la présentation ne modifie pas la valeur de vu ».
-- Migration de sauvegarde : aucune. Écart : couverture ciblée partielle, les scénarios complets fiche/allers-retours restent à tester. Questions pour Anthony : aucune.
-- Vérifications : tests T59 et `mgmtDuoPresentation.test.js` verts ; `node tools/verif-versions.js origin/main` sans écart. Pas d'appel sous-agent disponible ; pas de verdict de relecture.
+- Tests conservés : « Duo T59 — mgmtDuoPartieDe trouve une partie contenant le combattant » ; « Duo T59 — la présentation ne modifie pas la valeur de vu ».
+- Migration de sauvegarde : aucune. Écarts restant à reprendre : compléter les tests comportementaux (ouverture/retour J1, J2 et libre, conservation des états, erreur, sauvegarde octet pour octet, touches F, monde Duo réel et aller-retour réel de présentation). Le traitement du rechargement pendant la fiche nécessite aussi un test de cycle de vie dédié. Questions pour Anthony : aucune.
+- Vérifications : `node --test tests/mgmtDuoFiche.test.js` vert ; `node tools/verif-versions.js origin/main` sans écart. Aucun sous-agent disponible, pas de verdict de relecture.

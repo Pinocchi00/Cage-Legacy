@@ -11,11 +11,12 @@ Object.assign(CL,{
     if(!m||!partie)return false;
     MGMT_DUO_FICHE={partie:m,retour:retourEcran||G.screen};
     try{G.mgmt=partie;MGMT_FICHE.retour='mgmt_duo_fiche_retour';CL.mgmtFiche(id);return true;}
-    catch(e){G.mgmt=m;throw e;}
+    catch(e){G.mgmt=m;MGMT_DUO_FICHE={partie:null,retour:null};throw e;}
   },
   mgmtDuoFicheRetour(){
     const {partie,retour}=MGMT_DUO_FICHE;
-    try{G.mgmt=partie||G.mgmt;}finally{G.mgmt=partie||G.mgmt;MGMT_DUO_FICHE={partie:null,retour:null};}
+    if(partie)G.mgmt=partie;
+    MGMT_DUO_FICHE={partie:null,retour:null};
     CL.go(retour||'mgmt_duo');
   }
 });
