@@ -14,7 +14,18 @@ const MGMT_ACCUEIL_JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendred
 /** La puce de menu d'un événement : le menu où il se retrouve. */
 const MGMT_ACCUEIL_MENUS={vie:'Effectif',demande:'Presse',attente:'Contrats',corps:'Effectif',resultat:'Résultats',titre:'Ceintures'};
 const MGMT_ACCUEIL_MAX_PASSE=5;
-const MGMT_ACCUEIL_MAX_ATTEND=3;
+/* ==== [ANCRE: ACCUEIL_TEXTES_EXPORTABLES] — Monde lot 12 T2 ==== */
+const MGMT_ACCUEIL_TEXTES={
+  voirTout:{texte:'Voir tout ›',relu:false},
+  finir:{texte:'Finir la carte',relu:false},
+  dossiers:{texte:'Ouvrir les dossiers',relu:false},
+  resumes:{
+    leila_propose:{texte:'Leïla propose ',relu:false},
+    leila_react:{texte:'Leïla revient sur ',relu:false},
+    leila_react_swap:{texte:'Leïla propose un échange pour ',relu:false},
+    leila_react_crush:{texte:'Leïla revient sur ',relu:false},
+  },
+};
 
 /** Le nom d'un combattant (de l'organisation ou extérieur), ou '' s'il est inconnu. Pur. */
 function mgmtAccueilNom(m,id){
@@ -34,7 +45,8 @@ function mgmtAccueilN(m,id){ const nom=mgmtAccueilNom(m,id); return nom?{id,nom}
 /** La date du jour en toutes lettres : « Lundi 12 janvier 2027 ». Pur. */
 function mgmtAccueilDate(m){
   const j=mgmtCalAujourdhui(m), d=mgmtJourDate(j), dt=new Date(d.ts);
-  return MGMT_ACCUEIL_JOURS[dt.getUTCDay()]+' '+d.jour+' '+d.mois+' '+dt.getUTCFullYear();
+  /* ==== [ANCRE: ACCUEIL_DATE_PHRASE] — Monde lot 12 T2 ==== */
+  return MGMT_ACCUEIL_JOURS[dt.getUTCDay()]+' '+d.jour+' '+d.mois.toLowerCase()+' '+dt.getUTCFullYear();
 }
 
 /** La phrase d'un combat de la trace : « A bat B » (les deux noms ouvrent leur fiche). Pur. */
@@ -57,13 +69,13 @@ function mgmtAccueilContenu(m){
     org, ville:ident?ident.ville:'', annee:ident?ident.annee:null, date:mgmtAccueilDate(m),
     semaine:Number.isSafeInteger(m.cycle)?m.cycle:1,
     soiree:{nom:org+' Fight Night '+((m.eventsPlayed||0)+1),dans:rest===null?'—':(rest===0?'CE SOIR':'DANS '+rest+' J')},
-    lieu:{nom:salle?salle.nom:(infos.lieu||'—'),sous:[salle&&salle.ville?salle.ville:'',infos.date].filter(Boolean).join(', ')},
+    /* ==== [ANCRE: ACCUEIL_LIEU_REPRISE] — Monde lot 12 T2 ==== */
+    lieu:{nom:(salle?salle.nom:(infos.lieu||'—')).toUpperCase(),sous:[salle&&salle.ville?salle.ville:'',(infos.date||'').toLowerCase()].filter(Boolean).join(', ')},
     carte:{valeur:carte.main+' / '+carte.sm,sous:carte.sm-carte.main>0?(carte.sm-carte.main===1?'Une place à finir':(carte.sm-carte.main)+' places à finir'):'Carte complète'},
   };
   /* Que s'est-il passé ? Les marques allumées du lot 8, une phrase chacune. */
   const passe=[];
   for(const id of mgmtMarquesAllumees(m)){
-    if(passe.length>=MGMT_ACCUEIL_MAX_PASSE) break;
     const ev=mgmtDepuisVisite(m,id)[0]; if(!ev) continue;
     const nom=mgmtAccueilN(m,id); if(!nom) continue;
     let parts=[nom,mgmtAccueilT(' · '+ev.phrase)];
@@ -76,19 +88,25 @@ function mgmtAccueilContenu(m){
   /* Qu'est-ce qui m'attend ? La première ligne des blocages, puis les demandes et les affaires ouvertes. */
   let prochaine=null;
   const b=mgmtAgendaBlocages(m)[0];
-  if(b) prochaine={titre:b.label,detail:b.texte,bouton:b.label,onclick:b.onclick};
+  /* ==== [ANCRE: ACCUEIL_ACTION_UNIQUE] — Monde lot 12 T2 ==== */
+  const libre=m.card.main.findIndex(x=>!x);
+  if(b) prochaine=b.k==='main'
+    ?{titre:MGMT_ACCUEIL_TEXTES.finir.texte,relu:false,detail:b.texte,bouton:MGMT_ACCUEIL_TEXTES.dossiers.texte,onclick:`CL.mgmtCarteDossiersOuvrir(${libre<0?m.card.main.length:libre})`}
+    :{titre:b.texte,detail:'',bouton:b.label,onclick:b.onclick};
   else if(mgmtAgendaActif(m)&&!mgmtDemoTerminee(m)) prochaine={titre:'La soirée est prête',detail:MGMT_PRISE_TEXTES.prete.texte,bouton:'Ouvrir le calendrier',onclick:"CL.go('mgmt_calendrier')"};
-  else{ const s=mgmtContinuerRaison(m); prochaine={titre:s.libelle,detail:'',bouton:s.libelle,onclick:'CL.mgmtContinuer()'}; }
+  else{ const s=mgmtContinuerRaison(m); prochaine={titre:s.libelle,detail:'',bouton:'Ouvrir',relu:false,onclick:'CL.mgmtContinuer()'}; }
   const ouvertes=[];
   for(const d of mgmtDemandesOuvertes(m)){
     const def=MGMT_DEMANDES[d.want], n=mgmtAccueilN(m,d.a), cible=d.target?mgmtAccueilN(m,d.target):null;
     if(!def||!n) continue;
     ouvertes.push({kind:'demande',i:d.i,id:d.a,parts:[n,mgmtAccueilT(' demande : '+def.libelle.toLowerCase())].concat(cible?[mgmtAccueilT(' — '),cible]:[])});
   }
-  for(const a of m.pile.filter(x=>x.status==='open')){
-    if(a.kind==='leila_bulk'){ ouvertes.push({kind:'affaire',id:a.id,bulk:true,parts:[mgmtAccueilT('Carte proposée — '+(Array.isArray(a.fights)?a.fights.length:0)+' combats')],sous:mgmtBulkSubject(m,a)}); continue; }
+  /* ==== [ANCRE: ACCUEIL_RESUMES_REPRISE] — Monde lot 12 T2 ==== */
+  const resumes=MGMT_ACCUEIL_TEXTES.resumes;
+  for(const a of m.pile.filter(x=>x.status==='open'&&(x.kind==='leila_bulk'||resumes[x.kind]))){
+    if(a.kind==='leila_bulk'){ ouvertes.push({kind:'affaire',id:a.id,bulk:true,relu:false,parts:[mgmtAccueilT('Carte proposée — '+(Array.isArray(a.fights)?a.fights.length:0)+' combats')],sous:mgmtBulkSubject(m,a)}); continue; }
     const A=mgmtAccueilN(m,a.a), B=mgmtAccueilN(m,a.b);
-    ouvertes.push({kind:'affaire',id:a.id,bulk:false,parts:(A&&B)?[A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
+    ouvertes.push({kind:'affaire',id:a.id,bulk:false,relu:false,parts:(A&&B)?[mgmtAccueilT(resumes[a.kind].texte),A,mgmtAccueilT(' contre '),B]:[mgmtAccueilT('Affaire')],sous:(A&&B)?mgmtAffairSubject(m,a):''});
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
@@ -153,65 +171,50 @@ function mgmtAccueilTuile(lib,val,sous){
   return `<div class="mf-ac-tuile"><div class="mf-ac-tl">${esc(lib)}</div><div class="mf-ac-tv" style="font-size:${mfCorps(val,182,40)}px">${esc(mfNet(val))}</div><div class="mf-ac-ts">${esc(sous||'')}</div></div>`;
 }
 function mgmtAccueilBandeau(c,m){
-  const h=c.heritage;
-  const tuiles=c.premiere&&h&&(h.predecesseur||h.adjointe)
-    ?(h.predecesseur?mgmtAccueilTuile('Ton prédécesseur',h.predecesseur.nom,''):'')+(h.adjointe?mgmtAccueilTuile('Ton adjointe',h.adjointe.nom,''):'')
-      +mgmtAccueilTuile('Ta première soirée',c.ou.soiree.dans,c.ou.soiree.nom)
-    :mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous);
+  /* ==== [ANCRE: ACCUEIL_BANDEAU_SOIREE] — Monde lot 12 T2 ==== */
+  const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous);
   return `<div class="mf-ac-band"><div class="mf-ac-id"><div class="mf-ac-org" style="font-size:${mfCorps(c.ou.org,520,120,60)}px">${esc(mfNet(c.ou.org))}</div>`
     +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
     +`<div class="mf-ac-tuiles">${tuiles}</div></div>`;
 }
-/** Une affaire dépliée : qui parle, ce qu'il dit, les réponses (clic ou 1 à 3). */
-function mgmtAccueilEchange(m,a){
-  const ex=MGMT_EXCHANGES[a.exchange], spk=MGMT_SPEAKERS[a.speaker]||{name:'?',role:''};
-  const lines=(ex?ex.lines:[]).filter(t=>typeof t==='string').map(t=>`<div class="mf-ac-dit">${esc(t)}</div>`).join('');
-  const combats=a.kind==='leila_bulk'&&Array.isArray(a.fights)?a.fights.map((f,i)=>{
-    const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b); if(!fa||!fb) return '';
-    return `<div class="mf-ac-fc${a.marked===i?' sel':''}"><span>${mgmtAccueilParts(m,[{id:fa.id,nom:fa.name},{t:' contre '},{id:fb.id,nom:fb.name}])}</span>`
-      +`<button type="button" class="mf-ac-lien" onclick="CL.mgmtMark('${esc(a.id)}',${i})">${a.marked===i?'Reposer':'Échanger'}</button></div>`;
-  }).join(''):'';
-  const reps=mgmtVisibleReplies(m,a).map((r,i)=>{
-    const lib=r.text||MGMT_ACTION_LABELS[r.action];
-    const go=r.action==='__ignore'?`CL.mgmtIgnore('${esc(a.id)}')`:`CL.mgmtReply('${esc(a.id)}','${esc(r.id)}')`;
-    return mfBouton(lib,{touche:String(i+1),jaune:i===0,onclick:go});
-  }).join('');
-  return `<div class="mf-ac-ech"><div class="mf-ac-l">${esc((spk.name+(spk.role?' · '+spk.role:'')).toUpperCase())}</div>${lines}${combats}<div class="mf-ac-reps">${reps}</div></div>`;
-}
 function mgmtAccueilAttend(m,c,extra=''){
   const p=c.attend.prochaine;
   const retrait=typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):'';
-  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(mfNet(p.titre))}</div>`
+  /* ==== [ANCRE: ACCUEIL_JAUNE_REPRISE] — Monde lot 12 T2 ==== */
+  const boite=`<div class="mf-ac-jaune"><div class="mf-ac-jl">LA PROCHAINE CHOSE À FAIRE</div><div class="mf-ac-jt">${esc(p.titre.charAt(0).toUpperCase()+p.titre.slice(1))}</div>`
     +`<div class="mf-ac-jp"><div class="mf-ac-jd">${esc(p.detail)}</div><button type="button" class="mf-ac-jb" onclick="${p.onclick}">${mfTouche('Entrée')}<span>${esc(mfNet(p.bouton))}</span></button></div></div>`;
-  const sel=m.open?m.pile.find(a=>a.id===m.open&&a.status==='open'):null;
-  let rows='', nb=0;
+  let rows='';
   const liste=c.attend.ouvertes;
-  for(const r of liste){
-    const ouverte=r.kind==='affaire'&&sel&&sel.id===r.id;
-    /* Une affaire dépliée prend la place : les autres affaires attendent, les demandes restent (au plus une). */
-    if(!ouverte&&sel&&r.kind==='affaire') continue;
-    if(!ouverte&&nb>=(sel?2:MGMT_ACCUEIL_MAX_ATTEND)) continue;
-    nb++;
+  for(const r of liste.slice(0,4)){
+    /* ==== [ANCRE: ACCUEIL_AFFAIRES_LIGNES] — Monde lot 12 T2 ==== */
     const texte=`<div class="mf-ac-rt"><div class="mf-ac-rp">${mgmtAccueilParts(m,r.parts)}</div>${r.sous?`<div class="mf-ac-rs">${esc(r.sous)}</div>`:''}</div>`;
     const actions=r.kind==='demande'
-      ?`<div class="mf-ac-ra">${mfBouton('Promettre',{jaune:false,onclick:`CL.mgmtDemande(${esc(r.i)},'promettre')`})}${mfBouton('Refuser',{onclick:`CL.mgmtDemande(${esc(r.i)},'refuser')`})}</div>`
-      :`<button type="button" class="mf-ac-act" onclick="CL.mgmtOpen('${esc(r.id)}')">${ouverte?'Ouverte':'Répondre ›'}</button>`;
-    rows+=`<div class="mf-ac-ligne${ouverte?' sel':''}">${texte}${actions}</div>`+(ouverte?mgmtAccueilEchange(m,sel):'');
+      ?`<button type="button" class="mf-ac-lien mf-ac-demande" onclick="CL.mgmtFiche('${esc(r.id)}');CL.mgmtFicheOnglet('ondit')">Répondre ›</button>`
+      :`<button type="button" class="mf-ac-act" onclick="CL.mgmtOpen('${esc(r.id)}');CL.go('mgmt_bureau')">Décider ›</button>`;
+    rows+=`<div class="mf-ac-ligne">${texte}${actions}</div>`;
   }
-  const plus=liste.length>nb?`<div class="mf-ac-rs">+ ${liste.length-nb} de plus : elles passeront dès que celles-ci seront réglées.</div>`:'';
+  /* ==== [ANCRE: ACCUEIL_VOIR_TOUT_REPRISE] — Monde lot 12 T2 ==== */
+  for(const kind of ['demande','affaire']){
+    if(liste.slice(4).some(r=>r.kind===kind)) rows+=`<button type="button" class="mf-ac-lien" data-famille="${kind}" onclick="CL.go('${kind==='demande'?'mgmt_effectif':'mgmt_bureau'}')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`;
+  }
   return mfPanneau(mgmtAccueilTitre('CE QUI T’ATTEND')+boite
     +(retrait?`<div class="mf-ac-retrait">${retrait}</div>`:'')
-    +(liste.length?`<div class="mf-ac-lib">DEMANDES ET AFFAIRES OUVERTES</div>`:'')+rows+plus+extra,'normal','mf-ac-p mf-ac-c5 mf-ac-haut');
+    +(liste.length?`<div class="mf-ac-lib">DEMANDES ET AFFAIRES OUVERTES</div>`:'')+rows+extra,'normal','mf-ac-p mf-ac-c5 mf-ac-haut');
 }
 function mgmtAccueilPasse(m,c){
-  const rows=c.passe.map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
+  /* ==== [ANCRE: ACCUEIL_PASSE_R4] — Monde lot 12 T2 ==== */
+  if(!c.passe.length) return '';
+  const rows=c.passe.slice(0,MGMT_ACCUEIL_MAX_PASSE).map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
     +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('');
-  const vide=`<div class="mf-ac-rs">Rien de neuf depuis ta dernière visite.</div>`;
   const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
-  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(rows||vide)+touches,'normal','mf-ac-p mf-ac-c5');
+  /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
+  const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-famille="passe" onclick="CL.go('mgmt_effectif')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`:'';
+  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
 }
 function mgmtAccueilAilleurs(m,c){
+  /* ==== [ANCRE: ACCUEIL_AILLEURS_R4] — Monde lot 12 T2 ==== */
+  if(!c.ailleurs.length) return '';
   const rows=c.ailleurs.map(r=>`<div class="mf-ac-al"><div class="mf-ac-ap">${mgmtAccueilParts(m,r.parts)}</div>${r.detail?`<div class="mf-ac-rs">${esc(r.detail)}</div>`:''}</div>`).join('');
   return mfPanneau(mgmtAccueilTitre('ET AILLEURS')+(rows||`<div class="mf-ac-rs">Rien à signaler hors de ${esc(c.ou.org)}.</div>`),'normal','mf-ac-p mf-ac-c3');
 }
@@ -231,8 +234,9 @@ function mgmtAccueilHeritage(m,c){
 function scr_mgmt_accueil(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, c=mgmtAccueilContenu(m);
-  if(MGMT_ACCUEIL.cur>=c.passe.length) MGMT_ACCUEIL.cur=c.passe.length-1;
-  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}<div class="mf-ac-colonne mf-ac-c5">${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div></div>`;
+  if(MGMT_ACCUEIL.cur>=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)) MGMT_ACCUEIL.cur=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)-1;
+  /* ==== [ANCRE: ACCUEIL_TROIS_COLONNES] — Monde lot 12 T2 ==== */
+  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
@@ -246,7 +250,7 @@ Object.assign(CL,{
   /** Le curseur des événements de la semaine. */
   mgmtAccueilDeplacer(dir){
     if(!G||!G.mgmt) return;
-    const n=mgmtAccueilContenu(G.mgmt).passe.length;
+    const n=Math.min(MGMT_ACCUEIL_MAX_PASSE,mgmtAccueilContenu(G.mgmt).passe.length);
     if(!n) return;
     MGMT_ACCUEIL.cur=(MGMT_ACCUEIL.cur+dir+n)%n;
     render();
@@ -266,9 +270,6 @@ keysRegister('mgmt_accueil',{
   ArrowUp(){ CL.mgmtAccueilDeplacer(-1); },
   ArrowDown(){ CL.mgmtAccueilDeplacer(1); },
   Enter(){ CL.mgmtAccueilOuvrir(); },
-  '1'(){ mgmtKeyReply(0); },
-  '2'(){ mgmtKeyReply(1); },
-  '3'(){ mgmtKeyReply(2); },
   Escape(){ CL.mgmtMenuPrincipal(); },
 });
 /* ==== [FIN ANCRE] ==== */

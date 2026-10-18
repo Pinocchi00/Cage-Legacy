@@ -258,7 +258,7 @@ function mfSoireeInfos(m){
     const soir=m.cal.prochaines[0], jd=mgmtJourDate(soir.jour), reste=Math.max(0,soir.jour-(m.cal.jour||0));
     const salle=(typeof mgmtSalleParId==='function'&&mgmtSalleParId(m,soir.salle))||(typeof mgmtSalleDefaut==='function'?mgmtSalleDefaut(m):null);
     /* Un nom de salle long (« Palais des sports de Marseille ») ne tient pas dans la boîte de la planche (« Dôme de Lyon ») : la ville le remplace. */
-    const lieu=salle?String(salle.nom.length<=16||!salle.ville?salle.nom:salle.ville).toUpperCase():'';
+    const lieu=salle?String(salle.nom.length<=24||!salle.ville?salle.nom:salle.ville).toUpperCase():'';
     return {dans:reste===0?'Aujourd’hui':'Dans '+reste+' jour'+(reste>1?'s':''),date:jd.jour+' '+jd.mois,lieu};
   }catch(e){ return vide; }
 }

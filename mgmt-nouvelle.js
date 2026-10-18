@@ -60,8 +60,9 @@ function mgmtNouvelleBarreSuivante(aff,cible){
 }
 function mgmtNouvelleCible(g){
   if(g.pret) return 100;
-  /* Monde lot 9 T2a : avec les sept autres organisations, la barre compte le passé du joueur puis leurs pas. */
-  if(g.monde) return Math.max(0,Math.min(100,100*(g.k+(g.monde.fait/Math.max(1,g.monde.ids.length)))/Math.max(1,g.n+(g.monde.total/Math.max(1,g.monde.ids.length)))));
+  /* ==== [ANCRE: MONDE_LOT12_T1_CIBLE] — Monde lot 12 T1 ==== */
+  /* La planche mesure les soirées de cette organisation ; les autres continuent
+     de se jouer avant que le bouton d'entrée soit disponible. */
   return Math.max(0,Math.min(100,100*g.k/Math.max(1,g.n)));
 }
 /* ==== [ANCRE: MONDE_LOT10_T1_FAITS] — Monde lot 10 T1 ==== */
@@ -86,6 +87,11 @@ function mgmtNouvelleLireFaits(g){
       }
     }
     if(f.k==='injury') g.blessures++;
+    /* ==== [ANCRE: MONDE_LOT12_T1_DERNIERE_RETRAITE] — Monde lot 12 T1 ==== */
+    if(f.k==='retired'){
+      const fighter=mgmtFighterById(g.m,f.a);
+      if(fighter)g.dernier={nom:fighter.nom||fighter.name||f.a,division:mgmtDivisionLabel(fighter.div),soiree:f.c,retraite:true};
+    }
   }
 }
 /** Compteurs réels de la partie, dont les faits sont lus incrémentalement. @param {object} g Génération. @returns {Array<object>} Libellés et valeurs. */
@@ -99,30 +105,49 @@ function mgmtNouvelleCompteurs(g){
     {k:'blessures',v:g.blessures||0},
   ];
 }
+/* ==== [ANCRE: MONDE_LOT12_T1_CHARGEMENT] — Monde lot 12 T1 ==== */
+/* Textes fixes portés de MondeChargement.html ; relu:false. */
+function mgmtNouvelleSituation(g){
+  const ident=mgmtOrgIdentite(g.orgId), p=ident&&ident.predecesseur;
+  return {ident,annee:g.pret?mgmtPasseAnnee(g.n,g.n-1):g.annee,
+    titre:g.pret?'Six ans sont écrits':g.k?`${ident?ident.soirees:g.org} ${g.k}`:'Les combattants arrivent',
+    detail:g.pret?`${g.n} soirées, de ${mgmtPasseAnnee(g.n,0)} à ${mgmtPasseAnnee(g.n,g.n-1)}`:g.k?`Soirée ${g.k} sur ${g.n}`:'La première soirée se prépare',
+    predecesseur:p?`${p.prenom} ${p.nom} ${g.pret?`a composé les ${g.n} cartes`:'compose les cartes'}`:''};
+}
+function mgmtNouvelleFaitHtml(g){
+  if(g.erreur) return `<div class="mf-genese-dernier-fait"><div>La création s’est arrêtée pendant l’année ${esc(g.erreurAnnee||g.annee)}.</div><small>Rien n’a été enregistré : l’emplacement ${esc(g.slot)} reste libre.</small></div>`;
+  const f=g.dernier, ident=mgmtOrgIdentite(g.orgId);
+  return f?`<div class="mf-genese-dernier-fait"><span>Le dernier fait marquant</span><div>${esc(f.nom)} ${f.retraite?'· Retraite':'prend la ceinture'}</div><small>${esc(f.division)} · ${esc(ident?ident.soirees:'soirée')} ${esc(f.soiree)}</small></div>`:'';
+}
+function mgmtNouvelleCartonHtml(g){
+  const L=MGMT_NOUVELLE_LECTURES, i=((g.lec||0)%L.length+L.length)%L.length, ident=mgmtOrgIdentite(g.orgId);
+  const titre=i===1&&ident&&ident.adjointe?`${ident.adjointe.prenom} t’aide.`:L[i].titre;
+  return `<div class="mf-lecture-entete"><div>Ce qu’il faut savoir<i></i></div><span>Carton ${i+1} sur ${L.length}</span></div>`
+    +`<div class="mf-lecture-carton"><div class="mf-lecture-titre">${esc(titre)}</div><div class="mf-lecture-texte">${esc(L[i].texte)}</div></div>`
+    +`<div class="mf-lecture-pastilles">${L.map((_,j)=>`<button type="button" class="mf-lecture-pastille${j===i?' actif':''}" aria-label="Carton ${j+1} sur ${L.length}" onclick="CL.mgmtNouvelleLecture(${j})">${j+1}</button>`).join('')}<span>← → pour lire les autres</span></div>`;
+}
 function mgmtNouvelleGenHtml(g){
   if(!Number.isFinite(g.aff)) g.aff=0;
-  const a0=+mgmtPasseAnnee(g.n,0), an=+g.annee;
-  const frise=Number.isFinite(a0)?Array.from({length:6},(_,i)=>{
-    const y=a0+i, idx=Array.from({length:g.n},(_,k)=>k).find(k=>+mgmtPasseAnnee(g.n,k)===y), pct=100*(idx===undefined?0:idx)/Math.max(1,g.n), cls=g.pret||y<an?'fait':(y===an?'cours':'');
-    return `<div class="mf-genese-an ${cls}" data-year="${y}" style="left:${pct}%">${esc(y)}${cls==='fait'?' ✓':''}</div>`;
-  }).join(''):'';
+  const s=mgmtNouvelleSituation(g), an=+s.annee;
+  if(!g.reperes){
+    g.reperes=[];
+    for(let k=0;k<g.n;k++){const y=mgmtPasseAnnee(g.n,k);if(!g.reperes.some(r=>r.y===y))g.reperes.push({y,pct:100*k/g.n});}
+  }
+  const frise=g.reperes.map(({y,pct})=>`<div class="mf-genese-an ${g.pret||y<an?'fait':y===an?'cours':''}" data-year="${esc(y)}" style="left:calc(${pct}% + ${pct?10:0}px)">${esc(y)}</div>`).join('');
+  const traits=g.reperes.slice(1).map(r=>`<i style="left:${r.pct}%"></i>`).join('');
   const compteurs=mgmtNouvelleCompteurs(g).map(c=>`<div class="mf-genese-cpt"><b>${esc(c.v)}</b><span>${esc(c.k)}</span></div>`).join('');
-  const lib=g.pret?'Prêt. Six ans d’histoire sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
-  const gauche=`<div class="mf-genese-gauche"><div class="mf-genese-nom">${esc(g.org)}</div>`
-    +`<div class="mf-genese-texte">Six années à vivre avant ton arrivée</div><div class="mf-genese-frise">${frise}</div>`
+  const gauche=`<div class="mf-genese-gauche"><div class="mf-genese-ident"><div class="mf-genese-nom">${esc(g.org)}</div><div>${s.ident?`<div class="mf-genese-ville">${esc(s.ident.ville)} · depuis ${esc(s.ident.annee)}</div>`:''}<div class="mf-genese-phrase">Six années se jouent avant ton arrivée.</div></div></div>`
+    +`<div class="mf-genese-maint"><div class="mf-genese-annee">${esc(s.annee)}</div><div><div class="mf-genese-soiree">${esc(s.titre)}</div><div class="mf-genese-detail">${esc(s.detail)}</div>${s.predecesseur?`<div class="mf-genese-predecesseur">${esc(s.predecesseur)}</div>`:''}</div></div>`
+    +`<div class="mf-genese-barre" role="progressbar" aria-label="Les six ans" aria-valuemin="0" aria-valuemax="${esc(g.n)}" aria-valuenow="${esc(g.k)}"><b style="width:${(g.pret?100:g.aff).toFixed(2)}%"></b>${traits}</div><div class="mf-genese-frise">${frise}</div>`
     +`<div class="mf-genese-compteurs">${compteurs}</div>`
-    +`<div class="mf-genese-barre" role="progressbar" aria-valuemin="0" aria-valuemax="${esc(g.n)}" aria-valuenow="${esc(g.k)}"><b style="width:${g.aff.toFixed(2)}%"><i class="mf-genese-lueur"></i></b></div>`
-    +`<div class="mf-genese-texte">${esc(lib)}</div></div>`;
-  const L=MGMT_NOUVELLE_LECTURES, i=((g.lec||0)%L.length+L.length)%L.length;
-  const pastilles=L.map((_,j)=>`<button type="button" class="mf-lecture-pastille${j===i?' actif':''}" aria-label="Carton ${j+1} sur ${L.length}" onclick="CL.mgmtNouvelleLecture(${j})">${j+1}</button>`).join('');
-  const droite=`<div class="mf-genese-droite"><div class="mf-lecture-entete">Pendant que ça charge, ce qu’il faut savoir</div>`
-    +`<div class="mf-lecture-carton"><div class="mf-lecture-titre">${esc(L[i].titre)}</div><div class="mf-lecture-texte">${esc(L[i].texte)}</div></div>`
-    +`<div class="mf-lecture-pastilles">${pastilles}</div>`
-     +(g.pret?`<div class="mf-genese-entree">${mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'})}</div>`:'')
-     +`</div>`;
-  const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}" role="status" aria-live="polite">${gauche}${droite}${g.erreur?`<div class="mf-genese-erreur"><p>Échec en ${esc(g.erreurAnnee||g.annee)}, emplacement ${esc(g.slot)} : ${esc(g.erreurMessage||'erreur inconnue')}</p><button type="button" onclick="CL.mgmtNouvelleRecommencer()">Recommencer</button><button type="button" onclick="CL.mgmtNouvelleAbandonner()">Choisir une autre organisation</button></div>`:''}</div>`;
-  return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie',
-    touches:[{ks:['Échap'],t:'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},...(g.erreur?[{ks:['Entrée'],t:'Recommencer',onclick:'CL.mgmtNouvelleRecommencer()'}]:[{ks:['←','→'],t:'Lire'}])]});
+    +mgmtNouvelleFaitHtml(g)+`</div>`;
+  const action=g.erreur?mfBouton('Recommencer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleRecommencer()'})+mfBouton('Choisir une autre organisation',{touche:'Échap',onclick:'CL.mgmtNouvelleAbandonner()'}):g.pret?mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'}):'<div class="mf-genese-attente">Le bouton pour entrer apparaîtra à la fin des six ans.</div>';
+  const droite=`<div class="mf-genese-droite">${mfPanneau(mgmtNouvelleCartonHtml(g),'normal','mf-lecture-panneau')}<div class="mf-genese-entree">${action}</div></div>`;
+  const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}${g.org.length>18?' nom-long':''}" role="status" aria-live="polite">${gauche}${droite}</div>`;
+  return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie · six ans avant ton arrivée',droite:`Emplacement ${g.slot}`,
+    touches:[{ks:['Échap'],t:g.erreur?'Choisir une autre organisation':'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},
+      {ks:['←','→'],t:'Lire les cartons'},
+      ...(g.erreur?[{ks:['Entrée'],t:'Recommencer',onclick:'CL.mgmtNouvelleRecommencer()'}]:g.pret?[{ks:['Entrée'],t:'Entrer dans '+g.org,onclick:'CL.mgmtNouvelleEntrer()'}]:[])]});
 }
 /** Actualise les nœuds de progression sans reconstruire l'écran. @param {object} g Génération active. @returns {void} Met à jour les textes et attributs ciblés. */
 function mgmtNouvelleProgression(g){
@@ -130,12 +155,31 @@ function mgmtNouvelleProgression(g){
   const rac=document.querySelector('.mf-genese'); if(!rac) return;
   const valeurs=mgmtNouvelleCompteurs(g), noeuds=rac.querySelectorAll('.mf-genese-cpt');
   valeurs.forEach((c,i)=>{if(noeuds[i]){const b=noeuds[i].querySelector('b'),s=noeuds[i].querySelector('span');if(b)b.textContent=c.v;if(s)s.textContent=c.k;}});
-   const texte=rac.querySelector('.mf-genese-gauche .mf-genese-texte:last-child');
-   if(texte) texte.textContent=g.erreur?`Échec en ${g.erreurAnnee||g.annee}, emplacement ${g.slot} : ${g.erreurMessage||'erreur inconnue'}`:g.pret?'Six ans sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
-   const barre=rac.querySelector('.mf-genese-barre'); if(barre){barre.setAttribute('aria-valuenow',g.k);if(g.erreur)barre.classList.add('erreur');const b=barre.querySelector('b');if(b){b.style.width=g.erreur?(g.aff||0)+'%':Math.max(g.aff||0,100*g.k/Math.max(1,g.n))+'%';if(g.erreur)b.style.background='#777';}}
+  /* ==== [ANCRE: MONDE_LOT12_T1_PROGRESSION] — Monde lot 12 T1 ==== */
+  const s=mgmtNouvelleSituation(g);
+  for(const [classe,valeur] of [['annee',s.annee],['soiree',s.titre],['detail',s.detail],['predecesseur',s.predecesseur]]){
+    const el=rac.querySelector('.mf-genese-'+classe);if(el)el.textContent=valeur;
+  }
+  rac.classList.toggle('debut',!g.m);rac.classList.toggle('chargement',!!g.m&&!g.pret&&!g.erreur);
+  const barre=rac.querySelector('.mf-genese-barre');if(barre)barre.setAttribute('aria-valuenow',g.k);
   const annees=rac.querySelectorAll('.mf-genese-an'); annees.forEach(el=>{const y=+el.dataset.year;el.classList.toggle('fait',g.pret||y<g.annee);el.classList.toggle('cours',!g.pret&&y===g.annee);});
-  let fait=rac.querySelector('.mf-genese-dernier-fait');
-  if(g.dernier){if(!fait){fait=document.createElement('div');fait.className='mf-genese-dernier-fait';rac.querySelector('.mf-genese-gauche').appendChild(fait);}fait.textContent=`${g.dernier.nom} prend la ceinture · ${g.dernier.division} · soirée ${g.dernier.soiree}`;}
+  const fait=rac.querySelector('.mf-genese-dernier-fait');
+  if(g.dernier){
+    if(!fait)rac.querySelector('.mf-genese-gauche').insertAdjacentHTML('beforeend',mgmtNouvelleFaitHtml(g));
+    else{const ident=mgmtOrgIdentite(g.orgId);fait.querySelector('div').textContent=g.dernier.nom+(g.dernier.retraite?' · Retraite':' prend la ceinture');fait.querySelector('small').textContent=`${g.dernier.division} · ${ident?ident.soirees:'soirée'} ${g.dernier.soiree}`;}
+  }
+}
+/* ==== [ANCRE: MONDE_LOT12_T1_LECTURE] — Monde lot 12 T1 ==== */
+function mgmtNouvelleLectureActualiser(g){
+  if(typeof document==='undefined')return;
+  const panneau=document.querySelector('.mf-lecture-panneau .mf-p3');
+  if(panneau)panneau.innerHTML=mgmtNouvelleCartonHtml(g);
+  mgmtNouvelleMouvement(true);
+}
+function mgmtNouvelleFin(g){
+  render();
+  if(typeof document!=='undefined'){const b=document.querySelector('.mf-genese-entree .mf-bouton');if(b)b.focus();}
+  mgmtNouvelleBarreBoucle(g);
 }
 /** Le mouvement est écrit en script (mgmt-animations.js, décision du 07/10) : la lueur de la barre (coupée sous prefers-reduced-motion) et le fondu de 300 ms du carton. */
 function mgmtNouvelleMouvement(fondu){
@@ -143,10 +187,10 @@ function mgmtNouvelleMouvement(fondu){
     if(typeof document==='undefined') return;
     if(typeof mgmtAnimOk==='function'&&!mgmtAnimOk()) return;
     if(typeof window!=='undefined'&&typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const l=document.querySelector('.mf-genese-lueur');
+    const l=document.querySelector('.mf-genese.chargement .mf-genese-barre b');
     if(l&&!l.dataset.anime&&typeof l.animate==='function'){
       l.dataset.anime='1';
-      l.animate([{transform:'translateX(-120px)'},{transform:'translateX(1000px)'}],{duration:1600,iterations:Infinity,easing:'linear'});
+      l.animate([{backgroundPosition:'0 0'},{backgroundPosition:'40px 0'}],{duration:1200,iterations:Infinity,easing:'linear'});
     }
     const c=document.querySelector('.mf-lecture-carton');
     if(fondu&&c&&typeof c.animate==='function') c.animate([{opacity:0},{opacity:1}],{duration:300,easing:'ease-out'});
@@ -165,7 +209,7 @@ function mgmtNouvelleLectureArmer(g){
   if(MGMT_GEN_TIMERS.lecture!==null){ clearInterval(MGMT_GEN_TIMERS.lecture); MGMT_GEN_TIMERS.lecture=null; }
   MGMT_GEN_TIMERS.lecture=setInterval(()=>{
     if(MGMT_NOUVELLE.gen!==g||!G||G.screen!=='mgmt_nouvelle'){ mgmtNouvelleGenNettoyer(); return; }
-    g.lec=((g.lec||0)+1)%MGMT_NOUVELLE_LECTURES.length; render(); mgmtNouvelleMouvement(true);
+    g.lec=((g.lec||0)+1)%MGMT_NOUVELLE_LECTURES.length; mgmtNouvelleLectureActualiser(g);
   },MGMT_NOUVELLE_LECTURE_MS);
 }
 /** La barre : à chaque image, la largeur affichée rattrape la cible ; elle s'arrête, pleine, quand la partie est prête. */
@@ -174,9 +218,13 @@ function mgmtNouvelleBarreBoucle(g){
     MGMT_GEN_TIMERS.barre=null;
     if(MGMT_NOUVELLE.gen!==g||!G||G.screen!=='mgmt_nouvelle') return;
     mgmtNouvelleMouvement(false);
-    g.aff=mgmtNouvelleBarreSuivante(Number.isFinite(g.aff)?g.aff:0,mgmtNouvelleCible(g));
+    /* ==== [ANCRE: MONDE_LOT12_T1_BARRE] — Monde lot 12 T1 ==== */
+    const cible=mgmtNouvelleCible(g);
+    const reduit=typeof window!=='undefined'&&typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mouvement=!reduit&&(typeof mgmtAnimOk!=='function'||mgmtAnimOk());
+    g.aff=Math.max(g.aff||0,cible);
     const b=typeof document!=='undefined'?document.querySelector('.mf-genese-barre b'):null;
-    if(b) b.style.width=g.aff.toFixed(2)+'%';
+    if(b){b.style.transition=mouvement?'width .6s linear':'none';b.style.width=g.aff.toFixed(2)+'%';}
     if(g.pret&&g.aff>=100) return;
     MGMT_GEN_TIMERS.barre=(typeof requestAnimationFrame==='function')?requestAnimationFrame(image):setTimeout(image,16);
   };
@@ -190,7 +238,7 @@ function mgmtNouvelleGenPas(){
   try{
     if(!g.m){ g.m=mgmtPassePreparer(g.orgId,{soirees:g.n}); mgmtNouvelleLireFaits(g); }
     else if(g.monde){
-      if(mgmtMondeVivantPas(g.monde).termine){ g.pret=true; G.mgmt=null; render(); mgmtNouvelleBarreBoucle(g); return; }
+      if(mgmtMondeVivantPas(g.monde).termine){ g.pret=true; G.mgmt=null; mgmtNouvelleFin(g); return; }
     }
     else{
       const r=mgmtPasseSoiree(g.m,g.k);
@@ -198,10 +246,9 @@ function mgmtNouvelleGenPas(){
       if(r.termine){
         mgmtPasseCloturer(g.m);
         /* Monde lot 9 T2a : la création réelle (sans nombre de soirées imposé) fait aussi vivre les sept autres organisations, pas à pas. */
-        if(g.avecMonde){ g.monde=mgmtMondeVivantPreparer(g.m,{soirees:g.n}); G.mgmt=null; render(); mgmtNouvelleGenSuite(g); return; }
+        if(g.avecMonde){ g.monde=mgmtMondeVivantPreparer(g.m,{soirees:g.n}); G.mgmt=null; mgmtNouvelleProgression(g); mgmtNouvelleGenSuite(g); return; }
         g.pret=true; G.mgmt=null;   /* la partie vit dans g.m jusqu au bouton */
-        render();
-        mgmtNouvelleBarreBoucle(g);
+        mgmtNouvelleFin(g);
         return;
       }
     }
@@ -284,7 +331,7 @@ Object.assign(CL,{
     const g=MGMT_NOUVELLE.gen; if(!g||!Number.isSafeInteger(i)) return;
     const n=MGMT_NOUVELLE_LECTURES.length;
     g.lec=((i%n)+n)%n;
-    mgmtNouvelleLectureArmer(g); render(); mgmtNouvelleMouvement(true);
+    mgmtNouvelleLectureArmer(g); mgmtNouvelleLectureActualiser(g);
   },
   mgmtNouvelleLectureDelta(d){ const g=MGMT_NOUVELLE.gen; if(g) CL.mgmtNouvelleLecture((g.lec||0)+d); },
   /** Recommence une génération interrompue en conservant l'organisation choisie. @returns {void} Relance l'écran de création. */

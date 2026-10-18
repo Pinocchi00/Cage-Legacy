@@ -42,7 +42,9 @@ test('T5 — la première arrivée : héritage avant la première soirée, semai
   const r=res(w,`const m=G.mgmt, av=mgmtAccueilContenu(m); const t1=document.getElementById('app').textContent;
     ${apres} render(); const ap=mgmtAccueilContenu(m); const t2=document.getElementById('app').textContent;
     return {p1:av.premiere,h1:!!av.heritage,p2:ap.premiere,h2:ap.heritage,t1:/ORGANISATION/.test(t1),t2:/CE QUI S.EST PASS/.test(t2),saved:Object.keys(m).includes('accueil')};`);
-  assert.deepEqual([r.p1,r.h1,r.p2,r.h2,r.t1,r.t2,r.saved],[true,true,false,null,false,true,false]);
+  /* ==== [ANCRE: ACCUEIL_TEST_PASSE_VIDE_R4] — Monde lot 12 T2 ==== */
+  /* Fiche T2, R4 : sans événement, le panneau du passé n'est plus affiché. */
+  assert.deepEqual([r.p1,r.h1,r.p2,r.h2,r.t1,r.t2,r.saved],[true,true,false,null,false,false,false]);
 });
 
 /* ==== [ANCRE: TEST_MGMT_PRESENTATION_ACCUEIL_ROUTE] — Monde lot 3 T5 ==== */
@@ -58,12 +60,16 @@ test('T4 — chaque nom affiché ouvre la présentation du bon combattant actif'
   assert.ok(r.lies>=1&&r.noms>=1); assert.equal(r.ecran,'mgmt_presentation_combattant'); assert.equal(r.sujet,r.attendu); assert.equal(r.bon,true);
 });
 
+/* ==== [ANCRE: ACCUEIL_DEMANDE_ACTION_TEST] — Monde lot 12 T2 ==== */
+/* Fiche T2, écart 4 : Répondre ouvre la fiche existante au lieu des deux décisions dans la liste. */
 test('T6 — une demande ouverte se règle depuis l’Accueil', () => {
   const w=ouverte();
   const r=res(w,`const m=G.mgmt; ${apres} const f=m.roster.find(x=>!mgmtIsRetired(x));
     m.facts.push({k:'demande',a:f.id,want:'carte-principale',c:m.cycle}); render();
     const avant=mgmtDemandesOuvertes(m).length, vue=/demande/.test(document.querySelector('.mf-ac').textContent);
-    const bouton=[...document.querySelectorAll('.mf-ac-ra .mf-bouton')].find(b=>/Refuser/.test(b.textContent)); bouton.click();
+    document.querySelector('.mf-ac-demande').click();
+    const bouton=[...document.querySelectorAll('.mf-demande .mf-bouton')].find(b=>/Refuser/.test(b.textContent)); bouton.click();
+    CL.go('mgmt_accueil');
     return {avant,vue,ap:mgmtDemandesOuvertes(m).length,ecran:G.screen};`);
   assert.ok(r.avant>=1); assert.equal(r.vue,true); assert.equal(r.ap,r.avant-1); assert.equal(r.ecran,'mgmt_accueil');
 });
@@ -73,9 +79,11 @@ test('T6 — une affaire ouverte se règle depuis l’Accueil', () => {
   const r=res(w,`const m=G.mgmt; ${apres} render();
     const n0=m.pile.filter(a=>a.status==='open').length; const ligne=document.querySelector('.mf-ac-act');
     if(!ligne) return {n0,sans:true};
-    ligne.click(); const avant=document.querySelectorAll('.mf-ac-reps .mf-bouton').length; document.querySelector('.mf-ac-reps .mf-bouton').click();
+    /* REPRISE 2 : l'échange est désormais ouvert dans Les affaires. */
+    ligne.click(); const boutons=[...document.querySelectorAll('button')].filter(b=>/CL.mgmtReply/.test(b.getAttribute('onclick')||''));
+    const avant=boutons.length; boutons[0].click();
     return {n0,avant,ecran:G.screen};`);
-  assert.ok(r.sans||(r.avant>=1&&r.ecran==='mgmt_accueil'));
+  assert.ok(r.sans||(r.avant>=1&&r.ecran==='mgmt_bureau'));
 });
 
 test('Lot 7 — le lien des affaires mène à l’Accueil ; aucune minuterie ni surimpression dans l’Accueil', () => {
@@ -91,4 +99,162 @@ test('Lot 7 — aucun texte sous 22 px dans les règles de l’Accueil, aucune a
   const tailles=[...bloc.matchAll(/font-size:\s*([0-9.]+)px/g)].map(x=>parseFloat(x[1]));
   assert.ok(tailles.length>10); assert.deepEqual(tailles.filter(t=>t<22),[]);
   assert.ok(!/@keyframes|animation:|transition:/.test(bloc),'aucune animation');
+});
+
+/* ==== [ANCRE: ACCUEIL_PLANCHE_TEST] — Monde lot 12 T2 ==== */
+test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochaine soirée et une action par affaire', () => {
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt;
+    const f=m.roster.find(x=>!mgmtIsRetired(x));
+    m.facts.push({k:'injury',a:f.id,c:m.cycle});
+    m.facts.push({k:'demande',a:f.id,want:'carte-principale',c:m.cycle});
+    render();
+    const c=mgmtAccueilContenu(m);
+    const colonnes=[...document.querySelector('.mf-ac-cols').children];
+    const lignes=[...document.querySelectorAll('.mf-ac-haut .mf-ac-ligne')];
+    const bandeau=document.querySelector('.mf-ac-tuiles').textContent;
+    const date=mgmtJourDate(mgmtCalAujourdhui(m));
+    return {colonnes:colonnes.length,titres:colonnes.map(x=>x.querySelector('.mf-ac-h').textContent),
+      bandeau,date:c.ou.date,mois:date.mois.toLowerCase(),
+      lignes:lignes.length,attend:c.attend.ouvertes.length,
+      actions:lignes.map(x=>x.querySelectorAll('.mf-ac-act,.mf-ac-demande').length),
+      decisions:document.querySelectorAll('.mf-ac-ra').length,
+      prochaine:document.querySelectorAll('.mf-prise-suite').length,
+      jaune:document.querySelector('.mf-ac-jaune').textContent,
+      vides:mgmtAccueilPasse(m,{passe:[]})+mgmtAccueilAilleurs(m,{ailleurs:[]})};`);
+  assert.equal(r.colonnes,3);
+  assert.deepEqual(r.titres,['CE QUI S’EST PASSÉ','CE QUI T’ATTEND','ET AILLEURS']);
+  assert.match(r.bandeau,/Prochaine soirée.*Le lieu.*La carte/);
+  assert.doesNotMatch(r.bandeau,/prédécesseur|adjointe|première soirée/);
+  assert.ok(r.date.includes(r.mois));
+  assert.equal(r.lignes,Math.min(4,r.attend));
+  assert.ok(r.actions.every(n=>n===1));
+  assert.equal(r.decisions,0);
+  assert.equal(r.prochaine,0);
+  assert.equal(r.vides,'');
+  assert.equal((r.jaune.match(/Finir la carte/gi)||[]).length,1);
+  assert.equal((r.jaune.match(/Ouvrir les dossiers/gi)||[]).length,1);
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:5 1 0;min-width:0\}/);
+  assert.doesNotMatch(css,/\.mf-ac-haut[^{}]*\{[^}]*overflow-y:auto/);
+});
+
+/* ==== [ANCRE: ACCUEIL_REPRISE_2_TESTS] — Monde lot 12 T2 ==== */
+test('Monde lot 12 T2 — reprise 2 — colonnes 5 / 5 / 3',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:5 1 0;min-width:0\}/);
+  assert.match(css,/\.mf-ac-cols>\.mf-ac-c3\{flex:3 1 0\}/);
+  assert.match(css,/\.mf-ac-cols\{display:flex;align-items:stretch;gap:18px;min-height:700px/);
+});
+
+test('Monde lot 12 T2 — reprise 2 — seulement demandes et affaires de Leïla',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster;
+    m.facts=[{k:'demande',a:a.id,want:'carte-principale',c:m.cycle}];
+    const kinds=['leila_propose','leila_react','leila_bulk','leila_react_swap','leila_react_crush'];
+    m.pile=kinds.map((kind,i)=>({id:'r'+i,kind,status:'open',a:a.id,b:b.id,fights:[]}));
+    m.pile.push({id:'fermee',kind:'leila_propose',status:'closed'},{id:'contrat',kind:'contrat',status:'open'});
+    return mgmtAccueilContenu(m).attend.ouvertes.map(x=>({id:x.id,kind:x.kind,relu:x.relu}));`);
+  assert.equal(r.length,6);
+  assert.deepEqual(r.slice(1).map(x=>x.id),['r0','r1','r2','r3','r4']);
+  assert.ok(r.slice(1).every(x=>x.kind==='affaire'&&x.relu===false));
+});
+
+test('Monde lot 12 T2 — reprise 2 — actions et résumé sans échange développé',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster;
+    m.facts=[]; m.pile=[{id:'reprise',kind:'leila_propose',status:'open',a:a.id,b:b.id}]; m.open='reprise'; render();
+    const ligne=document.querySelector('.mf-ac-ligne');
+    const texte=ligne.querySelector('.mf-ac-rp').textContent, sous=ligne.querySelector('.mf-ac-rs').textContent;
+    const action=ligne.querySelector('.mf-ac-act').textContent, echanges=document.querySelectorAll('.mf-ac-ech').length;
+    document.querySelector('.mf-ac-act').click();
+    return {texte,sous,action,echanges,ecran:G.screen,open:m.open,a:a.name,b:b.name,record:a.W+'-'+a.L+'-'+a.D};`);
+  assert.equal(r.texte,`Leïla propose ${r.a} contre ${r.b}`);
+  assert.ok(r.sous.includes(r.record)); assert.equal(r.action,'Décider ›');
+  assert.equal(r.echanges,0); assert.equal(r.ecran,'mgmt_bureau'); assert.equal(r.open,'reprise');
+});
+
+test('Monde lot 12 T2 — reprise 2 — lieu en majuscules et mois en minuscules',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, c=mgmtAccueilContenu(m), infos=mfSoireeInfos(m);
+    const salle=mgmtSalleParId(m,m.cal.prochaines[0].salle);
+    return {lieu:c.ou.lieu,nom:salle.nom,ville:salle.ville,date:infos.date};`);
+  assert.equal(r.lieu.nom,r.nom.toUpperCase());
+  assert.equal(r.lieu.sous,r.ville+', '+r.date.toLowerCase());
+});
+
+test('Monde lot 12 T2 — reprise 2 — listes limitées et Voir tout sans nom coupé',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt; m.facts=[]; m.pile=[]; m.visites={};
+    /* Le budget du conteur reste indépendant de la limite de rendu testée. */
+    mgmtMarqueBudget=()=>7;
+    for(const f of m.roster.filter(x=>!mgmtIsRetired(x)).slice(0,7)){
+      m.facts.push({k:'injury',a:f.id,c:m.cycle},{k:'demande',a:f.id,want:'carte-principale',c:m.cycle});
+    }
+    const nomLong='Alexandre & Jean-Baptiste de La Roche';
+    m.roster.filter(x=>!mgmtIsRetired(x)).slice(0,7).forEach(f=>{f.name=nomLong;});
+    const [a,b]=m.roster;
+    m.pile=[{id:'debordement',kind:'leila_propose',status:'open',a:a.id,b:b.id}];
+    render(); const c=mgmtAccueilContenu(m);
+    const liens=[...document.querySelectorAll('.mf-ac-lien')].filter(x=>x.textContent==='Voir tout ›');
+    MGMT_ACCUEIL.cur=4; CL.mgmtAccueilDeplacer(1);
+    return {total:c.passe.length,passe:document.querySelectorAll('.mf-ac-ev').length,
+      affaires:document.querySelectorAll('.mf-ac-ligne').length,
+      liens:liens.map(x=>({famille:x.dataset.famille,go:x.getAttribute('onclick'),attend:!!x.closest('.mf-ac-haut')})),
+      noms:[...document.querySelectorAll('.mf-ac-ev .mf-ac-nom,.mf-ac-ligne .mf-ac-nom')].map(x=>x.textContent),
+      nomLong,cur:MGMT_ACCUEIL.cur};`);
+  assert.ok(r.total>5); assert.equal(r.passe,5); assert.equal(r.affaires,4);
+  assert.deepEqual(r.liens.find(x=>x.famille==='passe'),{famille:'passe',go:"CL.go('mgmt_effectif')",attend:false});
+  assert.deepEqual(r.liens.find(x=>x.famille==='demande'),{famille:'demande',go:"CL.go('mgmt_effectif')",attend:true});
+  assert.deepEqual(r.liens.find(x=>x.famille==='affaire'),{famille:'affaire',go:"CL.go('mgmt_bureau')",attend:true});
+  assert.equal(r.liens.length,3); assert.equal(r.cur,0);
+  assert.ok(r.noms.length>=9); assert.ok(r.noms.every(n=>n===r.nomLong),'les noms complets restent dans chaque bouton');
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac\{[^}]*overflow:visible/);
+  assert.match(css,/\.mf-ac-p>\.mf-p2>\.mf-p3\{[^}]*overflow:visible/);
+  assert.match(css,/\.mf-ac \.mf-ac-nom\{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%\}/);
+});
+
+test('Monde lot 12 T2 — reprise 2 — bloc jaune en casse phrase et action à droite',()=>{
+  const w=ouverte();
+  const r=res(w,`const titre=document.querySelector('.mf-ac-jt').textContent;
+    const ligne=document.querySelector('.mf-ac-jp');
+    return {titre,classes:[...ligne.children].map(x=>x.className),entree:ligne.querySelector('.mf-ac-jb').textContent};`);
+  assert.equal(r.titre,'Finir la carte'); assert.deepEqual(r.classes,['mf-ac-jd','mf-ac-jb']);
+  assert.match(r.entree,/Entrée/);
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-ac-jp\{display:flex;justify-content:space-between;align-items:center;gap:12px\}/);
+  assert.doesNotMatch(css,/[^{}]*\.mf-ac-jp[^{}]*\{[^}]*flex-wrap:wrap/);
+});
+
+/* ==== [ANCRE: ACCUEIL_CORRECTIONS_RELECTURE_TESTS] — Monde lot 12 T2 ==== */
+test('Monde lot 12 T2 — reprise — bloc jaune conserve Leïla depuis Continuer',()=>{
+  const w=ouverte();
+  const r=res(w,`mgmtAgendaBlocages=()=>[]; mgmtAgendaActif=()=>false;
+    const m=G.mgmt; m.pile=[{id:'leila',kind:'leila_propose',status:'open'}];
+    render(); return {source:mgmtContinuerRaison(m).libelle,titre:document.querySelector('.mf-ac-jt').textContent};`);
+  assert.equal(r.source,'Répondre à Leïla'); assert.equal(r.titre,r.source);
+});
+
+test('Monde lot 12 T2 — reprise — dossiers sur le premier emplacement libre',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt, [a,b]=m.roster; m.card.main=new Array(2); m.card.main[1]={a:a.id,b:b.id};
+    /* La presse ne fait pas partie du choix de l'emplacement testé. */
+    mgmtMediasLignes=()=>[];
+    let cible=null; CL.mgmtCarteDossiersOuvrir=i=>{cible=i;};
+    render(); const titre=document.querySelector('.mf-ac-jt').textContent;
+    document.querySelector('.mf-ac-jb').click(); return {titre,cible};`);
+  assert.equal(r.titre,'Finir la carte'); assert.equal(r.cible,0);
+});
+
+test('Monde lot 12 T2 — reprise — Voir tout est exporté parmi les textes à relire',()=>{
+  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'cage-accueil-textes-'));
+  try{
+    const out=path.join(dir,'textes.md');
+    require('node:child_process').execFileSync(process.execPath,['tools/exporter-textes.js','--out',out],{cwd:path.join(__dirname,'..'),stdio:'pipe'});
+    const texte=fs.readFileSync(out,'utf8');
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.voirTout[^\n]*Voir tout ›/);
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.finir[^\n]*Finir la carte/);
+    assert.match(texte,/MGMT_ACCUEIL_TEXTES\.resumes\.leila_propose[^\n]*Leïla propose/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

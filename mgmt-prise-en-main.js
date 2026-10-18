@@ -74,7 +74,8 @@ function mfPriseHtml(m,ecran,grise){
   if(!m||!G||G.mgmt!==m) return '';
   if(ecran==='mgmt_carte'&&typeof MGMT_CART!=='undefined'&&MGMT_CART.mode==='dossiers') return '';
   /* Monde lot 10 T3 : Résultats porte déjà la prochaine chose à faire dans son bloc jaune (même source) ; la ligne du bas ne la répète pas. */
-  const p=(grise||ecran==='mgmt_resultats')?null:mgmtProchaineChose(m), id=mgmtPriseMoment(m,ecran);
+  /* ==== [ANCRE: ACCUEIL_SANS_PROCHAINE_ETAPE] — Monde lot 12 T2 ==== */
+  const p=(grise||ecran==='mgmt_resultats'||ecran==='mgmt_accueil')?null:mgmtProchaineChose(m), id=mgmtPriseMoment(m,ecran);
   const leila=id?`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(MGMT_PRISE_TEXTES.moments[id].texte)}</span></div>`:'';
   const suite=p?`<button type="button" class="mf-prise-suite" onclick="${p.onclick}"><span>Prochaine étape</span><b>${esc(p.texte)}</b></button>`:'';
   /* Une seule ligne à la fois dans le bas de l'écran : la parole de Leïla quand un moment est à dire, sinon la prochaine étape. */
@@ -250,8 +251,7 @@ function scr_mgmt_arrivee(){
     </div></div></div>`;
 
   /* Col2 champions. */
-  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : ${mgmtArriveeNom(plusLongReigne.id,plusLongReigne.nom)}</div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>` :
-    `<div class="carte-l"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>`;
+  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : ${mgmtArriveeNom(plusLongReigne.id,plusLongReigne.nom)}</div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>` : '';
 
   const htmlCol2=`
     <div class="pan ar-c2"><div class="p2"><div class="p3">
