@@ -66,9 +66,7 @@ fait plus de soirées ; sans le second, une partie Duo se corrompt.
 
 - Titre en jeu à la super carte, réunification des ceintures.
 - Recette, cachets, salle et public de la super carte (elle se joue salle pleine, sans argent sauf les enchères).
-- Planches d'écran : **décision de Claude, à confirmer par Anthony** — pour aller vite, les écrans du Duo sont montés avec
-  les composants existants du cadre (`mfEcran`, `mfBouton`, cartes d'organisation de « Nouvelle partie », listes de
-  l'Effectif), sans planche validée. Les planches viendront après le premier essai avec François.
+- ~~Planches d'écran~~ : faites le 18/10 à la demande d'Anthony (« fais les maquettes »), dans `maquettes/duo/` — à valider avant DUO-T3.
 - Plus de deux joueurs. Jeu en ligne (Steam Remote Play Together le permettra sans code réseau une fois sur Steam).
 
 ## 6. Idées en attente de la décision d'Anthony (ne pas coder)

@@ -1,13 +1,15 @@
 # DUO-T4 — la super carte à l'écran : enchères, draft, soirée, bilan
 
 Branche : `mode-duo`, après DUO-T3. Brief : `docs/BRIEF-18-10-MODE-DUO.md`. Commit : `Duo T4 : enchères, draft, soirée et bilan de la super carte`.
-Mêmes règles d'écran que DUO-T3 (composants existants, pas de planche, ≥ 22 px, 1280/1440/1920 sans débordement, `esc()`
+Planches : `maquettes/duo/` (`DuoEncheres`, `DuoDraft`, `DuoSoiree`, `DuoBilan`) — à valider par Anthony avant le code, puis elles
+priment pour tout ce qui se voit. Mêmes règles d'écran que DUO-T3 (≥ 22 px, 1280/1440/1920 sans débordement, `esc()`
 partout, CSS dans `ui-cadre.css` sous `/* ==== [ANCRE: DUO_T4_ECRANS] ==== */`, classes `mf-duo-`). Tout dans
 `mgmt-duo-ecrans.js`. Version de sauvegarde inchangée.
 
 **Règle des deux joueurs sur un écran** : chaque écran dit en haut, en grand, **à qui c'est** : `À {nom} de miser`,
 `À {nom} de placer`, `À {nom} de répondre`. La couleur du joueur dont c'est le tour : J1 le rouge de la direction
-visuelle, J2 le jaune, les mêmes sur tous les écrans du Duo (variables CSS existantes du cadre, aucune couleur neuve).
+visuelle `#E23A2B`, J2 le bleu-vert `#1B8C8F` (texte `#3FB7BA` sur fond noir), pris dans la palette des affiches du jeu ; le jaune reste
+l'action principale, jamais un joueur (valeurs exactes : `maquettes/duo/src/duo.css`).
 
 ## 1. Les enchères — écran `mgmt_duo_encheres`
 

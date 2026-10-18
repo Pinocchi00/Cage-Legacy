@@ -3,12 +3,12 @@
 Branche : `mode-duo`, après DUO-T2. Brief : `docs/BRIEF-18-10-MODE-DUO.md`. Commit : `Duo T3 : menu, création à deux, QG et effectifs`.
 Version de sauvegarde inchangée.
 
-**Pas de planche** (décision de Claude pour aller vite, brief §5, à confirmer par Anthony) : monte les écrans avec les
-composants existants — `mfEcran`, `mfBouton` (`mgmt-cadre.js`), les cartes d'organisation de « Nouvelle partie »
-(`mgmtNouvelleOrgHtml`, `mgmtNouvelleApercuHtml`, `mgmt-nouvelle.js`), les classes de liste de l'Effectif. Règles du cadre
-inchangées : **aucun texte sous 22 px**, rien ne déborde ni ne se superpose à 1280, 1440 et 1920 px (cadre 1920×1080 mis à
-l'échelle, `mfAjuste`), `esc()` sur **tout** nom (joueurs, combattants, organisations). Le CSS neuf va dans `ui-cadre.css`
-sous `/* ==== [ANCRE: DUO_T3_ECRANS] ==== */`, avec des classes préfixées `mf-duo-`.
+**Planches** : `maquettes/duo/` (`DuoCreation`, `DuoQG`, `DuoEffectif`, lire `maquettes/duo/LISEZ-MOI.md`). **Rien ne se code avant
+qu'Anthony les ait validées** ; ensuite elles priment sur cette fiche pour tout ce qui se voit : porte leurs valeurs exactes (positions,
+tailles, couleurs, textes — `src/duo.css` et `src/commun.css`), ne les décris pas. Pour le reste, les composants existants (`mfEcran`,
+`mfBouton`, `mgmtNouvelleOrgHtml`, classes de l'Effectif). Règles du cadre inchangées : **aucun texte sous 22 px**, rien ne déborde ni ne se
+superpose à 1280, 1440 et 1920 px (`mfAjuste`), `esc()` sur **tout** nom. Le CSS neuf va dans `ui-cadre.css` sous
+`/* ==== [ANCRE: DUO_T3_ECRANS] ==== */`, avec des classes préfixées `mf-duo-`.
 
 ## Fichier neuf `mgmt-duo-ecrans.js`
 
