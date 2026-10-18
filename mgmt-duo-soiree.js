@@ -34,14 +34,14 @@ function mgmtDuoSoireeHtml(){
   const methode=typeof mgmtLendemainMethode==='function'?mgmtLendemainMethode(t):mgmtSuMethodeFamille(t);
   const bas=resultat?`<div class="so-res"><div class="T">${duoEsc(duoMaj(gagnant<0?`${a.name} et ${b.name}`:`${gagnant===0?a.name:b.name} bat ${gagnant===0?b.name:a.name}`))}</div><div class="l1">${duoEsc(methode)}</div></div>
         <div class="so-boutons"><div class="bouton jaune" onclick="CL.mgmtDuoSoireeSuivant()"><span class="T">${i===5?'LE BILAN':'COMBAT SUIVANT'}</span><span class="k">Entrée</span></div><div class="bouton" onclick="CL.mgmtDuoSoireeRegarder()"><span class="T">REVOIR</span><span class="k">R</span></div></div>`
-      :`<div class="so-boutons"><div class="bouton jaune" onclick="CL.mgmtDuoSoireeRegarder()"><span class="T">REGARDER</span><span class="k">Entrée</span></div><div class="bouton" onclick="CL.mgmtDuoSoireeResultat()"><span class="T">RÉSULTAT</span><span class="k">P</span></div></div>`;
+      :`<div class="so-boutons"><div class="bouton jaune" onclick="CL.mgmtDuoSoireeRegarder()"><span class="T">REGARDER</span><span class="k">Entrée</span></div><div class="bouton" onclick="CL.mgmtDuoPresentation()"><span class="T">Présentation</span><span class="k">F</span></div><div class="bouton" onclick="CL.mgmtDuoSoireeResultat()"><span class="T">RÉSULTAT</span><span class="k">P</span></div></div>`;
   const titre=`La super carte · ${duoEsc(duoMaj(m.duo.noms.a))} × ${duoEsc(duoMaj(m.duo.noms.b))}`;
   const corps=`${duoEntete(titre,duoDroiteSaison(score.saison,n))}
     <main class="contenu large"><div class="so">
       <div class="so-haut"><div class="col"><div class="lab">Super carte ${n} · ${duoEsc(mgmtJourDateTexte(m.cal.jour).toLowerCase())}</div><div class="T so-num">${i===5?'COMBAT PRINCIPAL':'COMBAT '+(6-i)}</div><div class="l2">${duoEsc(mgmtDivisionLabel(c.div))} · ${i===5?'5 rounds':'3 rounds'}</div></div>
         <div class="so-score"><span class="lab">${duoEsc(duoMaj(m.duo.noms.a))}</span><span class="T j1c">${score.a}</span><span class="T t2">–</span><span class="T j2c">${score.b}</span><span class="lab">${duoEsc(duoMaj(m.duo.noms.b))}</span></div></div>
       <div class="so-face">${cote(a,0)}<div class="so-vs T">VS</div>${cote(b,1)}</div><div class="so-pied">${bas}</div></div></main>
-    ${duoTouches([[['Entrée'],resultat?(i===5?'Le bilan':'Combat suivant'):'Regarder',true,resultat?'CL.mgmtDuoSoireeSuivant()':'CL.mgmtDuoSoireeRegarder()'],[['P'],'Résultat',false,'CL.mgmtDuoSoireeResultat()'],[['Échap'],'Retour au QG',false,'CL.mgmtDuoSoireeEchapper()']])}`;
+     ${duoTouches([[['Entrée'],resultat?(i===5?'Le bilan':'Combat suivant'):'Regarder',true,resultat?'CL.mgmtDuoSoireeSuivant()':'CL.mgmtDuoSoireeRegarder()'],...(!resultat?[[['F'],'Présentation',false,'CL.mgmtDuoPresentation()']]:[]),[['P'],'Résultat',false,'CL.mgmtDuoSoireeResultat()'],[['Échap'],'Retour au QG',false,'CL.mgmtDuoSoireeEchapper()']])}`;
   return duoCadre(corps);
 }
 SCREENS.mgmt_duo_soiree=mgmtDuoSoireeHtml;
@@ -62,4 +62,4 @@ Object.assign(CL,{
   },
   mgmtDuoSoireeEchapper(){CL.go('mgmt_duo');}
 });
-keysRegister('mgmt_duo_soiree',{Enter(){if(MGMT_DUO_UI.vu)CL.mgmtDuoSoireeSuivant();else CL.mgmtDuoSoireeRegarder();},KeyP(){CL.mgmtDuoSoireeResultat();},Escape(){CL.mgmtDuoSoireeEchapper();}});
+keysRegister('mgmt_duo_soiree',{Enter(){if(MGMT_DUO_UI.vu)CL.mgmtDuoSoireeSuivant();else CL.mgmtDuoSoireeRegarder();},KeyF(){if(!MGMT_DUO_UI.vu)CL.mgmtDuoPresentation();},KeyP(){CL.mgmtDuoSoireeResultat();},Escape(){CL.mgmtDuoSoireeEchapper();}});

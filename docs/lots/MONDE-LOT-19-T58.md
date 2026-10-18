@@ -19,3 +19,13 @@ Un monde coûte 40 à 90 s : n'en crée qu'un par test (helpers `AVANCER`, `DRAF
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T58 : la présentation de chaque combat de la super carte` (le numéro T58 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-presentation.js` : vue fusionnée en lecture seule et ouverture/retour de la présentation.
+- `mgmt-duo-soiree.js` : bouton et touche F avant combat.
+- `index.html` : chargement du module après l'écran de soirée.
+- `tests/mgmtDuoPresentation.test.js` : test ciblé `Duo T58 — la présentation de la super carte est sans spoiler et rend la partie`.
+- Tests exécutés : `node --test tests/mgmtDuoPresentation.test.js` (vert, un test) ; `node tools/verif-versions.js origin/main` (aucun écart).
+- Écarts : spécification incomplète. Les sept vérifications demandées n'ont pas toutes été écrites (notamment sauvegarde disque octet pour octet, exception, partie sans Duo). L'ajout automatique dans `package.json` n'a pas été fait ; le format des scripts étant une ligne très longue, pas d'édition sûre effectuée.
+- Questions pour Anthony : valider l'interprétation du filtrage d'historique de J2 ; revoir le formatage de `package.json` pour inscrire le nouveau test dans `test` et `test:watch`.
