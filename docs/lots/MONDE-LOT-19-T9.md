@@ -20,6 +20,10 @@ Points (6) le QG montre les deux organisations, les deux noms (esc), le bouton d
 - `tests/mgmtDuoEcrans.test.js` : tests « Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape », « Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suivante », « Duo T9 — le QG ne contient aucun texte de travail ».
 - Migration de sauvegarde : aucune ; `MGMT_SAVE_VERSION` inchangée.
 - Vérification des versions : le contrôle signale l'écart préexistant de `mgmt-salles.js` face à `origin/main` ; ce fichier n'appartient pas à la tranche et n'a pas été modifié.
-- Contrôle visuel/captures : non effectué dans cet environnement.
+- Reprise après relecture : les boutons d'effectif et les touches `1`/`2` sélectionnent maintenant le côté J1/J2 ; `Super cartes passées` et `H` sont affichés/actifs uniquement si `m.duo.cartes` contient des cartes.
+- Contrôle visuel/captures : non effectué. Aucun navigateur/capteur n'a été exécuté ; les captures obligatoires du QG, de l'effectif et de la création aux résolutions 1280, 1440 et 1920 px restent à produire. Pas de captures jointes.
+- Fichiers modifiés pour la reprise : `mgmt-duo-ecrans.js` (sélection du côté des effectifs, historique et raccourci H) ; `index.html` (version cache montée par `node tools/_bump.js`). Les modifications locales `.opencode/agents/*.md`, `opencode.json` et `sw.js` sont hors périmètre et laissées non ajoutées au commit.
+- Tests : suite `tests/mgmtDuoEcrans.test.js`, 12 passés ; aucun intitulé de test ajouté. Vérification versions : écart préexistant `mgmt-salles.js` inchangé.
+- Écarts à la fiche : contrôle visuel obligatoire non réalisé, donc aucune capture ne peut être jointe.
 - Questions pour Anthony : aucune.
 
