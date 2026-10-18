@@ -115,9 +115,11 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain,idx){
       +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Titre en jeu — le champion ne combat que pour sa ceinture">TITRE</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${idx},${!titre})">${titre?'TITRE':'SANS TITRE'}</button>`:'')}</div>`
       +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${idx})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`
       /* ==== [ANCRE: MONDE_LOT5_T4_ACTION] — Monde lot 5 T4 ==== */
+      /* Monde lot 17 — décision d'Anthony du 17/10/2026 : la coche et la croix à droite des combats sont retirées ; retirer un combat du joueur se fait par ce bouton texte (touche X), comme annuler un combat hérité. */
+      +(fight.herite!==true?`<button type="button" class="mf-car-retirer" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${idx})">Retirer ce combat [X]</button>`:'')
       +(fight.herite===true?`<button type="button" class="mf-car-annule" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${idx})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')
       /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_SLOT] — Monde lot 3 T5 ==== */
-      +`<button type="button" class="mf-pr-entree" onclick="CL.mgmtCartePresentation(${idx})">Présentation</button></div><div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${idx})">×</button></div></div>`;
+      +`<button type="button" class="mf-pr-entree" onclick="CL.mgmtCartePresentation(${idx})">Présentation</button></div></div>`;
   }
   const pre=etatMain.pre===i;
   const pa=pre?mgmtFighterById(m,MGMT_CART.pick):null, pb=pre?etatMain.vise:null;
@@ -177,8 +179,10 @@ function scr_mgmt_carte_liste(){
   const places=mgmtCartePlaces(m), prochaine=places.findIndex(x=>!x);
   const etat={courant:plein?-1:prochaine,pre:(pickF&&!plein)?prochaine:-1,vise:(pickF&&vise&&vise.id!==pickF.id)?vise:null};
   const slots=places.map((pl,i)=>mgmtCarteCombatLigne(m,i,pl?pl.fight:null,etat,pl?pl.index:-1));
-  const legende=`<div class="mf-car-legende"><span>${MF_SVG_CONFIRME}Confirmé</span><span><i class="mf-eff-q">?</i>À confirmer</span><span>À composer</span></div>`;
-  const gauche=mfPanneau(`<div class="mf-car-t">LA CARTE</div><div class="mf-car-slots">${slots.join('')}</div>${legende}`,'normal','mf-car-g');
+  const legende=`<div class="mf-car-legende"><span><i class="mf-eff-q">?</i>À confirmer</span><span>À composer</span></div>`;
+  /* Monde lot 17 : les dossiers de Leïla s'ouvrent ici, par un bouton visible (touche D). */
+  const accesDossiers=(!plein&&mgmtAgendaActif(m))?mfBouton('Les dossiers de Leïla',{touche:'D',jaune:true,onclick:'CL.mgmtDossiers()',classe:'mf-car-dossiers'}):'';
+  const gauche=mfPanneau(`<div class="mf-car-t">LA CARTE</div><div class="mf-car-slots">${slots.join('')}</div>${accesDossiers}${legende}`,'normal','mf-car-g');
 
   /* Le centre : le combat visé, ou le combattant que le curseur désigne. */
   const A=pickF||vise, B=pickF?etat.vise:null;
@@ -212,18 +216,22 @@ function scr_mgmt_carte_liste(){
     +mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${prop?`<div class="mf-car-prop mf-ancien">${prop}</div>`:''}${faits}${boutons}`,'normal','mf-car-cmp')+`</div>`;
 
   /* La droite : les adversaires, six lignes qui suivent le curseur. */
-  const debut=Math.min(Math.max(0,cur-MGMT_CARTE_LIGNES+1),Math.max(0,liste.length-MGMT_CARTE_LIGNES));
+  /* Monde lot 17 : avec le pager (liste plus longue que la fenêtre), la fenêtre perd une ligne pour que « Catégorie » reste dans le panneau. */
+  const fenetre=liste.length>MGMT_CARTE_LIGNES?MGMT_CARTE_LIGNES-1:MGMT_CARTE_LIGNES;
+  const debut=Math.min(Math.max(0,cur-fenetre+1),Math.max(0,liste.length-fenetre));
   const homo=mgmtCarteHomonymes(liste);
-  const lignes=liste.slice(debut,debut+MGMT_CARTE_LIGNES).map((f,k)=>mgmtCarteAdvLigne(m,f,debut+k,debut+k===cur,homo)).join('');
+  const lignes=liste.slice(debut,debut+fenetre).map((f,k)=>mgmtCarteAdvLigne(m,f,debut+k,debut+k===cur,homo)).join('');
   const libres=liste.filter(f=>mgmtSelectable(m,f,MGMT_CART.pick)).length;
   const droite=mfPanneau(`<div class="mf-car-t">${pickF?'ADVERSAIRES':'COMBATTANTS'}</div>`
     +`<div class="mf-car-tri"><span>${libres} libres sur ${liste.length}</span><span>Tri : classement</span></div>`
-    +`<div class="mf-car-advs">${lignes||'<div class="mf-eff-aucun">Personne dans cette catégorie.</div>'}</div>`
+    /* Monde lot 17 — décision d'Anthony du 17/10/2026 : sans clavier on restait bloqué aux six premiers ; molette sur la liste et boutons Précédents / Suivants. */
+    +(liste.length>MGMT_CARTE_LIGNES?`<div class="mf-car-pager"><button type="button" onclick="CL.mgmtCarteDefile(-${fenetre})"${debut<=0?' disabled':''}>▲ Précédents</button><span>${debut+1} à ${Math.min(liste.length,debut+fenetre)}</span><button type="button" onclick="CL.mgmtCarteDefile(${fenetre})"${debut+fenetre>=liste.length?' disabled':''}>▼ Suivants</button></div>`:'')
+    +`<div class="mf-car-advs" onwheel="event.preventDefault();CL.mgmtCarteDefile(event.deltaY>0?1:-1)">${lignes||'<div class="mf-eff-aucun">Personne dans cette catégorie.</div>'}</div>`
     +mfBouton('Catégorie : '+mfNet(mgmtDivisionLabel(mgmtCarteDiv(m))),{touche:'C',onclick:'CL.mgmtCarteCategorie(1)',classe:'mf-car-cat'}),'normal','mf-car-d');
   const contenu=`<main class="mf-contenu mf-carte">${gauche}${centre}${droite}</main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:`${main.length} / ${taille}`,tuiles:[main.length,taille],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteLeave()'},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},{ks:['C'],t:'Catégorie',onclick:'CL.mgmtCarteCategorie(1)'},
-      {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},{ks:['Entrée'],t:pickF?'Confirmer':'Choisir',jaune:true,onclick:'CL.mgmtCarteEntree()'}]});
+      {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},{ks:['D'],t:'Dossiers de Leïla',onclick:'CL.mgmtDossiers()'},{ks:['Entrée'],t:pickF?'Confirmer':'Choisir',jaune:true,onclick:'CL.mgmtCarteEntree()'}]});
 }
 function scr_mgmt_carte_cadre(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
@@ -415,8 +423,8 @@ Object.assign(CL,{
   /** La préparation à la demande. En mode dossier, D demande une nouvelle pile selon l’étape. */
   mgmtCarteProposer(){
     const m=G.mgmt; if(!mgmtAgendaActif(m)) return;
-    /* Décision d'Anthony du 17/10/2026 : Leïla ne touche qu'aux préliminaires ; la touche « Proposer » (D) de la liste n'existe plus. D ne demande de nouveaux dossiers que dans les dossiers. */
-    if(MGMT_CART.mode!=='dossiers') return;
+    /* Décision d'Anthony du 17/10/2026 : Leïla ne touche qu'aux préliminaires ; la touche « Proposer » (D) de la liste n'existe plus. Dans la liste, D ouvre les dossiers de Leïla ; dans les dossiers, D en demande d'autres. */
+    if(MGMT_CART.mode!=='dossiers'){ if(!MGMT_CART.pick) CL.mgmtDossiers(); return; }
     if(MGMT_CART.etape===1){
       const vus=Array.isArray(MGMT_CART.vusCombattants)?MGMT_CART.vusCombattants:[];
       const pile=mgmtDossiersCombattants(m,null,vus);
@@ -464,6 +472,12 @@ Object.assign(CL,{
     MGMT_CART.mode='dossiers'; MGMT_CART.listeDepuisDossiers=false; render();
   },
   mgmtCarteEsc(){ return CL.mgmtDossierEsc(); },
+  /** Monde lot 17 : fait défiler la liste des combattants à la souris (molette, boutons) : le curseur avance de `delta` lignes, la fenêtre le suit. */
+  mgmtCarteDefile(delta){
+    const m=G.mgmt; if(!m||MGMT_CART.mode==='dossiers') return;
+    const n=mgmtCarteListe(m).length; if(!n) return;
+    MGMT_CART.cursor=Math.max(0,Math.min(n-1,(MGMT_CART.cursor||0)+delta)); render();
+  },
   mgmtDossiers(){ return CL.mgmtCarteDossiersActiver(); },
   mgmtCarteDossiers(){ return CL.mgmtCarteDossiersActiver(); },
   mgmtDossierEchap(){ return CL.mgmtDossierEsc(); },
