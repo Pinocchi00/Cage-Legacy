@@ -1180,8 +1180,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-ligne{box-sizing:border-box;padding:7px 16px;background:#252121;font:500 25px/1.05 var(--mf-texte);overflow-wrap:anywhere}
 .mf-pr-media,.mf-pr-sujet,.mf-pr-noms{font-size:22px;line-height:1.1;margin-bottom:5px}
 .mf-pr-media{font-weight:600;color:#F0B220}
-.mf-pr-lien{padding:0;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:underline;cursor:pointer;overflow-wrap:anywhere}
-.mf-pr-lien.choisi{color:#F0B220;outline:2px solid #F0B220;outline-offset:2px}
+/* Monde lot 20 (retour d'Anthony du 18/10/2026) : un nom cliquable est un simple nom blanc ; il se met en surbrillance au survol (et à la sélection au clavier), sans encadré jaune. */
+.mf-pr-lien{padding:0 4px;margin:0 -4px;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:none;cursor:pointer;overflow-wrap:anywhere}
+.mf-pr-lien:hover,.mf-pr-lien.choisi{background:rgba(233,230,225,.22)}
 /* Monde lot 18 — les lignes des panneaux de présentation (planches MondePresentationCombat / Combattant) : marques, lignes à deux niveaux, tableau « Leur histoire », en-têtes. L'écart `--mf-ecart` sépare deux textes voisins (règle L5). */
 .mf-pr-ph{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--mf-ecart)}
 .mf-pr-panneau .mf-pr-ph h2{white-space:nowrap;flex:none}
@@ -1238,7 +1239,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fb-rang{width:84px;height:84px;background:var(--mf-blanc);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:46px;line-height:1}
 .mf-fb-rang.or{background:var(--mf-jaune)}
 /* ==== [ANCRE: MONDE_LOT9_T5_FICHE_MONDIAL_CSS] — Monde lot 9 T5 ==== */
-.mf-fb-monde{margin-top:-6px;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;letter-spacing:.02em;color:var(--mf-blanc);text-transform:uppercase;white-space:nowrap}
+.mf-fb-monde{max-width:230px;text-align:center;margin-top:-6px;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;letter-spacing:.02em;color:var(--mf-blanc);text-transform:uppercase;white-space:normal}
 .mf-fb-cat{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1.1;text-align:center}
 .mf-fi-onglets{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center}
 .mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
@@ -1646,3 +1647,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-arr button.aller{font-family:var(--mf-titre);font-size:24px;font-weight:800;color:var(--mf-jaune)}
 .mf-arr .ar-action.focus,.mf-arr .ar-action:focus-visible{outline:2px solid var(--mf-jaune);outline-offset:2px}
 .mf-arr .jaune-bloc{cursor:pointer}
+
+/* Monde lot 20 : le mouvement de classement de chaque combattant sur les résultats du lendemain (deux textes voisins séparés par l'écart L5). */
+.mgmt-ld-rangs{display:flex;flex-wrap:wrap;column-gap:var(--mf-ecart);row-gap:2px;font-size:22px;line-height:1.1;color:rgba(233,230,225,.74)}
+.mf-pr-l1{display:flex;align-items:center;height:1em;column-gap:var(--mf-ecart)}
+.mf-pr-nom.b .mf-pr-l1{justify-content:flex-end}
+.mf-pr-rg{font:600 22px/22px var(--mf-texte);font-style:normal;padding:0 8px;border:2px solid rgba(233,230,225,.6);background:#0D0B0B;white-space:nowrap}
+.mf-so-rang{font-style:normal;margin-left:var(--mf-ecart);padding:2px 8px;border:2px solid rgba(233,230,225,.6);white-space:nowrap}

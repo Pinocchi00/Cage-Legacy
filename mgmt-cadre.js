@@ -511,3 +511,20 @@ keysRegister('title',{
   R(){ if(titleMgmtState()) CL.mgmtEnter(mgmtSlotDernier()||1); },
 });
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT20_INFOBULLE_COUPEE] — Monde lot 20 (retour d'Anthony du 18/10/2026) : un texte coupé par « … » (une ligne ou plusieurs)
+   se lit en entier au survol de la souris, par l'infobulle native. Lecture seule : l'attribut `title` posé est le texte même de l'élément. ==== */
+function mfInfobulleCoupee(ev){
+  let el=ev.target&&ev.target.closest?ev.target:null;
+  for(let i=0;el&&i<4&&el!==document.body;i++,el=el.parentElement){
+    if(el.hasAttribute('title')) return;
+    const cs=window.getComputedStyle(el);
+    const uneLigne=cs.textOverflow==='ellipsis'&&el.scrollWidth>el.clientWidth+1;
+    const plusieurs=!!cs.webkitLineClamp&&cs.webkitLineClamp!=='none'&&el.scrollHeight>el.clientHeight+1;
+    if(!uneLigne&&!plusieurs) continue;
+    const texte=(el.textContent||'').replace(/\s+/g,' ').trim();
+    if(texte) el.setAttribute('title',texte);
+    return;
+  }
+}
+if(typeof document!=='undefined') document.addEventListener('mouseover',mfInfobulleCoupee,true);

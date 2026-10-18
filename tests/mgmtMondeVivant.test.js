@@ -232,3 +232,16 @@ test('Monde lot 9 T2e — une victoire vivante et une victoire Split sont évalu
   /* Monde lot 16 : le plancher de carrière ajoute un terme flottant ; même loi à 1e-9 près (avant : égalité exacte). */
   assert.ok(Math.abs(r.vivant.variation-r.split.variation)<1e-9,'la victoire ajoute le même score sous-partie pour les deux organisations');
 });
+
+/* Monde lot 20 (décision d'Anthony du 18/10/2026 : « recharger ne perd rien ») — après une soirée du monde vivant, les sous-parties portent des comptes allégés
+   ({salle,salleId,taux}) : la sauvegarde écrite doit se recharger telle quelle, sans retomber sur le secours. */
+test('Monde lot 20 — la partie sauvegardée après une semaine du monde vivant se recharge (comptes allégés valides)',()=>{
+  const win=creer(true);
+  const r=JSON.parse(win.eval(`(function(){const m=G.mgmt;m.cal.jour+=MGMT_EVENT_WEEKS*7;m.cycle++;mgmtMondeVivantSemaine(m);saveMgmt();
+    const lu=mgmtParseAndValidate(stockageLire(mgmtSlotKey(MGMT_SLOT)));
+    const allege=Object.keys(m.orgs).some(k=>(m.orgs[k].comptes||[]).some(c=>c.n===undefined));
+    return JSON.stringify({primaire:!!lu,allege,egal:!!lu&&mgmtSerialiser(lu)===mgmtSerialiser(m)});})()`));
+  assert.ok(r.allege,'la semaine a bien laissé des comptes allégés');
+  assert.equal(r.primaire,true,'la sauvegarde principale est valide');
+  assert.equal(r.egal,true,'elle se recharge à l’identique');
+});
