@@ -606,6 +606,11 @@ function mgmtCartRows(m){
 const MGMT_RANG_OUBLI=0.5;
 /* Et le temps seul use le passé : le bilan d'avant la partie garde MGMT_RANG_TEMPS de son poids à chaque soirée jouée, qu'on combatte ou non — pour tout le monde, extérieur compris, afin qu'une recrue ne change pas de rang en signant. */
 const MGMT_RANG_TEMPS=0.94;
+/* Monde lot 16 — décision d'Anthony du 17/10/2026 (classements et palmarès comme dans la vraie vie) : un plancher de carrière (0,12 par victoire nette, pesé par le volume :
+   12 combats pour compter en entier) que ni l'oubli ni le temps n'effacent — avant, 0,94^62 ≈ 0,02 au premier jour : le classement n'était que la forme sur trois combats ;
+   la forme récente garde sa loi d'origine (l'oubli fait toujours bouger le top 5 : tests/mgmtTop5). Un combattant de moins de 6 combats n'entre pas dans le top 10 sauf s'il est invaincu
+   avec au moins 4 victoires. */
+const MGMT_RANG_CARRIERE=0.12, MGMT_RANG_VOLUME=12, MGMT_RANG_TOP=10, MGMT_RANG_NOVICE=6;
 /* Part minimale d'une victoire qui s'ajoute au score : un vainqueur ne recule pas (brief démo, lot 4, D1). */
 const MGMT_RANG_VICTOIRE=0.5;
 
@@ -626,7 +631,8 @@ function mgmtRangScores(m,cands,cycle){
     /* Brief démo, lot 4 (D1) : la formule d'origine divisait par deux le bilan de celui qui venait de combattre, vainqueur compris, alors que ceux qui n'avaient pas combattu le gardaient entier — tout vainqueur reculait derrière eux. Résultat par résultat : une défaite garde l'oubli (le score est divisé par MGMT_RANG_OUBLI), une victoire ne fait jamais reculer (elle ajoute au moins la moitié de sa valeur). */
     let s=(W0-L0)*Math.pow(MGMT_RANG_TEMPS,Math.max(0,ref0-1));
     for(let i=0;i<n;i++) s=res[i]>0?Math.max(s*MGMT_RANG_OUBLI+res[i],s+res[i]*MGMT_RANG_VICTOIRE):s*MGMT_RANG_OUBLI+res[i];
-    sc.set(o.id,s);
+    /* Monde lot 16 : le plancher de carrière (jamais effacé par l'oubli ni par le temps) garde les vétérans établis devant un 1-0 ; petit, pour que la forme continue de faire bouger le top 5. */
+    sc.set(o.id,s+(w-l)*MGMT_RANG_CARRIERE*Math.min(1,Math.max(0,w+l)/MGMT_RANG_VOLUME));
   }
   return sc;
 }
@@ -755,7 +761,12 @@ function mgmtDivisionRankingCalcule(m,divId,scope,cycle){
     }
   }else scores=mgmtRangScores(m,cands,passe?c:undefined);
   cands.sort((x,y)=>mgmtRankingCompare(x,y,scores));
-  return cands;
+  /* Monde lot 16 : pas de novice dans le top 10 (partition stable : l'ordre relatif de chacun est conservé). */
+  const novice=o=>{ const W=Number.isSafeInteger(o.W)?o.W:0, L=Number.isSafeInteger(o.L)?o.L:0, D=Number.isSafeInteger(o.D)?o.D:0;
+    return W+L+D<MGMT_RANG_NOVICE&&!(L===0&&W>=4); };
+  const tete=[]; for(const o of cands){ if(tete.length>=MGMT_RANG_TOP) break; if(!novice(o)) tete.push(o); }
+  const dansTete=new Set(tete);
+  return tete.concat(cands.filter(o=>!dansTete.has(o)));
 }
 
 /** Rang d'une ligne dans sa catégorie (1..n). Pur : ne trie que des copies,

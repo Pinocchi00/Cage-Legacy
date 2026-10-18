@@ -229,5 +229,6 @@ test('Monde lot 9 T2e — une victoire vivante et une victoire Split sont évalu
   assert.ok(r.vivant.gagnant&&r.split.gagnant,'le combattant testé est bien le vainqueur dans chaque partie');
   assert.ok(r.vivant.apres<=r.vivant.avant,'la victoire vivante ne fait pas reculer');
   assert.ok(r.split.apres<=r.split.avant,'la victoire Split ne fait pas reculer');
-  assert.equal(r.vivant.variation,r.split.variation,'la victoire ajoute le même score sous-partie pour les deux organisations');
+  /* Monde lot 16 : le plancher de carrière ajoute un terme flottant ; même loi à 1e-9 près (avant : égalité exacte). */
+  assert.ok(Math.abs(r.vivant.variation-r.split.variation)<1e-9,'la victoire ajoute le même score sous-partie pour les deux organisations');
 });
