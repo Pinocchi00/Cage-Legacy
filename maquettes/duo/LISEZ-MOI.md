@@ -53,11 +53,13 @@ planches de la refonte (valeurs de `ui-cadre.css`) ; `src/duo.css` ajoute ce qui
 
 ## Écarts et questions relevés en faisant les planches
 
-1. **Les enchères sont presque gratuites et souvent impossibles.** Le brief (DUO-T2) fixe le prix d'ouverture à la prime de signature
-   (`mgmtContratPrime(3, bourse)`) : dans la partie relevée, de 5 000 € à 9 000 €, contre des caisses de plusieurs dizaines de milliers
-   d'euros — l'argent ne pèse pas. Et quand une caisse est à découvert (Split à −194 000 € après deux soirées dans la partie à 6 soirées
-   de passé), `mgmtCanAfford` refuse toute mise : ce joueur ne peut plus rien acheter. **À trancher par Anthony** : prix d'ouverture =
-   la valeur du contrat (3 × la bourse) plutôt que la prime ? Les mises autorisées jusqu'au découvert permis ?
+1. **Les enchères sont presque gratuites, et le joueur 1 ne peut jamais miser.** Le brief (DUO-T2) fixe le prix d'ouverture à la prime de
+   signature (`mgmtContratPrime(3, bourse)`) : dans la partie relevée, **5 000 € à 8 000 €**, même pour le n° 1 mondial d'une catégorie.
+   Surtout, **la caisse de Split est à découvert à chacune des quatre super cartes** (−106 000 €, −223 000 €, −300 000 €, −228 000 €),
+   avec un découvert permis nul ou presque : `mgmtCanAfford` refuse toute mise, Anthony ne peut rien acheter de la saison (c'est l'état
+   `caisse` de la planche). Garden of Blood passe de +45 000 € à −50 000 €. Ce n'est pas propre au Duo : **le matchmaker automatique fait
+   plonger la caisse de Split** (dans le solo, c'est lui qui joue les six ans du passé). **À trancher par Anthony** : prix d'ouverture = la
+   valeur du contrat (3 × la bourse) plutôt que la prime ? Mises permises dans le découvert ? Et faut-il regarder l'économie du matchmaker
+   automatique avant tout ?
 2. **L'écran « Nouvelle partie » du jeu coupe déjà certaines réputations** (hauteur de 48 px pour deux lignes) : la planche garde 50 px et
    resserre les marges ; à revoir dans `ui-cadre.css` en même temps que DUO-T3.
-3. **La forme (V/D/N)** ne compte que les combats que la fiche du combattant relit (`mgmtResultatsDetail`) : souvent vide après le passé.

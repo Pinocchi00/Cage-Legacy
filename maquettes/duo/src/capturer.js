@@ -4,7 +4,7 @@
 const path=require('path'), fs=require('fs'), http=require('http');
 const pw=require(process.env.PW||'/home/claude/.npm-global/lib/node_modules/@playwright/mcp/node_modules/playwright');
 const ICI=path.join(__dirname,'..'), CAP=path.join(ICI,'captures');
-const PLANCHES={DuoCreation:'noms j1 j2',DuoQG:'attente progression arrivee',DuoEffectif:'j1 j2',DuoEncheres:'ouverture mise caisse adjuge',DuoDraft:'place reponse pret',DuoSoiree:'avant resultat principal',DuoBilan:'carte saison'};
+const PLANCHES={DuoCreation:'noms j1 j2',DuoQG:'attente progression arrivee',DuoEffectif:'j1 j2',DuoEncheres:'ouverture caisse mise adjuge',DuoDraft:'place reponse pret',DuoSoiree:'avant resultat principal',DuoBilan:'carte saison'};
 const args=process.argv.slice(2), seul1440=args.includes('--1440'), choix=args.filter(a=>!a.startsWith('--'));
 const TYPES={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.jpg':'image/jpeg','.woff2':'font/woff2','.ttf':'font/ttf'};
 const srv=http.createServer((q,r)=>{ const f=path.join(ICI,decodeURIComponent(q.url.split('?')[0])); if(!f.startsWith(ICI)||!fs.existsSync(f)){r.statusCode=404;return r.end();}

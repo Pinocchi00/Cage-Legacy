@@ -178,17 +178,20 @@ ${lire('commun.js')}
     return pan(`en-caisse ${s.cls}`,`<div class="bande"></div><div class="lab">${esc(MAJ(s.org.nom))}</div><div class="T en-nom">${esc(MAJ(s.nom))}</div>
       <div class="sep"></div><div class="lab">En caisse</div><div class="T en-v">${esc(c.caisses[k])}</div>
       <div class="sep"></div><div class="lab">Peut miser</div><div class="l1">${dispo>0?'jusqu’à '+euros(dispo):'rien : la caisse est à découvert'}</div>`); };
+  const peut=k=>(k==='a'?c.caisses.aK+c.caisses.capA:c.caisses.bK+c.caisses.capB)>=L.ouverture;
+  const meneur=`<div class="l2">${tag(second)} mène · palier ${esc(L.pasTxt)}</div>`;
   const etatBloc={
-    ouverture:{tour:premier,prix:`<div class="lab">Ouverture</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">Personne n’a encore misé · palier ${esc(L.pasTxt)}</div>`,mise:L.ouvertureTxt},
-    mise:{tour:second,prix:`<div class="lab">Prix actuel</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">${tag(premier)} mène · palier ${esc(L.pasTxt)}</div>`,mise:L.deux},
-    caisse:{tour:second,prix:`<div class="lab">Prix actuel</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">${tag(premier)} mène · palier ${esc(L.pasTxt)}</div>`,mise:L.deux,refus:`Pas assez en caisse pour miser ${L.deux}.`},
-    adjuge:{tour:null,prix:`<div class="lab">Adjugé</div><div class="T en-prix">${esc(L.deux)}</div><div class="l2">${esc(cote(second).nom)} a passé</div>`},
+    ouverture:{tour:premier,prix:`<div class="lab">Ouverture</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">Personne n’a encore misé · palier ${esc(L.pasTxt)}</div>`,mise:L.ouvertureTxt,
+      refus:peut(premier)?'':`Pas assez en caisse pour miser ${L.ouvertureTxt}.`,cache:true},
+    caisse:{tour:premier,prix:`<div class="lab">Ouverture</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">Personne n’a encore misé · palier ${esc(L.pasTxt)}</div>`,mise:L.ouvertureTxt,refus:`Pas assez en caisse pour miser ${L.ouvertureTxt}.`},
+    mise:{tour:premier,prix:`<div class="lab">Prix actuel</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div>${meneur}`,mise:L.deux},
+    adjuge:{tour:null,prix:`<div class="lab">Adjugé</div><div class="T en-prix">${esc(L.ouvertureTxt)}</div><div class="l2">${esc(cote(premier).nom)} a passé</div>`},
   };
   const vue=e=>{ const x=etatBloc[e];
     const bandeau=x.tour?`<div class="tour ${cote(x.tour).cls}"><span class="T">À ${esc(MAJ(cote(x.tour).nom))} DE MISER</span></div>`
-      :`<div class="tour ${cote(premier).cls}"><span class="T">${esc(MAJ(cote(premier).nom))} SIGNE ${esc(MAJ(L.name))}</span></div>`;
-    const boutons=x.tour?`<div class="en-boutons"><div class="bouton jaune"><span class="T">MISER ${esc(x.mise)}</span><span class="k">Entrée</span></div><div class="bouton"><span class="T">PASSER</span><span class="k">P</span></div></div>${x.refus?`<div class="en-refus l1">${esc(x.refus)}</div>`:''}`
-      :`<div class="en-boutons"><div class="bouton jaune"><span class="T">COMBATTANT SUIVANT</span><span class="k">Entrée</span></div></div><div class="l1 t2 en-sous">Contrat de 3 combats chez ${esc(cote(premier).org.nom)}.</div>`;
+      :`<div class="tour ${cote(second).cls}"><span class="T">${esc(MAJ(cote(second).nom))} SIGNE ${esc(MAJ(L.name))}</span></div>`;
+    const boutons=x.tour?`<div class="en-boutons"><div class="bouton jaune"><span class="T">MISER ${esc(x.mise)}</span><span class="k">Entrée</span></div><div class="bouton"><span class="T">PASSER</span><span class="k">P</span></div></div>${x.refus&&!x.cache?`<div class="en-refus l1">${esc(x.refus)}</div>`:''}`
+      :`<div class="en-boutons"><div class="bouton jaune"><span class="T">COMBATTANT SUIVANT</span><span class="k">Entrée</span></div></div><div class="l1 t2 en-sous">Contrat de 3 combats chez ${esc(cote(second).org.nom)}.</div>`;
     return `<div class="en" data-etat="${e}">${caisse('a')}
       ${pan('en-centre',`<div class="en-lots">${c.lots.map((l,i)=>`<span class="en-pt${i===0?' on':''}">${i+1}</span>`).join('')}<span class="lab">Combattant 1 sur ${c.lots.length}</span></div>
         <div class="lab">${esc(MAJ(L.div))} · LIBRE · VIENT DE ${esc(MAJ(L.org))}</div>
@@ -198,9 +201,9 @@ ${lire('commun.js')}
         ${bandeau}${boutons}`)}
       ${caisse('b')}</div>`; };
   const corps=`${entete(`Enchères · ${versus}`,droiteSaison(1,2))}
-  <main class="contenu large">${['ouverture','mise','caisse','adjuge'].map(vue).join('')}</main>
+  <main class="contenu large">${['ouverture','caisse','mise','adjuge'].map(vue).join('')}</main>
   ${touches([[['Entrée'],'Miser',true],[['P'],'Passer'],[['Échap'],'Retour au QG']])}`;
-  page('DuoEncheres','Duo — les enchères','ouverture mise caisse adjuge',corps);
+  page('DuoEncheres','Duo — les enchères','ouverture caisse mise adjuge',corps);
 }
 
 /* ======================================================================================
@@ -295,7 +298,7 @@ ${lire('commun.js')}
       :pan('bi-saison',`${titre('LA SAISON 1',`APRÈS ${n} SUPER CARTE${n>1?'S':''}`)}
       <div class="bi-gros"><span class="T j1c">${scoreSaison(n).a}</span><span class="T t2">–</span><span class="T j2c">${scoreSaison(n).b}</span></div>
       <div class="l1 t2">Prochaine super carte : ${esc(c.superProchaine.toLowerCase())}</div>
-      ${pan('bi-rec',`<div class="sous">Recrues des enchères</div><div class="l1 t2">Aucune : personne n’a misé.</div>`)}`);
+      ${pan('bi-rec',`<div class="sous">Recrues des enchères</div><div class="l1">${(()=>{ const L=c.lots[0], pr=C1.score.a>C1.score.b?'b':(C1.score.b>C1.score.a?'a':'b'), w=pr==='a'?'b':'a'; return `${tag(w)} signe <span class="nom">${esc(L.name)}</span> · ${esc(L.ouvertureTxt)}`; })()}</div>`)}`);
     return `<div class="bi" data-etat="${etat}">
       <div class="bi-bandeau ${g?cote(g).cls:'nul'}"><span class="T">${g?esc(MAJ(cote(g).nom))+' REMPORTE LA SUPER CARTE '+n:'ÉGALITÉ À LA SUPER CARTE '+n}</span><span class="T bi-sc">${c.score.a} – ${c.score.b}</span></div>
       <div class="bi-cols">${pan('bi-liste',`${titre('LES SIX COMBATS',esc(c.superDate))}<div class="bi-l bi-h"><div class="lab bi-num"></div><div class="bi-n lab">${esc(MAJ(NA))} · ${esc(MAJ(A.nom))}</div><div class="bi-n lab">${esc(MAJ(NB))} · ${esc(MAJ(B.nom))}</div><div class="bi-m lab">Comment</div><div></div></div>${c.draft.map(ligne).join('')}`)}${saison}</div>
