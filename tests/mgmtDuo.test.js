@@ -249,3 +249,27 @@ test('Duo T2 — les enchères : lots, mises, passes, caisse, transferts, rechar
     return {sain:essai(()=>{}),passes:essai(e=>{e.lots[0].passes=3;}),tour:essai(e=>{e.lots[0].tour='z';}),quatre:essai(e=>{e.lots=[lot,lot,lot,lot];}),prix:essai(e=>{e.lots[0].prix=-1;})};`);
   assert.deepEqual(g, { sain: true, passes: false, tour: false, quatre: false, prix: false });
 });
+
+/* Duo T4 (point 10) — la partie complète par les actions d'écran : avancer, enchères (une mise de chaque côté), draft, soirée en « Résultat », bilan, puis une deuxième super carte où le perdant commence. */
+test('Duo T4 — partie complète : deux super cartes par les écrans, le perdant de la première commence la deuxième',()=>{
+  const win = creer();
+  const tour = json(win, `const m=G.mgmt;CL.go('mgmt_duo');mgmtDuoAvancer(m);m.treasury=400;m.orgs[m.duo.b].treasury=400;
+    CL.go('mgmt_duo_encheres');const e=m.duo.encheres,L=e.lots[0];
+    mgmtDuoMiser(m);mgmtDuoMiser(m);mgmtDuoPasser(m);   // J2 mise, J1 relance, J2 passe : J1 signe le premier lot
+    while(m.duo.etape==='encheres') mgmtDuoPasser(m);
+    return {signe:L.gagnant,etape:m.duo.etape,premier:m.duo.draft.premier};`);
+  assert.equal(tour.signe, 'a'); assert.equal(tour.etape, 'draft'); assert.equal(tour.premier, 'b');
+  assert.equal(json(win, DRAFT), 'pret');
+  const c1 = json(win, `const m=G.mgmt;CL.mgmtDuoDraftJouer();const out={screen:G.screen,etape:m.duo.etape,cartes:m.duo.cartes.length};
+    for(let i=0;i<6;i++){CL.mgmtDuoSoireeResultat();CL.mgmtDuoSoireeSuivant();}
+    out.apres={screen:G.screen,etape:m.duo.etape};CL.mgmtDuoBilanRetour();out.fin={screen:G.screen,etape:m.duo.etape,gagnant:m.duo.cartes[0].gagnant};return out;`);
+  assert.equal(c1.screen, 'mgmt_duo_soiree'); assert.equal(c1.etape, 'soiree'); assert.equal(c1.cartes, 1);
+  assert.deepEqual(c1.apres, { screen: 'mgmt_duo_bilan', etape: 'bilan' });
+  assert.equal(c1.fin.screen, 'mgmt_duo'); assert.equal(c1.fin.etape, 'attente');
+  /* deuxième carte : le perdant de la première place en premier (l'égalité redonne la main à J2) */
+  const c2 = json(win, `const m=G.mgmt;m.treasury=400;m.orgs[m.duo.b].treasury=400;mgmtDuoAvancer(m);
+    const perdant=m.duo.cartes[0].gagnant==='a'?'b':m.duo.cartes[0].gagnant==='b'?'a':'b';
+    while(m.duo.etape==='encheres') mgmtDuoPasser(m);
+    return {etape:m.duo.etape,premier:m.duo.draft.premier,attendu:perdant,g:G.mgmt===m,valide:validateMgmt(JSON.parse(JSON.stringify(m)))};`);
+  assert.equal(c2.etape, 'draft'); assert.equal(c2.premier, c2.attendu); assert.ok(c2.g); assert.ok(c2.valide);
+});
