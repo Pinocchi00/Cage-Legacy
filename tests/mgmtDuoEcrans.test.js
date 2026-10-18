@@ -95,3 +95,27 @@ test('Duo T9 — le QG ne contient aucun texte de travail',()=>{
   const w=newGameWindow();
   assert.doesNotMatch(w.eval("String(SCREENS.mgmt_duo)").toUpperCase(),/EMPLACEMENT AUTEUR|TODO/);
 });
+
+test('Duo T10 — effectif : Tab bascule de J2 à J1 puis revient à J2',()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'}); CL.mgmtDuoOuvrirEffectif('b');`);
+  assert.match(w.document.body.textContent,/François/);
+  w.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}))");
+  assert.equal(w.eval('MGMT_DUO_EFFECTIF_COTE'),'a');
+  assert.match(w.document.body.textContent,/Anthony/);
+  w.eval("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}))");
+  assert.equal(w.eval('MGMT_DUO_EFFECTIF_COTE'),'b');
+  assert.match(w.document.body.textContent,/François/);
+});
+
+test('Duo T10 — une super carte jouée apparaît en tête de l’historique avec ses combats',()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'});`);
+  w.eval(`mgmtDuoAvancer(G.mgmt); while(G.mgmt.duo.etape==='encheres')mgmtDuoPasser(G.mgmt); const m=G.mgmt; for(let i=0;i<6;i++){const t=m.duo.draft.tour,p=mgmtDuoPlacables(m,t)[0]; if(!p||!mgmtDuoPlacer(m,p.id))throw Error('placement '+i); const r=mgmtDuoDisponibles(m,m.duo.draft.tour).find(f=>f.div===p.div); if(!r||!mgmtDuoRepondre(m,r.id))throw Error('réponse '+i);} mgmtDuoJouer(m); CL.go('mgmt_duo'); render();`);
+  assert.equal(w.eval('G.mgmt.duo.cartes.length'),1);
+  w.eval("CL.go('mgmt_duo_histo'); render();");
+  assert.equal(w.eval('G.screen'),'mgmt_duo_histo');
+  assert.match(w.document.body.textContent,/Super carte 1/);
+  assert.match(w.document.body.textContent,/Revoir/);
+  assert.equal(w.document.querySelectorAll('.mf-duo-histo-carte button').length,6);
+});
