@@ -94,7 +94,8 @@ test('Marque — la marque est dessinée dans chaque liste où le nom figure', (
     {nom:'Ceintures (le mur)',ec:'mgmt_ceintures',prep:`CL.go('mgmt_ceintures');`,sel:'.mf-su-ce-nom .mf-oct-nom',total:8},
     {nom:'Ceintures (la ceinture ouverte)',ec:'mgmt_ceintures',prep:`MGMT_SU_CE.i=allDivisions().filter(d=>d.gender==='H').findIndex(d=>d.id==='H-light'); MGMT_SU_CE.ouverte=true; CL.go('mgmt_ceintures');`,sel:null,parts:{'.mf-su-det-nom .mf-oct-nom':1,'.mf-su-r-nom .mf-oct-nom':1}},
     {nom:'Camps',ec:'mgmt_camps',prep:`CL.go('mgmt_camps');`,sel:'.mf-su-ca-mn .mf-oct-nom',total:6},
-    {nom:'Carte',ec:'mgmt_carte',prep:`CL.go('mgmt_carte');`,sel:'.mf-car-adv .mf-oct-nom',total:6}
+    /* Monde lot 17 — décision d'Anthony du 17/10/2026 : la liste a un pager (molette, Précédents / Suivants) ; elle montre cinq lignes au lieu de six pour que « Catégorie » reste dans le panneau. */
+    {nom:'Carte',ec:'mgmt_carte',prep:`CL.go('mgmt_carte');`,sel:'.mf-car-adv .mf-oct-nom',total:5}
   ];
   for(const e of ecrans){
     win.eval(e.prep);

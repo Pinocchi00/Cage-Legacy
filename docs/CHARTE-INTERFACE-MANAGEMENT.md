@@ -67,6 +67,10 @@ Rassemble et rend vérifiables les règles déjà posées par le CDC (§6, §7),
 - **L3.** Libellés décoratifs (titres de colonne) : au moins 11px, contraste d'au moins 3:1.
 - **L4.** Noms longs (prénom + nom composés) : jamais tronqués au point de devenir
   ambigus, jamais de chevauchement.
+- **L5. Écart de lecture** (décision d'Anthony du 17/10/2026 : « un écart de deux mots, appliqué partout »). Deux textes voisins d'une même ligne
+  (un libellé et sa valeur, un nom de famille et une catégorie, un compteur et son intitulé) sont séparés d'au moins **deux mots** :
+  `column-gap: var(--mf-ecart)` (jeton de `ui-cadre.css`, 26 px à 22 px de corps), avec retour à la ligne plutôt qu'un chevauchement. Aucun `gap` de
+  moins de ce jeton entre deux textes d'une même ligne ; tout écran nouveau l'utilise.
 
 ---
 

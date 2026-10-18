@@ -97,7 +97,8 @@ test('Monde lot 5 T4 — souris clavier et modification ne contournent pas la co
   const w=partie();
   try {
     const avant=photo(w),seed=w.eval('SEED');
-    const actions=['.mf-car-retire','.mf-car-num','.mf-car-slot-n','.mf-car-annule'];
+    /* Décision d'Anthony du 17/10/2026 (lot 17) : la croix à droite des combats est retirée ; restent le numéro, le nom du combat et le bouton Annuler. */
+    const actions=['.mf-car-num','.mf-car-slot-n','.mf-car-annule'];
     for(const selector of actions){
       clic(w,ligne(w),selector);
       assert.equal(photo(w),avant); assert.ok(ligne(w).querySelector('.mf-car-avertissement'));

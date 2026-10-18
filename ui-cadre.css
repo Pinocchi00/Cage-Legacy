@@ -8,6 +8,8 @@
 /* La famille des titres, noms et chiffres : Saira Extra Condensed 800 (SIL OFL, Google Fonts), posée le 06/10/2026. */
 @font-face{font-family:'Saira Extra Condensed';src:url('fonts/extracondensed-800.ttf?v=b6') format('truetype');font-weight:800;font-display:swap}
 :root{
+  /* Monde lot 17 — règle de lisibilité (décision d'Anthony du 17/10/2026) : deux textes voisins d'une même ligne sont séparés d'au moins deux mots (≈ 26 px à 22 px de corps). À utiliser partout : column-gap:var(--mf-ecart). */
+  --mf-ecart:26px;
   --mf-noir:#0D0B0B; --mf-panneau:#121010; --mf-ligne:#252121; --mf-blanc:#E9E6E1;
   --mf-rouge:#B32A1E; --mf-rouge-vif:#E23A2B; --mf-jaune:#F0B220;
   --mf-texte2:rgba(233,230,225,.74); --mf-sep:rgba(233,230,225,.16); --mf-bord:rgba(233,230,225,.38);
@@ -492,13 +494,18 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE_LOT5_T4_EN_LIGNE] — Monde lot 5 T4 ==== */
 .mf-car-slot.herite{height:auto;min-height:104px;padding-top:8px;padding-bottom:8px}
 .mf-car-annule{align-self:flex-start;font:inherit;font-size:22px;color:inherit;background:none;border:0;text-align:left;cursor:pointer}
+.mf-car-retirer{align-self:flex-start;font:inherit;font-size:22px;color:inherit;background:none;border:0;text-align:left;cursor:pointer;text-decoration:underline}
+.mf-car-pager{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:22px;color:var(--mf-texte2)}
+.mf-car-pager button{font:inherit;font-size:22px;color:var(--mf-texte);background:none;border:2px solid currentColor;padding:2px 10px;cursor:pointer}
+.mf-car-pager button:disabled{opacity:.35;cursor:default}
+.mf-car-dossiers{margin-top:10px}
 .mf-car-slot.mf-car-annulation{height:auto;min-height:104px;padding:12px 16px}
 .mf-car-avertissement{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
 .mf-car-annulation-actions{display:flex;flex-wrap:wrap;gap:8px}
 .mf-car-annulation-actions button{font:inherit;font-size:22px;white-space:normal;color:var(--mf-noir);background:var(--mf-blanc);border:0;padding:6px 10px;cursor:pointer}
 /* ==== [ANCRE: MONDE_LOT5_T3_ESPACEMENT] — Monde lot 5 T3 ==== */
 .mf-car-slot.herite .mf-car-slot-c{gap:4px}
-.mf-car-slot-t{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.mf-car-slot-t{display:flex;align-items:center;flex-wrap:wrap;column-gap:var(--mf-ecart);row-gap:6px}
 .mf-car-slot-t span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em}
 .mf-car-slot-t em{font-style:normal;font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid currentColor}
 .mf-car-slot-t em.titre{background:var(--mf-jaune);border-color:var(--mf-jaune);color:var(--mf-noir)}
@@ -601,9 +608,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ct-pips i.fait{background:currentColor}
 .mf-eff-sit.jaune{color:var(--mf-jaune)}
 .mf-ct-ligne.choisie .mf-eff-sit.jaune{color:var(--mf-noir)}
-.mf-ct-fiche .mf-p3{padding:13px;gap:8px}
+.mf-ct-fiche .mf-p3{padding:13px;gap:4px}   /* Monde lot 17 : le panneau débordait de 53 px sur la barre des touches (gap 8 → 4, citation sur une ligne, grand chiffre plus petit) */
 .mf-ct-offre{display:flex;flex-direction:column;gap:2px}
-.mf-ct-n{display:flex;gap:6px;margin:6px 0}
+.mf-ct-n{display:flex;gap:6px;margin:2px 0}
 .mf-ct-n button{width:44px;height:48px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important;line-height:48px}
 .mf-ct-n button.on{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-ct-msg{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-jaune)}
@@ -634,7 +641,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-champ-box span,.mf-su-rang-box span{font-family:var(--mf-texte);font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);text-transform:none;letter-spacing:normal}
 .mf-su-rang-evo{position:absolute;left:18px;top:18px}
 .mf-su-rang-n{position:absolute;left:18px;top:0;bottom:0;display:flex;align-items:center;font-size:200px;line-height:.69}
-.mf-su-rang-nom{position:absolute;left:118px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:12px;white-space:nowrap}
+.mf-su-rang-nom{position:absolute;left:118px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding-top:60px;gap:12px;white-space:nowrap}   /* Monde lot 17 (règle L5) : le nom passe sous la boîte du palmarès et de la série — « CHUKWUEMEKA » recouvrait « 2 victoires de suite » */
 .mf-su-rang-box{position:absolute;right:18px;top:18px;display:flex;flex-direction:column;gap:12px;align-items:flex-end;text-align:right}
 .mf-su-rang-box b{font-size:44px;line-height:.8}
 .mf-su-rang.sel .mf-p3{background:var(--mf-blanc);color:var(--mf-noir)}
@@ -808,7 +815,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 .mf-ct-dit{display:flex;flex-direction:column;gap:4px;margin-top:8px}
 .mf-ct-dit b{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);text-transform:uppercase}
-.mf-ct-dit span{font-size:22px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mf-ct-dit span{font-size:22px;line-height:1.15;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT11_CSS] — Brief du 06/10/2026, lot 11 : la soirée (planches « Soirée 1 » à « Soirée 5 ») et la barre du
    combat animé (planche « Le combat animé »). Valeurs portées des planches : colonnes de 320 / 880 / 320, bannière de 250, bande de
@@ -1350,7 +1357,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* Planche « Contrats » : le contrat en cours en grand. */
 .mf-ct-cours{margin-bottom:6px}
 .mf-ct-cours-l{display:flex;align-items:center;gap:14px}
-.mf-ct-cours-l b{font-family:var(--mf-titre);font-weight:800;font-size:72px;line-height:.9}
+.mf-ct-cours-l b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.9}
 .mf-ct-cours-l span{font-family:var(--mf-titre);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase;letter-spacing:var(--mf-titre-ls)}
 .mf-ct-cours-l em{margin-left:auto;font-style:normal;font-size:22px;color:var(--mf-texte2)}
 .mf-fi-co{grid-template-columns:44px 340px minmax(0,1fr) 52px}
@@ -1375,10 +1382,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 #stockage-alerte{position:fixed;left:50%;top:24px;transform:translateX(-50%);z-index:9999;display:flex;gap:24px;align-items:center;padding:14px 22px;background:var(--mf-rouge,#E23A2B);color:#fff;font-size:24px;line-height:1.1;border:3px solid #fff}
 #stockage-alerte button{font-size:24px;padding:6px 18px;background:#fff;color:#111;border:0;cursor:pointer}
 /* Brief démo, lot 8 : la prise en main — la parole de Leïla, sinon la prochaine étape, sur la ligne sous les touches (rien ne se superpose). */
-.mf-prise{position:absolute;left:300px;right:56px;top:1057px;height:22px;display:flex;align-items:center;justify-content:flex-start}
-.mf-prise-leila{display:flex;gap:12px;align-items:center;border-left:4px solid var(--mf-jaune);padding:0 10px;height:22px;font-size:22px;line-height:22px;white-space:nowrap}
+.mf-prise{position:absolute;left:300px;right:56px;top:90px;height:32px;display:flex;align-items:center;justify-content:flex-start}
+.mf-prise-leila{display:flex;column-gap:var(--mf-ecart);align-items:center;border-left:4px solid var(--mf-jaune);padding:0 10px;height:22px;font-size:22px;line-height:22px;white-space:nowrap}
 .mf-prise-leila b{color:var(--mf-jaune);font-family:var(--mf-titre);font-weight:800;letter-spacing:.04em}
-.mf-prise-suite{display:flex;gap:12px;align-items:center;font-size:22px;line-height:22px;background:none;border:0;padding:0;color:var(--mf-texte2);cursor:pointer;text-align:left;height:22px;white-space:nowrap}
+.mf-prise-suite{display:flex;column-gap:var(--mf-ecart);align-items:center;font-size:22px;line-height:22px;background:none;border:0;padding:0;color:var(--mf-texte2);cursor:pointer;text-align:left;height:32px;white-space:nowrap}
+.mf-prise-lib{font-family:var(--mf-titre);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mf-noir);background:var(--mf-jaune);padding:3px 12px}
 .mf-prise-suite b{color:var(--mf-blanc);font-weight:600}
 .mf-arrivee{width:900px}
 .mf-arrivee .mf-prise-leila{height:auto;padding:12px 16px;font-size:26px;line-height:1.1;width:auto;white-space:normal}
