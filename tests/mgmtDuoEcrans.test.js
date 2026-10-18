@@ -125,8 +125,17 @@ test('Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et état
   assert.match(w.document.body.innerHTML,/Combattant 1 sur 1/);
   assert.match(w.document.body.innerHTML,/class="T en-prix"/);
   assert.match(w.document.body.innerHTML,/class="pan en-caisse j1"/);
-  w.eval('G.mgmt.duo.encheres.lots[0].fini=true; G.mgmt.duo.encheres.lots[0].gagnant="a"; G.mgmt.duo.encheres.lots[0].prix=1000; render();');
+  assert.match(w.document.body.innerHTML,/class="pan en-caisse j2"/);
+  assert.match(w.document.body.textContent,/En caisse/);
+  assert.match(w.document.body.textContent,/Peut miser/);
+  assert.match(w.document.body.textContent,/Peut miserjusqu’à 5 000 000 €/);
+  w.eval('G.mgmt.duo.encheres.lots[0].fini=true; G.mgmt.duo.encheres.lots[0].gagnant=null; G.mgmt.duo.encheres.lots[0].prix=1000; render();');
   assert.match(w.document.body.textContent,/Adjugé/);
+  assert.match(w.document.body.textContent,/a passé/);
+  assert.match(w.document.body.textContent,/ANTHONY A PASSÉ/);
+  w.eval('G.mgmt.duo.encheres.lots[0].gagnant="a"; render();');
+  assert.match(w.document.body.textContent,/SIGNE/);
   w.eval('G.mgmt.duo.encheres.lots[0].fini=false; MGMT_DUO_UI.refus=true; render();');
   assert.match(w.document.body.textContent,/Pas assez en caisse/);
+  assert.match(w.document.body.innerHTML,/class="en-refus l1"/);
 });

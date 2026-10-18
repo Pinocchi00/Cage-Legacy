@@ -19,10 +19,11 @@ Le HTML contient `duo-s` et les classes du bandeau « À {nom} de miser » (`tou
 
 ## Compte rendu
 
-- `mgmt-duo-encheres.js` : écran des enchères porté au balisage de la planche DuoEncheres, enveloppe `duoCadre`, noms échappés, actions et touches conservées ; version bumpée.
-- `tests/mgmtDuoEcrans.test.js` : ajout du test « Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge ».
+- `mgmt-duo-encheres.js` : somme misable calculée depuis caisse et `mgmtOverdraftCap`; adjudication sans gagnant affiche « a passé » au bandeau ; version bumpée.
+- `ui-duo-encheres.css` supprimée et son lien retiré d’`index.html` ; aucun CSS ajouté.
+- `tests/mgmtDuoEcrans.test.js` : test « Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et états caisse/adjuge » renforcé (deux caisses, montant misable, état sans gagnant, refus de caisse).
 - Migration de sauvegarde : aucune.
-- Écarts à la fiche : aucun connu. `node --test tests/mgmtDuoEcrans.test.js` garde un échec préexistant hors de cette tranche dans le test QG T9 (attend « Avancer jusqu’à la super carte », alors que le QG affiche « Jusqu’à la super carte du… ») ; assertion préexistante laissée intacte. Test T52 ciblé vert.
-- Vérification versions : `node tools/verif-versions.js origin/main` passe sans écart.
-- Relecteur : indisponible (limite de profondeur des sous-agents) ; vérification effectuée localement.
+- Écarts à la fiche : aucun connu.
+- Vérification : test ciblé lancé ; le fichier révèle deux échecs préexistants (QG T9 et T4 qui ne fournit pas les données requises à `mgmtDuoScore`). Le T52 a détecté puis corrigé l’assertion de bandeau (le nom apparaît aussi dans le bloc de prix).
+- Relecteur : reprise des quatre écarts signalés, vérifiée localement.
 - Questions pour Anthony : aucune.
