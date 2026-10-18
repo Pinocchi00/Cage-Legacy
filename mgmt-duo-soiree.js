@@ -1,6 +1,7 @@
 "use strict";
 /* ==== [ANCRE: DUO_T4_ECRANS] — Monde lot 19 T13 ==== */
-let MGMT_DUO_UI={vu:false};
+var MGMT_DUO_UI=(typeof MGMT_DUO_UI==='undefined')?{}:MGMT_DUO_UI;
+MGMT_DUO_UI.vu=false;
 
 function mgmtDuoSoireeHtml(){
   const m=G&&G.mgmt;

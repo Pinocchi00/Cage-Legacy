@@ -100,6 +100,8 @@ test('Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suiva
 test('Duo T9 — le QG ne contient aucun texte de travail',()=>{
   const w=newGameWindow();
   assert.doesNotMatch(w.eval("String(SCREENS.mgmt_duo)").toUpperCase(),/EMPLACEMENT AUTEUR|TODO/);
+});
+
 test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du texte',()=>{
   const w=newGameWindow({runMain:true});
   w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:"<J1'",b:'J2'},etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]}};

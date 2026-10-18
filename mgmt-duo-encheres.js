@@ -25,7 +25,9 @@ function mgmtDuoEncheresHtml(){
   return `<main class="mf-duo-encheres"><header><h1>Enchères · combattant ${e.i+1} sur ${e.lots.length}</h1><p class="mf-duo-tour ${tour==='a'?'j1':'j2'}">À ${esc(joueur)} de miser</p></header><section class="mf-duo-combattant"><h2>${nom}</h2><p>${esc(mgmtDivisionLabel(L.div))} · ${esc(bilan)} · ${esc(String(combattant.age||''))} ans · ${esc(String(L.rang))}e mondial</p><p>Libre · vient de ${esc(origine?origine.nom:'')}</p><strong>${L.meneur===null?'Ouverture à':'Prix actuel'} ${esc(mgmtEuros(prix))}</strong><p>${L.meneur===null?`${esc(mgmtEuros(L.ouverture))}`:`${esc(L.meneur==='a'?nomA:nomB)} mène`}</p></section><div class="mf-duo-caisses"><p>${esc(nomA)} · ${caisseA}</p><p>${esc(nomB)} · ${caisseB}</p></div>${adjudication}${refus}<div class="mf-duo-actions">${L.fini?'<button class="mf-duo-action" onclick="CL.mgmtDuoEncheresSuivant()">Combattant suivant · Entrée</button>':`<button class="mf-duo-action" onclick="CL.mgmtDuoMiser()">Miser ${esc(mgmtEuros(prochain))} · Entrée / M</button><button class="mf-duo-action" onclick="CL.mgmtDuoPasser()">Passer · P</button>`}</div></main>`;
 }
 SCREENS.mgmt_duo_encheres=mgmtDuoEncheresHtml;
-let MGMT_DUO_UI={refus:false};
+/* État d'interface commun aux écrans Duo (non sauvegardé) : un seul objet, chaque écran y ajoute sa clé. */
+var MGMT_DUO_UI=(typeof MGMT_DUO_UI==='undefined')?{}:MGMT_DUO_UI;
+MGMT_DUO_UI.refus=false;
 Object.assign(CL,{
   mgmtDuoEncheres(){MGMT_DUO_UI.refus=false;CL.go('mgmt_duo_encheres');},
   mgmtDuoMiser(){const r=mgmtDuoMiser(G.mgmt);MGMT_DUO_UI.refus=!r.ok&&r.raison==='caisse';if(G.mgmt.duo.etape!=='encheres')CL.go('mgmt_duo_draft');else render();},
