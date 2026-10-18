@@ -342,6 +342,24 @@ function mgmtDuoResume(m,cote){
   });
 }
 
+/* ==== [ANCRE: MONDE_LOT_19_T7_EFFECTIF] — Monde lot 19 T7 ==== */
+/** Lecture pure de l'effectif d'un joueur. @returns {Array<object>} */
+function mgmtDuoEffectif(m,cote,divId){
+  return mgmtDuoAvec(m,cote,partie=>{
+    const classe=mgmtDivisionRanking(partie,divId,'organization');
+    const rangs=new Map(classe.map((f,i)=>[f.id,i+1]));
+    return (partie.roster||[]).filter(f=>f.div===divId).map(f=>{
+      const rang=rangs.has(f.id)?rangs.get(f.id):null;
+      let etat='dispo';
+      if(f.susp>=partie.cycle) etat='blesse';
+      else if(f.libre) etat='libre';
+      else if(mgmtContratIndispo(partie,f)) etat='refuse';
+      const forme=mgmtResultatsDetail(partie,f).slice(0,3).reverse().map(r=>r.issue==='win'?'v':r.issue==='loss'?'d':'n');
+      return {id:f.id,name:f.name,rang,W:f.W||0,L:f.L||0,D:f.D||0,age:f.age,etat,restants:mgmtContratRestants(f),forme};
+    }).sort((a,b)=>(a.rang==null?Infinity:a.rang)-(b.rang==null?Infinity:b.rang));
+  });
+}
+
 /* ==== [ANCRE: DUO_T2_ENCHERES] — Duo T2, docs/lots/DUO-T2.md ==== */
 const MGMT_DUO_LOTS=3;            // combattants mis aux enchères par super carte
 const MGMT_DUO_CONTRAT=3;         // combats du contrat signé

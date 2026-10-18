@@ -16,3 +16,14 @@ Points (1) menu hors démo / pas en démo, (2) emplacement vide en mode Duo, (5)
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T7 : le menu Duo, les emplacements, l'entrée dans une partie Duo, l'effectif en lecture`.
 
+## Compte rendu
+
+- `mgmt-cadre.js` : entrée « Duo » au menu principal ; `mfMenu()` conserve son filtre de démo.
+- `mgmt-emplacements.js` : mode duo pour les emplacements partagés, création temporaire, affichage DUO/super carte ; retour à `CL.mgmtParties()` remet le mode solo.
+- `mgmt-screens.js` : une reprise Duo ouvre `mgmt_duo` si l'écran est enregistré, sinon garde le chemin actuel.
+- `mgmt-duo.js` : fonction de lecture `mgmtDuoEffectif`, rang organisationnel, état de contrat/blessure/libre et forme récente.
+- `mgmt-duo-ecrans.js` : déclaration des états interface et écran temporaire de création ; chargé juste avant `main.js`.
+- Tests : `Duo T3 — le menu Duo existe hors démo et reste masqué en démo`, `Duo T3 — emplacement vide en mode Duo ouvre la création temporaire`, `Duo T3 — une partie Duo rouverte ouvre mgmt_duo si l’écran existe`, `Duo T3 — l’emplacement affiche le libellé DUO et la prochaine super carte`, `Duo T3 — mgmtDuoEffectif lit le côté B, trie et expose son état`, `Duo T3 — aucun texte de travail dans les écrans ajoutés`.
+- Sauvegarde inchangée. Écart : le test neuf n'a pas été inscrit dans `package.json` (`test` et `test:watch`) ; cette obligation reste à corriger. L’écran effectif reste hors de cette tranche ; aucun contrôle visuel réalisé.
+- Questions pour Anthony : aucune.
+

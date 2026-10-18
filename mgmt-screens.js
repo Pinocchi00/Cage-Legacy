@@ -381,6 +381,9 @@ Object.assign(CL,{
       mgmtRepair(G.mgmt);
     }
     if(mgmtAgendaSuivante(G.mgmt)) saveMgmt();
+    if(typeof mgmtDuoActif==='function'&&mgmtDuoActif(G.mgmt)){
+      if(SCREENS.mgmt_duo){ CL.go('mgmt_duo'); return; }
+    }
     /* Lot 1 du brief démo : une soirée interrompue se rouvre là où elle a été laissée. */
     if(mgmtSoireeEnCours(G.mgmt)){ mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree'); return; }
     /* Lot 8 T1 du brief démo : une partie neuve s'ouvre sur l'arrivée ; une partie reprise ne la revoit pas. */
