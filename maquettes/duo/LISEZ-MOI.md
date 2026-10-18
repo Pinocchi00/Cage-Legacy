@@ -1,7 +1,7 @@
-# Mode Duo — planches à valider (18/10/2026)
+# Mode Duo — planches VALIDÉES par Anthony le 18/10/2026
 
 Sept planches, une par écran du mode Duo (brief `docs/BRIEF-18-10-MODE-DUO.md`, fiches `docs/lots/DUO-T3.md` et `DUO-T4.md`).
-**À valider par Anthony avant le code des tranches d'écran.** Une fois validées, elles priment sur les fiches pour tout ce qui se voit
+**VALIDÉES par Anthony (message du 18/10/2026 : « les planches sont validées ») : le code des écrans peut commencer.** Une fois validées, elles priment sur les fiches pour tout ce qui se voit
 (positions, tailles, couleurs, textes) ; les fiches gardent les règles de jeu.
 
 | Planche | Écran du jeu (fiche) | États (`?etat=…`) |
