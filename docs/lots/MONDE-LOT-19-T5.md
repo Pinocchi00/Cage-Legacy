@@ -14,3 +14,10 @@ Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T5 : le moteur du Duo, première moitié (partie à deux, avancer, draft)` (sans « inachevé » si tout est vert).
 
+## Compte rendu
+- Fichiers modifiés : `mgmt-duo.js` — formatage et correction des noms par défaut lors de la création.
+- Tests ajoutés : aucun.
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : tranche non terminée ; le draft complet et les tests prescrits ne sont pas implémentés. Le fichier contenait également plusieurs fonctions T6 hors périmètre, laissées en place.
+- Questions pour Anthony : compléter l'implémentation et les tests T5 avant de considérer la tranche livrée.
+
