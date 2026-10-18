@@ -47,6 +47,11 @@
 .mf-duo-bi-rec{margin-top:auto;flex:none}
 .mf-duo-bi-rec>.mf-p2>.mf-p3{gap:10px;padding:12px 15px;overflow:hidden}
 .mf-duo-bi-bas{flex:none;display:flex;justify-content:flex-end}
+/* Les deux plaques de droite de l'en-tête (planche DuoBilan) : SAISON n, SUPER CARTE k SUR 4. Portées dans `droiteHtml` par
+   mfEcran (mgmt-cadre.js), jamais dans `droite` (échappé). */
+.mf-duo-bi-plaques{display:flex;align-items:center;gap:16px}
+.mf-duo-bi-k{color:var(--mf-rouge-vif)}
+.mf-duo-bi-sur{font-size:24px;font-weight:600;letter-spacing:.06em}
 .mf-duo-tag{display:inline-block;background:var(--mf-duo-tc,var(--mf-ligne));color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;padding:4px 10px 3px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);white-space:nowrap;text-transform:uppercase}
 .mf-duo-tag.j1{--mf-duo-tc:var(--mf-rouge-vif)}
 .mf-duo-tag.j2{--mf-duo-tc:#1B8C8F}

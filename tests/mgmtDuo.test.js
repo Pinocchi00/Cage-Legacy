@@ -4,6 +4,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
+const { AVANCER, DRAFT } = require('./helpers/duoPartie');   /* Monde lot 19 T14 : source unique des pas de partie Duo */
 
 function creer() {
   const win = newGameWindow({ runMain: true });
@@ -11,19 +12,6 @@ function creer() {
   return win;
 }
 const json = (win, code) => JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`));
-
-/* Avance jusqu'au draft : depuis DUO-T2 les enchères s'ouvrent d'abord ; personne ne mise, tout le monde passe. */
-const AVANCER = `mgmtDuoAvancer(G.mgmt);while(G.mgmt.duo.etape==='encheres'){mgmtDuoPasser(G.mgmt);}`;
-
-/* Joue un draft complet : le joueur dont c'est le tour place son premier combattant plaçable, l'autre répond dans la même catégorie. */
-const DRAFT = `const m=G.mgmt;
-  for(let i=0;i<6;i++){
-    const t=m.duo.draft.tour,p=mgmtDuoPlacables(m,t)[0];
-    if(!p||!mgmtDuoPlacer(m,p.id)) return 'placement '+i;
-    const r=mgmtDuoDisponibles(m,m.duo.draft.tour).find(f=>f.div===p.div);
-    if(!r||!mgmtDuoRepondre(m,r.id)) return 'réponse '+i;
-  }
-  return m.duo.etape;`;
 
 test('Duo T1 — la création, l’avancée du temps, la caisse stable et le draft', () => {
   const win = creer();

@@ -36,10 +36,12 @@ function mgmtDuoBilanLigneArgent(m,cote,montant){
   return `<div class="mf-duo-bi-ligne"><div class="mf-duo-bi-l1"><span class="mf-duo-tag ${mgmtDuoBilanCote(cote)}">${esc(nom)}</span> ${esc(org)}</div><div class="mf-duo-bi-t mf-duo-bi-g">+ ${esc(mgmtEuros(montant))}</div></div>`;
 }
 
-/** Une ligne de combat du bilan, six fois. @returns {string} */
-function mgmtDuoBilanCombatHtml(i,c){
+/** Une ligne de combat du bilan, six fois. La méthode vient du rejeu fidèle de la trace (mgmtResultatDetail, comme
+ *  les écrans de résultats et la soirée) : « Décision unanime après 3 rounds » ; à défaut la famille. @returns {string} */
+function mgmtDuoBilanCombatHtml(m,i,c){
   const gain=c.winner==='A'?' gagne':'', gagnb=c.winner==='B'?' gagne':'';
-  const meth=mgmtSuMethodeFamille({nul:c.winner==='D',family:c.family,round:c.round,rounds:c.rounds});
+  const d=mgmtResultatDetail(m,c.h);
+  const meth=d?mgmtSuMethodeFine(d):mgmtSuMethodeFamille({nul:c.winner==='D',family:c.family,round:c.round,rounds:c.rounds});
   return `<div class="mf-duo-bi-l" data-duo-combat="${i}">`
     +`<div class="mf-duo-bi-num">${mgmtDuoBilanPlace(i)}</div>`
     +`<div class="mf-duo-bi-n${gain}"><span class="mf-duo-bi-pt j1"></span>${esc(c.na)}</div>`
@@ -57,7 +59,7 @@ function mgmtDuoBilanListeHtml(m,carte){
     +`<div class="mf-duo-bi-n mf-duo-bi-lab">${esc(noms.a)} · ${esc(orgA)}</div>`
     +`<div class="mf-duo-bi-n mf-duo-bi-lab">${esc(noms.b)} · ${esc(orgB)}</div>`
     +`<div class="mf-duo-bi-m mf-duo-bi-lab">Comment</div><div class="mf-duo-bi-num"></div></div>`;
-  const lignes=carte.combats.map((c,i)=>mgmtDuoBilanCombatHtml(i,c)).join('');
+  const lignes=carte.combats.map((c,i)=>mgmtDuoBilanCombatHtml(m,i,c)).join('');
   return mfPanneau(tete+entete+lignes,'normal','mf-duo-bi-liste');
 }
 
@@ -118,8 +120,9 @@ function mgmtDuoBilanHtml(){
   const bandeau=carte.gagnant==='nul'
     ?`<span class="mf-duo-bi-t">Égalité</span>`
     :`<span class="mf-duo-bi-t">${esc(m.duo.noms[carte.gagnant])} remporte la super carte ${carte.n}</span>`;
-  const cls=mgmtDuoBilanCote(carte.gagnant);
-  opts.droite='Saison '+mgmtDuoScore(m).saison+' · super carte '+((carte.n-1)%MGMT_DUO_CARTES_SAISON+1)+' sur '+MGMT_DUO_CARTES_SAISON;
+  const cls=carte.gagnant==='nul'?'nul':mgmtDuoBilanCote(carte.gagnant);
+  const sc=mgmtDuoScore(m), k=(carte.n-1)%MGMT_DUO_CARTES_SAISON+1;
+  opts.droiteHtml=`<span class="mf-duo-bi-plaques"><span class="mf-plaque">Saison ${sc.saison}</span><span class="mf-plaque">Super carte <b class="mf-duo-bi-k">${k}</b><span class="mf-duo-bi-sur">sur ${MGMT_DUO_CARTES_SAISON}</span></span></span>`;
   const contenu=`<main class="mf-duo-bi">`
     +`<div class="mf-duo-bi-bandeau ${cls}">${bandeau}<span class="mf-duo-bi-sc">${scoreA} – ${scoreB}</span></div>`
     +`<div class="mf-duo-bi-cols">${mgmtDuoBilanListeHtml(m,carte)}${mgmtDuoBilanSaison(m,carte)}</div>`
@@ -131,8 +134,6 @@ function mgmtDuoBilanHtml(){
 SCREENS.mgmt_duo_bilan=mgmtDuoBilanHtml;
 
 Object.assign(CL,{
-  /** Le bouton du QG « Voir le bilan » : ouvre l'écran du bilan de la dernière super carte. */
-  mgmtDuoBilan(){ CL.go('mgmt_duo_bilan'); },
   /** Revoir un des six combats de la carte affichée : le même rejeu que les écrans de résultats (l'arène d'avant pour
    *  une trace sans agenda, l'écran animé sinon). */
   mgmtDuoBilanRevoir(i){

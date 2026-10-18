@@ -308,12 +308,13 @@ function mfEntetePastilles(t){
 /* ==== [FIN ANCRE] ==== */
 
 /** Un écran du cadre : le fond cendré, l'en-tête, la barre, le contenu, les touches.
- *  opts : {barre:'jeu'|'demarrage'|'aucune', courant, grise, m, plaque, libelle, droite, touches, fond:'cendre'|'teinte', couleur, contenuBrut} */
+ *  opts : {barre:'jeu'|'demarrage'|'aucune', courant, grise, m, plaque, libelle, droite, droiteHtml, touches, fond:'cendre'|'teinte', couleur, contenuBrut}
+ *  `droiteHtml` (Monde lot 19 T14) : une droite déjà en HTML (des plaques), pour les écrans du Duo ; `droite` reste du texte échappé. */
 function mfEcran(contenu,opts={}){
   const o=Object.assign({barre:'jeu',courant:null,grise:false,m:null,plaque:'',libelle:'',droite:'',touches:null,couleur:''},opts);
   const entete=o.plaque
     ?`<header class="mf-entete"><div class="mf-entete-g"><div class="mf-plaque">${esc(o.plaque)}</div>${mfEntetePastilles(o.tuiles)}${mfEnteteOnglets(o.onglets)}${mfEnteteLibelle(o.libelle)}${o.compteur?`<div class="mf-entete-n">${esc(o.compteur)}</div>`:''}</div>`
-      +(o.droite?(o.m&&/fight night/i.test(o.droite)?mfEnteteSoiree(o.m):`<div class="mf-entete-d">${esc(o.droite)}</div>`):'')+`</header>`
+      +(o.droiteHtml?`<div class="mf-entete-d">${o.droiteHtml}</div>`:(o.droite?(o.m&&/fight night/i.test(o.droite)?mfEnteteSoiree(o.m):`<div class="mf-entete-d">${esc(o.droite)}</div>`):''))+`</header>`
     :'';
   const barre=o.barre==='aucune'?'':(o.barre==='logo'
     ?`<div class="mf-logo-seul">${mfLogoHtml()}</div>`

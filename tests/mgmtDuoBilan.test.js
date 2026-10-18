@@ -5,6 +5,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
+const {AVANCER,DRAFT}=require('./helpers/duoPartie');   /* source unique des pas de partie Duo (voir tests/helpers/duoPartie.js) */
 
 /* Un monde comme tests/mgmtDuo.test.js : passé court (six soirées), monde vivant, partie Duo J1=Anthony J2=François. */
 function creer(){
@@ -12,17 +13,6 @@ function creer(){
   win.eval("setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'});");
   return win;
 }
-/* Avance jusqu'au draft : les enchères s'ouvrent d'abord, personne ne mise, tout le monde passe. */
-const AVANCER=`mgmtDuoAvancer(G.mgmt);while(G.mgmt.duo.etape==='encheres'){mgmtDuoPasser(G.mgmt);}`;
-/* Joue un draft complet : le joueur dont c'est le tour place son premier combattant plaçable, l'autre répond dans la même catégorie. */
-const DRAFT=`const m=G.mgmt;
-  for(let i=0;i<6;i++){
-    const t=m.duo.draft.tour,p=mgmtDuoPlacables(m,t)[0];
-    if(!p||!mgmtDuoPlacer(m,p.id)) return 'placement '+i;
-    const r=mgmtDuoDisponibles(m,m.duo.draft.tour).find(f=>f.div===p.div);
-    if(!r||!mgmtDuoRepondre(m,r.id)) return 'réponse '+i;
-  }
-  return m.duo.etape;`;
 
 test('Duo T4 — bilan : le vainqueur, les six combats, le retour au QG (étape attente et date suivante)',()=>{
   const win=creer();
@@ -59,10 +49,14 @@ test('Duo T4 — bilan : le vainqueur, les six combats, le retour au QG (étape 
   assert.doesNotMatch(win.document.body.innerHTML,/<b>O'Neil<\/b>/,"un nom injecté n'est pas du HTML");
   assert.match(win.document.body.innerHTML,/&lt;b&gt;/,'le nom est échappé');
 
-  /* le retour au QG : Entrée referme le bilan (étape attente, plus de soirée, date suivante) */
+  /* le retour au QG : Entrée referme le bilan (étape attente, plus de soirée, date suivante). Le QG (T9) vit dans une autre
+     tranche : ici on pose un écran témoin pour prouver que le retour va jusqu'au RENDU du QG, et non sur le repli de `render`
+     (CL.go pose G.screen par construction, l'assertion seule ne prouverait rien). */
+  win.eval(`SCREENS.mgmt_duo=()=>'<div class="mf-duo-qg">QG témoin</div>';`);
   win.eval(`keysHandle({key:'Enter',preventDefault(){}})`);
   assert.equal(win.eval('G.mgmt.duo.etape'),'attente','le bilan refermé : étape attente');
   assert.equal(win.eval('G.mgmt.duo.soiree'),null,'plus de soirée en cours');
   assert.equal(win.eval('G.mgmt.duo.prochaine'),carte.jour+periode,'la super carte suivante est à la bonne date');
-  assert.equal(win.eval('G.screen'),'mgmt_duo','le QG est l\'écran courant');
+  assert.equal(win.eval('G.screen'),'mgmt_duo','le retour mène au QG');
+  assert.equal(win.eval(`!!document.querySelector('.mf-duo-qg')`),true,'le QG est réellement rendu, pas le repli');
 });

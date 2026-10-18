@@ -22,4 +22,14 @@ L'écran `mgmt_duo_bilan` (bandeau vainqueur ou `Égalité`, score, six combats 
 - **Écarts à la fiche** : (1) la fiche nomme `tests/mgmtDuoBilan.test.js` en tête mais demande de « Compléter `tests/mgmtDuoEcrans.test.js` » dans « Tests » — j'ai suivi la tête (et la règle du travail en parallèle : ne pas éditer un fichier de T11-T13), d'où un fichier neuf et son ajout à `package.json`. (2) `keysRegister` « de tous les écrans Duo » : je pose celui du bilan et, seulement s'il est encore libre, celui des enchères (`Entrée/ M` miser, `P` passer, Échap QG), car le draft et la soirée appartiennent aux écrans de T12/T13 dont l'état d'interface (curseur, onglet) n'est pas atteignable d'ici ; leurs touches restent chez eux.
 - **Questions pour Anthony** : faut-il, au bilan, la méthode fine (`mgmtLendemainMethode`, qui rejoue la trace) plutôt que `mgmtSuMethodeFamille` — j'ai pris la famille pour ne pas rejouer six combats à l'affichage ; et confirmer que draft/soirée gardent leur clavier posé par T12/T13.
 
+## Reprise (les 7 écarts du relecteur)
+
+1. **Code mort `CL.mgmtDuoBilan`** : retiré (le QG ouvre par `CL.go('mgmt_duo_bilan')` ; les deux voies auraient fait un second système).
+2. **Méthode fine** : le bilan lit `mgmtResultatDetail(m, c.h)` (le rejeu fidèle déjà mémoïsé des écrans de résultats) et `mgmtSuMethodeFine` — « Décision unanime après 3 rounds », comme la planche ; repli sur `mgmtSuMethodeFamille` sans trace.
+3. **CSS mort `.nul`** : le bandeau pose désormais `nul` (`cls = carte.gagnant==='nul' ? 'nul' : mgmtDuoBilanCote(...)`), la règle vit.
+4. **Plaques d'en-tête** : `mfEcran` reçoit une option additive `droiteHtml` (mgmt-cadre.js) ; le bilan y met les deux plaques `SAISON n` et `SUPER CARTE k SUR 4` (planche DuoBilan). Les autres écrans ne changent pas (`droite` reste du texte échappé).
+5. **Helpers de test** : `AVANCER`/`DRAFT` extraits dans `tests/helpers/duoPartie.js`, requis par `tests/mgmtDuo.test.js` et `tests/mgmtDuoBilan.test.js` — une seule source, plus de recopie.
+6. **Test du retour au QG** : le test pose `SCREENS.mgmt_duo` (témoin) et vérifie que le QG est **réellement rendu** (`.mf-duo-qg`), pas le repli de `render` — `G.screen` seul ne prouvait rien.
+7. **Claviers draft/soirée — tranché** : laissés aux écrans qui les possèdent (T12/T13). Leur clavier dépend d'un état d'interface (curseur de liste, onglet) absent de cette branche ; le poser d'ici ferait un second clavier ou des appels morts. Le QG ouvre par `CL.go`, l'enchère garde sa carte de secours posée ici si T12 ne l'a pas déjà prise.
+
 
