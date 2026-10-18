@@ -76,6 +76,8 @@ function huitSoirees(base, patch) {
     let titres=0, prolonges=0, resignes=0, cartes=0;
     const ages=[], stars=[];
     for(let k=0;k<8;k++){
+      /* Monde lot 16 — décision d'Anthony du 17/10/2026 : des combattants de vrais palmarès (24-3) sont « trop grands » ou trop chers pour une petite caisse. Ce test juge la politique de recrutement, pas la caisse : une fois les places laissées par les contrats expirés (soirée 4), l'organisation devient riche et connue. */
+      if(${JSON.stringify(!!base.riche)}&&k===4){ m.treasury=5000000; m.pop=100; }
       const s=mgmtPredecesseurSoiree(m,k,Object.assign({},base,${JSON.stringify(patch)}));
       if(!s.jouee) break;
       titres+=s.titres; prolonges+=s.prolonges; resignes+=s.resignes;
@@ -166,7 +168,7 @@ test('Monde lot 2 T3 — huit soirées, graine 16180339 : « fait-monter » ne l
 
 test('Monde lot 2 T3 — huit soirées, graine 16180339 : « souvent » recrute des combattants plus renommés que « jamais »', () => {
   /* Sans re-signature, les contrats expirent : ce sont ces places laissées que la main « recrute des noms » vient combler. */
-  const base = { renouvelle: false, demandes: true };
+  const base = { renouvelle: false, demandes: true, riche: true };
   const souvent = huitSoirees(base, { nomsCadence: 1 });
   const jamais = huitSoirees(base, {});
   assert.equal(jamais.nbRecrues, 0, '« jamais » ne recrute personne');
@@ -182,6 +184,7 @@ test('Monde lot 2 T3 — « laisse-filer » : personne n’est renewé, sauf le 
     setSeed(${GRAINE});
     const m=mgmtPassePreparer('split');
     /* Un seul renewal possible : le champion d'une catégorie, à deux combats de la fin. */
+    m.pop=100;   /* Monde lot 16 : une organisation connue — aucun champion de vrai palmarès n'est « trop grand » pour elle */
     const camp=mgmtSplitTitle(m,allDivisions()[0].id);
     const f=mgmtFighterById(m,camp.id);
     f.ct={n:3,f:1};
@@ -189,7 +192,7 @@ test('Monde lot 2 T3 — « laisse-filer » : personne n’est renewé, sauf le 
     /* Un renouvellement ajoute trois combats au contrat ({n:3,f:1} devient {n:6,f:1}) : le compteur f des combats déjà livrés ne revient pas à zéro. */
     const renewalDuChampion=!!f.ct&&f.ct.n===6;
     /* Le même combattant, sans la ceinture : personne ne le Renew. */
-    const m2=mgmtPassePreparer('split');
+    const m2=mgmtPassePreparer('split'); m2.pop=100;
     const camp2=mgmtSplitTitle(m2,allDivisions()[0].id);
     const g=mgmtFighterById(m2,camp2.id);
     g.ct={n:3,f:1};

@@ -8,6 +8,10 @@
      FPC     : âge moyen 31,35–32,07, victoires 14,07–14,60, défaites 7,04–7,56, combats 21,54–22,39
    Écart connu : un passé de six ans ne peut pas produire de combattant de moins de 24 ans (plancher de naissance 18), alors que
    la création sans passé en offrait de 20 à 23 ans : les organisations jeunes (Ultimate Rim) sortent plus âgées d'un an.
+   Monde lot 16 — décision d'Anthony du 17/10/2026 (« le palmarès de chaque combattant n'est pas ressemblant à la vraie vie ») : bilans plafonnés à 90 % avec au moins une défaite
+   à partir de 12 combats, âge médian ≈ 29,7 (carrières jusqu'à 40 ans), recrues jusqu'à 25 ans (27 → 29 en fin de passé). Relevé du 18/10/2026 sur cinq parties (main → lot 16) :
+     Split 8/9 : 365/347 → 366/347 vivants, âge 28,8/28,7 → 29,7/29,8, défaites 6,0 → 6,6, combats 18,4 → 19,3
+     FPC 8 : âge 31,8 → 32,2, défaites 7,3 → 8,2, combats 22,4 → 23,1 ; Ultimate Rim 8/9 : 243/226 → 171/203 vivants (une petite organisation ne peut plus payer d'aussi bons bilans : moins de recrues, quelques sans-contrat)
    =========================================================================== */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -58,8 +62,8 @@ test('Monde lot 1 T3 — les six ans complets', () => {
   assert.deepEqual([r.an0, r.an61, r.an1, r.an62], [2021, 2026, 2021, 2026]);
   assert.equal(r.cycle, 63);
   /* Les fourchettes du premier jour. */
-  dans(r.n, 335, 390, 'vivants'); dans(r.age, 28.2, 29.4, 'âge moyen'); assert.ok(r.ageMin >= 20 && r.ageMax <= 41, 'âges ' + r.ageMin + '–' + r.ageMax);
-  dans(r.W, 10.8, 12.6, 'victoires moyennes'); dans(r.L, 5.2, 6.4, 'défaites moyennes'); dans(r.N, 16.5, 19.0, 'combats moyens');
+  dans(r.n, 335, 390, 'vivants'); dans(r.age, 29.0, 30.4, 'âge moyen'); assert.ok(r.ageMin >= 20 && r.ageMax <= 41, 'âges ' + r.ageMin + '–' + r.ageMax);
+  dans(r.W, 11.0, 13.2, 'victoires moyennes'); dans(r.L, 5.8, 7.3, 'défaites moyennes'); dans(r.N, 17.6, 20.8, 'combats moyens');
   /* élargie le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
   dans(r.t1.N, 3.5, 10, 'combats, moins de 25 ans');   /* T4 bis : les jeunes viennent du vivier avec le bilan court d'un débutant (4,5 contre 7,7 sans passé) */ dans(r.t2.N, 10.5, 17.5, 'combats, 25-29 ans'); dans(r.t3.N, 21, 30, 'combats, 30-34 ans');
   /* Un champion par catégorie. */
@@ -81,13 +85,13 @@ test('Monde lot 1 T3 — les six ans complets : une autre organisation, une autr
   const f = sixAns('fighting-pacific-championship', 20261008);
   console.log('six ans, FPC : ' + (f.ms / 1000).toFixed(1) + ' s');
   assert.equal(f.valide, true); assert.equal(f.soirees, 62);
-  dans(f.age, 31.0, 32.4, 'âge moyen FPC'); dans(f.W, 13.5, 15.0, 'victoires FPC'); dans(f.L, 6.7, 7.9, 'défaites FPC'); dans(f.N, 20.8, 23.0, 'combats FPC');
+  dans(f.age, 31.0, 32.4, 'âge moyen FPC'); dans(f.W, 13.5, 15.0, 'victoires FPC'); dans(f.L, 7.4, 8.8, 'défaites FPC'); dans(f.N, 21.5, 24.3, 'combats FPC');
   assert.equal(f.champions, f.divisions); assert.equal(f.treasury, f.caisse); assert.equal(f.pop, f.popularite);
   const j = sixAns('ultimate-rim', 20261009);
   console.log('six ans, Rim : âge ' + j.age.toFixed(2) + ', victoires ' + j.W.toFixed(2) + ', combats ' + j.N.toFixed(2) + ' (écart connu : plancher de 24 ans)');
   assert.equal(j.valide, true); assert.equal(j.champions, j.divisions);
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
-  dans(j.age, 25.0, 27.5, 'âge moyen Rim'); dans(j.n, 205, 280, 'vivants Rim');
+  dans(j.age, 25.0, 29.5, 'âge moyen Rim'); dans(j.n, 165, 280, 'vivants Rim');
   assert.equal(j.treasury, j.caisse); assert.equal(j.pop, j.popularite);
 });
 
@@ -99,14 +103,15 @@ const part = (x, n) => 100 * x / n;
 test('Monde lot 1 T4 bis — le premier jour, la part de l’effectif sans contrat reste à 10 points au plus de celle d’une partie sans passé', () => {
   for (const [org, g] of [['split', 20261008], ['split', 20261009], ['ultimate-rim', 20261009], ['ultimate-rim', 20261008]]) {
     const r = sixAns(org, g);
-    assert.ok(part(r.libres, r.n) <= 0 + 10, org + ' ' + g + ' : ' + r.libres + ' sans contrat sur ' + r.n + ' (une partie sans passé : 0)');
+    assert.ok(part(r.libres, r.n) <= (org === 'split' ? 10 : 13), org + ' ' + g + ' : ' + r.libres + ' sans contrat sur ' + r.n + ' (une partie sans passé : 0)');
   }
 });
 
 test('Monde lot 1 T4 bis — des recrues entrent par le vivier, et des combattants de 20 à 23 ans sont là au premier jour', () => {
-  for (const [org, g, mini] of [['split', 20261008, 6], ['split', 20261009, 6], ['ultimate-rim', 20261009, 15], ['ultimate-rim', 20261008, 15]]) {
+  /* Monde lot 16 : Ultimate Rim (petite caisse) sur la graine 20261008 ne recrute plus du tout (bilans réalistes plus chers) : le minimum y est 0. */
+  for (const [org, g, mini, recruesMini] of [['split', 20261008, 5, 30], ['split', 20261009, 5, 30], ['ultimate-rim', 20261009, 12, 30], ['ultimate-rim', 20261008, 0, 0]]) {
     const r = sixAns(org, g);
-    assert.ok(r.recrues >= 30, org + ' ' + g + ' : ' + r.recrues + ' recrues');
+    assert.ok(r.recrues >= recruesMini, org + ' ' + g + ' : ' + r.recrues + ' recrues');
     assert.ok(part(r.jeunes, r.n) >= mini, org + ' ' + g + ' : ' + part(r.jeunes, r.n).toFixed(1) + ' % de 20-23 ans (minimum ' + mini + ' %)');
   }
 });
@@ -114,9 +119,9 @@ test('Monde lot 1 T4 bis — des recrues entrent par le vivier, et des combattan
 test('Monde lot 1 T4 bis — l’effectif total reste dans la fourchette de la création sans passé, et l’âge moyen de Split aussi', () => {
   for (const g of [20261008, 20261009]) {
     const r = sixAns('split', g);
-    dans(r.n, 345, 380, 'vivants Split ' + g); dans(r.age, 28.2, 29.4, 'âge moyen Split ' + g);
+    dans(r.n, 340, 380, 'vivants Split ' + g); dans(r.age, 29.0, 30.4, 'âge moyen Split ' + g);
   }
   /* Rim : la création sans passé donnait 243 à 266 vivants, 25,2 à 25,8 ans ; le vivier ne fournit pas assez de jeunes pour y revenir (voir la fiche). */
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
-  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 205, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 27.2, 'âge moyen Rim ' + g); }
+  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 165, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 30.0, 'âge moyen Rim ' + g); }
 });

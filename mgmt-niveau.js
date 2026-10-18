@@ -179,8 +179,11 @@ function mgmtRouille(m,f,cycle){
 /** Le bilan d'un combattant de niveau `lv` sur `total` combats : un tirage (comme correlatedRecord), mais une courbe qui reste modeste au milieu et touche 90 % et plus au sommet. */
 function mgmtBilanReel(lv,total){
   const u=clamp((lv-MGMT_NIV_MIN)/(MGMT_NIV_MAX-MGMT_NIV_MIN),0,1);
-  const ratio=clamp(0.48+0.42*Math.pow(u,1.6)+(rnd()*2-1)*0.06,0.2,1);
-  const W=clamp(Math.round(total*ratio),0,total);
+  /* Monde lot 16 — décision d'Anthony du 17/10/2026 (« le palmarès de chaque combattant n'est pas ressemblant à la vraie vie ») : un champion réel a 1 à 6
+     défaites sur 15 à 35 combats ; le ratio plafonne à 90 % et un combattant de 12 combats et plus compte au moins une défaite (7 % des combats). Le tirage est inchangé. */
+  const ratio=clamp(0.48+0.42*Math.pow(u,1.6)+(rnd()*2-1)*0.06,0.2,0.9);
+  const plancherL=total>=12?Math.max(1,Math.round(total*0.07)):0;
+  const W=clamp(Math.round(total*ratio),0,total-plancherL);
   return {W,L:total-W};
 }
 /** Les nuls d'un combattant : rares, plus probables avec le nombre de combats (≈ 1,5 % des combats, ≈ 18 % des combattants en comptent un). `u` est un tirage 0-99. */
