@@ -3,6 +3,48 @@
 let MGMT_DUO_NOUVELLE={slot:0,etape:'noms',noms:{a:'',b:''},a:null,i:0};
 let MGMT_DUO_QG={};
 
+/* ==== [ANCRE: MONDE_LOT_19_T9_QG] — Monde lot 19 T9 ==== */
+function mgmtDuoQGHtml(){
+  const m=G.mgmt,d=m.duo,score=mgmtDuoScore(m);
+  const nomOrg=cote=>MGMT_ORGANISATIONS.find(o=>o.id===(cote==='a'?mgmtPredecesseurOrgId(m):d.b))?.nom||'';
+  const coteHtml=cote=>{
+    const partie=mgmtDuoPartie(m,cote),resume=mgmtDuoResume(m,cote),rang=mgmtOrgClassement(m).find(x=>x.id===(cote==='a'?mgmtPredecesseurOrgId(m):d.b))?.rang;
+    const combats=resume.combats.slice(0,6).map(c=>{
+      const vainqueur=c.winner==='D'?'Égalité':(c.winner==='a'?c.a:c.b),perdant=c.winner==='a'?c.b:c.a;
+      const methode=mgmtSuMethodeFamille({nul:c.winner==='D',family:c.family,round:c.round,rounds:c.rounds});
+      return `<div class="mf-duo-qg-combat">${esc(vainqueur)} ${c.winner==='D'?'fait match nul contre':'bat'} ${esc(perdant)} · ${esc(mgmtDivisionLabel(c.div))} · ${esc(methode)}</div>`;
+    }).join('')||'<div class="mf-duo-qg-combat">Rien encore</div>';
+    const champions=resume.champions.filter(x=>x.id).length;
+    return `<section class="mf-duo-qg-cote"><h2>${esc(nomOrg(cote))}</h2><div class="mf-duo-qg-joueur">${esc(d.noms[cote])}</div><div class="mf-duo-qg-score">${score[cote]}</div><div class="mf-duo-qg-tuiles"><div>En caisse<strong>${esc(mgmtEuros(partie.treasury))}</strong></div><div>Classement des organisations<strong>${rang||'—'}</strong></div><div>Champions<strong>${champions}</strong></div></div><div class="mf-duo-qg-recent">Depuis la dernière super carte · ${resume.soirees} soirées${combats}</div><button class="mf-duo-qg-effectif" onclick="CL.go('mgmt_duo_effectif')">Effectif de ${esc(d.noms[cote])}</button></section>`;
+  };
+  const actions={attente:['Avancer jusqu’à la super carte','CL.mgmtDuoAvancer()'],encheres:['Ouvrir les enchères',"CL.go('mgmt_duo_encheres')"],draft:['Composer la super carte',"CL.go('mgmt_duo_draft')"],pret:['Lancer la super carte',"CL.go('mgmt_duo_draft')"],soiree:['Reprendre la soirée',"CL.go('mgmt_duo_soiree')"],bilan:['Voir le bilan',"CL.go('mgmt_duo_bilan')"]};
+  const action=actions[d.etape],cible=SCREENS[action&&d.etape==='attente'?'__absent__':({encheres:'mgmt_duo_encheres',draft:'mgmt_duo_draft',pret:'mgmt_duo_draft',soiree:'mgmt_duo_soiree',bilan:'mgmt_duo_bilan'}[d.etape]||'__absent__')];
+  const bouton=action&&(!cible||d.etape==='attente')?mfBouton(action[0],{touche:'Entrée',jaune:true,onclick:action[1]}):'';
+  const progression=MGMT_DUO_QG.enCours?`<div class="mf-duo-qg-progress"><div>Les soirées des adjoints se jouent · ${esc(mgmtJourDateTexte(m.cal.jour))}</div><progress max="${Math.max(1,d.prochaine-MGMT_DUO_QG.depart)}" value="${Math.max(0,m.cal.jour-MGMT_DUO_QG.depart)}"></progress></div>`:'';
+  const erreur=MGMT_DUO_QG.erreur?`<div>La progression s'est arrêtée. ${mfBouton('Réessayer',{jaune:true,onclick:'CL.mgmtDuoAvancerReessayer()'})}</div>`:'';
+  const centre=`<div class="mf-duo-qg-centre"><div>Score de la saison</div><strong>${score.a} – ${score.b}</strong><p>Prochaine super carte : ${esc(mgmtJourDateTexte(d.prochaine))}</p><div>${esc(action?action[0]:d.etape)}</div>${MGMT_DUO_QG.enCours||MGMT_DUO_QG.erreur?'':bouton}${progression}${erreur}</div>`;
+  return mfEcran(`<div class="mf-duo-qg">${coteHtml('a')}${centre}${coteHtml('b')}</div>`,{barre:'logo',plaque:'Duo',libelle:`${esc(d.noms.a)} × ${esc(d.noms.b)}`,droite:`Saison ${score.saison} · super carte ${score.numero} sur 4`,touches:[{ks:['Échap'],t:'Quitter'},{ks:['1'],t:`Effectif de ${esc(d.noms.a)}`},{ks:['2'],t:`Effectif de ${esc(d.noms.b)}`}]});
+}
+SCREENS.mgmt_duo=mgmtDuoQGHtml;
+Object.assign(CL,{
+  mgmtDuoAvancer(){
+    if(MGMT_DUO_QG.enCours)return;
+    MGMT_DUO_QG={enCours:true,erreur:false,depart:G.mgmt.cal.jour};
+    const pas=()=>{
+      try{
+        const r=mgmtDuoAvancerPas(G.mgmt);
+        saveMgmt();
+        if(r.termine){MGMT_DUO_QG={};CL.go('mgmt_duo');return;}
+        render();requestAnimationFrame(()=>setTimeout(pas,0));
+      }catch(e){MGMT_DUO_QG={enCours:false,erreur:true};render();}
+    };
+    render();requestAnimationFrame(()=>setTimeout(pas,0));
+  },
+  mgmtDuoAvancerReessayer(){MGMT_DUO_QG={};CL.mgmtDuoAvancer();},
+  mgmtDuoQuitter(){if(!MGMT_DUO_QG.enCours)CL.mgmtLeave();}
+});
+keysRegister('mgmt_duo',{Escape(){CL.mgmtDuoQuitter();},'1'(){if(!MGMT_DUO_QG.enCours)CL.go('mgmt_duo_effectif');},'2'(){if(!MGMT_DUO_QG.enCours)CL.go('mgmt_duo_effectif');}});
+
 function mgmtDuoNouvelleHtml(){
   const s=MGMT_DUO_NOUVELLE;
   const titre=s.etape==='noms'?'Duo':`${s.noms[s.etape==='a'?'a':'b']||`Joueur ${s.etape==='a'?1:2}`} · choisis ton organisation`;

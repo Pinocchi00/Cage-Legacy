@@ -1624,3 +1624,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-duo-champs{display:flex;gap:24px}.mf-duo-champs label{flex:1;font-size:24px;color:#E23A2B}
 .mf-duo-champs label+label{color:#3FB7BA}.mf-duo-champs input{display:block;width:100%;height:92px;margin-top:12px;background:#0D0B0B;border:3px solid currentColor;color:#E9E6E1;font:800 48px 'Saira Extra Condensed',sans-serif;padding:8px 16px}
 .mf-duo-noms p{font-size:24px}.mf-duo-grille .mf-org-grille{top:0}.mf-duo-org{position:relative}.mf-duo-org.mf-duo-prise{opacity:.45;pointer-events:none}.mf-duo-prise-nom{position:absolute;right:18px;top:12px;font-size:24px;color:#E9E6E1}.mf-duo-pied{position:absolute;left:0;top:684px;width:1808px;padding-top:16px;border-top:2px solid #393434;display:flex;justify-content:flex-end}
+/* ==== [ANCRE: MONDE_LOT_19_T9_QG_CSS] — Monde lot 19 T9 ==== */
+.mf-duo-qg{position:absolute;inset:0;display:grid;grid-template-columns:676px 424px 676px;gap:16px;color:#E9E6E1}
+.mf-duo-qg-cote,.mf-duo-qg-centre{min-width:0;background:#121010;border:2px solid #393434;padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.mf-duo-qg-cote h2{font-size:60px;line-height:.9;margin:0;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-duo-qg-joueur{font-size:26px}.mf-duo-qg-score{font-size:104px;line-height:.85;font-weight:800}
+.mf-duo-qg-tuiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mf-duo-qg-tuiles div{font-size:22px;background:#252121;padding:10px;min-width:0}.mf-duo-qg-tuiles strong{display:block;font-size:32px;margin-top:8px}
+.mf-duo-qg-recent{font-size:22px;line-height:1.2;overflow:hidden}.mf-duo-qg-combat{padding:7px 0;border-bottom:1px solid #393434}
+.mf-duo-qg-effectif{margin-top:auto;min-height:60px;background:#252121;color:#E9E6E1;font-size:26px;padding:12px;text-align:left}
+.mf-duo-qg-centre{align-items:center;text-align:center;justify-content:center}.mf-duo-qg-centre>strong{font-size:104px}.mf-duo-qg-centre p{font-size:26px}.mf-duo-qg-centre button{background:#F0B220;color:#0D0B0B;padding:18px;font-size:28px}.mf-duo-qg-progress{font-size:22px;width:100%}.mf-duo-qg-progress progress{width:100%;height:26px}

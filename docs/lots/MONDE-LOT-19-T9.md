@@ -13,3 +13,13 @@ Points (6) le QG montre les deux organisations, les deux noms (esc), le bouton d
 ## Fin
 `node tools/_bump.js` sur chaque `.js` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T9 : le QG du Duo et la progression`.
 
+## Compte rendu
+
+- `mgmt-duo-ecrans.js` : ajout du QG à deux colonnes, données des organisations/joueurs, score, caisse, classement, champions, combats récents échappés, action d'étape et progression asynchrone.
+- `ui-cadre.css` : styles du QG et de sa progression, sous l'ancre dédiée T9.
+- `tests/mgmtDuoEcrans.test.js` : tests « Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape », « Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suivante », « Duo T9 — le QG ne contient aucun texte de travail ».
+- Migration de sauvegarde : aucune ; `MGMT_SAVE_VERSION` inchangée.
+- Vérification des versions : le contrôle signale l'écart préexistant de `mgmt-salles.js` face à `origin/main` ; ce fichier n'appartient pas à la tranche et n'a pas été modifié.
+- Contrôle visuel/captures : non effectué dans cet environnement.
+- Questions pour Anthony : aucune.
+

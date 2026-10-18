@@ -72,3 +72,26 @@ test('Duo T3 — aucun texte de travail dans les écrans ajoutés',()=>{
   const w=newGameWindow();
   assert.equal(w.eval("String(SCREENS.mgmt_duo_nouvelle()).includes('TODO')"),false);
 });
+
+test('Duo T9 — le QG montre les deux organisations, les deux noms échappés et le bouton de l’étape',()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:"<b>O'Neil</b>",b:'François'}); G.screen='mgmt_duo'; render();`);
+  assert.match(w.document.body.textContent,/Split/);
+  assert.match(w.document.body.textContent,/MMA Korner/);
+  assert.match(w.document.body.innerHTML,/&lt;b&gt;O'Neil&lt;\/b&gt;/);
+  assert.doesNotMatch(w.document.body.innerHTML,/<b>O'Neil<\/b>/);
+  assert.match(w.document.body.textContent,/Avancer jusqu’à la super carte/);
+});
+
+test('Duo T9 — mgmtDuoAvancer atteint la date et le QG montre l’étape suivante',async()=>{
+  const w=newGameWindow();
+  w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'}); G.mgmt.cal.prochaines=[]; G.screen='mgmt_duo'; CL.mgmtDuoAvancer();`);
+  for(let i=0;i<200&&!w.eval("G.mgmt.cal.jour>=G.mgmt.duo.prochaine");i++) await new Promise(resolve=>setTimeout(resolve,25));
+  assert.equal(w.eval("G.mgmt.cal.jour>=G.mgmt.duo.prochaine"),true);
+  assert.equal(w.eval("['encheres','draft'].includes(G.mgmt.duo.etape)"),true);
+});
+
+test('Duo T9 — le QG ne contient aucun texte de travail',()=>{
+  const w=newGameWindow();
+  assert.doesNotMatch(w.eval("String(SCREENS.mgmt_duo)").toUpperCase(),/EMPLACEMENT AUTEUR|TODO/);
+});
