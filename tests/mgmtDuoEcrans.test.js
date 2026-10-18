@@ -72,3 +72,15 @@ test('Duo T3 — aucun texte de travail dans les écrans ajoutés',()=>{
   const w=newGameWindow();
   assert.equal(w.eval("String(SCREENS.mgmt_duo_nouvelle()).includes('TODO')"),false);
 });
+
+test('Duo T4 — enchères : le joueur du tour est nommé et les noms restent du texte',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval(`const m=G.mgmt||{}; G.mgmt=m; m.duo={b:'mma-korner',noms:{a:"<J1'",b:'J2'},etape:'encheres',encheres:{i:0,lots:[{id:'x',name:'Combattant',div:'plume',rang:1,ouverture:1000,pas:100,prix:0,meneur:null,tour:'a',passes:0,fini:false,gagnant:null}]}};
+    m.orgs=m.orgs||{}; m.orgs['mma-korner']={treasury:10000};
+    mgmtDuoPartie=(m,c)=>c==='a'?m:m.orgs['mma-korner'];
+    mgmtExteriorCombattant=()=>({name:'Combattant',W:2,L:1,D:0,age:25,libre:true});
+    mgmtDivisionLabel=()=> 'Poids plume'; mgmtEuros=x=>String(x)+' €'; mgmtOrgNom=()=> 'Organisation';
+    CL.go('mgmt_duo_encheres');`);
+  assert.match(w.document.body.textContent,/À <J1'/);
+  assert.doesNotMatch(w.document.body.innerHTML,/<J1'/);
+});

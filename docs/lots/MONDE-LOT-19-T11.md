@@ -13,3 +13,10 @@ L'écran `mgmt_duo_encheres` (lot courant, caisses des deux joueurs, `Miser {pri
 ## Fin
 `node tools/_bump.js`, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T11 : l'écran des enchères`.
 
+## Compte rendu
+
+- Fichiers : `mgmt-duo-encheres.js` (écran, commandes clavier et actions enchères), `ui-duo-encheres.css` (mise en forme), `index.html` (liens script et CSS), `tests/mgmtDuoEcrans.test.js` (test d’échappement et du joueur actif).
+- Tests ajoutés : `Duo T4 — enchères : le joueur du tour est nommé et les noms restent du texte`.
+- Migration de sauvegarde : aucune.
+- Écarts : les contraintes de travail parallèle interdisent la modification de `mgmt-duo-ecrans.js`, où le QG et son bouton de lancement devraient être branchés ; aucun QG `SCREENS.mgmt_duo` n’est présent dans ce checkout.
+- Questions pour Anthony : le bandeau d’adjudication doit-il interrompre le moteur entre deux lots ? `mgmtDuoPasser` avance actuellement immédiatement au lot suivant, sans état intermédiaire d’adjudication.

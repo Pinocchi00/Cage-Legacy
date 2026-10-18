@@ -1,0 +1,12 @@
+/* ==== [ANCRE: DUO_T4_ECRANS] — Monde lot 19 T11 ==== */
+.mf-duo-encheres{max-width:1920px;margin:auto;padding:clamp(24px,4vw,64px);font-size:22px;display:grid;gap:24px}
+.mf-duo-encheres h1{font-size:clamp(32px,4vw,64px);margin:0}
+.mf-duo-encheres h2{font-size:clamp(40px,7vw,100px);margin:12px 0}
+.mf-duo-tour{font-size:clamp(28px,4vw,56px);font-weight:700;padding:18px;background:#E23A2B;color:#fff;margin:12px 0}
+.mf-duo-tour.j2{background:#1B8C8F;color:#3FB7BA}
+.mf-duo-combattant,.mf-duo-caisses{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;border-block:1px solid var(--mgmt-edge);padding:20px}
+.mf-duo-actions{display:flex;gap:16px;flex-wrap:wrap}
+.mf-duo-action{font-size:24px;padding:18px;background:var(--mgmt-yellow);color:var(--mgmt-plum-deep)}
+.mf-duo-refus{color:var(--mgmt-red);font-size:24px}
+.mf-duo-adjuge{font-size:30px;padding:20px;border:2px solid var(--mgmt-yellow)}
+@media(max-width:800px){.mf-duo-combattant,.mf-duo-caisses{display:block}}
