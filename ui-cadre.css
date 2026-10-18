@@ -1181,7 +1181,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-media,.mf-pr-sujet,.mf-pr-noms{font-size:22px;line-height:1.1;margin-bottom:5px}
 .mf-pr-media{font-weight:600;color:#F0B220}
 /* Monde lot 20 (retour d'Anthony du 18/10/2026) : un nom cliquable est un simple nom blanc ; il se met en surbrillance au survol (et à la sélection au clavier), sans encadré jaune. */
-.mf-pr-lien{padding:0 4px;margin:0 -4px;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:none;cursor:pointer;overflow-wrap:anywhere;transition:background .12s}
+.mf-pr-lien{padding:0 4px;margin:0 -4px;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:none;cursor:pointer;overflow-wrap:anywhere}
 .mf-pr-lien:hover,.mf-pr-lien.choisi{background:rgba(233,230,225,.22)}
 /* Monde lot 18 — les lignes des panneaux de présentation (planches MondePresentationCombat / Combattant) : marques, lignes à deux niveaux, tableau « Leur histoire », en-têtes. L'écart `--mf-ecart` sépare deux textes voisins (règle L5). */
 .mf-pr-ph{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--mf-ecart)}
