@@ -14,7 +14,7 @@ function partie() {
 function photo(w) { return w.eval('JSON.stringify(G.mgmt)'); }
 function ligne(w) {
   const host=w.document.createElement('div');
-  host.innerHTML=w.eval('mgmtCarteCombatLigne(G.mgmt,0,G.mgmt.card.main[0],{courant:-1})');
+  host.innerHTML=w.eval('mgmtCarteCombatLigne(G.mgmt,0,G.mgmt.card.main[0],{courant:-1},0)');
   return host;
 }
 function clic(w,host,selector) {
@@ -22,7 +22,7 @@ function clic(w,host,selector) {
   w.eval(el.getAttribute('onclick'));
 }
 /* ==== [ANCRE: MONDE_LOT5_T4_REPRISE_FIXTURES] — Monde lot 5 T4 ==== */
-function carteValide(w,index) {
+function carteValide(w) {
   w.eval(`while(G.mgmt.card.main.length<5){
     const m=G.mgmt, rows=mgmtCartRows(m); let pose=false;
     for(const a of rows){
@@ -30,11 +30,11 @@ function carteValide(w,index) {
       if(pose) break;
     }
     if(!pose) throw new Error('Aucune paire valide');
-  }
-  G.mgmt.card.main.splice(${index},0,G.mgmt.card.main.shift());`);
+  }`);
   assert.equal(w.eval('validateMgmt(G.mgmt)'),true);
   assert.equal(w.eval('new Set(G.mgmt.card.main.flatMap(f=>[f.a,f.b])).size'),10);
-  assert.equal(w.eval(`G.mgmt.card.main[${index}].herite`),true);
+  /* Monde lot 15 : les combats d'ouverture laissés par l'ancien matchmaker sont aux places 4 et 5 (index 3 et 4), derrière les trois combats du joueur. */
+  assert.equal(w.eval('G.mgmt.card.main.map(f=>f.herite===true)').join(),[false,false,false,true,true].join());
 }
 test('Monde lot 5 T4 — avertir avant de retirer un combat hérité', () => {
   for(const action of ['CL.mgmtUnbook(0)','CL.mgmtCarteModifie(0)']) {
@@ -64,7 +64,8 @@ test('Monde lot 5 T4 — renoncer conserve exactement le combat hérité', () =>
       assert.equal(photo(w),avant); assert.equal(w.eval('SEED'),seed);
       assert.equal(w.eval('sauvegardesT4'),0);
       assert.equal(w.eval('MGMT_CART.annulation'),undefined);
-      assert.ok(ligne(w).querySelector('.mf-car-provenance'));
+      /* Décision d'Anthony du 17/10/2026 : l'étiquette « VIENT D'AVANT » est retirée ; le combat hérité se reconnaît à sa classe et à son bouton Annuler. */
+      assert.ok(ligne(w).querySelector('.mf-car-slot.herite .mf-car-annule'));
     } finally { w.close(); }
   }
 });
@@ -103,13 +104,13 @@ test('Monde lot 5 T4 — souris clavier et modification ne contournent pas la co
       w.eval('CL.mgmtCarteRenonce()');
     }
     /* ==== [ANCRE: MONDE_LOT5_T4_REPRISE_CLAVIER] — Monde lot 5 T4 ==== */
-    for(let i=0;i<5;i++) {
+    for(const [touche,i] of [['4',3],['5',4]]) {
       const fixture=partie();
       try {
-        carteValide(fixture,i);
+        carteValide(fixture);
         const p=photo(fixture),rng=fixture.eval('SEED');
         fixture.eval('G.screen="mgmt_carte"');
-        fixture.document.dispatchEvent(new fixture.KeyboardEvent('keydown',{key:String(i+1),bubbles:true,cancelable:true}));
+        fixture.document.dispatchEvent(new fixture.KeyboardEvent('keydown',{key:touche,bubbles:true,cancelable:true}));
         assert.equal(photo(fixture),p); assert.equal(fixture.eval('MGMT_CART.annulation.i'),i);
         assert.equal(fixture.eval('sauvegardesT4'),0); assert.equal(fixture.eval('SEED'),rng);
       } finally { fixture.close(); }
@@ -151,9 +152,11 @@ test('Monde lot 5 T4 — un combat joueur reste retirable sans contrariété hé
   try {
     w.eval('var paireT4={...G.mgmt.card.main[0]}; CL.mgmtUnbook(0); CL.mgmtCarteConfirmeAnnulation();');
     assert.ok(w.eval('mgmtBookMain(G.mgmt,paireT4.a,paireT4.b)'));
-    const i=w.eval('G.mgmt.card.main.length-1'),n=i+1;
+    /* Monde lot 15 : le combat du joueur s'insère devant le combat d'ouverture restant. */
+    const i=w.eval('G.mgmt.card.main.findIndex(f=>f.herite===undefined)'),n=w.eval('G.mgmt.card.main.length');
+    assert.equal(i,0);
     assert.equal(w.eval(`G.mgmt.card.main[${i}].herite`),undefined);
-    assert.equal(w.eval(`mgmtCarteCombatLigne(G.mgmt,${i},G.mgmt.card.main[${i}],{courant:-1}).includes('mf-car-annule')`),false);
+    assert.equal(w.eval(`mgmtCarteCombatLigne(G.mgmt,${i},G.mgmt.card.main[${i}],{courant:-1},${i}).includes('mf-car-annule')`),false);
     w.eval(`CL.mgmtUnbook(${i})`);
     assert.equal(w.eval('G.mgmt.card.main.length'),n-1);
     assert.equal(w.eval('MGMT_CART.annulation'),undefined);

@@ -435,6 +435,34 @@ function mgmtEngaged(m,f){
   return on(m.card.main)||on(m.card.prelims);
 }
 
+/* ==== [ANCRE: MONDE_LOT15_OUVERTURES] — Monde lot 15 ====
+   Décision d'Anthony du 17/10/2026 : la carte laissée par l'ancien matchmaker se compose des préliminaires et des DEUX premiers combats de la carte
+   principale (places 4 et 5, joués en ouverture) ; le joueur compose les trois plus gros (places 1, 2, 3). Sans trou dans m.card.main (tableau dense) :
+   les combats d'ouverture portent `ouverture:true` et restent à la FIN du tableau ; un combat que le joueur pose s'insère devant eux. La place d'un
+   combat s'en déduit (mgmtCartePlaceDe) : les siens en tête (place = rang dans le tableau), les ouvertures aux dernières places. */
+/** Nombre de combats d'ouverture de la carte principale (ils sont en fin de tableau). */
+function mgmtCarteNbOuvertures(m){
+  const main=m&&m.card&&Array.isArray(m.card.main)?m.card.main:[];
+  let n=0; for(let i=main.length-1;i>=0&&main[i]&&main[i].ouverture===true;i--) n++;
+  return n;
+}
+/** Pose un combat dans la carte principale : devant les combats d'ouverture, sinon en fin. */
+function mgmtCarteInserer(m,fight){
+  m.card.main.splice(m.card.main.length-mgmtCarteNbOuvertures(m),0,fight);
+}
+/** Les places de la carte principale, dans l'ordre d'affichage (place 1 = combat principal) : {fight,index} ou null pour une place à composer. */
+function mgmtCartePlaces(m){
+  const main=m&&m.card&&Array.isArray(m.card.main)?m.card.main:[];
+  const taille=Number.isSafeInteger(m&&m.card&&m.card.sizeMain)&&m.card.sizeMain>0?m.card.sizeMain:MGMT_MAIN_SIZE;
+  const nO=mgmtCarteNbOuvertures(m), propres=main.length-nO, places=[];
+  for(let p=0;p<taille;p++){
+    if(p<propres) places.push({fight:main[p],index:p});
+    else if(p>=taille-nO) places.push({fight:main[propres+(p-(taille-nO))],index:propres+(p-(taille-nO))});
+    else places.push(null);
+  }
+  return places;
+}
+
 /**
  * Pose un combat du joueur en carte principale : premier emplacement libre
  * (append — les places se remplissent dans l'ordre), slot:'main', cycle
@@ -463,7 +491,7 @@ function mgmtBookMain(m,aid,bid){
   if(titre&&!mgmtCanTitle(m,{a:fa.id,b:fb.id})) return null;
   const fight={a:fa.id,b:fb.id,cycle:m.cycle,slot:'main'};
   if(titre) fight.title=true;
-  m.card.main.push(fight);
+  mgmtCarteInserer(m,fight);
   mgmtPromote(m,fa); mgmtPromote(m,fb);
   mgmtPropositionsPerimees(m);
   /* §T3 : une fois la cinquième place posée, Leïla propose aussitôt les

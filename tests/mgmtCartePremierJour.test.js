@@ -15,7 +15,8 @@ test('Monde lot 5 T3 — seuls les combats hérités portent la provenance', () 
   const win = partie();
   try {
     const n = win.eval('G.mgmt.card.main.length');
-    assert.ok(n === 2 || n === 3);
+    /* Monde lot 15 — décision d'Anthony du 17/10/2026 : l'ancien matchmaker laisse exactement deux combats d'ouverture (places 4 et 5). */
+    assert.equal(n, 2);
     assert.equal(win.eval('mgmtSoireesJoueur(G.mgmt)'), 0);
     assert.equal(win.eval('G.mgmt.card.main.every(f=>f.herite===true)'), true);
     assert.equal(win.eval(`(function(){const m=G.mgmt;for(const a of mgmtCartRows(m)){
@@ -23,12 +24,15 @@ test('Monde lot 5 T3 — seuls les combats hérités portent la provenance', () 
       const b=mgmtCartRows(m).find(b=>b.id!==a.id&&b.div===a.div&&mgmtSelectable(m,b,a.id));
       if(b&&mgmtBookMain(m,a.id,b.id)) return true;
     }return false;})()`), true);
-    assert.equal(win.eval('G.mgmt.card.main.at(-1).herite'), undefined);
-    const html = win.eval('G.mgmt.card.main.map((f,i)=>mgmtCarteCombatLigne(G.mgmt,i,f,{courant:-1})).join("")');
+    /* Les combats que le joueur pose se placent devant les combats d'ouverture, qui restent en fin de carte. */
+    assert.equal(win.eval('G.mgmt.card.main[0].herite'), undefined);
+    assert.equal(win.eval('G.mgmt.card.main.at(-1).herite'), true);
+    const html = win.eval('G.mgmt.card.main.map((f,i)=>mgmtCarteCombatLigne(G.mgmt,i,f,{courant:-1},i)).join("")');
     const host = win.document.createElement('div'); host.innerHTML = html;
-    assert.equal(host.querySelectorAll('.mf-car-provenance').length, n);
-    assert.equal(host.querySelector('.mf-car-provenance em').textContent, "VIENT D'AVANT");
-    assert.equal(win.eval('MGMT_CARTE_PROVENANCE.relu'), false);
+    /* Décision d'Anthony du 17/10/2026 : l'étiquette « VIENT D'AVANT » est retirée ; le combat hérité reste reconnaissable à son bouton Annuler. */
+    assert.equal(host.querySelectorAll('.mf-car-provenance').length, 0);
+    assert.ok(!/VIENT D'AVANT/.test(host.textContent));
+    assert.equal(host.querySelectorAll('.mf-car-slot.herite .mf-car-annule').length, 2);
   } finally { win.close(); }
 });
 
@@ -60,13 +64,13 @@ test('Monde lot 5 T3 — modifier un combat efface sa provenance', () => {
   const win = partie();
   try {
     assert.equal(win.eval(`(function(){const m=G.mgmt, f=m.card.main[0], a=f.a,b=f.b;
-      mgmtRemoveMain(m,0);return !!mgmtBookMain(m,a,b)&&m.card.main.at(-1).herite===undefined;})()`), true);
+      mgmtRemoveMain(m,0);const poses=mgmtBookMain(m,a,b);return !!poses&&poses.herite===undefined&&poses.ouverture===undefined&&m.card.main[0]===poses&&m.card.main.at(-1).ouverture===true;})()`), true);
     assert.equal(win.eval(`(function(){const m=G.mgmt;
       // Fixture de titre vacant : aucune ceinture ni combat de titre concurrent.
       m.hist=[];m.facts=m.facts.filter(f=>f.k!=='title_initial'&&f.k!=='title_fight');
       m.card.main.forEach(f=>delete f.title);
       const i=m.card.main.findIndex(f=>f.herite&&mgmtCanTitle(m,f));
       if(i<0) return false;const f=m.card.main[i];const next=!f.title;
-      return mgmtSetTitle(m,i,next)&&f.herite===undefined;})()`), true);
+      return mgmtSetTitle(m,i,next)&&f.herite===undefined&&f.ouverture===true;})()`), true);
   } finally { win.close(); }
 });

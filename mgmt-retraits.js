@@ -135,7 +135,7 @@ function mgmtRetraitRemonter(m){
   if(!o||!o.remonter) return false;
   const fight=m.card.prelims[0];
   m.card.prelims=m.card.prelims.slice(1);
-  m.card.main.push({a:fight.a,b:fight.b,cycle:m.cycle,slot:'main'});
+  mgmtCarteInserer(m,{a:fight.a,b:fight.b,cycle:m.cycle,slot:'main'});
   mgmtAddFact(m,{c:m.cycle,k:'retrait_sortie',s:'remonter'});
   mgmtComposerPrelims(m);
   return true;
