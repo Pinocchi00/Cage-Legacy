@@ -121,26 +121,62 @@ keysRegister('mgmt_duo',{Enter(){CL.mgmtDuoQGAction();},Escape(){CL.mgmtDuoQuitt
 
 /* ==== [ANCRE: DUO_T3_ECRANS] — Monde lot 19 T10 ==== */
 let MGMT_DUO_EFFECTIF_DIV=null;
+/** L'effectif d'un joueur, au balisage exact de la planche DuoEffectif : onglets de catégorie, liste (rang, nom, bilan, âge, forme, état, contrat). */
 function mgmtDuoEffectifHtml(){
   const m=G.mgmt,d=m.duo,cote=MGMT_DUO_EFFECTIF_COTE,orgId=cote==='a'?mgmtPredecesseurOrgId(m):d.b;
-  const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId),divisions=allDivisions(),divId=MGMT_DUO_EFFECTIF_DIV||divisions[0].id;
-  const effectif=mgmtDuoEffectif(m,cote,divId);
-  const lignes=effectif.map(f=>`<div class="mf-duo-effectif-ligne"><strong>${esc(f.rang||'—')}</strong><span>${esc(f.name)}</span><span>${esc(`${f.W}-${f.L}-${f.D}`)}</span><span>${esc(`${f.age} ans`)}</span><span>${f.forme.map(x=>`<i>${esc(x==='v'?'V':x==='d'?'D':'N')}</i>`).join('')}</span><span>${esc(({dispo:'Disponible',blesse:'Blessé',libre:'Sans contrat',refuse:'Refuse de combattre'})[f.etat]||'')}</span><span>${esc(`${f.restants} combats au contrat`)}</span></div>`).join('')||'<p>Aucun combattant</p>';
-  const onglets=divisions.map((x,i)=>`<button class="${x.id===divId?'actif':''}" onclick="CL.mgmtDuoEffectifDivision('${esc(x.id)}')">${esc(mgmtDivisionLabel(x.id))}</button>`).join('');
-  return mfEcran(`<div class="mf-duo-effectif"><div class="mf-duo-effectif-tete"><strong>${esc(d.noms[cote])}</strong><span>${esc(org&&org.nom||'')}</span></div><nav>${onglets}</nav><div class="mf-duo-effectif-liste"><div class="mf-duo-effectif-ligne mf-duo-effectif-entete"><strong>Rang</strong><strong>Combattant</strong><strong>Bilan</strong><strong>Âge</strong><strong>Forme</strong><strong>État</strong><strong>Contrat</strong></div>${lignes}</div></div>`,{barre:'logo',plaque:'Effectif',libelle:`${esc(org&&org.nom||'')} · ${esc(d.noms[cote])}`,touches:[{ks:['Tab'],t:'Autre effectif'},{ks:['Échap'],t:'Retour'}]});
+  const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId)||{nom:''},divisions=allDivisions(),divId=MGMT_DUO_EFFECTIF_DIV||divisions[0].id;
+  const divCourante=divisions.find(x=>x.id===divId)||divisions[0];
+  const ETAT={dispo:'Disponible',blesse:'Blessé',libre:'Sans contrat',refuse:'Refuse de combattre'};
+  const groupe=divisions.filter(x=>x.gender===divCourante.gender);
+  const autreGroupe=divisions.filter(x=>x.gender!==divCourante.gender);
+  const onglets=`<div class="onglets">${groupe.map(x=>`<div class="ong${x.id===divCourante.id?' on':''}" onclick="CL.mgmtDuoEffectifDivision('${duoEsc(x.id)}')" style="cursor:pointer">${duoEsc(duoMaj(String(mgmtDivisionLabel(x.id)).replace('Poids ','').replace(' féminin','')))}</div>`).join('')}${autreGroupe.length?`<div class="ong" onclick="CL.mgmtDuoEffectifDivision('${duoEsc(autreGroupe[0].id)}')" style="cursor:pointer">${divCourante.gender==='F'?'MASCULINS':'FÉMININES'} ›</div>`:''}</div>`;
+  const lignes=mgmtDuoEffectif(m,cote,divCourante.id).slice(0,8).map(f=>`<div class="ef-l"><div class="ef-r T">${duoEsc(f.rang||'—')}</div><div class="ef-n l1">${duoEsc(f.name)}</div><div class="ef-b l1">${duoEsc(`${f.W}-${f.L}-${f.D}`)}</div><div class="ef-a l1 t2">${duoEsc(f.age)} ans</div>${duoForme(f.forme)}<div class="ef-e l2 ${duoEsc(f.etat)}">${ETAT[f.etat]||''}</div><div class="ef-c l2">${f.restants?`${duoEsc(f.restants)} combat${f.restants>1?'s':''} au contrat`:'—'}</div></div>`).join('');
+  const autre=cote==='a'?'b':'a';
+  const versus=`${duoEsc(duoMaj(d.noms.a))} <span class="t2">×</span> ${duoEsc(duoMaj(d.noms.b))}`;
+  const vue=`<div class="ef ${cote==='a'?'j1':'j2'} vis">
+      <div class="ef-tete"><div class="tour-mini ${cote==='a'?'j1':'j2'}">${duoEsc(duoMaj(d.noms[cote]))}</div><div class="T ef-org">${duoEsc(duoMaj(org.nom))}</div><div class="l2">Tab : l’effectif ${duoEsc(mgmtDuoDe(d.noms[autre]))}</div></div>
+      ${onglets}
+      ${duoPan('ef-pan',`<div class="ef-l ef-h"><div class="ef-r lab">Rang</div><div class="ef-n lab">Combattant</div><div class="ef-b lab">Bilan</div><div class="ef-a lab">Âge</div><div class="forme lab">Forme</div><div class="ef-e lab">État</div><div class="ef-c lab">Contrat</div></div>${lignes}`)}
+    </div>`;
+  const touches=duoTouches([[['←','→'],'Catégorie'],[['Tab'],'L’autre joueur',false,'CL.mgmtDuoEffectifAutre()'],[['Échap'],'Retour au QG',false,'CL.mgmtDuoEffectifRetour()']]);
+  return duoCadre(`${duoEntete(`Effectif · ${versus}`,`<div class="plaque"><span class="T">${duoEsc(duoMaj(mgmtDivisionLabel(divCourante.id)))}</span></div>`)}
+  <main class="contenu large">${vue}</main>
+  ${touches}`);
 }
 SCREENS.mgmt_duo_effectif=mgmtDuoEffectifHtml;
 Object.assign(CL,{mgmtDuoEffectifDivision(id){if(allDivisions().some(d=>d.id===id)){MGMT_DUO_EFFECTIF_DIV=id;render();}},mgmtDuoEffectifAutre(){MGMT_DUO_EFFECTIF_COTE=MGMT_DUO_EFFECTIF_COTE==='a'?'b':'a';render();},mgmtDuoEffectifRetour(){CL.go('mgmt_duo');}});
 keysRegister('mgmt_duo_effectif',{Escape(){CL.mgmtDuoEffectifRetour();},Tab(){CL.mgmtDuoEffectifAutre();},ArrowLeft(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i-1+a.length)%a.length].id);},ArrowRight(){const a=allDivisions(),i=a.findIndex(d=>d.id===MGMT_DUO_EFFECTIF_DIV);CL.mgmtDuoEffectifDivision(a[(i+1)%a.length].id);}});
 
+let MGMT_DUO_HISTO_I=0;
+/** Les super cartes passées, au balisage du bilan (planche DuoBilan) : la carte choisie en liste de six combats, toutes les cartes à droite. */
 function mgmtDuoHistoHtml(){
-  const m=G.mgmt,d=m.duo,cartes=(d.cartes||[]).slice().reverse();
-  const html=cartes.map(c=>`<article class="mf-duo-histo-carte"><h2>Super carte ${esc(c.n)} · ${esc(mgmtJourDateTexte(c.jour))} · ${esc(d.noms.a)} ${esc(c.combats.filter(x=>x.winner==='A').length)} – ${esc(c.combats.filter(x=>x.winner==='B').length)} ${esc(d.noms.b)}</h2>${c.combats.map(x=>`<div>${esc(x.na)} – ${esc(x.nb)} · ${esc(mgmtDivisionLabel(x.div))} · ${esc(x.winner==='A'?d.noms.a:x.winner==='B'?d.noms.b:'Égalité')} · ${esc(mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds}))} · R${esc(x.round)}<button onclick="CL.mgmtDuoHistoRevoir(${esc(x.h)})">Revoir</button></div>`).join('')}</article>`).join('')||'<p>Aucune super carte passée</p>';
-  return mfEcran(`<div class="mf-duo-histo">${html}</div>`,{barre:'logo',plaque:'Super cartes passées',libelle:`${esc(d.noms.a)} × ${esc(d.noms.b)}`,touches:[{ks:['Échap'],t:'Retour'}]});
+  const m=G.mgmt,d=m.duo,cartes=d.cartes.slice().reverse();
+  const i=Math.max(0,Math.min(MGMT_DUO_HISTO_I,cartes.length-1)), c=cartes[i];
+  const versus=`${duoEsc(duoMaj(d.noms.a))} <span class="t2">×</span> ${duoEsc(duoMaj(d.noms.b))}`;
+  const sc=mgmtDuoScore(m);
+  if(!c) return duoCadre(`${duoEntete(`Super cartes passées · ${versus}`,duoDroiteSaison(sc.saison,sc.numero))}<main class="contenu large"><div class="l1 t2">Aucune super carte jouée.</div></main>${duoTouches([[['Échap'],'Retour au QG',false,'CL.mgmtDuoHistoRetour()']])}`);
+  const scoreA=c.combats.filter(x=>x.winner==='A').length, scoreB=c.combats.filter(x=>x.winner==='B').length;
+  const g=c.gagnant==='a'||c.gagnant==='b'?c.gagnant:null;
+  const orgA=mgmtOrgNom(m), orgB=mgmtOrgNom(mgmtDuoPartie(m,'b'));
+  const lignes=c.combats.map((x,k)=>{
+    const meth=mgmtSuMethodeFamille({nul:x.winner==='D',family:x.family,round:x.round,rounds:x.rounds});
+    return `<div class="bi-l"><div class="lab bi-num">${k===5?'PRINCIPAL':'COMBAT '+(6-k)}</div><div class="bi-n l1 ${x.winner==='A'?'gagne':''}"><span class="pt j1"></span>${duoEsc(x.na)}</div><div class="bi-n l1 ${x.winner==='B'?'gagne':''}"><span class="pt j2"></span>${duoEsc(x.nb)}</div><div class="bi-m l2">${duoEsc(mgmtDivisionLabel(x.div))} · ${duoEsc(meth)}</div><div class="aller" onclick="CL.mgmtDuoHistoRevoir(${x.h})" style="cursor:pointer">Revoir ›</div></div>`;
+  }).join('');
+  const liste=cartes.map((k,n)=>{
+    const a=k.combats.filter(x=>x.winner==='A').length, b=k.combats.filter(x=>x.winner==='B').length;
+    return `<div class="ligne${n===i?' focus':''}" onclick="CL.mgmtDuoHistoCarte(${n})" style="cursor:pointer"><div class="l1">Super carte ${duoEsc(k.n)} · ${duoEsc(mgmtJourDateTexte(k.jour).toLowerCase())}</div><div class="l1">${a} – ${b}</div></div>`;
+  }).join('');
+  const corps=`${duoEntete(`Super cartes passées · ${versus}`,duoDroiteSaison(sc.saison,sc.numero))}
+  <main class="contenu large bi"><div class="bi-bandeau ${g?g==='a'?'j1':'j2':'nul'}"><span class="T">${g?`${duoEsc(duoMaj(d.noms[g]))} REMPORTE LA SUPER CARTE ${duoEsc(c.n)}`:`ÉGALITÉ À LA SUPER CARTE ${duoEsc(c.n)}`}</span><span class="T bi-sc">${scoreA} – ${scoreB}</span></div>
+    <div class="bi-cols">${duoPan('bi-liste',`${duoTitre('LES SIX COMBATS',duoEsc(mgmtJourDateTexte(c.jour)))}<div class="bi-l bi-h"><div class="lab bi-num"></div><div class="bi-n lab">${duoEsc(duoMaj(d.noms.a))} · ${duoEsc(duoMaj(orgA))}</div><div class="bi-n lab">${duoEsc(duoMaj(d.noms.b))} · ${duoEsc(duoMaj(orgB))}</div><div class="bi-m lab">Comment</div><div class="aller"></div></div>${lignes}`)}
+      ${duoPan('bi-saison',`${duoTitre('LES SUPER CARTES',`${cartes.length} JOUÉE${cartes.length>1?'S':''}`)}${liste}`)}</div></main>
+  ${duoTouches([[['↑','↓'],'Super carte'],[['Échap'],'Retour au QG',false,'CL.mgmtDuoHistoRetour()']])}`;
+  return duoCadre(corps);
 }
 SCREENS.mgmt_duo_histo=mgmtDuoHistoHtml;
-Object.assign(CL,{mgmtDuoHistoRevoir(h){const trace=G.mgmt.hist[h];if(trace)mgmtCombatOuvrir({trace,etiquette:'SUPER CARTE',retour:'mgmt_duo_histo',salle:{taux:1,prog:1}});},mgmtDuoHistoRetour(){CL.go('mgmt_duo');}});
-keysRegister('mgmt_duo_histo',{Escape(){CL.mgmtDuoHistoRetour();}});
+Object.assign(CL,{mgmtDuoHistoRevoir(h){const trace=G.mgmt.hist[h];if(trace)mgmtCombatOuvrir({trace,etiquette:'SUPER CARTE',retour:'mgmt_duo_histo',salle:{taux:1,prog:1}});},mgmtDuoHistoRetour(){CL.go('mgmt_duo');},
+  mgmtDuoHistoCarte(n){const max=G.mgmt.duo.cartes.length-1;MGMT_DUO_HISTO_I=Math.max(0,Math.min(max,n));render();}});
+keysRegister('mgmt_duo_histo',{Escape(){CL.mgmtDuoHistoRetour();},ArrowUp(){CL.mgmtDuoHistoCarte(MGMT_DUO_HISTO_I-1);},ArrowDown(){CL.mgmtDuoHistoCarte(MGMT_DUO_HISTO_I+1);}});
 
 /** La création à deux, au balisage exact de la planche DuoCreation (maquettes/duo) : les noms, puis le choix de J1, puis celui de J2. */
 function mgmtDuoNouvelleHtml(){

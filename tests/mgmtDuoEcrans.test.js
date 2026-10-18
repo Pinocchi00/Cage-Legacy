@@ -174,6 +174,8 @@ test('Monde lot 19 T52 — enchères : balisage Duo, lot, prix, caisses et état
   w.eval('G.mgmt.duo.encheres.lots[0].fini=false; MGMT_DUO_UI.refus=true; render();');
   assert.match(w.document.body.textContent,/Pas assez en caisse/);
   assert.match(w.document.body.innerHTML,/class="en-refus l1"/);
+});
+
 test('Duo T10 — effectif : Tab bascule de J2 à J1 puis revient à J2',()=>{
   const w=newGameWindow();
   w.eval(`setSeed(20261018); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); mgmtDuoCreer(G.mgmt,'mma-korner',{a:'Anthony',b:'François'}); CL.mgmtDuoOuvrirEffectif('b');`);
