@@ -176,19 +176,38 @@ function mgmtPredecesseurBooker(m,k,cfg,limite,contrats,reclamations){
 
 /* ==== [ANCRE: MONDE_LOT5_T1_CARTE_HERITEE] — Monde lot 5 T1 ==== */
 /** Prépare sans jouer la carte principale transmise au joueur ; exige G.mgmt===m.
+ *  Monde lot 15 — décision d'Anthony du 17/10/2026 : l'ancien matchmaker laisse EXACTEMENT deux combats, les deux premiers de la carte principale
+ *  (places 4 et 5, joués en ouverture) ; le joueur compose les trois plus gros. Des combats logiques (deux combattants voisins au classement de leur
+ *  catégorie, dans le milieu du classement), jamais un champion, jamais de titre en jeu. Un seul tirage seedé choisit la catégorie de départ.
  * @param {object} m Partie après recalage et passage de témoin.
  * @param {number} k Indice de la prochaine soirée.
- * @param {object} [reglages] Politique du prédécesseur.
- * @returns {number} Nombre de combats signés (2 ou 3 en génération normale). */
+ * @param {object} [reglages] Politique du prédécesseur (non lue : les combats d'ouverture n'en dépendent pas).
+ * @returns {number} Nombre de combats d'ouverture signés (2 en génération normale). */
 function mgmtPredecesseurCarteHeritee(m,k,reglages){
   if(typeof G==='undefined'||!G||G.mgmt!==m) throw new Error('mgmtPredecesseurCarteHeritee : G.mgmt doit être la partie préparée');
-  const cfg=Object.assign(mgmtPredecesseurReglages(mgmtPredecesseurOrgId(m)),reglages||{});
-  const limite=2+Math.floor(rnd()*2);
-  /* ==== [ANCRE: MONDE_LOT5_T3_PROVENANCE] — Monde lot 5 T3 ==== */
-  const existants=new Set(m.card.main);
-  const r=mgmtPredecesseurBooker(m,k,cfg,limite,true);
-  for(const fight of m.card.main){ if(!existants.has(fight)) fight.herite=true; }
-  return r.reclames+r.tetes;
+  void k; void reglages;
+  const divs=allDivisions().map(d=>d.id), depart=Math.floor(rnd()*divs.length), champions=mgmtChampionIds(m);
+  const admissible=f=>!!f&&!f.libre&&!mgmtIsRetired(f)&&mgmtContratRestants(f)>0&&!champions.has(f.id);
+  /* La paire la plus voisine au classement parmi les quatre suivants d'un combattant (jamais un champion). */
+  const voisine=liste=>{ let b=null;
+    for(let i=0;i+1<liste.length;i++) for(let j=i+1;j<liste.length&&j<=i+4;j++){
+      if(!mgmtSelectable(m,liste[j].f,liste[i].f.id)) continue;
+      const ecart=liste[j].r-liste[i].r; if(!b||ecart<b.ecart) b={a:liste[i].f,b:liste[j].f,ecart}; }
+    return b; };
+  let posees=0;
+  for(const milieu of [true,false]){
+    for(let t=0;t<divs.length&&posees<2;t++){
+      const div=divs[(depart+t)%divs.length];
+      if(!milieu&&m.card.main.some(x=>{ const f=mgmtFighterById(m,x.a); return f&&f.div===div; })) continue;
+      const rows=m.roster.filter(f=>f.div===div&&admissible(f)&&mgmtSelectable(m,f,null)).map(f=>({f,r:mgmtDivisionRank(m,f)||999}))
+        .filter(x=>!milieu||(x.r>=6&&x.r<=20)).sort((x,y)=>x.r-y.r||(x.f.id<y.f.id?-1:1));
+      const paire=voisine(rows); if(!paire) continue;
+      const fight=mgmtBookMain(m,paire.a.id,paire.b.id);
+      if(fight){ fight.herite=true; fight.ouverture=true; posees++; }
+    }
+    if(posees>=2) break;
+  }
+  return posees;
 }
 
 /* ==== [ANCRE: MONDE_LOT5_T2_DEMANDES] — Monde lot 5 T2 ==== */

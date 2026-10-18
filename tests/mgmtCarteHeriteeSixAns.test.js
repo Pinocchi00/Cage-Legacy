@@ -31,7 +31,8 @@ function matrice() {
         })())`));
         const contexte = `${graine} / ${org}`;
         assert.deepEqual([r.ev,r.passe,r.joueur,r.cycle,r.jour], [62,62,0,63,0], contexte);
-        assert.ok(r.main===2||r.main===3, contexte+' : carte partielle');
+        /* Monde lot 15 — décision d'Anthony du 17/10/2026 : l'ancien matchmaker laisse exactement deux combats d'ouverture (places 4 et 5). */
+        assert.equal(r.main, 2, contexte+' : deux combats hérités');
         assert.equal(r.distinct, r.main*2, contexte+' : doublons');
         for (const cle of ['agenda','metier','valide']) assert.equal(r[cle], true, contexte+' : '+cle);
         cartes.push(r.carte);

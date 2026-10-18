@@ -92,7 +92,8 @@ function mgmtCarteBanniere(a,b,div,rounds,retour){
     +`<div class="mf-car-vs">VS</div></div>`;
 }
 
-function mgmtCarteCombatLigne(m,i,fight,etatMain){
+/** Une place de la carte principale. @param {number} i la PLACE affichée (0 = combat principal) ; @param {number} idx l'index du combat dans m.card.main (-1 si la place est à composer) : les actions portent l'index réel. */
+function mgmtCarteCombatLigne(m,i,fight,etatMain,idx){
   const nom=MGMT_CARTE_NOMS[i]||('Combat '+(i+1));
   const cur=etatMain.courant===i;
   if(fight){
@@ -100,23 +101,23 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
     const titre=fight.title===true;
     /* ==== [ANCRE: MONDE_LOT5_T4_AVERTISSEMENT] — Monde lot 5 T4 ==== */
     const attente=MGMT_CART.annulation;
-    if(attente&&attente.m===m&&attente.i===i&&attente.fight===fight&&fight.herite===true){
+    if(attente&&attente.m===m&&attente.i===idx&&attente.fight===fight&&fight.herite===true){
       const texte=MGMT_CARTE_ANNULATION.avertissement.replace('{a}',fa?fa.name:'?').replace('{b}',fb?fb.name:'?');
       return `<div class="mf-car-slot mf-car-annulation"><div class="mf-car-slot-c"><div class="mf-car-avertissement">${esc(texte)}</div>`
         +`<div class="mf-car-annulation-actions"><button type="button" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtCarteConfirmeAnnulation()">${esc(MGMT_CARTE_ANNULATION.confirmer)}</button>`
         +`<button type="button" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtCarteRenonce()">${esc(MGMT_CARTE_ANNULATION.renoncer)}</button></div></div></div>`;
     }
     /* ==== [ANCRE: MONDE_LOT5_T3_ETIQUETTE] — Monde lot 5 T3 ==== */
-    const provenance=fight.herite===true?`<div class="mf-car-slot-t mf-car-provenance"><em>${esc(MGMT_CARTE_PROVENANCE.texte)}</em></div>`:'';
+    /* Monde lot 15 — décision d'Anthony du 17/10/2026 : l'étiquette « VIENT D'AVANT » est retirée ; le combat reste annulable (bouton Annuler). */
     /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — elle est en jeu d'office, le joueur ne la retire pas. */
     const champ=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set(), force=titre&&(champ.has(fight.a)||champ.has(fight.b));
-    return `<div class="mf-car-slot confirme${provenance?' herite':''}${cur?' choisi':''}"><div class="mf-car-num" onclick="CL.mgmtCarteModifie(${i})">${i+1}</div><div class="mf-car-slot-c">`
-      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
-      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`+provenance
+    return `<div class="mf-car-slot confirme${fight.herite===true?' herite':''}${cur?' choisi':''}"><div class="mf-car-num" onclick="CL.mgmtCarteModifie(${idx})">${i+1}</div><div class="mf-car-slot-c">`
+      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Titre en jeu — le champion ne combat que pour sa ceinture">TITRE</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${idx},${!titre})">${titre?'TITRE':'SANS TITRE'}</button>`:'')}</div>`
+      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${idx})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`
       /* ==== [ANCRE: MONDE_LOT5_T4_ACTION] — Monde lot 5 T4 ==== */
-      +(fight.herite===true?`<button type="button" class="mf-car-annule" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${i})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')
+      +(fight.herite===true?`<button type="button" class="mf-car-annule" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${idx})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')
       /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_SLOT] — Monde lot 3 T5 ==== */
-      +`<button type="button" class="mf-pr-entree" onclick="CL.mgmtCartePresentation(${i})">Présentation</button></div><div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
+      +`<button type="button" class="mf-pr-entree" onclick="CL.mgmtCartePresentation(${idx})">Présentation</button></div><div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${idx})">×</button></div></div>`;
   }
   const pre=etatMain.pre===i;
   const pa=pre?mgmtFighterById(m,MGMT_CART.pick):null, pb=pre?etatMain.vise:null;
@@ -172,8 +173,10 @@ function scr_mgmt_carte_liste(){
   const main=Array.isArray(m.card.main)?m.card.main:[];
   const taille=(Number.isSafeInteger(m.card.sizeMain)&&m.card.sizeMain>0)?m.card.sizeMain:MGMT_MAIN_SIZE;
   const plein=main.length>=taille;
-  const etat={courant:plein?-1:main.length,pre:(pickF&&!plein)?main.length:-1,vise:(pickF&&vise&&vise.id!==pickF.id)?vise:null};
-  const slots=[]; for(let i=0;i<taille;i++) slots.push(mgmtCarteCombatLigne(m,i,main[i]||null,etat));
+  /* Monde lot 15 : les combats d'ouverture laissés par l'ancien matchmaker occupent les dernières places ; la prochaine place à composer est la première libre. */
+  const places=mgmtCartePlaces(m), prochaine=places.findIndex(x=>!x);
+  const etat={courant:plein?-1:prochaine,pre:(pickF&&!plein)?prochaine:-1,vise:(pickF&&vise&&vise.id!==pickF.id)?vise:null};
+  const slots=places.map((pl,i)=>mgmtCarteCombatLigne(m,i,pl?pl.fight:null,etat,pl?pl.index:-1));
   const legende=`<div class="mf-car-legende"><span>${MF_SVG_CONFIRME}Confirmé</span><span><i class="mf-eff-q">?</i>À confirmer</span><span>À composer</span></div>`;
   const gauche=mfPanneau(`<div class="mf-car-t">LA CARTE</div><div class="mf-car-slots">${slots.join('')}</div>${legende}`,'normal','mf-car-g');
 
@@ -181,7 +184,7 @@ function scr_mgmt_carte_liste(){
   const A=pickF||vise, B=pickF?etat.vise:null;
   const ca=mgmtCarteColonne(m,A), cb=mgmtCarteColonne(m,B);
   const duo=!!(A&&B);
-  const rounds=duo?(main.length===0?5:3):'';
+  const rounds=duo?(prochaine===0?5:3):'';   /* le combat principal (place 1) se dispute en cinq rounds */
   const peutTitre=duo&&typeof mgmtCanTitle==='function'&&mgmtCanTitle(m,{a:A.id,b:B.id});
   const enjeux=[]; if(duo&&(ca.styleBilan||cb.styleBilan)) enjeux.push('D’après son bilan : le style'); if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
   /* Corrections du 08/10, 2.3 et 2.4 : ce que le booking sait de la paire, dit avant la confirmation. */
@@ -265,7 +268,7 @@ function mgmtCarteDossierHtml(m){
   const colonnes=lignes.slice(0,3).map((p,k)=>`<section><h2>${esc(p.titre)}</h2>${p.lignes.slice(0,k===0?3:3).map(x=>`<div class="mf-dos-ligne">${esc(x.texte)}</div>`).join('')}</section>`).join('');
    const banniere=`<div class="mf-dos-banner mf-pr-banniere"><div class="mf-dossier-nom"><small>${esc(mfNet(f.first||''))}</small><strong>${esc(mfNet(f.last||f.name||''))}</strong></div><aside><span>PALMARÈS<b>${esc(`${f.W||0}-${f.L||0}-${f.D||0}`)}</b></span><span>CHEZ ${esc(mgmtOrgNom(m).toUpperCase())}<b>${rang===null||rang<0?'—':'N°'+rang}</b></span><span>CONTRAT<b>${esc(mgmtCarteContratTexte(f))}</b></span></aside></div>`;
   const voisine=(delta,label)=>{const nd=pile[(i+delta+pile.length)%pile.length],nf=etape===2?nd.adversaire:nd.combattant,nr=nd.raison?mgmtRaisonLignes(m,nd.raison,[nd.combattant,nd.adversaire]):null;return `<button aria-label="${label==='SUIVANT'?'Suivant':'Précédent'}" class="mf-dos-voisin" onclick="CL.mgmtDossierIndex(${delta})"><span>DOSSIER ${label}</span><b>${esc(mfNet(nf.first||''))}</b><strong>${esc(nom(nf))}</strong><small>${nr?nr.l1:''}</small><i>${delta<0?'‹':'›'}</i></button>`;};
-  const main=m.card.main||[],libre=main.findIndex(x=>!x),k=MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1,nomCourant=nom(dossierF);
+  const main=m.card.main||[],libre=mgmtCartePlaces(m).findIndex(x=>!x),k=MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1,nomCourant=nom(dossierF);
   const introPhrase=etape===1?PHRASES_LEILA.etape1.texte.replace('{n}',pile.length).replace('{k}',k):PHRASES_LEILA.etape2.texte.replace('{nom}',esc(nom(combattant))).replace('{n}',pile.length);
    const steps=[['LE COMBATTANT',1],['SON ADVERSAIRE',2],['SUR LA CARTE',3]].map(([label,n])=>{const s=n<etape?'fait':n===etape?'courant':'avenir';return `<div class="mf-dos-step ${s}" aria-label="ÉTAPE ${n} ${label}"><i>${s==='fait'?'✓':n}</i><span><small>ÉTAPE ${n}</small><b>${label}</b></span></div>`;}).join('<b class="mf-dos-chevron">›</b>');
   const top=`<div class="mf-dos-intro"><div><b>LEÏLA, VOTRE ADJOINTE</b><strong>${introPhrase}</strong><span>Combat ${k} · ${esc(String(mgmtDivisionLabel(combattant.div)||'').toLowerCase())} · ${etape===2?`${esc(nom(combattant))} contre ?`:`${m.roster.filter(x=>x.div===combattant.div&&mgmtSelectable(m,x,null)).length} combattants libres`} · la carte en est à ${main.filter(Boolean).length} combats sur ${m.card.sizeMain||MGMT_MAIN_SIZE}</span></div><div class="mf-dos-steps">${steps}</div></div>`;
@@ -325,7 +328,7 @@ function mgmtCarteDossiersEcran(m){
     {ks:['L'],t:'Liste',onclick:'CL.mgmtDossierListe()'}
   ];
   if(MGMT_CART.etape===2) touches.push({ks:['P'],t:'Présentation',onclick:'CL.mgmtDossierPresentation()'});
-  const main=m.card.main||[],libre=main.findIndex(x=>!x);
+  const main=m.card.main||[],libre=mgmtCartePlaces(m).findIndex(x=>!x);
   const opts={barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:'LES DOSSIERS DE LEÏLA',compteur:`COMBAT ${MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches};
   return mfEcran? (typeof mfEcran==='function'? mfEcran(html,opts): html) : html;
 }
@@ -343,6 +346,11 @@ Object.assign(CL,{
     if(!CL.mgmtCarteDossiersActiver()) MGMT_CART.cible=null;
   },
   /* ==== [ANCRE: MONDE_LOT5_T4_CONFIRMATION] — Monde lot 5 T4 ==== */
+  /** Monde lot 15 : la touche d'une place (1 à 5) retire le combat de CETTE place, pas celui qui occupe l'index du même numéro dans le tableau (les combats d'ouverture sont aux dernières places). */
+  mgmtUnbookPlace(place){
+    if(!G||!G.mgmt) return;
+    const pl=mgmtCartePlaces(G.mgmt)[place]; if(pl) CL.mgmtUnbook(pl.index);
+  },
   mgmtCarteAnnule(i,modifier){
     const m=G&&G.mgmt, fight=m&&m.card.main[i];
     if(!fight||fight.herite!==true||MGMT_CART.annulation) return;
@@ -499,7 +507,7 @@ Object.assign(CL,{
       const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
       const d=pile[MGMT_CART.index||0];
       if(!d) return;
-      if(Number.isSafeInteger(MGMT_CART.cible)&&(MGMT_CART.cible<0||MGMT_CART.cible>=(m.card.sizeMain||MGMT_MAIN_SIZE)||m.card.main[MGMT_CART.cible])) { MGMT_CART.mode='liste'; MGMT_CART.cible=null; render(); return; }
+      if(Number.isSafeInteger(MGMT_CART.cible)&&(MGMT_CART.cible<0||MGMT_CART.cible>=(m.card.sizeMain||MGMT_MAIN_SIZE)||mgmtCartePlaces(m)[MGMT_CART.cible])) { MGMT_CART.mode='liste'; MGMT_CART.cible=null; render(); return; }
       if(MGMT_CART.etape===1){
         MGMT_CART.dossierCombattant=d.combattant&&d.combattant.id;
         // nouvelle pile adversaires
@@ -517,7 +525,7 @@ Object.assign(CL,{
       if(!cid||!aid) return;
       if(Number.isSafeInteger(MGMT_CART.cible)){
         const index=MGMT_CART.cible;
-        if(m.card.main[index]||!mgmtSelectable(m,mgmtFighterById(m,cid),null)||!mgmtSelectable(m,mgmtFighterById(m,aid),cid)) return;
+        if(mgmtCartePlaces(m)[index]||!mgmtSelectable(m,mgmtFighterById(m,cid),null)||!mgmtSelectable(m,mgmtFighterById(m,aid),cid)) return;
         /* Superviseur, 15/10/2026 : la carte principale est une liste sans trou (mgmtUnbook et les retraits la resserrent) ;
            le combat d'un dossier prend la première place libre, celle que mgmtBookMain lui donne. L'ancien code écrivait
            main[index] après un pop et laissait un trou ([vide, combat]) quand la place visée n'était pas la première libre. */
@@ -554,11 +562,11 @@ keysRegister('mgmt_carte',{
   D(){ CL.mgmtCarteProposer(); },
   f(){ CL.mgmtCarteFiche(); },
   F(){ CL.mgmtCarteFiche(); },
-  '1'(){ CL.mgmtUnbook(0); },
-  '2'(){ CL.mgmtUnbook(1); },
-  '3'(){ CL.mgmtUnbook(2); },
-  '4'(){ CL.mgmtUnbook(3); },
-  '5'(){ CL.mgmtUnbook(4); },
+  '1'(){ CL.mgmtUnbookPlace(0); },
+  '2'(){ CL.mgmtUnbookPlace(1); },
+  '3'(){ CL.mgmtUnbookPlace(2); },
+  '4'(){ CL.mgmtUnbookPlace(3); },
+  '5'(){ CL.mgmtUnbookPlace(4); },
   Escape(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
   Backspace(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
 });

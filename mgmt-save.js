@@ -331,6 +331,8 @@ function validateMgmt(raw){
       if(!mgmtCombatRaisonValide(f,false)) return false;
       /* ==== [ANCRE: MONDE_LOT5_T3_VALIDATION] — Monde lot 5 T3 ==== */
       if(f.herite!==undefined&&(f.herite!==true||f.slot!=='main')) return false;
+      /* Monde lot 15 : un combat d'ouverture (places 4 et 5 laissées par l'ancien matchmaker) est en carte principale. */
+      if(f.ouverture!==undefined&&(f.ouverture!==true||f.slot!=='main')) return false;
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
@@ -689,6 +691,8 @@ function mgmtRepair(m){
     for(const slot of ['main','prelims']){
       m.card[slot]=m.card[slot].filter(x=>ids.has(x.a)&&ids.has(x.b));
     }
+    /* Monde lot 15 : les combats d'ouverture restent en fin de carte principale (partition stable). */
+    m.card.main=m.card.main.filter(x=>x.ouverture!==true).concat(m.card.main.filter(x=>x.ouverture===true));
   }
   if(Array.isArray(m.pile)){
     for(const a of m.pile){

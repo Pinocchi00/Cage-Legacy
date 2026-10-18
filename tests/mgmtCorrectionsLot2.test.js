@@ -36,7 +36,7 @@ test('2.2 — La ceinture en jeu ou non se lit sur la carte, sans doute possible
     m.card.main=[{a:f.id,b:adv.id,cycle:m.cycle,slot:'main'}]; G.screen='mgmt_carte'; render(); })()`);
   assert.match(app(win).textContent,/SANS TITRE/,'éteint, le bouton dit « sans titre »');
   win.eval(`mgmtSetTitle(G.mgmt,0,true); render();`);
-  assert.match(app(win).textContent,/TITRE EN JEU/);
+  assert.match(app(win).textContent,/TITRE/); /* Décision d'Anthony du 17/10/2026 : « TITRE EN JEU » est raccourci en « TITRE » (l'infobulle garde « Titre en jeu »). */
   const T=win.eval(`MGMT_SOIREE_TEXTES.sansCeinture`);
   assert.equal(T,'Ceinture pas en jeu');
   const e=win.eval(`mgmtSoireeEnjeux(G.mgmt,{titre:false,h:0,trace:{c:0,a:{id:'x'},b:{id:'y'}}},{rang:'C',last:'X',attente:0},{rang:'N°1',last:'Y',attente:0})`);
