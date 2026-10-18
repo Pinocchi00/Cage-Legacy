@@ -1,38 +1,331 @@
 "use strict";
 /* ==== [ANCRE: DUO_T1_MOTEUR] — Duo T1, docs/lots/DUO-T1.md ==== */
-const MGMT_DUO_PERIODE = 91;
-const MGMT_DUO_COMBATS = 6;
-const MGMT_DUO_CARTES_SAISON = 4;
-const MGMT_DUO_NOM_MAX = 16;
-const MGMT_DUO_GAIN = { vainqueur: 200, perdant: 50, nul: 125 };
+/* Une partie Duo est une partie management normale en monde vivant : J1 (côté 'a') joue l'organisation de la partie (`m`),
+   J2 (côté 'b') une des sept autres (`m.orgs[m.duo.b]`). Les soirées ordinaires des deux côtés sont jouées par le matchmaker
+   automatique ; tous les MGMT_DUO_PERIODE jours, une super carte de six combats J1 contre J2.
+   Aucun DOM, aucun Math.random(), rien d'affiché ici. Toute lecture ou écriture du côté 'b' passe par mgmtDuoAvec. */
 
-/** Indique si une partie est une partie Duo. */
-function mgmtDuoActif(m) { return !!(m && m.duo && typeof m.duo === 'object'); }
-/** Renvoie la partie correspondant au joueur. */
-function mgmtDuoPartie(m, cote) { return !mgmtDuoActif(m) ? null : cote === 'a' ? m : cote === 'b' ? m.orgs[m.duo.b] || null : null; }
-/** Exécute une opération dans le contexte de partie attendu et restaure J1 même en cas d'erreur. */
-function mgmtDuoAvec(m, cote, fn) { try { G.mgmt = mgmtDuoPartie(m, cote); return fn(G.mgmt); } finally { G.mgmt = m; } }
-/** Initialise l'état Duo si les organisations sont valides. */
-function mgmtDuoCreer(m, orgIdB, noms) {
-  if (!m || m.mondeVivant !== true || !m.orgs || !m.orgs[orgIdB] || orgIdB === mgmtPredecesseurOrgId(m)) return false;
-  const valeurs = noms || {};
-  const nom = (x, defaut) => String(x == null ? '' : x).trim().slice(0, MGMT_DUO_NOM_MAX) || defaut;
-  m.duo = { v: 1, b: orgIdB, noms: { a: nom(valeurs.a, 'Joueur 1'), b: nom(valeurs.b, 'Joueur 2') }, periode: MGMT_DUO_PERIODE,
-    prochaine: m.cal.jour + MGMT_DUO_PERIODE, etape: 'attente', reperes: { ca: m.cycle, cb: m.orgs[orgIdB].cycle },
-    draft: null, encheres: null, soiree: null, cartes: [] };
+const MGMT_DUO_PERIODE=91;          // décision d'Anthony du 18/10/2026 : tous les trois mois
+const MGMT_DUO_COMBATS=6;           // six combats, le dernier en cinq rounds
+const MGMT_DUO_CARTES_SAISON=4;     // une saison = un an = quatre super cartes
+const MGMT_DUO_NOM_MAX=16;          // longueur d'un nom de joueur
+const MGMT_DUO_GAIN={vainqueur:200,perdant:50,nul:125};   // k€ — la super carte rapporte le plus au vainqueur
+const MGMT_DUO_ETAPES=['attente','encheres','draft','pret','soiree','bilan'];
+const MGMT_DUO_PAS_MAX=20;          // garde-fou de mgmtDuoAvancer
+
+/** Vrai si la partie est une partie Duo. @returns {boolean} */
+function mgmtDuoActif(m){
+  return !!(m&&m.duo&&typeof m.duo==='object');
+}
+
+/** La partie d'un côté : `m` pour 'a', l'organisation vivante de J2 pour 'b', sinon null. @returns {?object} */
+function mgmtDuoPartie(m,cote){
+  if(!mgmtDuoActif(m)) return null;
+  if(cote==='a') return m;
+  if(cote==='b') return (m.orgs&&m.orgs[m.duo.b])||null;
+  return null;
+}
+
+/** Exécute `fn(partie)` avec G.mgmt posé sur la partie du côté demandé, et rend G.mgmt à J1 dans tous les cas.
+ *  @returns {*} le résultat de `fn` */
+function mgmtDuoAvec(m,cote,fn){
+  try{
+    G.mgmt=mgmtDuoPartie(m,cote);
+    return fn(G.mgmt);
+  }finally{
+    G.mgmt=m;
+  }
+}
+
+/** Le côté opposé. @returns {string} */
+function mgmtDuoAutre(cote){
+  return cote==='a'?'b':'a';
+}
+
+/** Pose `m.duo`. Refuse (sans rien toucher) hors monde vivant, pour une organisation inconnue ou celle de la partie.
+ *  @param {object} m @param {string} orgIdB identifiant de l'organisation de J2 @param {{a:string,b:string}} [noms]
+ *  @returns {boolean} */
+function mgmtDuoCreer(m,orgIdB,noms){
+  if(!m||m.mondeVivant!==true||!m.orgs||!m.orgs[orgIdB]) return false;
+  if(orgIdB===mgmtPredecesseurOrgId(m)) return false;
+  const valeurs=noms||{};
+  const nom=(x,defaut)=>String(x==null?'':x).trim().slice(0,MGMT_DUO_NOM_MAX)||defaut;
+  m.duo={
+    v:1,
+    b:orgIdB,
+    noms:{a:nom(valeurs.a,'Joueur 1'),b:nom(valeurs.b,'Joueur 2')},
+    periode:MGMT_DUO_PERIODE,
+    prochaine:m.cal.jour+MGMT_DUO_PERIODE,
+    etape:'attente',
+    reperes:{ca:m.cycle,cb:m.orgs[orgIdB].cycle},
+    draft:null,
+    encheres:null,
+    soiree:null,
+    cartes:[]
+  };
   return true;
 }
-/** Jour de prochaine soirée de J1. */
-function mgmtDuoProchaineSoiree(m) { return m.cal.prochaines && m.cal.prochaines[0] ? m.cal.prochaines[0].jour : m.cal.jour + MGMT_EVENT_WEEKS * 7; }
-/** Ouvre un draft avec priorité au perdant de la carte précédente. */
-function mgmtDuoDraftOuvrir(m) { const last = m.duo.cartes[m.duo.cartes.length - 1], premier = last && last.gagnant === 'a' ? 'b' : last && last.gagnant === 'b' ? 'a' : 'b'; m.duo.draft = { premier, tour: premier, attente: 'place', combats: [] }; }
-/** Avance le temps d'un pas déterministe jusqu'à la super carte ou soirée ordinaire. */
-function mgmtDuoAvancerPas(m){if(G.mgmt!==m||!mgmtDuoActif(m)||m.duo.etape!=='attente')return{termine:true};if(mgmtDuoProchaineSoiree(m)<=m.duo.prochaine){const a=m.treasury,b=mgmtDuoPartie(m,'b').treasury;const r=mgmtPredecesseurSoiree(m,m.eventsPlayed,mgmtPredecesseurReglages(mgmtPredecesseurOrgId(m)));m.treasury=a;mgmtDuoPartie(m,'b').treasury=b;if(r&&r.jouee)return{termine:false,jour:m.cal.jour,cible:m.duo.prochaine};}m.cal.jour=Math.max(m.cal.jour,m.duo.prochaine);mgmtAdvanceRosterAges(m);m.duo.etape='draft';mgmtDuoDraftOuvrir(m);saveMgmt();return{termine:true};}
-/** Avance jusqu'à la fin du pas courant avec un garde-fou. */
-function mgmtDuoAvancer(m){let r;for(let i=0;i<20;i++){r=mgmtDuoAvancerPas(m);if(r.termine)return r;}return r||{termine:true};}
-/** Classement saisonnier et historique des victoires. */
-function mgmtDuoScore(m){const n=m.duo.cartes.length,saison=Math.floor(n/MGMT_DUO_CARTES_SAISON)+1,act=m.duo.cartes.slice(Math.floor(n/MGMT_DUO_CARTES_SAISON)*MGMT_DUO_CARTES_SAISON);return{saison,numero:act.length+1,a:act.filter(x=>x.gagnant==='a').length,b:act.filter(x=>x.gagnant==='b').length,total:{a:m.duo.cartes.filter(x=>x.gagnant==='a').length,b:m.duo.cartes.filter(x=>x.gagnant==='b').length}};}
-/** Résumé des soirées ordinaires d'une partie depuis le repère. */
-function mgmtDuoResume(m,cote){const partie=mgmtDuoPartie(m,cote),cycle=cote==='a'?m.duo.reperes.ca:m.duo.reperes.cb;return mgmtDuoAvec(m,cote,p=>{const ts=(p.hist||[]).filter(t=>t.slot==='main'&&t.c>cycle&&!t.duo).sort((a,b)=>b.c-a.c).slice(0,12);return{soirees:new Set(ts.map(t=>t.c)).size,combats:ts.map(t=>({a:t.a.name,b:t.b.name,div:t.a.div,winner:t.winner,family:t.family,round:t.round,rounds:t.rounds})),champions:allDivisions().map(d=>({div:d.id,id:(mgmtSplitTitle(partie,d.id)||{}).id||null}))};});}
-/** Rejoue une trace de super carte dans le contexte des deux organisations. */
-function mgmtDuoRejouer(t){if(!t||!t.duo||!G.mgmt)return null;const m=G.mgmt,sous=m.orgs[t.duo.b],saved=SEED;try{setSeed(t.seed);const a=mgmtDuoAvec(m,'a',()=>mgmtFightReady(mgmtTraceLine(t.a),t.duo.ca)),b=mgmtDuoAvec(m,'b',()=>mgmtFightReady(mgmtTraceLine(t.b),t.duo.cb));return simulateFight(a,b,t.rounds);}finally{setSeed(saved);G.mgmt=m;}}
+
+/** Le jour de la prochaine soirée ordinaire de J1. @returns {number} */
+function mgmtDuoProchaineSoiree(m){
+  const p=m.cal&&m.cal.prochaines&&m.cal.prochaines[0];
+  if(p&&Number.isFinite(p.jour)) return p.jour;
+  return m.cal.jour+MGMT_EVENT_WEEKS*7;
+}
+
+/** Ouvre le draft : le perdant de la dernière carte place le premier ; à la première carte ou après une égalité, J2. */
+function mgmtDuoDraftOuvrir(m){
+  const derniere=m.duo.cartes[m.duo.cartes.length-1];
+  let premier='b';
+  if(derniere&&derniere.gagnant==='a') premier='b';
+  else if(derniere&&derniere.gagnant==='b') premier='a';
+  m.duo.draft={premier,tour:premier,attente:'place',combats:[]};
+}
+
+/** Un pas du temps : soit la soirée ordinaire de J1 (et, avec elle, celles des sept organisations), soit l'ouverture du draft
+ *  quand la super carte est due. La caisse des deux joueurs reste stable pendant les soirées ordinaires.
+ *  @returns {{termine:boolean,jour?:number,cible?:number}} */
+function mgmtDuoAvancerPas(m){
+  if(G.mgmt!==m||!mgmtDuoActif(m)||m.duo.etape!=='attente') return {termine:true};
+  if(mgmtDuoProchaineSoiree(m)<=m.duo.prochaine){
+    const caisseA=m.treasury;
+    const caisseB=mgmtDuoPartie(m,'b').treasury;
+    const compte=mgmtPredecesseurSoiree(m,m.eventsPlayed,mgmtPredecesseurReglages(mgmtPredecesseurOrgId(m)));
+    m.treasury=caisseA;
+    mgmtDuoPartie(m,'b').treasury=caisseB;
+    if(!compte||compte.jouee!==false) return {termine:false,jour:m.cal.jour,cible:m.duo.prochaine};
+  }
+  m.cal.jour=Math.max(m.cal.jour,m.duo.prochaine);
+  mgmtAdvanceRosterAges(m);
+  m.duo.etape='draft';
+  mgmtDuoDraftOuvrir(m);
+  saveMgmt();
+  return {termine:true};
+}
+
+/** Tous les pas jusqu'à l'ouverture du draft (tests, outils). @returns {{termine:boolean}} */
+function mgmtDuoAvancer(m){
+  let r={termine:true};
+  for(let i=0;i<MGMT_DUO_PAS_MAX;i++){
+    r=mgmtDuoAvancerPas(m);
+    if(r.termine) return r;
+  }
+  return r;
+}
+
+/* ==== [ANCRE: DUO_T1_DRAFT] — « je place, tu réponds » ==== */
+
+/** Les combattants disponibles d'un côté, hors ceux déjà placés dans le draft : copies `{id,name,div,W,L,D,age,rang}`,
+ *  par catégorie, puis rang (sans rang en dernier), puis identifiant. @returns {Array} */
+function mgmtDuoDisponibles(m,cote){
+  const pris=new Set();
+  const draft=m.duo.draft;
+  for(const c of (draft?draft.combats:[])){
+    if(c[cote]) pris.add(c[cote]);
+  }
+  const ordre=allDivisions().map(d=>d.id);
+  return mgmtDuoAvec(m,cote,partie=>{
+    const lignes=[];
+    for(const f of partie.roster){
+      if(mgmtIsRetired(f)||pris.has(f.id)||!mgmtAvailable(partie,f,null)) continue;
+      const rang=mgmtDivisionRank(partie,f,'organization');
+      lignes.push({id:f.id,name:f.name,div:f.div,W:f.W,L:f.L,D:f.D,age:f.age,rang:Number.isFinite(rang)&&rang>0?rang:null});
+    }
+    lignes.sort((x,y)=>{
+      const d=ordre.indexOf(x.div)-ordre.indexOf(y.div);
+      if(d!==0) return d;
+      const rx=x.rang===null?Infinity:x.rang, ry=y.rang===null?Infinity:y.rang;
+      if(rx!==ry) return rx<ry?-1:1;
+      return x.id<y.id?-1:x.id>y.id?1:0;
+    });
+    return lignes;
+  });
+}
+
+/** Les disponibles d'un côté dont la catégorie a au moins un disponible en face. @returns {Array} */
+function mgmtDuoPlacables(m,cote){
+  const enFace=new Set(mgmtDuoDisponibles(m,mgmtDuoAutre(cote)).map(f=>f.div));
+  return mgmtDuoDisponibles(m,cote).filter(f=>enFace.has(f.div));
+}
+
+/** Le joueur dont c'est le tour place un combattant : un combat naît, l'autre doit répondre. @returns {boolean} */
+function mgmtDuoPlacer(m,id){
+  if(!mgmtDuoActif(m)||m.duo.etape!=='draft'||!m.duo.draft||m.duo.draft.attente!=='place') return false;
+  const draft=m.duo.draft;
+  const ligne=mgmtDuoPlacables(m,draft.tour).find(f=>f.id===id);
+  if(!ligne) return false;
+  const autre=mgmtDuoAutre(draft.tour);
+  draft.combats.push({place:draft.tour,[draft.tour]:id,[autre]:null,div:ligne.div});
+  draft.tour=autre;
+  draft.attente='reponse';
+  saveMgmt();
+  return true;
+}
+
+/** L'autre joueur répond dans la même catégorie. Au sixième combat le draft est prêt ; sinon celui qui vient de répondre
+ *  place le suivant. @returns {boolean} */
+function mgmtDuoRepondre(m,id){
+  if(!mgmtDuoActif(m)||m.duo.etape!=='draft'||!m.duo.draft||m.duo.draft.attente!=='reponse') return false;
+  const draft=m.duo.draft;
+  const combat=draft.combats[draft.combats.length-1];
+  const ligne=mgmtDuoDisponibles(m,draft.tour).find(f=>f.id===id);
+  if(!combat||!ligne||ligne.div!==combat.div) return false;
+  combat[draft.tour]=id;
+  if(draft.combats.length===MGMT_DUO_COMBATS){
+    m.duo.etape='pret';
+    draft.attente=null;
+  }else{
+    draft.attente='place';
+  }
+  saveMgmt();
+  return true;
+}
+
+/** Défait le dernier geste du draft : une réponse, ou un placement. Depuis 'pret', défait la dernière réponse.
+ *  @returns {boolean} faux s'il n'y a rien à défaire */
+function mgmtDuoAnnuler(m){
+  if(!mgmtDuoActif(m)||!m.duo.draft) return false;
+  const draft=m.duo.draft;
+  const etape=m.duo.etape;
+  if(etape!=='draft'&&etape!=='pret') return false;
+  const dernier=draft.combats[draft.combats.length-1];
+  if(!dernier) return false;
+  if(etape==='pret'||draft.attente==='place'){
+    dernier[draft.tour]=null;
+    draft.attente='reponse';
+    m.duo.etape='draft';
+  }else{
+    draft.combats.pop();
+    draft.tour=dernier.place;
+    draft.attente='place';
+  }
+  saveMgmt();
+  return true;
+}
+
+/* ==== [ANCRE: DUO_T1_COMBAT] — le combat entre deux organisations ==== */
+
+/** Vrai si les six combats du draft sont jouables des deux côtés. @returns {boolean} */
+function mgmtDuoPret(m){
+  const draft=m.duo.draft;
+  if(!draft||draft.combats.length!==MGMT_DUO_COMBATS) return false;
+  const sous=mgmtDuoPartie(m,'b');
+  for(const c of draft.combats){
+    const fa=mgmtFighterById(m,c.a), fb=mgmtFighterById(sous,c.b);
+    if(!fa||!fb) return false;
+    if(!mgmtAvailable(m,fa,null)||!mgmtAvailable(sous,fb,null)) return false;
+  }
+  return true;
+}
+
+/** Joue les six combats, applique les suites de chaque côté, verse l'argent, archive la carte et sauvegarde, avant tout
+ *  affichage. Rien n'est muté si un combat n'est plus jouable. @returns {?object} la carte archivée, ou null */
+function mgmtDuoJouer(m){
+  if(G.mgmt!==m||!mgmtDuoActif(m)||m.duo.etape!=='pret'||!mgmtDuoPret(m)) return null;
+  const sous=mgmtDuoPartie(m,'b');
+  const combats=[];
+  const idsA=[], idsB=[];
+  let victoiresA=0, victoiresB=0;
+  m.duo.draft.combats.forEach((c,i)=>{
+    const fa=mgmtFighterById(m,c.a), fb=mgmtFighterById(sous,c.b);
+    const rounds=i===MGMT_DUO_COMBATS-1?5:3;
+    const traceA=mgmtTraceSide(fa), traceB=mgmtTraceSide(fb);
+    const seed=SEED;
+    const ra=mgmtDuoAvec(m,'a',p=>mgmtFightReady(fa,p.cycle));
+    const rb=mgmtDuoAvec(m,'b',p=>mgmtFightReady(fb,p.cycle));
+    const res=simulateFight(ra,rb,rounds);
+    const famille=mgmtMethodFamily(res.method,res.winner);
+    const round=Number.isSafeInteger(res.round)?res.round:rounds;
+    const t={c:m.cycle,slot:'main',seed,rounds,a:traceA,b:traceB,winner:res.winner,family:famille,round,
+      duo:{b:m.duo.b,ca:m.cycle,cb:sous.cycle}};
+    m.hist.push(t);
+    const h=m.hist.length-1;
+    sous.hist.push(Object.assign(JSON.parse(JSON.stringify(t)),{c:sous.cycle}));
+    mgmtDuoAvec(m,'a',p=>mgmtApplyFight(p,fa,fb,res,'A'));
+    mgmtDuoAvec(m,'b',p=>mgmtApplyFight(p,fb,fa,res,'B'));
+    mgmtRangsInvalider(m);
+    mgmtRangsInvalider(sous);
+    if(res.winner==='A') victoiresA++;
+    else if(res.winner==='B') victoiresB++;
+    idsA.push(c.a);
+    idsB.push(c.b);
+    combats.push({a:c.a,b:c.b,na:fa.name,nb:fb.name,div:c.div,winner:res.winner,family:famille,round,rounds,h});
+  });
+  mgmtDuoAvec(m,'a',p=>mgmtContratsApresSoiree(p,idsA));
+  mgmtDuoAvec(m,'b',p=>mgmtContratsApresSoiree(p,idsB));
+  const gagnant=victoiresA>victoiresB?'a':victoiresB>victoiresA?'b':'nul';
+  const gain=cote=>gagnant==='nul'?MGMT_DUO_GAIN.nul:(gagnant===cote?MGMT_DUO_GAIN.vainqueur:MGMT_DUO_GAIN.perdant);
+  const carte={n:m.duo.cartes.length+1,jour:m.cal.jour,combats,gagnant,gains:{a:gain('a'),b:gain('b')}};
+  m.duo.cartes.push(carte);
+  m.treasury+=carte.gains.a;
+  sous.treasury+=carte.gains.b;
+  m.duo.reperes={ca:m.cycle,cb:sous.cycle};
+  m.duo.prochaine+=m.duo.periode;
+  m.duo.draft=null;
+  m.duo.etape='soiree';
+  m.duo.soiree={i:0};
+  saveMgmt();
+  return carte;
+}
+
+/** Passe au combat suivant de la soirée ; après le sixième, le bilan. */
+function mgmtDuoSoireeSuivante(m){
+  if(!mgmtDuoActif(m)||m.duo.etape!=='soiree'||!m.duo.soiree) return;
+  m.duo.soiree.i++;
+  if(m.duo.soiree.i>=MGMT_DUO_COMBATS) m.duo.etape='bilan';
+  saveMgmt();
+}
+
+/** Referme le bilan : retour à l'attente de la prochaine super carte. */
+function mgmtDuoTerminer(m){
+  if(!mgmtDuoActif(m)||m.duo.etape!=='bilan') return;
+  m.duo.etape='attente';
+  m.duo.soiree=null;
+  saveMgmt();
+}
+
+/** Rejoue un combat de super carte avec les deux organisations : la RNG est remise à la graine de la trace avant les deux
+ *  profils (même ordre qu'au combat) ; SEED et G.mgmt sont rendus dans tous les cas. @returns {?object} le résultat du moteur */
+function mgmtDuoRejouer(t){
+  if(!t||!t.duo||!G.mgmt) return null;
+  const m=G.mgmt;
+  if(!mgmtDuoActif(m)||!m.orgs||!m.orgs[t.duo.b]) return null;
+  const sauvee=SEED;
+  try{
+    setSeed(t.seed);
+    const ra=mgmtDuoAvec(m,'a',()=>mgmtFightReady(mgmtTraceLine(t.a),t.duo.ca));
+    const rb=mgmtDuoAvec(m,'b',()=>mgmtFightReady(mgmtTraceLine(t.b),t.duo.cb));
+    return simulateFight(ra,rb,t.rounds);
+  }finally{
+    setSeed(sauvee);
+    G.mgmt=m;
+  }
+}
+
+/* ==== [ANCRE: DUO_T1_LECTURES] — lectures pures pour les écrans ==== */
+
+/** Le score : saison en cours (une saison = quatre cartes), numéro de la prochaine carte, cartes gagnées dans la saison et
+ *  au total. @returns {{saison:number,numero:number,a:number,b:number,total:{a:number,b:number}}} */
+function mgmtDuoScore(m){
+  const cartes=m.duo.cartes;
+  const debut=Math.floor(cartes.length/MGMT_DUO_CARTES_SAISON)*MGMT_DUO_CARTES_SAISON;
+  const saison=cartes.slice(debut);
+  const gagnees=(liste,cote)=>liste.filter(c=>c.gagnant===cote).length;
+  return {saison:Math.floor(cartes.length/MGMT_DUO_CARTES_SAISON)+1,numero:saison.length+1,
+    a:gagnees(saison,'a'),b:gagnees(saison,'b'),total:{a:gagnees(cartes,'a'),b:gagnees(cartes,'b')}};
+}
+
+/** Ce qui s'est passé dans la partie d'un côté depuis la dernière super carte : les douze combats les plus récents (hors
+ *  super cartes), le nombre de soirées et les champions de chaque catégorie. @returns {{soirees:number,combats:Array,champions:Array}} */
+function mgmtDuoResume(m,cote){
+  const repere=cote==='a'?m.duo.reperes.ca:m.duo.reperes.cb;
+  return mgmtDuoAvec(m,cote,partie=>{
+    const traces=(partie.hist||[]).filter(t=>t.slot==='main'&&t.c>repere&&!t.duo).reverse();
+    const combats=traces.slice(0,12).map(t=>({a:t.a.name,b:t.b.name,div:t.a.div,winner:t.winner,family:t.family,round:t.round,rounds:t.rounds}));
+    const champions=allDivisions().map(d=>{
+      const f=mgmtSplitTitle(partie,d.id);
+      return {div:d.id,id:(f&&f.id)||null,nom:(f&&f.name)||null};
+    });
+    return {soirees:new Set(traces.map(t=>t.c)).size,combats,champions};
+  });
+}

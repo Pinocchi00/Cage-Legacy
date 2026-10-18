@@ -155,8 +155,9 @@ function mgmtPasseLigne(t){
   return r;
 }
 /** L'entrée de m.hist d'un combat du passé, depuis sa ligne et l'effectif (par identifiant), ou null. Pur. */
-function mgmtPasseEntree(par,r){
-  const fa=par.get(r[2]), fb=par.get(r[7]);
+function mgmtPasseEntree(par,r,t){
+  /* Duo T1 : un combattant absent de l'effectif (super carte de la partie à deux, recrue partie ailleurs) se lit sur le côté de la trace elle-même. */
+  const fa=par.get(r[2])||(t&&t.a&&t.a.id===r[2]?t.a:null), fb=par.get(r[7])||(t&&t.b&&t.b.id===r[7]?t.b:null);
   if(!fa||!fb) return null;
   return {c:r[0],slot:r[1]===1?'main':'prelim',seed:0,rounds:r[15],a:mgmtPasseCote(fa,r[3],r[4],r[5],r[6]),b:mgmtPasseCote(fb,r[8],r[9],r[10],r[11]),
     winner:'ABD'[r[12]],family:r[13],round:r[14],p:true};
@@ -167,7 +168,7 @@ function mgmtPasseAlleger(m,gardes){
   const par=new Map(m.roster.map(f=>[f.id,f]));
   const hist=[];
   for(const t of m.hist){
-    const r=mgmtPasseLigne(t), e=r&&mgmtPasseEntree(par,r);
+    const r=mgmtPasseLigne(t), e=r&&mgmtPasseEntree(par,r,t);
     if(!e||!mgmtValidFightTrace(e)) return false;
     hist.push(e);
   }
@@ -195,6 +196,10 @@ function mgmtPasseCompacter(m){
   if(!p||!Number.isSafeInteger(p.nHist)||!Number.isSafeInteger(p.nFacts)||p.nHist+p.nFacts===0) return null;
   if(m.hist.length<p.nHist||m.facts.length<p.nFacts) return null;
   const s=[], si=new Map(), g=[], gi=new Map(), h=[], f=[];
+  /* Duo T1 : un combat allégé dont un combattant n'est plus à l'effectif (super carte, recrue partie ailleurs) ne se redéploierait pas (le nom se lit sur l'effectif) :
+     la part du passé reste alors telle quelle sur le disque, sans archive compacte. */
+  const present=new Set(m.roster.map(x=>x.id));
+  for(let i=0;i<p.nHist;i++){ const t=m.hist[i]; if(!t||!t.a||!t.b||!present.has(t.a.id)||!present.has(t.b.id)) return null; }
   const S=x=>{ let i=si.get(x); if(i===undefined){ i=s.length; si.set(x,i); s.push(x); } return i; };
   for(let i=0;i<p.nHist;i++){
     const t=m.hist[i], r=t&&t.p===true?mgmtPasseLigne(t):null;
