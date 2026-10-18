@@ -96,7 +96,8 @@ test('Monde lot 3 T5 — trente contenus distincts et six ouvertures',()=>{
 });
 test('Monde lot 12 T3 — Ses points forts ne répète pas l’histoire',()=>{
   const w=passe();
-  const r=lire(w,`const m=G.mgmt,t=m.hist.find(x=>x.winner!=='D'&&(x.family==='ko'||x.family==='sub')),id=t[t.winner==='A'?'a':'b'].id,h=m.hist.indexOf(t),v={mode:'combattant',ids:[id],h,page:0,nom:0};
+  const r=lire(w,`/* Monde lot 16 : le premier vainqueur par KO ou soumission n'a plus forcément de points forts (bilans et âges changés) ; on prend le premier qui en a. */
+    const m=G.mgmt,t=m.hist.find((x,i)=>x.winner!=='D'&&(x.family==='ko'||x.family==='sub')&&mgmtPointsFortLignes(m,x[x.winner==='A'?'a':'b'].id,i).length>0),id=t[t.winner==='A'?'a':'b'].id,h=m.hist.indexOf(t),v={mode:'combattant',ids:[id],h,page:0,nom:0};
     const c=mgmtPresentationLignes(m,v),fort=c.panneaux.find(x=>x.titre==='SES POINTS FORTS');
     return {fort:fort&&fort.lignes.map(x=>x.texte),points:mgmtPointsFortLignes(m,id,h).map(x=>x.texte),forces:mgmtLectureStyle(mgmtPresentationLigneCycle(m,id,h)).lignes};`);
   assert.ok(r.fort);assert.deepEqual(r.fort,r.points);assert.ok(r.forces.every(x=>r.fort.includes(x)));
