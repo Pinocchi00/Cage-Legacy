@@ -1,6 +1,6 @@
 # Monde lot 19 T53 — mode Duo : le draft, au balisage exact de la planche
 
-Branche : `duo-p3` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p3`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
+Branche : `duo-p2` (la branche courante de ce dossier ; copie de travail de `duo-int` ; commits ICI, sur `duo-p2`, le superviseur fusionne ensuite). **Pourquoi cette tranche** : l'écran existe et fonctionne mais il n'a PAS l'apparence de la planche validée par Anthony (page nue, texte géant). Le superviseur a posé la base : `ui-duo.css` (la feuille des planches portée telle quelle sous `.duo-s`, GÉNÉRÉE par `tools/duo-css.js` : ne la modifie jamais, n'écris aucun autre CSS), `mgmt-duo-ui.js` (aides `duoCadre`, `duoEntete`, `duoPan`, `duoTitre`, `duoForme`, `duoTouches`, `duoEuros`, `duoEsc`, `duoMaj`…) et le **QG déjà porté** : `mgmtDuoQGHtml` dans `mgmt-duo-ecrans.js` est ton MODÈLE (même démarche).
 Règles communes du lot 19 : cherche toi-même dans le code (grep/glob) ; **tout texte nouveau est `relu:false`** ; le jeu tutoie ; aucun `Math.random()` ; aucune modification du moteur de combat (`engine-combat*.js`) ; un test existant n'est réécrit que pour une décision citée ; `node tools/_bump.js` sur chaque `.js` modifié ; `node tools/verif-versions.js origin/main` ; la version de sauvegarde `MGMT_SAVE_VERSION` ne change pas (champ facultatif `m.duo`) ; **lance les tests UN FICHIER À LA FOIS** (`node --test tests/<fichier>.test.js`), jamais `npm run check` en entier ; si un test reste rouge ou si tu bloques, commite l'état avec « (inachevé) » dans le message et décris précisément le blocage dans le compte rendu : jamais de travail non commité.
 **Tu ne t'arrêtes pas au premier obstacle ; tu ne rends « inachevé » qu'après avoir réellement essayé, avec le blocage précis.**
 
@@ -16,3 +16,13 @@ Le HTML des trois états (place, reponse, pret) contient `duo-s`, les onglets (`
 
 ## Fin
 `node tools/_bump.js` sur chaque `.js` et `.css` touché, `node tools/verif-versions.js origin/main`, commit `Monde lot 19 T53 : <titre court>` (le numéro T53 est obligatoire dans le message).
+
+## Compte rendu
+
+- `mgmt-duo-draft.js` : écran du draft réécrit avec le balisage de DuoDraft, dans `duoCadre`, et données issues de l'état Duo ; classement, réponse filtrée, six cases, commande de lancement et touches conservés.
+- `index.html` : retrait du lien à la feuille CSS propre au draft ; version du script montée par `_bump.js`.
+- `ui-duo-draft.css` : supprimée, ses règles spécifiques ne sont plus utilisées.
+- `tests/mgmtDuoDraft.test.js` : assertions ajoutées dans « Duo T4 — draft : catégorie de réponse, annulation et six combats prêts » pour les trois états, le cadre, la carte et le filtre de réponse. Le libellé testé passe en majuscules comme sur la planche.
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : le test commun demande des onglets dans les trois états, tandis que le balisage exact `pret` de la planche n'en comporte pas ; le rendu suit la planche et n'ajoute donc pas d'onglets à l'état prêt. Tests ciblés verts. Version vérifiée contre `origin/main` sans écart.
+- Questions pour Anthony : pour l'état `pret`, faut-il conserver le balisage exact de la planche sans onglets, ou ajouter les onglets demandés par le paragraphe Tests ?
