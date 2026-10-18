@@ -45,7 +45,7 @@ test('Organisations — l’écran : huit organisations, la choisie marquée, «
   /* Monde lot 2 T5 : planche validée par Anthony le 10/10/2026, corrigée le même jour — plus aucun texte sous 22 px,
      « six ans d’histoire » entre dans l’annonce, « ton assistante » en sort. */
   assert.ok(r.t.includes('Le jeu crée tout le reste pour cette partie : six ans d’histoire, les combattants, les camps, les salles, la presse.'));
-  assert.ok(r.t.includes('Emplacement 3 · 8 organisations')&&r.t.includes('Nouvelle partie · choisis ton organisation'));
+  assert.ok(r.t.includes('Emplacement 3 · 8 organisations')&&/Nouvelle partie.*Choisis ton organisation/.test(r.t));
   assert.ok(r.avenir.includes('Créer ton organisation')&&r.avenir.includes('À venir')); assert.equal(r.avenirDisabled,'true');
   assert.equal(r.apres,r.avant,'« Créer ton organisation » n’ouvre rien'); assert.equal(r.bouton,1,'un seul bouton jaune');
 });

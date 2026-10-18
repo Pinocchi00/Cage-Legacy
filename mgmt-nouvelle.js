@@ -144,7 +144,7 @@ function mgmtNouvelleGenHtml(g){
   const action=g.erreur?mfBouton('Recommencer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleRecommencer()'})+mfBouton('Choisir une autre organisation',{touche:'Échap',onclick:'CL.mgmtNouvelleAbandonner()'}):g.pret?mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'}):'<div class="mf-genese-attente">Le bouton pour entrer apparaîtra à la fin des six ans.</div>';
   const droite=`<div class="mf-genese-droite">${mfPanneau(mgmtNouvelleCartonHtml(g),'normal','mf-lecture-panneau')}<div class="mf-genese-entree">${action}</div></div>`;
   const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}${g.org.length>18?' nom-long':''}" role="status" aria-live="polite">${gauche}${droite}</div>`;
-  return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie · six ans avant ton arrivée',droite:`Emplacement ${g.slot}`,
+  return mfEcran(contenu,{barre:'logo',plaque:'Nouvelle partie',libelle:'Six ans avant ton arrivée',droite:`Emplacement ${g.slot}`,
     touches:[{ks:['Échap'],t:g.erreur?'Choisir une autre organisation':'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},
       {ks:['←','→'],t:'Lire les cartons'},
       ...(g.erreur?[{ks:['Entrée'],t:'Recommencer',onclick:'CL.mgmtNouvelleRecommencer()'}]:g.pret?[{ks:['Entrée'],t:'Entrer dans '+g.org,onclick:'CL.mgmtNouvelleEntrer()'}]:[])]});
@@ -278,7 +278,7 @@ function scr_mgmt_nouvelle(){
     +`<div class="mf-nouvelle-pied"><div class="mf-nouvelle-texte">Le jeu crée tout le reste pour cette partie : six ans d’histoire, les combattants, les camps, les salles, la presse.</div>`
     +`<div class="mf-nouvelle-droite">${avenir}`
     +mfBouton('Créer la partie',{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleLancer()'})+`</div></div></div>`;
-  return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie · choisis ton organisation',
+  return mfEcran(contenu,{barre:'logo',plaque:'Nouvelle partie',libelle:'Choisis ton organisation',
     droite:'Emplacement '+F.slot+' · '+MGMT_ORGANISATIONS.length+' organisations',
     touches:[{ks:['Échap'],t:'Retour aux emplacements',onclick:'CL.mgmtNouvelleRetour()'},{ks:['↑','↓','←','→'],t:'Choisir'},
       {ks:['Entrée'],t:'Créer la partie',jaune:true,onclick:'CL.mgmtNouvelleLancer()'}]});

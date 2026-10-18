@@ -735,7 +735,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-ca-pin{flex:1;display:flex;flex-direction:column}
 .mf-su-ca-ptete{height:120px;background:var(--mf-ligne);padding:0 22px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .mf-su-ca-ptete span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap}
-.mf-su-ca-ptete b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-su-ca-ptete b{font-family:var(--mf-titre);font-weight:800;font-size:56px;line-height:.9;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}   /* Monde lot 18 (L4) : un nom long passe sur deux lignes au lieu d'être coupé (« BOXING CLUB DE … ») */
 .mf-su-ca-pcorps{flex:1;padding:22px;display:flex;flex-direction:column;gap:14px}
 .mf-su-ca-pn{display:flex;align-items:baseline;gap:12px}
 .mf-su-ca-pn b{font-family:var(--mf-titre);font-weight:800;font-size:150px;line-height:.75}
@@ -1602,7 +1602,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-arr .ar-chiffres .v{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
 .mf-arr .bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
 .mf-arr .bloc .l1{font-size:24px;line-height:1.1}
-.mf-arr .ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
+.mf-arr .ch-l{display:flex;align-items:center;column-gap:var(--mf-ecart);border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
 .mf-arr .ch-l .div{width:176px;flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
 .mf-arr .ch-l .n{flex:1;min-width:0;overflow:hidden;padding-bottom:6px;margin-bottom:-6px;text-overflow:ellipsis;font-size:24px;line-height:1;white-space:nowrap}
 .mf-arr .ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
