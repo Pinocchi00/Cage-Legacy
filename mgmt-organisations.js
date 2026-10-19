@@ -26,7 +26,7 @@ function mgmtOrgProfil(m){
 }
 
 /** L'échelle des organisations des combattants extérieurs, par prestige croissant : celle du code, où
- *  l'organisation jouée cède sa place à Split quand ce n'est pas Split. Quatre noms, toujours. */
+ *  l’organisation jouée cède sa place à Split quand ce n’est pas Split. Quatre noms (ancien monde) ou sept (echelleExt 7). */
 function mgmtExtOrgs(m){
   const partie=m||((typeof G!=='undefined'&&G)?G.mgmt:null);
   const nom=mgmtOrgNom(partie);
