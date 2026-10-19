@@ -166,7 +166,7 @@ function mgmtFicheStyleHtml(m,f){
   if(forces.length<1) bilan.filter(x=>x.s==='+').slice(0,1).forEach(x=>rows.push({lab:'FORCE',signe:'+',t:x.t,src:'D’après son bilan',p:x.p}));
   if(failles.length<1) bilan.filter(x=>x.s==='−').slice(0,1).forEach(x=>rows.push({lab:'FAILLE',signe:'−',t:x.t,src:'D’après son bilan',p:x.p}));
   const xp=typeof mgmtExperience==='function'?mgmtExperience(m,f,m.cycle):null;
-  if(xp&&xp.n>0) rows.push({lab:'PROGRESSION',signe:'+',t:xp.points>=1?'+'+Math.round(xp.points)+' points':'En progrès',src:xp.n+' combat'+(xp.n>1?'s':'')+' chez '+mgmtOrgNom(m),p:'Chaque combat joué chez nous fait progresser, d’autant plus vite que l’on est jeune.'});
+  if(xp&&xp.n>0) rows.push({lab:'PROGRESSION',signe:'+',t:xp.points>=1?'+'+Math.round(xp.points)+(Math.round(xp.points)>1?' points':' point'):'En progrès',src:xp.n+' combat'+(xp.n>1?'s':'')+' chez '+mgmtOrgNom(m),p:'Chaque combat joué chez '+mgmtOrgNom(m)+' fait progresser, d’autant plus vite que l’on est jeune.'});
   lec.detailInconnus.slice(0,1).forEach(l=>rows.push({lab:'INCONNU',signe:'?',t:l.t,src:'Jamais vu',p:T.inconnuPhrase}));
   /* L'allonge, lue sur sa catégorie. */
   const phys=mgmtCombatProfile(f).phys||{}, cat=mgmtEffectifLignes?mgmtEffectifLignes(m,f.div).map(x=>mgmtAllongeCm(x.f)).filter(x=>x>0):[];
@@ -327,7 +327,7 @@ function mgmtDepuisVisite(m,id){
            gabarit (mgmtMondePhrase, mgmt-bureau.js), l'étiquette est celle du
            bloc — aucune mise en page neuve. sans_reponse reprend la sorte
            'demande' (une demande, répondue ou non). */
-        phrase=mgmtMondePhrase(m,x)||'';
+        phrase=mgmtAccord(mgmtFighterById(m,id),mgmtMondePhrase(m,x)||'');   /* audit 16/10 : {Il} accordé, jamais affiché tel quel */
         sorte=MGMT_DEPUIS_SORTES[x.k]; libelle=MGMT_DEPUIS_LIBELLES[sorte];
       }
     }else{

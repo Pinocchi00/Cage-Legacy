@@ -118,10 +118,10 @@ test('MGMT bloc lisible — chaque combat : combattants, catégorie, bilan', () 
   }
 });
 
-const LEILA_BULK_LINE="J'ai préparé les préliminaires. J'espère qu'ils vous plairont.";
-const LEILA_BULK_WARN="Patron, un combat me gêne. Je pense qu'il faut le changer.";
-const LEILA_SWAP_LINE="Vous avez changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.";
-const LEILA_CRUSH_LINE="Prévenez-moi la prochaine fois. Je ne veux pas perdre ma semaine.";
+const LEILA_BULK_LINE="J'ai préparé les préliminaires. J'espère qu'ils te plairont.";
+const LEILA_BULK_WARN="Un combat me gêne. Je pense qu'il faut le changer.";
+const LEILA_SWAP_LINE="Tu as changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.";
+const LEILA_CRUSH_LINE="Préviens-moi la prochaine fois. Je ne veux pas perdre ma semaine.";
 const LEILA_R_VALIDATE="Très bien, Leïla. On garde tout.";
 const LEILA_R_SWAP="C'est bien, Leïla. Je change seulement ce combat.";
 const LEILA_R_CRUSH="Leïla, cette carte ne me plaît pas. Je la refais.";
@@ -447,12 +447,12 @@ test('MGMT avertissement affiché — avec les combats, sans désigner, puis sil
   /* Force un combat signalé : la remarque paraît une fois, sans nommer. */
   win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').fights[1].warned=true; render();`);
   let html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('un combat me gêne'), 'la remarque s\u2019affiche avec les combats');
-  assert.equal((html.match(/un combat me gêne/g)||[]).length, 1, 'une seule fois : le combat gênant reste à deviner');
+  assert.ok(html.includes('combat me gêne'), 'la remarque s\u2019affiche avec les combats');
+  assert.equal((html.match(/combat me gêne/g)||[]).length, 1, 'une seule fois : le combat gênant reste à deviner');
   /* Aucun signalé : rien. */
   win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').fights.forEach(f=>{f.warned=false;}); render();`);
   html = win.document.getElementById('app').innerHTML;
-  assert.ok(!html.includes('un combat me gêne'), 'sans signalement, pas de remarque');
+  assert.ok(!html.includes('combat me gêne'), 'sans signalement, pas de remarque');
 });
 
 test('MGMT extinction bout-en-bout — trois écrasements puis silence définitif', () => {

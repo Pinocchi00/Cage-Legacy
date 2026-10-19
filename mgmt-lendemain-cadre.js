@@ -16,7 +16,7 @@ const MGMT_LD_CRITERES={
   noms:{
     ok:{texte:'Des noms connus à l’affiche.',relu:false},
     non:{texte:'Peu de noms connus à l’affiche.',relu:false}},
-  determination:{texte:'La salle n’a pas été conquise. Vous savez quoi changer pour la prochaine.',relu:false},
+  determination:{texte:'La salle n’a pas été conquise. Tu sais quoi changer pour la prochaine.',relu:false},
 };
 const MGMT_LD_SEUIL_CRITERE=0.6;
 

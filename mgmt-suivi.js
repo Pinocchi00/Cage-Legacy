@@ -331,9 +331,12 @@ function mgmtFilMettreAJour(m){
       if(mgmtFilAjoute(m,{k:'public',c,a:r.a,b:r.b,w:r.k,p:r.c})) n++;
     }
   }
+  /* Audit 16/10 E82 : quatre cartes sur cinq disaient la même chose — au plus deux « attend depuis » par cycle. */
+  let attendus=0;
   for(const x of m.facts||[]){
-    if(!x||x.c!==c||x.k!=='attend') continue;
+    if(!x||x.c!==c||x.k!=='attend'||attendus>=2) continue;
     const f=mgmtFighterById(m,x.a); if(!f) continue;
+    attendus++;
     const mois=Math.max(1,Math.round(mgmtContratAttente(m,f)*MGMT_VOIX_MOIS_PAR_CYCLE));
     if(mgmtFilAjoute(m,{k:'combattant',c,a:x.a,w:'attend',p:x.p,n:mois})) n++;
   }

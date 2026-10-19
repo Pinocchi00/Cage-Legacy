@@ -196,8 +196,9 @@ test('MGMT T4 — les touchés se racontent en faits : retraite, blessure, suspe
   const html=win.document.getElementById('app').innerHTML;
   assert.ok(/fin de carrière médicale/i.test(html),'la retraite se lit en fait');
   assert.ok(html.includes('Fracture de la main'),'la blessure se lit par son nom');
-  assert.ok(html.includes('suspendu 90 jours'),'la suspension de la blessure se lit');
-  assert.ok(html.includes('suspendu 60 jours'),'la suspension sèche se lit');
+  /* Audit 16/10 D10 : l'accord suit le genre du combattant (suspendu / suspendue). */
+  assert.ok(/suspendue? 90 jours/.test(html),'la suspension de la blessure se lit');
+  assert.ok(/suspendue? 60 jours/.test(html),'la suspension sèche se lit');
   assert.ok(html.includes('Le lendemain de Split'),'l’écran rend malgré des événements plantés');
   assert.ok(!/trauma/i.test(html),'le corps reste caché');
 });

@@ -7,15 +7,15 @@
 
 const MGMT_PRISE_TEXTES={
   arrivee:{
-    titre:{texte:'Vous êtes le matchmaker de {org}',relu:false},
-    leila:{texte:'Je suis Leïla. Je vous aiderai pour les premiers combats.',relu:false},
+    titre:{texte:'Tu es le matchmaker de {org}',relu:false},
+    leila:{texte:'Je suis Leïla. Je t’aiderai pour les premiers combats.',relu:false},
     bouton:{texte:'Commencer',relu:false},
   },
   moments:{
     carte_vide:{texte:'Bienvenue. Choisissez un combattant, puis son adversaire.',relu:false},
     premier_combat:{texte:'Un premier combat. Il en faut cinq sur la carte principale.',relu:false},
     carte_complete:{texte:'La carte principale est complète. Je prépare les préliminaires.',relu:false},
-    prelims:{texte:'Voici mes préliminaires. Validez la carte, ou changez un combat.',relu:false},
+    prelims:{texte:'Voici mes préliminaires. Valide la carte, ou change un combat.',relu:false},
     soiree_prete:{texte:'Tout est prêt. Ouvrez le calendrier pour jouer la soirée.',relu:false},
     premier_lendemain:{texte:'Première soirée terminée. Regardez comment le public a réagi.',relu:false},
   },

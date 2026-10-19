@@ -87,17 +87,17 @@ const MGMT_EXCHANGES={
   leila_propose:{
     speaker:'leila',
     lines:[
-      "Patron, j'ai un très bon combat à vous proposer. Pouvez-vous le placer dans la carte principale ?",
+      "J'ai un très bon combat à te proposer. Tu peux le placer dans la carte principale ?",
     ],
     replies:[
-      {id:'accept',action:'accept',text:"D'accord. Je vous fais confiance."},
+      {id:'accept',action:'accept',text:"D'accord. Je te fais confiance."},
       {id:'refuse',action:'refuse',text:"Non, désolé. Ma carte est déjà faite."},
     ],
   },
   leila_refused:{
     speaker:'leila',
     lines:[
-      "Pas de souci. Retenez ces deux noms : ils vont monter au classement.",
+      "Pas de souci. Retiens ces deux noms : ils vont monter au classement.",
     ],
     replies:[
       {id:'close',action:'close',text:null,empty:'[RÉPLIQUE MANQUANTE — Leïla réagit à un refus : prendre acte]'},
@@ -127,22 +127,22 @@ Object.assign(MGMT_EXCHANGES,{
   leila_bulk:{
     speaker:'leila',
     lines:[
-      "J'ai préparé les préliminaires. J'espère qu'ils vous plairont.",
+      "J'ai préparé les préliminaires. J'espère qu'ils te plairont.",
     ],
     /* Retours d'Anthony du 09/10/2026 : Leïla ne redit pas la même phrase d'une soirée à l'autre — la première est celle du premier cycle, les suivantes tournent. */
     variantes:[
-      "Les préliminaires sont prêts, Patron. Dites-moi ce que vous en pensez.",
+      "Les préliminaires sont prêts. Dis-moi ce que tu en penses.",
       "Voici ma carte du début de soirée. Je crois qu'elle tient bien.",
-      "J'ai choisi les préliminaires. Un ou deux combats peuvent vous surprendre.",
+      "J'ai choisi les préliminaires. Un ou deux combats peuvent te surprendre.",
       "Mes préliminaires sont là. J'ai pensé à ceux qui attendent depuis longtemps.",
     ],
     avertissements:[
-      "Patron, un combat me gêne. Je pense qu'il faut le changer.",
-      "Un des combats ne me convainc pas. Pouvez-vous le regarder ?",
+      "Un combat me gêne. Je pense qu'il faut le changer.",
+      "Un des combats ne me convainc pas. Tu peux le regarder ?",
       "Je ne suis pas sûre d'un combat. Un autre choix serait peut-être mieux.",
-      "Il y a un combat que je changerais. Je vous laisse décider.",
+      "Il y a un combat que je changerais. Je te laisse décider.",
     ],
-    warning:"Patron, un combat me gêne. Je pense qu'il faut le changer.",
+    warning:"Un combat me gêne. Je pense qu'il faut le changer.",
     replies:[
       {id:'validate',action:'validate',text:"Très bien, Leïla. On garde tout."},
       {id:'swap',action:'swap',text:"C'est bien, Leïla. Je change seulement ce combat."},
@@ -152,7 +152,7 @@ Object.assign(MGMT_EXCHANGES,{
   leila_react_swap:{
     speaker:'leila',
     lines:[
-      "Vous avez changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.",
+      "Tu as changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.",
     ],
     replies:[
       {id:'close',action:'close'},
@@ -161,7 +161,7 @@ Object.assign(MGMT_EXCHANGES,{
   leila_react_crush:{
     speaker:'leila',
     lines:[
-      "Prévenez-moi la prochaine fois. Je ne veux pas perdre ma semaine.",
+      "Préviens-moi la prochaine fois. Je ne veux pas perdre ma semaine.",
     ],
     replies:[
       {id:'close',action:'close'},

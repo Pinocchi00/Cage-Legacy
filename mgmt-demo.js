@@ -5,7 +5,7 @@
 
 const MGMT_DEMO_FIN={
   titre:{texte:'Fin de la démo',relu:false},
-  corps:{texte:'Vous avez monté cinq soirées. Le jeu complet vous attend : ajoutez Cage Legacy à votre liste de souhaits sur Steam.',relu:false},
+  corps:{texte:'Tu as monté cinq soirées. Le jeu complet t’attend : ajoute Cage Legacy à ta liste de souhaits sur Steam.',relu:false},
 };
 let MGMT_DEMO_FIN_VUE=false;
 

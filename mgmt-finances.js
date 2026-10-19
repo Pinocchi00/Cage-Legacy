@@ -23,7 +23,7 @@ function mgmtFinancesCartes(m){
   const bourses=comptes.map(c=>c.purses+c.bonuses);
   const lieu=mgmtAgendaActif(m)&&m.cal.prochaines[0]?mgmtSalleParId(m,m.cal.prochaines[0].salle):null;
   return [
-    {t:'En caisse',v:mgmtEuros(m.treasury),l:[joues>0?`Après ${org} Fight Night ${joues}`:'Avant la première soirée',m.treasury<0?'La caisse est à découvert':' '],
+    {t:'En caisse',v:mgmtEuros(m.treasury),l:[joues>0?`Après ${org} Fight Night ${m.eventsPlayed||joues}`:'Avant la première soirée',m.treasury<0?'La caisse est à découvert':' '],
       d:[['En caisse',mgmtEuros(m.treasury)]].concat(comptes.slice().reverse().map(c=>[`Soirée ${c.n}`,(c.recette>=0?'+ ':'− ')+mgmtEuros(Math.abs(c.recette))]))},
     {t:'Dernière soirée',v:f?(f.recette>=0?'+ ':'− ')+mgmtEuros(Math.abs(f.recette)):'—',l:f?[`Recettes : ${mgmtEuros(recettes)}`,`Dépenses : ${mgmtEuros(depenses)}`]:['Aucune soirée jouée',' '],
       d:f?[['Billetterie',mgmtEuros(f.ticketing)],['Droits du diffuseur',mgmtEuros(f.tv)],['Cachets',mgmtEuros(-f.purses)],['Bonus de victoire',mgmtEuros(-f.bonuses)]]
@@ -31,8 +31,8 @@ function mgmtFinancesCartes(m){
         .concat(Number.isFinite(f.spectateurs)?[['Salle',`${f.salle} · ${f.spectateurs} spectateurs sur ${f.capacite}`],['Le public',f.satisfaction>=MGMT_SATISFAIT_SEUIL?'Satisfait':'Déçu']]:[]):[['Rien encore','—']]},
     {t:'Prochaine soirée',v:mgmtEuros(eng.k),l:['Bourses déjà engagées',`${eng.n} combat${eng.n>1?'s':''} composé${eng.n>1?'s':''} sur ${eng.sur}`],
       d:[['Bourses engagées',mgmtEuros(eng.k)],['Combats composés',`${eng.n} sur ${eng.sur}`]].concat(lieu?[['Salle',`${lieu.nom} · ${lieu.capacite} places`],['Location',mgmtEuros(mgmtLocation(lieu))]]:[])},
-    {t:'Découvert autorisé',v:mgmtEuros(cap),l:['Pour un remplaçant de dernière minute',debut>0?`Utilisé : ${mgmtEuros(debut)}`:'Rien d’utilisé pour l’instant'],
-      d:[['Découvert autorisé',mgmtEuros(cap)],['Utilisé',mgmtEuros(debut)],['Règle','La dernière recette, lissée sur deux soirées, jamais négative']]},
+    {t:'Découvert autorisé',v:mgmtEuros(cap),l:['Pour un remplaçant de dernière minute',debut>0?(debut>cap?`Dépassé de ${mgmtEuros(debut-cap)}`:`Utilisé : ${mgmtEuros(debut)}`):'Rien d’utilisé pour l’instant'],
+      d:[['Découvert autorisé',mgmtEuros(cap)],[debut>cap?'Dépassé de':'Utilisé',mgmtEuros(debut>cap?debut-cap:debut)],['Règle','La dernière recette, lissée sur deux soirées, jamais négative']]},
     {t:'Bourses versées',bars:bourses,numeros:comptes.map(c=>c.n),l:['En milliers d’euros, par soirée'],
       d:comptes.length?comptes.slice().reverse().map(c=>[`Soirée ${c.n}`,mgmtEuros(c.purses+c.bonuses)]):[['Aucune soirée jouée','—']]},
     {t:'Fins de contrat',v:'—',l:['Aucun contrat suivi pour l’instant',' '],d:[['Contrats','Pas encore suivis']],jaune:false},

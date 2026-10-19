@@ -24,8 +24,8 @@ const fs = require('fs');
 const path = require('path');
 const { newGameWindow } = require('./helpers/loadGame');
 
-const LEILA_PROPOSE="Patron, j'ai un très bon combat à vous proposer. Pouvez-vous le placer dans la carte principale ?";
-const LEILA_REFUSED="Pas de souci. Retenez ces deux noms : ils vont monter au classement.";
+const LEILA_PROPOSE="J'ai un très bon combat à te proposer. Tu peux le placer dans la carte principale ?";
+const LEILA_REFUSED="Pas de souci. Retiens ces deux noms : ils vont monter au classement.";
 
 /* ==== [ANCRE: TESTS_LEILA_CHOIX_RETIRES] — Monde lot 14 T1 ==== */
 // Décision d’Anthony du 17/10/2026 : les propositions restent générées, jamais ouvertes.
@@ -312,7 +312,7 @@ test('MGMT voix — les répliques de référence de Leïla figurent verbatim da
   assert.ok(!html.includes(LEILA_PROPOSE));
 });
 
-const LEILA_ACCEPT="D'accord. Je vous fais confiance.";
+const LEILA_ACCEPT="D'accord. Je te fais confiance.";
 const LEILA_REFUSE="Non, désolé. Ma carte est déjà faite.";
 
 test('MGMT réponses-joueur — deux répliques d\u2019auteur verbatim, une vide marquée', () => {

@@ -248,7 +248,7 @@ function mgmtFichePromesses(m,f){
       +`${mfBouton('Refuser',{touche:k===0?'R':'',onclick:`CL.mgmtDemande(${esc(d.i)},'refuser')`})}</div>`).join('')
       :(sans.length?'':'<p>Rien pour le moment.</p>'))
     +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'')
-    +(sans.length?`<ul class="mgmt-fiche-vie-liste">${sans.map(x=>`<li>${esc(mgmtMondePhrase(m,x)||'')}</li>`).join('')}</ul>`:'');
+    +(sans.length?`<ul class="mgmt-fiche-vie-liste">${sans.map(x=>`<li>${esc(mgmtAccord(f,mgmtMondePhrase(m,x)||''))}</li>`).join('')}</ul>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT5_H8_FICHE_ETENDUE] — La fiche devient l'écran le plus

@@ -141,6 +141,8 @@ test('Monde lot 3 T2 — chaque phrase retrouve sa source publique',()=>{
       for(const div of new Set(m.roster.map(f=>f.div))) for(const p of mgmtPresentationsCategorie({m,h},div)){
         for(const x of p.faits){
           const valeurs={...x.fait.valeur};
+          /* Audit 16/10 C11 (monde lot 23) : le bilan s'accorde (« 1 défaite »). */
+          if(x.fait.famille==='bilan'){const acc=(n,u,pl)=>Math.abs(Number(n))>=2?pl:u;valeurs.Wmot=acc(valeurs.W,'victoire','victoires');valeurs.Lmot=acc(valeurs.L,'défaite','défaites');valeurs.Dmot=acc(valeurs.D,'nul','nuls');}
           if('issue' in valeurs)valeurs.issue=valeurs.issue==='W'?'victoires':'défaites';
           if('methode' in valeurs)valeurs.methode=MGMT_FAMILY_LABELS[valeurs.methode]||valeurs.methode;
           if('moment' in valeurs)valeurs.moment=mgmtVieMomentById(valeurs.moment).libelle;

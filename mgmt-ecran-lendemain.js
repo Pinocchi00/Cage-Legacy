@@ -215,19 +215,19 @@ function mgmtLendemainConstatsHtml(m){
   const touched=Array.isArray(e.touched)?e.touched:[];
   for(const tu of touched){
     const fr=mgmtFighterById(m,tu.id);
-    const nm=fr?fr.name:'Combattant', age=fr?`${fr.age} ans`:null;
+    const nm=fr?fr.name:'Combattant', age=fr?`${fr.age} ans`:null, fem=mgmtFeminin(fr)?'e':'';   /* audit 16/10 D10 : « blessée » */
     const qui=`${esc(nm)}${age?`, ${esc(age)}`:''}`;
     let titre, detail='';
     if(tu.retired){
       titre=`${qui}, ${esc(MGMT_FACT_LABELS.retired.toLowerCase())}`;
       if(tu.injury) detail=`${esc(MGMT_LD_LABELS.blessureLabel)}${esc(tu.injury)}.`;
     }else if(tu.injury){
-      titre=`${qui}, blessé`;
+      titre=`${qui}, blessé${fem}`;
       detail=tu.days>0
-        ?`${esc(tu.injury)} — suspendu ${esc(tu.days)} jours.`
+        ?`${esc(tu.injury)} — suspendu${fem} ${esc(tu.days)} jours.`
         :`${esc(tu.injury)}.`;
     }else if(Number.isSafeInteger(tu.days)&&tu.days>0){
-      titre=`${qui}, suspendu ${esc(tu.days)} jours`;
+      titre=`${qui}, suspendu${fem} ${esc(tu.days)} jours`;
     }else{ continue; }
     out.push({gold:false,titre,detail});
   }

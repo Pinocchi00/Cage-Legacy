@@ -71,9 +71,10 @@ test('T4 — le réglage « Accompagnement de Leïla » vit dans l’onglet Part
   assert.deepEqual(r,{ligne:true,defaut:true,coupe:false,html:true});
 });
 
-test('Les textes de la prise en main sont des propositions non relues, et Leïla y vouvoie', () => {
+test('Les textes de la prise en main sont des propositions non relues, et Leïla y tutoie (audit 16/10, A2)', () => {
   const w=neuve();
   const r=res(w,'const t=[MGMT_PRISE_TEXTES.arrivee.titre,MGMT_PRISE_TEXTES.arrivee.leila,MGMT_PRISE_TEXTES.arrivee.bouton,MGMT_PRISE_TEXTES.prete,...Object.values(MGMT_PRISE_TEXTES.moments)]; return t;');
   assert.ok(r.every(x=>x.relu===false));
-  assert.ok(r.every(x=>!/(^|[^a-zéèêà])(tu|ton|ta|tes|toi)([^a-zéèêà]|$)/i.test(x.texte)),'Leïla vouvoie');
+  /* Décision du 19/10/2026 (audit A2, « tu / vous mélangés ») : le jeu tutoie ; plus de vouvoiement dans les textes de la prise en main. */
+  assert.ok(r.every(x=>!/(^|[^a-zéèêà])(vous|votre|vos)([^a-zéèêà]|$)/i.test(x.texte)),'Leïla tutoie');
 });

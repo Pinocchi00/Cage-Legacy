@@ -49,7 +49,7 @@ function mgmtContratsSituation(m,x){
   if(mgmtContratRestants(f)===1) return {texte:'Fin de contrat',classe:'jaune'};
   if(mgmtEngaged(m,f)) return {texte:'Sur la carte',classe:'carte'};
   if(!mgmtAvailable(m,f)) return {texte:'Blessé',classe:'blesse'};
-  return {texte:'Libre',classe:'libre'};
+  return {texte:'Disponible',classe:'libre'};
 }
 
 function mgmtContratsPips(f){

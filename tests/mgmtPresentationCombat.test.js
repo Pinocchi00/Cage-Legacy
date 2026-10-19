@@ -152,7 +152,8 @@ test('Monde lot 3 T3 — chaque phrase et preuve retrouve sa source',()=>{
         verifierSources(m,h,f.fait.sources);
         const attendu=reconstruirePaire(m,h,f.fait);
         if(JSON.stringify(attendu)!==JSON.stringify(f.fait.valeur))throw Error('Valeur non reconstruite '+f.fait.famille);
-        const v={...attendu};for(const k of ['styles','rangs'])if(Array.isArray(v[k]))v[k]=v[k].slice().sort((a,b)=>a<b?-1:a>b?1:0).join(' et ');
+        const v={...attendu};if(Array.isArray(v.styles))v.styles=v.styles.map(styleLabel);   /* audit 16/10 E165 : noms publics des styles */
+        for(const k of ['styles','rangs'])if(Array.isArray(v[k]))v[k]=v[k].slice().sort((a,b)=>a<b?-1:a>b?1:0).join(' et ');
         for(const k of ['adversaire','champion'])if(k in v)v[k]=m.roster.find(f=>f.id===v[k]).name;
         out.push({texte:f.texte,attendu:mgmtPresentationTexte(MGMT_PRESENTATION_COMBAT_TEXTES[f.modele],v)});
       }

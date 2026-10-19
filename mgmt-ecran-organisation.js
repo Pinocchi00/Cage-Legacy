@@ -31,7 +31,7 @@
    SCREENS avec les cinq autres (mgmt-screens.js), clavier inclus — échap
    ramène à la semaine. ==== */
 const MGMT_ORG_LABELS={
-  back:'← Retour à la semaine',
+  back:'← Retour à l’accueil',
   effectif:"L'effectif, par catégorie",
   finances:'Les finances',
   treasury:'Trésorerie',

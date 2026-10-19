@@ -7,6 +7,11 @@ function mgmtPresentationTexte(modele,valeurs){
 }
 function mgmtPresentationPhrase(m,fait){
   const modele=MGMT_PRESENTATION_COMBATTANT_TEXTES[fait.famille],valeurs={...fait.valeur};
+  if(fait.famille==='bilan'){
+    /* Audit 16/10 C11 : « 1 défaite », jamais « 1 défaites ». */
+    const accord=(n,un,plu)=>Math.abs(Number(n))>=2?plu:un;
+    valeurs.Wmot=accord(valeurs.W,'victoire','victoires'); valeurs.Lmot=accord(valeurs.L,'défaite','défaites'); valeurs.Dmot=accord(valeurs.D,'nul','nuls');
+  }
   if(Object.hasOwn(valeurs,'issue')) valeurs.issue=valeurs.issue==='W'?'victoires':'défaites';
   if(Object.hasOwn(valeurs,'methode')) valeurs.methode=MGMT_FAMILY_LABELS[valeurs.methode]||valeurs.methode;
   if(Object.hasOwn(valeurs,'moment')) valeurs.moment=mgmtVieMomentById(valeurs.moment).libelle;
