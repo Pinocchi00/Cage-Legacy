@@ -133,7 +133,7 @@ function mgmtRecrutementLigneHtml(x,i,curseur){
     +`<button type="button" class="mgmt-recru-nom" onclick="CL.mgmtFiche('${id}')">${esc(x.name)}</button>`
     +`<span class="mgmt-recru-age">${esc(x.age)}</span>`
     +`<span class="mgmt-recru-bilan">${esc(x.W)}-${esc(x.L)}</span>`
-    +`<span class="mgmt-recru-orgs">${esc(x.orgs.join(', puis '))}</span>`
+    +`<span class="mgmt-recru-orgs">${esc((x.orgs.length>3?'…, puis ':'')+x.orgs.slice(-3).join(', puis '))}</span>`
     +`<button type="button" class="mgmt-recru-go" onclick="CL.mgmtRecruter('${id}')">Recruter</button></div>`;
 }
 

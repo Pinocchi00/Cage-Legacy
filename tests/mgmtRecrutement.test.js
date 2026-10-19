@@ -16,7 +16,7 @@ test('T5 — les recrutables : le monde hors de Split, du mieux classé au moins
     const rec=mgmtRecrutables(m,DIV); const chez=new Set(m.roster.map(o=>o.id));
     const rangs=rec.map(x=>x.rang);
     return {n:rec.length,horsSplit:rec.every(x=>!chez.has(x.id)),croissant:rangs.every((v,i)=>i===0||rangs[i-1]<v),
-      champs:Object.keys(rec[0]).sort(),vide:mgmtRecrutables(m,'xx').length,orgsNommees:rec.every(x=>x.orgs.every(o=>MGMT_EXT_ORGS.includes(o))),
+      champs:Object.keys(rec[0]).sort(),vide:mgmtRecrutables(m,'xx').length,orgsNommees:rec.every(x=>x.orgs.every(o=>mgmtExtOrgs(m).includes(o))),
       total:mgmtWorldLivingCount(m,DIV),roster:m.roster.filter(o=>o.div===DIV).length};
   `);
   assert.ok(r.n>50); assert.ok(r.horsSplit); assert.ok(r.croissant); assert.equal(r.vide,0); assert.ok(r.orgsNommees);

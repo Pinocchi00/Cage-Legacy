@@ -104,7 +104,7 @@ try{
         evenings.push(row);
         if(!validateMgmt(m)) throw new Error('Sauvegarde invalide après soirée');
       }
-      const exterior=MGMT_EXT_ORGS.map(org=>({org,changes:0,defenses:0,losses:0,transfers:0,retirements:0,awards:0,vacant:0}));
+      const exterior=mgmtExtOrgs(G.mgmt).map(org=>({org,changes:0,defenses:0,losses:0,transfers:0,retirements:0,awards:0,vacant:0}));
       for(const div of allDivisions()){
         const titles=mgmtExteriorTitles(m,div.id),pending=new Map();
         for(const event of titles.history){
