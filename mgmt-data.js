@@ -236,6 +236,9 @@ const MGMT_MONDE_PHRASES={
    sinon l'objectif du patron serait acquis d'avance. Ne pas confondre les
    deux listes. */
 const MGMT_EXT_ORGS=['Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship'];
+/* ==== [ANCRE: MONDE_LOT24_T1_ECHELLE_HUIT] — Monde lot 24 T1 ==== */
+/* Décision d'Anthony du 17/10/2026 : prestige croissant des sept organisations extérieures. */
+const MGMT_EXT_ORGS_HUIT=['Garden of Blood','MMA Korner','Pure Impact','Ultimate Rim','Knuckle Gate','Undisputed Cage','Fighting Pacific Championship'];
 
 /* Calendrier du monde extérieur : une année sportive compte MGMT_EXT_YEAR_WEEKS
    semaines ; un cycle du bureau dure MGMT_EVENT_WEEKS semaines (lot 3a) —

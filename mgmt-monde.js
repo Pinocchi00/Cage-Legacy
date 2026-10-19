@@ -344,7 +344,7 @@ function mgmtExteriorCareer(seed,born,cycle){
   const bouts=[];
   let W=0,L=0,fights=0,streak=0,orgIdx=0,orgFights=0,w3=0;
   const orgs=[{i:0,from:null,to:null,fights:0}];
-  const orgMax=MGMT_EXT_ORGS.length;
+  const orgMax=mgmtExtOrgs().length;
   let s=proStart;
   for(;;){
     /* Fin de carrière : la retraite (T3, même loi que le roster) fige le

@@ -103,7 +103,7 @@ function mgmtDefault(orgRef){
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:choix.nom,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,cercle:[],suivis:[],
+  return {org:choix.nom,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,echelleExt:7,cercle:[],suivis:[],
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     visites:{},   /* Monde lot 8 T1 : [nFaits,nCombats] vus par combattant — une partie neuve n'a rien vu (réglé par mgmtVisitesInit, mgmt-attention.js). */
     hist:[],treasury:choix.profil.caisse,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
