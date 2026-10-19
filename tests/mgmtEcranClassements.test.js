@@ -33,7 +33,8 @@ test('MGMT T6 / lot 5 T1 — l’écran rend : onglets, portée, tendance, champ
   assert.ok(html.includes('Classements'), 'le titre de l’écran est présent');
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
   /* Lot 5 T1 remplace l'absence de ceintures prévue au lot 4. */
-  assert.equal(win.document.querySelectorAll('.mgmt-cl-champion').length,5,
+  assert.equal(win.document.querySelectorAll('.mgmt-cl-champion').length,8,   /* lot 24 T1 : l'échelle d'une partie neuve compte 7 organisations extérieures + Split */
+   
     'une ceinture par organisation en portée Mondial');
   assert.ok(!/PRESSE|réclame/.test(html), 'aucun bloc de presse (lot 5)');
   /* L'entrée « Classements » est dans la barre, signalée comme courante. */

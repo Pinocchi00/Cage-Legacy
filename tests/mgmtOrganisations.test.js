@@ -103,7 +103,7 @@ test('Organisations — une partie commencée ailleurs que chez Split n’affich
     CL.mgmtParties(); textes.parties=document.getElementById('app').textContent;
     const trace=mgmtExteriorTrace(m.exterieur[0],m.cycle);
     return {textes,org:m.org,ext:mgmtExtOrgs(m),tout:Object.entries(textes).map(([k,v])=>[k,(v.match(/Split/g)||[]).length])};`);
-  assert.equal(r.org,'Garden of Blood'); assert.deepEqual(r.ext,['Split','MMA Korner','Ultimate Rim','Fighting Pacific Championship'],'Split prend la place sur l’échelle des autres');
+  assert.equal(r.org,'Garden of Blood'); assert.deepEqual(r.ext,['Split','MMA Korner','Pure Impact','Ultimate Rim','Knuckle Gate','Undisputed Cage','Fighting Pacific Championship'],'lot 24 T1 : échelle à 7, Split prend la place au même rang');
   for(const [k,n] of r.tout){
     const t=r.textes[k];
     assert.ok(!/Split — Management|Split \d|de Split|chez Split|Le monde autour de Split|rejoint Split|Effectif Split|Activité Split/.test(t),`${k} : jamais Split comme organisation du joueur`);

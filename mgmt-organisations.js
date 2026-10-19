@@ -26,10 +26,12 @@ function mgmtOrgProfil(m){
 }
 
 /** L'échelle des organisations des combattants extérieurs, par prestige croissant : celle du code, où
- *  l'organisation jouée cède sa place à Split quand ce n'est pas Split. Quatre noms, toujours. */
+ *  l’organisation jouée cède sa place à Split quand ce n’est pas Split. Quatre noms (ancien monde) ou sept (echelleExt 7). */
 function mgmtExtOrgs(m){
-  const nom=mgmtOrgNom(m);
-  return MGMT_EXT_ORGS.map(o=>o===nom?MGMT_ORG:o);
+  const partie=m||((typeof G!=='undefined'&&G)?G.mgmt:null);
+  const nom=mgmtOrgNom(partie);
+  const source=partie&&partie.echelleExt===7?MGMT_EXT_ORGS_HUIT:MGMT_EXT_ORGS;
+  return source.map(o=>o===nom?MGMT_ORG:o);
 }
 
 /** Le poids d'une catégorie dans l'effectif de l'organisation : fortes ×1,5, faibles ×0,5. */

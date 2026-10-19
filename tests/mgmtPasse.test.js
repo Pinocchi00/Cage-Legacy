@@ -26,7 +26,8 @@ const B = partiePassee(GRAINE);
 const C = partiePassee(GRAINE + 1);
 const json = win => win.eval('JSON.stringify(G.mgmt)');
 /* Renumérotation de version à la fusion du lot 8 (12/10/2026) : la partie neuve porte maintenant `visites:{}` (monde lot 8 T1) ; l'empreinte est calculée sans ce champ, les empreintes d'avant restent donc valables. */
-const sansVisites = j => { const o = JSON.parse(j); delete o.visites; return JSON.stringify(o); };
+/* Monde lot 24 T1 : le champ facultatif echelleExt (échelle des organisations extérieures, 7 pour une partie neuve) n'entre pas dans l'empreinte — tout le reste de l'état doit rester identique. */
+const sansVisites = j => { const o = JSON.parse(j); delete o.visites; delete o.echelleExt; return JSON.stringify(o); };
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {

@@ -351,6 +351,7 @@ function validateMgmt(raw){
   if(raw.open!==null&&typeof raw.open!=='string') return false;
   if(raw.shortfall!==undefined&&typeof raw.shortfall!=='boolean') return false;
   if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
+  if(raw.echelleExt!==undefined&&raw.echelleExt!==4&&raw.echelleExt!==7) return false;
   if(raw.niveaux!==undefined&&raw.niveaux!==0&&raw.niveaux!==1) return false;
   /* Lot 5 H6 : ton cercle (5) et tes suivis (15) — des identifiants, sans doublon. */
   for(const [cle,max] of [['cercle',5],['suivis',15]]){
@@ -581,6 +582,7 @@ function mgmtMigrate(raw){
     raw.v=13;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* Monde lot 24 T1 : echelleExt est facultatif ; absent conserve l'échelle historique de quatre noms. */
   /* ==== [ANCRE: MGMT_BRIEF_LOT2_MIGRATION] — 13 → 14 : un niveau propre à chaque combattant. Chaque ligne reçoit
      comme niveau actuel celui que lui donnait son palmarès, un potentiel et un pic déduits de son identifiant. Les traces
      de combat d'avant ne portent pas de niveau et se rejouent à l'identique (ancienne loi). ==== */
