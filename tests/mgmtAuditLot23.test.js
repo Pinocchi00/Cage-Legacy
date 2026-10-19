@@ -51,3 +51,32 @@ test('Monde lot 23 — D10 : une combattante est « blessée » et « suspendue 
   assert.match(r, /, blessé\|/);
   assert.match(r, /suspendu 90 jours/);
 });
+
+test('Monde lot 23 — E3/E170 : plus d’étiquette doublée, et la blague des croissants épargne un Français sorti par une finition', () => {
+  const w = newGameWindow({ runMain: true });
+  const r = JSON.parse(w.eval(`JSON.stringify((function(){
+    setSeed(20261008); const m=mgmtDefault('split'); G={theme:'dark',mgmt:m};
+    const fr={name:'Louis Martin',ck:'FR'}, autre={name:'Hans Meyer',ck:'DE'};
+    const perd=mgmtMediasContexte(m,'fr',{a:autre,b:fr,family:'ko',round:1,rounds:3,n:5,cat:'x'});
+    const gagne=mgmtMediasContexte(m,'fr',{a:fr,b:autre,family:'ko',round:1,rounds:3,n:5,cat:'x'});
+    const decision=mgmtMediasContexte(m,'fr',{a:autre,b:fr,family:'dec',round:3,rounds:3,n:5,cat:'x'});
+    const prefixes=MGMT_MEDIAS_LIGNES?MGMT_MEDIAS_LIGNES.filter(l=>l.media==='sources-proches'&&/^Info :/.test(l.texte)).length:-1;
+    return {perd,gagneNom:gagne&&gagne.a,decisionNom:decision&&decision.a,prefixes};})())`));
+  assert.equal(r.perd, null);
+  assert.equal(r.gagneNom, 'Louis Martin');
+  assert.equal(r.decisionNom, 'Louis Martin');
+  assert.equal(r.prefixes, 0);
+});
+
+test('Monde lot 23 — A3 : la numérotation de soirée des Finances et des parties suit celle du reste du jeu', () => {
+  const { jouerSoirees } = { jouerSoirees: require('./helpers/jouerSoirees.js') };
+  const w = newGameWindow({ runMain: true });
+  w.eval("setSeed(20261008); mgmtPasseGenerer('split',{soirees:6});");
+  jouerSoirees(w, 2);
+  const r = JSON.parse(w.eval(`JSON.stringify((function(){
+    const m=G.mgmt, ev=m.eventsPlayed;
+    const finances=mgmtFinancesCartes(m)[0].l[0];
+    return {ev,finances,joues:mgmtSoireesJoueur(m)};})())`));
+  assert.ok(r.finances.endsWith('Fight Night ' + r.ev), 'les finances disent « Après … Fight Night ' + r.ev + ' » : ' + r.finances);
+  assert.ok(r.joues < r.ev, 'les soirées du joueur ne comptent pas celles d’avant son arrivée');
+});

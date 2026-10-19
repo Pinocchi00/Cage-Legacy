@@ -60,7 +60,7 @@ function mgmtPartieHtml(n,curseur,reg,maintenant){
     const prochaine=duo?`Super carte ${mgmtDuoScore(m).numero}`:`La prochaine soirée`;
     corps=tete(titre)+`<div class="mf-partie-corps"><div style="display:flex;flex-direction:column;gap:12px"><div class="mf-partie-sur">${prochaine}</div>`
       +`<div class="mf-partie-soiree"><span>${duo?esc(`Super carte ${mgmtDuoScore(m).numero}`):esc(m.org+' Fight Night')}</span><b>${esc(m.eventsPlayed+1)}</b></div></div>`
-      +`<div class="mf-partie-lignes">`+mfLigne('Soirées jouées',m.eventsPlayed)
+      +`<div class="mf-partie-lignes">`+mfLigne('Soirées jouées',mgmtSoireesJoueur(m))
       +mfLigne('En caisse',mgmtEuros(Number.isSafeInteger(m.treasury)?m.treasury:0))
       +(date?mfLigne('Jouée pour la dernière fois',date):'')+`</div>`+pied('Reprendre')+`</div>`;
   }
