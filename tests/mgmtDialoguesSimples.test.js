@@ -8,7 +8,8 @@ const {newGameWindow}=require('./helpers/loadGame');
 const mots=t=>String(t).split(/\s+/).filter(Boolean).length;
 const phrases=t=>String(t).split(/[.!?…]+(?:\s+|$)/).map(s=>s.trim()).filter(Boolean);
 const maxPhrase=liste=>Math.max(...liste.flatMap(phrases).map(mots));
-const tutoie=t=>/(^|[^a-zA-ZÀ-ÿ])(tu|ton|ta|tes|toi|te|t')([^a-zA-ZÀ-ÿ]|$)/i.test(t.replace(/’/g,"'"));
+/* Décision du 19/10/2026 (audit A2) : le jeu tutoie, Leïla aussi — c'est le vouvoiement qui est refusé. */
+const vouvoie=t=>/(^|[^a-zA-ZÀ-ÿ])(vous|votre|vos)([^a-zA-ZÀ-ÿ]|$)/i.test(t);
 
 function textes(){
   const win=newGameWindow();
@@ -23,11 +24,11 @@ function textes(){
   })())`));
 }
 
-test('Leïla vouvoie et parle court : jamais « tu », chaque phrase tient en 12 mots', () => {
+test('Leïla tutoie et parle court : jamais « vous », chaque phrase tient en 12 mots', () => {
   const t=textes();
   assert.ok(t.leila.length>=6);
   for(const l of [...t.leila,...t.prise]){
-    assert.ok(!tutoie(l),'Leïla vouvoie : '+l);
+    assert.ok(!vouvoie(l),'Leïla vouvoie : '+l);
     for(const p of phrases(l)) assert.ok(mots(p)<=12,'phrase courte ('+mots(p)+' mots) : '+p);
   }
 });
