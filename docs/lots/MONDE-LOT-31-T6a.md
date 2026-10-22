@@ -28,3 +28,14 @@ Versions à la main dans `index.html`, `node tools/verif-versions.js origin/main
 
 ## Compte rendu
 Fichiers et rôle ; tests (intitulés) ; temps mesurés ; la règle retenue pour `victoiresSuite` ; la numérotation de soirée utilisée ; écarts ; questions pour Anthony.
+
+### Réalisation (22/10/2026)
+- `mgmt-leaders.js` : calculs `mgmtMeilleurs` et `mgmtRecords`, mémo en WeakMap invalidé par la longueur de `m.hist`.
+- `index.html` : chargement de `mgmt-leaders.js` après `mgmt-stats.js`, version `p1t6a2`.
+- `tests/mgmtLeaders.test.js` : tests intitulés « Monde lot 31 T6a — les huit classements retournent trois entrées au plus », « la portée monde ne lève pas d’exception », « les records ignorent décisions et combats invalides », « battu est nul sans historique », « calcul pur et second appel mémoïsé », « une partie sans relevé rend des listes vides », « la partie de six soirées renseigne les détenteurs ».
+- `package.json` : commande `test:leaders`. Limite : les scripts agrégés `test` et `test:watch` n’ont pas été étendus.
+- Vérification ciblée : `timeout 110 node --test tests/mgmtLeaders.test.js` — 7/7 verts ; durée totale 14,1 s, partie de six soirées 6 ms (seuil 300 ms). Second appel : environ 0 ms (seuil 20 ms).
+- `victoiresSuite` : calculée comme la plus longue série actuellement ouverte (aucun maximum historique conservé séparément dans cette tranche).
+- Numérotation : `mgmtSoirees(m).n` dérive du numéro final `m.eventsPlayed`; les records enregistrent actuellement `t.c` comme `soiree` (écart à corriger/clarifier).
+- Écarts importants : les sept tests ne couvrent pas les valeurs exactes fabriquées, les égalités/qualifications et l’intégralité des records demandés. `defensesTitre`, `plusJeuneChampion`, le filtrage strict de carrière à l’organisation, et le livre complet des records sont incomplets ; le code doit être repris avant usage. Aucun format de sauvegarde changé.
+- Questions pour Anthony : confirmer la définition exacte d’une défense de titre consécutive (notamment défaites entre combats titrés) et les règles de classement d’âge si le combattant est champion plusieurs fois.

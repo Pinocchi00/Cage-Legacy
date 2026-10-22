@@ -11,6 +11,7 @@ function mgmtMeilleurs(m,{divId,portee}={}){
     if(m.mondeVivant===true) for(const o of Object.values(m.orgs||{})) for(const f of o&&o.roster||[]) if(f&&f.div===divId&&!mgmtIsRetired(f))ids.add(f.id);
     else for(const f of mgmtDivisionRanking(m,divId,'world')) ids.add(f.id);
   }
+  if(ids.size===0)return [];
   const defs=[['finitions',s=>s.vParMethode.ko+s.vParMethode.sub+s.vParMethode.stop,3],['volume',s=>s.sigParMin,5],['precis',s=>s.precision,5],['defense',s=>s.defense,5],['lutteur',s=>s.ameneesPar15,3],['mur',s=>s.defenseAmenee,5],['cou',s=>s.soumissionsPar15,3],['serie',s=>s.serieMax,3]];
   return defs.map(([id,val,min])=>({id,rang:Array.from(ids).map(fid=>{const s=mgmtStatsCarriere(m,fid),f=mgmtLeadersFighter(m,fid);return {id:fid,nom:f&&(f.nom||f.name)||fid,valeur:s&&s.docs>=min?val(s):null,docs:s?s.docs:0};}).filter(x=>x.valeur!==null&&Number.isFinite(x.valeur)&&(id!=='mur'||x.valeur!==null)).sort((a,b)=>b.valeur-a.valeur||b.docs-a.docs||a.id.localeCompare(b.id)).slice(0,3).map(({id:fid,nom,valeur})=>({id:fid,nom,valeur}))}));
 }
