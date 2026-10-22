@@ -112,12 +112,15 @@ test('Monde lot 5 T2 — une promesse héritée se tient ou se rompt selon les r
   const w=partie(true); try{
     /* ==== [ANCRE: MONDE_LOT5_T2_TEST_SIGNATURE_ET_FAITS_COPIE] — Monde lot 5 T2 ==== */
     const r=lire(w,`${TROIS} m.card.main=[];
-      const candidats=m.roster.filter(x=>!x.libre&&mgmtContratRestants(x)>0&&mgmtSelectable(m,x,null)&&!mgmtChampionIds(m).has(x.id));
+      /* Combat lot 1 (22/10/2026) : les combats simulés changent ; la clôture ne doit pas blesser les deux combattants du booking — on écarte ceux des préliminaires hérités. */
+      const heritage=new Set((m.card.prelims||[]).flatMap(c=>c?[c.a,c.b]:[]));
+      const candidats=m.roster.filter(x=>!x.libre&&mgmtContratRestants(x)>0&&mgmtSelectable(m,x,null)&&!mgmtChampionIds(m).has(x.id)&&!heritage.has(x.id));
       const f=candidats.find(a=>candidats.some(b=>b.id!==a.id&&mgmtSelectable(m,b,a.id)));
-      const adversaire=candidats.find(b=>b.id!==f.id&&mgmtSelectable(m,b,f.id));
+      let adversaire=null;   /* choisi APRÈS la clôture : la nouvelle carte héritée engage d'autres combattants */
       const i=m.facts.length; mgmtAddFact(m,{c:m.cycle,k:'demande',a:f.id,want:'carte-principale'});
       mgmtRepondreDemande(m,i,'promettre'); const promesse=m.facts[m.facts.length-1];
       mgmtPasseCloturer(m); m.card.main=[];
+      adversaire=candidats.find(b=>b.id!==f.id&&mgmtSelectable(m,b,f.id));
       const histAvant=JSON.stringify(m.hist), soireesAvant=m.cal.faites.length;
       const signe=!!mgmtBookMain(m,f.id,adversaire.id);
       const surCarte=m.card.main.some(cf=>cf.slot==='main'&&(cf.a===f.id||cf.b===f.id));

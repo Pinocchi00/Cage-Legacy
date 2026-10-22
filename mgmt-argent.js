@@ -92,7 +92,8 @@ const MGMT_TICKET_PER_DRAW=11.4;
    décidée surtout avant la soirée — MGMT_AUD_BASE est acquise d'avance, la
    part de finitions observée ne pèse que sur le reste. Une soirée sans
    finition garde donc une audience non nulle. */
-const MGMT_AUD_BASE=0.7;
+/* Combat lot 1 (22/10/2026) : les combats finissent moins souvent (KO + soumissions : 64 % -> 48 % des combats). Pour que l'économie ne bouge pas, la base monte de 0,70 à 0,74 : le mélange mesuré sur le jeu (base + (1 - base) x spectacle) reste 0,865 comme avant (recette moyenne du joueur d'écran : 36,5 k$ avant, 39,4 avec 0,79, tools/monte-carlo-economie.js --n=600). */
+const MGMT_AUD_BASE=0.74;
 const MGMT_AUD_PER_DRAW=1000;
 /* Droits du diffuseur (k$) pour MGMT_TV_ECRANS écrans, payés au prorata du
    nombre de combats joués par rapport à la carte contractuelle (addendum
@@ -124,7 +125,7 @@ const MGMT_DRAW_AVG=0.49;
 const MGMT_CARD_AVANT_H4=MGMT_MAIN_SIZE+MGMT_PRELIM_AVANT_H4;
 const MGMT_ECO_ECHELLE_H4=0.87;
 /* ==== [FIN ANCRE] ====*/
-const MGMT_SPECTACLE_REF=0.64;
+const MGMT_SPECTACLE_REF=0.48;   /* Combat lot 1 : était 0,64 avec l'ancien déroulé (KO + soumissions, mesuré sur le jeu réel : tools/mesure-finitions-jeu.js). */
 
 /** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
  *  ratio de victoires, niveau dérivé du bilan. Pur et déterministe, jamais

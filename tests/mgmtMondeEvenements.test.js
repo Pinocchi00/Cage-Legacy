@@ -244,7 +244,7 @@ test('Monde T4a — une demande périmée écrit « restée sans réponse » une
 test('Monde T4a — le fait injury garde le nom de la blessure et la fiche l’affiche', () => {
   const win=neuve(7);
   const r=res(win,`const m=G.mgmt; mgmtVisitesInit(m);
-    rollInjury=function(){ return {name:'Fracture du nez',fights:3}; };
+    mgmtRollInjuryFor=function(){ return {name:'Fracture du nez',fights:3}; };   /* combat lot 2 : le type de blessure se tire par mgmtRollInjuryFor */
     const f=m.roster[0], g=m.roster[1];
     const res={winner:'A',method:'Blessure',round:2,stats:{A:{dmgHead:0,wobbled:0},B:{dmgHead:8,wobbled:1}}};
     const t=mgmtApplyFight(m,f,g,res,'B');

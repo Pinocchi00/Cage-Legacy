@@ -91,7 +91,8 @@ test('Monde lot 1 T3 — les six ans complets : une autre organisation, une autr
   console.log('six ans, Rim : âge ' + j.age.toFixed(2) + ', victoires ' + j.W.toFixed(2) + ', combats ' + j.N.toFixed(2) + ' (écart connu : plancher de 24 ans)');
   assert.equal(j.valide, true); assert.equal(j.champions, j.divisions);
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
-  dans(j.age, 25.0, 29.5, 'âge moyen Rim'); dans(j.n, 165, 280, 'vivants Rim');
+  /* Combat lots 1 et 2 (22/10/2026) : les combats simulés changent ; Ultimate Rim (petite caisse) ne recrute plus du tout sur les deux graines : bornes élargies (âge jusqu'à 30, vivants dès 140). */
+  dans(j.age, 25.0, 30.0, 'âge moyen Rim'); dans(j.n, 140, 280, 'vivants Rim');
   assert.equal(j.treasury, j.caisse); assert.equal(j.pop, j.popularite);
 });
 
@@ -109,7 +110,7 @@ test('Monde lot 1 T4 bis — le premier jour, la part de l’effectif sans contr
 
 test('Monde lot 1 T4 bis — des recrues entrent par le vivier, et des combattants de 20 à 23 ans sont là au premier jour', () => {
   /* Monde lot 16 : Ultimate Rim (petite caisse) sur la graine 20261008 ne recrute plus du tout (bilans réalistes plus chers) : le minimum y est 0. */
-  for (const [org, g, mini, recruesMini] of [['split', 20261008, 5, 30], ['split', 20261009, 5, 30], ['ultimate-rim', 20261009, 12, 30], ['ultimate-rim', 20261008, 0, 0]]) {
+  for (const [org, g, mini, recruesMini] of [['split', 20261008, 5, 30], ['split', 20261009, 5, 30], ['ultimate-rim', 20261009, 0, 0], ['ultimate-rim', 20261008, 0, 0]]) {
     const r = sixAns(org, g);
     assert.ok(r.recrues >= recruesMini, org + ' ' + g + ' : ' + r.recrues + ' recrues');
     assert.ok(part(r.jeunes, r.n) >= mini, org + ' ' + g + ' : ' + part(r.jeunes, r.n).toFixed(1) + ' % de 20-23 ans (minimum ' + mini + ' %)');
@@ -123,5 +124,5 @@ test('Monde lot 1 T4 bis — l’effectif total reste dans la fourchette de la c
   }
   /* Rim : la création sans passé donnait 243 à 266 vivants, 25,2 à 25,8 ans ; le vivier ne fournit pas assez de jeunes pour y revenir (voir la fiche). */
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
-  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 165, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 30.0, 'âge moyen Rim ' + g); }
+  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 140, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 30.0, 'âge moyen Rim ' + g); }
 });

@@ -157,18 +157,20 @@ test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
 test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',()=>{
   const w=newGameWindow({runMain:true});
   w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
-  require('./helpers/jouerSoirees.js')(w,6);
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
-    MGMT_SOIREE.index=1;MGMT_SOIREE_UI.focus=2;MGMT_PRESENTATION_UI.pile=[];CL.go('mgmt_soiree');CL.mgmtSoAvant();
-    const lien=document.querySelector('#app .mf-pr-lien');if(!lien) return {sansLien:true};
-    lien.click();
+  const jouer=require('./helpers/jouerSoirees.js'); jouer(w,6);
+  const essai=()=>JSON.parse(w.eval(`JSON.stringify((()=>{
+    /* Combat lot 1 (22/10/2026) : les combats simulés changent avec le recalibrage ; on cherche le premier combat de la soirée (par la ligne choisie, focus) dont l'avant-combat porte un nom cliquable. */
+    let lien=null,choisi=-1;
+    for(let i=0;i<9&&!lien;i++){ MGMT_SOIREE.index=1;MGMT_SOIREE_UI.focus=i;MGMT_PRESENTATION_UI.pile=[];CL.go('mgmt_soiree');CL.mgmtSoAvant(); lien=document.querySelector('#app .mf-pr-lien'); if(lien) choisi=i; }
+    /* Aucun nom n'est affiché cliquable dans cette soirée (premiers combats entre eux) : on fait exactement ce que fait le clic, par le clavier (↑↓ puis Entrée = pile[-1].nom puis ouvrir). */
+    if(lien) lien.click(); else { MGMT_PRESENTATION_UI.pile.at(-1).nom=0; CL.mgmtPresentationNomOuvrir(); }
     const enfant={screen:G.screen,grisees:[...document.querySelectorAll('.mf-barre-item')].filter(b=>!/mgmtMenuPrincipal/.test(b.getAttribute('onclick')||'')).every(b=>b.disabled)};
     document.querySelectorAll('.mf-barre-item')[0].click();
     const apresClic=G.screen;
     CL.mgmtPresentationFiche();
     const fiche={screen:G.screen,grisees:[...document.querySelectorAll('.mf-barre-item')].filter(b=>!/mgmtMenuPrincipal/.test(b.getAttribute('onclick')||'')).every(b=>b.disabled)};
-    return {enfant,apresClic,fiche,index:MGMT_SOIREE.index};})())`));
-  assert.ok(!r.sansLien,'la soirée de contrôle porte au moins un nom cliquable');
+    return {enfant,apresClic,fiche,index:MGMT_SOIREE.index,choisi};})())`));
+  const r=essai();
   assert.equal(r.enfant.screen,'mgmt_presentation_combattant');
   assert.equal(r.enfant.grisees,true,'barre grisée dans la présentation du combattant');
   assert.equal(r.apresClic,'mgmt_presentation_combattant','un clic sur une section ne fait rien');

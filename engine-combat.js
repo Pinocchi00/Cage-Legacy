@@ -591,8 +591,8 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            a l'intensite d'attaque (subTop/subBot ci-dessus, qui pilote toujours
            subAtt) : un defenseur souple/calme/fort rend la finition plus dure
            sans changer combien de fois l'attaquant a reellement tente. ==== */
-        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot)/Math.pow(tenueTop,1.6);
-        const subChB=clamp((bot.submission-top.submission)/10,0,0.88)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult*posProf.botSubMult*submissionDefenseMult(top);
+        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.32*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot)/Math.pow(tenueTop,1.6);
+        const subChB=clamp((bot.submission-top.submission)/10,0,0.88)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.32*subWeightMult*posProf.botSubMult*submissionDefenseMult(top);
         /* ==== [FIN ANCRE] ==== */
         if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
         else if(rnd()<koGnp*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;
@@ -1170,11 +1170,11 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              déclencher un arrêt médical — méthode de victoire DISTINCTE du
              KO/TKO (voir engine.js, isKOMethod). ==== */
           if(st.B.cuts>=CUT_SEVERE_THRESHOLD && headA>0.5){
-            const medStopChance=clamp((st.B.cuts-CUT_SEVERE_THRESHOLD+1)*0.05*headA,0,0.35)*(dt/50);
+            const medStopChance=clamp((st.B.cuts-CUT_SEVERE_THRESHOLD+1)*0.035*headA,0,0.35)*(dt/50);
             if(rnd()<medStopChance){ finish={by:A,loser:B,method:'Arrêt médical',round:r,detail:'coupure trop profonde pour continuer'}; }
           }
           if(!finish && st.A.cuts>=CUT_SEVERE_THRESHOLD && headB>0.5 && !immuneA){
-            const medStopChance=clamp((st.A.cuts-CUT_SEVERE_THRESHOLD+1)*0.05*headB,0,0.35)*(dt/50);
+            const medStopChance=clamp((st.A.cuts-CUT_SEVERE_THRESHOLD+1)*0.035*headB,0,0.35)*(dt/50);
             if(rnd()<medStopChance){ finish={by:B,loser:A,method:'Arrêt médical',round:r,detail:'coupure trop profonde pour continuer'}; }
           }
           /* ==== [FIN ANCRE] ==== */
@@ -1193,13 +1193,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              indépendamment du tirage "coup lourd" indépendant ci-dessus. ==== */
           if(isKdA){
             st.A.kd++; st.B.wobbled++; chinVulnB+=6;
-            const finishChanceA=clamp(0.60*(1+((a.killer||50)-50)*0.003)*(1-((b.composure||50)-50)*0.003)*(1-((b.heart||50)-50)*0.002),0.25,0.85);
+            const finishChanceA=clamp(0.44*(1+((a.killer||50)-50)*0.003)*(1-((b.composure||50)-50)*0.003)*(1-((b.heart||50)-50)*0.002),0.25,0.85);
             if(rnd()<finishChanceA){ finish={by:A,loser:B,method:'KO/TKO',round:r}; applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.25,3,8),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
             else { kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l’arbitre laisse le combat continuer !`}; dangerB=Math.max(dangerB,DANGER_TICKS_KD); applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.18,2,5),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
           }
           else if(isKdB){
             st.B.kd++; st.A.wobbled++; chinVulnA+=6;
-            const finishChanceB=clamp(0.60*(1+((b.killer||50)-50)*0.003)*(1-((a.composure||50)-50)*0.003)*(1-((a.heart||50)-50)*0.002),0.25,0.85);
+            const finishChanceB=clamp(0.44*(1+((b.killer||50)-50)*0.003)*(1-((a.composure||50)-50)*0.003)*(1-((a.heart||50)-50)*0.002),0.25,0.85);
             if(!immuneA && rnd()<finishChanceB){ finish={by:B,loser:A,method:'KO/TKO',round:r}; applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.25,3,8),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
             else { kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l’arbitre laisse le combat continuer !`}; dangerA=Math.max(dangerA,DANGER_TICKS_KD); applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.18,2,5),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
           }
@@ -1212,11 +1212,11 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              dangerBoostA/B valent 1 hors fenêtre : (dangerBoostX-1) est donc
              nul hors fenêtre et proportionnel au boost de volume dedans. ==== */
           if(!finish && dangerB>0){
-            const stormFinishA=clamp((dangerBoostA-1)*0.85+((a.killer||50)-50)*0.003,0,0.45)*(1-((b.composure||50)-50)*0.003)*(dt/50);
+            const stormFinishA=clamp((dangerBoostA-1)*0.70+((a.killer||50)-50)*0.003,0,0.45)*(1-((b.composure||50)-50)*0.003)*(dt/50);
             if(rnd()<stormFinishA){ finish={by:A,loser:B,method:'KO/TKO',round:r,detail:'enchaînement dans la tempête'}; applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.25,3,8),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
           }
           if(!finish && dangerA>0 && !immuneA){
-            const stormFinishB=clamp((dangerBoostB-1)*0.85+((b.killer||50)-50)*0.003,0,0.45)*(1-((a.composure||50)-50)*0.003)*(dt/50);
+            const stormFinishB=clamp((dangerBoostB-1)*0.70+((b.killer||50)-50)*0.003,0,0.45)*(1-((a.composure||50)-50)*0.003)*(dt/50);
             if(rnd()<stormFinishB){ finish={by:B,loser:A,method:'KO/TKO',round:r,detail:'enchaînement dans la tempête'}; applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.25,3,8),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
           }
           /* ==== [FIN ANCRE] ==== */

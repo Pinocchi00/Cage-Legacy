@@ -79,6 +79,6 @@ function judgesVerdict(j1A,j1B,j2A,j2B,j3A,j3B){
    à 0.5 : un examen reste un examen, jamais une sentence automatique.
    @returns {number} */
 function ringsideExamStopChance(cuts,hasInjury){
-  return clamp((cuts||0)*0.035+(hasInjury?0.09:0),0,0.5);
+  return clamp((cuts||0)*0.025+(hasInjury?0.06:0),0,0.5);
 }
 /* ==== [FIN ANCRE] ==== */
