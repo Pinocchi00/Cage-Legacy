@@ -45,7 +45,6 @@ const MGMT_DEMANDES={
 };
 /* ==== [ANCRE: DEMANDE_TEXTE] — Monde lot 26 T1 ==== */
 function mgmtDemandeTexte(want,cibleNom){
-  const cible=cibleNom?' '+cibleNom:'';
   switch(want){
     case 'carte-principale': return 'veut la carte principale';
     case 'un-classe': return 'veut affronter un classé'+(cibleNom?': '+cibleNom:'');
