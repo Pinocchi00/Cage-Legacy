@@ -12,9 +12,15 @@ loss:{ko:['{a} met {n} K.-O. au round {r}','{p} est arrêté par {a} au round {r
 const MGMT_ACTU_BLESSURES=['{n} se blesse : {b}','{p} est touché : {b}','Mauvaise nouvelle pour {p} : {b}','{p} s’arrête : {b}','{n} passera un moment à l’écart : {b}','Infirmerie pour {p} : {b}'];
 const MGMT_ACTU_CONTRATS={fin_contrat:['Le contrat de {n} arrive à son terme','{p} n’a plus de combat au contrat','Contrat terminé pour {p}','{n} finit son contrat','Plus rien au contrat de {p}','{p} arrive au bout de son contrat'],libere:['{n} est libre','{p} quitte l’effectif','{p} n’est plus sous contrat','{n} est sans contrat','{p} reprend sa liberté','Le contrat de {p} est rompu']};
 function mgmtActuHash(s){let h=2166136261; for(const c of String(s)) h=Math.imul(h^c.charCodeAt(0),16777619); return h>>>0;}
-function mgmtActuVariante(cle,type,sous,banque){const a=Array.isArray(banque)?banque:[]; if(!a.length)return ''; const i=mgmtActuHash(cle)%a.length; return a[i];}
-function mgmtActuNom(m,id){const f=mgmtFighterById(m,id); if(f)return {n:f.name,p:f.first||f.name}; for(const t of m.hist||[]){for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id};} return {n:id,p:id};}
-mgmtActuSourceAjouter({type:'resultat',lire(m,ids,depuis){const out=[]; for(const [i,t] of (m.hist||[]).entries()){if(!t||!Number.isSafeInteger(t.c)||t.c<depuis||!t.a||!t.b)continue; for(const id of ids){const moi=t.a.id===id?t.a:t.b.id===id?t.b:null;if(moi)out.push({type:'resultat',c:t.c,id,adv:(moi===t.a?t.b:t.a).id,donnees:{combat:t,index:i}});}} return out;} });
+function mgmtActuVariante(cle,type,sous,banque){
+  const a=Array.isArray(banque)?banque:[]; if(!a.length)return '';
+  const match=String(cle).match(/\|(\d+)$/),rang=match?Number(match[1]):0;
+  let i=(mgmtActuHash(String(cle).replace(/\|\d+$/,''))+rang)%a.length;
+  if(typeof sous==='string'&&sous.startsWith('prev:')&&a.length>1&&a[i]===sous.slice(5))i=(i+1)%a.length;
+  return a[i];
+}
+function mgmtActuNom(m,id){const f=mgmtFighterById(m,id); if(f)return {n:f.name,p:f.first||f.name}; for(const t of m.hist||[]){for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id};}for(const o of Object.values(m.orgs||{})){for(const t of o.hist||[])for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id};}return {n:id,p:id};}
+mgmtActuSourceAjouter({type:'resultat',lire(m,ids,depuis){const out=[];const historiques=[...(m.hist||[]).map((t,i)=>({t,i})),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>(o.hist||[]).map((t,i)=>({t,i}))):[])];const vus=new Set();for(const {t,i} of historiques){if(!t||!Number.isSafeInteger(t.c)||t.c<depuis||!t.a||!t.b)continue;for(const id of ids){const moi=t.a.id===id?t.a:t.b.id===id?t.b:null;if(moi){const uniq=t.c+'|'+i+'|'+id;if(vus.has(uniq))continue;vus.add(uniq);out.push({type:'resultat',c:t.c,id,adv:(moi===t.a?t.b:t.a).id,donnees:{combat:t,index:i}});}}}return out;} });
 mgmtActuSourceAjouter({type:'blessure',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='injury'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'blessure',c:x.c,id:x.a,donnees:x}));}});
 mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&['fin_contrat','libere','contrat'].includes(x.k)&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'contrat',c:x.c,id:x.a,donnees:x,sous:x.k}));}});
 function mgmtActualites(m,opts){
@@ -22,11 +28,12 @@ function mgmtActualites(m,opts){
   opts=opts||{}; const ids=mgmtSuivis(m), cycles=Number.isSafeInteger(opts.cycles)&&opts.cycles>=0?opts.cycles:8, depuis=Math.max(0,(Number.isSafeInteger(m.cycle)?m.cycle:0)-cycles+1), brut=[];
   for(const s of MGMT_ACTU_SOURCES){try{brut.push(...s.lire(m,ids,depuis));}catch(e){}}
   const rang=new Map(), rows=[];
+  const dernier=new Map();
   for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, moi=mgmtActuNom(m,x.id),a=mgmtActuNom(m,x.adv||'').n,d=x.donnees||{};let banque,vars,detail='';
-    if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.';}
+     if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}
     else {if(d.k==='contrat')continue;banque=MGMT_ACTU_CONTRATS[d.k];if(!banque)continue;vars={n:moi.n,p:moi.p};detail=d.k==='libere'?'Il peut signer ailleurs.':'C’est le moment de lui parler.';}
-    const phrase=mgmtActuVariante(cle,x.type,x.sous,banque).replace(/\{(\w+)\}/g,(_,key)=>vars[key]===undefined?'':String(vars[key]));
+    const groupe=x.type+'|'+x.id,phraseBrute=mgmtActuVariante(cle,x.type,'prev:'+String(dernier.get(groupe)||''),banque),phrase=phraseBrute.replace(/\{(\w+)\}/g,(_,key)=>vars[key]===undefined?'':String(vars[key]));dernier.set(groupe,phraseBrute);
     rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,titre:phrase,texte:detail,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
   }
   rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
