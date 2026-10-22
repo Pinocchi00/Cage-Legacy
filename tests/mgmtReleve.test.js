@@ -15,7 +15,7 @@ test('Monde lot 31 T1 — forme, arrondis et coin du relevé',()=>{
 test('Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poids',()=>{
   const w=newGameWindow({runMain:true});
   const r=evalJSON(w,`setSeed(20261008); const m=mgmtDefault('split'); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; const out=[]; for(let i=0;i<40;i++){ const n=i%2?5:3, a=m.roster[i%m.roster.length], b=m.roster[(i+1)%m.roster.length]; const res=simulateFight(mgmtFightReady(a,m.cycle),mgmtFightReady(b,m.cycle),n), s=mgmtReleveDeResultat(res,n); out.push({s,round:res.round,stats:res.stats,roundStats:res.roundStats,method:res.method,n}); } return out;`);
-  let mean=0,max=0;
+  let mean=0,max=0; const diffs={sig:0,td:0,kd:0,subAtt:0};
   for(const {s,round,stats,roundStats,n} of r){
     assert.equal(w.eval(`mgmtReleveValide(${JSON.stringify(s)})`),true);
     assert.equal(s.r.length,round||n,'arrêts et décisions doivent compter le round réellement joué');
@@ -23,11 +23,17 @@ test('Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poi
     for(let i=0;i<s.r.length;i++) for(let c=0;c<2;c++){
       const row=s.r[i],o=c*14;
       assert.ok(row[o+4]+row[o+5]+row[o+6]<=row[o]+1);
+      for(const [key,ix,statKey] of [['sig',0,'sig'],['td',7,'td'],['kd',10,'kd'],['subAtt',12,'subAtt']]){
+        const actual=row[o+ix], expected=Number(roundStats[i]?.[statKey+(c?'B':'A')]||0);
+        diffs[key]=Math.max(diffs[key],Math.abs(actual-expected));
+        assert.ok(Math.abs(actual-expected)<=1,`${key} round ${i+1}, coin ${c?'B':'A'}: ${actual} vs ${expected}`);
+      }
     }
     const bytes=Buffer.byteLength(JSON.stringify(s)); mean+=bytes;max=Math.max(max,bytes);
   }
   mean/=r.length;
-  assert.ok(mean>0); assert.ok(max>=mean);
+  assert.ok(mean>0); assert.ok(max>=mean); assert.ok(mean<=280,`poids moyen ${mean}`); assert.ok(max<=450,`poids maximal ${max}`);
+  console.log('Mesures relevé:',JSON.stringify({ecartsMax:diffs,poidsMoyen:mean,poidsMax:max}));
 });
 
 test('Monde lot 31 T1 — le relevé ne consomme pas la RNG',()=>{
