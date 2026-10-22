@@ -42,10 +42,11 @@ const MGMT_CHIN_WEAR=0.55;
 const MGMT_CHIN_FLOOR=0.35;
 const MGMT_GAIN_CAP=45;
 const MGMT_HEAD_SUSP=30;
-const MGMT_INJURY_BASE=0.03;
+const MGMT_INJURY_BASE=0.02;
 const MGMT_INJURY_HEAD=0.004;
 const MGMT_INJURY_TRAUMA=0.0015;
-const MGMT_INJURY_KD=0.05;
+/* Combat lot 2 (22/10/2026, audit D9) : base 0,03 -> 0,02, knockdown 0,05 -> 0,02 — environ une blessure grave sur six combats, plus une sur trois. */
+const MGMT_INJURY_KD=0.02;
 
 /** Hachage stable FNV-1a 32 bits d'une chaîne : pur, ne consomme jamais
  *  rnd() — la dérivation du traumatisme n'avance pas la suite des tirages.
@@ -505,6 +506,27 @@ function mgmtTouchedRank(t){
   return (t.retired?1000000:0)+(Number.isSafeInteger(t.days)?t.days:0)*10+(t.injury?1:0);
 }
 
+/** Combat lot 2 (22/10/2026, audit D9) : le TYPE de la blessure suit ce que le combat a fait au corps — une commotion exige un coup à la tête qui a compté
+ *  (étourdissement, knockdown, KO ou dégâts à la tête importants), les ligaments et la cheville suivent les dégâts aux jambes, l'orbite les dégâts à la tête.
+ *  Un seul tirage (comme rollInjury) : le flux du hasard n'est pas décalé. Pur hors rnd().
+ *  @param {object|null} st statistiques du combattant dans ce combat @param {string} fam famille de la méthode @returns {{name:string,fights:number}} */
+function mgmtRollInjuryFor(st,fam){
+  const z=v=>Number.isFinite(v)?v:0;   /* num() de engine.js rend 50 pour une valeur absente : ici l'absence vaut 0 */
+  const H=z(st&&st.dmgHead), L=z(st&&st.dmgLegs), B=z(st&&st.dmgBody), K=z(st&&st.wobbled)+z(st&&st.kd);
+  const commotion=(K>0||fam==='ko'||H>=12)?(1+H*0.15+K*2):0;
+  const poids={
+    'Déchirure ligamentaire (genou)':1+L*1.2,
+    'Fracture orbitale':1+H*0.25,
+    'Fracture de la main':1.5,
+    'Commotion cérébrale sévère':commotion,
+    'Entorse grave à la cheville':1+L*0.8+B*0.1,
+  };
+  const liste=INJURY_TYPES.map(t=>({t,w:Math.max(0,z(poids[t.name]))})).filter(x=>x.w>0);
+  let r=rnd()*liste.reduce((a,x)=>a+x.w,0);
+  for(const x of liste){ r-=x.w; if(r<0) return x.t; }
+  return liste[liste.length-1].t;
+}
+
 /** Applique à une ligne tout ce que son combat lui a fait (§6) : bilan,
  *  traumatisme (écrit sur la ligne — premier combat sur la carte),
  *  blessure (rollInjury(), inchangé), suspension (la plus longue l'emporte),
@@ -540,14 +562,14 @@ function mgmtApplyFight(m,f,opp,res,side){
   const loserSide=res.winner==='D'?null:(res.winner==='A'?'B':'A');
   let injury=null;
   if(res.method==='Blessure'&&loserSide===side){
-    injury=rollInjury();
+    injury=mgmtRollInjuryFor(st,fam);
   }else{
     /* Lot 5 H5 : une année chargée (moments de vie, hors moments heureux)
        rend la blessure au camp plus probable ; 0 à charge faible, le combat
        d'avant est strictement identique. */
     const p=MGMT_INJURY_BASE+MGMT_INJURY_HEAD*H+MGMT_INJURY_TRAUMA*T0+(K>0?MGMT_INJURY_KD*K:0)
       +mgmtVieRisqueBlessure(m,f,m.cycle);
-    if(rnd()<p) injury=rollInjury();
+    if(rnd()<p) injury=mgmtRollInjuryFor(st,fam);
   }
   let days=0;
   if(injury) days=Math.max(days,mgmtInjuryDays(injury.name));

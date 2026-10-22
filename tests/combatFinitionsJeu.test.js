@@ -18,3 +18,19 @@ test('Combat lot 1 — les finitions du jeu réel : 45 à 60 % en tout, KO/TKO d
   assert.ok(P(r.ko) >= 25 && P(r.ko) <= 36, 'KO/TKO ' + P(r.ko).toFixed(1) + ' %');
   assert.ok(P(r.sub) >= 12 && P(r.sub) <= 22, 'soumissions ' + P(r.sub).toFixed(1) + ' %');
 });
+
+test('Combat lot 2 — le type de blessure suit le corps : pas de commotion sans coup à la tête qui compte, les jambes mènent aux ligaments et à la cheville', () => {
+  const w = newGameWindow({ runMain: true });
+  const r = JSON.parse(w.eval(`JSON.stringify((function(){
+    setSeed(20261022);
+    const compte=(st,fam)=>{ const c={}; for(let i=0;i<600;i++){ const t=mgmtRollInjuryFor(st,fam).name; c[t]=(c[t]||0)+1; } return c; };
+    return {calme:compte({dmgHead:2,dmgLegs:0,dmgBody:1,wobbled:0,kd:0},'dec'),
+            jambes:compte({dmgHead:2,dmgLegs:12,dmgBody:1,wobbled:0,kd:0},'dec'),
+            tete:compte({dmgHead:20,dmgLegs:0,dmgBody:1,wobbled:2,kd:1},'ko'),
+            vide:mgmtRollInjuryFor(null,'dec').name};})())`));
+  assert.equal(r.calme['Commotion cérébrale sévère'] || 0, 0, 'aucune commotion après une décision sans coup à la tête qui compte');
+  const jambes = (r.jambes['Déchirure ligamentaire (genou)'] || 0) + (r.jambes['Entorse grave à la cheville'] || 0);
+  assert.ok(jambes > 0.6 * 600, 'les dégâts aux jambes mènent surtout au genou ou à la cheville : ' + jambes);
+  assert.ok((r.tete['Commotion cérébrale sévère'] || 0) > (r.calme['Fracture de la main'] || 0), 'après un KO la commotion est la blessure la plus fréquente');
+  assert.equal(typeof r.vide, 'string', 'sans statistiques, une blessure valide est tirée');
+});
