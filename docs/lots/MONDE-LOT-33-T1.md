@@ -36,4 +36,7 @@ Tous les endroits qui privilégiaient le cercle (`mgmt-mouvement.js`, `mgmt-voix
 - Migration : `mgmtRepair` fusionne les identifiants de `cercle` puis `suivis`, déduplique et vide `cercle`, sans changement de `MGMT_SAVE_VERSION`.
 - Touche retenue : S (et S majuscule) sur la fiche ; conflit vérifié dans le registre de la fiche, aucune touche S concurrente n’y est définie.
 - Écarts à la fiche : test `mgmtMarqueBudget` chronométré, laissé intact après dépassement ; aucun autre écart connu. `node tools/verif-versions.js origin/main` passe. Pas de `npm run check`, conformément à la consigne.
+- Reprise demandée : `tests/mgmtMarqueBudget.test.js` adapté avec le commentaire `brief du 22/10, P3 T1 : une seule liste` ; le lien est désormais suivi pour K et S, K (fait compté au même cycle) passe devant le combat de S, puis S passe devant U plus récent après `mgmtVuEnregistre(K)`. Le test ciblé a dépassé son premier délai de 110 s, puis a passé les 13 tests en arrière-plan (484846 ms).
+- Test Monde lot 9 T2a « la création réelle de l'écran fait aussi vivre les sept organisations » : lancé en arrière-plan à la demande. Commande exécutée avec `--test-name-pattern` après le chemin du fichier ; la sortie relue montre les autres sous-tests du fichier et le sous-test lent toujours en cours, sans résultat à la clôture de ce compte rendu.
+- `node tools/verif-versions.js origin/main` passe. Pas de `npm run check`, conformément à la consigne.
 - Questions pour Anthony : aucune.
