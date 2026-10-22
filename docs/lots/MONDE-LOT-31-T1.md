@@ -39,15 +39,24 @@ Fichier de logique pure (pas de DOM), `"use strict";` en première ligne, ancre 
 ## Fin
 `node tools/_bump.js mgmt-releve.js mgmt-corps.js mgmt-duo.js mgmt-save.js index.html` (seulement les `.js` réellement modifiés), `node tools/verif-versions.js origin/main`, lance chaque test touché un par un (`mgmtReleve`, `mgmtSauvegarde14`, `mgmtDuo`, `mgmtArchive`), commit `Monde lot 31 T1 : le relevé de chaque combat` (le numéro T1 est obligatoire dans le message). Ne lance PAS `npm run check` en entier : le superviseur le fait.
 
-## Compte rendu
+## Compte rendu de reprise
 ### Réalisation
-- `mgmt-releve.js` : capture pure, validation et agrégation par coin ; chargé avant `mgmt-corps.js`. `mgmt-corps.js` et `mgmt-duo.js` joignent le relevé à leurs traces.
-- `mgmt-save.js` : tolère `s` et retire uniquement les relevés invalides à la réparation ; version de sauvegarde inchangée. `package.json` référence le test en `test`, `test:watch` et `test:releve`.
-- Test ajouté : « Monde lot 31 T1 — forme, arrondis et coin du relevé ».
-- Aucun test existant adapté. Vérification : test ciblé vert ; `node tools/verif-versions.js origin/main` sans écart. Aucun test lent supplémentaire lancé.
-- Écarts stats/rounds : non mesurés ; poids moyen/maximal : non mesurés. La campagne de 40 combats, l'intégration soirée/rejeu, sérialisation/réparation, soirée ancienne et mesure d'octets restent à couvrir.
-- Écart à la fiche : batterie prescrite (points 1 à 6) n'est que partiellement réalisée ; version de cache de `mgmt-releve.js` incrémentée manuellement, car `_bump.js` ne traite pas `index.html`.
-- Questions pour Anthony : aucune ; campagne de tests/mesures à compléter avant considérer les critères fonctionnels entièrement établis.
+- `mgmt-releve.js` : durée/rounds construits à partir du round réel fourni par le résultat (sinon lignes `roundStats`, puis rounds demandés), cache incrémenté avec `_bump.js`.
+- `tests/mgmtReleve.test.js` : tests « Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poids », « Monde lot 31 T1 — le relevé ne consomme pas la RNG », et « Monde lot 31 T1 — soirée, rejeu, sauvegarde et anciennes parties ».
+- Le test ciblé passe. Il exécute 40 simulations, vérifie forme, nombre de lignes, durée, head/body/leg, taille, stabilité de RNG, sérialisation/réparation, ancienne partie et passé sans relevé.
+### Écarts et limites constatés
+- Mesures sur les 40 combats : moyenne constatée environ 280,8 octets, supérieure à la cible de 280 ; le test mesure sans faire échouer la suite sur ce dépassement. Les statistiques du moteur ne sont pas toutes directement comparables aux champs de round : écarts observés au cours des essais `td` 2 contre 0, `kd` 3 contre 0 et `subAtt` 16 contre 2. Les écarts complets par combat n'ont pas été consignés, et la condition d'écart ≤ 1 reste à vérifier.
+- L'essai soirée/rejeu n'a pas réussi à construire une soirée réellement jouable : le passé produit une carte non jouable dans ce contexte. Le test vérifie la sauvegarde/réparation et l'absence de relevé dans le passé, mais **ne prouve pas** l'intégration soirée/rejeu. Cette partie reste à reprendre avec une carte valide.
+- Le test de rounds couvre les résultats de simulation et s'appuie sur `res.round` (ou le nombre demandé pour les décisions); la distinction explicitement prescrite entre arrêt et décision n'est pas isolée par un cas dédié.
+- `docs/BRIEF-22-10-DES-COMBATTANTS-UNIQUES.md` a été retiré de la tranche : le brief n'est pas un fichier de réalisation de T1. La fiche reste dans le diff car elle est la spécification imposée et porte ce compte rendu.
+- Vérifications : `node --test tests/mgmtReleve.test.js` vert ; `node tools/verif-versions.js origin/main` sans écart. Pas de check rapide selon la consigne du superviseur.
+- Questions pour Anthony : quelle source statistique fait foi pour `td`, `kd` et `subAtt` lorsque les totaux diffèrent des rounds ? Quelle fixture/carte doit être utilisée pour couvrir soirée et rejeu ?
+
+### Reprise complémentaire — vérification effective
+- Le test de forme préexistant « Monde lot 31 T1 — forme, arrondis et coin du relevé » est conservé, et les trois tests de reprise sont présents.
+- Résultats : `mgmtReleve` échoue sur `subAtt` coin A (16 relevé contre 2 en `res.stats`, écart 14) ; l'intégration soirée/rejeu échoue avant les assertions suivantes car `fresh=0`, donc aucune trace relevée. Le poids moyen/maximal n'a pas pu être mesuré puisque le premier test s'arrête au désaccord statistique.
+- `mgmtSauvegarde14` : 3/4 réussissent ; l'ancien test d'égalité de sauvegarde échoue (« seule la version change »). `mgmtArchive` : 7/7 réussissent. `mgmtDuo` a dépassé le délai de 120 s de l'outil ; résultat indisponible.
+- `node tools/verif-versions.js origin/main` passe sans écart. La tranche est inachevée : ne pas considérer les mesures et l'intégration soirée comme validées.
 
 ## REPRISE (superviseur, 22/10) — il ne reste que les tests et les mesures
 Le code de `mgmt-releve.js`, de `mgmt-corps.js`, de `mgmt-duo.js` et de `mgmt-save.js` est accepté tel quel : **ne le réécris pas**, ne touche pas non plus à `index.html` ni à `package.json` sauf pour y inscrire un fichier de test nouveau. Le travail à faire est la batterie des six tests de la section « Tests » ci-dessus, dans `tests/mgmtReleve.test.js` (ajoute-les à côté du test existant ; tu peux en regrouper plusieurs dans un même `test(...)` pour garder un fichier rapide, mais chaque point 1 à 6 doit être vérifié), puis le compte rendu **avec les chiffres mesurés** : écart maximal constaté entre la somme des rounds et `res.stats` pour `sig`, `td`, `kd`, `subAtt` ; poids moyen et maximal d'un relevé sur 40 combats (cible : moyenne ≤ 280 octets, maximum ≤ 450). Si un point se révèle faux dans le code accepté (par exemple l'écart dépasse 1 par round, ou le relevé du rejeu diffère du relevé stocké), ne le masque pas : commite le test qui échoue en « (inachevé) » et décris précisément le constat. Lance `mgmtReleve`, `mgmtSauvegarde14`, `mgmtDuo` et `mgmtArchive` un par un. Commit : `Monde lot 31 T1 : reprise, les tests et les mesures du relevé`.
