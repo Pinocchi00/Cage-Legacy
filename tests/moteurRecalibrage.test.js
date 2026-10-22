@@ -113,12 +113,13 @@ test('Précision — les frappes significatives touchent 42 à 48 % du temps, sa
 });
 
 test('Les quatre issues globales restent près de leur valeur d\'avant (±3 points) : KO, soumissions, décisions, poids lourds finis', () => {
-  /* Valeurs d'avant le lot, mesurées au même outil sur trois graines (tools/reports/LOT-3-RECALIBRAGE-MOTEUR.md) : 30,1 / 22,1 / 47,5 / 57,3. */
+  /* Valeurs de référence sur l'échantillon aléatoire de cet outil. Combat lot 1 (décision d'Anthony du 22/10/2026, audit D7) : le moteur est recalibré sur le JEU RÉEL (tools/mesure-finitions-jeu.js : 62 % de finitions, KO 39 %, ramenés à 53 % et 31 %) ;
+     sur cet échantillon aléatoire d'adversaires de même force, les issues deviennent 23,3 / 21,1 / 55,6 / 45 (avant : 30,1 / 22,1 / 47,5 / 57,3, tools/reports/LOT-3-RECALIBRAGE-MOTEUR.md). */
   const M=mesure(20261006,4800), P=x=>100*x/M.n;
-  assert.ok(Math.abs(P(M.ko)-30.1)<=4,`KO/TKO ${P(M.ko).toFixed(1)}`);
-  assert.ok(Math.abs(P(M.sub)-22.1)<=4,`soumissions ${P(M.sub).toFixed(1)}`);
-  assert.ok(Math.abs(P(M.dec)-47.5)<=4,`décisions ${P(M.dec).toFixed(1)}`);
-  assert.ok(Math.abs(100*M.heavyFin/M.heavy-57.3)<=6,`poids lourds finis ${(100*M.heavyFin/M.heavy).toFixed(1)}`);
+  assert.ok(Math.abs(P(M.ko)-23.3)<=4,`KO/TKO ${P(M.ko).toFixed(1)}`);
+  assert.ok(Math.abs(P(M.sub)-21.1)<=4,`soumissions ${P(M.sub).toFixed(1)}`);
+  assert.ok(Math.abs(P(M.dec)-55.6)<=4,`décisions ${P(M.dec).toFixed(1)}`);
+  assert.ok(Math.abs(100*M.heavyFin/M.heavy-45)<=6,`poids lourds finis ${(100*M.heavyFin/M.heavy).toFixed(1)}`);
 });
 
 test('Le moteur reste déterministe à graine fixe, et chaque style reste jouable', () => {

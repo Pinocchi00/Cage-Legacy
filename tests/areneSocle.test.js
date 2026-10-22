@@ -396,8 +396,9 @@ test('ARENE T4 — cible 2 : aucune image au-dessus de 6 m/s', () => {
       const B=makeFighter({div:'H-welter',gender:'H'});
       const s=areneConstruire(simulateFight(A,B,3),{a:A.name,b:B.name});
       let prev=null;
-      for(let t=0;t<s.dureeCombat;t+=1/30){
-        const e=areneMoment(s,t);
+      /* Combat 22/10/2026 : le temps de COMBAT saute les pauses entre rounds (les pions y regagnent leur coin) ; on mesure donc le temps d'AFFICHAGE, pauses comprises. */
+      for(let t=0;t<s.dureeAffichage;t+=1/30){
+        const e=areneInstant(s,t);
         if(prev){
           for(const [x,y] of [[e.ax,e.ay],[e.bx,e.by],[e.refX,e.refY]]){
             const p=prev.shift();
