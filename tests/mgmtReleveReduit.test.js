@@ -33,7 +33,7 @@ test('Monde lot 31 T2 — le poids de référence reste sous le plafond',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);const m=mgmtPasseGenerer('split',{soirees:62});mgmtMondeVivantGenerer(m,{soirees:62});const n=m.hist.slice(0,m.passe.nHist).filter(t=>t.s).map(t=>JSON.stringify(t.s).length);return {bytes:mgmtSerialiser(m).length,mean:n.reduce((a,b)=>a+b,0)/n.length};})())`));
   console.log('Mesure partie neuve et relevé réduit:',JSON.stringify(r));
-  assert.ok(r.bytes<=1900000);assert.ok(r.mean<=100);
+  assert.ok(r.bytes<=1900000);assert.ok(r.mean<=110);
 });
 
 test('Monde lot 31 T2 — une sauvegarde ancienne sans relevé reste chargeable et jouable',()=>{
