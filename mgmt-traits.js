@@ -51,3 +51,75 @@ const MGMT_TRAITS=Object.freeze([
   {id:'comeback',famille:'mental',nom:'Revenu de loin',public:true,temporaire:true,effet:null,condition:c=>c.k.serieAvantDerniereDefaites>=2&&c.k.serieVictoires===1,conserve:()=>false}
 ]);
 function mgmtTraitInfo(id){const x=MGMT_TRAITS.find(t=>t.id===id);return x?Object.freeze({...x}):null;}
+/* ==== [ANCRE: P2_T1_TRAITS_DERIVES] — Monde lot 32 T1 ==== */
+const MGMT_TRAITS_MEMO=new WeakMap();
+function mgmtTraitsContexte(m,id,cycle){
+  const all=mgmtStatsCombats(m,id).filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle).sort((a,b)=>a.c-b.c);
+  const docs=all.filter(x=>x.pour&&x.contre), n=docs.length, bilan={W:0,L:0,D:0}, wins=[], losses=[];
+  let kdRecus=0,kdDonnes=0,vKO=0,vSub=0,vStop=0,dKO=0,dSub=0,dStop=0,vDec=0,dDec=0,
+    sigDonne=0,sigPris=0,secondes=0,td=0,tdAtt=0,tdSubis=0,tdAttSubis=0,ctrl=0,
+    finitionsR1=0,principalN=0,principalV=0,revanches=0,titres=0,guerres=0,
+    defaitesControle=0,defaitesRound3=0,victoiresRound3=0,serieVictoires=0,serieDefaites=0,
+    serieAvantDerniereDefaites=0,koSansDefaite=0,dernierKOsubi=false;
+  const derniers=docs.slice(-6), idsAvant=new Set();
+  for(let i=0;i<n;i++){
+    const x=docs[i], win=x.resultat, fam=String(x.famille||'').toLowerCase(), victoire=win==='V', defaite=win==='D';
+    if(victoire){bilan.W++;wins.push(fam);}else if(defaite){bilan.L++;losses.push(fam);}else bilan.D++;
+    kdRecus+=Number(x.contre.kd)||0;kdDonnes+=Number(x.pour.kd)||0;
+    sigDonne+=Number(x.pour.sig)||0;sigPris+=Number(x.contre.sig)||0;secondes+=Number(x.d)||0;
+    td+=Number(x.pour.td)||0;tdAtt+=Number(x.pour.tdAtt)||0;tdSubis+=Number(x.contre.td)||0;tdAttSubis+=Number(x.contre.tdAtt)||0;ctrl+=Number(x.pour.ctrlSec)||0;
+    if(x.slot==='main'){principalN++;if(victoire)principalV++;}
+    if(victoire&&fam==='ko')vKO++;if(victoire&&fam==='sub')vSub++;if(victoire&&fam==='stop')vStop++;
+    if(defaite&&fam==='ko'){dKO++;koSansDefaite=0;}else if(defaite)koSansDefaite++;
+    if(defaite&&fam==='sub')dSub++;if(defaite&&fam==='stop')dStop++;
+    if(victoire&&fam==='dec')vDec++;if(defaite&&fam==='dec')dDec++;
+    if(victoire&&fam!=='dec'&&x.round===1)finitionsR1++;
+    if((fam==='sub'||fam==='stop')&&defaite&&(Number(x.contre.ctrlSec)||0)>=120)defaitesControle++;
+    if(defaite&&(Number(x.round)||0)>=3||(defaite&&fam==='dec'&&(Number(x.rounds)||0)>=5))defaitesRound3++;
+    if(victoire&&((fam!=='dec'&&(Number(x.round)||0)>=3)||(fam==='dec'&&(Number(x.rounds)||0)>=3)))victoiresRound3++;
+    if(x.adversaire&&x.adversaire.id&&idsAvant.has(x.adversaire.id)&&victoire)revanches++;
+    if(x.adversaire&&x.adversaire.id&&defaite)idsAvant.add(x.adversaire.id);
+    if((Number(x.pour.kd)||0)>0&&(Number(x.contre.kd)||0)>0)guerres++;
+    if(victoire){serieVictoires++;serieDefaites=0;}else if(defaite){serieDefaites++;serieVictoires=0;}else{serieDefaites=0;serieVictoires=0;}
+    if(i===n-2)serieAvantDerniereDefaites=serieDefaites;
+    dernierKOsubi=defaite&&fam==='ko';
+  }
+  const f=(m.roster||[]).find(x=>x&&x.id===id)||Object.values(m.orgs||{}).flatMap(o=>o&&o.roster||[]).find(x=>x&&x.id===id)||null;
+  const bilanCombats=f&&Number.isFinite(f.W)?Math.max(0,f.W+(f.L||0)+(f.D||0)):n;
+  const pct=(a,b)=>b?a/b:0, totalVic=bilan.W;
+  const fin= vKO+vSub+vStop;
+  const k={n,bilanCombats,W:bilan.W,L:bilan.L,D:bilan.D,victoires:bilan.W,defaites:bilan.L,nuls:bilan.D,
+    kdRecus,kdDonnes,dKO,dSub,dStop,vKO,vSub,vStop,vDec,dDec,dKO6:derniers.filter(x=>x.resultat==='D'&&String(x.famille).toLowerCase()==='ko').length,
+    koSansDefaite,dernierKOsubi,dernier:{index:Math.max(0,n-1)},sigDonne,sigPris,secondes,
+    sigParMin:pct(sigDonne,secondes/60),sigEncaisseParMin:pct(sigPris,secondes/60),ameneesPar15:pct(td,secondes/900),
+    reussiteAmenee:pct(td,tdAtt),defenseAmenee:tdAttSubis?pct(tdAttSubis-tdSubis,tdAttSubis):0,ameneesAdverses:tdAttSubis,
+    controlePar15:pct(ctrl,secondes/900),tauxVictoires:pct(bilan.W,n),tauxFinition:pct(fin,totalVic),
+    tauxDecision:pct(vDec+dDec,n),partVictoiresSub:pct(vSub,totalVic),finitionsR1,principal:{n:principalN,taux:pct(principalV,principalN)},
+    revancheVictoires:revanches,titres,guerres,defaitesControle,defaitesRound3,victoiresRound3,serieVictoires,serieDefaites,serieAvantDerniereDefaites,
+    age:f&&Number.isFinite(f.age)?f.age:0,cyclesDepuisDernier:all.length?Math.max(0,(Number.isSafeInteger(cycle)?cycle:m.cycle||0)-all[all.length-1].c):999};
+  return {n,dernier:derniers,bilan,victoires:{ko:vKO,sub:vSub,stop:vStop,dec:vDec},defaites:{ko:dKO,sub:dSub,stop:dStop,dec:dDec},kdRecus,kdDonnes,serieVictoires,serieDefaites,principale:k.principal,revanches,titres,secondes,sig:{donnes:sigDonne,encaisses:sigPris},k,combats:docs};
+}
+function mgmtTraitsEtat(m,id,cycle){
+  if(!m||typeof m!=='object')return [];
+  const orgs=m.mondeVivant===true&&m.orgs&&typeof m.orgs==='object'?Object.values(m.orgs):[];
+  const signature=[Array.isArray(m.hist)?m.hist.length:0,...orgs.map(o=>Array.isArray(o&&o.hist)?o.hist.length:0)].join(',');
+  let cache=MGMT_TRAITS_MEMO.get(m);if(!cache||cache.signature!==signature){cache={signature,ids:new Map()};MGMT_TRAITS_MEMO.set(m,cache);}
+  const key=`${id}|${Number.isSafeInteger(cycle)?cycle:'*'}`;if(cache.ids.has(key))return cache.ids.get(key).slice();
+  const combats=mgmtStatsCombats(m,id).filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle).sort((a,b)=>a.c-b.c);
+  let actifs=[];
+  for(let i=1;i<=combats.length;i++){
+    const contexte=mgmtTraitsContexte(m,id,combats[i-1].c+1), c={...contexte,k:contexte.k};
+    actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
+    for(const t of MGMT_TRAITS){if(!actifs.includes(t.id)&&t.id!=='debutant'&&t.id!=='routinier'&&t.condition(c))actifs.push(t.id);}
+  }
+  const contexte=mgmtTraitsContexte(m,id,cycle), c={...contexte,k:contexte.k};
+  actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
+  for(const t of MGMT_TRAITS){if(t.id!=='debutant'&&t.id!=='routinier'&&!actifs.includes(t.id)&&t.condition(c))actifs.push(t.id);}
+  if(!actifs.length){const fallback=MGMT_TRAITS.find(t=>t.id==='debutant');if(fallback.condition(c))actifs.push('debutant');else if(contexte.k.bilanCombats>=10)actifs.push('routinier');else actifs.push('debutant');}
+  const counts=new Map();const ordered=actifs.slice().sort((a,b)=>{const ta=MGMT_TRAITS.find(t=>t.id===a),tb=MGMT_TRAITS.find(t=>t.id===b);return Number(tb.temporaire)-Number(ta.temporaire)||((counts.get(ta.famille)||0)-(counts.get(tb.famille)||0))||MGMT_TRAITS.indexOf(ta)-MGMT_TRAITS.indexOf(tb);});
+  const selected=[];for(const idTrait of ordered){const t=MGMT_TRAITS.find(x=>x.id===idTrait);if(selected.length<4){selected.push(idTrait);counts.set(t.famille,(counts.get(t.famille)||0)+1);}}
+  const result=selected.sort((a,b)=>MGMT_TRAITS.indexOf(MGMT_TRAITS.find(t=>t.id===a))-MGMT_TRAITS.indexOf(MGMT_TRAITS.find(t=>t.id===b)));
+  cache.ids.set(key,result);return result.slice();
+}
+function mgmtTraitsDe(m,id,cycle){return mgmtTraitsEtat(m,id,cycle);}
+function mgmtTraitsVisibles(m,id,cycle){return mgmtTraitsDe(m,id,cycle).filter(idTrait=>{const t=MGMT_TRAITS.find(x=>x.id===idTrait);return t&&t.public;});}
