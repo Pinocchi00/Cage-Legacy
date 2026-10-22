@@ -32,7 +32,7 @@ function nettoyer(){
 function wrapper(window, files, nom, orig){
   return function(...args){
     const seed = window.eval('SEED');
-    const key = empreinte(files, nom, args, seed);
+    const key = empreinte(files, nom, args, seed + '|G' + (window.eval('G===null||G===undefined') ? 'nul' : 'ok'));   /* la présence de G change l'effet de la vraie fonction */
     let record = memory.get(key);
     const file = path.join(CACHE_DIR, key + '.json');
     if(!record){
@@ -50,14 +50,14 @@ function wrapper(window, files, nom, orig){
         window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}`);
       } else {
         rendu = window.__cacheTmp;
-        window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}; G.mgmt=window.__cacheTmp`);
+        window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}; ${record.gPose ? "if(typeof G==='undefined'||!G) G={theme:'dark'}; G.mgmt=window.__cacheTmp" : ''}`);   /* G.mgmt n'est posée que si la vraie fonction l'a posée (G peut être null dans certains tests) */
       }
       window.__cacheTmp = null;
       return rendu;
     }
     const partie = orig.apply(this, args);
     const aEcrire = nom === 'monde' ? { orgs: partie.orgs, mondeVivant: partie.mondeVivant } : partie;
-    record = { partie: JSON.stringify(aEcrire), seedApres: window.eval('SEED'), idCounterApres: window.eval('_idCounter') };
+    record = { partie: JSON.stringify(aEcrire), seedApres: window.eval('SEED'), idCounterApres: window.eval('_idCounter'), gPose: nom === 'passe' && window.eval('G!==null&&G!==undefined') && window.eval('G.mgmt') === partie };
     memory.set(key, record);
     nettoyer();
     const tmp = file + '.' + process.pid + '.' + Date.now() + '.tmp';

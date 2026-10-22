@@ -65,3 +65,12 @@ test('Monde lot 35 T1 — l\'empreinte change avec le code, les arguments et la 
   const b = lance(newGameWindow({ runMain: true }), CODE);
   assert.deepEqual(b, a, 'le fichier abîmé est ignoré, la partie est régénérée à l\'identique');
 });
+
+test('Monde lot 35 T1 — sans runMain (G nul au départ), la génération met G en place comme la vraie fonction, et le cache aussi', () => {
+  const CODE = `setSeed(20261018); const m=mgmtPasseGenerer('split',{soirees:1}); return JSON.stringify({g:typeof G,gm:G.mgmt===m,th:G.theme,seed:SEED,n:m.roster.length});`;
+  const sans = sansCache(() => lance(newGameWindow(), CODE));
+  lance(newGameWindow(), CODE);
+  const second = lance(newGameWindow(), CODE);
+  assert.deepEqual(second, sans);
+  assert.equal(sans.gm, true); assert.equal(sans.g, 'object');
+});
