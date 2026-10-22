@@ -21,7 +21,8 @@
     "test:releve": "node --test tests/mgmtReleve.test.js",
     "test:releve2": "node --test tests/mgmtReleveReduit.test.js",
     "test:stats": "node --test tests/mgmtStats.test.js",
-    "test:fichestats": "node --test tests/mgmtFicheStats.test.js"
+    "test:fichestats": "node --test tests/mgmtFicheStats.test.js",
+    "test:leaders": "node --test tests/mgmtLeaders.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",
