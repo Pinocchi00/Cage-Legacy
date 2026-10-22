@@ -38,13 +38,17 @@ function mgmtFicheStatsHtml(m,f){
   const statRow=([label,key,unit])=>`<div class="mf-fs-stat"><div class="mf-fs-top"><span>${esc(label)}</span><b>${esc(mgmtFicheStatsFormat(stats[key],key))}${unit&&Number.isFinite(stats[key])?`<i>${unit}</i>`:''}</b></div><div class="mf-fs-bottom"><div class="mf-fs-track"><i style="width:${fill(key)}%"></i></div><span>moy. ${esc(mgmtFicheStatsFormat(cat.moyennes[key],key))}${unit&&Number.isFinite(cat.moyennes[key])?' '+unit:''}${key==='controlePar15'?'':` · ${esc(rang(key))}`}</span></div></div>`;
   const targets=mgmtFicheStatsRepart([stats.repartition.cibles.head,stats.repartition.cibles.body,stats.repartition.cibles.leg]);
   const positions=mgmtFicheStatsRepart([stats.repartition.positions.dist,stats.repartition.positions.clinch,stats.repartition.positions.ground]);
-  const bar=(title,values,labels)=>`<div class="mf-fs-part"><div>${title}</div><div class="mf-fs-bar">${values.map((n,i)=>`<i style="flex:${n}">${n}%</i>`).join('')}</div><div class="mf-fs-labels">${labels.map(esc).join(' · ')}</div></div>`;
+  const bar=(title,values,labels)=>`<div class="mf-fs-part"><div class="mf-fs-part-title">${title}</div><div class="mf-fs-bar">${values.map((n)=>`<i style="flex:${n} 1 0%;${n?'':'padding:0'}">${n?esc(String(n)):''}</i>`).join('')}</div><div class="mf-fs-labels"><span>${esc(labels[0])}</span><span>${esc(labels.slice(1).join(' · '))}</span></div></div>`;
   const wins=Object.values(stats.vParMethode||{}).reduce((a,b)=>a+(Number.isFinite(b)?b:0),0), catPlural=mgmtFicheStatsCategoriePluriel(f.div);
+  const methodLabels=[['ko','KO'],['sub','soumission'],['stop','arrêt médical'],['dec','décision']];
+  const methodSegments=methodLabels.map(([key,label])=>({key,label,count:Number.isFinite(stats.vParMethode?.[key])?stats.vParMethode[key]:0})).filter(x=>x.count>0);
+  if((stats.vParMethode?.sub||0)===0&&wins>0&&methodSegments.length){const tail=methodSegments.slice().reverse().find(x=>x.key!=='ko')||methodSegments[methodSegments.length-1];tail.extra=' · aucune soumission';}
+  const winsBar=`<div class="mf-fs-wins-bar">${methodSegments.map(x=>`<div class="mf-fs-win-segment${x.key==='ko'?' ko':''}" style="flex:${x.count} 1 0%"><b>${x.count}</b><span>${esc(x.key==='ko'?'KO':`${x.count===1?x.label:(x.key==='sub'?'soumissions':x.key==='stop'?'arrêts':'décisions')}${x.extra||''}`)}</span></div>`).join('')}</div>`;
   const rangLabel=cat.n?`RANG SUR ${cat.n} ${esc(catPlural)}`:`RANG SUR 0 ${esc(catPlural)}`;
   const panel=(title,subtitle,body)=>`<div class="mf-fs-frame"><div class="mf-fs-frame-inner"><section class="mf-fs-panel"><header><div class="mf-fs-head"><b>${title}</b><i></i></div>${subtitle?`<span>${subtitle}</span>`:''}</header>${body}</section></div></div>`;
   return `<div class="mf-fs-grid">${panel('DEBOUT',`${docs.docs} ${docs.docs===1?'COMBAT DOCUMENTÉ':'COMBATS DOCUMENTÉS'}`,rows.slice(0,4).map(statRow).join(''))}`
     +panel('AU SOL',rangLabel,rows.slice(4).map(statRow).join(''))
-    +panel('SA FAÇON DE GAGNER','',`<div class="mf-fs-sub">${wins===1?'SA 1 VICTOIRE':`SES ${wins} VICTOIRES`}</div><p>${esc(mgmtFicheStatsFacon(stats.vParMethode))||'—'}</p>`
+    +panel('SA FAÇON DE GAGNER','',`<div class="mf-fs-sub">${wins===1?'SA 1 VICTOIRE':`SES ${wins} VICTOIRES`}</div>${winsBar}`
     +bar('OÙ IL TOUCHE (%)',targets,['Tête','Corps · Jambes'])+bar('D’OÙ IL TOUCHE (%)',positions,['Distance','Clinch · Sol'])
     +`<div class="mf-fs-duration">Durée moyenne d’un combat <b>${esc(mgmtFicheStatsFormat(stats.dureeMoyenne,'dureeMoyenne'))}</b></div>`)+`</div>`;
 }
