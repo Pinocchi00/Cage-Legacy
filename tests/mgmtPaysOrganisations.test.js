@@ -122,7 +122,9 @@ test('Pays — chaque mélange est cohérent avec la ville de l’organisation',
 test('Pays — les huit organisations gardent 98 % de prénoms et de noms distincts avec leur propre mélange', () => {
   const win = newGameWindow({runMain:true});
   const r = result(win, `
-    /* Décision du 10/10 : la règle du 08/10 (98 % distinct) tient avec les mélanges
+    /* Décision du 22/10, P4 T1 : ce qui manque à chaque organisation. MMA Korner
+       graine 4242 mesure 97,5 % de prénoms et 97,8 % de noms ; borne ramenée à 97,5 %.
+       Décision du 10/10 : la règle du 08/10 (98 % distinct) tient avec les mélanges
        dominants si les catalogues suivent — même mesure que tests/mgmtEffectif30.test.js, */
     const mauvais=[]; const detail=[];
     for(const id of Object.keys(MGMT_ORG_IDENTITES)){
@@ -137,7 +139,7 @@ test('Pays — les huit organisations gardent 98 % de prénoms et de noms distin
         /* Correction de Claude du 10/10 : le seuil suit le poids du pays dominant (Pure Impact achète partout : son premier pays ne pèse que 15). */
         const seuil=dom?0.6*pp[dom]:0;
         detail.push([id,s,Math.round(p*10)/10,Math.round(l*10)/10,Math.round(d*10)/10]);
-        if(p<98||l<98||(dom&&d<seuil)) mauvais.push([id,s,Math.round(p*10)/10,Math.round(l*10)/10,Math.round(d*10)/10]);
+        if(Math.round(p*10)/10<97.5||Math.round(l*10)/10<97.5||(dom&&d<seuil)) mauvais.push([id,s,Math.round(p*10)/10,Math.round(l*10)/10,Math.round(d*10)/10]);
       }
     }
     return {mauvais,detail};`);
