@@ -39,13 +39,25 @@ function wrapper(window, files, nom, orig){
       try { record = JSON.parse(fs.readFileSync(file, 'utf8')); } catch(_) { record = null; }
     }
     if(record){
-      window.__cacheTmp = JSON.parse(record.partie);
-      window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}; G.mgmt=window.__cacheTmp`);
       memory.set(key, record);
-      return window.__cacheTmp;
+      window.__cacheTmp = window.JSON.parse(record.partie);   /* objets de la fenêtre, comme ceux que la vraie fonction aurait fabriqués */
+      let rendu;
+      if(nom === 'monde'){
+        /* mgmtMondeVivantGenerer(m,opts) MUTE la partie reçue (m.orgs, m.mondeVivant) et la rend : on greffe sur l'objet de l'appelant. */
+        const m = args[0];
+        m.orgs = window.__cacheTmp.orgs; m.mondeVivant = window.__cacheTmp.mondeVivant;
+        rendu = m;
+        window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}`);
+      } else {
+        rendu = window.__cacheTmp;
+        window.eval(`SEED=${record.seedApres}; _idCounter=${record.idCounterApres}; G.mgmt=window.__cacheTmp`);
+      }
+      window.__cacheTmp = null;
+      return rendu;
     }
     const partie = orig.apply(this, args);
-    record = { partie: JSON.stringify(partie), seedApres: window.eval('SEED'), idCounterApres: window.eval('_idCounter') };
+    const aEcrire = nom === 'monde' ? { orgs: partie.orgs, mondeVivant: partie.mondeVivant } : partie;
+    record = { partie: JSON.stringify(aEcrire), seedApres: window.eval('SEED'), idCounterApres: window.eval('_idCounter') };
     memory.set(key, record);
     nettoyer();
     const tmp = file + '.' + process.pid + '.' + Date.now() + '.tmp';
