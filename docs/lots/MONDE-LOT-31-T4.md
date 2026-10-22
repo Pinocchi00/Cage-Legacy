@@ -80,3 +80,11 @@ J'ai mesuré, dans un navigateur à 1920×1080, la planche (`UniFicheStats.dc.ht
 - Valeurs portées d'après la fiche du superviseur et les styles de `UniFicheStats.dc.html` : trois panneaux 559/487/487 px × 508 px, espacements déclarés 16 px ; fonds cadre `rgba(233,230,225,0.5)`, `#0D0B0B`, `#121010`, tuiles `#252121`, texte `#E9E6E1`, rouge `#E23A2B`, jaune `#F0B220` ; découpes 18/17/14 px ; header 53 px avec barre rouge 56×8 px ; jauges 10 px et conversion par échelle fixe ; segments de méthode 48 px et répartitions 40 px ; valeur de durée 40 px ; touche S 33×38 px et bouton suivi 126×56 px.
 - Écart arithmétique de 1 px dans les mesures du lot : 559 + 487 + 487 + deux espacements de 16 = 1565 px, alors que la largeur de contenu est 1564 px et le troisième panneau est coté à x=1377. Les largeurs et le gap explicites sont conservés ; le troisième panneau débute à x=1378.
 - Migration de sauvegarde : aucune. Questions pour Anthony : confirmer si la coordonnée x=1377 prime sur le gap de 16 px (écart d'un pixel indiqué ci-dessus).
+
+## Compte rendu — dernière reprise (22/10)
+- `mgmt-fiche-stats.js` : contrôle au sol formaté directement depuis les secondes (arrondi avant affichage) et remplissage calculé sur secondes ÷ 300 ; lignes de DEBOUT et AU SOL regroupées dans un conteneur flexible.
+- `ui-cadre.css` : conteneur des quatre lignes en `flex:1` / `justify-content:space-between` ; premier libellé des barres de répartition en `#E9E6E1`, second conservé à 0,74 d'opacité.
+- `index.html` : versions manuelles montées pour les fichiers retouchés (`mgmt-fiche-stats.js` `monde31t4g`, `ui-cadre.css` `monde31t4g`).
+- `tests/mgmtFicheStats.test.js` : test ajouté, intitulé « Monde lot 31 T4 — contrôle au sol formaté en secondes par 15 minutes » ; vérifie 24 → « 0:24 », 111 → « 1:51 », 0 → « 0:00 » et `null` → « — ».
+- Tests ciblés lancés séparément : `timeout 110 node --test tests/mgmtFicheStats.test.js` (8/8) et `timeout 110 node --test tests/mgmtFicheCadre.test.js` (2/2). Mesure de rendu rapportée par le test : 17 ms. Aucune migration de sauvegarde.
+- Écarts à la fiche : aucun pour cette reprise. Questions pour Anthony : aucune nouvelle ; la question sur la coordonnée x=1377 demeure ouverte comme notée ci-dessus.

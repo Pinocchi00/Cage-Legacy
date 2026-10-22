@@ -1282,7 +1282,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fs-bar{height:40px;display:flex;gap:4px}
 .mf-fs-bar i{min-width:0;display:flex;align-items:center;padding:0 10px;background:#E9E6E1;color:#0D0B0B;font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800;font-size:28px}
 .mf-fs-bar i:nth-child(2){background:rgba(233,230,225,.55)}.mf-fs-bar i:nth-child(3){background:#252121;color:#E9E6E1}
-.mf-fs-labels{display:flex;justify-content:space-between;gap:12px;font-size:22px}.mf-fs-labels span:last-child{color:rgba(233,230,225,.74)}
+.mf-fs-labels{display:flex;justify-content:space-between;gap:12px;font-size:22px}.mf-fs-labels span:first-child{color:#E9E6E1}.mf-fs-labels span:last-child{color:rgba(233,230,225,.74)}
 .mf-fs-duration{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;font-size:24px}.mf-fs-duration b{font-size:40px}
 .mf-fi-empty-stats{padding:24px;font-size:24px;background:#121010;flex:1}
 /* ==== [FIN ANCRE] ==== */
