@@ -39,3 +39,12 @@ Fichiers et rôle ; tests (intitulés) ; temps mesurés ; la règle retenue pour
 - Numérotation : `mgmtSoirees(m).n` dérive du numéro final `m.eventsPlayed`; les records enregistrent actuellement `t.c` comme `soiree` (écart à corriger/clarifier).
 - Écarts importants : les sept tests ne couvrent pas les valeurs exactes fabriquées, les égalités/qualifications et l’intégralité des records demandés. `defensesTitre`, `plusJeuneChampion`, le filtrage strict de carrière à l’organisation, et le livre complet des records sont incomplets ; le code doit être repris avant usage. Aucun format de sauvegarde changé.
 - Questions pour Anthony : confirmer la définition exacte d’une défense de titre consécutive (notamment défaites entre combats titrés) et les règles de classement d’âge si le combattant est champion plusieurs fois.
+
+## Compte rendu — reprise 22/10/2026
+- `package.json` : `tests/mgmtLeaders.test.js` inscrit dans `test` et `test:watch` ; commande `test:leaders` conservée.
+- `mgmt-leaders.js` : records de carrière filtrés aux combattants de l’organisation, calcul des défenses et âge champion, retrait des défaites/combats externes des séries et records carrière.
+- `index.html` : version `mgmt-leaders.js?v=p1t6a3`.
+- `tests/mgmtLeaders.test.js` : ajout « Monde lot 31 T6a — valeurs exactes sur un combat fabriqué » ; le fichier couvre également les autres intitulés listés dans la réalisation initiale ci-dessus.
+- Vérification finale : `timeout 110 node --test tests/mgmtLeaders.test.js` — 8/8 ; calcul généré sur six soirées 6 ms (seuil 300 ms). Le contrôle `node tools/verif-versions.js origin/main` ne relève aucun écart.
+- `victoiresSuite` : plus longue série ouverte parmi les combattants de l’organisation, et à défaut la plus longue série historique (décision du superviseur). Numérotation de soirée enregistrée : `t.c`, faute d’une association dédiée établie ici.
+- Questions pour Anthony : aucune. Réserve : l’âge champion est lu sur `t.a.age`/`t.b.age` si fourni ; les séries de défenses sont calculées à partir des faits `title_fight` ordonnés dans l’historique.
