@@ -40,3 +40,19 @@ Versions montées à la main dans `index.html` (`mgmt-fiche-stats.js` inscrit av
 
 ## Compte rendu
 Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adaptés (lesquels, pourquoi, décision citée) ; **les valeurs de la planche que tu as portées** (couleurs, tailles, polices, positions principales, avec leur source dans le HTML) ; mesure du temps de rendu ; écarts à la fiche ou à la planche ; questions pour Anthony.
+
+### Réalisation T4
+- `mgmt-fiche-stats.js` : rendu dérivé depuis `mgmtStatsCarriere`, `mgmtStatsCategorie` et `mgmtStatsDocumentes`, formatage, répartitions en pourcentages par plus grand reste, pluriels de catégorie et répartition des méthodes.
+- `mgmt-fiche-cadre.js` : onglet Statistiques, rendu, navigation clavier et commande S de suivi.
+- `mgmt-fiche-planche.js` : aucun changement livré ; la bannière du nom reste inchangée. Le contrôle SUIVI/SUIVRE est dans la rangée d’onglets, comme sur la planche.
+- `mgmt-ecran-fiche.js` : le mécanisme existant `mgmtFicheLien`/`CL.mgmtSuivre` est conservé ; le nouveau contrôle appelle la même action.
+- `ui-cadre.css` : styles de l’onglet et du bouton de suivi.
+- `index.html` : chargement du nouveau fichier avant `mgmt-fiche-cadre.js` et versions montées à la main.
+- `package.json` : ajout à `test`, `test:watch` et `test:fichestats`.
+- `tests/mgmtFicheStats.test.js` — intitulés : « Monde lot 31 T4 — onglet troisième, Tab dans l’ordre, Aperçu par défaut et phrase vide » ; « Monde lot 31 T4 — huit libellés, valeurs formatées, moyenne et rang sans valeurs invalides » ; « Monde lot 31 T4 — les deux répartitions totalisent exactement 100 » ; « Monde lot 31 T4 — façon de gagner selon les méthodes et échappement » ; « Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S » ; « Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms ».
+- `tests/mgmtFicheCadre.test.js` adapté selon « brief du 22/10, P1 T4 : le cinquième onglet Statistiques » : compte et ordre des onglets.
+- Migration de sauvegarde : aucune, aucun champ sauvegardé n’est ajouté.
+- Valeurs portées d’après les attributs `style` de `UniFicheStats.dc.html` : toile 1920 × 1080 ; zone de contenu 1564 × 856 à (300,128) ; fond `#0D0B0B`, encre `#E9E6E1`, panneaux `#121010`, tuiles `#252121`, rouge `#E23A2B`, jaune `#F0B220`; Saira Condensed 500/600 et Saira Extra Condensed 800. Typographies principales : 44 px pour les titres, 24 px pour les libellés, 44 px pour les grandes valeurs, 22 px pour les mentions, segments de répartition de 40 px avec chiffres 28 px. Panneaux : intérieur 15 px, espacement 16 px et colonnes en proportion 1,15:1. Bouton suivi : 56 px de haut, biseau 10 px, 20 px de padding horizontal, texte Saira Extra Condensed 800 à 32 px, coche SVG 24 × 24 px.
+- Mesure du rendu complet avec l’onglet Statistiques ouvert : **28 ms** (cible fiche <150 ms, garde-fou <600 ms).
+- Écart à la planche : le bouton de suivi est placé dans la rangée des onglets comme sur le visuel, et non superposé au bloc du nom dans la bannière. Aucun chevauchement intentionnel. Les largeurs de barre des huit chiffres sont calculées à partir de la valeur courante (bornée à 100 %) plutôt que des largeurs d’exemple de la planche ; la planche n’indique pas d’échelle statistique. Les calculs et valeurs viennent du système `mgmt-stats.js` existant.
+- Questions pour Anthony : aucune.

@@ -1,0 +1,36 @@
+"use strict";
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {newGameWindow}=require('./helpers/loadGame');
+function monde(){const w=newGameWindow({runMain:true});w.eval("setSeed(20261008); mgmtPasseGenerer('split',{soirees:6});");return w;}
+function open(w,tab='stats'){w.eval(`(()=>{const m=G.mgmt,f=m.roster.find(x=>x&&mgmtStatsCarriere(m,x.id)?.docs>=3)||m.roster.find(x=>x&&mgmtStatsDocumentes(m,x.id));MGMT_FICHE={id:f.id,retour:'mgmt_effectif',cursor:0,onglet:${JSON.stringify(tab)}};G.screen='mgmt_fiche';render();})()`);}
+
+test('Monde lot 31 T4 — onglet troisième, Tab dans l’ordre, Aperçu par défaut et phrase vide',()=>{
+ const w=monde();assert.equal(w.eval("MGMT_FICHE_ONGLETS.map(x=>x.id).join(',')"),'apercu,style,stats,combats,contrat,ondit');
+ w.eval("MGMT_FICHE={id:G.mgmt.roster[0].id,retour:'mgmt_effectif',cursor:0};G.screen='mgmt_fiche';render()");assert.equal(w.eval('MGMT_FICHE.onglet'),'apercu');
+ w.eval('CL.mgmtFicheOnglet("stats")');assert.match(w.eval("document.querySelector('.mf-fi-corps').textContent"),/Pas encore de combat documenté/);
+});
+test('Monde lot 31 T4 — huit libellés, valeurs formatées, moyenne et rang sans valeurs invalides',()=>{
+ const w=monde();open(w);const text=w.eval("document.querySelector('.mf-fi-corps').textContent"), data=JSON.parse(w.eval("(()=>{const f=mgmtFighterById(G.mgmt,MGMT_FICHE.id),s=mgmtStatsCarriere(G.mgmt,f.id);return JSON.stringify({s,value:mgmtFicheStatsFormat(s.sigParMin,'sigParMin'),pct:mgmtFicheStatsFormat(s.precision,'precision'),duration:mgmtFicheStatsFormat(s.dureeMoyenne,'dureeMoyenne')});})()"));
+ for(const label of ['Coups significatifs donnés par minute','Précision','Encaissés par minute','Défense debout','Amenées par 15 minutes','Défense d’amenée','Soumissions tentées par 15 min','Contrôle au sol par 15 minutes']) assert.ok(text.includes(label),label);
+ assert.ok(text.includes(String(data.s.docs)));assert.ok(text.includes(data.value));assert.ok(text.includes(data.pct));assert.ok(text.includes(data.duration));assert.ok(text.includes('moy.'));assert.doesNotMatch(text,/NaN|undefined|Infinity|null/);
+});
+test('Monde lot 31 T4 — les deux répartitions totalisent exactement 100',()=>{
+ const w=monde();const out=w.eval("JSON.stringify([mgmtFicheStatsRepart([.61,.22,.17]),mgmtFicheStatsRepart([.88,.09,.03])])");
+ for(const bar of JSON.parse(out))assert.equal(bar.reduce((a,b)=>a+b,0),100);
+});
+test('Monde lot 31 T4 — façon de gagner selon les méthodes et échappement',()=>{
+ const w=monde();const r=w.eval("JSON.stringify([mgmtFicheStatsFacon({}),mgmtFicheStatsFacon({ko:1}),mgmtFicheStatsFacon({ko:2,sub:1,stop:1,dec:2}),mgmtFicheStatsFacon({ko:1,sub:0})])");
+ assert.deepEqual(JSON.parse(r),['','1 KO · aucune soumission','2 KO · 1 soumission · 1 arrêt médical · 2 décisions','1 KO · aucune soumission']);
+ open(w);w.eval("G.mgmt.roster[0].name='<b>test</b>'");const html=w.eval("mgmtFicheStatsHtml(G.mgmt,G.mgmt.roster[0])");assert.doesNotMatch(html,/<b>test<\/b>/);
+});
+test('Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S',()=>{
+ const w=monde();open(w,'apercu');let html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");
+ assert.match(html,/SUIVRE/);assert.match(html,/aria-pressed="false"/);assert.match(html,/CL\.mgmtSuivre/);
+ w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
+ const n=w.eval('mgmtSuivis(G.mgmt).length');w.eval("keysHandle({key:'s',preventDefault(){}})");assert.equal(w.eval('mgmtSuivis(G.mgmt).length'),n-1);
+});
+test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
+ const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
+ console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);
+});
