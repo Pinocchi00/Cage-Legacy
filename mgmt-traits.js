@@ -52,15 +52,20 @@ const MGMT_TRAITS=Object.freeze([
 ]);
 function mgmtTraitInfo(id){const x=MGMT_TRAITS.find(t=>t.id===id);return x?Object.freeze({...x}):null;}
 /* ==== [ANCRE: P2_T2_APPLIQUER_TRAITS] — Monde lot 32 T2 ==== */
+function mgmtTraitEffetAppliquer(effet,c){
+  if(!effet||!c||!c.attrs)return c;
+  for(const [k,delta] of Object.entries(effet))c.attrs[k]=clamp(Math.round((Number(c.attrs[k])||0)+delta),1,100);
+  if(typeof overall==='function')c.overall=overall(c);
+  return c;
+}
 function mgmtTraitsAppliquer(partie,f,cycle,c){
   if(!partie||!f||!c||!c.attrs)return c;
   const ids=mgmtTraitsDe(partie,f.id,cycle);
   for(const id of ids){
     const trait=MGMT_TRAITS.find(t=>t.id===id);
     if(!trait||!trait.effet)continue;
-    for(const [k,delta] of Object.entries(trait.effet))c.attrs[k]=clamp(Math.round((Number(c.attrs[k])||0)+delta),1,100);
+    mgmtTraitEffetAppliquer(trait.effet,c);
   }
-  if(typeof overall==='function')c.overall=overall(c);
   return c;
 }
 /* ==== [ANCRE: P2_T1_TRAITS_DERIVES] — Monde lot 32 T1 ==== */
