@@ -13,36 +13,15 @@ const T = (id, ok, pas) => [id, ok, pas];
 const TABLE = [
   T('menton-granit', { kdRecus: 3, dKO: 0, n: 5 }, { kdRecus: 2, dKO: 0, n: 5 }),
   T('menton-fele', { dKO6: 2 }, { dKO6: 1 }),
-  T('encaisseur', { sigEncaisseParMin: 3.5, n: 4, tauxVictoires: 0.45 }, { sigEncaisseParMin: 3.4, n: 4, tauxVictoires: 0.45 }),
-  T('fragile-apres-ko', { dernierKOsubi: true, kdRecus: 2, n: 3, dernier: { index: 2 } }, { dernierKOsubi: true, kdRecus: 1, n: 3, dernier: { index: 2 } }),
-  T('diesel', { victoiresRound3: 3 }, { victoiresRound3: 2 }),
-  T('s-eteint', { defaitesRound3: 3 }, { defaitesRound3: 2 }),
-  T('rythme-infernal', { sigParMin: 4.2, n: 4 }, { sigParMin: 4.1, n: 4 }),
-  T('sous-pression', { principal: { n: 3, taux: 0.34 } }, { principal: { n: 3, taux: 0.35 } }),
-  T('revanchard', { revancheVictoires: 2 }, { revancheVictoires: 1 }),
-  T('hesite-apres-ko', { dernierKOsubi: true }, { dernierKOsubi: false }),
-  T('grands-soirs', { principal: { n: 3, taux: 0.67 } }, { principal: { n: 3, taux: 0.66 } }),
-  T('serie-noire', { serieDefaites: 3 }, { serieDefaites: 2 }),
-  T('sur-sa-lancee', { serieVictoires: 4 }, { serieVictoires: 3 }),
   T('ne-se-releve-pas', { defaitesControle: 2 }, { defaitesControle: 1 }),
   T('chasseur-de-cou', { vSub: 2 }, { vSub: 1 }),
   T('tombeur', { ameneesPar15: 2.5, reussiteAmenee: 0.4, n: 3 }, { ameneesPar15: 2.4, reussiteAmenee: 0.4, n: 3 }),
-  T('mur', { defenseAmenee: 0.8, ameneesAdverses: 10 }, { defenseAmenee: 0.8, ameneesAdverses: 9 }),
-  T('etouffeur', { controlePar15: 180, n: 3 }, { controlePar15: 179, n: 3 }),
-  T('finisseur', { victoires: 3, tauxFinition: 0.67 }, { victoires: 2, tauxFinition: 0.67 }),
-  T('juge-dependant', { n: 4, tauxDecision: 0.75 }, { n: 3, tauxDecision: 0.75 }),
   T('foudroyant', { finitionsR1: 2 }, { finitionsR1: 1 }),
   T('poings-de-marbre', { vKO: 3 }, { vKO: 2 }),
   T('specialiste-soumission', { vSub: 2, partVictoiresSub: 0.4 }, { vSub: 1, partVictoiresSub: 0.4 }),
-  T('guerrier', { guerres: 1 }, { guerres: 0 }),
   T('rouille', { n: 1, cyclesDepuisDernier: 39 }, { n: 1, cyclesDepuisDernier: 38 }),
-  T('vieux-briscard', { age: 36, n: 20 }, { age: 35, n: 20 }),
-  T('jeune-loup', { age: 24, victoires: 3, dKO: 0 }, { age: 25, victoires: 3, dKO: 0 }),
-  T('roi', { titres: 3 }, { titres: 2 }),
-  T('invaincu', { victoires: 5, defaites: 0, nuls: 0 }, { victoires: 4, defaites: 0, nuls: 0 }),
   T('debutant', { bilanCombats: 2 }, { bilanCombats: 3 }),
   T('routinier', { bilanCombats: 10 }, { bilanCombats: 9 }),
-  T('comeback', { serieAvantDerniereDefaites: 2, serieVictoires: 1 }, { serieAvantDerniereDefaites: 1, serieVictoires: 1 }),
 ];
 /* Une entrée de m.hist fabriquée : le combattant x bat (ou perd contre) y, par la famille donnée, avec un relevé réduit de valeurs connues. */
 const CODE_HIST = `
@@ -54,10 +33,10 @@ const CODE_HIST = `
   const partie=(f,hist)=>({cycle:6,roster:[Object.assign({id:'x',W:0,L:0,D:0,age:28,div:'H-light'},f||{})],hist:hist,facts:[]});`;
 const lance = (w, code) => JSON.parse(w.eval(`(function(){${CODE_HIST}${code}})()`));
 
-test('Monde lot 32 T1 — le catalogue : 32 traits, identifiants uniques, six familles, aucun effet, aucune phrase', () => {
+test('Monde lot 32 T1 — le catalogue : 11 traits, identifiants uniques, quatre familles, effets mesurés ou neutres, aucune phrase', () => {
   const w = jeu();
-  const r = JSON.parse(w.eval(`JSON.stringify({n:MGMT_TRAITS.length,ids:MGMT_TRAITS.map(x=>x.id),familles:[...new Set(MGMT_TRAITS.map(x=>x.famille))],effets:MGMT_TRAITS.every(x=>x.effet===null),cles:[...new Set(MGMT_TRAITS.flatMap(x=>Object.keys(x)))].sort(),info:!!mgmtTraitInfo('etouffeur')})`));
-  assert.equal(r.n, 32); assert.equal(new Set(r.ids).size, 32); assert.equal(r.familles.length, 6); assert.ok(r.effets); assert.ok(r.info);
+  const r = JSON.parse(w.eval(`JSON.stringify({n:MGMT_TRAITS.length,ids:MGMT_TRAITS.map(x=>x.id),familles:[...new Set(MGMT_TRAITS.map(x=>x.famille))],effets:MGMT_TRAITS.every(x=>x.effet||['rouille','debutant','routinier'].includes(x.id)),cles:[...new Set(MGMT_TRAITS.flatMap(x=>Object.keys(x)))].sort(),info:!!mgmtTraitInfo('chasseur-de-cou')})`));
+  assert.equal(r.n, 11); assert.equal(new Set(r.ids).size, 11); assert.equal(r.familles.length, 4); assert.ok(r.effets); assert.ok(r.info);
   assert.deepEqual(r.cles, ['condition', 'conserve', 'effet', 'famille', 'id', 'nom', 'public', 'temporaire'].sort(), 'aucune phrase dans le catalogue');
   assert.deepEqual(TABLE.map(x => x[0]).sort(), r.ids.slice().sort(), 'la table de ce test couvre chaque trait du catalogue, une fois');
 });
@@ -77,7 +56,7 @@ test('Monde lot 32 T1 — la dérivation lit les combats documentés : quatre KO
   assert.ok(r.vis.every(id => r.t.includes(id)), 'les traits visibles sont parmi les traits');
 });
 
-test('Monde lot 32 T1 — l’hystérésis : un trait acquis ne se perd que sous son seuil de conservation ; un temporaire cesse avec sa condition', () => {
+test('Monde lot 32 T2 — l’hystérésis mesurable reste ; « série noire » est retiré (48,67 % ± 1,29, victoire témoin/trait 48,67/48,67)', () => {
   const w = jeu();
   const r = lance(w, `
     const sub=i=>combat(i,'x','y'+i,'V','sub',2,3,'prelim',{sig:5,sigAtt:8,subAtt:2},{sig:2,sigAtt:5});
@@ -88,8 +67,8 @@ test('Monde lot 32 T1 — l’hystérésis : un trait acquis ne se perd que sous
     const c=mgmtTraitsDe(partie({W:1,L:3},h2.concat([dec(4,'V')])),'x');
     return JSON.stringify({a:a,b:b,c:c});`);
   assert.ok(r.a.includes('chasseur-de-cou'), 'acquis, gardé après une défaite : ' + r.a.join(','));
-  assert.ok(r.b.includes('serie-noire'), 'trois défaites d’affilée : « En plein doute » : ' + r.b.join(','));
-  assert.ok(!r.c.includes('serie-noire'), 'une victoire : le trait temporaire cesse');
+  assert.ok(!r.b.includes('serie-noire'), 'trois défaites ne dérivent plus un trait sans effet mesurable : ' + r.b.join(','));
+  assert.ok(!r.c.includes('serie-noire'), 'une victoire ne réintroduit pas le trait retiré');
 });
 
 test('Monde lot 32 T1 — le plafond : jamais plus de quatre traits ; « Débutant » et « Routinier » n’apparaissent jamais avec un autre trait', () => {
