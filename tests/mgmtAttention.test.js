@@ -21,11 +21,12 @@ test('H6 — le cercle tient 5, les suivis 15, un membre du cercle n’est plus 
     mgmtSuiviToggle(m,ids[30]); mgmtCercleToggle(m,ids[4]); mgmtCercleToggle(m,ids[30]);
     return {poses,s,refus,lien,retire,suivi30:mgmtSuivis(m).includes(ids[30]),cercle:mgmtCercle(m).length,valide:validateMgmt(m)};
   `);
-  assert.deepEqual(r.poses,[true,true,true,true,true,false],'le sixième du cercle est refusé');
-  assert.equal(r.s.filter(Boolean).length,15,'quinze suivis au plus'); assert.equal(r.s[15],false);
-  assert.equal(r.refus,false,'un membre du cercle ne devient pas suivi');
-  assert.deepEqual(r.lien,['cercle','suivi',null]); assert.equal(r.retire,null,'le suivi se retire');
-  assert.equal(r.suivi30,false,'entrer au cercle retire le suivi'); assert.equal(r.valide,true);
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.deepEqual(r.poses,[true,true,true,true,true,true],'le plafond unique est 60');
+  assert.equal(r.s.filter(Boolean).length,17,'les suivis acceptent plus de 15 entrées');
+  assert.equal(r.refus,true,'le cercle est désormais un suivi');
+  assert.deepEqual(r.lien,[null,'suivi',null]); assert.equal(r.retire,null,'le suivi se retire');
+  assert.equal(r.suivi30,false,'la bascule retire le suivi'); assert.equal(r.valide,true);
 });
 
 test('H6 — le cercle et les suivis se gardent et la porte de sauvegarde refuse les valeurs fausses', () => {
@@ -41,8 +42,9 @@ test('H6 — le cercle et les suivis se gardent et la porte de sauvegarde refuse
     return {ok,dbl:validateMgmt(dbl),trop:validateMgmt(trop),faux:validateMgmt(faux),mele:validateMgmt(mele),ancien:validateMgmt(ancien),
       defaut:[mgmtDefault().cercle.length,mgmtDefault().suivis.length]};
   `);
+  /* brief du 22/10, P3 T1 : une seule liste */
   assert.equal(r.ok,true); assert.equal(r.dbl,false); assert.equal(r.trop,false);
-  assert.equal(r.faux,false); assert.equal(r.mele,false);
+  assert.equal(r.faux,false); assert.equal(r.mele,true);
   assert.equal(r.ancien,true,'une ancienne sauvegarde sans cercle reste valide'); assert.deepEqual(r.defaut,[0,0]);
 });
 
@@ -100,11 +102,12 @@ test('H6 — le conteur : le cercle d’abord, jamais deux infos sur le même co
     pose(a,'divorce'); pose(b,'mariage'); pose(c,'adopte-chien'); pose(d,'deces-parent'); pose(e,'video-virale'); pose(f,'enfant-malade');
     m.facts.push({c:10,k:'moment_vie',a:a.id,m:'mariage'});
     const cand=mgmtConteurCandidats(m,10), sel=mgmtConteur(m);
-    return {ordre:cand.slice(0,2).map(x=>x.id===e.id?'cercle':(x.id===d.id?'suivi':'autre')),
+    return {ordre:cand.slice(0,2).map(x=>(x.id===e.id||x.id===d.id)?'suivi':'autre'),
       uniques:new Set(cand.map(x=>x.id)).size===cand.length,prive:cand.some(x=>x.id===f.id),
       n:sel.length,budget:mgmtConteurBudget(m),max:MGMT_CONTEUR_MAX};
   `);
-  assert.deepEqual(r.ordre,['cercle','suivi'],'ton cercle, puis tes suivis'); assert.ok(r.uniques,'un seul moment par combattant');
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.deepEqual(r.ordre,['suivi','suivi'],'le cercle n’a plus de rang distinct'); assert.ok(r.uniques,'un seul moment par combattant');
   assert.equal(r.prive,false,'un moment sans relais ne se raconte pas');
   assert.ok(r.n>=1&&r.n<=r.budget-1&&r.budget<=r.max,'dans le budget, une place gardée aux nouvelles du monde');
 });
@@ -157,9 +160,10 @@ test('H6 — la fiche montre le rôle, le cercle, les suivis ; les boutons agiss
     MGMT_FICHE={id:f.id,retour:'mgmt_bureau',cursor:0}; G.screen='mgmt_fiche';
     const avant=scr_mgmt_fiche();
     CL.mgmtCercle(f.id); const apres=scr_mgmt_fiche();
-    return {role:(mgmtRole(m,f)||{}).libelle||null,avantRole:avant.includes('mgmt-fiche-role'),bouton:avant.includes('Ton cercle · 0/5'),
-      apres:apres.includes('Ton cercle · 1/5')&&!apres.includes('Tes suivis'),brut:avant.includes('<b>'+f.last),cercle:mgmtCercle(m).length};
+    return {role:(mgmtRole(m,f)||{}).libelle||null,avantRole:avant.includes('mgmt-fiche-role'),bouton:avant.includes('Suivre'),
+      apres:apres.includes('SUIVI')&&!apres.includes('Ton cercle')&&!apres.includes('Tes suivis'),brut:avant.includes('<b>'+f.last),cercle:mgmtCercle(m).length};
   `);
-  assert.ok(r.bouton); assert.ok(r.apres); assert.equal(r.cercle,1); assert.equal(r.brut,false,'rien n’est injecté sans esc()');
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.ok(r.bouton); assert.ok(r.apres); assert.equal(r.cercle,0); assert.equal(r.brut,false,'rien n’est injecté sans esc()');
   if(r.role) assert.ok(r.avantRole,'le rôle s’affiche à côté du nom');
 });

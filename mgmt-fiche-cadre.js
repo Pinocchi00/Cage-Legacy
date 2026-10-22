@@ -106,6 +106,8 @@ keysRegister('mgmt_fiche',{
   ArrowUp(){ CL.mgmtFicheDeplacer(-1); },
   Enter(){ CL.mgmtFicheEntree(); },
   Escape(){ CL.mgmtFicheRetour(); },
+  s(){ CL.mgmtSuivre(MGMT_FICHE.id); },
+  S(){ CL.mgmtSuivre(MGMT_FICHE.id); },
   p(){ CL.mgmtFicheDemande('promettre'); },
   P(){ CL.mgmtFicheDemande('promettre'); },
   r(){ CL.mgmtFicheDemande('refuser'); },

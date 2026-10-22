@@ -66,7 +66,7 @@ function mgmtMouvementHtml(m){
   const id=esc(f.id);
   return `<aside class="mgmt-popup" role="status" aria-live="polite">`
     +`<button type="button" class="mgmt-popup-ferme" aria-label="Fermer" onclick="CL.mgmtPopupFermer()">✕</button>`
-    +`<div class="mgmt-popup-lien">${c.lien==='cercle'?'Ton cercle':'Tes suivis'}</div>`
+    +`<div class="mgmt-popup-lien">Suivis</div>`
     +`<h4>${esc(f.name)}${sur?` <em>« ${esc(sur)} »</em>`:''}</h4>`
     +`<p class="mgmt-popup-portrait">${role?esc(role.libelle)+' · ':''}${esc(mgmtDivisionLabel(f.div))} · ${esc(f.W)}-${esc(f.L)}${f.D?'-'+esc(f.D):''}</p>`
     +`<p class="mgmt-popup-moment">${esc(mgmtVieTexte(c.moment))} <span>${esc(c.moment.relais.join(' · '))}</span></p>`
