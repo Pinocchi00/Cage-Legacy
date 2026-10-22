@@ -63,3 +63,12 @@ Fixtures : `mgmtPasseGenerer('split',{soirees:6})` à la graine 20261008 (rapide
 
 ## Fin
 Versions montées à la main dans `index.html`, `node tools/verif-versions.js origin/main`, tests touchés un par un, commit `Monde lot 32 T1 : le catalogue des traits` (le numéro T1 est obligatoire). Compte rendu dans la fiche : fichiers et rôle, tests (intitulés), **la répartition mesurée des traits sur la partie de six soirées**, les seuils que tu as trouvés trop larges ou trop serrés (un trait que 60 % des combattants portent, ou que personne ne porte, est un seuil à revoir : dis-le sans le corriger), écarts, questions.
+
+## Compte rendu
+
+- `mgmt-traits.js` : catalogue et première version de dérivation des traits ; `index.html` : script ajouté après `mgmt-stats.js`.
+- `tests/mgmtTraits.test.js` : huit tests créés avec les intitulés de la fiche, mais le test 2 ne pilote pas encore des jeux de données au seuil et juste en dessous.
+- Pas de migration de sauvegarde.
+- Écart / blocage : le test ciblé (`timeout 110 node --test tests/mgmtTraits.test.js`) échoue sur sept tests. Il a révélé un catalogue à 32 entrées, des contextes qui manquent des noms attendus par les conditions (`principale`/`principale`), et une expression régulière incorrecte dans le test de texte. Le calcul plante donc avant les mesures et aucun résultat de répartition/temps n'a été obtenu. `package.json` n'a pas encore été inscrit dans `test`, `test:watch` et `test:traits`.
+- Commits intermédiaires : pas 1 `7bda0d4`, pas 2 `35f039a`. Pas 3 à commiter en état inachevé ; reste à corriger avant livraison finale.
+- Questions pour Anthony : aucune question de spécification ; la tranche est inachevée par défauts d'implémentation et tests non verts.
