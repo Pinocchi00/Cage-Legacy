@@ -47,7 +47,7 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
     'split|20261008': '018abcfddc4a0f92', 'split|20261009': 'bedfbfc1b22d160d',
     'ultimate-rim|20261008': 'e04c79c0e03a267f', 'ultimate-rim|20261009': '503f21eb7047f705',
     'fighting-pacific-championship|20261008': 'fc011cca7e3671fb', 'fighting-pacific-championship|20261009': '930a4a3a9c2a939b',
-    jouee3: '269e238541acc0e9',
+    jouee3: 'c995e2f6d5074271',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -301,7 +301,7 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
   /* Monde lot 16 — décision d'Anthony du 17/10/2026 : empreintes de six soirées recalculées le 18/10/2026 (mêmes tirages, bilans, âges et classement différents). */
   /* Monde lot 23 (audit 16/10 E3/E170) : les lignes de presse changent (étiquette « Info : » retirée, blague des croissants gardée pour le vainqueur) ; empreintes recalculées, vérifié en retirant ces deux changements : les anciennes valeurs reviennent. */
   /* Combat lots 1 et 2 (décision d'Anthony du 22/10/2026, « si ça améliore concrètement le jeu ») : le moteur et les blessures sont recalibrés (finitions 62 % -> 53 %, blessures graves -29 %) ; les combats simulés changent, empreintes recalculées. */
-  const AVANT = { 20261008: '87043b280e46bebe', 20261009: 'b855116cad4ba3ba' };
+  const AVANT = { 20261008: '3ea58029eb2a0885', 20261009: '3fab3223e739a1c8' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });
