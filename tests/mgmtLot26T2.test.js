@@ -6,8 +6,8 @@ const {newGameWindow}=require('./helpers/loadGame');
 
 test('Monde lot 26 T2 — vestiaire trié par catégorie puis rang',()=>{
   const w=newGameWindow();
-  const resultat=JSON.parse(w.eval(`(function(){setSeed(20261008);const m=mgmtDefault('split');mgmtNewRoster(m);G={theme:'dark',mgmt:m};MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0};const l=mgmtVestiaireLignes(m).filter(x=>!x.signe);const ds=allDivisions().map(d=>d.id);return JSON.stringify(l.map(x=>ds.indexOf(x.f.div)))})()`));
-  assert.ok(resultat.every((d,i)=>i===0||resultat[i-1]<=d),'les catégories doivent être monotones');
+  const resultat=JSON.parse(w.eval(`(function(){setSeed(20261008);const m=mgmtDefault('split');mgmtNewRoster(m);G={theme:'dark',mgmt:m};MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0};const ds=allDivisions().map(d=>d.id);return JSON.stringify(mgmtVestiaireLignes(m).filter(x=>!x.signe).map(x=>{const rang=mgmtRangAffichable(m,x.f);return {categorie:ds.indexOf(x.f.div),rang:rang==='C'?0:(rang??Infinity)}}))})()`));
+  assert.ok(resultat.every((x,i)=>i===0||resultat[i-1].categorie<x.categorie||(resultat[i-1].categorie===x.categorie&&resultat[i-1].rang<=x.rang)),'les combattants sans quelque chose à dire doivent être ordonnés par catégorie puis par rang');
 });
 
 test('Monde lot 26 T2 — les contrats expliquent l’échelle des barres',()=>{

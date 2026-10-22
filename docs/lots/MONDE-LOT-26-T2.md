@@ -21,5 +21,5 @@ Branche : `monde-lot-26-audit` (la branche courante de ce dossier ; commits ICI 
 - `tests/mgmtLot26T2.test.js` : tests « Monde lot 26 T2 — vestiaire trié par catégorie puis rang » et « Monde lot 26 T2 — les contrats expliquent l’échelle des barres ».
 - `package.json` : commande `test:monde26t2` ajoutée.
 - Tests existants adaptés : aucun. Migration de sauvegarde : aucune.
-- Écart à la fiche : le nouveau test n'est pas encore ajouté aux scripts globaux `test` et `test:watch`.
+- Reprise après relecture : `tests/mgmtLot26T2.test.js` est inscrit dans `test` et `test:watch` ; le test filtre les combattants sans signe (« quelque chose à dire ») et vérifie l'ordre catégorie puis rang.
 - Questions pour Anthony : aucune.
