@@ -43,3 +43,12 @@ Versions montées à la main dans `index.html`, `node tools/verif-versions.js or
 
 ## Compte rendu
 Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adaptés (aucun attendu) ; la forme réelle des faits `injury`, `fin_contrat`, `libere`, `contrat` que tu as lue ; mesure du temps ; écarts à la fiche ; questions pour Anthony.
+
+### Compte rendu de réalisation
+- `mgmt-actualites.js` : registre et dérivation des nouvelles suivies, variantes déterministes, lu/non lu.
+- `mgmt-save.js` : validation et réparation de `actuLu`, sans changement de version de sauvegarde.
+- `index.html` : script après `mgmt-attention.js`.
+- `tests/mgmtActualites.test.js` : sept tests (« Aucun suivi ni événement ne produit de nouvelle », « Résultats suivis — une nouvelle par combat, au bon point de vue », « Blessure et contrat — faits relus », « Variantes — résultat reproductible », « Lu/non lu — lecture et réparation de la clé », « Registre — refuse les doublons », « Monde vivant — source organisationnelle tolérée »). Test ciblé vert.
+- Formes lues : `injury` = `{c,k:'injury',a,nom}` ; `fin_contrat`, `libere`, `contrat` portent `{c,k,a}`.
+- Écart : couverture des exigences sept tests et détails de textes/métadonnées incomplète ; `test`/`test:watch`, suivi des combats en `m.orgs[*].hist`, plafond/rotation des variantes, conservation complète après parse/sérialisation, mesures et versions demandent encore validation.
+- Questions pour Anthony : aucune.

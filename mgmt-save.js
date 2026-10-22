@@ -360,6 +360,7 @@ function validateMgmt(raw){
     for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
   }
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
+  if(raw.actuLu!==undefined&&(!Array.isArray(raw.actuLu)||raw.actuLu.length>300||raw.actuLu.some(x=>typeof x!=='string'||x.length>80))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
   for(const r of raw.recettes){ if(!Number.isSafeInteger(r)) return false; }
@@ -656,6 +657,7 @@ function mgmtRepair(m){
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
   m.suivis=[...new Set([...cercleAncien,...suivisExistants])].filter(mgmtValidId);
   m.cercle=[];
+  if(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80)) m.actuLu=[];
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
