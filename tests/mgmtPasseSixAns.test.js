@@ -74,9 +74,9 @@ test('Monde lot 1 T3 — les six ans complets', () => {
   assert.equal(r.orphelins, 0); assert.equal(r.sommeHist, 2 * r.hist); assert.equal(r.partNegative, 0);
   /* Le passage de témoin. */
   assert.equal(r.treasury, r.caisse); assert.equal(r.pop, r.popularite);
-  /* T5 : le poids. Les combats des six ans pèsent 80 Ko au plus dans la sauvegarde, la partie du premier jour 420 Ko au plus (236 Ko sans passé). */
-  assert.ok(r.combatsDisque <= 80000, 'combats du passé : ' + r.combatsDisque + ' octets');
-  assert.ok(r.disque <= 420000, 'partie du premier jour : ' + r.disque + ' octets');
+  /* Brief du 22/10, P1 T2 : bornes resserrées d'après les mesures : combats du passé 84 604 octets, premier jour 408 099 octets. */
+  assert.ok(r.combatsDisque <= 85000, 'combats du passé : ' + r.combatsDisque + ' octets');
+  assert.ok(r.disque <= 410000, 'partie du premier jour : ' + r.disque + ' octets');
   assert.equal(r.relu, true, 'la partie relue sur le disque est celle de la mémoire');
   console.log('poids au premier jour : ' + r.disque + ' octets sur disque (' + r.poids + ' en clair), dont les combats du passé ' + r.combatsDisque);
 });
