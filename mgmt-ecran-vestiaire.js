@@ -94,8 +94,7 @@ function scr_mgmt_vestiaire(){
     +`<div class="mgmt-vest-filtres"><div class="mgmt-vest-chips">${divChips}</div>`
     +`<div class="mgmt-vest-chips"><span>Rôle</span>${roles}`
     +chip('Disponibles',F.dispo,"CL.mgmtVestiaireFiltre('dispo','')")
-    +chip('Ton cercle',F.lien==='cercle',"CL.mgmtVestiaireFiltre('lien','cercle')")
-    +chip('Tes suivis',F.lien==='suivi',"CL.mgmtVestiaireFiltre('lien','suivi')")
+    +chip('Suivis',F.lien==='suivi',"CL.mgmtVestiaireFiltre('lien','suivi')")
     +chip('Quelque chose à dire',F.signe,"CL.mgmtVestiaireFiltre('signe','')")+`</div></div>`
     +`<div class="mgmt-cols mgmt-vest-cols"><section class="mgmt-vest-liste">`
     +`<div class="mgmt-vest-row head"><span></span><span>Combattant</span><span>Rôle</span><span>Catégorie</span><span>Bilan</span><span>Lien</span></div>`
@@ -103,8 +102,7 @@ function scr_mgmt_vestiaire(){
     +`<div class="mgmt-vest-pages"><button type="button" onclick="CL.mgmtVestiairePage(-1)"${F.page<=0?' disabled':''}>Précédent</button>`
     +`<span>Page ${esc(F.page+1)} / ${esc(pages)} · ${esc(lignes.length)}</span>`
     +`<button type="button" onclick="CL.mgmtVestiairePage(1)"${F.page>=pages-1?' disabled':''}>Suivant</button></div></section>`
-    +`<aside class="mgmt-vest-aside">${mgmtVestiaireAside(m,'Ton cercle',mgmtCercle(m),MGMT_CERCLE_MAX)}`
-    +mgmtVestiaireAside(m,'Tes suivis',mgmtSuivis(m),MGMT_SUIVIS_MAX)
+    +`<aside class="mgmt-vest-aside">${mgmtVestiaireAside(m,'Tes suivis',mgmtSuivis(m),MGMT_SUIVIS_MAX)}`
     +`<div class="mgmt-vest-bloc"><h3>Quelque chose à dire · ${esc(aDire)}</h3><p>Un carré signale une demande en attente ou un moment relayé cette semaine. Un clic ouvre la fiche.</p></div></aside>`
     +`</div></div>`;
 }

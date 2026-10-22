@@ -213,10 +213,10 @@ function mgmtFicheRelaisHtml(moment){
 }
 function mgmtFicheLien(m,f){
   const lien=mgmtLien(m,f.id), id=esc(f.id);
-  const cercle=lien==='cercle', suivi=lien==='suivi';
+  const suivi=lien==='suivi';
   return `<div class="mgmt-fiche-lien mf-lien">`
-    +`<button class="mgmt-fiche-lien-cercle${cercle?' on':''}" aria-pressed="${cercle}" onclick="CL.mgmtCercle('${id}')">Ton cercle · ${esc(mgmtCercle(m).length)}/${MGMT_CERCLE_MAX}</button>`
-    +(cercle?'':`<button class="mgmt-fiche-lien-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${id}')">Tes suivis · ${esc(mgmtSuivis(m).length)}/${MGMT_SUIVIS_MAX}</button>`)
+    +`<button class="mgmt-fiche-lien-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${id}')">${suivi?'SUIVI':'Suivre'}</button>`
+    +`<span class="mgmt-fiche-lien-compte">${esc(mgmtSuivis(m).length)}/${MGMT_SUIVIS_MAX}</span>`
     +`</div>`;
 }
 function mgmtFicheConnaissance(m,f){

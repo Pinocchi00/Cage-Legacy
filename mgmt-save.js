@@ -355,8 +355,8 @@ function validateMgmt(raw){
   if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
   if(raw.echelleExt!==undefined&&raw.echelleExt!==4&&raw.echelleExt!==7) return false;
   if(raw.niveaux!==undefined&&raw.niveaux!==0&&raw.niveaux!==1) return false;
-  /* Lot 5 H6 : ton cercle (5) et tes suivis (15) — des identifiants, sans doublon. */
-  for(const [cle,max] of [['cercle',5],['suivis',15]]){
+  /* Monde lot 33 T1 : cercle résiduel vide après réparation, liste unique de 60 suivis. */
+  for(const [cle,max] of [['cercle',5],['suivis',60]]){
     if(raw[cle]===undefined) continue;
     if(!Array.isArray(raw[cle])||raw[cle].length>max||new Set(raw[cle]).size!==raw[cle].length) return false;
     for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
@@ -653,6 +653,11 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
+  const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
+  const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
+  m.suivis=[...new Set([...cercleAncien,...suivisExistants])].filter(mgmtValidId);
+  m.cercle=[];
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
