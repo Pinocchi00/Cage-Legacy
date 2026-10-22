@@ -99,7 +99,9 @@ function mgmtAccueilContenu(m){
   for(const d of mgmtDemandesOuvertes(m)){
     const def=MGMT_DEMANDES[d.want], n=mgmtAccueilN(m,d.a), cible=d.target?mgmtAccueilN(m,d.target):null;
     if(!def||!n) continue;
-    ouvertes.push({kind:'demande',i:d.i,id:d.a,parts:[n,mgmtAccueilT(' demande : '+def.libelle.toLowerCase())].concat(cible?[mgmtAccueilT(' — '),cible]:[])});
+    const texte=mgmtDemandeTexte(d.want,cible&&cible.name);
+    const sep=d.want==='un-classe'?': ':' contre ';
+    ouvertes.push({kind:'demande',i:d.i,id:d.a,parts:[n,mgmtAccueilT(' '+(cible?texte.slice(0,texte.lastIndexOf(sep)):texte))].concat(cible?[mgmtAccueilT(sep),cible]:[])});
   }
   /* ==== [ANCRE: ACCUEIL_RESUMES_REPRISE] — Monde lot 12 T2 ==== */
   const resumes=MGMT_ACCUEIL_TEXTES.resumes;

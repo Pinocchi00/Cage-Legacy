@@ -48,13 +48,13 @@ test('2.3 et 2.4 — Le booking marque le combat réclamé et prévient pour les
   win.eval(`window.__rec=[{a:'${p.a}',b:'${p.b}'}]; mgmtPublicReclame=function(){ return window.__rec; }; render();`);
   assert.match(app(win).textContent,/Combat réclamé/);
   win.eval(`window.__rec=[]; mgmtMemeCamp=function(){ return true; }; render();`);
-  assert.match(app(win).textContent,/Même camp : les opposer les contrarie/);
+  assert.match(app(win).textContent,/Même camp : s’ils se battent, ils le prennent mal/);
   assert.ok(!/Combat réclamé/.test(app(win).textContent));
   win.eval(`mgmtMemeCamp=function(){ return false; }; mgmtFratrie=function(m,f){ return ['${p.b}']; }; render();`);
-  assert.match(app(win).textContent,/Frère et sœur : les opposer les contrarie/);
+  assert.match(app(win).textContent,/Frère et sœur : s’ils se battent, ils le prennent mal/);
   /* L'écran Camps dit la même chose que la règle (une charge, pas un refus). */
   const src=fs.readFileSync(path.join(__dirname,'..','mgmt-suivi-cadre.js'),'utf8');
-  assert.ok(src.includes('Les opposer les contrarie')&&!src.includes('refusent de s’affronter'));
+  assert.ok(src.includes('S’ils se battent, ils le prennent mal.')&&!src.includes('refusent de s’affronter'));
 });
 
 test('2.6 — Deux combattants de même nom se distinguent dans la liste par l’initiale du prénom', () => {
