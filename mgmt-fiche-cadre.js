@@ -53,7 +53,7 @@ function mgmtFicheCorpsOnglet(m,f,line,id){
 function mgmtFicheSuiviBouton(m,f){
   const cercle=mgmtCercle(m).includes(f.id),suivi=mgmtSuivis(m).includes(f.id);
   if(cercle) return '';
-  return `<div class="mf-fiche-suivi"><span class="mf-fb-key">S</span><button type="button" class="mf-fb-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${esc(f.id)}')">${suivi?'<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="4"/></svg>':''}<b>${suivi?'SUIVI':'SUIVRE'}</b></button><span class="mf-fb-suivi-count">${esc(mgmtSuivis(m).length)}/60</span></div>`;
+  return `<div class="mf-fiche-suivi"><span class="mf-fb-suivi-count">${esc(mgmtSuivis(m).length)}/60</span><span class="mf-fb-key">S</span><button type="button" class="mf-fb-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${esc(f.id)}')">${suivi?'<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="4"/></svg>':''}<b>${suivi?'SUIVI':'SUIVRE'}</b></button></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -71,8 +71,8 @@ function scr_mgmt_fiche_cadre(){
     corps=onglet==='style'?mgmtFicheStyleHtml(m,f):onglet==='stats'?mgmtFicheStatsHtml(m,f):onglet==='combats'?mgmtFicheCombatsHtml(m,f,line):onglet==='contrat'?mgmtFicheContratPlanche(m,f):onglet==='ondit'?mgmtFicheOnEnDitHtml(m,f):mgmtFicheApercuHtml(m,f,line);
   }catch(e){ corps=`<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-rp">Cette fiche ne se lit pas pour l’instant.</div></div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`; }
   corps=mgmtAccord(f,corps);
-  const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(m,f,champion)}`
-     +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div>${mgmtFicheSuiviBouton(m,f)}<div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
+  const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2><div class="mf-fb-wrap">${mgmtFicheBanniereHtml(m,f,champion)}${mgmtFicheSuiviBouton(m,f)}</div>`
+     +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
     +`<div class="mf-fi-corps">${corps}</div></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',grise:(typeof mgmtPresentationDansSoiree==='function'&&mgmtPresentationDansSoiree())||(typeof mgmtDuoFicheActive==='function'&&mgmtDuoFicheActive()),m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,

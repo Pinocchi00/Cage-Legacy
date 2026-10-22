@@ -1245,11 +1245,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 .mf-fi-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
 /* ==== [ANCRE: MONDE_LOT31_T4_STATS_CSS] — Monde lot 31 T4 ==== */
-.mf-fiche-suivi{display:flex;align-items:center;gap:14px;margin-left:auto}
-.mf-fb-suivi{height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 20px;border:2px solid #E9E6E1;background:transparent;color:#E9E6E1;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);cursor:pointer}
-.mf-fb-suivi.on{border-color:#F0B220;background:#F0B220;color:#0D0B0B}
+.mf-fb-wrap{position:relative;width:1564px;height:260px;flex:none}
+.mf-fiche-suivi{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:14px}
+.mf-fb-suivi{box-sizing:border-box;width:126px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;border:2px solid #E9E6E1;background:transparent;color:#E9E6E1;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);cursor:pointer}
+.mf-fb-suivi.on{border-color:transparent;background:#F0B220;color:#0D0B0B}
 .mf-fb-suivi b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:32px;line-height:1}
-.mf-fb-key{border:2px solid currentColor;padding:5px 9px;font-size:24px;line-height:1}
+.mf-fb-key{box-sizing:border-box;width:33px;height:38px;border:2px solid #E9E6E1;padding:5px 9px;font-size:24px;line-height:24px;display:flex;align-items:center;justify-content:center}
 .mf-fb-suivi-count{font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
 .mf-fs-grid{flex:none;height:508px;min-height:0;display:grid;grid-template-columns:559px 487px 487px;gap:16px}
 .mf-fs-frame{min-width:0;height:508px;box-sizing:border-box;background:rgba(233,230,225,.5);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
