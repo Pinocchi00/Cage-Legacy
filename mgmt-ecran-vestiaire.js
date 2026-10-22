@@ -43,7 +43,9 @@ function mgmtVestiaireLignes(m){
     out.push({f,lien,signe,role});
   }
   const poids=x=>(x.lien==='cercle'?2:(x.lien==='suivi'?1:0))*10+(x.signe?1:0);
-  return out.sort((a,b)=>poids(b)-poids(a)||divs.indexOf(a.f.div)-divs.indexOf(b.f.div)||a.f.name.localeCompare(b.f.name,'fr'));
+  return out.sort((a,b)=>poids(b)-poids(a)
+    ||divs.indexOf(a.f.div)-divs.indexOf(b.f.div)
+    ||(()=>{const ra=mgmtRangAffichable(m,a.f),rb=mgmtRangAffichable(m,b.f);const na=ra==='C'?0:(ra??Infinity),nb=rb==='C'?0:(rb??Infinity);return na-nb;})());
 }
 
 function mgmtVestiaireLigneHtml(m,x,surnoms,i){

@@ -140,13 +140,15 @@ test('Camps — l’écran défile les salles, annonce le refus, Entrée ouvre u
   const win=neuve(7);
   win.eval(`MGMT_SU_CA={i:0}; CL.go('mgmt_camps');`);
   assert.equal(win.eval(`document.querySelectorAll('.mf-su-ca-gr').length`),1); assert.equal(win.eval(`document.querySelectorAll('.mf-su-ca-p:not(.vide)').length`),2,'une salle de chaque côté');
-  const t=texte(win); for(const s of ['LE COACH','ON Y TRAVAILLE','COMBATTANTS CHEZ TOI']) assert.ok(t.includes(s),s);
+  const t=texte(win); for(const s of ['LE COACH','ON Y TRAVAILLE']) assert.ok(t.includes(s),s);
+  /* Lot 26 T1 (audit E70) : au-delà de six membres, le titre annonce « LES 6 PREMIERS SUR n ». */
+  assert.ok(t.includes('COMBATTANTS CHEZ TOI')||t.includes('LES 6 PREMIERS SUR'),'titre de la liste des membres');
   touche(win,'ArrowRight'); assert.equal(win.eval('MGMT_SU_CA.i'),1);
   touche(win,'ArrowLeft'); touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_SU_CA.i'),win.eval('mgmtCampsListe(G.mgmt).length-1'),'le défilé fait le tour');
   const refus=res(win,`const l=mgmtCampsListe(G.mgmt); return l.filter(g=>g.refus).length;`);
   assert.ok(refus>=1);
   win.eval(`MGMT_SU_CA.i=mgmtCampsListe(G.mgmt).findIndex(g=>g.refus); render();`);
-  assert.ok(texte(win).includes('Les opposer les contrarie'));
+  assert.ok(texte(win).includes('S’ils se battent, ils le prennent mal.'));
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_fiche');
 });
 
