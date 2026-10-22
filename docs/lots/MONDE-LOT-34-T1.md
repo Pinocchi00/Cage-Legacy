@@ -32,4 +32,7 @@ Ajoute à chaque `profil` deux clés **nouvelles** (les clés existantes `fortes
 `node tools/_bump.js` sur chaque `.js` touché, vérifie `index.html`, `node tools/verif-versions.js origin/main`, lance chaque test touché un par un (le nouveau, `mgmtOrganisations`, `mgmtAttributionProfils`, `mgmtEffectif30`, `mgmtPasse`, `mgmtPasseSixAns` — ce dernier est long, une seule fois), commit `Monde lot 34 T1 : ce qui manque à chaque organisation` (le numéro T1 est obligatoire). Ne lance PAS `npm run check` en entier : le superviseur le fait.
 
 ## Compte rendu
-Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adaptés (lesquels, pourquoi, décision citée) ; mesures chiffrées de la section 2 ; écarts à la fiche ; questions pour Anthony.
+Fichiers modifiés : `mgmt-organisations-data.js` porte les deux nouvelles clés de profil ; `mgmt-organisations.js` fait lire les catégories par les deux fonctions ; `index.html` porte les versions montées ; `tests/mgmtLot34T1.test.js` teste les profils et les modificateurs ; cette fiche.
+Tests ajoutés : « Monde lot 34 T1 — les profils portent leurs manques et forces catégoriels » ; « Monde lot 34 T1 — poids et niveaux lisent les catégories et gardent les anciens profils ».
+Tests existants adaptés : aucun. Mesures de génération : non réalisées. Écart : le test `mgmtOrganisations` échoue sur l'effectif mince ; les mesures et contrôles demandés restent à faire. Le nouveau test n'est pas inscrit dans `package.json`.
+Questions pour Anthony : aucune question de spécification identifiée. État inachevé : impossible de terminer et de vérifier la tranche dans la session ; vérification ciblée `mgmtLot34T1` verte (2/2), mais `mgmtOrganisations` rouge (1 échec / 9) ; vérification de versions sans écart.
