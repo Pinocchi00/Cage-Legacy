@@ -46,8 +46,8 @@ function mgmtFicheStatsHtml(m,f){
   const winsBar=`<div class="mf-fs-wins-bar">${methodSegments.map(x=>`<div class="mf-fs-win-segment${x.key==='ko'?' ko':''}" style="flex:${x.count} 1 0%"><b>${x.count}</b><span>${esc(x.key==='ko'?'KO':`${x.count===1?x.label:(x.key==='sub'?'soumissions':x.key==='stop'?'arrêts':'décisions')}${x.extra||''}`)}</span></div>`).join('')}</div>`;
   const rangLabel=cat.n?`RANG SUR ${cat.n} ${esc(catPlural)}`:`RANG SUR 0 ${esc(catPlural)}`;
   const panel=(title,subtitle,body)=>`<div class="mf-fs-frame"><div class="mf-fs-frame-inner"><section class="mf-fs-panel"><header><div class="mf-fs-head"><b>${title}</b><i></i></div>${subtitle?`<span>${subtitle}</span>`:''}</header>${body}</section></div></div>`;
-  return `<div class="mf-fs-grid">${panel('DEBOUT',`${docs.docs} ${docs.docs===1?'COMBAT DOCUMENTÉ':'COMBATS DOCUMENTÉS'}`,rows.slice(0,4).map(statRow).join(''))}`
-    +panel('AU SOL',rangLabel,rows.slice(4).map(statRow).join(''))
+  return `<div class="mf-fs-grid">${panel('DEBOUT',`${docs.docs} ${docs.docs===1?'COMBAT DOCUMENTÉ':'COMBATS DOCUMENTÉS'}`,`<div class="mf-fs-rows">${rows.slice(0,4).map(statRow).join('')}</div>`)} `
+    +panel('AU SOL',rangLabel,`<div class="mf-fs-rows">${rows.slice(4).map(statRow).join('')}</div>`)
     +panel('SA FAÇON DE GAGNER','',`<div class="mf-fs-sub">${wins===1?'SA 1 VICTOIRE':`SES ${wins} VICTOIRES`}</div>${winsBar}`
     +bar('OÙ IL TOUCHE (%)',targets,['Tête','Corps · Jambes'])+bar('D’OÙ IL TOUCHE (%)',positions,['Distance','Clinch · Sol'])
     +`<div class="mf-fs-duration">Durée moyenne d’un combat <b>${esc(mgmtFicheStatsFormat(stats.dureeMoyenne,'dureeMoyenne'))}</b></div>`)+`</div>`;
