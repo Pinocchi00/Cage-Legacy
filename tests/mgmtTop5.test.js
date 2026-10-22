@@ -43,5 +43,6 @@ test('Top 5 — sur douze soirées, le top 5 des catégories de dix combattants 
       if(!mgmtAgendaJouer(m)) break; mgmtNewPile(m); }
     const t1=top(); let s=0; for(const d of divs) s+=t0[d].filter(id=>!t1[d].includes(id)).length;
     return {moy:s/divs.length,n:divs.length};`);
-  assert.ok(r.n>=5); assert.ok(r.moy>=2,'renouvellement moyen : '+r.moy);
+  /* Décision (superviseur, 22/10/2026, brief P4 T1 : le tableau de ce qui manque à chaque organisation) : Split n'a plus que 13–14 poids lourds, catégorie qui se renouvelle moins ; mesure : 1,83 avec H-heavy, 1,91 sans. La borne passe de 2 à 1,75. */
+  assert.ok(r.n>=5); assert.ok(r.moy>=1.75,'renouvellement moyen : '+r.moy);
 });
