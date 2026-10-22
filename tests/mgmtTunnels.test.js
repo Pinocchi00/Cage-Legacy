@@ -30,15 +30,16 @@ test('Les deux tunnels sont des images du dépôt, déclarées dans le cache hor
 
 const champion=(win,oui)=>win.eval(`(function(){ const m=G.mgmt; const f=m.roster.find(f=>{ const t=mgmtSplitTitle(m,f.div); return !!(t&&t.id===f.id)===${oui}; }); return f?f.id:null; })()`);
 
-test('La Fiche : cinq onglets, la bannière rouge, et le retour n’est pas un onglet', () => {
+/* Brief du 22/10/2026, P1 T4 : le cinquième onglet « Statistiques » s'ajoute entre Style et Combats — six onglets, dont Contrat (grisé sans agenda). */
+test('La Fiche : six onglets, la bannière rouge, et le retour n’est pas un onglet', () => {
   const win=neuve();
   const id=champion(win,false); assert.ok(id,'fixture : un combattant sans ceinture');
   win.eval(`CL.mgmtFiche(${JSON.stringify(id)})`);
   const a=app(win);
-  assert.equal(a.querySelectorAll('.mf-fiche-onglets .mf-onglet:not(.mf-fiche-retour)').length,5);
+  assert.equal(a.querySelectorAll('.mf-fiche-onglets .mf-onglet:not(.mf-fiche-retour)').length,6);
   assert.ok(a.querySelector('.mf-fb:not(.or) .mf-fb-img'),'bannière rouge');
   assert.ok(a.querySelector('.mf-fb .mf-fb-nom .n')&&a.querySelector('.mf-fb .mf-fb-pal b'),'le nom et le palmarès');
-  for(const o of ['apercu','style','combats','contrat','ondit']){
+  for(const o of ['apercu','style','stats','combats','contrat','ondit']){
     win.eval(`CL.mgmtFicheOnglet('${o}')`);
     assert.ok(a.querySelector('.mf-fi-corps').children.length>0,o+' : un corps');
   }

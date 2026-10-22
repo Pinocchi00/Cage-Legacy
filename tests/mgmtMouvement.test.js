@@ -77,12 +77,13 @@ test('H9 — les cartes : les moments du cercle et des suivis, deux au plus, apr
     moment(a,'mariage'); moment(b,'divorce'); moment(c,'video-virale'); moment(d,'deces-parent');
     CL.mgmtFilDemarrer(); const pendantFil=MGMT_POPUPS.file.length; const htmlFil=SCREENS.mgmt_bureau();
     CL.mgmtFilPasser(); const file=MGMT_POPUPS.file.map(x=>x.id); const html=SCREENS.mgmt_bureau();
-    return {pendantFil,file,ids:[a.id,b.id,c.id,d.id],carte:html.includes('class="mgmt-popup"'),lien:html.includes('Ton cercle'),
-      portrait:html.includes(a.name.toUpperCase())||html.includes(esc(a.name)),moment:html.includes(mgmtVieMomentById('mariage').libelle),
+    return {pendantFil,file,ids:[a.id,b.id,c.id,d.id],carte:html.includes('class="mgmt-popup"'),lien:html.includes('Suivis'),
+      portrait:[a,b].some(f=>html.includes(f.name.toUpperCase())||html.includes(esc(f.name))),moment:['mariage','divorce'].some(id=>html.includes(mgmtVieMomentById(id).libelle)),
       fiche:html.includes('Voir la fiche'),fermer:html.includes('aria-label="Fermer"'),horsFil:!htmlFil.includes('class="mgmt-popup"')};
   `);
-  assert.equal(r.pendantFil,0,'les cartes attendent la fin du fil'); assert.deepEqual(r.file,[r.ids[0],r.ids[1]],'cercle puis suivi, deux au plus');
-  assert.ok(r.carte&&r.lien&&r.portrait&&r.moment&&r.fiche&&r.fermer); assert.ok(r.horsFil);
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.equal(r.pendantFil,0,'les cartes attendent la fin du fil'); assert.deepEqual(r.file,[r.ids[1],r.ids[0]],'sans rang cercle, deux suivis au plus');
+  assert.ok(r.carte&&r.lien&&r.portrait&&r.moment&&r.fiche&&r.fermer,JSON.stringify(r)); assert.ok(r.horsFil);
 });
 
 test('H9 — fermer une carte montre la suivante ; Échap la ferme ; « Voir la fiche » et « Lui trouver un combat » mènent où il faut', () => {

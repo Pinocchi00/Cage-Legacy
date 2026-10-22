@@ -86,23 +86,22 @@ test('Budget — un combat ancien déjà lu n\'est plus un événement en attent
   assert.equal(r[1],false,'V non plus : les deux ont lu le combat');
 });
 
-test('Budget — le cercle passe avant le suivi, le suivi avant l\'inconnu, même quand l\'inconnu est plus récent', () => {
+test('Budget — les suivis passent avant l\'inconnu plus récent ; le moment le plus fort départage les suivis', () => {
   const win=neuve(7);
   win.eval(`const m=G.mgmt; mgmtVisitesInit(m); mgmtMarqueBudget=function(){return 1;};
     const U=m.roster[0].id, S=m.roster[1].id, K=m.roster[2].id;
-    mgmtSuiviToggle(m,S); mgmtCercleToggle(m,K);
-    m.facts.push({c:m.cycle,k:'injury',a:U});
-    m.facts.push({c:m.cycle-3,k:'injury',a:S});
-    m.facts.push({c:m.cycle-6,k:'injury',a:K});
+    mgmtSuiviToggle(m,S); mgmtSuiviToggle(m,K);
+    /* brief du 22/10, P3 T1 : une seule liste */
+    m.hist.push({c:m.cycle,slot:'main',a:{id:S},b:{id:m.roster[3].id},winner:'b'});
+    m.facts.push({c:m.cycle,k:'injury',a:K});
+    m.facts.push({c:m.cycle+1,k:'injury',a:U});
     G.U=U; G.S=S; G.K=K;`);
   const [U,S,K]=res(win,`return [G.U,G.S,G.K];`);
-  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[K],'le cercle passe, l\'inconnu plus récent attend');
+  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[K],'le fait compte avant le combat au même cycle ; l\'inconnu plus récent attend');
   /* « Sans K » : ses événements sont lus (fiche ouverte) — K n'est plus candidat.
-     Les index des faits ne bougent pas : jamais un filtre de m.facts ici. */
+      Les index des faits ne bougent pas : jamais un filtre de m.facts ici. */
   win.eval(`mgmtVuEnregistre(G.mgmt,G.K);`);
-  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[S],'sans K, le suivi passe');
-  win.eval(`mgmtVuEnregistre(G.mgmt,G.S);`);
-  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[U],'sans K ni S, l\'inconnu passe');
+  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[S],'sans K, le suivi restant passe avant l\'inconnu');
 });
 
 test('Budget — à lien égal le plus récent passe, à date égale le mieux classé, puis l\'identifiant', () => {

@@ -109,8 +109,8 @@ test('Agenda — migration : une partie d’avant joue sa soirée en cours, puis
   assert.equal(win.eval('G.mgmt.cal.jour'),win.eval('G.mgmt.eventsPlayed*35'));
 });
 
-/* Décision d'Anthony du 17/10/2026 (monde lot 14 T2) : Leïla compose les préliminaires à la pose ; les réservés (cercle, suivis) sont donc désignés avant la pose et aucun ne figure dans les préliminaires qu'elle pose. */
-test('Agenda — réservation : Leïla ne place jamais un combattant du cercle ou des suivis', () => {
+/* brief du 22/10, P3 T1 : une seule liste */
+test('Agenda — un combattant suivi n’est pas réservé à Leïla', () => {
   const win=neuve();
   const r=res(win,`const m=G.mgmt;
     const reserves=mgmtCartRows(m).slice(0,4);
@@ -119,7 +119,7 @@ test('Agenda — réservation : Leïla ne place jamais un combattant du cercle o
     mgmtAgendaPoser(m,10,'petite');
     const ids=new Set(reserves.map(f=>f.id));
     return {poses:m.card.prelims.length,taille:m.card.sizePrelims,touche:m.card.prelims.some(f=>ids.has(f.a)||ids.has(f.b)),res:reserves.every(f=>mgmtAgendaReserve(m,f))};`);
-  assert.ok(r.res); assert.equal(r.poses,r.taille,'Leïla pose les préliminaires'); assert.equal(r.touche,false,'aucun réservé dans ses préliminaires');
+  assert.equal(r.res,false,'un suivi ne réserve pas le combattant'); assert.equal(r.poses,r.taille,'Leïla pose les préliminaires');
 });
 
 test('Agenda — préparation à la demande : le joueur désigne un combattant, l’assistante propose l’adversaire le plus proche', () => {

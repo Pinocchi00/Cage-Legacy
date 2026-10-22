@@ -543,14 +543,14 @@ Object.assign(CL,{
     }else if(r.raison==='carte'){ CL.mgmtCarte(); return; }
     CL.mgmtNextCycle();
   },
-  /* Lot 5 H6 : ton cercle (5) et tes suivis (15), choix du joueur, gardés. */
+  /* Monde lot 33 T1 : suivi unique, conservé dans la liste commune. */
   mgmtCercle(id){
     if(!G||!G.mgmt) return;
     if(mgmtCercleToggle(G.mgmt,id)){ saveMgmt(); render(); }
   },
   mgmtSuivre(id){
     if(!G||!G.mgmt) return;
-    if(mgmtSuiviToggle(G.mgmt,id)){ saveMgmt(); render(); }
+    if(mgmtSuivre(G.mgmt,id)){ saveMgmt(); render(); }
   },
   /* Lot 5 H7 : répondre à une demande — promettre ou refuser, un fait chaque fois. */
   mgmtDemande(i,reponse){

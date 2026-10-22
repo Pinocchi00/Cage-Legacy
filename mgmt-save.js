@@ -270,13 +270,15 @@ function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
   /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
   if(x.p!==undefined&&x.p!==true) return false;
+  /* Monde lot 31 T1 : s est optionnelle même si invalide ; mgmtRepair la
+     retire seule sans écarter la trace. */
   /* Duo T1 : `duo` marque un combat de super carte — {b,ca,cb}, facultatif comme `p`. */
   if(x.duo!==undefined){
     const d=x.duo;
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo').sort().join(',');
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -353,8 +355,8 @@ function validateMgmt(raw){
   if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
   if(raw.echelleExt!==undefined&&raw.echelleExt!==4&&raw.echelleExt!==7) return false;
   if(raw.niveaux!==undefined&&raw.niveaux!==0&&raw.niveaux!==1) return false;
-  /* Lot 5 H6 : ton cercle (5) et tes suivis (15) — des identifiants, sans doublon. */
-  for(const [cle,max] of [['cercle',5],['suivis',15]]){
+  /* Monde lot 33 T1 : cercle résiduel vide après réparation, liste unique de 60 suivis. */
+  for(const [cle,max] of [['cercle',5],['suivis',60]]){
     if(raw[cle]===undefined) continue;
     if(!Array.isArray(raw[cle])||raw[cle].length>max||new Set(raw[cle]).size!==raw[cle].length) return false;
     for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
@@ -651,6 +653,11 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
+  const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
+  const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
+  m.suivis=[...new Set([...cercleAncien,...suivisExistants])].filter(mgmtValidId);
+  m.cercle=[];
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
@@ -710,7 +717,7 @@ function mgmtRepair(m){
     /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
        des faits de titre, sans couper ni décaler leur combat par erreur. */
     const indices=new Map(),hist=[];
-    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ indices.set(i,hist.length); hist.push(x); } });
+    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
     m.hist=hist;
     m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
     for(const f of m.facts){ if(f.k==='title_fight') f.fight=indices.get(f.fight); }
