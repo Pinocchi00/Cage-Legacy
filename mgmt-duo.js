@@ -249,7 +249,7 @@ function mgmtDuoJouer(m){
     const famille=mgmtMethodFamily(res.method,res.winner);
     const round=Number.isSafeInteger(res.round)?res.round:rounds;
     const t={c:m.cycle,slot:'main',seed,rounds,a:traceA,b:traceB,winner:res.winner,family:famille,round,
-      duo:{b:m.duo.b,ca:m.cycle,cb:sous.cycle}};
+      duo:{b:m.duo.b,ca:m.cycle,cb:sous.cycle},s:mgmtReleveDeResultat(res,rounds)};
     m.hist.push(t);
     const h=m.hist.length-1;
     sous.hist.push(Object.assign(JSON.parse(JSON.stringify(t)),{c:sous.cycle}));
