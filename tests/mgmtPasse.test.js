@@ -47,7 +47,7 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
     'split|20261008': '818706c1ca24e1aa', 'split|20261009': '74731cb3b87415c4',
     'ultimate-rim|20261008': 'e04c79c0e03a267f', 'ultimate-rim|20261009': '503f21eb7047f705',
     'fighting-pacific-championship|20261008': 'f020fff72ce4d9a9', 'fighting-pacific-championship|20261009': 'c2612f3e054a41da',
-    jouee3: 'c995e2f6d5074271',
+    jouee3: '5280d7d504885a51', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
