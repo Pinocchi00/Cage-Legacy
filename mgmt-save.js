@@ -360,7 +360,6 @@ function validateMgmt(raw){
     for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
   }
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
-  if(raw.actuLu!==undefined&&(!Array.isArray(raw.actuLu)||raw.actuLu.length>300||raw.actuLu.some(x=>typeof x!=='string'||x.length>80))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
   for(const r of raw.recettes){ if(!Number.isSafeInteger(r)) return false; }

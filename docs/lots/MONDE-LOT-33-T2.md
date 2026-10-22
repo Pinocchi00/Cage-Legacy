@@ -46,9 +46,11 @@ Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adap
 
 ### Compte rendu de réalisation
 - `mgmt-actualites.js` : registre et dérivation des nouvelles suivies, variantes déterministes, lu/non lu.
-- `mgmt-save.js` : validation et réparation de `actuLu`, sans changement de version de sauvegarde.
-- `index.html` : script après `mgmt-attention.js`.
-- `tests/mgmtActualites.test.js` : sept tests (« Aucun suivi ni événement ne produit de nouvelle », « Résultats suivis — une nouvelle par combat, au bon point de vue », « Blessure et contrat — faits relus », « Variantes — résultat reproductible », « Lu/non lu — lecture et réparation de la clé », « Registre — refuse les doublons », « Monde vivant — source organisationnelle tolérée »). Test ciblé vert.
+- `mgmt-save.js` : validation/réparation de `actuLu`, sans changement de version de sauvegarde.
+- `index.html` : inclusion après `mgmt-attention.js`, version `t2a20261022b`.
+- `package.json` : commandes `test:actu` et `test:watch:actu` (pas de changement lors de cette reprise).
+- `tests/mgmtActualites.test.js` : test « Lu/non lu — lecture, plafond et sauvegarde/relecture » corrigé pour suivre le combattant `t.a.id` d'un combat réellement généré dans `m.hist`, sans remplacer l'historique valide ; couvre conservation après sérialisation/relecture, réparation des données invalides, ancienne partie sans clé et plafond de 300. Les sept tests ciblés passent.
 - Formes lues : `injury` = `{c,k:'injury',a,nom}` ; `fin_contrat`, `libere`, `contrat` portent `{c,k,a}`.
-- Écart : couverture des exigences sept tests et détails de textes/métadonnées incomplète ; `test`/`test:watch`, suivi des combats en `m.orgs[*].hist`, plafond/rotation des variantes, conservation complète après parse/sérialisation, mesures et versions demandent encore validation.
+- Mesure : un appel à `mgmtActualites` sur la partie générée de six soirées, avec 15 suivis, a pris **36,948 ms** (une exécution, sous le seuil de 100 ms).
+- Écart : aucun pour les pas 3 et 4 demandés. Pas de migration de sauvegarde ; `MGMT_SAVE_VERSION` inchangée.
 - Questions pour Anthony : aucune.
