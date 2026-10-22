@@ -35,7 +35,7 @@ const MGMT_MEDIAS_LIGNES=[
   {media:'cage-hebdo',situation:'lendemain',si:'dec',texte:'{a} gagne aux points contre {b}, après {round} rounds. Le public voulait plus de spectacle.',relu:false},
   /* Sources Proches */
   {media:'sources-proches',situation:'affiche',texte:'{a} contre {b} sera en tête d’affiche de {org} {n}. Plusieurs sources le disent.',relu:false},
-  {media:'sources-proches',situation:'affiche',texte:'Info : {a} et {b} sont sur la même carte à {org} {n}. On saura tout à la pesée.',relu:false},
+  {media:'sources-proches',situation:'affiche',texte:'{a} et {b} sont sur la même carte à {org} {n}. On saura tout à la pesée.',relu:false},
   /* Clé de Bras (majuscules appliquées à l’affichage) */
   {media:'cle-de-bras',situation:'lendemain',si:'ko1',texte:'{a} BAT {b} EN UN ROUND : VOYEZ LA RÉACTION DES FANS',relu:false},
   {media:'cle-de-bras',situation:'lendemain',si:'surprise',texte:'{b} PERD FACE À {a} : LES FANS SONT CHOQUÉS',relu:false},

@@ -310,7 +310,9 @@ test('Monde T4a — mgmtMondePhrase couvre les six genres et les variantes', () 
     for(const x of faits) m.facts.push(Object.assign({c:m.cycle,a:f.id},x));
     /* Du plus récent au plus ancien : le combat du soir d'abord, puis les faits à l'envers. */
     return mgmtDepuisVisite(m,f.id).map(x=>({sorte:x.sorte,libelle:x.libelle,phrase:x.phrase}));`);
-  const attenduDepuis=[r.phrases[9],r.phrases[8],r.phrases[7],r.phrases[5],r.phrases[4],r.phrases[2]];
+  /* Audit 16/10 (monde lot 23) : le bloc accorde les jetons {Il} {lui} au genre du combattant (ici masculin) au lieu de les afficher tels quels. */
+  const accorde=t=>t.replace(/\{Il\}/g,'Il').replace(/\{il\}/g,'il').replace(/\{lui\}/g,'lui').replace(/\{delui\}/g,'de lui');
+  const attenduDepuis=[r.phrases[9],r.phrases[8],r.phrases[7],r.phrases[5],r.phrases[4],r.phrases[2]].map(accorde);
   assert.deepEqual(dep.slice(1).map(x=>x.phrase),attenduDepuis,'les six genres T4a sont dits au bloc, phrase pour phrase');
   for(const ligne of dep.slice(1)){
     assert.ok(ligne.libelle&&ligne.libelle.length>0,'chaque ligne a son étiquette');

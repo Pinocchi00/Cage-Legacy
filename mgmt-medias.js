@@ -68,6 +68,8 @@ function mgmtMediasContexte(m,si,scene){
     case 'serie': return scene.serie?Object.assign(base,{a:scene.a.name,b:scene.b.name}):null;
     case 'fr': {
       const fr=pair.find(f=>mgmtIdentitePays(f)==='FR');
+      /* Audit 16/10 E170 : la blague des croissants ne s'adresse pas à un Français sorti par une finition. */
+      if(fr&&fr===scene.b&&fam&&fam!=='dec') return null;
       return fr?Object.assign(base,{a:fr.name,b:(fr===scene.a?scene.b:scene.a).name}):null;
     }
     case 'etranger': case 'etrangerPerd': {

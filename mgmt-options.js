@@ -39,7 +39,7 @@ const MGMT_OP_LIGNES={
     {cle:'exporter',lib:'EXPORTER LA PARTIE',aide:'Un fichier de cette partie, à garder ou à envoyer. Il se relit avec « Importer ».',action:'EXPORTER'},
     {cle:'importer',lib:'IMPORTER UNE PARTIE',aide:'Relit un fichier exporté dans cet emplacement. Un fichier abîmé ou d’une version inconnue est refusé, rien n’est écrasé.',action:'CHOISIR UN FICHIER'},
     {cle:'effacer',lib:'EFFACER CETTE PARTIE',aide:'L’emplacement redevient vide. Une confirmation est demandée.',action:'EFFACER'},
-    {cle:'accompagnement',groupe:'aide',lib:'ACCOMPAGNEMENT DE LEÏLA',aide:'Leïla vous guide pour les premiers combats, une phrase à la fois. Ce réglage vaut pour toutes les parties.',choix:[[true,'OUI'],[false,'NON']]},
+    {cle:'accompagnement',groupe:'aide',lib:'ACCOMPAGNEMENT DE LEÏLA',aide:'Leïla te guide pour les premiers combats, une phrase à la fois. Ce réglage vaut pour toutes les parties.',choix:[[true,'OUI'],[false,'NON']]},
   ],
 };
 /* ==== [ANCRE: MGMT_BRIEF_DEMO_LOT2_T4_EXPORT] — Brief démo, lot 2 T4 : exporter et importer une partie. L'import passe par mgmtParseAndValidate (migration et

@@ -48,6 +48,8 @@ function mgmtPresentationCombat(contexte,aid,bid){
   }
   const faits=retenus.map(fait=>{
     const modele=MGMT_PRESENTATION_COMBAT_TEXTES[fait.famille],valeurs={...fait.valeur};
+    /* Audit 16/10 E165 : les styles se lisent par leur nom public (« Lutte », « MMA complet »), jamais par leur clé. */
+    if(Array.isArray(valeurs.styles)) valeurs.styles=valeurs.styles.map(styleLabel);
     for(const k of ['styles','rangs']) if(Array.isArray(valeurs[k])) valeurs[k]=valeurs[k].slice().sort((a,b)=>a<b?-1:a>b?1:0).join(' et ');
     for(const k of ['adversaire','champion']) if(k in valeurs){
       const id=valeurs[k],f=base.population.find(f=>f.id===id)||m.roster.find(f=>f.id===id);

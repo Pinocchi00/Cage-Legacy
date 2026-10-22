@@ -250,8 +250,8 @@ function mgmtCarteDossierHtml(m){
   /* ==== [ANCRE: MONDE_LOT4_T8_DOSSIER] — Monde lot 4 T8 ==== */
   /* ==== [ANCRE: MONDE_LOT4_T8_PHRASES] — Monde lot 4 T8 ==== */
   const PHRASES_LEILA={
-    etape1:{id:'dossiers.etape1',relu:false,texte:'« Voici {n} dossiers pour le combat {k}. Faites-les défiler, puis choisissez. »'},
-    etape2:{id:'dossiers.etape2',relu:false,texte:'« Vous avez choisi {nom}. Voici {n} adversaires possibles. »'}
+    etape1:{id:'dossiers.etape1',relu:false,texte:'« Voici {n} dossiers pour le combat {k}. Fais-les défiler, puis choisis. »'},
+    etape2:{id:'dossiers.etape2',relu:false,texte:'« Tu as choisi {nom}. Voici {n} adversaires possibles. »'}
   };
   const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
   const i=Math.max(0,Math.min(MGMT_CART.index||0,Math.max(0,pile.length-1)));
