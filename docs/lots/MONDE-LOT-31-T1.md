@@ -40,4 +40,11 @@ Fichier de logique pure (pas de DOM), `"use strict";` en première ligne, ancre 
 `node tools/_bump.js mgmt-releve.js mgmt-corps.js mgmt-duo.js mgmt-save.js index.html` (seulement les `.js` réellement modifiés), `node tools/verif-versions.js origin/main`, lance chaque test touché un par un (`mgmtReleve`, `mgmtSauvegarde14`, `mgmtDuo`, `mgmtArchive`), commit `Monde lot 31 T1 : le relevé de chaque combat` (le numéro T1 est obligatoire dans le message). Ne lance PAS `npm run check` en entier : le superviseur le fait.
 
 ## Compte rendu
-Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adaptés (lesquels, pourquoi, décision citée) ; écarts constatés entre `res.stats` et la somme des rounds ; poids moyen mesuré d'un relevé ; écarts à la fiche ; questions pour Anthony : aucune (le plafond de sauvegarde se décide pour T2).
+### Réalisation
+- `mgmt-releve.js` : capture pure, validation et agrégation par coin ; chargé avant `mgmt-corps.js`. `mgmt-corps.js` et `mgmt-duo.js` joignent le relevé à leurs traces.
+- `mgmt-save.js` : tolère `s` et retire uniquement les relevés invalides à la réparation ; version de sauvegarde inchangée. `package.json` référence le test en `test`, `test:watch` et `test:releve`.
+- Test ajouté : « Monde lot 31 T1 — forme, arrondis et coin du relevé ».
+- Aucun test existant adapté. Vérification : test ciblé vert ; `node tools/verif-versions.js origin/main` sans écart. Aucun test lent supplémentaire lancé.
+- Écarts stats/rounds : non mesurés ; poids moyen/maximal : non mesurés. La campagne de 40 combats, l'intégration soirée/rejeu, sérialisation/réparation, soirée ancienne et mesure d'octets restent à couvrir.
+- Écart à la fiche : batterie prescrite (points 1 à 6) n'est que partiellement réalisée ; version de cache de `mgmt-releve.js` incrémentée manuellement, car `_bump.js` ne traite pas `index.html`.
+- Questions pour Anthony : aucune ; campagne de tests/mesures à compléter avant considérer les critères fonctionnels entièrement établis.
