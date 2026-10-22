@@ -22,7 +22,7 @@ function mgmtFicheStatsRepart(values){
 function mgmtFicheStatsFormat(value,key){
   if(!Number.isFinite(value)) return '—';
   if(key==='precision'||key==='defense'||key==='defenseAmenee') return String(Math.round(value*100));
-  if(key==='controlePar15') {const s=Math.round(value*900);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+  if(key==='controlePar15') {const s=Math.round(value);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
   if(key==='dureeMoyenne') {const s=Math.round(value);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
   return value.toFixed(key==='sigParMin'||key==='sigEncaisseParMin'?2:1).replace('.',',');
 }
@@ -34,7 +34,7 @@ function mgmtFicheStatsHtml(m,f){
     ['Amenées par 15 minutes','ameneesPar15',''],['Défense d’amenée','defenseAmenee','%'],['Soumissions tentées par 15 min','soumissionsPar15',''],['Contrôle au sol par 15 minutes','controlePar15','']
   ];
   const rang=(key)=>{const r=cat.rangs.get(f.id)?.[key];return Number.isInteger(r)?`${r===1?'1er':`${r}e`}`:'—';};
-  const fill=(key)=>{if(!Number.isFinite(stats[key]))return 0;const scales={precision:100,defense:100,defenseAmenee:100,sigParMin:100/6,sigEncaisseParMin:100/6,ameneesPar15:100/5,soumissionsPar15:100/2.5,controlePar15:900/300};return Math.max(0,Math.min(100,Math.round(stats[key]*(scales[key]||0))));};
+  const fill=(key)=>{if(!Number.isFinite(stats[key]))return 0;const scales={precision:100,defense:100,defenseAmenee:100,sigParMin:100/6,sigEncaisseParMin:100/6,ameneesPar15:100/5,soumissionsPar15:100/2.5,controlePar15:100/300};return Math.max(0,Math.min(100,Math.round(stats[key]*(scales[key]||0))));};
   const statRow=([label,key,unit])=>`<div class="mf-fs-stat"><div class="mf-fs-top"><span>${esc(label)}</span><b>${esc(mgmtFicheStatsFormat(stats[key],key))}${unit&&Number.isFinite(stats[key])?`<i>${unit}</i>`:''}</b></div><div class="mf-fs-bottom"><div class="mf-fs-track"><i style="width:${fill(key)}%"></i></div><span>moy. ${esc(mgmtFicheStatsFormat(cat.moyennes[key],key))}${unit&&Number.isFinite(cat.moyennes[key])?' '+unit:''}${key==='controlePar15'?'':` · ${esc(rang(key))}`}</span></div></div>`;
   const targets=mgmtFicheStatsRepart([stats.repartition.cibles.head,stats.repartition.cibles.body,stats.repartition.cibles.leg]);
   const positions=mgmtFicheStatsRepart([stats.repartition.positions.dist,stats.repartition.positions.clinch,stats.repartition.positions.ground]);

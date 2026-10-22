@@ -16,6 +16,10 @@ test('Monde lot 31 T4 — huit libellés, valeurs formatées, moyenne et rang sa
  for(const label of ['Coups significatifs donnés par minute','Précision','Encaissés par minute','Défense debout','Amenées par 15 minutes','Défense d’amenée','Soumissions tentées par 15 min','Contrôle au sol par 15 minutes']) assert.ok(text.includes(label),label);
  assert.ok(text.includes(String(data.s.docs)));assert.ok(text.includes(data.value));assert.ok(text.includes(data.pct));assert.ok(text.includes(data.duration));assert.ok(text.includes('moy.'));assert.doesNotMatch(text,/NaN|undefined|Infinity|null/);
 });
+test('Monde lot 31 T4 — contrôle au sol formaté en secondes par 15 minutes',()=>{
+  const w=monde();
+  assert.deepEqual(JSON.parse(w.eval("JSON.stringify([mgmtFicheStatsFormat(24,'controlePar15'),mgmtFicheStatsFormat(111,'controlePar15'),mgmtFicheStatsFormat(0,'controlePar15'),mgmtFicheStatsFormat(null,'controlePar15')])")),['0:24','1:51','0:00','—']);
+});
 test('Monde lot 31 T4 — les deux répartitions totalisent exactement 100',()=>{
  const w=monde();const out=w.eval("JSON.stringify([mgmtFicheStatsRepart([.61,.22,.17]),mgmtFicheStatsRepart([.88,.09,.03])])");
  for(const bar of JSON.parse(out))assert.equal(bar.reduce((a,b)=>a+b,0),100);
