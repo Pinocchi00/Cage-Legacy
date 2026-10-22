@@ -176,7 +176,7 @@ test('Marque — une partie en version 14 se charge, se valide, ne s\u2019allume
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length,n:mig.roster.length};`);
   assert.ok(r,'la migration n\u2019a pas refusé la partie');
   /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_MARQUE_14] — Monde lot 5 T3 ==== */
-  assert.equal(r.v,21,'chaîne 14 → 15 (lot 1) → 16 (lot 8) → 17 (lot 5 T3) → 18 (lot 5 T4) → 19 (lot 6 T3) → 20 (lot 9 T2a) → 21 (lot 9 T2d)'); /* décision du 15/10/2026 : fusion du lot 6 */ assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide'); /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false ; lot 9 T2d : 20 → 21, identifiants préfixés */
+  assert.equal(r.v,21,'chaîne 14 → 15 (lot 1) → 16 (lot 8) → 17 (lot 5 T3) → 18 (lot 5 T4) → 19 (lot 6 T3) → 20 (lot 9 T2a) → 21 (lot 9 T2d)'); /* décision du 15/10/2026 : fusion du lot 6 */ /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : effectif total mesuré 349 (−15, Split avec moins de poids lourds). */ assert.equal(r.n,349); assert.ok(r.valide,'la partie migrée se valide'); /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false ; lot 9 T2d : 20 → 21, identifiants préfixés */
   assert.equal(r.allumes,0,'la migration part pleine : personne n\u2019est marqué');
   const charge=res(win,`G.mgmt=null; return !!mgmtParseAndValidate(JSON.stringify(G.brut));`);
   assert.ok(charge,'une v14 persistée se charge sans perte');
@@ -230,5 +230,6 @@ test('Marque — le dessin de la marque tient dans sa cellule', () => {
 test('Marque — une partie neuve démarre sans aucune marque', () => {
   const win=neuve(7);
   const r=res(win,`const m=G.mgmt; return {n:m.roster.length,allumes:m.roster.filter(o=>mgmtMarque(m,o.id)).length};`);
-  assert.equal(r.n,364); assert.equal(r.allumes,0,'une partie neuve démarre sans marque');
+  /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : 349 combattants au lieu de 364, uniquement le roster Split aminci ; aucune marque ne s’allume. */
+  assert.equal(r.n,349); assert.equal(r.allumes,0,'une partie neuve démarre sans marque');
 });
