@@ -1,6 +1,7 @@
 "use strict";
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
 const {newGameWindow}=require('./helpers/loadGame');
 function monde(){const w=newGameWindow({runMain:true});w.eval("setSeed(20261008); mgmtPasseGenerer('split',{soirees:6});");return w;}
 function open(w,tab='stats'){w.eval(`(()=>{const m=G.mgmt,f=m.roster.find(x=>x&&mgmtStatsCarriere(m,x.id)?.docs>=3)||m.roster.find(x=>x&&mgmtStatsDocumentes(m,x.id));MGMT_FICHE={id:f.id,retour:'mgmt_effectif',cursor:0,onglet:${JSON.stringify(tab)}};G.screen='mgmt_fiche';render();})()`);}
@@ -25,10 +26,18 @@ test('Monde lot 31 T4 — façon de gagner selon les méthodes et échappement',
  open(w);w.eval("G.mgmt.roster[0].name='<b>test</b>'");const html=w.eval("mgmtFicheStatsHtml(G.mgmt,G.mgmt.roster[0])");assert.doesNotMatch(html,/<b>test<\/b>/);
 });
 test('Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S',()=>{
- const w=monde();open(w,'apercu');let html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");
- assert.match(html,/SUIVRE/);assert.match(html,/aria-pressed="false"/);assert.match(html,/CL\.mgmtSuivre/);
- w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
- const n=w.eval('mgmtSuivis(G.mgmt).length');w.eval("keysHandle({key:'s',preventDefault(){}})");assert.equal(w.eval('mgmtSuivis(G.mgmt).length'),n-1);
+  // Adapté selon la décision superviseur « REPRISE VISUELLE » : le contrôle suit la bannière, non la rangée d’onglets.
+  const w=monde();open(w,'apercu');let html=w.eval("document.querySelector('.mf-fb-wrap').innerHTML");
+  assert.match(html,/SUIVRE/);assert.match(html,/aria-pressed="false"/);assert.match(html,/CL\.mgmtSuivre/);
+  w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fb-wrap').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
+  assert.match(fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8'),/\.mf-fb-suivi\.on\{[^}]*background:#F0B220/);
+  const n=w.eval('mgmtSuivis(G.mgmt).length');w.eval("keysHandle({key:'s',preventDefault(){}})");assert.equal(w.eval('mgmtSuivis(G.mgmt).length'),n-1);
+});
+test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',()=>{
+  const w=monde();open(w);const shape=JSON.parse(w.eval("JSON.stringify((()=>{const panels=[...document.querySelectorAll('.mf-fs-panel')],frames=[...document.querySelectorAll('.mf-fs-frame')],bars=[...document.querySelectorAll('.mf-fs-part')];return {panels:panels.length,frames:frames.length,layers:frames.map(x=>x.firstElementChild?.firstElementChild?.classList.contains('mf-fs-panel')?3:0),segments:bars.map(x=>x.querySelectorAll('.mf-fs-bar i').length),percent:bars.some(x=>x.querySelector('.mf-fs-bar').textContent.includes('%'))}})())"));
+  assert.equal(shape.panels,3);assert.equal(shape.frames,3);assert.deepEqual(shape.layers,[3,3,3]);assert.deepEqual(shape.segments,[3,3]);assert.equal(shape.percent,false);
+  const fills=JSON.parse(w.eval(`(()=>{const old=[mgmtStatsCarriere,mgmtStatsDocumentes,mgmtStatsCategorie];mgmtStatsCarriere=()=>({docs:3,sigParMin:3.12,precision:.58,sigEncaisseParMin:0,defense:0,ameneesPar15:.3,defenseAmenee:0,soumissionsPar15:0,controlePar15:0,dureeMoyenne:0,repartition:{cibles:{head:1,body:0,leg:0},positions:{dist:1,clinch:0,ground:0}},vParMethode:{}});mgmtStatsDocumentes=()=>({docs:3});mgmtStatsCategorie=()=>({n:3,moyennes:{},rangs:new Map()});const html=mgmtFicheStatsHtml(G.mgmt,mgmtFighterById(G.mgmt,MGMT_FICHE.id));[mgmtStatsCarriere,mgmtStatsDocumentes,mgmtStatsCategorie]=old;return JSON.stringify(html.split('width:').slice(1).map(x=>Number(x.split('%')[0])).filter(Number.isFinite))})()`));
+  assert.ok(fills.includes(58));assert.ok(fills.includes(52));assert.ok(fills.includes(6));
 });
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
