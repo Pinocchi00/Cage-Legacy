@@ -1244,6 +1244,48 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-onglets{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center}
 .mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 .mf-fi-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
+/* ==== [ANCRE: MONDE_LOT31_T4_STATS_CSS] — Monde lot 31 T4 ==== */
+.mf-fb-wrap{position:relative;width:1564px;height:260px;flex:none}
+.mf-fiche-suivi{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:14px}
+.mf-fb-suivi{box-sizing:border-box;width:126px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;border:2px solid #E9E6E1;background:transparent;color:#E9E6E1;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);cursor:pointer}
+.mf-fb-suivi.on{border-color:transparent;background:#F0B220;color:#0D0B0B}
+.mf-fb-suivi b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:32px;line-height:1}
+.mf-fb-key{box-sizing:border-box;width:33px;height:38px;border:2px solid #E9E6E1;padding:5px 9px;font-size:24px;line-height:24px;display:flex;align-items:center;justify-content:center}
+.mf-fb-suivi-count{font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
+.mf-fs-grid{flex:none;height:508px;min-height:0;display:grid;grid-template-columns:559px 487px 487px;gap:16px}
+.mf-fs-frame{min-width:0;height:508px;box-sizing:border-box;background:rgba(233,230,225,.5);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-fs-frame-inner{height:100%;min-width:0;box-sizing:border-box;display:flex;background:#0D0B0B;padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.mf-fs-panel{flex:1;min-width:0;min-height:0;box-sizing:border-box;background:#121010;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:16px}
+.mf-fs-panel header{height:53px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex:none}
+.mf-fs-head{display:flex;flex-direction:column;gap:12px}
+.mf-fs-head i{display:block;width:56px;height:8px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-fs-panel header b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:44px;line-height:.75}
+.mf-fs-panel header span,.mf-fs-sub{font-size:22px;font-weight:600;line-height:1;color:rgba(233,230,225,.74);letter-spacing:.88px}
+.mf-fs-stat{display:flex;flex-direction:column;gap:8px}
+/* ==== [ANCRE: MONDE31T4_STATS_ROWS_FLEX] — Monde lot 31 T4 ==== */
+.mf-fs-rows{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;padding:16px 0;margin-top:6px}
+.mf-fs-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;font-size:24px;line-height:1}
+.mf-fs-top b,.mf-fs-duration b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:44px;line-height:.75;white-space:nowrap}
+.mf-fs-top i{font-style:normal;font-size:26px;color:rgba(233,230,225,.74)}
+.mf-fs-bottom{display:flex;align-items:center;gap:14px;font-size:22px;line-height:1;color:rgba(233,230,225,.74);white-space:nowrap}
+.mf-fs-track{position:relative;height:10px;flex:1;min-width:0;background:#252121}
+.mf-fs-track i{display:block;height:10px;background:#E9E6E1}
+.mf-fs-sub{letter-spacing:.88px}
+.mf-fs-wins-bar{height:48px;display:flex;gap:4px;flex:none}
+.mf-fs-win-segment{min-width:0;display:flex;align-items:center;gap:10px;padding:0 12px;background:#252121;color:#E9E6E1;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);white-space:nowrap}
+.mf-fs-win-segment.ko{background:#E23A2B;color:#0D0B0B}
+.mf-fs-win-segment b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:34px;line-height:1}
+.mf-fs-win-segment span{font-size:22px;font-weight:500;line-height:1;overflow:hidden;text-overflow:clip}
+.mf-fs-win-segment.ko span{font-weight:600}
+.mf-fs-part{display:flex;flex-direction:column;gap:8px;font-size:22px;color:rgba(233,230,225,.74)}
+.mf-fs-part-title{font-weight:600;letter-spacing:.88px}
+.mf-fs-bar{height:40px;display:flex;gap:4px}
+.mf-fs-bar i{min-width:0;display:flex;align-items:center;padding:0 10px;background:#E9E6E1;color:#0D0B0B;font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800;font-size:28px}
+.mf-fs-bar i:nth-child(2){background:rgba(233,230,225,.55)}.mf-fs-bar i:nth-child(3){background:#252121;color:#E9E6E1}
+.mf-fs-labels{display:flex;justify-content:space-between;gap:12px;font-size:22px}.mf-fs-labels span:first-child{color:#E9E6E1}.mf-fs-labels span:last-child{color:rgba(233,230,225,.74)}
+.mf-fs-duration{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;font-size:24px}.mf-fs-duration b{font-size:40px}
+.mf-fi-empty-stats{padding:24px;font-size:24px;background:#121010;flex:1}
+/* ==== [FIN ANCRE] ==== */
 .mf-fi-corps{flex:1;min-height:0;display:flex}
 .mf-fi-ligne{flex:1;display:flex;gap:16px;min-height:0;min-width:0}
 .mf-fi-c1{flex:1;display:flex;min-width:0}

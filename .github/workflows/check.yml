@@ -1,0 +1,54 @@
+name: check
+
+# Vérification automatique de chaque proposition de changement (PR) : lint, lint du contenu, puis les tests répartis en 8 lots qui tournent en parallèle.
+# Elle ne publie rien : la mise en ligne (GitHub Pages) reste celle de la branche main.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run lint:content
+      - name: la répartition des tests couvre toute la liste de package.json
+        run: node tools/repartir-tests.js --verifie 8
+
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        lot: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: tests, lot ${{ matrix.lot }} sur 8
+        run: node --test $(node tools/repartir-tests.js ${{ matrix.lot }} 8)
+
+  resultat:
+    # Un seul statut à lire (et à exiger) : vert si le lint et les huit lots sont verts.
+    if: always()
+    needs: [lint, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "lint : ${{ needs.lint.result }} ; tests : ${{ needs.tests.result }}"
+          test "${{ needs.lint.result }}" = "success" && test "${{ needs.tests.result }}" = "success"
