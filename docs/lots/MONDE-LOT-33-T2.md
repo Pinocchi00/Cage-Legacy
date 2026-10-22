@@ -54,3 +54,11 @@ Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adap
 - Mesure : un appel à `mgmtActualites` sur la partie générée de six soirées, avec 15 suivis, a pris **36,948 ms** (une exécution, sous le seuil de 100 ms).
 - Écart : aucun pour les pas 3 et 4 demandés. Pas de migration de sauvegarde ; `MGMT_SAVE_VERSION` inchangée.
 - Questions pour Anthony : aucune.
+
+### Compte rendu de correction — clé facultative `actuLu`
+- `mgmt-save.js` : `mgmtRepair` ne répare `actuLu` que si la propriété existe et est mal formée ; une propriété absente reste absente.
+- `index.html` : version de `mgmt-save.js` montée d'un cran.
+- `tests/mgmtActualites.test.js` : assertion ajoutée au test « Lu/non lu — lecture, plafond et sauvegarde/relecture » : une sauvegarde sans `actuLu`, rechargée, ne possède toujours pas cette clé. `mgmtActuLire` reste l'action qui peut la créer ; la lecture seule des actualités ne l'initialise pas.
+- Tests ciblés : `tests/mgmtArchive.test.js` (test « Monde lot 1 T5 — sauvegarder puis recharger rend le même état en mémoire ») et `tests/mgmtActualites.test.js` : réussis, 7/7 chacun.
+- Vérification de versions : `node tools/verif-versions.js origin/main` signale sept écarts préexistants sur d'autres fichiers (mgmt-agenda.js, mgmt-attention.js, mgmt-ecran-fiche.js, mgmt-ecran-vestiaire.js, mgmt-fiche-cadre.js, mgmt-mouvement.js, mgmt-screens.js) ; aucun n'est touché par cette correction.
+- Écart à la fiche : aucun. Questions pour Anthony : aucune.
