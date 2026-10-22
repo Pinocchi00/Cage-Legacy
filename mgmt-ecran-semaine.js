@@ -72,7 +72,7 @@ function mgmtSemaineMonde(m){
   if(typeof mgmtDemandesOuvertes==='function'){
     for(const d of mgmtDemandesOuvertes(m).slice(0,2)){
       const f=mgmtFighterById(m,d.a), cible=d.target?mgmtFighterById(m,d.target):null;
-      news.push({type:'demande',div:f.div,text:f.name+' demande : '+MGMT_DEMANDES[d.want].libelle.toLowerCase()+(cible?' — '+cible.name:''),id:f.id,source:'Demande'});
+      news.push({type:'demande',div:f.div,text:f.name+' '+mgmtDemandeTexte(d.want,cible&&cible.name),id:f.id,source:'Demande'});
       used.add(f.id);
     }
   }

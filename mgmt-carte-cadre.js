@@ -195,8 +195,8 @@ function scr_mgmt_carte_liste(){
   if(duo){
     const reclame=typeof mgmtPublicReclame==='function'?mgmtPublicReclame(m).find(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id)):null;
     if(reclame) enjeux.push('Combat réclamé'+(reclame.raison&&MGMT_RECLAME_LIBELLES[reclame.raison]?' : '+MGMT_RECLAME_LIBELLES[reclame.raison].toLowerCase():''));
-    if(typeof mgmtMemeCamp==='function'&&m.effectifs===1&&mgmtMemeCamp(m,A,B)) enjeux.push('Même camp : les opposer les contrarie');
-    if(typeof mgmtFratrie==='function'&&m.effectifs===1&&mgmtFratrie(m,A).includes(B.id)) enjeux.push('Frère et sœur : les opposer les contrarie');
+    if(typeof mgmtMemeCamp==='function'&&m.effectifs===1&&mgmtMemeCamp(m,A,B)) enjeux.push('Même camp : s’ils se battent, ils le prennent mal.');
+    if(typeof mgmtFratrie==='function'&&m.effectifs===1&&mgmtFratrie(m,A).includes(B.id)) enjeux.push('Frère et sœur : s’ils se battent, ils le prennent mal.');
   }
   const comp=duo
     ?mgmtCarteLigneComp(esc(ca.rang),esc(cb.rang),'Classement')+mgmtCarteLigneComp(esc(ca.bilan),esc(cb.bilan),'Palmarès')

@@ -28,7 +28,7 @@ test('H9 — les lignes du fil : demandes puis moments relayés, ton cercle d’
     for(const f of m.roster.slice(10,30)) moment(f,'video-virale');
     return {l,tailleMax:mgmtFilLignes(m).length,libM:mgmtVieMomentById('mariage').libelle,libD:mgmtVieMomentById('divorce').libelle,nomB:b.name,nomA:a.name,nomC:c.name,nomD:d.name};
   `);
-  assert.ok(r.l[0].startsWith(r.nomD+' demande : une revanche'),'la demande d’abord');
+  assert.ok(r.l[0].startsWith(r.nomD+' veut sa revanche'),'la demande d’abord');
   assert.equal(r.l[1],r.nomB+' : '+r.libM,'puis le cercle'); assert.ok(r.l.includes(r.nomA+' : '+r.libD));
   assert.ok(!r.l.some(x=>x.startsWith(r.nomC+' ')),'un moment privé ne défile pas'); assert.equal(r.tailleMax,8);
 });

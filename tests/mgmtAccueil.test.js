@@ -62,11 +62,11 @@ test('T4 — chaque nom affiché ouvre la présentation du bon combattant actif'
 
 /* ==== [ANCRE: ACCUEIL_DEMANDE_ACTION_TEST] — Monde lot 12 T2 ==== */
 /* Fiche T2, écart 4 : Répondre ouvre la fiche existante au lieu des deux décisions dans la liste. */
-test('T6 — une demande ouverte se règle depuis l’Accueil', () => {
+test('T6 — une demande ouverte se règle depuis l’Accueil (lot 26 : « veut … » remplace « demande : »)', () => {
   const w=ouverte();
   const r=res(w,`const m=G.mgmt; ${apres} const f=m.roster.find(x=>!mgmtIsRetired(x));
     m.facts.push({k:'demande',a:f.id,want:'carte-principale',c:m.cycle}); render();
-    const avant=mgmtDemandesOuvertes(m).length, vue=/demande/.test(document.querySelector('.mf-ac').textContent);
+    const avant=mgmtDemandesOuvertes(m).length, vue=/veut/.test(document.querySelector('.mf-ac').textContent);
     document.querySelector('.mf-ac-demande').click();
     const bouton=[...document.querySelectorAll('.mf-demande .mf-bouton')].find(b=>/Refuser/.test(b.textContent)); bouton.click();
     CL.go('mgmt_accueil');

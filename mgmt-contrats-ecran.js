@@ -84,7 +84,7 @@ function scr_mgmt_contrats(){
   const sexe=`<div class="mf-eff-sexe"><button type="button" class="${F.sexe==='H'?'on':''}" onclick="CL.mgmtContratsSexe('H')">HOMMES</button><button type="button" class="${F.sexe==='F'?'on':''}" onclick="CL.mgmtContratsSexe('F')">FEMMES</button></div>`;
   const puces=`<button type="button" class="${F.div===''?'on':''}" onclick="CL.mgmtContratsDiv('')">TOUTES</button>`
     +allDivisions().filter(d=>d.gender===F.sexe).map(d=>`<button type="button" class="${d.id===F.div?'on':''}" onclick="CL.mgmtContratsDiv('${esc(d.id)}')">${esc(mgmtEffectifPuce(d))}</button>`).join('');
-  const entete=(F.mode==='contrats'?['Combattant','Catégorie','Rang','Contrat','Reste','Situation']:['Combattant','Catégorie','Âge','Palmarès','Tu l’as vu','D’où il vient']);
+  const entete=(F.mode==='contrats'?['Combattant','Catégorie','Rang','Contrat · 1 barre = 1 combat au contrat','Reste','Situation']:['Combattant','Catégorie','Âge','Palmarès','Tu l’as vu','D’où il vient']);
   const rangees=fen.map((x,k)=>mgmtContratsLigneHtml(m,x,debut+k,debut+k===F.curseur)).join('');
   const liste=mfPanneau(`<div class="mf-eff-liste"><div class="mf-ct-entete">${entete.map(t=>`<div>${esc(t)}</div>`).join('')}</div>${rangees||'<div class="mf-eff-aucun">Personne dans cette catégorie.</div>'}`
     +`<div class="mf-eff-pied"><span>${esc(fen.length)} AFFICHÉS SUR ${esc(lignes.length)}</span><span>${F.mode==='contrats'?'SOUS CONTRAT':'SANS CONTRAT'}</span></div></div>`,'normal','mf-eff-panneau');

@@ -31,7 +31,7 @@ function mgmtFilLignes(m){
   if(typeof mgmtDemandesOuvertes==='function'){
     for(const d of mgmtDemandesOuvertes(m)){
       const f=mgmtFighterById(m,d.a);
-      if(f&&MGMT_DEMANDES[d.want]) out.push(f.name+' demande : '+MGMT_DEMANDES[d.want].libelle.toLowerCase());
+      if(f&&MGMT_DEMANDES[d.want]) out.push(f.name+' '+mgmtDemandeTexte(d.want,d.target&&mgmtFighterById(m,d.target)?.name));
     }
   }
   if(typeof mgmtRecruesLignes==='function') for(const r of mgmtRecruesLignes(m)) out.push(r.text);

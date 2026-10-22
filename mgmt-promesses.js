@@ -43,6 +43,17 @@ const MGMT_DEMANDES={
   /* Lot 5 H10 (scénario n° 29, la descente aux enfers) : une pause se tient en NE bookant PAS. */
   'pause':{libelle:'Une pause',relu:false},
 };
+/* ==== [ANCRE: DEMANDE_TEXTE] — Monde lot 26 T1 ==== */
+function mgmtDemandeTexte(want,cibleNom){
+  switch(want){
+    case 'carte-principale': return 'veut la carte principale';
+    case 'un-classe': return 'veut affronter un classé'+(cibleNom?': '+cibleNom:'');
+    case 'revanche': return 'veut sa revanche'+(cibleNom?' contre '+cibleNom:'');
+    case 'trilogie': return 'veut le troisième combat'+(cibleNom?' contre '+cibleNom:'');
+    case 'pause': return 'veut une pause';
+    default: return '';
+  }
+}
 const MGMT_PROMESSE_CYCLES=3;
 const MGMT_DEMANDE_EXPIRE=3;
 const MGMT_DEMANDE_MAX_OUVERTES=2;

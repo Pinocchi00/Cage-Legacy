@@ -212,10 +212,12 @@ function mgmtSuCampGrand(m,g){
     return `<div class="mf-su-ca-m"><div class="mf-su-ca-mn"><b>${esc(mgmtSuMaj(f.last||f.name))}</b><span>${esc(f.first||'')}</span>${mfMarqueNom(m,f.id)}</div>`
       +`<span class="mf-su-ca-mc">${esc(mgmtEffectifPuce(divById(f.div)).charAt(0)+mgmtEffectifPuce(divById(f.div)).slice(1).toLowerCase())}</span><b>${esc(mgmtRangTexte(m,f))}</b></div>`;
   }).join('');
-  const refus=g.refus?`<div class="mf-su-ca-refus">Les opposer les contrarie</div>`:'<div></div>';
+  const refus=g.refus?`<div class="mf-su-ca-refus">S’ils se battent, ils le prennent mal.</div>`:'<div></div>';
+  const titreEffectif=n>6?`LES 6 PREMIERS SUR ${n}`:`SES ${n} COMBATTANT${n>1?'S':''} CHEZ TOI`;
+  const autres=n>6?`<div class="mf-su-ca-m">+ ${n-6} autres : voir l’effectif</div>`:'';
   const corps=`<div class="mf-su-ca-g1"><div class="mf-su-ca-bloc"><span>LE COACH</span><b>${esc(mgmtSuMaj(prenom))}${nom?'<br>'+esc(mgmtSuMaj(nom)):''}</b></div>`
     +`<div class="mf-su-ca-bloc"><span>ON Y TRAVAILLE</span><b class="mf-su-ca-spec">${esc(mgmtSuMaj(g.specialite.libelle))}</b></div></div>`
-    +`<div class="mf-su-ca-g2"><span class="mf-su-ca-l">SES ${n} COMBATTANT${n>1?'S':''} CHEZ TOI</span><div class="mf-su-ca-ms">${lignes}</div></div>`;
+    +`<div class="mf-su-ca-g2"><span class="mf-su-ca-l">${titreEffectif}</span><div class="mf-su-ca-ms">${lignes}${autres}</div></div>`;
   const bas=`<div class="mf-su-ca-bas">${refus}${mfBouton('Voir ses combattants',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuCaVoir()'})}</div>`;
   return `<div class="mf-su-ca-gr">`+mfPanneau(`<div class="mf-su-ca-gin"><div class="mf-su-ca-gtete" style="background:${couleur}"><div><span>${esc(mgmtSuMaj(g.ville))}</span><b style="font-size:${mfCorps(g.nom,560,116,44)}px">${esc(mgmtSuMaj(g.nom))}</b></div>`
     +`<div class="mf-su-ca-gn"><b>${esc(n)}</b><span>COMBATTANT${n>1?'S':''}</span></div></div><div class="mf-su-ca-gcorps">${corps}${bas}</div></div>`,'choisi')+`</div>`;
