@@ -40,10 +40,11 @@ function mgmtFicheStatsHtml(m,f){
   const bar=(title,values,labels)=>`<div class="mf-fs-part"><div>${title}</div><div class="mf-fs-bar">${values.map((n,i)=>`<i style="flex:${n}">${n}%</i>`).join('')}</div><div class="mf-fs-labels">${labels.map(esc).join(' · ')}</div></div>`;
   const wins=Object.values(stats.vParMethode||{}).reduce((a,b)=>a+(Number.isFinite(b)?b:0),0), catPlural=mgmtFicheStatsCategoriePluriel(f.div);
   const rangLabel=cat.n?`RANG SUR ${cat.n} ${esc(catPlural)}`:`RANG SUR 0 ${esc(catPlural)}`;
-  return `<div class="mf-fs-grid"><section class="mf-fs-panel"><header><b>DEBOUT</b><span>${docs.docs} ${docs.docs===1?'COMBAT DOCUMENTÉ':'COMBATS DOCUMENTÉS'}</span></header>${rows.slice(0,4).map(statRow).join('')}</section>`
-    +`<section class="mf-fs-panel"><header><b>AU SOL</b><span>${rangLabel}</span></header>${rows.slice(4).map(statRow).join('')}</section>`
-    +`<section class="mf-fs-panel mf-fs-wide"><header><b>SA FAÇON DE GAGNER</b></header><div class="mf-fs-sub">${wins===1?'SA 1 VICTOIRE':`SES ${wins} VICTOIRES`}</div><p>${esc(mgmtFicheStatsFacon(stats.vParMethode))||'—'}</p>`
+  const panel=(title,subtitle,body)=>`<div class="mf-fs-frame"><div class="mf-fs-frame-inner"><section class="mf-fs-panel"><header><div class="mf-fs-head"><b>${title}</b><i></i></div>${subtitle?`<span>${subtitle}</span>`:''}</header>${body}</section></div></div>`;
+  return `<div class="mf-fs-grid">${panel('DEBOUT',`${docs.docs} ${docs.docs===1?'COMBAT DOCUMENTÉ':'COMBATS DOCUMENTÉS'}`,rows.slice(0,4).map(statRow).join(''))}`
+    +panel('AU SOL',rangLabel,rows.slice(4).map(statRow).join(''))
+    +panel('SA FAÇON DE GAGNER','',`<div class="mf-fs-sub">${wins===1?'SA 1 VICTOIRE':`SES ${wins} VICTOIRES`}</div><p>${esc(mgmtFicheStatsFacon(stats.vParMethode))||'—'}</p>`
     +bar('OÙ IL TOUCHE (%)',targets,['Tête','Corps · Jambes'])+bar('D’OÙ IL TOUCHE (%)',positions,['Distance','Clinch · Sol'])
-    +`<div class="mf-fs-duration">Durée moyenne d’un combat <b>${esc(mgmtFicheStatsFormat(stats.dureeMoyenne,'dureeMoyenne'))}</b></div></section></div>`;
+    +`<div class="mf-fs-duration">Durée moyenne d’un combat <b>${esc(mgmtFicheStatsFormat(stats.dureeMoyenne,'dureeMoyenne'))}</b></div>`)+`</div>`;
 }
 /* ==== [FIN ANCRE] ==== */

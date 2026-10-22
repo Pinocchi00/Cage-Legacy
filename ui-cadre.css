@@ -1251,11 +1251,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fb-suivi b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:32px;line-height:1}
 .mf-fb-key{border:2px solid currentColor;padding:5px 9px;font-size:24px;line-height:1}
 .mf-fb-suivi-count{font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
-.mf-fs-grid{flex:1;min-height:0;display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:1fr 1fr;gap:16px}
-.mf-fs-panel{min-width:0;min-height:0;box-sizing:border-box;background:#121010;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:12px}
-.mf-fs-panel header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex:none}
+.mf-fs-grid{flex:none;height:508px;min-height:0;display:grid;grid-template-columns:559px 487px 487px;gap:16px}
+.mf-fs-frame{min-width:0;height:508px;box-sizing:border-box;background:rgba(233,230,225,.5);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-fs-frame-inner{height:100%;min-width:0;box-sizing:border-box;display:flex;background:#0D0B0B;padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.mf-fs-panel{flex:1;min-width:0;min-height:0;box-sizing:border-box;background:#121010;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:16px}
+.mf-fs-panel header{height:53px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex:none}
+.mf-fs-head{display:flex;flex-direction:column;gap:12px}
+.mf-fs-head i{display:block;width:56px;height:8px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .mf-fs-panel header b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:44px;line-height:.75}
-.mf-fs-panel header span,.mf-fs-sub{font-size:22px;line-height:1;color:rgba(233,230,225,.74);letter-spacing:.04em}
+.mf-fs-panel header span,.mf-fs-sub{font-size:22px;font-weight:600;line-height:1;color:rgba(233,230,225,.74);letter-spacing:.04em}
 .mf-fs-stat{display:flex;flex-direction:column;gap:8px}
 .mf-fs-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;font-size:24px;line-height:1}
 .mf-fs-top b,.mf-fs-duration b{font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:44px;line-height:.75;white-space:nowrap}
