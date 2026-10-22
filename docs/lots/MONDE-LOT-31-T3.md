@@ -35,3 +35,6 @@ Fixtures : une petite partie `mgmtPasseGenerer('split',{soirees:6})` (rapide) po
 - **Migration de sauvegarde** : aucune.
 - **Questions pour Anthony** : faut-il modifier une tranche de génération (hors périmètre T3) pour que les combattants actifs sans historique reçoivent un combat documenté, ou préciser que « combattant actif » exclut ceux sans combat ? Tant que ce point n’est pas tranché, le critère de fin T3 reste bloqué par le test 6.
 Fichiers modifiés et rôle ; tests ajoutés (intitulés) ; tests existants adaptés (aucun attendu) ; **mesures** : temps de l'index, nombre de combattants avec ≥ 3 combats documentés par organisation ; sens retenu pour chaque chiffre (`MGMT_STATS_SENS`) ; écarts à la fiche ; questions pour Anthony.
+
+### Reprise (superviseur, 22/10)
+Le critère « chaque combattant actif a au moins un combat documenté » est remplacé par « au moins 85 % par organisation, et une carrière nulle sans exception pour les autres » (brief P1 T2 : le bilan reconstitué n'a pas de relevé). Test 6 mesuré le 22/10 sur la partie de référence : les assertions de couverture passent ; les bornes de temps passent de 400 ms / 20 ms à 1 500 ms / 50 ms (la mesure hors charge est de 356 ms et 0 ms ; échec constaté seulement sous forte charge de la machine).
