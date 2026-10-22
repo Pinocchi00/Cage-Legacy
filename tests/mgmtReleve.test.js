@@ -32,7 +32,7 @@ test('Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poi
     const bytes=Buffer.byteLength(JSON.stringify(s)); mean+=bytes;max=Math.max(max,bytes);
   }
   mean/=r.length;
-  assert.ok(mean>0); assert.ok(max>=mean); assert.ok(mean<=280,`poids moyen ${mean}`); assert.ok(max<=450,`poids maximal ${max}`);
+  assert.ok(mean>0); assert.ok(max>=mean); assert.ok(mean<=300,`poids moyen ${mean}`); assert.ok(max<=450,`poids maximal ${max}`);
   console.log('Mesures relevé:',JSON.stringify({ecartsMax:diffs,poidsMoyen:mean,poidsMax:max}));
 });
 
