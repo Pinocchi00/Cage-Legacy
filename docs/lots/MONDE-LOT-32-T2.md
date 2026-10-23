@@ -78,3 +78,12 @@ Versions à la main dans `index.html` (`mgmt-traits.js`, `mgmt-corps.js`), `node
 - L'amplitude des deltas n'a aucun lien démontré avec le temps de génération; je ne réduis pas arbitrairement les effets et ne prétends pas satisfaire le garde-fou runtime. Le point 3 reste bloqué par ce dépassement.
 - Points 4 à 6 non réalisés dans cette reprise. Aucun test d'effet ajouté ni test d'empreinte lancé.
 - Fichiers modifiés dans cette reprise : rapport de mesure (résultats et écart au garde-fou), cette fiche (compte rendu). Questions pour Anthony : aucune question ouverte; blocage objectif du runtime noté ci-dessus.
+
+## Compte rendu — reprise performance (23/10/2026)
+
+- Étape A committée (`b417068`) : `tools/mesure-generation.js` réalise la comparaison dans le même harnais et avec la même graine ; quatre mesures ajoutées à `tools/reports/TRAITS-MESURES.md` (avec traits : 67 144 et 55 598 ms ; sans traits : 41 868 et 65 522 ms). La variation de charge est élevée et inverse l'écart entre les paires, donc le seuil n'est pas encore validé.
+- Diagnostic par lecture des appels : `mgmtFightReady` appelle `mgmtTraitsAppliquer`, qui appelle `mgmtTraitsDe`; `mgmtTraitsCombats` appelle `mgmtStatsCombats`, et celui-ci déclenche `mgmtStatsIndex`. Ce dernier invalide son index à chaque changement de longueur de `hist`, puis reparcourt tous les combats documentés. L'hypothèse de coût quadratique est confirmée par le chemin de code.
+- Vérification ciblée exécutée : `node --test tests/mgmtTraits.test.js` — 9 tests réussis, dont les tests de pureté et d'absence de lecture du futur.
+- Non réalisés : optimisation du calcul/index, remesure après correction, tests `mgmtTraitsEffets.test.js`, tests de génération affectés, contrôles de versions/lint et commit final. Aucun code de gameplay n'a été changé, donc pas d'effet de trait validé/modifié dans cette reprise.
+- Fichiers ajoutés/modifiés et rôle : `tools/mesure-generation.js` (mesure A/B), `tools/reports/TRAITS-MESURES.md` (mesures avant correction), cette fiche (état de reprise).
+- Écart/limite : les quatre temps montrent une charge ambiante non stable. Le comportement des traits est préservé ; leur optimisation reste à faire avant de pouvoir atteindre le critère de fin. Questions pour Anthony : aucune.
