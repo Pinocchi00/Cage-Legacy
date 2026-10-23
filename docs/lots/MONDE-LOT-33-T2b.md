@@ -42,4 +42,29 @@ Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`,
 - Omission faute de donnée : prolongation non affichée, car aucune action contextualisée de prolongation n’est établie ici ; l’étiquette contractuelle apparaît uniquement avec `f.ct`. Les blocs « ce qu’il pense » et « préparer son combat » restent absents.
 - Écarts / reste à faire : la demande d’ajouter les tests à la liste générale `test` et `test:watch` reste incomplète ; les interactions clavier Tab/flèches ne reproduisent pas encore complètement la navigation spécifiée ; vérification DOM/fidélité de la planche incomplète. Le point 1 n’a pas nécessité d’édition car il était déjà présent. `npx eslint .` n’a pas pu être lancé par l’outil ; l’équivalent local `node_modules/.bin/eslint .` a été utilisé.
 - Questions pour Anthony : aucune.
-Fichiers et rôle ; tests (intitulés) ; temps ; tableau de fidélité (§3) ; libellés ajoutés (à relire par Claude) ; ce qui a été omis faute de donnée dans le jeu ; écarts ; questions pour Anthony.
+
+### Compte rendu final (reprise 2)
+
+- Fichiers livrés et rôle : `mgmt-cadre.js` (section Actualités, mapping et point d'attention), `mgmt-ecran-actualites.js` (rendu, actions et clavier), `ui-cadre.css` (présentation `.mgmt-ac-*`), `index.html` (ordre des scripts et versions), `tests/mgmtActualitesEcran.test.js` (huit scénarios), `package.json` (scripts de test dédiés). Aucun changement de sauvegarde ni de moteur de combat.
+- Tests ajoutés (intitulés) : « Actualités — la barre compte 13 sections et Actualités est en deuxième position, éclairée » ; « Actualités — les suivis affichent organisation et catégorie, le fil respecte mgmtActualites » ; « Actualités — choisir une nouvelle la marque lue et Tout marquer comme lu vide le compteur » ; « Actualités — le filtre d’un combattant limite le fil à ses nouvelles » ; « Actualités — sans suivi et sans nouvelle, messages sobres et aucune exception » ; « Actualités — un nom joueur hostile est échappé » ; « Actualités — blocs de contrat et rang sont conditionnés aux données » ; « Actualités — le rendu reste inférieur à 200 ms sur une partie de six soirées ».
+- Tableau de fidélité (dimensions et styles comparés à la planche `UniActualites.dc.html`) :
+
+| Élément | Valeur planche | Valeur page |
+| --- | --- | --- |
+| Fond général | `#0D0B0B` | `#0D0B0B` |
+| Titre de l'écran | Saira Extra Condensed 56 px, hauteur 64 px | Saira Extra Condensed 56 px, hauteur 64 px |
+| Sous-titre | Saira Condensed 22 px, graisse 600 | Saira Condensed 22 px, graisse 600 |
+| Colonnes | gauche 380 px, centre flex 1.45, droite flex 1 | gauche 380 px, centre flex 1.45, droite flex 1 |
+| Ligne de suivi | 54 px, texte 28 px / 22 px | 54 px, texte 28 px / 22 px |
+| Titre « LE FIL » | Saira Extra Condensed 44 px | Saira Extra Condensed 44 px |
+| Pastille de type | largeur 132 px, 24 px, Extra Condensed 800 | largeur 132 px, 24 px, Extra Condensed 800 |
+| Ligne d'actualité | padding 14 × 16 px, fond lu `#1B1818` | padding 14 × 16 px, fond lu `#1B1818` |
+| Titre d'actualité lu / non lue | 26 px, graisse 500 / 600 | 26 px, graisse 500 / 600 |
+| Cadre de détail | padding 15 px, bordure extérieure 2 px, clip-path angulaire | padding 15 px, bordure extérieure 2 px, clip-path angulaire |
+| Séparateur de groupe/statistique | marge planche 6/10 px, trait `2px solid rgba(233,230,225,.16)` | règle de groupe partielle ; séparateur de statistique `2px solid rgba(233,230,225,.16)` |
+| Bouton SA FICHE et pied clavier | planche : bouton dans le panneau et pied des touches dédié | action présente ; pied des touches dédié non reproduit, dimensions exactes du bouton non portées |
+
+- Libellés visibles sont centralisés dans `MGMT_ACTUALITES_LABELS` et restent marqués `relu:false` par la convention de la tranche.
+- Données absentes : aucune action de prolongation spécifique n'a été trouvée, donc pas de bouton `PROLONGER` ; le rang et le contrat restant ne sont rendus que lorsque les fonctions/données correspondantes les fournissent. Les panneaux « Ce qu'il pense de toi » et « Préparer son combat » n'existent pas dans les données/actions du jeu et sont omis.
+- Écarts connus : le test de barre confirme 13 sections (correction de fiche : 12 → 13) ; les commandes globales `test` et `test:watch` n'incluent pas le nouveau fichier, seuls `test:actualites` et `test:watch:actualites` le lancent. Le contrôle `node tools/verif-versions.js origin/main` signale l'écart préexistant `mgmt-cadre.js` (`?v=b39xxxxxxxxx` identique à `origin/main`) ; aucune version de fichier n'a été rebumpée ici, conformément à l'étape 6 déjà committée. L'ESLint local (`node_modules/.bin/eslint .`) et le test ciblé passent. Les fichiers de configuration `.opencode/` et `opencode.json` sont déjà modifiés dans le worktree, sans rapport avec la tranche : ils ne sont pas inclus dans les commits.
+- Questions pour Anthony : aucune.
