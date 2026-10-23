@@ -13,3 +13,32 @@ Règles communes : cherche toi-même dans le code ; **additif** : une partie anc
 **[ ] 6. Fidélité à la planche** (je la vérifie à 1920×1080 en mesurant le DOM) : positions absolues dans la scène 1920×1080, polices Saira, tailles, couleurs `#E9E6E1` `#F0B220` `#E23A2B` `#0D0B0B`, coins coupés via `mfPanneau`. Le cadre met un padding de 22 px dans `.mf-p3`, la planche en a 15 pour ses panneaux (texte à `panneau + 22`) : ajuste. Après l'animation d'entrée, mesure ton rendu contre la planche (le rendu de la planche : `docs/planches-uniques/*.dc.html`, styles inline lisibles) et écris dans le compte rendu un tableau « élément — valeur planche — valeur page » pour 10 éléments.
 **[ ] 7. Tests** (nouveau `tests/mgmtLot38T2.test.js`, inscrit dans les listes `test` ET `test:watch` de `package.json`, pas dans `pretest`) : (1) l'étape 1 rend le titre, les trois lignes, l'objectif et la réplique de Leïla pour Split ; `Entrée` passe à l'étape 2 ; (2) l'étape 2 rend six cartes ; garder trois active le bouton, garder un quatrième est refusé ; rendre en libère un ; (3) la création d'une partie neuve mène à `mgmt_arrivee` ; une partie ancienne ou jouée n'y est pas envoyée ; (4) « Revoir ce qui manque » (Organisation) et « Tes espoirs » (Accueil) ouvrent l'écran ; (5) l'Accueil rend le bloc des espoirs avec leurs lignes calculées, rien sans espoir ; (6) un nom `<img onerror>` fabriqué est échappé partout ; (7) la presse (si case 5 faite) émet au plus une ligne de manque par saison ; (8) rendu < 200 ms ; (9) aucun texte sous 22 px (`tests/mgmtCadre.test.js` reste vert, lance-le). Adapte les tests existants qui comptent les écrans ou les blocs de l'Accueil / d'Organisation / du flux de création (grep `mgmt_accueil`, `mgmtNouvelleFin` dans `tests/`) avec la citation « brief du 22/10, P4 T2/T3 » et les chiffres.
 **[ ] 8. Fin.** `?v=` à la main, `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 38 T2 : l'ecran d'arrivee, ce qui manque et les trois espoirs` (le numéro T2 est obligatoire), compte rendu dans la fiche (fichiers et rôle, tests, tableau de fidélité, cases sautées et pourquoi, textes écrits à relire, questions pour Anthony).
+
+## Compte rendu
+
+**État partiel — critères de fin non atteints.**
+
+- `mgmt-ecran-arrivee.js` : première version d'un rendu en deux étapes, cartes d'espoirs, gestes de garder/rendre/entrer, échappement des noms et états de clavier. Les libellés ajoutés sont dans `MGMT_ARRIVEE_TEXTES` et marqués `relu:false`.
+- `index.html` : référence de cache `monde38t2b` montée manuellement. Le module est placé après la déclaration de l'arrivée historique (`mgmt-prise-en-main.js`) afin de ne pas se faire écraser par cette déclaration, puis avant `mgmt-screens.js`.
+- `tests/mgmtLot38T2.test.js` : deux tests provisoires « Monde lot 38 T2 — écran d’arrivée en deux étapes et six propositions » et « Monde lot 38 T2 — texte joueur échappé dans les cartes » ; ils ne couvrent pas encore les neuf groupes de critères demandés et le fichier n'est pas inscrit aux scripts `test`/`test:watch` de `package.json`.
+- Vérifications réussies : `node --test tests/mgmtLot38T2.test.js` (2/2), `node --test tests/mgmtCadre.test.js` (12/12), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`.
+- `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai de 110 secondes de l'outil ; relancer en arrière-plan selon la procédure de la fiche.
+
+### Fidélité à la planche
+
+Mesures DOM après animation non réalisées ; aucune valeur de page ne peut donc être présentée comme mesurée. Tableau de comparaison restant à faire :
+
+| Élément | Valeur planche | Valeur page |
+|---|---:|---:|
+| Scène | 1920 × 1080 | 1920 × 1080 via `mfEcran` (non mesuré dans un navigateur) |
+| Début horizontal de scène | 300 px | 300 px CSS |
+| Début vertical du contenu | à relever dans la planche | 112 px CSS |
+| Largeur de scène | 1564 px | 1564 px CSS |
+| Plaque | 64 px de haut | style du cadre, mesure non faite |
+| Panneau principal étape 1 | à relever | `mfPanneau`, position CSS locale déclarée |
+| Grille de cartes | à relever | 3 colonnes déclarées, dimensions non mesurées |
+| Taille du titre d'étape 1 | à relever | 58 px CSS |
+| Texte de métadonnées | 22 px minimum | 22 px CSS |
+| Palette | `#E9E6E1`, `#F0B220`, `#E23A2B`, `#0D0B0B` | couleurs présentes dans les styles du nouvel écran et du cadre |
+
+Non faits : branchement de création contrôlé par les trois conditions spécifiées ; retours de fiche ; lien organisation et panneau calculé ; bloc d'espoirs calculé à l'accueil ; presse ; suite complète de tests et adaptation des tests existants ; ajout du nouveau test aux listes npm ; mesure DOM de la fidélité. La planche demande de s'abstenir d'inventer ces résultats : ils restent à implémenter/valider. Aucun changement de sauvegarde. Aucun texte d'attribut ou de note ajouté. Questions pour Anthony : aucune question de spécification identifiée, mais la validation visuelle et le reste du branchement sont à reprendre.
