@@ -6,6 +6,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+/* la CI coupe le cache (CL_TEST_CACHE=0) pour les autres fichiers ; ce fichier-ci teste justement le cache : il le rallume pour son propre processus */
+process.env.CL_TEST_CACHE = '1';
 const { newGameWindow } = require('./helpers/loadGame');
 const { empreinte, CACHE_DIR, memory } = require('./helpers/partieCache');
 
