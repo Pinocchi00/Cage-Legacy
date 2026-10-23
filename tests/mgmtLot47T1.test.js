@@ -44,3 +44,19 @@ test('Lot 47 T1 — plainte de presse limitée à une par dix soirées',()=>{
   m.cycle=11;w.mgmtMemoireSoiree(m);
   assert.equal(m.facts.filter(x=>x.k==='memoire-presse'&&x.a==='c').length,2);
 });
+
+/* Constat du 23/10/2026 : les tests de la tranche passaient par des contextes simulés ; celui-ci joue de vraies soirées sur une partie créée par le chemin réel. */
+const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
+test('Monde lot 47 T1 — dix soirées jouées une à une : aucune exception, la partie reste valide et la mémoire se recharge',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(20261008); CL.mgmtEnter(1); mgmtPasseGenerer('split',{soirees:3});`);
+  for(let k=0;k<10;k++) jouerSoirees(w,1);
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=G.mgmt;const mem=m.memoire||{};const ids=Object.keys(mem);
+    const copie=JSON.parse(JSON.stringify(m));
+    return {valide:validateMgmt(m),n:ids.length,max:ids.reduce((a,i)=>Math.max(a,(mem[i].s||[]).length),0),recharge:validateMgmt(copie),joues:m.eventsPlayed};})())`));
+  assert.equal(r.valide,true);
+  assert.equal(r.recharge,true);
+  assert.ok(r.max<=8,'au plus huit souvenirs par combattant');
+  assert.ok(r.joues>=10);
+});
