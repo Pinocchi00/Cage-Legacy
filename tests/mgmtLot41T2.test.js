@@ -20,3 +20,4 @@ test('P6 T2 — chaque classe se-* du rendu a un style et aucun corps de texte n
     assert.doesNotMatch(bloc,/font(?:-size)?\s*:[^;}]*?(?:1[0-9]|20|21)px/i);
   }finally{w.close();}
 });
+test('P6 T2 — la semaine en bref exclut le jour sélectionné et dédoublonne famille et combattant',()=>{const w=newGameWindow();try{const html=w.eval(`(()=>{const m={ville:'Lyon',semaine:{n:1,ev:[{f:'poids',j:'vendredi',a:'x',b:'y',v:0,p:true},{f:'medias',j:'mardi',a:'x',b:'y',v:0,p:false},{f:'medias',j:'mercredi',a:'x',b:'y',v:0,p:false}]},card:{main:[],prelims:[]}};G={mgmt:m};MGMT_SE_JOUR=4;return scr_mgmt_semaine();})()`);assert.equal((html.match(/class="se-bref"/g)||[]).length,1);assert.doesNotMatch(html,/Rien d’autre cette semaine\./);assert.equal((html.match(/Le combattant arrive à Lyon/g)||[]).length,2);}finally{w.close();}});
