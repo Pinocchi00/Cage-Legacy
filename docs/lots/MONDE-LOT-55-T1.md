@@ -30,3 +30,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications effectuées : `node --test tests/mgmtLot55T1.test.js` (3/3 vert), `node tools/verif-versions.js origin/main` (aucun écart). ESLint ciblé sur `mgmt-ceremonie.js` sans erreur ; le fichier de test est ignoré par la configuration ESLint.
 - État toujours incomplet : écran cérémonie, carnet, vrais critères de calcul corrigés, persistance/validation/réparation, tests de parcours multi-années et intégration des tests aux listes générales `test`/`test:watch` ne sont pas réalisés. Les formulations présentes dans le calcul n'ont pas été générées par l'écrivain et ne satisfont pas l'exigence complète des textes. Les précisions du superviseur (fenêtre, scoring complet, déclencheur UI) restent à implémenter.
 - Écart au commit demandé : ce commit conserve le statut inachevé et ne prétend pas satisfaire les cases non faites.
+
+### Reprise 3
+
+- Corrigé le calcul existant : les combats de titre sont désormais reconnus via les faits `title_fight` pointant sur l'index du relevé, et la révélation tient compte du palmarès professionnel avant l'année (instantané `W/L/D`), pas du nombre de combats annuels.
+- Corrigé la recherche d'absence pour le retour : elle ne mélange plus les dates de l'adversaire et du lauréat. La trace persistée ne contient pas de détail de blessure, de pronostic public, de knockdowns ni de chronomètre de fin ; ces critères nécessitent un ajustement documenté de la règle au relevé réel et restent non déterminés ici.
+- Tests exécutés : `node --test tests/mgmtLot55T1.test.js` (3/3), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint mgmt-ceremonie.js` (vert).
+- Non réalisé : jeux sur trois années, phrase de presse renouvelée par soirée, validation/réparation du champ de prix, cérémonie et carnet rendus, raccordement à la fin d'année et test CSS/échappement. Aucun test de trois années ou test de sauvegarde lent n'a été lancé.
+- Les modifications d'outillage `.opencode/agents/*` et `opencode.json` sont étrangères. `sw.js` a été restauré depuis `origin/main`, sans être inclus.
+- Livraison partielle, engagée sous `Monde lot 55 T1 (inachevé) : critères de calcul`. Les écarts de la maquette restent complets pour les deux écrans. Questions pour Anthony : aucune question nouvelle ; les informations manquantes dans les relevés restent à préciser si l'on exige ces critères au-delà des données observables.

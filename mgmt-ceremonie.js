@@ -13,23 +13,24 @@ function mgmtCeremonieCalculer(m){
   if(!m||!Array.isArray(m.hist))return [];
   const now=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0, from=now-365;
   const h=m.hist.map((t,i)=>({t,i})).filter(x=>x.t&&x.t.a&&x.t.b&&Number.isFinite(x.t.c)&&x.t.c>=from&&x.t.c<now);
-  const wins=new Map(), byId=new Map();
+  const titres=new Set((m.facts||[]).filter(f=>f&&f.k==='title_fight').map(f=>f.fight));
+  const byId=new Map();
   const nom=s=>s&&(s.name||s.nom)||'Combattant';
-  const entrant=(id,s)=>{if(!id)return null;if(!byId.has(id))byId.set(id,{id,nom:nom(s),combats:0,victoires:0,defaites:0,finitions:0,score:0});return byId.get(id);};
-  for(const {t} of h){for(const s of [t.a,t.b])entrant(s.id,s).combats++;if(t.winner==='A'||t.winner==='B'){const side=t.winner==='A'?t.a:t.b, x=entrant(side.id,side);x.victoires++;if(['ko','sub','stop'].includes(t.family))x.finitions++;}}
+  const entrant=(id,s)=>{if(!id)return null;if(!byId.has(id))byId.set(id,{id,nom:nom(s),combats:0,victoires:0,defaites:0,finitions:0,score:0,proAvant:Infinity});return byId.get(id);};
+  for(const {t} of h){for(const s of [t.a,t.b]){const x=entrant(s.id,s);x.combats++;const avant=Number(s.W||0)+Number(s.L||0)+Number(s.D||0);if(Number.isFinite(avant))x.proAvant=Math.min(x.proAvant,avant);}if(t.winner==='A'||t.winner==='B'){const side=t.winner==='A'?t.a:t.b, x=entrant(side.id,side);x.victoires++;if(['ko','sub','stop'].includes(t.family))x.finitions++;}}
   const out=[];
   for(const p of MGMT_CEREMONIE_PRIX){let cand=null;
     if(p.id==='combattant'){
-      for(const {t} of h)if(t.winner==='A'||t.winner==='B'){const s=t.winner==='A'?t.a:t.b,x=entrant(s.id,s);x.score+=(t.title?3:(t.slot==='main'||t.slot==='co-main'?2:1))+(['ko','sub','stop'].includes(t.family)?1:0);if(t.winner==='A')entrant(t.b.id,t.b).defaites++;else entrant(t.a.id,t.a).defaites++;}
+      for(const {t,i} of h)if(t.winner==='A'||t.winner==='B'){const s=t.winner==='A'?t.a:t.b,x=entrant(s.id,s);x.score+=(titres.has(i)?3:(t.slot==='main'||t.slot==='co-main'?2:1))+(['ko','sub','stop'].includes(t.family)?1:0);if(t.winner==='A')entrant(t.b.id,t.b).defaites++;else entrant(t.a.id,t.a).defaites++;}
       cand=[...byId.values()].filter(x=>x.combats>=3&&x.score>=3).sort((a,b)=>b.score-a.score||a.defaites-b.defaites||String(a.id).localeCompare(String(b.id)))[0];
     } else if(p.id==='ko'||p.id==='soumission'){
-      cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').filter(({t})=>p.id==='ko'?t.family==='ko':t.family==='sub').map(({t,i})=>({t,i,side:t.winner==='A'?t.a:t.b,score:(t.title?3:0)+(t.round===1?2:0)+(t.slot==='main'||t.slot==='co-main'?1:0)})).sort((a,b)=>b.score-a.score||a.t.c-b.t.c||a.i-b.i)[0];
+       cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').filter(({t})=>p.id==='ko'?t.family==='ko':t.family==='sub').map(({t,i})=>({t,i,side:t.winner==='A'?t.a:t.b,score:(titres.has(i)?3:0)+(t.round===1?2:0)+(t.slot==='main'||t.slot==='co-main'?1:0)})).sort((a,b)=>b.score-a.score||a.t.c-b.t.c||a.i-b.i)[0];
     } else if(p.id==='combat'){
-      cand=h.map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((t.knockdownsA||0)+(t.knockdownsB||0)+(t.title?2:0)+(t.winner&&t.round===1?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
+       cand=h.map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((t.knockdownsA||0)+(t.knockdownsB||0)+(titres.has(i)?2:0)+(t.winner&&t.round===1?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
     } else if(p.id==='revelation'){
-      cand=[...byId.values()].filter(x=>x.combats<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||String(a.id).localeCompare(String(b.id)))[0];
+       cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||String(a.id).localeCompare(String(b.id)))[0];
     } else if(p.id==='retour'){
-      cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>({t,i,side:t.winner==='A'?t.a:t.b,previous:h.filter(x=>x.i<i&&(x.t.a.id===t.a.id||x.t.b.id===t.a.id||x.t.a.id===t.b.id||x.t.b.id===t.b.id)).filter(x=>x.t.c<t.c).reduce((v,x)=>Math.max(v,x.t.c),-Infinity)})).map(x=>({...x,gap:Number.isFinite(x.previous)?x.t.c-x.previous:0})).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c)[0];
+       cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=h.filter(x=>x.i<i&&(x.t.a.id===side.id||x.t.b.id===side.id)&&x.t.c<t.c).reduce((v,x)=>Math.max(v,x.t.c),-Infinity);return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0};}).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c||b.i-a.i)[0];
     }
     if(cand){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const index=(String(id||cand.i||'').length+value)%3;out.push({id:p.id,titre:p.titre,laureat:id,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]),relu:false,stat:value});
     }
