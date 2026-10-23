@@ -10,3 +10,12 @@ Branche : `p10-guerre` (la branche courante de ce dossier ; commits ICI ; le sup
 **[ ] 5. Fin.** Commit final `Monde lot 57 T1 : la guerre au classement` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- Travail repris : `mgmt-organisations.js` expose `mgmtGuerreClassement(m)` comme une porte sur `mgmtOrgClassement(m)` (les quatre rangs existants), avec les organisations et leurs identités, les voisins de Split et un champ de mouvement calculé à partir de `m.guerre.classementPrecedent`.
+- Test ajouté : `tests/mgmtLot57T1.test.js`, intitulés « Monde lot 57 T1 — le classement de guerre relie les huit rangs existants » et « Monde lot 57 T1 — le classement est déterministe ». Vérification ciblée : 2/2 réussis.
+- `package.json` a des alias dédiés `test:lot57t1` et `test:watch:lot57t1`, mais le fichier n'est pas ajouté aux listes principales `test` et `test:watch` (contrôle littéral encore faux).
+- Non réalisés : écran `UniGuerre`, mouvements de classement persistés / phrase `relu:false`, effets de fin d'année et annonces, essais sur trois années, cas de sauvegarde/empreintes/styles/échappement et test de plafond.
+- L'audit `node tools/verif-versions.js origin/main` signale six fichiers de la base lot 45 comme modifiés sans changement de version (`mgmt-actualites.js`, `mgmt-bureau.js`, `mgmt-matchmakers-data.js`, `mgmt-orgs-agissent.js`, `mgmt-rivalite-orgs.js`, `mgmt-save.js`). Ces modifications préexistantes ne sont pas de cette tranche et ne sont pas incluses ici.
+- Questions pour Anthony : aucune nouvelle question de spécification identifiée ; cette reprise est incomplète et ne satisfait donc pas le critère de fin.

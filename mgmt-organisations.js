@@ -123,6 +123,32 @@ function mgmtOrgClassement(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: P10_T3_GUERRE_CLASSEMENT] — Monde lot 57 T1 ==== */
+/** Classement des huit destiné à la guerre : porte unique sur le classement existant. */
+function mgmtGuerreClassement(m){
+  const classement=mgmtOrgClassement(m);
+  if(!classement) return [];
+  const splitId=mgmtPredecesseurOrgId(m);
+  const rangSplit=classement.findIndex(x=>x.id===splitId);
+  const precedent=Array.isArray(m.guerre&&m.guerre.classementPrecedent)?m.guerre.classementPrecedent:[];
+  return classement.map((ligne,index)=>{
+    const org=mgmtOrgParId(ligne.id), ident=mgmtOrgIdentite(ligne.id);
+    const ancien=precedent.indexOf(ligne.id);
+    return Object.assign({},ligne,{nom:org.nom,ville:ident.ville,annee:ident.annee,
+      mouvement:ancien<0?0:ancien-index});
+  }).map((ligne,index)=>Object.assign(ligne,{
+    devant:index>0?classement[index-1].id:null,
+    derriere:index+1<classement.length?classement[index+1].id:null,
+    estSplit:ligne.id===splitId,
+    duelSplit:ligne.id===splitId?{
+      devant:rangSplit>0?classement[rangSplit-1].id:null,
+      derriere:rangSplit+1<classement.length?classement[rangSplit+1].id:null,
+      mouvement:precedent.indexOf(splitId)<0?0:precedent.indexOf(splitId)-rangSplit
+    }:null
+  }));
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_CORR0810_LOT12_ATOUTS] — Corrections du 08/10/2026, lot 12 (D6) : chaque ligne de l'écran Nouvelle partie correspond à un effet que le joueur constate.
    Les lignes ne sont plus écrites à la main : elles se DÉDUISENT du profil, réglage par réglage, et seuls les réglages que le jeu lit existent
    (MGMT_ORG_REGLAGES_LUS — un test échoue si un profil porte un réglage hors de cette liste, ou si une ligne n'a pas de règle). Plus de promesse sans effet.

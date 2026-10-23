@@ -59,6 +59,8 @@
     "test:releve2": "node --test tests/mgmtReleveReduit.test.js",
     "test:lot45t1": "node --test tests/mgmtLot45T1.test.js",
     "test:watch:lot45t1": "node --test --watch tests/mgmtLot45T1.test.js",
+    "test:lot57t1": "node --test tests/mgmtLot57T1.test.js",
+    "test:watch:lot57t1": "node --test --watch tests/mgmtLot57T1.test.js",
     "test:stats": "node --test tests/mgmtStats.test.js",
     "test:fichestats": "node --test tests/mgmtFicheStats.test.js",
     "test:leaders": "node --test tests/mgmtLeaders.test.js",
