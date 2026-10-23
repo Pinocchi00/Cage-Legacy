@@ -146,12 +146,14 @@ function mgmtPasseCote(f,age,W,L,D){
   if(f.generation===MGMT_IDENTITE_GENERATION){ s.ck=f.ck; s.generation=f.generation; }
   return s;
 }
-/** La ligne de nombres d'un combat (complet ou allégé) : [cycle, 1 si principal, A, âge, V, D, N, B, âge, V, D, N, 0/1/2, famille, round, rounds], ou null. Pur. */
+/* ==== [ANCRE: MONDE_LOT31_T2_PASSE_RELEVE] — Monde lot 31 T2 ==== */
+/** La ligne d'un combat : 16 champs historiques et le relevé réduit facultatif, ou null. Pur. */
 function mgmtPasseLigne(t){
   if(!t||!t.a||!t.b) return null;
   const r=[t.c,t.slot==='main'?1:0,t.a.id,t.a.age,t.a.W,t.a.L,t.a.D,t.b.id,t.b.age,t.b.W,t.b.L,t.b.D,'ABD'.indexOf(t.winner),t.family,t.round,t.rounds];
   for(const i of [0,3,4,5,6,8,9,10,11,14,15]){ if(!Number.isSafeInteger(r[i])||r[i]<0) return null; }
   if(r[12]<0||typeof r[2]!=='string'||typeof r[7]!=='string'||typeof r[13]!=='string') return null;
+  r.push(mgmtReleveReduit(t.s));
   return r;
 }
 /** L'entrée de m.hist d'un combat du passé, depuis sa ligne et l'effectif (par identifiant), ou null. Pur. */
@@ -159,8 +161,10 @@ function mgmtPasseEntree(par,r,t){
   /* Duo T1 : un combattant absent de l'effectif (super carte de la partie à deux, recrue partie ailleurs) se lit sur le côté de la trace elle-même. */
   const fa=par.get(r[2])||(t&&t.a&&t.a.id===r[2]?t.a:null), fb=par.get(r[7])||(t&&t.b&&t.b.id===r[7]?t.b:null);
   if(!fa||!fb) return null;
-  return {c:r[0],slot:r[1]===1?'main':'prelim',seed:0,rounds:r[15],a:mgmtPasseCote(fa,r[3],r[4],r[5],r[6]),b:mgmtPasseCote(fb,r[8],r[9],r[10],r[11]),
+  const e={c:r[0],slot:r[1]===1?'main':'prelim',seed:0,rounds:r[15],a:mgmtPasseCote(fa,r[3],r[4],r[5],r[6]),b:mgmtPasseCote(fb,r[8],r[9],r[10],r[11]),
     winner:'ABD'[r[12]],family:r[13],round:r[14],p:true};
+  if(r.length>16&&r[16]!==null){ if(!mgmtReleveValide(r[16])) return null; e.s=r[16]; }
+  return e;
 }
 
 /** À la clôture : allège m.hist, écarte les faits perdus, note la part du passé. @returns {boolean} faux si un combat n'a pas pu s'alléger (rien n'est alors changé). */
@@ -204,7 +208,7 @@ function mgmtPasseCompacter(m){
   for(let i=0;i<p.nHist;i++){
     const t=m.hist[i], r=t&&t.p===true?mgmtPasseLigne(t):null;
     if(!r) return null;
-    h.push([r[0],r[1],S(r[2]),r[3],r[4],r[5],r[6],S(r[7]),r[8],r[9],r[10],r[11],r[12],S(r[13]),r[14],r[15]]);
+    h.push([r[0],r[1],S(r[2]),r[3],r[4],r[5],r[6],S(r[7]),r[8],r[9],r[10],r[11],r[12],S(r[13]),r[14],r[15],r[16]]);
   }
   for(let i=0;i<p.nFacts;i++){
     const x=m.facts[i];
@@ -236,7 +240,10 @@ function mgmtPasseDeployer(m){
     const par=new Map(m.roster.map(f=>[f.id,f]));
     const hist=[];
     for(const r of a.h){
-      const e=mgmtPasseEntree(par,[r[0],r[1],a.s[r[2]],r[3],r[4],r[5],r[6],a.s[r[7]],r[8],r[9],r[10],r[11],r[12],a.s[r[13]],r[14],r[15]]);
+       if(!Array.isArray(r)||(r.length!==16&&r.length!==17)) return null;
+       const ligne=[r[0],r[1],a.s[r[2]],r[3],r[4],r[5],r[6],a.s[r[7]],r[8],r[9],r[10],r[11],r[12],a.s[r[13]],r[14],r[15]];
+       if(r.length===17) ligne.push(r[16]);
+       const e=mgmtPasseEntree(par,ligne);
       if(!e) return null;
       hist.push(e);
     }

@@ -666,7 +666,7 @@ function mgmtRunEvent(m){
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
     m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
-      winner:res.winner,family:fam,round:roundF});
+      winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
     mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le score dérive de m.hist, muté à ce combat. */
     if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});
     const ta=mgmtApplyFight(m,fa,fb,res,'A');

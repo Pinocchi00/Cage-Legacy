@@ -9,7 +9,7 @@
    fonctionnels. Rien de dérivé n'est stocké. ==== */
 
 const MGMT_CERCLE_MAX=5;
-const MGMT_SUIVIS_MAX=15;
+const MGMT_SUIVIS_MAX=60;
 /** Informations de la semaine (décision du 22/09, lot 2B §5 e). */
 const MGMT_CONTEUR_MIN=3;
 const MGMT_CONTEUR_MAX=5;
@@ -124,39 +124,29 @@ function mgmtRole(m,f,classements){
 function mgmtCercle(m){ return (m&&Array.isArray(m.cercle))?m.cercle:[]; }
 function mgmtSuivis(m){ return (m&&Array.isArray(m.suivis))?m.suivis:[]; }
 
-/** Le plus fort lien du joueur avec un combattant : 'cercle', 'suivi' ou null. */
+/** Le lien du joueur avec un combattant : 'suivi' ou null. */
 function mgmtLien(m,id){
-  if(mgmtCercle(m).includes(id)) return 'cercle';
   if(mgmtSuivis(m).includes(id)) return 'suivi';
   return null;
 }
 
 /** Ajoute ou retire un combattant du cercle (5 au plus). Un combattant du
  *  cercle n'est plus un simple suivi. @returns {boolean} vrai si l'état a changé. */
-function mgmtCercleToggle(m,id){
-  if(!m||!mgmtValidId(id)) return false;
-  if(!Array.isArray(m.cercle)) m.cercle=[];
-  if(!Array.isArray(m.suivis)) m.suivis=[];
-  const i=m.cercle.indexOf(id);
-  if(i>=0){ m.cercle.splice(i,1); return true; }
-  if(m.cercle.length>=MGMT_CERCLE_MAX) return false;
-  m.cercle.push(id);
-  m.suivis=m.suivis.filter(x=>x!==id);
-  return true;
-}
+function mgmtCercleToggle(m,id){ return mgmtSuiviToggle(m,id); }
 
 /** Ajoute ou retire un suivi (15 au plus). Refusé pour un membre du cercle. */
 function mgmtSuiviToggle(m,id){
   if(!m||!mgmtValidId(id)) return false;
   if(!Array.isArray(m.cercle)) m.cercle=[];
   if(!Array.isArray(m.suivis)) m.suivis=[];
-  if(m.cercle.includes(id)) return false;
   const i=m.suivis.indexOf(id);
-  if(i>=0){ m.suivis.splice(i,1); return true; }
+  if(i>=0){ m.suivis.splice(i,1); m.cercle=m.cercle.filter(x=>x!==id); return true; }
   if(m.suivis.length>=MGMT_SUIVIS_MAX) return false;
-  m.suivis.push(id);
+  m.cercle=m.cercle.filter(x=>x!==id);
+  m.suivis.unshift(id);
   return true;
 }
+function mgmtSuivre(m,id){ return mgmtSuiviToggle(m,id); }
 
 /* ---- La connaissance progressive (§3.3) ------------------------------ */
 
@@ -201,14 +191,14 @@ function mgmtConteurCandidats(m,cycle){
     vus.add(f.id);
     const lien=mgmtLien(m,f.id);
     out.push({id:f.id,name:f.name,div:f.div,moment,lien,
-      rang:(lien==='cercle'?2:(lien==='suivi'?1:0))*1000+moment.poids});
+      rang:(lien==='suivi'?1:0)*1000+moment.poids});
   };
   for(const x of m.facts||[]){
     if(!x||x.k!=='moment_vie'||x.c!==cycle) continue;
     const f=mgmtFighterById(m,x.a), moment=mgmtVieMomentById(x.m);
     if(f&&moment&&!mgmtIsRetired(f)) poser(f,moment);
   }
-  for(const id of [...mgmtCercle(m),...mgmtSuivis(m)]){
+  for(const id of mgmtSuivis(m)){
     if(m.roster.some(o=>o.id===id)) continue;
     const ligne=(m.exterieur||[]).find(e=>e.id===id);
     if(!ligne||mgmtExteriorRetired(ligne,cycle)) continue;

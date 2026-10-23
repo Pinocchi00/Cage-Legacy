@@ -62,16 +62,18 @@ test('H8 — filtres : catégorie, rôle, disponibles, cercle, suivis, quelque c
     const dispo=mgmtVestiaireLignes(m); const okDispo=dispo.every(x=>mgmtAvailable(m,x.f))&&!dispo.some(x=>x.f.id===m.roster[5].id);
     CL.mgmtVestiaireFiltre('dispo','');
     mgmtCercleToggle(m,m.roster[1].id); mgmtSuiviToggle(m,m.roster[2].id);
-    CL.mgmtVestiaireFiltre('lien','cercle'); const cer=mgmtVestiaireLignes(m).map(x=>x.f.id);
+    CL.mgmtVestiaireFiltre('lien','suivi'); const cer=mgmtVestiaireLignes(m).map(x=>x.f.id);
     CL.mgmtVestiaireFiltre('lien','suivi'); const sui=mgmtVestiaireLignes(m).map(x=>x.f.id);
     CL.mgmtVestiaireFiltre('lien','suivi'); const tout=mgmtVestiaireLignes(m).length;
+    CL.mgmtVestiaireFiltre('lien','suivi'); const reset=mgmtVestiaireLignes(m).length;
     m.facts.push({c:m.cycle,k:'moment_vie',a:m.roster[7].id,m:'mariage'});
     CL.mgmtVestiaireFiltre('signe',''); const sig=mgmtVestiaireLignes(m).map(x=>x.f.id);
     CL.mgmtVestiaireFiltre('signe','');
-    return {okDiv,okRole,okDispo,cer,sui,tout,roster:m.roster.length,sig:sig.includes(m.roster[7].id),premier:cer[0]===m.roster[1].id,id1:m.roster[1].id,id2:m.roster[2].id};
+    return {okDiv,okRole,okDispo,cer,sui,tout,reset,roster:m.roster.length,sig:sig.includes(m.roster[7].id),premier:cer[0]===m.roster[1].id,id1:m.roster[1].id,id2:m.roster[2].id};
   `);
   assert.ok(r.okDiv); assert.ok(r.okRole); assert.ok(r.okDispo);
-  assert.deepEqual(r.cer,[r.id1]); assert.deepEqual(r.sui,[r.id2]); assert.equal(r.tout,r.roster,'un second clic défait le filtre');
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.deepEqual(r.cer,[r.id2,r.id1]); assert.equal(r.sui.length,r.roster,'le second clic défait le filtre unique'); assert.equal(r.tout,2,'un clic suivant le réactive'); assert.equal(r.reset,r.roster,'un clic suivant le défait');
   assert.ok(r.sig,'un moment relayé cette semaine est un signe');
 });
 
@@ -87,6 +89,7 @@ test('H8 — le tri : ton cercle, tes suivis, puis ceux qui ont quelque chose à
     CL.mgmtVestiairePage(999); const haut=SCREENS.mgmt_vestiaire()&&MGMT_VESTIAIRE.page;
     return {ordre:[m.roster[9].id,m.roster[8].id,m.roster[7].id],t,bas,p2,haut,pages:Math.ceil(mgmtVestiaireLignes(m).length/MGMT_VESTIAIRE_PAGE)};
   `);
+  /* brief du 22/10, P3 T1 : une seule liste */
   assert.deepEqual(r.t,r.ordre); assert.equal(r.bas,0); assert.equal(r.p2,2); assert.equal(r.haut,r.pages-1,'la page reste dans les bornes');
 });
 
@@ -98,9 +101,10 @@ test('H8 — un carré signale une demande en attente ; l’aside liste le cercl
     mgmtCercleToggle(m,f.id);
     G.screen='mgmt_vestiaire'; const html=SCREENS.mgmt_vestiaire();
     return {signe:mgmtVestiaireSigne(m,f),carre:html.includes('aria-label="Quelque chose à dire"'),brut:html.includes('<img src=x>'),echappe:html.includes('&lt;img src=x&gt;'),
-      cercle:html.includes('Ton cercle · 1/5'),vide:html.includes('Tes suivis · 0/15')};
+      cercle:html.includes('Tes suivis'),vide:html.includes('Ton cercle')};
   `);
-  assert.ok(r.signe&&r.carre); assert.equal(r.brut,false); assert.ok(r.echappe); assert.ok(r.cercle&&r.vide);
+  /* brief du 22/10, P3 T1 : une seule liste */
+  assert.ok(r.signe&&r.carre); assert.equal(r.brut,false); assert.ok(r.echappe); assert.ok(r.cercle&&!r.vide);
 });
 
 test('H8 — la fiche étendue : son histoire (milieu, ancien métier) et son corps (disponibilité, blessures gardées)', () => {

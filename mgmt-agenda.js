@@ -220,10 +220,9 @@ function mgmtAgendaJouer(m){
   while(c.faites.length>24) c.faites.shift();
   return ev;
 }
-/** Réservé : le cercle et les suivis du joueur. Leïla ne place jamais un combattant réservé (agenda actif). Pur. */
+/** Compatibilité historique : le suivi ne réserve plus le combattant. Pur. */
 function mgmtAgendaReserve(m,f){
-  if(!mgmtAgendaActif(m)||!f) return false;
-  return (Array.isArray(m.cercle)&&m.cercle.includes(f.id))||(Array.isArray(m.suivis)&&m.suivis.includes(f.id));
+  return false;
 }
 
 /** La préparation à la demande : le joueur a désigné un combattant, l'assistante lui propose l'adversaire le plus proche au

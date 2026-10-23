@@ -59,7 +59,7 @@ test('Monde lot 3 T5 — clavier, noms et fiche complète',()=>{
   touche(w,'Enter');assert.equal(w.eval('mgmtPresentationCadre().ids[0]'),choisi);assert.equal(w.eval('mgmtPresentationCadre().h'),r.h);
   touche(w,'Escape');assert.equal(w.eval('mgmtPresentationCadre().ids[0]'),r.id);
   const contenu=w.eval('JSON.stringify(mgmtPresentationCadre())');
-  touche(w,'F');assert.equal(w.eval('G.screen'),'mgmt_fiche');assert.equal(w.eval(`document.querySelectorAll('.mf-fiche-onglets .mf-onglet:not(.mf-fiche-retour)').length`),5);
+  touche(w,'F');assert.equal(w.eval('G.screen'),'mgmt_fiche');assert.equal(w.eval(`document.querySelectorAll('.mf-fiche-onglets .mf-onglet:not(.mf-fiche-retour)').length`),6); /* brief du 22/10, P1 T4 : l'onglet Statistiques */
   touche(w,'Escape');assert.equal(w.eval('JSON.stringify(mgmtPresentationCadre())'),contenu);
   w.eval('mgmtPresentationCadre().index=0');assert.equal(w.eval('mgmtPresentationCadre().index'),0);
   touche(w,'ArrowLeft');assert.equal(w.eval('mgmtPresentationCadre().index'),0);
