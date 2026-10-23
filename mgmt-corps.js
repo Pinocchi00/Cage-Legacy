@@ -732,6 +732,8 @@ function mgmtRunEvent(m){
      est encore entière mais on lit m.hist.slice(premier), jamais m.card
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
+  /* Poids de la sauvegarde (1,9 Mo, sacré ; `main` y est collé à 21 octets) : les six ans de passé de chaque organisation n'écrivent pas de mémoire. */
+  if((m.memoire!==undefined||typeof mgmtMemoireSoiree==='function')&&!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)) mgmtMemoireSoiree(m);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   /* ==== [ANCRE: P11_T2_DEFIS_FIN_SOIREE] — Monde lot 46 T1 ==== */
   /* Une seule évaluation par soirée jouée, à la clôture : lit m.hist,
