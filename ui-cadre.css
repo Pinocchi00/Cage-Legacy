@@ -1325,7 +1325,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-pm{font-weight:600;font-size:24px;line-height:1;white-space:nowrap}
 .mf-fi-traits .mf-p3{padding:15px;gap:12px}
 .mf-fi-traits .mf-fi-p{gap:12px;overflow:hidden}
-.mf-fi-traits .mf-fi-p{gap:0;overflow:hidden}
+.mf-fi-traits .mf-fi-p{gap:0;overflow:hidden;padding:0}.mf-fi-traits .mf-fi-ph{margin-bottom:20px}.mf-fi-traits .mf-fi-trait{padding-left:16px}.mf-fi-trait-entete{flex-wrap:wrap;row-gap:4px}.mf-fi-trait-fait{white-space:nowrap}
 .mf-fi-trait{height:95px;flex:none;display:flex;align-items:flex-start;padding-top:8px;box-sizing:border-box;gap:16px}
 .mf-fi-trait-icone{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;font:800 44px/1 var(--mf-titre);color:#E9E6E1}
 .mf-fi-trait-contenu{flex:1;min-width:0}
