@@ -1,6 +1,6 @@
 "use strict";
 /* ==== [ANCRE: P4_T3A_ESPOIRS] — Monde lot 38 T1 ==== */
-const MGMT_ESPOIRS_LIBELLES={angles:{reponse:'CELUI QUI RÉPOND AU MANQUE',monte:'CELUI QUI MONTE',jeune:'LA PLUS JEUNE',oublie:'CELUI QU’ON NE REGARDE PAS',revenant:'LE REVENANT',libre:'À RECRUTER'},phrases:{debut:'Combats documentés : {n}.',victoire:'Série de {n} victoires.'}}; /* Proposition de Claude, relu:false. */
+const MGMT_ESPOIRS_LIBELLES={angles:{reponse:'CELUI QUI RÉPOND AU MANQUE',monte:'CELUI QUI MONTE',jeune:'LA PLUS JEUNE',oublie:'CELUI QU’ON NE REGARDE PAS',revenant:'LE REVENANT',libre:'À RECRUTER'},phrases:{debut:'Combats documentés : {n}.',victoire:'{n} victoire{plural} de suite.',defaite:'Sa dernière défaite remonte à {n} combat{plural}.',absence:'En attente de son prochain combat.'}}; /* Proposition de Claude, relu:false. */
 function mgmtEspoirsCandidats(m){
   const all=[...(m.roster||[]),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>o.roster||[]):[]),...(m.exterieur||[]).map(e=>mgmtExteriorCombattant(m,e.id)).filter(Boolean)];
   const champions=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]), seen=new Set(); return all.filter(f=>f&&typeof f.id==='string'&&!seen.has(f.id)&&seen.add(f.id)&&!mgmtIsRetired(f)&&!champions.has(f.id)).sort((a,b)=>a.id.localeCompare(b.id));
@@ -24,8 +24,17 @@ function mgmtEspoirsFabrique(m,ids){
     })[0];
    if(!f||used.has(f.id))continue; used.add(f.id);
    const s=mgmtStatsCarriere(m,f.id), trait=mgmtTraitsDe(m,f.id), doc=mgmtStatsDocumentes(m,f.id),
-     record=doc&&doc.bilan?`${doc.bilan.W}-${doc.bilan.L}${doc.bilan.D?'-'+doc.bilan.D:''}`:`${f.W||0}-${f.L||0}`;
-   out.push({id:f.id,angle:angles[i],etiquette:MGMT_ESPOIRS_LIBELLES.angles[angles[i]],origine:f.org===mgmtOrgNom(m)?'effectif':(f.org?'monde':'libre'),raison:MGMT_ESPOIRS_LIBELLES.phrases.debut.replace('{n}',doc?doc.docs:0),fiche:{bilan:record,description:`${f.div||''} · ${f.age||'—'} ans · ${f.city||f.ville||''}`,chiffres:[{libelle:'Coups par minute',valeur:s&&Number.isFinite(s.sigParMin)?s.sigParMin.toFixed(1):'—'},{libelle:'Précision',valeur:s&&Number.isFinite(s.precision)?Math.round(s.precision*100)+' %':'—'}],trait:Array.isArray(trait)&&trait.length?String(trait[0]).toLocaleUpperCase('fr'):'',phrase:MGMT_ESPOIRS_LIBELLES.phrases.victoire.replace('{n}',s?s.serieMax:0)}});
+      exterior=mgmtExteriorCombattant(m,f.id), bilan=doc&&doc.bilan?doc.bilan:(exterior||f),
+      record=`${Number(bilan.W)||0}-${Number(bilan.L)||0}${Number(bilan.D)?'-'+Number(bilan.D):''}`,
+      chiffres=[];
+    if(s&&Number.isFinite(s.sigParMin))chiffres.push({libelle:'Coups / min',valeur:s.sigParMin.toFixed(2).replace('.',',')});
+    if(s&&Number.isFinite(s.precision))chiffres.push({libelle:'Précision',valeur:Math.round(s.precision*100)+' %'});
+    if(s&&Number.isFinite(s.finitions))chiffres.push({libelle:'Finitions',valeur:`${s.finitions} SUR ${s.finitions}`});
+    while(chiffres.length<2)chiffres.push({libelle:'Combats',valeur:String(doc?doc.docs:0)});
+    const serie=s&&Number(s.serieMax)||0, traitTexte=Array.isArray(trait)&&trait.length?String(trait[0]).toLocaleUpperCase('fr'):'';
+    const phrase=serie>0?MGMT_ESPOIRS_LIBELLES.phrases.victoire.replace('{n}',serie).replace('{plural}',serie===1?'':'s'):MGMT_ESPOIRS_LIBELLES.phrases.absence;
+    const ville=typeof mgmtIdentiteVille==='function'?mgmtIdentiteVille(f):f.city||f.ville||'';
+    out.push({id:f.id,angle:angles[i],etiquette:MGMT_ESPOIRS_LIBELLES.angles[angles[i]],origine:f.org===mgmtOrgNom(m)?'effectif':(f.org?'monde':'libre'),raison:MGMT_ESPOIRS_LIBELLES.phrases.debut.replace('{n}',doc?doc.docs:0),fiche:{bilan:record,description:`${mgmtDivisionLabel(f.div)} · ${f.age||'—'} ans${ville?' · '+ville:''}`,chiffres:chiffres.slice(0,2),trait:traitTexte==='DEBUTANT'?'':traitTexte,traitNeutre:traitTexte==='DEBUTANT',phrase}});
  }
  return out;
 }
