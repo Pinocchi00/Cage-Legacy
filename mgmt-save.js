@@ -282,9 +282,11 @@ function mgmtValidFightTrace(x){
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
+  /* Monde lot 50 T1 : `position` (rang du combat dans la carte principale, 0 = principal ; null en préliminaires) est facultative. */
+  if(x.position!==undefined&&x.position!==null&&!(Number.isSafeInteger(x.position)&&x.position>=0&&x.position<=20)) return false;
   /* Monde lot 44 T1 : pr marque le prix reçu (combat de la soirée, performance). */
   if(x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') return false;
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr').sort().join(',');
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr'&&k!=='position').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -344,11 +346,17 @@ function mgmtDuoValide(d,raw){
  *  Lot 3b T1 : l'argent s'ajoute — trésorerie entière (le découvert est
  *  permis, c'est T sous zéro), les deux dernières recettes, l'audience
  *  d'historique et le nombre de soirées jouées. */
+/* ==== [ANCRE: P7_T4_DISCOURS_VALIDATION] — Monde lot 50 T1 ==== */
+function mgmtDiscoursValide(x){
+  return !!x&&typeof x==='object'&&!Array.isArray(x)&&Number.isSafeInteger(x.c)&&x.c>=0&&Array.isArray(x.d)&&x.d.length<=4&&x.d.every(d=>d&&typeof d==='object'&&typeof d.a==='string'&&d.a.length<=80&&typeof d.adv==='string'&&d.adv.length<=80&&typeof d.motif==='string'&&d.motif.length<=40&&typeof d.ton==='string'&&d.ton.length<=40&&Array.isArray(d.lignes)&&d.lignes.length<=5&&d.lignes.every(l=>typeof l==='string'&&l.length<=200)&&(d.interpelle===null||d.interpelle===undefined||typeof d.interpelle==='string'&&d.interpelle.length<=80));
+}
+
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(raw.vues!==undefined&&(!raw.vues||typeof raw.vues!=='object'||Array.isArray(raw.vues)||Object.keys(raw.vues).length>12||Object.entries(raw.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) return false;
   if(raw.surnomsGagnes!==undefined&&typeof raw.surnomsGagnes!=='boolean') return false;
+  if(raw.discours!==undefined&&!mgmtDiscoursValide(raw.discours)) return false;
   if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
@@ -705,6 +713,7 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(Object.prototype.hasOwnProperty.call(m,'discours')&&!mgmtDiscoursValide(m.discours)) delete m.discours;
   if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
