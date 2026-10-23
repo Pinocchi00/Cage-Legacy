@@ -39,3 +39,8 @@ Mesure fixe du 22/10/2026 : 1 500 combats par trait, même combattant H-light mo
 32 traits gardés, dont 8 avec un effet mesuré ; les 24 autres sont de pure identité (effet nul, non mesurable à ±5 points d'attribut). Les 8 effets mesurés sont ceux listés ci-dessus ; les 24 autres restent dans `MGMT_TRAITS` avec `effet:null`.
 
 Le cardio (`diesel`, `s-eteint`) ne change pas le rapport des coups significatifs du round 3 au round 1 dans la mesure (0,74 → 0,74 pour diesel ; 0,77 → 0,77 pour s'éteint). Le moteur lit bien `c.attrs.cardio` : `eff()` (`engine.js`) le replie en `0,82·cardio + 0,18·recovery` avant `simulateFight`. L'effet de ±7 points d'attribut (≈ ±5,7 points d'endurance) est donc appliqué, mais trop faible pour déplacer le rapport sur trois rounds. Aucune modification du moteur.
+
+## Garde-fou — mesure d'avant (origin/main, 14e1673, 23/10/2026)
+
+`node tools/mesure-finitions-jeu.js 40 20261008,777,4242` : 1 080 combats ; KO/TKO 34,7 % ; soumissions 16,2 % ; arrêts médicaux 5,1 % ; décisions 43,7 % ; nuls 0,3 % ; finitions en tout 56 % ; combats en 5 rounds 25,7 %.
+`mgmtPasseGenerer('split',{soirees:62})` (graine 20261008) : 52 911 ms.
