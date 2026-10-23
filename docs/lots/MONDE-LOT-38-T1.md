@@ -28,3 +28,13 @@ Sur `mgmtPasseGenerer('split',{soirees:6})` (graine 20261008) et des parties fab
 
 ## Fin
 Un commit après chaque point (A : fonction et libellés ; B : propositions ; B : garder/rendre et sauvegarde ; B : nouvelles ; tests ; versions) ; `?v=` à la main ; `node tools/verif-versions.js origin/main` ; `node_modules/.bin/eslint .` ; commit final `Monde lot 38 T1 : ce qui manque et les trois espoirs, le calcul` (le numéro T1 est obligatoire). Compte rendu dans la fiche (fichiers et rôle, tests, mesures de temps, textes écrits à relire, écarts, questions pour Anthony).
+
+## Compte rendu
+
+- `mgmt-manque.js` : ajout du calcul dérivé, du cache par partie et des libellés/phrases; valeurs comparatives « autres organisations » restent provisoirement `—`, et la catégorie domicile est encore le message de catalogue indisponible.
+- `mgmt-espoirs.js` : candidats déterministes, fixation et gestion de la liste gardée, source d’actualités. Les six angles ne couvrent pas encore toutes les règles de sélection demandées (progression récente, provenance libre/pays, ajustement des catégories, motifs de faits spécifiques).
+- `mgmt-save.js` : validation et réparation facultative des deux clés, sans changement de version. `index.html` : scripts/versions. `mgmt-actualites.js` : étiquette et événement ESPOIR. `package.json` : commandes dédiées et hooks de test. `tests/mgmtLot38T1.test.js` : deux tests de base (« faits mesurés par profil et propos déterministes », « proposition fixée, suivi et plafond de trois »).
+- Vérifications : tests du lot (2/2, environ 4,4 s), `mgmtActualites.test.js` (7/7, environ 6,4 s), ESLint complet et audit des versions passés. `mgmtReleveReduit.test.js` a dépassé le délai de 110 s de l’outil; aucun résultat concluant. La règle de représentation dans `test`/`test:watch` n’est satisfaite que par des hooks/commandes dédiées, non par l’ajout aux longues listes existantes.
+- Textes écrits dans `MGMT_MANQUE_LIBELLES` et `MGMT_ESPOIRS_LIBELLES`, à relire (`relu:false`).
+- Écarts restant : les tests exhaustifs de la fiche (huit profils, calcul indépendant, anciennes sauvegardes, source d’actualité espoir et HTML hostile) ne sont pas encore écrits; lignes comparatives, trois statistiques carrière représentatives, traits/phrases factuelles détaillés et pays du candidat libre à compléter.
+- Questions pour Anthony : aucune question bloquante identifiée; reprendre les écarts listés avant de déclarer la tranche complète.
