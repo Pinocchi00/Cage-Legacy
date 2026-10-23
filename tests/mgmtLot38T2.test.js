@@ -45,6 +45,8 @@ test('Monde lot 38 T2 — étape 1 reprend la géométrie mesurée de la planche
   const w=newGameWindow();const r=result(w,`CL.mgmtEnter(1);MGMT_ESP_ARRIVEE.etape=1;return SCREENS.mgmt_espoirs_arrivee();`);
   assert.match(r,/\.ma-title\{font:800 72px\/\.85/);
   assert.match(r,/\.ma-line\{padding:14px 0/);
-  assert.match(r,/\.ma-leila\{position:absolute;left:-810px;top:100px/);
-  assert.match(r,/\.ma-leila:before\{content:"LEÏLA"/);
+  /* Décision du 23/10/2026 (vérification dans le jeu réel) : la ligne de Leïla en position absolue à left:-810px disparaissait derrière l'autre panneau ;
+     elle est maintenant dans le panneau « Ce qui manque », aux valeurs de la planche (étiquette 600/22 px, phrase italique 26 px) — voir mgmtLot38T3Leila.test.js. */
+  assert.match(r,/\.ma-leila\{display:flex;flex-direction:column;gap:10px/);
+  assert.match(r,/\.ma-leila-nom\{font:600 22px\/1/);
 });
