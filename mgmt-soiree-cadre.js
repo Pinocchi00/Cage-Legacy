@@ -309,6 +309,8 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index<G.mgmt.lastEvent.fights.length) return;
     const m=G.mgmt, touched=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     MGMT_SOIREE_UI.commence=null; MGMT_SOIREE_UI.focus=null;
+    /* ==== [ANCRE: P7_T2_EFFACER_VUES] — Monde lot 49 T1 ==== */
+    delete m.vues;
     /* Brief démo, lot 6 T2 : le lendemain passe après chaque soirée, blessés ou non. */
     CL.go('mgmt_lendemain');
   },
