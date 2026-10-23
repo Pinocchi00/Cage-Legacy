@@ -51,7 +51,8 @@
     "test:lot42t1": "node --test tests/mgmtLot42T1.test.js",
     "test:watch:lot42t1": "node --test --watch tests/mgmtLot42T1.test.js",
     "test:lot50t1": "node --test tests/mgmtLot50T1.test.js",
-    "test:watch:lot50t1": "node --test --watch tests/mgmtLot50T1.test.js"
+    "test:watch:lot50t1": "node --test --watch tests/mgmtLot50T1.test.js",
+    "test:lot50t1:complet": "node --test tests/mgmtLot50T1.test.js tests/mgmtRivalites.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",
