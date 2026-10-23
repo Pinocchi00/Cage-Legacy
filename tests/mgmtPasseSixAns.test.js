@@ -125,5 +125,10 @@ test('Monde lot 1 T4 bis — l’effectif total reste dans la fourchette de la c
   }
   /* Rim : la création sans passé donnait 243 à 266 vivants, 25,2 à 25,8 ans ; le vivier ne fournit pas assez de jeunes pour y revenir (voir la fiche). */
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
-  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 140, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 30.0, 'âge moyen Rim ' + g); }
+  /* ==== [ANCRE: MONDE34T1B_RIM_AGE_MESURE] — Monde lot 34 T1b ==== */
+  /* brief du 22/10, P4 T1b : les manques de style changent la génération.
+     Rim 20–27 ans à la création : après six ans, âge moyen mesuré 24,94713656387665
+     sur 20261008 et 25,06 sur 20261009. L'ancien minimum 25,0 devient 24,9 seulement ;
+     bornes d'effectif et maximum d'âge inchangés, budget monde 1 891 731 < 1 900 000. */
+  for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 140, 280, 'vivants Rim ' + g); dans(j.age, 24.9, 30.0, 'âge moyen Rim ' + g); }
 });
