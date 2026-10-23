@@ -5,7 +5,7 @@ const MGMT_SE_TITRES=['Arrivée à {ville}','Journée des médias','Conférence 
 let MGMT_SE_JOUR=0;
 function mgmtSeEvenement(m,jour){return m.semaine.ev.find(e=>e.j===jour)||null;}
 function mgmtSeTitre(m,i){const e=mgmtSeEvenement(m,MGMT_SE_JOURS[i]);if(e){const f=MGMT_SEMAINE_FAMILLES.find(x=>x.id===e.f);return f?f.id.replace(/_/g,' ').toLocaleUpperCase('fr'):'';}return MGMT_SE_TITRES[i].replace('{ville}',esc(m.ville||'la ville'));}
-function mgmtSeCarte(m){return (m.card.main||[]).concat(m.card.prelims||[]).map(f=>{const a=mgmtFighterById(m,f.a),b=mgmtFighterById(m,f.b);return `<div class="se-combat">${esc(a&&a.name||'À déterminer')} <span>—</span> ${esc(b&&b.name||'À déterminer')}</div>`;}).join('');}
+function mgmtSeCarte(m){return (m.card.main||[]).concat(m.card.prelims||[]).map(f=>{const a=mgmtFighterById(m,f.a),b=mgmtFighterById(m,f.b),diminue=id=>m.semaine.ev.some(e=>e.f==='blessure_camp'&&e.p&&e.a===id),nom=(x,id)=>`${esc(x&&x.name||'À déterminer')}${diminue(id)?'<strong class="se-diminue"> — diminué : sa forme baisse pour ce combat</strong>':''}`;return `<div class="se-combat">${nom(a,f.a)} <span>—</span> ${nom(b,f.b)}</div>`;}).join('');}
 /* ==== [ANCRE: MONDE_51_T1_CHOIX_APPLIQUER] — Monde lot 51 T1 ==== */
 function mgmtSeChoisir(i,r){
   const m=G&&G.mgmt,e=m&&m.semaine&&m.semaine.ev[i];

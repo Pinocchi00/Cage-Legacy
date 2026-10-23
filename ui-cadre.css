@@ -1822,4 +1822,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .se-heading{margin:0 0 12px}
 .se-bref{padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16)}
 .se-combat{padding:10px 0;border-bottom:1px solid rgba(233,230,225,.16)}
+.se-diminue{font-size:22px;color:#F0B220}
 .se-card{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
