@@ -27,3 +27,32 @@ test('Monde lot 39 T1 — le choix des commentaires reste local à l’arène',(
   const r=w.eval(`(()=>{const s={mgmtIds:{A:'absent-a',B:'absent-b'},mgmtCycle:1};return {rng:typeof areneAlea==='function',seuil:4,fiche:typeof mgmtTraitsFiche==='function',html:typeof mgmtPresentationHtml==='function'}})()`);
   assert.equal(r.rng,true);assert.equal(r.fiche,true);assert.equal(r.html,true);
 });
+
+test('Monde lot 39 T1 — les traits visibles sont ceux qui alimentent réellement la présentation « L’histoire »',()=>{
+  const w=newGameWindow({runMain:true});w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+    const m=G.mgmt, combat=m.hist.find(t=>t&&t.a&&t.b&&t.s);
+    if(!combat)return {fixture:false};
+    const ids=[combat.a.id,combat.b.id];
+    const v={mode:'combat',ids,h:combat.c,page:0,nom:0,vue:'histoire'};
+    const c=mgmtPresentationLignes(m,v),p=c.panneaux.find(x=>x.titre==='LEUR HISTOIRE');
+    if(!p)return {fixture:true,traits:[],expected:[]};
+    const expected=ids.flatMap(id=>(mgmtTraitsFiche(m,id,combat.c).vus||[]).slice(0,4).map(t=>t.nom+' · '+t.fait));
+    return {fixture:true,traits:p.lignes.filter(x=>x.sous&&x.texte.includes(' · ')).map(x=>x.texte),expected};
+  })())`));
+  assert.equal(r.fixture,true);
+  for(const line of r.expected) assert.ok(r.traits.includes(line),line);
+});
+
+test('Monde lot 39 T1 — le rendu de l’histoire échappe les noms injectés',()=>{
+  const w=newGameWindow({runMain:true});w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
+  const r=w.eval(`(()=>{
+    const m=G.mgmt, f=m.roster[0]; if(!f)return {fixture:false};
+    const original=f.name, originalFirst=f.first, originalLast=f.last;
+    f.name='<img onerror="alert(1)">';f.first=f.name;f.last='';
+    const html=mgmtPresentationNomHtml(m,{mode:'combattant',ids:[f.id],noms:[f.id]},f.id);
+    f.name=original;f.first=originalFirst;f.last=originalLast;
+    return {fixture:true,escaped:html.includes('&lt;img onerror=')&&!html.includes('<img onerror=')};
+  })()`);
+  assert.equal(r.fixture,true);assert.equal(r.escaped,true);
+});

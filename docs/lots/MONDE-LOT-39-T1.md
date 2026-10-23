@@ -25,3 +25,12 @@ Règles communes : cherche toi-même dans le code ; **rien ne se stocke** (aucun
 - Vérifications après reprise : `timeout 110 node --test tests/mgmtLot39T1.test.js`, `node --test tests/mgmtTraitsFiche.test.js`, `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis.
 - Les lacunes de couverture énumérées ci-dessus demeurent ; listes `test`/`test:watch` non modifiées. Rendu 1920×1080 non mesuré. Textes à relire : `mgmt-commentaire-traits-data.js` (`relu:false`).
 - Aucun changement de sauvegarde. Aucune question supplémentaire ; questions en suspens conservées ci-dessus.
+
+### Reprise 2
+
+- Fichiers modifiés : `tests/mgmtLot39T1.test.js` — deux assertions comportementales supplémentaires sur la présentation des traits visibles et l'échappement des noms ; `package.json` — inscription du test dans `test` et `test:watch` (aucun `pretest`/`pretest:watch`) ; cette fiche — présent compte rendu.
+- Tests ajoutés : « Monde lot 39 T1 — les traits visibles sont ceux qui alimentent réellement la présentation « L’histoire » » ; « Monde lot 39 T1 — le rendu de l’histoire échappe les noms injectés ».
+- Vérifications réussies : test de tranche (6/6), `tests/mgmtCadre.test.js` (12/12), `tests/mgmtPresentationCombat.test.js` (7/7), `tests/mgmtTraitsFiche.test.js` (3/3), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .`.
+- Écart restant : les tests de comportement demandés sur le branchement/quota des commentaires, révélation du trait caché, rejeu strictement identique et comparaison de performance n'ont pas été ajoutés dans cette reprise. La présentation est couverte sur une partie générée, pas sur la fixture entièrement fabriquée demandée ; la vérification d'échappement cible la fonction d'étiquette de nom.
+- Pas de migration de sauvegarde. Rendu manuel à 1920×1080 non mesuré. Textes `relu:false` à relire dans `mgmt-commentaire-traits-data.js`.
+- Questions pour Anthony : aucune nouvelle question ; restent celles consignées plus haut.
