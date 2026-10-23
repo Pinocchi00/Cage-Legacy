@@ -54,3 +54,25 @@ Fichiers et rôle ; tableau des mesures (par manque, trois graines) et réglages
 - `tools/mesure-manques.js` : CLI graines / `--json`, génération du passé et du monde vivant, huit indicateurs par organisation, comparaison à la moyenne des sept autres et rapport Markdown. Les taux de finition comptent les victoires effectivement simulées, pas le bilan antérieur dérivé.
 - Premier essai sur 20261008 : espoirs 0,417 / 0,508 = 0,821 (hors cible) ; potentiel 66 / 70,362 (−4,362) ; expérimentés 0 / 0,136 ; jeunes-partout 0,776 / 0,457 = 1,699 ; finisseurs 37,468 / 56,255 = 0,666, finitions passées 0,333 / 0,513 = 0,649 ; soumissions 36,922 / 55,799 = 0,662, passé 0,111 / 0,172 = 0,646. Pure Impact : indicateur structurellement nul, marqué NON MESURABLE.
 - Deuxième vérification rapide terminée : 1 344 succès, deux assertions en échec (`mgmtMondeVivant` loi du score, `mgmtReleveReduit` poids 1,9 Mo), un todo préexistant ; pas d'erreur de chargement/OOM. Audit versions vert. Ces deux échecs restent à diagnostiquer aux garde-fous.
+
+### Point 3 — réglage et rapport
+
+- Rapport détaillé versionné : `tools/reports/MANQUES-MESURES.md` (valeurs brutes, sept autres, rapports et verdicts). Les scripts de sondage et JSON de travail de ce dossier restent ignorés.
+- Réglages retenus : espoirs, tirage de 28 à 38 ans (premier essai 25–38 insuffisant au passé court : rapport 0,821) ; expérimentés, 20–30 ans avec exposant 1,5 favorisant les jeunes ; potentiel/pic de niveau plafonné à 66 ; finisseurs, attributs ×(0,45+0,08u) ; soumission ×(0,35+0,08u). Le premier essai commun ×(0,60+0,08u) passait les attributs mais pas toutes les méthodes historiques (finition 4242 : 0,837 ; soumission 777 : 0,940). Un réglage supplémentaire des attributs a suffi.
+
+| Manque / force, indicateur | 20261008 | 777 | 4242 |
+| --- | ---: | ---: | ---: |
+| espoirs, rapport jeunes | 0,487 | 0,623 | 0,504 |
+| expérimentés, rapport 32+ | 0 | 0 | 0 |
+| jeunes-partout, rapport jeunes | 1,790 | 1,745 | 2,072 |
+| potentiel-champion, écart niveau | −4,404 | −4,127 | −4,312 |
+| finisseurs, rapport attributs | 0,507 | 0,509 | 0,510 |
+| finisseurs, rapport finitions passées | 0,643 | 0,458 | 0,601 |
+| soumissions, rapport attribut | 0,401 | 0,399 | 0,398 |
+| soumissions, rapport victoires par soumission | 0,300 | 0,395 | 0,269 |
+| à domicile | non mesurable | non mesurable | non mesurable |
+
+- Tous les indicateurs mesurables passent sur les trois graines ; `a-domicile` est explicitement signalé, pas présenté comme une réussite.
+- Comparaison JSON contre les fonctions originales d'`origin/main`, dans des fenêtres neuves et avec des initialisations identiques : Split, Pure Impact et Undisputed Cage identiques intégralement sur chacune des trois graines. Seules les cinq autres sous-parties changent. Le premier sondage mélangeait une référence après 62 soirées avec un état neuf ; il a été corrigé, puis les trois comparaisons ont été entièrement refaites.
+- Ancien profil sans manque ni force, huit organisations, graine 20261008 : SHA-256 de la génération originale `515d22c6a1059c577168488fa1559420d0bc4365ac6fda4f800b4fcd91c56581`, identique avec le code neuf.
+- Nouveau test local achevé en arrière-plan après un essai interrompu à 110 s : 5/5 (164,4 s sous concurrence). L'audit versions est vert. Dernier check rapide : 981 succès, 38 échecs dont 36 fichiers interrompus et un export temporaire refusé ; le score `mgmtMondeVivant` reste un vrai échec à corriger. Pas de résultat global vert revendiqué.

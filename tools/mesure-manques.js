@@ -5,11 +5,11 @@ const path=require('node:path');
 const {newGameWindow}=require('../tests/helpers/loadGame');
 const MOY=values=>values.reduce((a,b)=>a+b,0)/values.length;
 
-function mesureManques(seed){
+function mesureManques(seed,opts){
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(${Number(seed)}); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6});`);
-    return JSON.parse(w.eval(`JSON.stringify(MGMT_ORGANISATIONS.map(o=>{
+    const organisations=JSON.parse(w.eval(`JSON.stringify(MGMT_ORGANISATIONS.map(o=>{
       const m=o.id==='split'?G.mgmt:G.mgmt.orgs[o.id];
       const roster=m.roster.filter(f=>!mgmtIsRetired(f));
       const n=roster.length,pays=mgmtOrgPaysDomicile(m);
@@ -26,6 +26,7 @@ function mesureManques(seed){
         soumissionsPasse:hist.filter(h=>h.family==='sub').length/hist.length,
         categories:allDivisions().map(d=>({id:d.id,n:roster.filter(f=>f.div===d.id).length,champion:(mgmtSplitTitle(m,d.id)||{}).id||null}))};
     }))`));
+    return opts&&opts.snapshot?{organisations,monde:w.eval('JSON.stringify(G.mgmt)')}:organisations;
   }finally{w.close();}
 }
 
