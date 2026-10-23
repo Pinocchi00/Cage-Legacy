@@ -50,12 +50,19 @@ test('5.3 — La fiche d’une combattante ne dit « il » ni « lui » nulle pa
   for(const o of ['apercu','style','combats','contrat','ondit']){
     win.eval(`CL.mgmtFiche(${JSON.stringify(f)}); CL.mgmtFicheOnglet('${o}')`);
     const t=win.eval(`document.getElementById('app').textContent`);
-    assert.ok(!/(?<!s[’'])\b(Il|il|lui)\b/.test(t),o+' : aucun pronom masculin pour une combattante (« s’il est confirmé » parle du combat)');
+    // « s’il est confirmé » (mgmt-fiche-planche.js) décrit le combat, pas la combattante : le retirer avant de contrôler les accords personnels.
+    assert.ok(!/(?<!s[’'])\b(Il|il|lui)\b/.test(t.replace(/s’il est confirmé/g,'')),o+' : aucun pronom masculin accordé à une combattante (hors « s’il est confirmé », qui parle du combat)');
     assert.ok(!/\{(Il|il|lui|delui)\}/.test(t),'aucun jeton d’accord oublié');
   }
   win.eval(`CL.mgmtFiche(${JSON.stringify(h)}); CL.mgmtFicheOnglet('ondit')`);
   assert.match(win.eval(`document.getElementById('app').textContent`),/Ce qu(’|')on dit de lui/);
   assert.equal(win.eval(`mgmtAccord(mgmtFighterById(G.mgmt,${JSON.stringify(f)}),'{Il} gagne, {il} le sait, {lui} aussi : ce qu’on dit {delui}')`),'Elle gagne, elle le sait, elle aussi : ce qu’on dit d’elle');
+});
+
+test('5.3 — Une défaite par soumission ancienne ne masculinise pas la combattante', () => {
+  const win=newGameWindow({runMain:true});
+  const phrase=win.eval(`MGMT_ANCIENS_TEXTES.subD.find(x=>x.t.includes('amenée ratée')).t`);
+  assert.equal(phrase,'Une amenée ratée, puis la personne est restée au sol.');
 });
 
 test('5.5 — Les deux verbes de la réplique de retour sont au futur', () => {
