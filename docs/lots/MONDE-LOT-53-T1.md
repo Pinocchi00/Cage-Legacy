@@ -33,4 +33,14 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Vérification package : les scripts spécialisés `test:lot53t1` et `test:watch:lot53t1` existent, mais `mgmtLot53T1.test.js` n'est pas inscrit dans les listes complètes `test` et `test:watch`; le test des empreintes de `mgmtPasse.test.js`, le cumul de durée, le contrôle exhaustif des classes et l'échappement de toutes les données du nouvel écran ne sont pas livrés.
 - État de livraison : incomplet. Le commit antérieur porte le message demandé, mais les critères de fin des cases 1, 2, 3 et 5 ne sont pas atteints ; ne pas déclarer `TOUT_EST_FINI`.
 
+### Reprise 7 — vérification ciblée complémentaire
+
+- Aucun comportement applicatif nouveau. Le test ciblé continue de couvrir le chemin réel d'une soirée, le réglage indépendant de vues et l'échappement d'un nom dans les annonces de primes.
+- Tests exécutés : `node --test tests/mgmtLot53T1.test.js` (3 réussis), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (réussi).
+- Tentative de mesure du cumul : avec 7 combats évalués à 45 s et les durées disponibles des deux combats complets, la graine testée donnait 407 s, hors des 15 minutes minimales. Le test provisoire a été retiré : la mesure n'utilisait pas la base de calcul de lecture réelle et ne constituait pas une preuve valide. Le critère 15–20 minutes reste non satisfait/non vérifié.
+- Toujours non livré : portage exact de `UniSoiree` et `UniSoireeFin`, frise/transitions de `UniTempsForts`, contrôle de fenêtres passables et carte résultat-seul, test de durée conforme, audit exhaustif des classes/tailles/échappements et test d'empreintes anciennes. Le test reste absent des longues listes `test` et `test:watch` de `package.json`.
+- Écart : les primes sont seulement ajoutées à la fin ancienne ; la somme d'argent et la scène finale de la maquette ne sont pas portées. La lecture par fenêtres reste celle déjà présente, sans frise ni fondu.
+- Question pour Anthony : quelle durée de lecture réelle imputer à un combat complet ? La durée de trace disponible ne permet pas d'atteindre la cible sur la graine mesurée ; aucune règle n'a été inventée.
+- Conclusion : tranche incomplète ; ne pas déclarer `TOUT_EST_FINI`.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
