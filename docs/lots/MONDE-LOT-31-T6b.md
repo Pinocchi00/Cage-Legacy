@@ -63,9 +63,12 @@ Tranche livrée sur l’écran réel du cadre. `MGMT_SU_CL.vue` vaut `liste` par
 - Le test de rendu mesure les fonctions de rendu à <300 ms sur la partie de six soirées ; la construction du DOM jsdom du test est beaucoup plus lente et n’est pas assimilée au temps de rendu du jeu.
 - Aucun autre écart ni question ouverte pour Anthony.
 
-### Compte rendu — ajustements de fidélité T6b
-- Fichiers modifiés : `mgmt-su-leaders.js` (rangée d’onglets, formats, détenteur et mise en évidence des records, bouton Records) ; `mgmt-suivi-cadre.js` (raccourci R réservé à Meilleurs) ; `ui-cadre.css` (géométrie de la rangée, cartes et panneaux, typographie et couleurs des records) ; `index.html` (versions manuelles CSS/JS) ; `tests/mgmtLeadersEcran.test.js` (sélecteurs d’onglets et format de précision) ; cette fiche (tableau de fidélité).
-- Tests ciblés demandés : `tests/mgmtLeadersEcran.test.js` — 8/8 ; `tests/mgmtCadre.test.js` — 12/12.
+### Compte rendu — ajustements de fidélité T6b (mesures finales)
+- Fichiers modifiés : `ui-cadre.css` (boutons de la rangée à 56 px, padding des cartes Meilleurs corrigé, rangs décalés de 20 px, lignes Records fixées au pas de 117 px) ; `index.html` (version CSS manuelle) ; cette fiche (compte rendu).
+- Tests ciblés demandés : `tests/mgmtLeadersEcran.test.js` — 8/8 ; `tests/mgmtCadre.test.js` — 12/12 ; exécutés séparément.
+- Contrôles : `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` vert.
 - Sauvegarde : aucune donnée persistée, aucune migration, `MGMT_SAVE_VERSION` inchangé.
-- Versions : `ui-cadre.css?v=monde31t6b9`, `mgmt-suivi-cadre.js?v=m5xxxxxxxx5`, `mgmt-su-leaders.js?v=7`.
-- Écarts : la fidélité géométrique a été alignée avec les mesures transmises. L’année d’un record reste omise lorsqu’aucune date fiable n’existe dans l’historique, comme indiqué plus haut.
+- Cache : `ui-cadre.css?v=monde31t6b10` ; aucun JavaScript modifié.
+- Mesures corrigées : rangée 56 px, texte 32 px centré verticalement ; cartes Meilleurs padding extérieur 0 et intérieur 22 px, titre à +22 px, valeurs à +58 px, nom à +144 px, lignes 2/3 à +260/+290 px ; lignes Records à 117 px de hauteur et de pas, cinq lignes à y=307/424/541/658/774 selon la planche. Le rendu des noms et années Records déjà présent utilise `soiree` et la date historique associée à `c` lorsque disponible ; sinon l’année est omise.
+- Écarts/questions : aucun nouveau. Les fichiers préexistants modifiés hors tranche (`.opencode/` et `opencode.json`) ont été laissés intacts et hors des commits.
+- Commits des points : `9bf95bf` (rangée/cartes) puis `da162af` (version cache CSS). Commit final ciblé de cette fiche à réaliser.
