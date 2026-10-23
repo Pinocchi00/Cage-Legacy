@@ -12,3 +12,11 @@ Branche : `p5-recruteur` (la branche courante de ce dossier ; commits ICI ; le s
 **[ ] 5. Fin.** `?v=` à la main (tout `.js` modifié ou ajouté), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 42 T1 : le recruteur` (le numéro T1 est obligatoire), compte rendu dans cette fiche (fichiers et rôle, tests, textes à relire, écarts, comment le temps avance).
 
 Règles communes : **additif** ; **aucun écran** ici (la tranche suivante porte l'écran « Envoyer le recruteur » et « Ses retours » aux valeurs des maquettes) ; ne touche pas au moteur de combat ; un test n'est **jamais** assoupli sans citer la décision. Quand TOUT est fait et commité, termine ta réponse par la ligne exacte `TOUT_EST_FINI`.
+
+## Compte rendu
+
+- Fichiers : `mgmt-recruteur-data.js` fournit les destinations et les textes `relu:false` ; `mgmt-recruteur.js` gère envoi, génération déterministe, retours et suivi ; `mgmt-save.js` valide/répare l'état facultatif sans augmenter la version ; `index.html` déclare les deux scripts ; `package.json` offre les scripts ciblés `test:lot42t1` et `test:watch:lot42t1`.
+- Temps : la date est `m.cal.jour`, la mission revient à `partiLe + sem * 7` et `mgmtRecruteurRetour` la traite lors de son premier appel à ou après l'échéance (première ouverture de l'Accueil si appelé par celui-ci).
+- Tests ajoutés : « P5 T1 — neuf destinations, coûts et chances de pépite », « P5 T1 — une mission, coût et retour à échéance », « P5 T1 — partie ancienne sans recruteur conservée ». Ciblés verts ; vérification des versions verte ; ESLint ciblé sans erreur (test ignoré par configuration ESLint).
+- Écart et question : le calcul attend encore les scénarios statistiques/distinctivité/pépites/bredouille, la validation exhaustive et l'échappement hostile ; l'intégration des tests dans les commandes générales n'est pas réalisée. La signature par `mgmtRecruter`/contrats reste à vérifier avec une vraie partie : les profils générés ne portent pas de trace de marché équivalente. Aucun écran n'est ajouté. Les textes sont à relire (`relu:false`).
+- Hors tranche laissés intacts : fichiers `.opencode/agents/*` déjà modifiés par le travail de reprise.

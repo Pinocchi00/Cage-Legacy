@@ -1,0 +1,22 @@
+"use strict";
+/* ==== [ANCRE: P5_T1_RECRUTEUR] — Monde lot 42 T1 ==== */
+const MGMT_RECRUTEUR={
+  nom:"Karim Ouali",
+  destinations:[
+    {id:"daghestan",nom:"Daghestan",ck:"DAG",styles:{lutteur:70,frappeur:5,grappler:20,complet:5},categories:["LW","WW","MW"],cout:16000,pepites:30,sem:3,bredouille:0.1,circuits:["Cercle de Makhatchkala","Ligue du Caucase","Défi de la Caspienne"],envoi:{texte:"Je vais regarder les lutteurs et les spécialistes du sambo dans les petites salles.",relu:false}},
+    {id:"kirghizistan",nom:"Kirghizistan",ck:"KG",styles:{lutteur:55,frappeur:10,grappler:25,complet:10},categories:["LW","WW","FW"],cout:18000,pepites:40,sem:3,bredouille:0.11,circuits:["Cage du Tian Shan","Circuit de Bichkek","Ligue de l'Ala-Too"],envoi:{texte:"Je vais faire le tour des salles et voir qui tient vraiment la distance.",relu:false}},
+    {id:"bresil",nom:"Brésil",ck:"BR",styles:{lutteur:10,frappeur:15,grappler:65,complet:10},categories:["FW","LW","WW"],cout:20000,pepites:35,sem:4,bredouille:0.12,circuits:["Cage du Paraná","Circuit du Nordeste","Ligue de l'Intérieur"],envoi:{texte:"Je cherche les spécialistes du sol qui n'ont pas encore quitté leur circuit.",relu:false}},
+    {id:"etats-unis",nom:"États-Unis",ck:"US",styles:{lutteur:65,frappeur:15,grappler:10,complet:10},categories:["LW","WW","MW"],cout:24000,pepites:50,sem:4,bredouille:0.12,circuits:["Cage des Appalaches","Circuit des Grands Lacs","Ligue du Sud"],envoi:{texte:"Je vais voir les lutteurs qui cherchent encore leur premier contrat important.",relu:false}},
+    {id:"pays-bas",nom:"Pays-Bas",ck:"NL",styles:{lutteur:10,frappeur:65,grappler:10,complet:15},categories:["FW","LW","WW"],cout:12000,pepites:25,sem:2,bredouille:0.09,circuits:["Cage du Brabant","Circuit du Nord","Ligue des Polders"],envoi:{texte:"Je vais regarder les frappeurs des petits circuits, pas seulement les grandes salles.",relu:false}},
+    {id:"thailande",nom:"Thaïlande",ck:"TH",styles:{lutteur:5,frappeur:75,grappler:10,complet:10},categories:["FW","BW","LW"],cout:14000,pepites:30,sem:3,bredouille:0.1,circuits:["Cage du Nord","Circuit de l'Isan","Ligue du Sud"],envoi:{texte:"Je cherche des frappeurs capables de s'adapter aux règles du MMA.",relu:false}},
+    {id:"pologne",nom:"Pologne",ck:"PL",styles:{lutteur:35,frappeur:30,grappler:20,complet:15},categories:["LW","WW","MW"],cout:10000,pepites:20,sem:2,bredouille:0.08,circuits:["Cage de Silésie","Circuit de Mazovie","Ligue de la Vistule"],envoi:{texte:"Je vais parcourir les cartes régionales et trouver un profil prêt à bouger.",relu:false}},
+    {id:"japon",nom:"Japon",ck:"JP",styles:{lutteur:20,frappeur:35,grappler:25,complet:20},categories:["FW","LW","WW"],cout:22000,pepites:60,sem:4,bredouille:0.14,circuits:["Cage du Kansai","Circuit de Tohoku","Ligue du Chūbu"],envoi:{texte:"Je vais chercher un combattant complet dans les circuits qui restent discrets.",relu:false}},
+    {id:"france",nom:"France",ck:"FR",styles:{lutteur:20,frappeur:30,grappler:30,complet:20},categories:["FW","LW","WW"],cout:6000,pepites:20,sem:2,bredouille:0.08,circuits:["Cage de l'Ouest","Circuit des Alpes","Ligue du Nord"],envoi:{texte:"Je connais les petites salles, je vais regarder les profils qui y progressent.",relu:false}}
+  ],
+  retour:{
+    style:{lutteur:["Il sait imposer le rythme au sol.","Sa lutte ressort dès les premières images.","Il sait faire travailler son adversaire contre la cage."],frappeur:["Il choisit bien ses moments pour attaquer.","Ses enchaînements sont nets sur les images.","Il garde son calme quand l'échange s'accélère."],grappler:["Il cherche les positions avant de forcer la finition.","Son travail au sol est déjà bien construit.","Il sait rester dangereux depuis son dos."],complet:["Il ne se perd pas quand le combat change de phase.","Son jeu reste cohérent debout comme au sol.","Il a déjà de bons repères dans toutes les phases."]},
+    bredouille:["J'ai vu du monde, mais rien que je puisse te recommander.","Les profils suivis n'étaient pas prêts à bouger.","Cette fois, je préfère rentrer sans te vendre du vent."],
+    pepite:["Celui-là mérite qu'on regarde toutes ses images.","Son bilan parle pour lui, mais je veux le voir face à un autre niveau.","Je n'en vois pas souvent un qui avance comme ça dans ce circuit."],
+    relu:false
+  }
+};

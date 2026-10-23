@@ -41,7 +41,9 @@
     "test:releve2": "node --test tests/mgmtReleveReduit.test.js",
     "test:stats": "node --test tests/mgmtStats.test.js",
     "test:fichestats": "node --test tests/mgmtFicheStats.test.js",
-    "test:leaders": "node --test tests/mgmtLeaders.test.js"
+    "test:leaders": "node --test tests/mgmtLeaders.test.js",
+    "test:lot42t1": "node --test tests/mgmtLot42T1.test.js",
+    "test:watch:lot42t1": "node --test --watch tests/mgmtLot42T1.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",
