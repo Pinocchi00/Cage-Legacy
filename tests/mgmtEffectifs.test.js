@@ -29,12 +29,15 @@ test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, car
 test('H4 — chaque catégorie du vestiaire compte environ 30 combattants, et le monde environ 1 800', () => {
   const win=newGameWindow();
   const r=result(win,`
-    const par={};
-    for(let s=1;s<=20;s++){ setSeed(s); const m=mgmtDefault(); mgmtNewRoster(m); const c={}; for(const f of m.roster) c[f.div]=(c[f.div]||0)+1; for(const d of allDivisions()){ (par[d.id]=par[d.id]||[]).push(c[d.id]||0); } }
-    return {somme:Object.values(MGMT_WORLD_SIZE).reduce((a,b)=>a+b,0),min:Math.min(...Object.values(par).flat()),max:Math.max(...Object.values(par).flat())};
+    const par={},splitHeavy=[];
+    for(let s=1;s<=20;s++){ setSeed(s); const m=mgmtDefault('split'); mgmtNewRoster(m); const c={}; for(const f of m.roster) c[f.div]=(c[f.div]||0)+1; for(const d of allDivisions()){ (par[d.id]=par[d.id]||[]).push(c[d.id]||0); } splitHeavy.push(c['H-heavy']||0); }
+    const horsSplit=Object.entries(par).filter(([d])=>d!=='H-heavy').flatMap(([,n])=>n);
+    return {somme:Object.values(MGMT_WORLD_SIZE).reduce((a,b)=>a+b,0),min:Math.min(...horsSplit),max:Math.max(...horsSplit),hhMin:Math.min(...splitHeavy),hhMax:Math.max(...splitHeavy)};
   `);
   assert.ok(r.somme>=1750&&r.somme<=1850,'le monde compte environ 1 800 combattants : '+r.somme);
-  assert.ok(r.min>=28&&r.max<=32,`de 28 à 32 combattants par catégorie : ${r.min}–${r.max}`);
+  /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : Split a volontairement moins de poids lourds ; mesure sur 20 graines : H-heavy 13–14, les autres catégories restent dans 28–32. */
+  assert.ok(r.min>=28&&r.max<=32,`de 28 à 32 combattants hors H-heavy de Split : ${r.min}–${r.max}`);
+  assert.ok(r.hhMin>=10&&r.hhMax<=20,`H-heavy de Split de 10 à 20 : ${r.hhMin}–${r.hhMax}`);
 });
 
 test('H4 — le monde tient la table par catégorie, Split compris, et la retraite est remplacée', () => {
