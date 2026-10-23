@@ -205,14 +205,17 @@ function mgmtAccueilAttend(m,c,extra=''){
 }
 function mgmtAccueilPasse(m,c){
   /* ==== [ANCRE: ACCUEIL_PASSE_R4] — Monde lot 12 T2 ==== */
-  if(!c.passe.length) return '';
-  const rows=c.passe.slice(0,MGMT_ACCUEIL_MAX_PASSE).map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
+  const actu=typeof mgmtActualites==='function'?mgmtActualites(m):[];
+  const actus=[...actu.filter(x=>!x.lu).sort((a,b)=>b.c-a.c),...actu.filter(x=>x.lu).sort((a,b)=>b.c-a.c)];
+  if(!c.passe.length&&!actus.length) return '';
+  const actuRows=actus.slice(0,MGMT_ACCUEIL_MAX_PASSE),anciens=c.passe.slice(0,Math.max(0,MGMT_ACCUEIL_MAX_PASSE-actuRows.length));
+  const rows=anciens.map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
-    +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('');
+    +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('')+actuRows.map(x=>`<button type="button" class="mf-ac-ev" onclick="CL.mgmtAccueilActu('${escJsAttr(x.cle)}')"><i class="mf-oct mf-ac-oct"></i><div class="mf-ac-evt"><div class="mf-ac-evp"><b>${esc(x.nom)}</b> · ${esc(x.titre)}</div><div class="mf-ac-rs">${esc(x.texte)}</div></div><span class="mf-ac-menu">ACTUALITÉS</span></button>`).join('');
   const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
   /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
   const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-famille="passe" onclick="CL.go('mgmt_effectif')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`:'';
-  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
+  return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(mgmtActuNonLues(m)?`<span class="mf-ac-rs">${mgmtActuNonLues(m)} non lues</span>`:'')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
 }
 function mgmtAccueilAilleurs(m,c){
   /* ==== [ANCRE: ACCUEIL_AILLEURS_R4] — Monde lot 12 T2 ==== */
@@ -247,6 +250,7 @@ function scr_mgmt_accueil(){
 SCREENS.mgmt_accueil=scr_mgmt_accueil;
 
 Object.assign(CL,{
+  mgmtAccueilActu(cle){const row=mgmtActualites(G.mgmt).find(x=>x.cle===cle);if(!row)return;MGMT_ACTUALITES_UI.cle=cle;MGMT_ACTUALITES_UI.id=null;mgmtActuLire(G.mgmt,cle);saveMgmt();CL.go('mgmt_actualites');},
   /* ==== [ANCRE: MGMT_PRESENTATION_ACCUEIL_GESTE] — Monde lot 3 T5 ==== */
   mgmtAccueilNom(id){if(!CL.mgmtPresentationOuvrir('combattant',[id])) CL.mgmtFiche(id);},
   /** Le curseur des événements de la semaine. */

@@ -140,13 +140,31 @@ function mgmtSuiviToggle(m,id){
   if(!Array.isArray(m.cercle)) m.cercle=[];
   if(!Array.isArray(m.suivis)) m.suivis=[];
   const i=m.suivis.indexOf(id);
-  if(i>=0){ m.suivis.splice(i,1); m.cercle=m.cercle.filter(x=>x!==id); return true; }
+  if(i>=0){ m.suivis.splice(i,1); m.cercle=m.cercle.filter(x=>x!==id); if(Array.isArray(m.reserves))m.reserves=m.reserves.filter(x=>x!==id); return true; }
   if(m.suivis.length>=MGMT_SUIVIS_MAX) return false;
   m.cercle=m.cercle.filter(x=>x!==id);
   m.suivis.unshift(id);
   return true;
 }
 function mgmtSuivre(m,id){ return mgmtSuiviToggle(m,id); }
+
+/* ==== [ANCRE: MONDE_LOT33_T3_RESERVES] — Monde lot 33 T3 ==== */
+function mgmtReserves(m){return m&&Array.isArray(m.reserves)?m.reserves:[];}
+function mgmtEstReserve(m,id){return mgmtReserves(m).includes(id);}
+function mgmtReserver(m,id){
+  if(!m||!mgmtValidId(id))return false;
+  if(!Array.isArray(m.reserves))m.reserves=[];
+  if(mgmtEstReserve(m,id))return true;
+  if(m.reserves.length>=15)return false;
+  m.reserves.push(id);return true;
+}
+function mgmtReserveToggle(m,id){
+  if(!m||!mgmtValidId(id))return false;
+  if(!Array.isArray(m.reserves))m.reserves=[];
+  const i=m.reserves.indexOf(id);
+  if(i>=0){m.reserves.splice(i,1);return true;}
+  return mgmtReserver(m,id);
+}
 
 /* ---- La connaissance progressive (§3.3) ------------------------------ */
 

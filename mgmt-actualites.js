@@ -1,7 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P3_T2_ACTUALITES] — Monde lot 33 T2 ==== */
 const MGMT_ACTU_SOURCES=[];
-const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT'};
+const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR'};
 function mgmtActuSourceAjouter(src){
   if(!src||typeof src.type!=='string'||typeof src.lire!=='function'||MGMT_ACTU_SOURCES.some(x=>x.type===src.type)) return false;
   MGMT_ACTU_SOURCES.push(src); return true;
@@ -19,7 +19,7 @@ function mgmtActuVariante(cle,type,sous,banque){
   if(typeof sous==='string'&&sous.startsWith('prev:')&&a.length>1&&a[i]===sous.slice(5))i=(i+1)%a.length;
   return a[i];
 }
-function mgmtActuNom(m,id){const f=mgmtFighterById(m,id); if(f)return {n:f.name,p:f.first||f.name}; for(const t of m.hist||[]){for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id};}for(const o of Object.values(m.orgs||{})){for(const t of o.hist||[])for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id};}return {n:id,p:id};}
+function mgmtActuNom(m,id){const f=mgmtFighterById(m,id)||mgmtExteriorCombattant(m,id); if(f)return {n:f.name,p:f.first||f.name,org:f.org||null,div:f.div||null}; for(const t of m.hist||[]){for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id,org:null,div:x.div||null};}for(const o of Object.values(m.orgs||{})){for(const t of o.hist||[])for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id,org:null,div:x.div||null};}return null;}
 mgmtActuSourceAjouter({type:'resultat',lire(m,ids,depuis){const out=[];const historiques=[...(m.hist||[]).map((t,i)=>({t,i})),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>(o.hist||[]).map((t,i)=>({t,i}))):[])];const vus=new Set();for(const {t,i} of historiques){if(!t||!Number.isSafeInteger(t.c)||t.c<depuis||!t.a||!t.b)continue;for(const id of ids){const moi=t.a.id===id?t.a:t.b.id===id?t.b:null;if(moi){const uniq=t.c+'|'+i+'|'+id;if(vus.has(uniq))continue;vus.add(uniq);out.push({type:'resultat',c:t.c,id,adv:(moi===t.a?t.b:t.a).id,donnees:{combat:t,index:i}});}}}return out;} });
 mgmtActuSourceAjouter({type:'blessure',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='injury'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'blessure',c:x.c,id:x.a,donnees:x}));}});
 mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&['fin_contrat','libere','contrat'].includes(x.k)&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'contrat',c:x.c,id:x.a,donnees:x,sous:x.k}));}});
@@ -29,12 +29,14 @@ function mgmtActualites(m,opts){
   for(const s of MGMT_ACTU_SOURCES){try{brut.push(...s.lire(m,ids,depuis));}catch(e){}}
   const rang=new Map(), rows=[];
   const dernier=new Map();
-  for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, moi=mgmtActuNom(m,x.id),a=mgmtActuNom(m,x.adv||'').n,d=x.donnees||{};let banque,vars,detail='';
+   for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const moi=mgmtActuNom(m,x.id);if(!moi)continue;const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, adversaire=mgmtActuNom(m,x.adv||''),a=adversaire?adversaire.n:(x.adv||''),d=x.donnees||{};let banque,vars,detail='';
      if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}
-    else {if(d.k==='contrat')continue;banque=MGMT_ACTU_CONTRATS[d.k];if(!banque)continue;vars={n:moi.n,p:moi.p};detail=d.k==='libere'?'Il peut signer ailleurs.':'C’est le moment de lui parler.';}
+     else if(x.type==='espoir'){banque=[''];vars={};detail='';}
+     else {if(d.k==='contrat')continue;banque=MGMT_ACTU_CONTRATS[d.k];if(!banque)continue;vars={n:moi.n,p:moi.p};detail=d.k==='libere'?'Il peut signer ailleurs.':'C’est le moment de lui parler.';}
     const groupe=x.type+'|'+x.id,phraseBrute=mgmtActuVariante(cle,x.type,'prev:'+String(dernier.get(groupe)||''),banque),phrase=phraseBrute.replace(/\{(\w+)\}/g,(_,key)=>vars[key]===undefined?'':String(vars[key]));dernier.set(groupe,phraseBrute);
-    rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,titre:phrase,texte:detail,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
+     if(x.type==='espoir'){banque=null;}
+     rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
   }
   rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
 }
