@@ -659,7 +659,7 @@ function mgmtRepair(m){
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
   m.suivis=[...new Set([...cercleAncien,...suivisExistants])].filter(mgmtValidId);
   m.cercle=[];
-  m.reserves=Array.isArray(m.reserves)?[...new Set(m.reserves.filter(id=>mgmtValidId(id)&&id.length<=80))].slice(0,15):[];
+  if(m.reserves!==undefined) m.reserves=Array.isArray(m.reserves)?[...new Set(m.reserves.filter(id=>mgmtValidId(id)&&id.length<=80))].slice(0,15):[];   /* facultative : une ancienne partie n'en porte pas */
   if(Object.prototype.hasOwnProperty.call(m,'actuLu')&&(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80))) m.actuLu=[];
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
