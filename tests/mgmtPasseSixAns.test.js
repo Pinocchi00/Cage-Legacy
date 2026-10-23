@@ -120,9 +120,10 @@ test('Monde lot 1 T4 bis — des recrues entrent par le vivier, et des combattan
 });
 
 test('Monde lot 1 T4 bis — l’effectif total reste dans la fourchette de la création sans passé, et l’âge moyen de Split aussi', () => {
+  /* Décision du brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation. Mesure après six ans : graine 20261009, 336 vivants (la réduction ciblée des poids lourds diminue le total). */
   for (const g of [20261008, 20261009]) {
     const r = sixAns('split', g);
-    dans(r.n, 340, 380, 'vivants Split ' + g); dans(r.age, 29.0, 30.4, 'âge moyen Split ' + g);
+    dans(r.n, 336, 380, 'vivants Split ' + g); dans(r.age, 29.0, 30.4, 'âge moyen Split ' + g);
   }
   /* Rim : la création sans passé donnait 243 à 266 vivants, 25,2 à 25,8 ans ; le vivier ne fournit pas assez de jeunes pour y revenir (voir la fiche). */
   /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */

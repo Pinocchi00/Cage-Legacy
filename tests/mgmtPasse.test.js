@@ -45,10 +45,10 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
   /* Décision d'Anthony du 17/10/2026 (monde lot 14 T1, « enlever les choix de Leïla ») : les affaires de Leïla sont fermées dès la création ; empreintes recalculées. Vérifié par comparaison JSON avec main : seuls changent pile[i].status (open→closed), pile[i].decision (null→ignored) et open ; roster, faits, tirages et monde extérieur sont identiques. Les parties split ne changent pas (aucune affaire de Leïla ouverte à la création). */
   /* Monde lot 16 — décision d'Anthony du 17/10/2026 (palmarès réalistes : bilans plafonnés à 90 % avec une défaite au moins dès 12 combats, âge médian ≈ 29,7, classement qui compte la carrière, champion initial réaliste) : empreintes de création et de trois soirées recalculées le 18/10/2026 ; le nombre de tirages ne change pas (seuls les bilans, les âges et les titres changent). */
   const AVANT = {
-    'split|20261008': '018abcfddc4a0f92', 'split|20261009': 'bedfbfc1b22d160d',
+    'split|20261008': '818706c1ca24e1aa', 'split|20261009': '74731cb3b87415c4',
     'ultimate-rim|20261008': 'e04c79c0e03a267f', 'ultimate-rim|20261009': '503f21eb7047f705',
-    'fighting-pacific-championship|20261008': 'fc011cca7e3671fb', 'fighting-pacific-championship|20261009': '930a4a3a9c2a939b',
-    jouee3: 'c995e2f6d5074271',
+    'fighting-pacific-championship|20261008': 'f020fff72ce4d9a9', 'fighting-pacific-championship|20261009': 'c2612f3e054a41da',
+    jouee3: '5280d7d504885a51', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -300,10 +300,10 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
   /* Décision d'Anthony du 17/10/2026 (monde lot 14 T1, « enlever les choix de Leïla ») : les affaires de Leïla sont fermées dès la création ; empreintes recalculées. Vérifié par comparaison JSON avec main : seuls changent pile[i].status (open→closed), pile[i].decision (null→ignored) et open ; roster, faits, tirages et monde extérieur sont identiques. */
   /* Monde lot 16 — décision d'Anthony du 17/10/2026 : empreintes de six soirées recalculées le 18/10/2026 (mêmes tirages, bilans, âges et classement différents). */
+  /* Décision du brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation. Les empreintes Split sont recalculées après vérification que seuls roster, bilans, exterieur et leurs champs dérivés évoluent. */
   /* Monde lot 23 (audit 16/10 E3/E170) : les lignes de presse changent (étiquette « Info : » retirée, blague des croissants gardée pour le vainqueur) ; empreintes recalculées, vérifié en retirant ces deux changements : les anciennes valeurs reviennent. */
   /* Combat lots 1 et 2 (décision d'Anthony du 22/10/2026, « si ça améliore concrètement le jeu ») : le moteur et les blessures sont recalibrés (finitions 62 % -> 53 %, blessures graves -29 %) ; les combats simulés changent, empreintes recalculées. */
-  /* Brief du 22/10, P2 T2 : les traits changent les combats. Mesure : sur six soirées de prédécesseur la graine 20261008 reste identique (peu de combats documentés, traits neutres) ; la graine 20261009 change (empreinte 3fab3223e739a1c8 -> e3dedb1b77656a64) parce qu'un trait à effet (menton, sol, finition) joue dans un combat. La propriété gardée est le déterminisme. */
-  const AVANT = { 20261008: '3ea58029eb2a0885', 20261009: 'e3dedb1b77656a64' };
+  const AVANT = { 20261008: 'ee921986816aa5a8', 20261009: '413a790d63563e36' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

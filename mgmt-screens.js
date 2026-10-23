@@ -552,6 +552,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt) return;
     if(mgmtSuivre(G.mgmt,id)){ saveMgmt(); render(); }
   },
+  mgmtReserveToggle(id){if(!G||!G.mgmt||!mgmtSuivis(G.mgmt).includes(id))return;if(mgmtReserveToggle(G.mgmt,id)){saveMgmt();render();}},
   /* Lot 5 H7 : répondre à une demande — promettre ou refuser, un fait chaque fois. */
   mgmtDemande(i,reponse){
     if(!G||!G.mgmt) return;
