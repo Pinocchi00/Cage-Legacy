@@ -6,7 +6,7 @@
    l'agenda (comme les contrats) ; les quatre autres sont neufs. Tout texte injecté passe par esc(). Les titres et
    phrases de presse sont des modèles relu:false (mgmt-suivi.js). ==== */
 
-let MGMT_SU_CL={sexe:'H',div:'',curseur:0,portee:'organization'};
+let MGMT_SU_CL={sexe:'H',div:'',curseur:0,portee:'organization',vue:'liste'};
 let MGMT_SU_CE={sexe:'H',div:'',i:0,ouverte:false};
 let MGMT_SU_CA={i:0};
 let MGMT_SU_PR={filtre:'',i:0};
@@ -80,6 +80,9 @@ function mgmtSuLigneClassement(m,x,selectionne,k){
 
 function scr_mgmt_classements_cadre(){
   const m=G.mgmt, F=MGMT_SU_CL, div=mgmtSuDiv(F); F.div=div;
+  if(!['liste','meilleurs','records'].includes(F.vue)) F.vue='liste';
+  if(F.vue==='meilleurs') return scr_mgmt_meilleurs_cadre();
+  if(F.vue==='records') return scr_mgmt_records_cadre();
   const lignes=mgmtClassementLignes(m,div,F.portee);
   if(F.curseur>=lignes.length) F.curseur=Math.max(0,lignes.length-1);
   if(F.curseur<0) F.curseur=0;
@@ -100,10 +103,11 @@ function scr_mgmt_classements_cadre(){
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${mgmtSuSexeHtml(F,'CL.mgmtSuClSexe')}<div class="mf-eff-trait"></div>${mgmtSuPucesHtml(F,div,'CL.mgmtSuClDiv')}</div>`
     +`<div class="mf-su-cartes">${cartes||'<div class="mf-eff-aucun">Aucun combattant classé.</div>'}</div>${table}</main>`;
   const d=divById(div);
-  return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
+  const onglets=[['liste',F.portee==='world'?'MONDIAL':'SPLIT'],['meilleurs','LES MEILLEURS'],['records','LES RECORDS']].map(([vue,t])=>({t,on:F.vue===vue,onclick:`CL.mgmtSuClVue('${vue}')`}));
+  return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',onglets,libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuClSexe()'},
-      {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},
+      {ks:['Tab'],t:'Catégorie / onglet',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},{ks:['V'],t:'Changer de vue',onclick:'CL.mgmtSuClVueSuivante()'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtSuClOuvrir()'}]});
 }
 
@@ -676,8 +680,18 @@ Object.assign(CL,{
     const liste=allDivisions().filter(d=>d.gender===MGMT_SU_CL.sexe).map(d=>d.id), i=liste.indexOf(mgmtSuDiv(MGMT_SU_CL));
     CL.mgmtSuClDiv(liste[(i+(delta||1)+liste.length)%liste.length]);
   },
-  mgmtSuClPortee(){ MGMT_SU_CL.portee=MGMT_SU_CL.portee==='world'?'organization':'world'; MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClPortee(p){ MGMT_SU_CL.portee=p==='world'||p==='organization'?p:(MGMT_SU_CL.portee==='world'?'organization':'world'); MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClListePortee(p){ if(p!=='world'&&p!=='organization')return; MGMT_SU_CL.vue='liste'; MGMT_SU_CL.portee=p; MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClVue(v){ if(['liste','meilleurs','records'].includes(v)){ MGMT_SU_CL.vue=v; MGMT_SU_CL.curseur=0; render(); } },
+  mgmtSuClVueSuivante(){ const a=['liste','meilleurs','records'],i=a.indexOf(MGMT_SU_CL.vue); CL.mgmtSuClVue(a[(i+1)%a.length]); },
   mgmtSuClOuvrir(){
+    if(MGMT_SU_CL.vue==='meilleurs'){
+      const r=mgmtMeilleurs(G.mgmt,{divId:mgmtSuDiv(MGMT_SU_CL),portee:MGMT_SU_CL.portee==='world'?'monde':'split'});
+      const rank=(r.find(x=>x.id==='finitions')||{}).rang||[]; if(rank[0]) CL.mgmtFiche(rank[0].id); return;
+    }
+    if(MGMT_SU_CL.vue==='records'){
+      const r=mgmtRecords(G.mgmt),first=[...r.unCombat,...r.carriere].find(x=>x&&x.combattant); if(first) CL.mgmtFiche(first.combattant.id); return;
+    }
     const l=mgmtClassementLignes(G.mgmt,mgmtSuDiv(MGMT_SU_CL),MGMT_SU_CL.portee)[MGMT_SU_CL.curseur];
     if(l) CL.mgmtFiche(l.id);
   },
@@ -791,8 +805,15 @@ keysRegister('mgmt_classements',{
   ArrowDown(){ if(mgmtSuAgenda()) CL.mgmtSuClChoisir(MGMT_SU_CL.curseur+1); },
   g(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); }, G(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); },
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
-  Tab(){ if(mgmtSuAgenda()) CL.mgmtSuClCategorie(1); },
+  Tab(){
+    if(mgmtSuAgenda()){
+      if(MGMT_SU_CL.vue==='liste')CL.mgmtSuClCategorie(1);
+      else CL.mgmtSuClVueSuivante();
+    }
+  },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
+  v(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); }, V(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); },
+  r(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClVue('records'); }, R(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClVue('records'); },
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_ceintures',{
