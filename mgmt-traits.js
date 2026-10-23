@@ -18,7 +18,7 @@ const MGMT_TRAITS_SEUILS=Object.freeze({
 });
 const MGMT_TRAITS=Object.freeze([
   {id:'menton-granit',famille:'menton',nom:'Menton de granit',public:true,temporaire:false,effet:{chin:5.25,durability:2.25},condition:c=>c.k.kdRecus>=3&&c.k.dKO===0&&c.k.n>=5,conserve:c=>c.k.dKO6===0},
-  {id:'menton-fele',famille:'menton',nom:'Menton fêlé',public:false,temporaire:false,effet:{chin:-5.25},condition:c=>c.k.dKO6>=2,conserve:c=>c.k.koSansDefaite<4},
+  {id:'menton-fele',famille:'menton',nom:'Menton fêlé',public:false,temporaire:false,effet:{chin:-4},condition:c=>c.k.dKO6>=2,conserve:c=>c.k.koSansDefaite<4},
   {id:'encaisseur',famille:'menton',nom:'Encaisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.sigEncaisseParMin>=3.5&&c.k.n>=4&&c.k.tauxVictoires>=.45,conserve:c=>c.k.sigEncaisseParMin>=3},
   {id:'fragile-apres-ko',famille:'menton',nom:'Fragile après un KO',public:false,temporaire:true,effet:null,condition:c=>c.k.dernierKOsubi&&c.k.kdRecus>=2&&c.k.dernier.index>=Math.max(0,c.k.n-2),conserve:()=>false},
   {id:'diesel',famille:'cardio',nom:'Diesel',public:true,temporaire:false,effet:null,condition:c=>c.k.victoiresRound3>=3,conserve:c=>c.k.victoiresRound3>=2},
@@ -37,8 +37,8 @@ const MGMT_TRAITS=Object.freeze([
   {id:'etouffeur',famille:'sol',nom:'Étouffeur',public:true,temporaire:false,effet:null,condition:c=>c.k.controlePar15>=180&&c.k.n>=3,conserve:c=>c.k.controlePar15>=150},
   {id:'finisseur',famille:'finition',nom:'Finisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.victoires>=3&&c.k.tauxFinition>=.67,conserve:c=>c.k.tauxFinition>=.50},
   {id:'juge-dependant',famille:'finition',nom:'Juge-dépendant',public:true,temporaire:false,effet:null,condition:c=>c.k.n>=4&&c.k.tauxDecision>=.75,conserve:c=>c.k.tauxDecision>=.60},
-  {id:'foudroyant',famille:'finition',nom:'Foudroyant',public:true,temporaire:false,effet:{explosiveness:3.75,killer:2.25},condition:c=>c.k.finitionsR1>=2,conserve:c=>c.k.finitionsR1>=1},
-  {id:'poings-de-marbre',famille:'finition',nom:'Poings de marbre',public:true,temporaire:false,effet:{power:3.75},condition:c=>c.k.vKO>=3,conserve:c=>c.k.vKO>=2},
+  {id:'foudroyant',famille:'finition',nom:'Foudroyant',public:true,temporaire:false,effet:{explosiveness:2.5,killer:1.5},condition:c=>c.k.finitionsR1>=2,conserve:c=>c.k.finitionsR1>=1},
+  {id:'poings-de-marbre',famille:'finition',nom:'Poings de marbre',public:true,temporaire:false,effet:{power:2.5},condition:c=>c.k.vKO>=3,conserve:c=>c.k.vKO>=2},
   {id:'specialiste-soumission',famille:'finition',nom:'Spécialiste de la soumission',public:true,temporaire:false,effet:{submission:2.5},condition:c=>c.k.vSub>=2&&c.k.partVictoiresSub>=.40,conserve:c=>c.k.partVictoiresSub>=.30},
   {id:'guerrier',famille:'finition',nom:'Guerrier',public:false,temporaire:false,effet:null,condition:c=>c.k.guerres>=1,conserve:c=>c.k.guerres>=1},
   {id:'rouille',famille:'moment',nom:'Rouillé',public:true,temporaire:true,effet:null,condition:c=>c.k.n>=1&&c.k.cyclesDepuisDernier>=39,conserve:()=>false},

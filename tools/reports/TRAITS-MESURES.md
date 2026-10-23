@@ -65,3 +65,8 @@ La forte inversion entre répétitions confirme que la machine est chargée de f
 ### Correction de performance (23/10/2026)
 
 Cause du +83 % : `mgmtStatsIndex` (mgmt-stats.js) rebâtissait tout l'index à chaque combat ajouté à `m.hist` pendant la génération (quadratique), et recalculait le bilan officiel de tous les combattants. Il est maintenant incrémental quand seul `m.hist` grandit (sans monde vivant) et le bilan se lit à la demande (`mgmtStatsTotal`) ; `mgmtTraitsEtat` calcule la liste des combats du combattant une fois. Mesure comparable, même processus, `node tools/mesure-generation.js 62` : avec traits 49 022 ms, sans traits 48 806 ms (+0,4 %). Ancien : 67 144 ms contre 41 868 ms.
+
+
+### Réglage final après fusion avec main (23/10/2026)
+
+Sur le monde de main (manques de catégories, P4 T1), le test `combatFinitionsJeu` (graine 20261008) mesurait KO/TKO 40,3 % (bande 25–39 %) avec les effets de coups lourds : réglés à `menton-fele` chin −4, `foudroyant` explosiveness +2,5 / killer +1,5, `poings-de-marbre` power +2,5 ; résultat : test vert (finitions et soumissions dans leurs bandes). Effets de sol : chasseur 3, spécialiste 2,5, ne-se-relève-pas −3, tombeur 3. Les mesures de victoire par trait du tableau ci-dessus datent des deltas d'origine et sont à lire comme l'ordre de grandeur du levier, pas comme la valeur finale.
