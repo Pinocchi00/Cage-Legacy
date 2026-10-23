@@ -13,3 +13,14 @@ Branche : `p10-rivalites` (la branche courante de ce dossier ; commits ICI ; le 
 **[ ] 6. Fin.** `?v=` à la main (tout `.js` modifié ou ajouté), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 45 T1 : les organisations agissent` (le numéro T1 est obligatoire), compte rendu dans cette fiche (fichiers et rôle, seuils choisis, tests, noms et textes à relire, écarts).
 
 Règles communes : **additif** ; **aucun écran** ici ; ne touche pas au moteur de combat ; un test n'est **jamais** assoupli sans citer la décision. Quand TOUT est fait et commité, termine ta réponse par la ligne exacte `TOUT_EST_FINI`.
+
+## Compte rendu
+
+- `mgmt-matchmakers-data.js` : huit matchmakers (Ruud Verbeek et Siobhan Kerr conservés), manières et banques de piques/raisons. Les textes proposés sont marqués `relu:false`.
+- `mgmt-orgs-agissent.js` : actions déterministes raccordées à l'ouverture de la prochaine pile, après l'avancée hebdomadaire des organisations vivantes ; événements limités à 40.
+- `mgmt-rivalite-orgs.js` : scores pondérés, seuil 15, fenêtre de 8 cycles et hystérésis 1,3 ; rendu de raisons et changement de rivale.
+- `mgmt-save.js` : validation/réparation de la clé facultative, version de sauvegarde inchangée. `mgmt-bureau.js` appelle les actions au cycle de clôture ; versions de cache ajustées dans `index.html`.
+- `tests/mgmtLot45T1.test.js` : tests (1) à (10) ajoutés ; package.json référence le test dans `test`, `test:watch` et ses commandes dédiées.
+- Écarts à traiter : l'actualité dédiée via le registre `mgmtActuSourceAjouter` n'est pas rendue ; le compteur des événements fondus au-delà de 40 n'est pas persisté. Les tests ciblés n'ont pas tous abouti : l'exécution sans cache a dépassé 5 minutes ; l'exécution avec cache a échoué sur `ENOSPC` dans `tests/helpers/partieCache.js`, et a révélé une instabilité du scénario de déterminisme liée aux identifiants produits lors des générations cachées. Pas de changement aux valeurs des tests préexistants ni aux empreintes.
+- Noms et textes à relire : les six noms proposés hors noms déjà validés, huit phrases signatures, douze piques (et variantes supplémentaires), banques de raisons.
+- Questions pour Anthony : confirmer les noms proposés et les textes `relu:false`, et décider de la formulation et de la portée de l'actualité de rivalité. Aucun test lent complet n'a pu être mené ; mesure de clôture non réalisée.

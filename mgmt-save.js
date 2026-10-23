@@ -463,6 +463,24 @@ function validateMgmt(raw){
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
   /* Retours du 09/10/2026 : la graine de la partie (facultative : une partie d'avant n'en a pas). */
   if(raw.graine!==undefined&&(typeof raw.graine!=='string'||!/^[0-9a-z]{1,16}$/.test(raw.graine))) return false;
+  /* Monde lot 45 T1 : la guerre entre organisations — clé facultative, jamais ajoutée
+     à une partie qui ne l'a pas. Tolérée absente, stricte si présente. */
+  if(raw.guerre!==undefined){
+    if(!raw.guerre||typeof raw.guerre!=='object'||Array.isArray(raw.guerre)) return false;
+    if(raw.guerre.rival!==null&&(typeof raw.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===raw.guerre.rival))) return false;
+    if(!Number.isSafeInteger(raw.guerre.depuis)||raw.guerre.depuis<0) return false;
+    if(!Array.isArray(raw.guerre.ev)) return false;
+    if(raw.guerre.ev.length>40) return false;
+    for(const ev of raw.guerre.ev){
+      if(!ev||typeof ev!=='object'||Array.isArray(ev)) return false;
+      if(typeof ev.o!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===ev.o)) return false;
+      if(typeof ev.t!=='string'||!['pris','agent','meme-soir','parti','voisin','pique'].includes(ev.t)) return false;
+      if(!Number.isSafeInteger(ev.c)||ev.c<0) return false;
+      if(ev.x!==null&&(typeof ev.x!=='string'||!mgmtValidId(ev.x))) return false;
+      if(!Number.isFinite(ev.p)||ev.p<0||ev.p>50) return false;
+      if(Object.keys(ev).sort().join(',')!=='c,o,p,t,x') return false;
+    }
+  }
   return true;
 }
 
@@ -758,6 +776,26 @@ function mgmtRepair(m){
   if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
   m.leila.crushes=m.leila.crushes.filter(c=>Number.isSafeInteger(c)&&c>=0);
   if(m.lastEvent!==undefined&&m.lastEvent!==null&&!mgmtValidEvent(m.lastEvent)) m.lastEvent=null;
+  /* Monde lot 45 T1 : la guerre entre organisations — clé facultative.
+     Si présente et malformée, on la supprime (jamais de plantage au chargement). */
+  if(m.guerre!==undefined){
+    if(!m.guerre||typeof m.guerre!=='object'||Array.isArray(m.guerre)
+      ||m.guerre.rival!==null&&(typeof m.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===m.guerre.rival))
+      ||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<0
+      ||!Array.isArray(m.guerre.ev)
+      ||m.guerre.ev.some(ev=>!ev||typeof ev!=='object'||Array.isArray(ev)
+        ||typeof ev.o!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===ev.o)
+        ||typeof ev.t!=='string'||!['pris','agent','meme-soir','parti','voisin','pique'].includes(ev.t)
+        ||!Number.isSafeInteger(ev.c)||ev.c<0
+        ||ev.x!==null&&(typeof ev.x!=='string'||!mgmtValidId(ev.x))
+        ||!Number.isFinite(ev.p)||ev.p<0||ev.p>50
+        ||Object.keys(ev).sort().join(',')!=='c,o,p,t,x')){
+      delete m.guerre;
+    }else{
+      /* Plafonner à 40 événements les plus récents */
+      if(m.guerre.ev.length>40) m.guerre.ev=m.guerre.ev.slice(-40);
+    }
+  }
   if(Array.isArray(m.card.main)&&Array.isArray(m.roster)){
     const ids=new Set(m.roster.map(o=>o&&o.id));
     for(const slot of ['main','prelims']){
