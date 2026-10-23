@@ -24,7 +24,7 @@ function mgmtEspoirsFabrique(m,ids){
     })[0];
    if(!f||used.has(f.id))continue; used.add(f.id);
    const s=mgmtStatsCarriere(m,f.id), trait=mgmtTraitsDe(m,f.id), doc=mgmtStatsDocumentes(m,f.id),
-      exterior=mgmtExteriorCombattant(m,f.id), bilan=doc&&doc.bilan?doc.bilan:(exterior||f),
+      exterior=mgmtExteriorCombattant(m,f.id), bilan=[f,exterior].find(x=>x&&Number.isFinite(x.W)&&Number.isFinite(x.L))||{},
       record=`${Number(bilan.W)||0}-${Number(bilan.L)||0}${Number(bilan.D)?'-'+Number(bilan.D):''}`,
       chiffres=[];
     if(s&&Number.isFinite(s.sigParMin))chiffres.push({libelle:'Coups / min',valeur:s.sigParMin.toFixed(2).replace('.',',')});
