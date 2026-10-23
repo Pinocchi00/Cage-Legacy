@@ -206,7 +206,7 @@ function mgmtWithNav(screen){
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
    Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
    comme eux (mgmtWithNav). Lot 4 T6 : les classements, de même. ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_recrutement:mgmtWithNav(scr_mgmt_recrutement),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_recrutement:mgmtWithNav(scr_mgmt_recrutement),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements),mgmt_poste:scr_mgmt_poste,mgmt_poste_bilan:scr_mgmt_poste_bilan});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -287,6 +287,8 @@ keysRegister('mgmt_fiche',{
 keysRegister('mgmt_organisation',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
+keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+1)%MGMT_POSTE_ONGLETS.length;render();},ShiftTab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)-1+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();}});
+keysRegister('mgmt_poste_bilan',{Escape(){CL.go('mgmt_accueil');},Enter(){const b=mgmtPosteBilan(G.mgmt);if(b&&b.issue!=='renvoi'){mgmtPosteRenouveler(G.mgmt,b.issue);CL.go('mgmt_poste');}else CL.go('mgmt_accueil');}});
 /* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements
    au clavier — échap ramène à la semaine, comme à la souris. Aucune
    exclusive : le bouton de la navigation fait le même chemin. ==== */

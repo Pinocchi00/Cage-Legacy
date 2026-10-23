@@ -26,7 +26,7 @@ function mgmtEspArriveeHtml(){
   const L=MGMT_ESP_ARRIVEE_TEXTES,man=mgmtManque(m),org=mgmtOrgNom(m),step=MGMT_ESP_ARRIVEE.etape;
   let body='';
   if(step===1&&m.poste){
-    const p=m.poste, patron=mgmtPostePatron(m), quote=MGMT_POSTE.seuils.phrases[p.conf]||MGMT_POSTE.seuils.phrases[2];
+    const p=m.poste, patron=mgmtPostePatron(m), quote=mgmtPosteNiveau(p.conf);
     const rows=p.obj.map((o,i)=>`<div class="po-objectif"><b>${i+1}</b><div>${esc(mgmtPosteObjectifTexte(o,m))}<small>Aujourd'hui : ${esc(mgmtPosteValeurTexte(m,o))}</small></div></div>`).join('');
     const dateRdv=typeof mgmtJourDate==='function'?mgmtJourDate(p.debut+182):null;
     body=mfPanneau(`<div class="po-title">TON CONTRAT</div><div class="po-meta"><span>Patron<b>${esc(patron)}</b></span><span>Durée<b>1 AN</b></span><span>Jusqu’au<b>${esc(mgmtPosteDateTexte(p.fin))}</b></span><span>Salaire<b>${esc(mgmtEuros(p.salaire/1000))} PAR MOIS</b></span><span>Rendez-vous<b>MI-SAISON${dateRdv?', EN '+esc(dateRdv.mois.toUpperCase()):''}</b></span><span>Réputation<b>TOUT À FAIRE</b></span></div><p class="po-quote">${esc(quote.banque[0].texte)}</p><p class="po-issues">À la fin de l’année : <b>prolongé et augmenté</b>, prolongé sous condition, ou remercié.</p>`,'normal','po-card mf-sem-p')+mfPanneau(`<h2 class="po-title">CE QU’IL ATTEND</h2>${rows}<p class="po-note">Le premier objectif vient de ce qui manque à ${esc(org)}.</p>`,'normal','po-card mf-sem-p')+mfBouton('SUITE : CE QUI MANQUE',{touche:'Entrée',jaune:true,onclick:'CL.mgmtEspArriveeEtape(2)'});
