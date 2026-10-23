@@ -76,6 +76,9 @@ test('L\'écran Options : cinq onglets, les réglages des planches, les touches 
   touche(win,'Tab'); t=maj(win);
   for(const x of ['VOLUME GÉNÉRAL','MUSIQUE','LA SALLE','LES COUPS','SON COUPÉ HORS DU JEU']) assert.ok(t.includes(x),x);
   assert.equal(res(win,`return document.querySelectorAll('.mf-op-bloc').length;`),40);
+  /* Décision du brief du 22/10, P7 T2 (les temps forts) : un sixième onglet SOIRÉE porte le réglage « vue des combats », entre le Son et les Touches. */
+  touche(win,'Tab'); t=maj(win);
+  for(const x of ['VUE DES COMBATS','PAR DÉFAUT','TOUT EN ENTIER','TOUT EN RÉSULTAT']) assert.ok(t.includes(x),x);
   touche(win,'Tab'); t=maj(win);
   for(const x of ['PARTOUT','DANS LES LISTES','PENDANT LA SOIRÉE','PENDANT LE COMBAT','ESPACE']) assert.ok(t.includes(x),x);
   touche(win,'Tab'); assert.ok(maj(win).includes('SAUVEGARDER MAINTENANT'));

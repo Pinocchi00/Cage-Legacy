@@ -136,6 +136,8 @@ function mgmtFicheApercuHtml(m,f,line){
   const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone" aria-hidden="true">+</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
   const cache=traits.caches?`<div class="mf-fi-trait-cache"><div class="mf-fi-trait-entete"><b>PAS ENCORE VU</b><span>caché</span></div><div>${esc(traits.indice||'')}</div></div>`:'';
   const distinction=mgmtFichePanneau('Ce qui le distingue',traits.vus.length+' TRAITS',traitsLignes+cache,'mf-fi-traits');
+  const pense=mgmtMemoirePense(m,f.id);
+  const penseHtml=pense?`<div class="me-pensee"><b>Ce qu’il pense de toi</b><span>${esc(pense.phrase)}</span></div>`:'';
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
@@ -143,7 +145,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const restant=f.libre?'LIBRE':(f.ct?mgmtContratRestants(f)+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—');
    const gagne=m.surnoms&&m.surnoms[f.id];
    const cases=[['Âge',f.age+' ANS'],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE'],['Taille',taille],['Allonge',allonge],['Chez '+mgmtOrgNom(m)+' depuis',depuis],['Contrat restant',restant],...(gagne?[['Surnom','SOIRÉE '+gagne.s]]:[])];
-  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan');
+  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>${penseHtml}`,'normal','mf-fi-pan');
   const suite=prochain
     ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
     :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;

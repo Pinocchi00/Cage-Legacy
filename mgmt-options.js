@@ -7,8 +7,8 @@
    Les textes de réglage sont ceux des planches. ==== */
 
 let MGMT_OP={onglet:'combat',ligne:0,retour:'title',message:''};
-const MGMT_OP_ONGLETS=[{id:'combat',lib:'COMBAT'},{id:'affichage',lib:'AFFICHAGE'},{id:'son',lib:'SON'},{id:'touches',lib:'TOUCHES'},{id:'partie',lib:'PARTIE'}];
-const MGMT_OP_TITRES={combat:'LE COMBAT',affichage:'L’AFFICHAGE',son:'LE SON',touches:'LES TOUCHES',partie:'LA PARTIE'};
+const MGMT_OP_ONGLETS=[{id:'combat',lib:'COMBAT'},{id:'affichage',lib:'AFFICHAGE'},{id:'son',lib:'SON'},{id:'soiree',lib:'SOIRÉE'},{id:'touches',lib:'TOUCHES'},{id:'partie',lib:'PARTIE'}];
+const MGMT_OP_TITRES={combat:'LE COMBAT',affichage:'L’AFFICHAGE',son:'LE SON',soiree:'LA SOIRÉE',touches:'LES TOUCHES',partie:'LA PARTIE'};
 /** Les réglages de chaque onglet, dans l'ordre de la planche. `choix` : [valeur, libellé] ; `niveau` : de 0 à 10. */
 const MGMT_OP_LIGNES={
   combat:[
@@ -24,6 +24,8 @@ const MGMT_OP_LIGNES={
     {cle:'taille',lib:'TAILLE DE L’IMAGE',aide:'Les écrans sont dessinés en 1920 × 1080 et s’adaptent aux autres tailles.',choix:[[1280,'1280 × 720'],[1920,'1920 × 1080'],[2560,'2560 × 1440']]},
     {cle:'fps',lib:'IMAGES PAR SECONDE',aide:'Moins d’images soulage les petites machines.',choix:[[30,'30'],[60,'60']]},
     {cle:'mouvement',lib:'MOUVEMENT DE L’INTERFACE',aide:'Les écrans arrivent en biais, une bande les relie. À couper si ça te gêne.',choix:[[true,'OUI'],[false,'NON']]},
+    /* Monde lot 44 T1 : l'option masque la salle, jamais les primes. */
+    {cle:'salleAmbiance',lib:'AMBIANCE DE SALLE',aide:'La salle réagit aux combats, entre deux combats. Masquée, elle continue de vivre ; les primes ne changent pas.',choix:[[true,'AFFICHÉE'],[false,'MASQUÉE']]},
   ],
   son:[
     {cle:'general',lib:'VOLUME GÉNÉRAL',aide:'Tout le son du jeu.',niveau:true},
@@ -32,6 +34,7 @@ const MGMT_OP_LIGNES={
     {cle:'coups',lib:'LES COUPS',aide:'Les impacts dans la cage.',niveau:true},
     {cle:'silence',lib:'SON COUPÉ HORS DU JEU',aide:'Le jeu se tait quand tu passes sur une autre fenêtre.',choix:[[true,'OUI'],[false,'NON']]},
   ],
+  soiree:[{cle:'vue',lib:'VUE DES COMBATS',aide:'Le réglage par défaut ou une vue commune à toute la soirée.',choix:[['defaut','PAR DÉFAUT'],['entier','TOUT EN ENTIER'],['resultat','TOUT EN RÉSULTAT']]}],
   partie:[
     {cle:'sauver',lib:'SAUVEGARDER',aide:'La partie s’enregistre aussi toute seule après chaque soirée.',action:'SAUVEGARDER MAINTENANT',touche:'Entrée'},
     {cle:'arrivee',lib:'REVOIR MON ARRIVÉE',aide:'L’écran de ton arrivée : l’organisation, ce que tu hérites, la première soirée.',action:'OUVRIR'},
@@ -46,7 +49,7 @@ const MGMT_OP_LIGNES={
    validation) : un fichier abîmé ou d'une version inconnue est refusé et rien n'est écrasé. ==== */
 /** Le texte de l'export : la partie telle qu'elle est sur le disque (celle de l'emplacement actif), sinon l'état vivant. */
 function mgmtPartieExportee(m){
-  try{ const brut=stockageLire(mgmtSlotKey(MGMT_SLOT)); if(brut&&mgmtParseAndValidate(brut)) return brut; }catch(e){}
+  try{ const clair=mgmtLireSauvegarde(mgmtSlotKey(MGMT_SLOT)); if(clair&&mgmtParseAndValidate(clair)) return clair; }catch(e){}
   return mgmtSerialiser(m);
 }
 /** Importe le texte d'un fichier dans l'emplacement `slot` : la partie d'avant passe en secours si elle est valide. @returns {{ok:boolean,raison:string}} */
@@ -56,7 +59,7 @@ function mgmtPartieImporter(texte,slot){
   try{
     const cle=mgmtSlotKey(slot), prec=stockageLire(cle);
     if(prec&&mgmtParseAndValidate(prec)) stockageEcrire(mgmtSlotBackupKey(slot),prec);
-    stockageEcrire(cle,JSON.stringify(m));
+    stockageEcrire(cle,mgmtSerialiserCompresse(m));
     return {ok:true,raison:''};
   }catch(e){ return {ok:false,raison:'L’écriture a échoué.'}; }
 }

@@ -28,7 +28,9 @@ const json = win => win.eval('JSON.stringify(G.mgmt)');
 /* Renumérotation de version à la fusion du lot 8 (12/10/2026) : la partie neuve porte maintenant `visites:{}` (monde lot 8 T1) ; l'empreinte est calculée sans ce champ, les empreintes d'avant restent donc valables. */
 /* Monde lot 24 T1 : le champ facultatif echelleExt (échelle des organisations extérieures, 7 pour une partie neuve) n'entre pas dans l'empreinte — tout le reste de l'état doit rester identique. */
 /* Monde lot 31 T1 (brief du 22/10/2026, P1 T1) : la clé facultative `s` (le relevé de chaque combat) est ajoutée à chaque entrée de m.hist ; elle n'entre pas dans l'empreinte — tout le reste de l'état doit rester identique à main (vérifié : les empreintes d'avant restent valables sans `s`). */
-const sansVisites = j => { const o = JSON.parse(j); delete o.visites; delete o.echelleExt; if (Array.isArray(o.hist)) for (const t of o.hist) delete t.s; return JSON.stringify(o); };
+/* Décisions du brief du 22/10 : P6 T3 (la mémoire des combattants, `m.memoire`) et P11 T2 (les réussites secondaires, `m.defis`) sont des états annexes facultatifs,
+   calculés à la clôture d'une soirée ou au premier défi ; l'empreinte les ignore, comme les autres états annexes ; les valeurs historiques du test restent intactes. */
+const sansVisites = j => { const o = JSON.parse(j); delete o.visites; delete o.echelleExt; delete o.memoire; delete o.defis; if (Array.isArray(o.hist)) for (const t of o.hist) delete t.s; return JSON.stringify(o); };
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
@@ -57,7 +59,8 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
        658ce68e78f452a4/b153a42da14353d7 → 7277e3fc6f365200/b751300f43c7e2ef. Split et Pacific inchangés. */
     'ultimate-rim|20261008': '7277e3fc6f365200', 'ultimate-rim|20261009': 'b751300f43c7e2ef',
     'fighting-pacific-championship|20261008': 'ff903675a846298e', 'fighting-pacific-championship|20261009': 'c11eaada7162a87f',
-    jouee3: '5280d7d504885a51', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
+    /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
+    jouee3: 'ad34b123fcafa8ab', /* Décision « brief du 22/10, P7 T3 : les primes » : m.hist porte pr, m.soirees le dernier état de salle, finance.primes et les faits prime sont ajoutés, et la caisse paie — seuls ces champs changent ; empreinte recalculée le 23/10/2026 (5280d7d504885a51 → ad34b123fcafa8ab), après avoir figé les soirées du prédécesseur (la salle et les primes n'y écrivent rien). */
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);

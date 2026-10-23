@@ -54,7 +54,7 @@ test('Monde lot 1 T5 — pour chaque combattant, les victoires, défaites et nul
 test('Monde lot 1 T5 — sauvegarder puis recharger rend le même état en mémoire', () => {
   const r = JSON.parse(A.eval(`JSON.stringify((function(){
     const m=G.mgmt, avant=JSON.stringify(m); saveMgmt();
-    const disque=stockageLire(mgmtSlotKey(MGMT_SLOT)); const lu=mgmtParseAndValidate(disque);
+    const disque=mgmtLireSauvegarde(mgmtSlotKey(MGMT_SLOT)); const lu=mgmtParseAndValidate(disque);
     const compact=JSON.parse(disque);
     G.mgmt=null; const ok=loadMgmt();
     return {memeSerialisation:disque===mgmtSerialiser(m),identique:!!lu&&JSON.stringify(lu)===avant,charge:ok,identiqueCharge:JSON.stringify(G.mgmt)===avant,

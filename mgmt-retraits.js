@@ -48,6 +48,24 @@ function mgmtRetraitProb(m,f){
 function mgmtRetraitsAvantSoiree(m){
   if(!m||m.effectifs!==1||!mgmtCardFull(m)) return null;
   if((m.facts||[]).some(x=>x&&x.k==='retrait'&&x.c===m.cycle)) return null;
+  /* ==== [ANCRE: P6_T2_RETRAIT_POIDS_CHOIX] — Monde lot 41 T2 ====
+     Une annulation choisie avant la soirée utilise le flux de retrait existant. ==== */
+   const poids=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.find(e=>e&&e.p&&['poids','blessure_camp','visa'].includes(e.f)&&e.r==='B');
+   if(poids){
+    for(const slot of ['main','prelims']){
+      const fight=m.card[slot].find(x=>x.a===poids.a||x.b===poids.a);
+      if(!fight) continue;
+      const adv=fight.a===poids.a?fight.b:fight.a;
+      m.card[slot]=m.card[slot].filter(x=>x!==fight);
+      const f=mgmtFighterById(m,poids.a);
+      if(f) f.susp=Math.max(Number.isSafeInteger(f.susp)?f.susp:0,m.cycle);
+      const fait={c:m.cycle,k:'retrait',a:poids.a,adv,slot:slot==='main'?'main':'prelim'};
+      mgmtAddFact(m,fait);
+      if(slot==='prelims'&&mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
+      return fait;
+    }
+    return null;
+  }
   for(const slot of ['main','prelims']){
     for(const fight of m.card[slot]){
       for(const [id,adv] of [[fight.a,fight.b],[fight.b,fight.a]]){

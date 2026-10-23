@@ -172,6 +172,9 @@ function mgmtExtLibre(m,line,trace){
  *  @returns {{ok:boolean,raison?:string,demande:number,prime:number}} */
 function mgmtContratReponse(m,f,n,b,renouvellement){
   const demande=mgmtBourseSouhaitee(m,f,renouvellement), prime=Number.isSafeInteger(n)&&b>0?mgmtContratPrime(n,b):0;
+  /* ==== [ANCRE: P6_T3_MEMOIRE_PROLONGATION] — Monde lot 47 T1 ==== */
+  const pense=renouvellement&&typeof mgmtMemoirePense==='function'?mgmtMemoirePense(m,f&&f.id):null;
+  if(pense&&pense.niveau==='part')return {ok:false,raison:'memoire',demande,prime};
   if(!Number.isSafeInteger(n)||n<MGMT_CT_MIN||n>MGMT_CT_MAX||!Number.isFinite(b)||b<=0) return {ok:false,raison:'offre',demande,prime};
   if(mgmtContratGrandeur(m,f).refus) return {ok:false,raison:'trop-grand',demande,prime};
   if(!mgmtCanAfford(m,prime)) return {ok:false,raison:'caisse',demande,prime};

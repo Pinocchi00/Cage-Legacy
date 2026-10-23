@@ -175,6 +175,9 @@ function mgmtValidEvent(e){
   }
   if(e.e1!==undefined&&typeof e.e1!=='boolean') return false;
   if(e.vu!==undefined&&(!Number.isSafeInteger(e.vu)||e.vu<0)) return false;
+  /* Monde lot 44 T1 : la première entrée de la soirée dans m.hist, et la
+     prime payée à la clôture (0 : soirée sans combat notable). */
+  if(e.premier!==undefined&&(!Number.isSafeInteger(e.premier)||e.premier<0)) return false;
   if(e.finance!==undefined){
     const f=e.finance;
     if(!f||typeof f!=='object'||Array.isArray(f)) return false;
@@ -188,6 +191,7 @@ function mgmtValidEvent(e){
     /* Lot 2B T4 : le bonus de victoire voyage avec la finance — toléré
        absent (soirée d'avant la tranche), strict quand il est là. */
     if(f.bonuses!==undefined&&(!Number.isSafeInteger(f.bonuses)||f.bonuses<0)) return false;
+    if(f.primes!==undefined&&(!Number.isSafeInteger(f.primes)||f.primes<0)) return false;
     if(!Number.isSafeInteger(f.recette)) return false;
     /* Brief démo, lot 6 : les trois critères de la satisfaction, absents des soirées d'avant. */
     if(f.criteres!==undefined){
@@ -278,7 +282,9 @@ function mgmtValidFightTrace(x){
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s').sort().join(',');
+  /* Monde lot 44 T1 : pr marque le prix reçu (combat de la soirée, performance). */
+  if(x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -341,10 +347,14 @@ function mgmtDuoValide(d,raw){
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
+  if(raw.vues!==undefined&&(!raw.vues||typeof raw.vues!=='object'||Array.isArray(raw.vues)||Object.keys(raw.vues).length>12||Object.entries(raw.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) return false;
   if(raw.surnomsGagnes!==undefined&&typeof raw.surnomsGagnes!=='boolean') return false;
   if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
+  if(raw.semaine!==undefined&&!mgmtSemaineValide(raw.semaine)) return false;
+  if(raw.recruteur!==undefined&&!mgmtRecruteurValide(raw.recruteur)) return false;
+  if(raw.memoire!==undefined&&!mgmtMemoireValide(raw.memoire)) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
   if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
@@ -366,6 +376,10 @@ function validateMgmt(raw){
   if(raw.reserves!==undefined&&(!Array.isArray(raw.reserves)||raw.reserves.length>15||new Set(raw.reserves).size!==raw.reserves.length||raw.reserves.some(id=>!mgmtValidId(id)||id.length>80)))return false;
   for(const k of ['espoirsPropose','espoirs']) if(raw[k]!==undefined&&(!Array.isArray(raw[k])||raw[k].length>(k==='espoirs'?3:12)||new Set(raw[k]).size!==raw[k].length||raw[k].some(id=>typeof id!=='string'||!id||id.length>80)))return false;
   if(raw.espoirs&&raw.espoirsPropose&&raw.espoirs.some(id=>!raw.espoirsPropose.includes(id)))return false;
+  /* ==== [ANCRE: P11_T2_DEFIS_SAUVEGARDE] — Monde lot 46 T1 ==== */
+  /* Facultatif : une partie d'avant le lot n'en porte pas. Quand il est là,
+     seuls des identifiants connus, soixante entrées au plus. */
+  if(raw.defis!==undefined&&!mgmtDefisValide(raw.defis)) return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -401,6 +415,8 @@ function validateMgmt(raw){
   if(raw.visites!==undefined&&!mgmtVisitesValide(raw.visites)) return false;
   if(!mgmtSallesValide(raw)) return false;
   if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
+  /* Monde lot 44 T1 : le dernier état de salle, facultatif, strict quand il est là. */
+  if(raw.soirees!==undefined&&!mgmtSalleEtatValide(raw.soirees)) return false;
   if(raw.leila!==undefined){
     if(!raw.leila||typeof raw.leila!=='object'||Array.isArray(raw.leila)) return false;
     if(!Array.isArray(raw.leila.crushes)) return false;
@@ -445,6 +461,9 @@ function validateMgmt(raw){
       if(f.k==='retrait'&&(!mgmtValidId(f.adv)||(f.slot!=='main'&&f.slot!=='prelim'))) return false;
       if(f.k==='retrait_sortie'&&!['remonter','split','externe','reduite'].includes(f.s)) return false;
       if(f.k==='engage'&&!['split','autre','libre'].includes(f.src)) return false;
+    }else if(f.k==='prime'){
+      /* Monde lot 44 T1 : un versement, sur un combat de cette soirée. */
+      if(!mgmtPrimeFactValide(f,raw.hist)||f.c>raw.cycle) return false;
     }else if(f.k==='recrue'){
       /* Lot 5 T5 : le geste de recruter — un fait, l'identifiant du recruté et le cycle. */
       if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
@@ -490,6 +509,7 @@ function validateMgmt(raw){
       }
     }
   }
+  if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
   return true;
 }
 
@@ -685,6 +705,12 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
+  if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
+  if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
+  if(Object.prototype.hasOwnProperty.call(m,'memoire')&&!mgmtMemoireValide(m.memoire)) delete m.memoire;
   if(Object.prototype.hasOwnProperty.call(m,'surnoms')){
     const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
     if(surnoms===undefined) delete m.surnoms;
@@ -699,6 +725,13 @@ function mgmtRepair(m){
    for(const k of ['espoirsPropose','espoirs']) if(Object.prototype.hasOwnProperty.call(m,k)&&(!Array.isArray(m[k])||m[k].length>(k==='espoirs'?3:12)||new Set(m[k]).size!==m[k].length||m[k].some(id=>typeof id!=='string'||!id||id.length>80)))delete m[k];
   if(Array.isArray(m.espoirs)&&Array.isArray(m.espoirsPropose)&&m.espoirs.some(id=>!m.espoirsPropose.includes(id)))delete m.espoirs;
   if(Object.prototype.hasOwnProperty.call(m,'actuLu')&&(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80))) m.actuLu=[];
+  /* ==== [ANCRE: P11_T2_DEFIS_REPARATION] — Monde lot 46 T1 ==== */
+  /* Présent et malformé seulement : les entrées lisibles d'un défi connu
+     restent, le reste tombe, soixante au plus. Absent, il le reste. */
+  if(Object.prototype.hasOwnProperty.call(m,'defis')){
+    const defis=mgmtDefisReparer(m.defis);
+    if(defis===null) delete m.defis; else m.defis=defis;
+  }
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
@@ -708,6 +741,9 @@ function mgmtRepair(m){
   if(!mgmtVisitesValide(m.visites)) mgmtVisitesInit(m);
   if(!mgmtSallesValide(m)){ delete m.salles; delete m.pop; delete m.comptes; }
   if(m.cal&&m.cal.actif===true) mgmtSallesInit(m);
+  /* Monde lot 44 T1 : une clé de salle malformée est effacée, jamais ajoutée
+     à une partie qui n'en porte pas. */
+  if(m.soirees!==undefined&&!mgmtSalleEtatValide(m.soirees)) delete m.soirees;
   if(m.card&&m.card.sizeEarly!==undefined&&(!Number.isSafeInteger(m.card.sizeEarly)||m.card.sizeEarly<0||m.card.sizeEarly>m.card.sizePrelims)) m.card.sizeEarly=0;
   if(!Array.isArray(m.facts)) m.facts=[];
   /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
@@ -758,10 +794,14 @@ function mgmtRepair(m){
     /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
        des faits de titre, sans couper ni décaler leur combat par erreur. */
     const indices=new Map(),hist=[];
-    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
+    m.hist.forEach((x,i)=>{ if(x&&typeof x==='object'&&x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') delete x.pr; if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
     m.hist=hist;
     m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
-    for(const f of m.facts){ if(f.k==='title_fight') f.fight=indices.get(f.fight); }
+    /* Monde lot 44 T1 : le fait prime suit le combat, comme le fait de titre. */
+    for(const f of m.facts){ if(f.k==='title_fight'||f.k==='prime') f.fight=indices.get(f.fight); }
+    /* Monde lot 44 T1 : un fait prime malformé (ou qui pointe un combat
+       disparu) est écarté. */
+    m.facts=m.facts.filter(f=>f.k!=='prime'||mgmtPrimeFactValide(f,m.hist));
   }
   /* Lot 2 T1 : la carte {sizeMain,sizePrelims,main,prelims} se recadre — les
      deux capacités et les deux listes existent toujours, un combat qui ne
@@ -784,6 +824,10 @@ function mgmtRepair(m){
   if(!m.leila||typeof m.leila!=='object'||Array.isArray(m.leila)) m.leila={crushes:[]};
   if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
   m.leila.crushes=m.leila.crushes.filter(c=>Number.isSafeInteger(c)&&c>=0);
+  if(m.lastEvent&&typeof m.lastEvent==='object'&&m.lastEvent.finance&&m.lastEvent.finance.primes!==undefined
+    &&(!Number.isSafeInteger(m.lastEvent.finance.primes)||m.lastEvent.finance.primes<0)) delete m.lastEvent.finance.primes;
+  if(m.lastEvent&&typeof m.lastEvent==='object'&&m.lastEvent.premier!==undefined
+    &&(!Number.isSafeInteger(m.lastEvent.premier)||m.lastEvent.premier<0)) delete m.lastEvent.premier;
   if(m.lastEvent!==undefined&&m.lastEvent!==null&&!mgmtValidEvent(m.lastEvent)) m.lastEvent=null;
   /* Monde lot 45 T1 : la guerre entre organisations — clé facultative.
      Si présente et malformée, on la supprime (jamais de plantage au chargement). */
@@ -865,6 +909,8 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
+  if(raw.charAt(0)==='\u0001') raw=mgmtDecompresser(raw);
+  if(raw===null) return null;
   try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); if(mgr&&mgr.orgs&&typeof mgr.orgs==='object'&&!Array.isArray(mgr.orgs)){ for(const id of Object.keys(mgr.orgs)){ if(!mgmtPasseDeployer(mgr.orgs[id])) return null; } }   /* Monde lot 9 T2a : chaque organisation redéploie son archive */
     return mgr&&validateMgmt(mgr)&&mgmtMondeVivantValide(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
@@ -887,6 +933,37 @@ function mgmtSlotValide(n){ return Number.isSafeInteger(n)&&n>=1&&n<=MGMT_SLOTS;
 /** La clé d'un emplacement : l'historique pour le 1, la sienne pour les autres. */
 function mgmtSlotKey(n){ return n===1?MGMT_KEY:MGMT_KEY+'-'+n; }
 function mgmtSlotBackupKey(n){ return mgmtSlotKey(n)+'_backup'; }
+
+/* ==== [ANCRE: SAUVEGARDE_COMPRESSION_LECTURE] — Monde lot 52 T1 ==== */
+function mgmtLireSauvegarde(cle){
+  const valeur=stockageLire(cle);
+  return typeof valeur==='string'&&valeur.charAt(0)==='\u0001'?mgmtDecompresser(valeur):valeur;
+}
+
+/** La dernière valeur que saveMgmt a écrite dans cette session : {cle, valeur}. */
+let mgmtDerniereEcriture={cle:null,valeur:null};
+
+/** Les morceaux de la partie écrite : leur concaténation est une chaîne JSON de la même partie que mgmtSerialiser (le corps d'abord, puis chaque organisation vivante
+ *  à part : ce sont les gros blocs qui ne changent pas d'une sauvegarde à l'autre). Pur. @returns {string[]} */
+function mgmtSerialiserMorceaux(m){
+  const o=mgmtSerialiserCorps(m), parts=[], orgs=m.orgs&&typeof m.orgs==='object';
+  let premier=true;
+  for(const k of Object.keys(o)){
+    if(k==='orgs'&&orgs){   /* à sa place d'origine : le texte rendu est celui de mgmtSerialiser, à l'octet près */
+      parts.push((premier?'{':',')+'"orgs":{'); premier=false;
+      Object.keys(m.orgs).forEach((id,i)=>parts.push((i?',':'')+JSON.stringify(id)+':'+JSON.stringify(mgmtSerialiserCorps(m.orgs[id]))));
+      parts.push('}');
+      continue;
+    }
+    const v=JSON.stringify(o[k]);
+    if(v===undefined) continue;
+    parts.push((premier?'{':',')+JSON.stringify(k)+':'+v); premier=false;
+  }
+  parts.push(premier?'{}':'}');
+  return parts;
+}
+/** La partie telle qu'elle s'écrit sur le disque : compressée, avec les gros blocs inchangés repris du mémo. @returns {string} */
+function mgmtSerialiserCompresse(m){ return mgmtCompresserMorceaux(mgmtSerialiserMorceaux(m)); }
 
 /** Le registre : {dernier:1..3|null, dates:{'1':ms,…}}. Toujours une forme saine. */
 function mgmtRegistre(){
@@ -911,7 +988,7 @@ function mgmtSlotPeek(n){
   if(n===MGMT_SLOT&&typeof G!=='undefined'&&G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
   try{
     for(const key of [mgmtSlotKey(n),mgmtSlotBackupKey(n)]){
-      const m=mgmtParseAndValidate(stockageLire(key));
+      const m=mgmtParseAndValidate(mgmtLireSauvegarde(key));
       if(m) return m;
     }
   }catch(e){}
@@ -954,9 +1031,12 @@ function saveMgmt(){
        avant sa sérialisation, jamais seulement dans la copie disque. */
     mgmtExteriorEnsure(G.mgmt);
     const cle=mgmtSlotKey(MGMT_SLOT);
-    const previous=stockageLire(cle);
-    if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    stockageEcrire(cle,mgmtSerialiser(G.mgmt));   /* Monde lot 1 T5 : la part du passé s'écrit en archive compacte */
+     const previous=stockageLire(cle);
+     /* Monde lot 52 T1 : ce que cette session vient d'écrire elle-même, relu à l'identique, n'est pas re-décompressé ni re-validé (124 ms sur une partie complète) : la première sauvegarde de la session valide le disque, les suivantes se fient à la trace de la dernière écriture. */
+     if((mgmtDerniereEcriture.cle===cle&&mgmtDerniereEcriture.valeur===previous)||mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
+     const ecrit=mgmtSerialiserCompresse(G.mgmt);   /* Monde lot 52 T1 : écriture compressée */
+     stockageEcrire(cle,ecrit);
+     mgmtDerniereEcriture={cle,valeur:ecrit};
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
     return stockageSignaler(true);
@@ -968,11 +1048,11 @@ function loadMgmt(){
   try{
     const cle=mgmtSlotKey(MGMT_SLOT), secours=mgmtSlotBackupKey(MGMT_SLOT);
     for(const key of [cle,secours]){
-      const candidate=mgmtParseAndValidate(stockageLire(key));
+      const candidate=mgmtParseAndValidate(mgmtLireSauvegarde(key));
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ stockageEcrire(cle,mgmtSerialiser(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,mgmtSerialiserCompresse(G.mgmt)); }catch(e){}
       }
       return true;
     }
@@ -982,8 +1062,8 @@ function loadMgmt(){
 
 function hasMgmt(){
   try{
-    if(mgmtParseAndValidate(stockageLire(mgmtSlotKey(MGMT_SLOT)))) return true;
-    if(mgmtParseAndValidate(stockageLire(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(mgmtLireSauvegarde(mgmtSlotKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(mgmtLireSauvegarde(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
   }catch(e){}
   return false;
 }

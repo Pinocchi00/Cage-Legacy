@@ -70,9 +70,15 @@ test('Arrivée — promesses affichent l\'échéance en Fight Night, jamais « c
 });
 
 test('Arrivée — Entrée ouvre la Carte et Échap ouvre l\'Accueil', () => {
+  /* Décision du 23/10/2026 (PR « ce qui manque et les trois espoirs s'affichent enfin ») : la partie de ce test porte un passé terminé ; la première arrivée
+     passe désormais par « Ce qui manque » et « Tes trois espoirs » avant la Carte (P4 T2/T3). Une fois les espoirs proposés, Entrée ouvre la Carte comme avant. */
   const w=premier();
-  const r=res(w,`keysHandle({key:'Enter',preventDefault(){}}); return {ap:G.screen};`);
-  assert.equal(r.ap,'mgmt_carte');
+  const r=res(w,`keysHandle({key:'Enter',preventDefault(){}}); return {ap:G.screen,retour:MGMT_ESP_ARRIVEE.retour};`);
+  assert.equal(r.ap,'mgmt_espoirs_arrivee');
+  assert.equal(r.retour,'mgmt_carte');
+  const w1=premier();
+  const r1=res(w1,`mgmtEspoirsFixer(G.mgmt); keysHandle({key:'Enter',preventDefault(){}}); return {ap:G.screen};`);
+  assert.equal(r1.ap,'mgmt_carte');
   const w2=premier();
   const r2=res(w2,`keysHandle({key:'Escape',preventDefault(){}}); return {ap:G.screen};`);
   assert.equal(r2.ap,'mgmt_accueil');
@@ -144,7 +150,8 @@ test('Arrivée — les noms ouvrent une fiche et échappent identifiant et texte
 });
 test('Arrivée — souris, flèches, Tab et Entrée activent la sélection',()=>{
   const w=premier();
-  const r=res(w,`let cartes=0,ouvert=null; CL.mgmtCarte=()=>{cartes++;}; CL.mgmtFiche=id=>{ouvert=id;};
+  /* Espoirs déjà proposés (décision du 23/10/2026) : ce test porte sur la sélection de l'écran d'arrivée, pas sur l'écran des espoirs. */
+  const r=res(w,`mgmtEspoirsFixer(G.mgmt); let cartes=0,ouvert=null; CL.mgmtCarte=()=>{cartes++;}; CL.mgmtFiche=id=>{ouvert=id;};
     document.querySelector('.jaune-bloc').click();
     keysHandle({key:'Enter',preventDefault(){}});
     keysHandle({key:'Tab',preventDefault(){}});
