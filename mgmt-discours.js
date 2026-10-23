@@ -34,7 +34,7 @@ function mgmtDiscoursComposer(m,combat){
     /* Chaque famille a son propre décalage : la combinaison complète ne
        retombe pas sur le même discours tous les quatre passages. */
     const decalage=(hash+n*0x9e3779b9)>>>0;
-    return banques[fam][(decalage+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'');
+     return banques[fam][(decalage+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'').slice(0,200);
   };
   const annonce=phrase('annonces',3);
   return {auteur:auteur.id,lignes:[phrase('ouvertures',0),phrase('remerciements',1),phrase('appels',2),annonce],interpelle,annonce,ton,motif:e.motif,adversaire:adversaire.id};
