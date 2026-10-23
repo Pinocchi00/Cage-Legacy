@@ -65,3 +65,34 @@ Un commit après chaque point (A : vue et libellés ; A : style planche ; B : bl
 - Revoir : branchement possible dans `CL.mgmtSuReRevoir` (mgmt-suivi-cadre.js, ~771), réutiliser `mgmtReleveCombat(m, m.hist[cur.i])` au moment où le rejeu expose son cadre ; laissé inchangé ici. Lendemain : `mgmt-ecran-lendemain.js`, dans le détail du combat récent, à brancher sur la trace `m.hist` correspondante ; laissé inchangé.
 - Écarts : les planches sont des scènes de référence ; le relevé est resserré dans le panneau détail existant pour ne pas créer d’écran superposé. Les planches prévoient juges/tournant, mais `mgmtReleveCombat` renvoie actuellement `null` pour ces champs : ces blocs ne sont donc pas inventés. Le test d’histoire compare le rendu courant, sans fixture HTML historique figée.
 - Questions pour Anthony : aucune.
+
+### Compte rendu — corrections de fidélité (23/10/2026)
+
+- `mgmt-presentation-ecrans.js` : formats des valeurs, atténuation du côté perdant à `.74`, exceptions null/égalité, suppression du pied des documentations et phrase de faible documentation sous le panneau.
+- `ui-cadre.css` : face-à-face compacté à 345 px et pas de 33 px ; relevé agrandi suivant la typographie de la planche.
+- `index.html` : versions cache `monde36t2b` pour les deux fichiers modifiés.
+- Tests ajoutés : aucun ; test ciblé existant `tests/mgmtCombatChiffresEcrans.test.js` conservé et vert (4/4).
+- Migration de sauvegarde : aucune.
+
+#### Comparaison des éléments corrigés
+
+| Élément | Valeur planche | Valeur page après correction |
+|---|---:|---:|
+| Face-à-face, panneau | largeur 1564 px, hauteur ~345 px | pleine largeur, 345 px |
+| Lignes | 9 lignes, pas 33 px | 9 lignes, 33 px |
+| Valeurs | Saira Extra Condensed, 34/800, line-height 1 | 34/800, line-height 1 |
+| Valeur gauche | x=325, largeur 120 px | marge intérieure 25 px, colonne 120 px |
+| Valeur droite | x=1719, largeur 120 px, alignée à droite | marge intérieure 25 px, colonne 120 px, alignée à droite |
+| Libellé | 24/500, centré, colonne 380 px | 24/500, centré, colonne 380 px |
+| Valeur non meilleure | `#E9E6E1` à .74 | `rgba(233,230,225,.74)` |
+| Contrôle / pourcentage | m:ss / entier + espace insécable | m:ss / entier + espace insécable |
+| Moyennes | coups/min deux décimales ; amenées une | deux / une décimale avec virgule |
+| Phrase de documentation faible | sous panneau, 16 px, 22/500, gris .74 | sous panneau, 16 px, 22/500, gris .74 |
+| Résultats, titres | 44/800 | 44/800 |
+| Résultats, totaux | 34/800 | 34/800 |
+| Résultats, rounds | grands chiffres 40/800 | titres et grands chiffres 40/800 |
+| Résultats, colonnes | rangées 52 px, libellés 24 px | disposition existante, libellés 24 px |
+
+- Vérifications : `node --test tests/mgmtCombatChiffresEcrans.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Revoir : branchement reste possible dans `CL.mgmtSuReRevoir` ; Lendemain : `mgmt-ecran-lendemain.js`, au détail d’un combat récent. Aucun changement dans ces écrans.
+- Écarts/questions : aucun.
