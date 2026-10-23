@@ -70,8 +70,13 @@ Un commit après chaque point (fichier de textes ; fonctions pures ; panneau ; s
 | Texte principal | `#E9E6E1` | `#E9E6E1` hérité |
 | Accent / barre | `#E23A2B` | barre de `mgmtFichePanneau` |
 | Remplissage ligne | `#252121` | `#252121` |
-| En-tête ligne | 30 px Saira Extra Condensed 800 | 23 px Saira Extra Condensed 800 (réduit) |
-| Preuve | 22 px, gris 74 % | 18 px, gris 74 % (réduit) |
-| Phrase | 24 px | 19 px (réduit) |
+| Largeur première colonne | 552 px | 552 px |
+| Largeurs colonnes | 552 / 385 / 595 px, écarts 16 px | 552 / 385 / 595 px, écarts 16 px |
+| Padding du panneau traits | 15 px (texte +22 via cadre) | 15 px |
+| Pas vertical des traits | 95 px | 95 px |
+| Nom | 30 px / 800 | 30 px / 800 |
+| Preuve | 22 px / 500, gris 74 %, alignée à droite | 22 px / 500, gris 74 %, alignée à droite |
+| Phrase | 24 px / 500, +35 px | 24 px / 500, +35 px |
+| Icône | 44 × 44 px, + clair / − rouge | 44 × 44 px, + clair / − rouge |
 
-Écart : l’Aperçu courant n’offre pas de panneau libre au même emplacement de la planche. Le nouveau bloc a été placé sous « Ce que tu as vu » dans la première colonne pour conserver les autres panneaux ; le corps de panneau reprend le padding de 15 px de la planche, mais les lignes sont compactées par rapport à la planche et aucune position absolue nouvelle n’a été imposée à la scène existante. Le compte apparaît comme `N TRAITS` ; les traits cachés restent une ligne d’indice. Le test sur le roster valide la dérivation et sa durée (< 300 ms), sans vérifier explicitement la règle 2-versus-3 combats dans un historique fabriqué ni les 100 ms de rendu. Tests ciblés verts ; `node tools/verif-versions.js origin/main` sans écart ; ESLint sans sortie. Questions pour Anthony : faut-il réserver un écran/planche distincte pour reproduire les positions absolues 1920 × 1080 sans compresser la première colonne ?
+Correction selon la précision du 23/10 : « Ce que tu as vu » a été retiré de l’Aperçu (doublon de l’onglet Style) ; le panneau traits est seul à gauche. La grille tient dans 1564 px : 552 + 16 + 385 + 16 + 595 = 1564. Les éléments de trait détaillés au tableau ont été rapportés aux valeurs demandées. Les lignes de traits sont configurées par pas de 95 px ; les valeurs d’icône et les lignes de preuve/phrase ne disposent pas encore d’une validation DOM automatisée.
