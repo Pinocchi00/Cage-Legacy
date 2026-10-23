@@ -343,6 +343,7 @@ function validateMgmt(raw){
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
+  if(raw.semaine!==undefined&&!mgmtSemaineValide(raw.semaine)) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
   if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
@@ -656,6 +657,7 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];

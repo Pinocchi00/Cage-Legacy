@@ -118,6 +118,7 @@ function mgmtAgendaPoser(m,jour,taille,salle){
      appel ne refait rien : n<=0). L'outil du prédécesseur garde son flux :
      MGMT_PREDECESSEUR_EN_COURS est vérifié à l'intérieur. ==== */
   if(mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
+  if(typeof mgmtSemaineTirer==='function'&&!m.semaine) mgmtSemaineTirer(m);
   return {ok:true};
 }
 

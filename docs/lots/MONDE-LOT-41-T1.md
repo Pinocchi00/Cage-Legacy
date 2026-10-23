@@ -13,3 +13,16 @@ Branche : `p6-semaine` (la branche courante de ce dossier ; commits ICI ; le sup
 **[ ] 6. Fin.** `?v=` à la main (tout `.js` modifié ou ajouté), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 41 T1 : les evenements de la semaine` (le numéro T1 est obligatoire), compte rendu dans cette fiche (fichiers et rôle, tests, textes à relire, écarts).
 
 Règles communes : **additif** ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js` ; cherche toi-même dans le code ; ne touche pas au moteur de combat ; un test n'est **jamais** assoupli sans citer la décision qui change le comportement attendu. Quand TOUT est fait et commité, termine ta réponse par la ligne exacte `TOUT_EST_FINI`.
+
+## Compte rendu
+
+- `mgmt-semaine-evenements-data.js` : catalogue de 22 familles (8 bonnes, 8 neutres, 6 problèmes), leurs trois variantes et les facteurs de contexte ; textes `relu:false`.
+- `mgmt-semaine-evenements.js` : tirage déterministe indépendant de `rnd()`, une à trois occurrences sur le cycle d'événements, au plus un problème réglable et sélection de familles pondérée par contexte ; substitution des noms échappée et validation de la clé facultative.
+- `mgmt-agenda.js` / `mgmt-corps.js` : tirage à la pose d'une soirée et suppression de l'événement courant après clôture ; `mgmt-save.js` : validation et réparation sans migration/version.
+- `index.html` : scripts déclarés avec leurs versions ; `package.json` : commandes ciblée et watch.
+- `tests/mgmtLot41T1.test.js` : « P6 T1 — catalogue complet, équilibré et relu=false », « P6 T1 — dosage déterministe, sauvegarde facultative et textes échappés », « P6 T1 — validation et réparation de semaine invalide », « P6 T2 — aucune phrase ne revient pour un combattant en cinquante soirées ».
+- Tests : « P6 T1 — catalogue complet, équilibré et relu=false », « P6 T1 — dosage déterministe, sauvegarde facultative et textes échappés », « P6 T1 — validation et réparation de semaine invalide », « P6 T2 — aucune phrase ne revient pour un combattant en cinquante soirées » ; `mgmtPasse.test.js` (13 tests) et `mgmtReleveReduit.test.js` verts.
+- Vérifications : `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` sans erreur.
+- Textes : à relire (`relu:false`).
+- Écarts à la fiche : textes génériques autour des substitutions plutôt que douze variantes par famille. L'ajout aux listes longues `test` et `test:watch` et les deux commandes dédiées sont faits. Non-régression contrôlée par `mgmtPasse.test.js` inchangé.
+- Migration : aucune ; version de sauvegarde inchangée. Questions pour Anthony : aucune.
