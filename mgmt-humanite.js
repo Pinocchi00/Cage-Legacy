@@ -96,7 +96,7 @@ function mgmtSurnomDe(m,id){
   if(!m||!id) return '';
   const f=(m.roster||[]).find(o=>o.id===id)||(m.exterieur||[]).find(o=>o.id===id);
   if(!f||!f.div) return '';
-  const cle=(m.cycle||0)+'|'+(m.roster?m.roster.length:0)+'|'+(m.exterieur?m.exterieur.length:0);
+  const cle=(m.cycle||0)+'|'+(m.roster?m.roster.length:0)+'|'+(m.exterieur?m.exterieur.length:0)+'|'+(m.surnomsGagnes===true?JSON.stringify(m.surnoms||{}):'ancien');
   if(MGMT_SURNOMS_MEMO.m!==m||MGMT_SURNOMS_MEMO.cle!==cle){ MGMT_SURNOMS_MEMO.m=m; MGMT_SURNOMS_MEMO.cle=cle; MGMT_SURNOMS_MEMO.par=new Map(); }
   if(!MGMT_SURNOMS_MEMO.par.has(f.div)) MGMT_SURNOMS_MEMO.par.set(f.div,mgmtIdentiteSurnomsDe(m,f.div));
   return MGMT_SURNOMS_MEMO.par.get(f.div).get(id)||'';
@@ -104,6 +104,11 @@ function mgmtSurnomDe(m,id){
 const MGMT_SURNOMS_MEMO={m:null,cle:'',par:new Map()};
 
 function mgmtIdentiteSurnom(m,f){
+  if(m&&m.surnomsGagnes===true){
+    const gagne=m.surnoms&&m.surnoms[f.id];
+    if(gagne&&typeof gagne.n==='string') return gagne.n;
+    if(mgmtIdentiteStream(f.id,'surnom-de-naissance',m)()<0.5) return '';
+  }
   return mgmtIdentiteAllouer(m,f.div,f,f.id).get(f.id)||'';
 }
 /** Les surnoms de TOUTE une catégorie, en une seule passe (lot 5 H8, le
@@ -124,6 +129,8 @@ function mgmtIdentiteAllouer(m,div,extra,jusquA){
   };
   const pris=new Set(), sortie=new Map();
   for(const o of [...lignes.values()].sort(ordre)){
+    if(m&&m.surnomsGagnes===true&&!m.surnoms?.[o.id]&&mgmtIdentiteStream(o.id,'surnom-de-naissance',m)()<0.5){ sortie.set(o.id,''); continue; }
+    if(m&&m.surnomsGagnes===true&&m.surnoms?.[o.id]){ const gagne=m.surnoms[o.id].n; sortie.set(o.id,gagne); pris.add(gagne); continue; }
     const candidats=mgmtIdentiteSurnoms(o);
     let surnom=candidats.find(t=>!pris.has(t));
     // Décision Anthony H3 : après banque ET motifs de sa ville épuisés,
