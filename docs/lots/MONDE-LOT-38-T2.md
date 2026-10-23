@@ -16,29 +16,35 @@ Règles communes : cherche toi-même dans le code ; **additif** : une partie anc
 
 ## Compte rendu
 
-**État partiel — critères de fin non atteints.**
+**État partiel : branchement et premiers blocs ajoutés ; plusieurs critères de fin demeurent non validés.**
 
-- `mgmt-ecran-arrivee.js` : première version d'un rendu en deux étapes, cartes d'espoirs, gestes de garder/rendre/entrer, échappement des noms et états de clavier. Les libellés ajoutés sont dans `MGMT_ARRIVEE_TEXTES` et marqués `relu:false`.
-- `index.html` : référence de cache `monde38t2b` montée manuellement. Le module est placé après la déclaration de l'arrivée historique (`mgmt-prise-en-main.js`) afin de ne pas se faire écraser par cette déclaration, puis avant `mgmt-screens.js`.
-- `tests/mgmtLot38T2.test.js` : deux tests provisoires « Monde lot 38 T2 — écran d’arrivée en deux étapes et six propositions » et « Monde lot 38 T2 — texte joueur échappé dans les cartes » ; ils ne couvrent pas encore les neuf groupes de critères demandés et le fichier n'est pas inscrit aux scripts `test`/`test:watch` de `package.json`.
-- Vérifications réussies : `node --test tests/mgmtLot38T2.test.js` (2/2), `node --test tests/mgmtCadre.test.js` (12/12), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`.
-- `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai de 110 secondes de l'outil ; relancer en arrière-plan selon la procédure de la fiche.
+- `mgmt-ecran-arrivee.js` : écran à deux étapes, six cartes, interactions garder/rendre/entrer, échappement des noms, clavier et libellés proposés marqués `relu:false`.
+- `mgmt-screens.js` : première arrivée conditionnée au statut de partie neuve sans clés espoirs et sans soirée jouée ; fiche ouverte depuis l'arrivée/Organisation revient au bon écran.
+- `mgmt-ecran-organisation.js` : lien « Revoir ce qui manque » dans la colonne finances. Le panneau n'est pas ajouté : les deux colonnes utilisent une hauteur fixe de 792 px, et aucune place supplémentaire sûre n'a été vérifiée.
+- `mgmt-accueil.js` : panneau additionnel des espoirs, avec rang calculé, disponibilité/contrat, dernier combat et lien fiche. Les détails blessure/durée de guérison et date de signature ne sont pas couverts.
+- `index.html` : cache manuellement monté pour les quatre modules modifiés ; l'écran d'arrivée est avant `mgmt-screens.js`.
+- `package.json` : commande isolée `test:lot38t2` et son mode watch ajoutés ; le nouveau fichier n'a pas encore été ajouté aux commandes globales `test` et `test:watch`.
+- `tests/mgmtLot38T2.test.js` : « Monde lot 38 T2 — écran d’arrivée en deux étapes et six propositions », « Monde lot 38 T2 — texte joueur échappé dans les cartes », « Monde lot 38 T2 — les gestes de garder et rendre respectent le plafond », « Monde lot 38 T2 — les liens d’Organisation et d’Accueil ouvrent les espoirs calculés », « Monde lot 38 T2 — le rendu des cartes reste sous 200 ms ».
+- `tests/mgmtPriseEnMain.test.js` : le test de création adapté avec la citation « brief du 22/10, P4 T2/T3 » ; partie neuve vers arrivée, reprise vers Accueil.
+- Aucun changement de sauvegarde. Rien dans la presse n'a été modifié : `mgmtMediasScene` n'a pas de porte démontrée pour une ligne dérivée par manque, donc pas de source parallèle ajoutée.
+
+Vérifications ciblées passées : `node --test tests/mgmtLot38T2.test.js` (5/5), `tests/mgmtCadre.test.js` (12/12), `tests/mgmtOrganisation.test.js` (3/3), `tests/mgmtAccueil.test.js` (19/19), `tests/mgmtPriseEnMain.test.js` (8/8), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (succès). Le contrôle initial de `mgmtPriseEnMain.test.js` a échoué sur l'ancien texte visible ; l'assertion a été mise à jour avec la citation requise et le test passe. Le test réduit de sauvegarde a été lancé en arrière-plan mais son résultat n'a pas été récupéré.
 
 ### Fidélité à la planche
 
-Mesures DOM après animation non réalisées ; aucune valeur de page ne peut donc être présentée comme mesurée. Tableau de comparaison restant à faire :
+Les valeurs de planche ci-dessous sont lues dans les styles inline des fichiers `.dc.html`. Valeurs de page = CSS déclaré, pas une mesure DOM : aucun navigateur de mesure n'a été exécuté dans cette reprise.
 
 | Élément | Valeur planche | Valeur page |
 |---|---:|---:|
-| Scène | 1920 × 1080 | 1920 × 1080 via `mfEcran` (non mesuré dans un navigateur) |
-| Début horizontal de scène | 300 px | 300 px CSS |
-| Début vertical du contenu | à relever dans la planche | 112 px CSS |
-| Largeur de scène | 1564 px | 1564 px CSS |
-| Plaque | 64 px de haut | style du cadre, mesure non faite |
-| Panneau principal étape 1 | à relever | `mfPanneau`, position CSS locale déclarée |
-| Grille de cartes | à relever | 3 colonnes déclarées, dimensions non mesurées |
-| Taille du titre d'étape 1 | à relever | 58 px CSS |
-| Texte de métadonnées | 22 px minimum | 22 px CSS |
-| Palette | `#E9E6E1`, `#F0B220`, `#E23A2B`, `#0D0B0B` | couleurs présentes dans les styles du nouvel écran et du cadre |
+| Scène | 1920 × 1080 | scène mfEcran 1920 × 1080, non mesurée DOM |
+| Départ horizontal | 300 px | 300 px déclaré |
+| Plaque arrivée | 64 px haut, haut à 20 px | cadre existant, mesure DOM non faite |
+| Départ des panneaux | haut scène vers 120 px | contenu haut 112 px déclaré |
+| Panneau « manque » | padding interne 15 px | `mfPanneau` padding de 22 px |
+| Titre « manque » | 72 px, rouge `#E23A2B` | 58 px, or `#F0B220` |
+| Réplique de Leïla | 26 px | 24 px |
+| Cartes espoirs | 3 colonnes, bordure 4 px, padding 16×20 px | 3 colonnes, dimensions CSS déclarées ; mesures DOM non faites |
+| Nom de combattant | 58 px Extra Condensed | 42 px Extra Condensed |
+| Métadonnées | 22 px | 22 px |
 
-Non faits : branchement de création contrôlé par les trois conditions spécifiées ; retours de fiche ; lien organisation et panneau calculé ; bloc d'espoirs calculé à l'accueil ; presse ; suite complète de tests et adaptation des tests existants ; ajout du nouveau test aux listes npm ; mesure DOM de la fidélité. La planche demande de s'abstenir d'inventer ces résultats : ils restent à implémenter/valider. Aucun changement de sauvegarde. Aucun texte d'attribut ou de note ajouté. Questions pour Anthony : aucune question de spécification identifiée, mais la validation visuelle et le reste du branchement sont à reprendre.
+Écarts/points sautés : pas de panneau Organisation (place sûre non établie), pas de presse (aucun point d'entrée dérivé confirmé), description complète des états espoirs de la planche à compléter ; tests globaux `test` / `test:watch`, tests de reprise/espoirs complémentaires, mesure DOM et vérification visuelle à faire. Aucun test portant sur Organisation/Accueil n'a été modifié. Textes visibles écrits dans cette tranche : libellés d'arrivée marqués `relu:false`; libellés du lien Organisation et du bloc Accueil à faire relire. Questions pour Anthony : confirmer le libellé d'état d'espoir sur l'Accueil pour les statuts de soin/durée et date de signature que le modèle actuel ne calcule pas ; préciser l'emplacement Organisation si un panneau est attendu malgré les 792 px de colonnes.

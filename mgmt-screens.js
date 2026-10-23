@@ -317,7 +317,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt||!mgmtFicheLigne(G.mgmt,id)) return;
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
-    const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
+    const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_arrivee'||G.screen==='mgmt_organisation'||G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
       /* ==== [ANCRE: MGMT_PRESENTATION_RETOUR_FICHE] — Monde lot 3 T5 ==== */
       ||G.screen==='mgmt_presentation_combattant'||G.screen==='mgmt_presentation_combat'||G.screen==='mgmt_soiree_avant'
@@ -387,7 +387,11 @@ Object.assign(CL,{
     /* Lot 1 du brief démo : une soirée interrompue se rouvre là où elle a été laissée. */
     if(mgmtSoireeEnCours(G.mgmt)){ mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree'); return; }
     /* Lot 8 T1 du brief démo : une partie neuve s'ouvre sur l'arrivée ; une partie reprise ne la revoit pas. */
-    if(neuve&&typeof scr_mgmt_arrivee==='function'){ CL.go('mgmt_arrivee'); return; }
+    /* ==== [ANCRE: P4_T23B_PREMIERE_ARRIVEE] — Monde lot 38 T2 ==== */
+    const premiereArrivee=neuve&&mgmtSoireesJoueur(G.mgmt)===0
+      &&!Array.isArray(G.mgmt.espoirs)&&!Array.isArray(G.mgmt.espoirsPropose);
+    if(premiereArrivee&&typeof mgmtEspoirsFixer==='function'){ mgmtEspoirsFixer(G.mgmt); saveMgmt(); }
+    if(premiereArrivee&&typeof mgmtArriveeOuvrir==='function'){ mgmtArriveeOuvrir(1,'mgmt_accueil'); return; }
     /* Monde lot 7 (décision du 12/10/2026) : une partie reprise s'ouvre sur l'Accueil. */
     CL.go('mgmt_accueil');
   },

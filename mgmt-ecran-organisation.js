@@ -109,7 +109,8 @@ function scr_mgmt_organisation(){
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
       +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
      +groupes+`</section>`,'normal','mf-sem-p')
-     +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-     +mgmtOrgMoneyHtml(m)+`</aside>`,'normal','mf-sem-p')+`</div></div>`;
+      /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
+      +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
+       +mgmtOrgMoneyHtml(m)+`<button type="button" onclick="mgmtArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
