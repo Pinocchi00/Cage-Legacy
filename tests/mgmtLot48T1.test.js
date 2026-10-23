@@ -61,3 +61,14 @@ test('Monde lot 48 T1 — Tab et Maj+Tab changent l’onglet inscrit',()=>{
   const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtPosteOngletAjouter('autre','AUTRE',()=>'<p>contenu autre</p>');keysRegister;return {keys:typeof keysRegister,screen:scr_mgmt_poste()}})()`);
   assert.equal(r.keys,'function');assert.match(r.screen,/AUTRE/);
 });
+
+/* Relevé visuel du 23/10/2026 : la confiance 4 (la meilleure) affichait « Il n'y croit plus » parce que les niveaux des données vont du meilleur au pire et que l'indice était pris tel quel. */
+test('Monde lot 48 T1 — la confiance se lit dans le bon sens : 4 est « Il est ravi », 0 « Il n’y croit plus »',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>({haut:mgmtPosteNiveau(4).niveau,bas:mgmtPosteNiveau(0).niveau,milieu:mgmtPosteNiveau(2).niveau,hors:mgmtPosteNiveau(99).niveau,absent:mgmtPosteNiveau(undefined).niveau}))())`));
+  assert.equal(r.haut,'Il est ravi');
+  assert.equal(r.bas,'Il n’y croit plus');
+  assert.equal(r.milieu,'Il attend de voir');
+  assert.equal(r.hors,'Il est ravi');
+  assert.equal(r.absent,'Il attend de voir');
+});
