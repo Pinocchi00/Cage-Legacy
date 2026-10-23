@@ -27,6 +27,7 @@ const MGMT_OP_LIGNES={
     /* Monde lot 44 T1 : l'option masque la salle, jamais les primes. */
     {cle:'salleAmbiance',lib:'AMBIANCE DE SALLE',aide:'La salle réagit aux combats, entre deux combats. Masquée, elle continue de vivre ; les primes ne changent pas.',choix:[[true,'AFFICHÉE'],[false,'MASQUÉE']]},
   ],
+  soiree:[{cle:'sansDiscours',lib:'DISCOURS APRÈS COMBAT',aide:'Les vainqueurs prennent la parole après les combats qui comptent.',choix:[[false,'AFFICHÉS'],[true,'MASQUÉS']]}],
   son:[
     {cle:'general',lib:'VOLUME GÉNÉRAL',aide:'Tout le son du jeu.',niveau:true},
     {cle:'musique',lib:'MUSIQUE',aide:'La musique des menus et de la soirée.',niveau:true},

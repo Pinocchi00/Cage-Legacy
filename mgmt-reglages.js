@@ -15,6 +15,7 @@ const MGMT_REGLAGES_VERSION=1;
 const MGMT_REGLAGES_ORIGINE={
   combat:{vitesse:1,camera:'cable',commentaire:true,coins:true,noms:true,secousses:true},
   affichage:{plein:false,taille:1920,fps:60,mouvement:true,salleAmbiance:true},
+  soiree:{sansDiscours:false},
   son:{general:8,musique:6,salle:8,coups:7,silence:true},
   aide:{accompagnement:true},
   soiree:{vue:'defaut'},
@@ -23,6 +24,7 @@ const MGMT_REGLAGES_ORIGINE={
 const MGMT_REGLAGES_VALEURS={
   combat:{vitesse:[1,2,4],camera:['cable','plafond','large'],commentaire:[true,false],coins:[true,false],noms:[true,false],secousses:[true,false]},
   affichage:{plein:[true,false],taille:[1280,1920,2560],fps:[30,60],mouvement:[true,false],salleAmbiance:[true,false]},
+  soiree:{sansDiscours:[true,false]},
   son:{general:'niveau',musique:'niveau',salle:'niveau',coups:'niveau',silence:[true,false]},
   aide:{accompagnement:[true,false]},
   soiree:{vue:['defaut','entier','resultat']},
