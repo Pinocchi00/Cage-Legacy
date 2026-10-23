@@ -71,7 +71,21 @@ function mgmtTraitsAppliquer(partie,f,cycle,c){
 /* ==== [ANCRE: P2_T1_TRAITS_DERIVES] — Monde lot 32 T1 ==== */
 /** Les combats documentés d'un combattant, du plus ancien au plus récent, chacun avec son cycle `c` (mgmtStatsCombats rend le plus récent d'abord et garde l'entrée de m.hist dans `t`). */
 function mgmtTraitsCombats(m,id,cycle){
-  return mgmtStatsCombats(m,id).slice().reverse().map(x=>Object.assign({},x,{c:x.t&&Number.isSafeInteger(x.t.c)?x.t.c:0})).filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle);
+  if(!m||typeof m!=='object')return [];
+  const histories=[m.hist];
+  if(m.mondeVivant===true)for(const org of Object.values(m.orgs||{}))histories.push(org&&org.hist);
+  const seen=new Set(),rows=[];
+  for(const history of histories)for(let i=0;i<(Array.isArray(history)?history.length:0);i++){
+    const t=history[i];if(!t||!t.a||!t.b||!mgmtReleveValide(t.s))continue;
+    const key=mgmtStatsPaire(t);if(seen.has(key))continue;seen.add(key);
+    const a=mgmtReleveCoin(t.s,'A'),b=mgmtReleveCoin(t.s,'B');if(!a||!b)continue;
+    const c=t.a.id===id?'A':t.b.id===id?'B':null;if(!c)continue;
+    const own=c==='A'?a:b,against=c==='A'?b:a,opp=c==='A'?t.b:t.a;
+    const resultat=t.winner==='D'?'N':t.winner===c?'V':'D',fightCycle=t.c||0;
+    if(Number.isSafeInteger(cycle)&&fightCycle>=cycle)continue;
+    rows.push({t,slot:t.slot||'main',adversaire:{id:opp.id,name:opp.name||''},resultat,famille:t.family||null,round:t.round,rounds:t.rounds,pour:own,contre:against,d:a.d,c:fightCycle});
+  }
+  return rows;
 }
 const MGMT_TRAITS_MEMO=new WeakMap();
 function mgmtTraitsContexte(m,id,cycle){
