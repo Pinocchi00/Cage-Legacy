@@ -674,6 +674,12 @@ function mgmtRunEvent(m){
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
     m.hist.push({c:m.cycle,slot:cf.slot,position:cf.position,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
+    /* ==== [ANCRE: P7_T1_SALLE_PRIMES_SOIREE] — Monde lot 44 T1 ====
+       L'ambiance se met à jour ENTRE deux combats, une fois le relevé écrit ;
+       l'ordre de la carte compte. Le calcul ne tire aucun hasard. */
+    if(typeof mgmtSalleAmbiance==='function'&&!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)){
+      m.soirees=mgmtSalleAmbiance(m,m.soirees,Object.assign({},m.hist[m.hist.length-1],{h:m.hist.length-1}));
+    }
     mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le score dérive de m.hist, muté à ce combat. */
     if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});
     const ta=mgmtApplyFight(m,fa,fb,res,'A');
@@ -726,6 +732,16 @@ function mgmtRunEvent(m){
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
+  /* ==== [ANCRE: P7_T1_SALLE_PRIMES_CLOTURE] — Monde lot 44 T1 ====
+     Les primes se choisissent sur les relevés de cette soirée seulement,
+     puis la caisse paie ; E1 se lit après la prime, sur la recette nette.
+     Le passé du prédécesseur n'ajoute ni premier ni prime : son état reste
+     exactement celui d'avant, empreintes de mgmtPasse comprises. */
+  if(!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)){
+    m.lastEvent.premier=premier;
+    if(typeof mgmtPrimesSoiree==='function') mgmtPrimesSoiree(m);
+    m.lastEvent.e1=!!(debtBefore&&finance.recette>0);
+  }
   m.card.main=[];
   m.card.prelims=[];
   /* Lot 10 : la soirée jouée entre au fil (presse, ceintures, public). */

@@ -175,6 +175,9 @@ function mgmtValidEvent(e){
   }
   if(e.e1!==undefined&&typeof e.e1!=='boolean') return false;
   if(e.vu!==undefined&&(!Number.isSafeInteger(e.vu)||e.vu<0)) return false;
+  /* Monde lot 44 T1 : la première entrée de la soirée dans m.hist, et la
+     prime payée à la clôture (0 : soirée sans combat notable). */
+  if(e.premier!==undefined&&(!Number.isSafeInteger(e.premier)||e.premier<0)) return false;
   if(e.finance!==undefined){
     const f=e.finance;
     if(!f||typeof f!=='object'||Array.isArray(f)) return false;
@@ -188,6 +191,7 @@ function mgmtValidEvent(e){
     /* Lot 2B T4 : le bonus de victoire voyage avec la finance — toléré
        absent (soirée d'avant la tranche), strict quand il est là. */
     if(f.bonuses!==undefined&&(!Number.isSafeInteger(f.bonuses)||f.bonuses<0)) return false;
+    if(f.primes!==undefined&&(!Number.isSafeInteger(f.primes)||f.primes<0)) return false;
     if(!Number.isSafeInteger(f.recette)) return false;
     /* Brief démo, lot 6 : les trois critères de la satisfaction, absents des soirées d'avant. */
     if(f.criteres!==undefined){
@@ -280,7 +284,9 @@ function mgmtValidFightTrace(x){
   }
   /* Monde lot 50 T1 : `position` (rang du combat dans la carte principale, 0 = principal ; null en préliminaires) est facultative. */
   if(x.position!==undefined&&x.position!==null&&!(Number.isSafeInteger(x.position)&&x.position>=0&&x.position<=20)) return false;
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='position').sort().join(',');
+  /* Monde lot 44 T1 : pr marque le prix reçu (combat de la soirée, performance). */
+  if(x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr'&&k!=='position').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -411,6 +417,8 @@ function validateMgmt(raw){
   if(raw.visites!==undefined&&!mgmtVisitesValide(raw.visites)) return false;
   if(!mgmtSallesValide(raw)) return false;
   if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
+  /* Monde lot 44 T1 : le dernier état de salle, facultatif, strict quand il est là. */
+  if(raw.soirees!==undefined&&!mgmtSalleEtatValide(raw.soirees)) return false;
   if(raw.leila!==undefined){
     if(!raw.leila||typeof raw.leila!=='object'||Array.isArray(raw.leila)) return false;
     if(!Array.isArray(raw.leila.crushes)) return false;
@@ -455,6 +463,9 @@ function validateMgmt(raw){
       if(f.k==='retrait'&&(!mgmtValidId(f.adv)||(f.slot!=='main'&&f.slot!=='prelim'))) return false;
       if(f.k==='retrait_sortie'&&!['remonter','split','externe','reduite'].includes(f.s)) return false;
       if(f.k==='engage'&&!['split','autre','libre'].includes(f.src)) return false;
+    }else if(f.k==='prime'){
+      /* Monde lot 44 T1 : un versement, sur un combat de cette soirée. */
+      if(!mgmtPrimeFactValide(f,raw.hist)||f.c>raw.cycle) return false;
     }else if(f.k==='recrue'){
       /* Lot 5 T5 : le geste de recruter — un fait, l'identifiant du recruté et le cycle. */
       if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
@@ -670,6 +681,7 @@ function mgmtMigrate(raw){
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(Object.prototype.hasOwnProperty.call(m,'discours')&&!mgmtDiscoursValide(m.discours)) delete m.discours;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
@@ -696,6 +708,9 @@ function mgmtRepair(m){
   if(!mgmtVisitesValide(m.visites)) mgmtVisitesInit(m);
   if(!mgmtSallesValide(m)){ delete m.salles; delete m.pop; delete m.comptes; }
   if(m.cal&&m.cal.actif===true) mgmtSallesInit(m);
+  /* Monde lot 44 T1 : une clé de salle malformée est effacée, jamais ajoutée
+     à une partie qui n'en porte pas. */
+  if(m.soirees!==undefined&&!mgmtSalleEtatValide(m.soirees)) delete m.soirees;
   if(m.card&&m.card.sizeEarly!==undefined&&(!Number.isSafeInteger(m.card.sizeEarly)||m.card.sizeEarly<0||m.card.sizeEarly>m.card.sizePrelims)) m.card.sizeEarly=0;
   if(!Array.isArray(m.facts)) m.facts=[];
   /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
@@ -746,10 +761,14 @@ function mgmtRepair(m){
     /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
        des faits de titre, sans couper ni décaler leur combat par erreur. */
     const indices=new Map(),hist=[];
-    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
+    m.hist.forEach((x,i)=>{ if(x&&typeof x==='object'&&x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') delete x.pr; if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
     m.hist=hist;
     m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
-    for(const f of m.facts){ if(f.k==='title_fight') f.fight=indices.get(f.fight); }
+    /* Monde lot 44 T1 : le fait prime suit le combat, comme le fait de titre. */
+    for(const f of m.facts){ if(f.k==='title_fight'||f.k==='prime') f.fight=indices.get(f.fight); }
+    /* Monde lot 44 T1 : un fait prime malformé (ou qui pointe un combat
+       disparu) est écarté. */
+    m.facts=m.facts.filter(f=>f.k!=='prime'||mgmtPrimeFactValide(f,m.hist));
   }
   /* Lot 2 T1 : la carte {sizeMain,sizePrelims,main,prelims} se recadre — les
      deux capacités et les deux listes existent toujours, un combat qui ne
@@ -772,6 +791,10 @@ function mgmtRepair(m){
   if(!m.leila||typeof m.leila!=='object'||Array.isArray(m.leila)) m.leila={crushes:[]};
   if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
   m.leila.crushes=m.leila.crushes.filter(c=>Number.isSafeInteger(c)&&c>=0);
+  if(m.lastEvent&&typeof m.lastEvent==='object'&&m.lastEvent.finance&&m.lastEvent.finance.primes!==undefined
+    &&(!Number.isSafeInteger(m.lastEvent.finance.primes)||m.lastEvent.finance.primes<0)) delete m.lastEvent.finance.primes;
+  if(m.lastEvent&&typeof m.lastEvent==='object'&&m.lastEvent.premier!==undefined
+    &&(!Number.isSafeInteger(m.lastEvent.premier)||m.lastEvent.premier<0)) delete m.lastEvent.premier;
   if(m.lastEvent!==undefined&&m.lastEvent!==null&&!mgmtValidEvent(m.lastEvent)) m.lastEvent=null;
   if(Array.isArray(m.card.main)&&Array.isArray(m.roster)){
     const ids=new Set(m.roster.map(o=>o&&o.id));
