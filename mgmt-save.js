@@ -345,6 +345,7 @@ function validateMgmt(raw){
   if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
+  if(raw.semaine!==undefined&&!mgmtSemaineValide(raw.semaine)) return false;
   if(raw.recruteur!==undefined&&!mgmtRecruteurValide(raw.recruteur)) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
@@ -661,6 +662,7 @@ function mgmtMigrate(raw){
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
   if(Object.prototype.hasOwnProperty.call(m,'surnoms')){
     const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
