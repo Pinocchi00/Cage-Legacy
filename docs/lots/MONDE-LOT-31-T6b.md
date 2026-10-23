@@ -26,4 +26,38 @@ Sur la partie `mgmtPasseGenerer('split',{soirees:6})` (graine 20261008) et une p
 Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`, tests un par un, commit `Monde lot 31 T6b : les meilleurs et les records, les écrans` (le numéro T6b est obligatoire). Un commit après chaque point (libellés et rendu Meilleurs ; rendu Records ; clavier ; style ; tests).
 
 ## Compte rendu
-Fichiers et rôle ; tests (intitulés) ; temps mesurés ; tableau de fidélité (§3) ; libellés ajoutés (à relire par Claude) ; écarts ; questions pour Anthony.
+
+Tranche livrée sur l’écran réel du cadre. `MGMT_SU_CL.vue` vaut `liste` par défaut et n’est pas sauvegardée ; les deux écrans nouveaux dérivent leurs données de `mgmtMeilleurs` et `mgmtRecords`. `MGMT_SAVE_VERSION` reste inchangé.
+
+### Fichiers et rôle
+- `mgmt-suivi-cadre.js` : état de vue, routage des trois vues, gestes de portée/catégorie/vue, normalisation des anciens états d’écran sans `vue`, clavier et ouverture d’une fiche.
+- `mgmt-su-leaders.js` : textes `MGMT_MEILLEURS_LABELS` (`relu:false`), rendus cadre de « Les meilleurs » et « Les records », formatage des données dérivées et liens vers les fiches.
+- `ui-cadre.css` : classes `.mf-me-*` / `.mf-re-*`, gabarits des cartes, podium, encadré « RECORD BATTU », groupes et lignes de records, onglets et pastille « NOUVEAU ».
+- `index.html` : chargement de `mgmt-su-leaders.js` après `mgmt-suivi-cadre.js` et versions de cache manuelles (`mgmt-suivi-cadre.js?v=m5xxxxxxxx4`, `mgmt-su-leaders.js?v=6`, `ui-cadre.css?v=monde31t6b8`). Le script de l’ancien écran est revenu à la version de base `b8x`.
+- `tests/mgmtLeadersEcran.test.js` : huit tests de la tranche. Le test est exécuté avant `test` et `test:watch` via les hooks `pretest` / `pretest:watch`, et possède aussi les scripts ciblés `test:leaders-ecran` / `test:watch:leaders-ecran`.
+- `mgmt-ecran-classements.js` : rétabli à l’état de `60e41ae`; les implémentations et styles de l’ancien écran ne restent pas en parallèle.
+
+### Tests
+- `tests/mgmtLeadersEcran.test.js` — « huit cartes Meilleurs dans l’ordre, valeurs et fiche du premier » ; « la portée mondiale et la portée Split pilotent le calcul » ; « Records rend les détenteurs dans l’ordre, sans primes » ; « un record battu seul porte NOUVEAU et le record antérieur » ; « Meilleurs et Records tolèrent une partie sans relevé » ; « les noms de combattants sont échappés » ; « rendu rapide sur six soirées » ; « l’écran par défaut reste la liste des classements » : **8/8 réussis**. Le test de temps impose <300 ms au rendu JS des deux vues.
+- Tests existants trouvés par `grep -l mgmt_classements tests/*.js` et exécutés séparément : `mgmtAnimations.test.js` (10/10), `mgmtCadre.test.js` (12/12), `mgmtCeintures.test.js` (11/11), `mgmtEcranClassements.test.js` (8/8), `mgmtFidelite.test.js` (8/8), `mgmtMarque.test.js` (12/12), `mgmtMouvement.test.js` (9/9), `mgmtOrganisations.test.js` (9/9), `mgmtPalmaresSurnoms.test.js` (4/4), `mgmtPrelimsMaquette.test.js` (6/6), `mgmtSoiree.test.js` (14/14), `mgmtSuivi.test.js` (17/17), `nomsApostrophe.test.js` (7/7). Les deux échecs de première passe furent corrigés sans modifier les tests : l’état sans champ `vue` normalise sur `liste`, et les nouveaux textes de cadre respectent le minimum de 22 px ; `mgmtSuivi.test.js` et `mgmtCadre.test.js` ont ensuite passé.
+- Vérifications : `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Aucun `npm run check` lancé.
+
+### Fidélité aux planches (valeurs déclarées dans les styles ; pas de mesure DOM automatisée)
+| Élément | Valeur planche | Valeur page |
+|---|---|---|
+| Titre de carte | 22 px, Saira Condensed 600 | 22 px, graisse 600 |
+| Valeur principale | 96 px, Saira Extra Condensed 800 | 96 px, graisse 800 |
+| Nom du 1er | 40 px, Saira Extra Condensed 800 | 40 px, graisse 800 |
+| Lignes 2/3 | 22 px, opacité .74 | 22 px, rgba(...,.74) |
+| Grille des cartes | 4 colonnes × 2 rangées, écart 16 px | 4 × 2, gap 16 px |
+| Cartes | fond #1B1818, contour 2 px, coins coupés 14 px, padding 20 px | mêmes couleurs, contour, clip-path et padding |
+| Onglets actif/inactif | jaune #F0B220 / gris clair | actif jaune ; inactif transparent, texte et bordure gris clair |
+| Encadré RECORD BATTU | hauteur 84 px, fond clair, badge rouge | 84 px, fond #E9E6E1, badge #E23A2B |
+| Ligne de record / séparateur | grille 210 px + 1fr, padding vertical 14 px, séparateur 2 px rgba(...,.16) | mêmes valeurs |
+| Pastille NOUVEAU | fond jaune, 22 px, clip-path 6 px | #F0B220, 22 px, clip-path 6 px |
+| Pied de page des touches | touches 24 px | rendu par `mfEcran` ; Échap, Tab, G, M, V et Entrée selon la vue |
+
+### Écarts et questions
+- Pas de relevé annuel fiable sur tous les enregistrements : l’année est rendue seulement si `m.hist` fournit une date pour le même `Fight Night`; sinon l’année (y compris dans « avant : … ») est omise, jamais inférée de `c`/du numéro de soirée. La phrase du record battu reste factuelle et n’invente ni année ni détenteur.
+- Le test de rendu mesure les fonctions de rendu à <300 ms sur la partie de six soirées ; la construction du DOM jsdom du test est beaucoup plus lente et n’est pas assimilée au temps de rendu du jeu.
+- Aucun autre écart ni question ouverte pour Anthony.
