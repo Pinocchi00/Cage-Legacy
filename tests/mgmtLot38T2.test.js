@@ -29,3 +29,15 @@ test('Monde lot 38 T2 — le rendu des cartes reste sous 200 ms',()=>{
   const ms=result(w,`setSeed(9);CL.mgmtEnter(1);mgmtEspoirsFixer(G.mgmt);MGMT_ARRIVEE.etape=2;const start=performance.now();SCREENS.mgmt_arrivee();return performance.now()-start;`);
   assert.ok(ms<200,`rendu en ${ms} ms`);
 });
+test('Monde lot 38 T2 — fiches espoirs : bilan extérieur, catégorie, chiffres et phrases',()=>{
+  const w=newGameWindow();
+  const r=result(w,`setSeed(9);CL.mgmtEnter(1);const m=G.mgmt,rows=mgmtEspoirsFixer(m);return rows.map(x=>x.fiche);`);
+  assert.equal(r.length,6);
+  for(const f of r){assert.doesNotMatch(f.bilan,/undefined|NaN|—/);assert.match(f.description,/Poids|Léger|Mouche|Welter|Moyen|Plume/i);assert.ok(f.chiffres.length>=2);for(const c of f.chiffres){assert.ok(c.libelle);assert.ok(c.valeur);assert.doesNotMatch(c.valeur,/undefined|NaN|—/);}}
+  assert.ok(r.every(f=>!/^Série de 1 victoires/.test(f.phrase)));
+});
+test('Monde lot 38 T2 — six cartes bornées dans la scène',()=>{
+  const w=newGameWindow();const r=result(w,`setSeed(9);CL.mgmtEnter(1);mgmtEspoirsFixer(G.mgmt);MGMT_ARRIVEE.etape=2;return SCREENS.mgmt_arrivee();`);
+  assert.equal((r.match(/class="ma-card"/g)||[]).length,6);
+  assert.match(r,/grid-template-rows:repeat\(2,337px\)/);assert.match(r,/\.ma-card\{height:337px/);
+});

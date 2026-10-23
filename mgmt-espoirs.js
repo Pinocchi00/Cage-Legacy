@@ -32,7 +32,8 @@ function mgmtEspoirsFabrique(m,ids){
     if(s&&Number.isFinite(s.finitions))chiffres.push({libelle:'Finitions',valeur:`${s.finitions} SUR ${s.finitions}`});
     while(chiffres.length<2)chiffres.push({libelle:'Combats',valeur:String(doc?doc.docs:0)});
     const serie=s&&Number(s.serieMax)||0, traitTexte=Array.isArray(trait)&&trait.length?String(trait[0]).toLocaleUpperCase('fr'):'';
-    const phrase=serie>0?MGMT_ESPOIRS_LIBELLES.phrases.victoire.replace('{n}',serie).replace('{plural}',serie===1?'':'s'):MGMT_ESPOIRS_LIBELLES.phrases.absence;
+    const dernier=f.last==='W'?'une victoire':f.last==='L'?'une défaite':f.last==='D'?'un nul':null;
+    const phrase=serie>0?MGMT_ESPOIRS_LIBELLES.phrases.victoire.replace('{n}',serie===1?'Une':String(serie)).replace('{plural}',serie===1?'':'s'):dernier?`Son dernier combat s’est terminé par ${dernier}.`:MGMT_ESPOIRS_LIBELLES.phrases.absence;
     const ville=typeof mgmtIdentiteVille==='function'?mgmtIdentiteVille(f):f.city||f.ville||'';
     out.push({id:f.id,angle:angles[i],etiquette:MGMT_ESPOIRS_LIBELLES.angles[angles[i]],origine:f.org===mgmtOrgNom(m)?'effectif':(f.org?'monde':'libre'),raison:MGMT_ESPOIRS_LIBELLES.phrases.debut.replace('{n}',doc?doc.docs:0),fiche:{bilan:record,description:`${mgmtDivisionLabel(f.div)} · ${f.age||'—'} ans${ville?' · '+ville:''}`,chiffres:chiffres.slice(0,2),trait:traitTexte==='DEBUTANT'?'':traitTexte,traitNeutre:traitTexte==='DEBUTANT',phrase}});
  }

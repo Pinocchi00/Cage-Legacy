@@ -16,6 +16,15 @@ Règles communes : cherche toi-même dans le code ; **additif** : une partie anc
 
 ## Compte rendu
 
+### Reprise demandée (23/10/2026)
+
+- `mgmt-espoirs.js` : bilan extérieur avec priorité au relevé documenté puis fiche extérieure, division française, ville d'identité si connue, chiffres libellés et formatés avec virgule, phrases de série grammaticales et absence du trait DEBUTANT seul.
+- `mgmt-ecran-arrivee.js` : règles d'étape 2 fixant la grille à six cartes de 337 px en deux rangées.
+- `tests/mgmtLot38T2.test.js` : « Monde lot 38 T2 — fiches espoirs : bilan extérieur, catégorie, chiffres et phrases » et « Monde lot 38 T2 — six cartes bornées dans la scène ».
+- Mesures rapportées par Anthony sur page/planche : cartes page constatées à ~540 px et 1196 px de hauteur cumulée ; cible planche 337 px/carte et deux rangées dans 690 px. Corrections CSS déclarées à 511 × 337 px, DOM non mesuré dans cette session. Données : H-heavy/H-bantam/F-feather → libellé `mgmtDivisionLabel`; ville obtenue via `mgmtIdentiteVille`.
+- Validé : tests ciblés `mgmtLot38T2`, `mgmtCadre`, `mgmtAccueil`, `mgmtOrganisation`, `mgmtPriseEnMain` (tous verts).
+- Restent à faire avant clôture : planche/page étape 1 et ses mesures; rendre Leïla à la position/typo exacte demandée; contrôler les positions DOM après animation; mettre le nouveau test dans les commandes globales `test` et `test:watch`; exécuter `node tools/verif-versions.js origin/main` et ESLint; tableau de fidélité complet à 10 éléments. Aucun changement de sauvegarde.
+
 **État partiel : branchement et premiers blocs ajoutés ; plusieurs critères de fin demeurent non validés.**
 
 - `mgmt-ecran-arrivee.js` : écran à deux étapes, six cartes, interactions garder/rendre/entrer, échappement des noms, clavier et libellés proposés marqués `relu:false`.
