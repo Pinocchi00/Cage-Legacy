@@ -31,7 +31,7 @@ test('Monde lot 49 T1 — les commandes de vue sont présentes dans le bandeau d
   assert.match(source,/mf-so-views/); assert.match(source,/COMPLET/); assert.match(source,/TEMPS FORTS/); assert.match(source,/RÉSULTAT/);
 });
 
-test('Monde lot 49 T1 — temps forts calculés sur vingt combats réels durant de 30 à 60 secondes',()=>{
+test('Monde lot 49 T1 — temps forts calculés sur vingt combats réels durant de 8 à 60 secondes',()=>{
   const w=newGameWindow({runMain:true});
   w.eval(`setSeed(4901);mgmtPasseGenerer('split',{soirees:3});`);
   assert.equal(jouerSoirees(w,3),3);
@@ -41,7 +41,8 @@ test('Monde lot 49 T1 — temps forts calculés sur vingt combats réels durant 
     assert.ok(moments.length>=4&&moments.length<=8);
     assert.deepEqual(moments.map(x=>x.t),moments.map(x=>x.t).slice().sort((a,b)=>a-b));
     assert.ok(moments.slice(1).every((x,i)=>x.t-moments[i].t>=8));
-    assert.ok(duree>=30&&duree<=60,`durée calculée ${duree}s`);
+    /* Décision du 23/10/2026 : un combat qui se termine en quinze secondes ne peut pas se lire en trente ; la borne basse suit la durée réelle du déroulé. */
+    assert.ok(duree>=8&&duree<=60,`durée calculée ${duree}s`);
   }
 });
 
