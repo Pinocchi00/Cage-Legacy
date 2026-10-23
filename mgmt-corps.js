@@ -719,7 +719,8 @@ function mgmtRunEvent(m){
      est encore entière mais on lit m.hist.slice(premier), jamais m.card
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
-  if(m.memoire!==undefined||typeof mgmtMemoireSoiree==='function') mgmtMemoireSoiree(m);
+  /* Poids de la sauvegarde (1,9 Mo, sacré ; `main` y est collé à 21 octets) : les six ans de passé de chaque organisation n'écrivent pas de mémoire. */
+  if((m.memoire!==undefined||typeof mgmtMemoireSoiree==='function')&&!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)) mgmtMemoireSoiree(m);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   /* ==== [ANCRE: P7_T1_SALLE_PRIMES_CLOTURE] — Monde lot 44 T1 ====
      Les primes se choisissent sur les relevés de cette soirée seulement,
