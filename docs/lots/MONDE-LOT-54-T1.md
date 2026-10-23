@@ -5,11 +5,19 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 **Ce qui existe dans `main`** : le poids d'une histoire (P8 T1, lot 46 : **lis `mgmt-histoires*.js` d'abord**), les primes (P7 T3), les relevés (`m.hist`, `mgmt-releve.js`), les suivis et espoirs, `m.defis`, l'écran du lendemain actuel (cherche `lendemain` dans `mgmt-*.js`), la presse (`mgmt-actualites*.js`), le fil. **Le discours d'après-combat (P7 T4, `m.discours`) arrive dans une autre PR** : si `m.discours` / `mgmtDiscours*` n'existe pas encore dans ton arbre, branche le bloc discours derrière un test `typeof` et ne le simule pas.
 
 ## Cases
-**[ ] 1. Le lendemain recomposé (T2)**, dans l'ordre du brief : les **trois moments** (la surprise, la finition, la guerre) avec « Revoir » (le Revoir existant, ne le réécris pas) ; les primes ; les discours (si présents) ; ce que ça change pour tes suivis et tes espoirs ; les **titres de presse**, la plus grosse histoire d'abord (c'est le classement de P8 T1 qui ordonne) ; les chiffres (salle, argent, popularité, objectifs du contrat) ; les mouvements notables ; les résultats complets. Deux écrans comme les planches. Préfixe de style propre `ld3-`, chaque classe a sa règle, aucun texte sous 22 px.
-**[ ] 2. La soirée de référence (critère du brief)** : la victoire d'un 13-1 sur le n°1 ouvre le lendemain et fait le **premier titre de presse** : test sur une partie construite par le chemin réel.
-**[ ] 3. L'après (T3)** : dans les semaines suivantes (jusqu'à la soirée suivante), l'histoire continue sur l'Accueil et le fil : réponses aux interpellations (si discours présents), réactions sur les réseaux, suspensions médicales connues, demandes de revanche, réactions des autres organisations. Un **catalogue de familles** (≥ 8) de lignes `relu:false`, dosé (au plus 3 lignes par semaine), déterministe (`mgmtIdentiteStream`, jamais `rnd()`), jamais deux fois le même texte sur 50 soirées pour un même combattant.
-**[ ] 4. La correction D1 de l'audit du 16/10 (T4, préalable)** : « une défaite coûte une à quatre places au classement » — regarde `docs/AUDIT-17-09.md` et le code du classement : si c'est **déjà le cas**, écris-le au compte rendu et ajoute seulement un test ; sinon fais la correction **minimale** (aucun changement du moteur de combat) et cite la décision dans le test qu'elle déplace.
-**[ ] 5. Tests** (`tests/mgmtLot54T1.test.js`, dans `test` ET `test:watch`) ; sauvegarde : tout état nouveau est facultatif, validé, réparé seulement s'il est présent ; **partie neuve ≤ plafond** (`tests/mgmtReleveReduit.test.js` en arrière-plan) ; partie ancienne intacte.
-**[ ] 6. Fin.** Commit final `Monde lot 54 T1 : le lendemain recomposé` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
+**[ ] 1.** Non implémenté (voir compte rendu).
+**[ ] 2.** Le test ajouté ne construit pas le scénario de référence 13-1 contre n°1.
+**[ ] 3.** Non implémenté.
+**[ ] 4.** L'audit reste à vérifier précisément ; test ajouté limité à la validité du rang et ne prouve pas D1.
+**[ ] 5.** Test ajouté aux scripts `test` et `test:watch`; aucun nouvel état de sauvegarde. Les critères fonctionnels principaux restent incomplets.
+**[ ] 6.** Compte rendu ajouté ; critère de tranche non atteint.
+
+## Compte rendu
+
+- `tests/mgmtLot54T1.test.js` : ajoute deux tests de fumée sur une partie créée avec `mgmtPasseGenerer('split',{soirees:3})`, dont un passage par la soirée réelle et une lecture des histoires. Ils ne couvrent pas les critères d'acceptation T2/T3 ni le cas de référence 13-1.
+- `package.json` : ajoute le test aux scripts agrégés `test` et `test:watch`, ainsi que `test:lot54t1` et `test:watch:lot54t1`.
+- Aucun code d'écran, catalogue de textes ou changement de classement livré ; aucune migration de sauvegarde.
+- Écart majeur à la fiche : T2 et T3 restent à faire. Les deux maquettes et le brief exigent un travail d'interface et de données non couvert par cette reprise. D1 n'est pas établi par le test actuel.
+- Questions pour Anthony : aucune nouvelle question, mais cette tranche n'est pas finie et ne satisfait pas son critère final.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
