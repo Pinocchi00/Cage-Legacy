@@ -64,7 +64,7 @@ test('Pendant la soirée, aucune section de la barre ne s\'ouvre ; elles se rouv
   const win=neuve(7);
   const sections=`[...document.querySelectorAll('.mf-barre-item[data-section]')].filter(b=>!['options','menu'].includes(b.dataset.section))`;
   const etat=()=>res(win,`const s=${sections}; return {n:s.length,ouvertes:s.filter(b=>!b.disabled&&!b.classList.contains('grise')).length};`);
-  assert.equal(etat().n,12);   /* décision du 12/10/2026 : l’Accueil est la première section (lot 7) : douze sections */ assert.equal(etat().ouvertes,0,'ouverture : grisée');
+  assert.equal(etat().n,13);   /* brief du 22/10, P3 T2b : une section Actualites de plus (12 -> 13) */ assert.equal(etat().ouvertes,0,'ouverture : grisée');
   touche(win,'Enter'); assert.equal(etat().ouvertes,0,'entre-deux : grisée');
   touche(win,'f'); assert.equal(etat().ouvertes,0,'avant-combat : grisée'); touche(win,'Escape');
   win.eval(`CL.mgmtSoRegarder()`); assert.equal(win.eval(`document.querySelectorAll('.mf-barre').length`),0,'le combat : plein écran, pas de barre');
