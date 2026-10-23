@@ -42,14 +42,14 @@ function mgmtPrimesCandidats(m){
   return out;
 }
 
-/** Le combat de la soirée : le plus fort de la carte principale ; un
- *  préliminaire ne l'obtient que s'il est le seul combat notable. Pur. */
+/** Le combat de la soirée : le plus fort sur finition + guerre + surprise,
+ *  toutes cartes confondues. Un préliminaire ordinaire (score 0) n'est jamais
+ *  candidat ; à score égal, la carte principale passe devant. Pur. */
 function mgmtPrimesCombatDeLaSoiree(candidats){
   const notables=(candidats||[]).filter(x=>x.score>0);
   if(!notables.length) return null;
-  const mains=notables.filter(x=>x.t.slot==='main');
-  const pool=mains.length?mains:notables;
-  return pool.slice().sort((a,b)=>b.score-a.score||b.i-a.i||String(a.t.a&&a.t.a.id).localeCompare(String(b.t.a&&b.t.a.id)))[0]||null;
+  const principal=x=>x.t&&x.t.slot==='main'?1:0;
+  return notables.slice().sort((a,b)=>b.score-a.score||principal(b)-principal(a)||b.i-a.i||String(a.t.a&&a.t.a.id).localeCompare(String(b.t.a&&b.t.a.id)))[0]||null;
 }
 
 /** Deux performances distinctes, hors du combat de la soirée quand d'autres

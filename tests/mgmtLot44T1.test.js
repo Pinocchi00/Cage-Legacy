@@ -100,15 +100,15 @@ test('Monde lot 44 T1 — le combat de la soirée et deux performances distincte
       const idsB=b.filter(x=>x.type==='pf').map(x=>x.a);
       const c=soiree(m,3,[{slot:'main',family:'dec',round:3,sig:10}]);
       return {a:a.map(x=>x.type),csA:csA&&csA.fight.slot,idsA,expA:[m.roster[2].id,m.roster[3].id],distinctA:new Set(idsA).size,
-        b:b.map(x=>x.type),csBi:csB&&csB.i,csBkd:csB&&csB.fight.s&&csB.fight.s.c[0][10],idsB,expB:[m.roster[0].id,m.roster[1].id],distinctB:new Set(idsB).size,
+        b:b.map(x=>x.type),csBi:csB&&csB.i,csBkd:csB&&csB.fight.s&&csB.fight.s.c[0][10],idsB,expB:[m.roster[2].id,m.roster[3].id],distinctB:new Set(idsB).size,
         c:c.length,pr3:m.lastEvent.finance.primes,tres3:m.treasury};`);
     assert.deepEqual(r.a,['cs','pf','pf']);
     assert.equal(r.csA,'main');
     assert.equal(r.distinctA,2);
     assert.deepEqual(r.idsA,r.expA);
     assert.deepEqual(r.b,['cs','pf','pf']);
-    assert.equal(r.csBi,1);
-    assert.equal(r.csBkd,2);
+    assert.equal(r.csBi,0);
+    assert.equal(r.csBkd,0);
     assert.deepEqual(r.idsB,r.expB);
     assert.equal(r.distinctB,2);
     assert.equal(r.c,0);
@@ -142,19 +142,22 @@ test('Monde lot 44 T1 — sur quarante soirées réelles, les primes restent sou
   try{
     w.eval(`setSeed(4401);(function(){const m=mgmtDefault('split');m.graine=mgmtGraineNeuve();mgmtNewRoster(m);mgmtNewPile(m);
       G={theme:'dark',mgmt:m};mgmtAgendaInit(m);})()`);
-    let brut=0,primes=0,soirees=0;
+    let brut=0,primes=0,soirees=0,primees=0;
     for(let k=0;k<40;k++){
       const n=jouerSoirees(w,1,{});
       if(!n) break;
       const f=JSON.parse(w.eval('JSON.stringify(G.mgmt.lastEvent&&G.mgmt.lastEvent.finance||null)'));
       if(!f) break;
       brut+=(f.ticketing||0)+(f.tv||0);
-      primes+=Number.isSafeInteger(f.primes)?f.primes:0;
+      const paye=Number.isSafeInteger(f.primes)?f.primes:0;
+      primes+=paye;
+      if(paye>0) primees++;
       assert.ok(!Number.isFinite(f.primes)||f.primes>=0);
       soirees++;
     }
     assert.equal(soirees,40);
     assert.ok(brut>0);
+    assert.ok(primees>0,'au moins une soirée simulée paie des primes (mesure non vide)');
     assert.ok(primes/brut<0.03,`primes ${primes} / brut ${brut} = ${(primes/brut*100).toFixed(2)} %`);
   }finally{w.close();}
 });

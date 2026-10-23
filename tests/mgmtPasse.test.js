@@ -57,8 +57,8 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
        658ce68e78f452a4/b153a42da14353d7 → 7277e3fc6f365200/b751300f43c7e2ef. Split et Pacific inchangés. */
     'ultimate-rim|20261008': '7277e3fc6f365200', 'ultimate-rim|20261009': 'b751300f43c7e2ef',
     'fighting-pacific-championship|20261008': 'ff903675a846298e', 'fighting-pacific-championship|20261009': 'c11eaada7162a87f',
-    jouee3: 'ad34b123fcafa8ab', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
-    /* Brief du 22/10, P7 T3 (primes) : m.hist porte pr, m.soirees le dernier état de salle, finance.primes et les faits prime sont ajoutés, et la caisse paie — seuls ces champs changent ; empreinte recalculée le 23/10/2026 (5280d7d504885a51 → ad34b123fcafa8ab, après avoir figé les soirées du prédécesseur : la salle et les primes n'y écrivent rien). */
+    /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
+    jouee3: 'ad34b123fcafa8ab', /* Décision « brief du 22/10, P7 T3 : les primes » : m.hist porte pr, m.soirees le dernier état de salle, finance.primes et les faits prime sont ajoutés, et la caisse paie — seuls ces champs changent ; empreinte recalculée le 23/10/2026 (5280d7d504885a51 → ad34b123fcafa8ab), après avoir figé les soirées du prédécesseur (la salle et les primes n'y écrivent rien). */
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);

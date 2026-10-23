@@ -28,6 +28,12 @@ Règles communes : **additif** ; **aucun écran** ici (l'écran de la soirée av
 - `index.html`, `sw.js`, `package.json` : scripts, `?v=`, listes `test` / `test:watch` et scripts `test:lot44t1` / `test:watch:lot44t1`.
 - `tests/mgmtLot44T1.test.js` (nouveau, 10 tests) ; `tests/mgmtPasse.test.js`, `tests/mgmtEconomie.test.js`, `tests/mgmtSalles.test.js` : empreintes/formules mises à jour avec la décision citée.
 
+**Reprise du 23/10/2026 (relecture)**
+- Le combat de la soirée se choisit désormais sur le **score le plus fort de toute la carte** (finition + guerre + surprise), la carte principale ne servant qu'à départager deux scores égaux ; un préliminaire ordinaire (score 0) reste exclu. Le test 4 attend donc le KO au 1er round du préliminaire comme combat de la soirée, et les deux performances sur la guerre du co-principal.
+- Le test de mesure sur 40 soirées vérifie maintenant qu'au moins une soirée paie réellement des primes (la mesure n'est plus vide par construction).
+- Les trois nouveaux scripts ont un `?v=` nommé (`lot44t1a/b/c`) au lieu des marqueurs provisoires `1x`/`1xx`.
+- Le commentaire d'empreinte `jouee3` cite la décision « brief du 22/10, P7 T3 : les primes » avec l'ancienne → nouvelle valeur ; l'empreinte reste `ad34b123fcafa8ab` (la sélection du combat ne change ni le total payé ni l'ordre des faits).
+
 **Montants choisis**
 - Un versement = `max(1, round(1 % de la bourse))`, les quatre versements plafonnés ensemble à `floor(2,9 % × (billetterie + droits TV))` ; 0 si le plancher n'est pas atteint.
 - Mesure sur 40 soirées réelles (`probe-lot44f`) : primes **1,60 %** des recettes brutes, maximum **2,64 %**, aucune soirée sans prime notable. La maquette (50 000 € par prime) reste une illustration : son ordre de grandeur casserait l'économie recalibrée (98,8 k$ brut / 5,3 k$ net sur l'ancien rapport). Écart signalé, pas corrigé ici.
