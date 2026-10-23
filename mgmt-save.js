@@ -278,7 +278,9 @@ function mgmtValidFightTrace(x){
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s').sort().join(',');
+  /* Monde lot 50 T1 : `position` (rang du combat dans la carte principale, 0 = principal ; null en préliminaires) est facultative. */
+  if(x.position!==undefined&&x.position!==null&&!(Number.isSafeInteger(x.position)&&x.position>=0&&x.position<=20)) return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='position').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
