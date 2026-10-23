@@ -12,3 +12,11 @@ Branche : `p11-ceremonie-carnet` (la branche courante de ce dossier ; commits IC
 **[ ] 5. Fin.** Commit final `Monde lot 55 T1 : la cérémonie et le carnet` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- État constaté à la reprise : seul le commit de la fiche (`645a108`) figure dans l’historique de cette branche ; aucun fichier de la tranche ni test n’était présent dans le dépôt. Les modifications Git préexistantes des fichiers `.opencode/agents/*` et `opencode.json` sont étrangères à cette tranche et sont laissées intactes.
+- Vérifications documentaires faites : sections P9 et P11 du brief, maquettes `UniCeremonie` et `UniCarnet`, et points d’entrée de validation/réparation des sauvegardes. Les maquettes requièrent une implémentation d’écran complète, et la fin d’année doit être raccordée au flux existant.
+- Non réalisé : calcul et persistance des prix, écran de cérémonie et carnet, tests exigés, audit et vérification de la tranche. Aucun code n’a été ajouté ni présenté comme achevé.
+- Écart à la fiche : la tranche reste entièrement à faire ; aucun commit de livraison n’a été produit. Il serait trompeur de déclarer les tests verts ou d’émettre `TOUT_EST_FINI`.
+- Questions pour Anthony : aucune question de spécification précise identifiée dans la fiche ; le point restant est l’implémentation complète de la tranche sur cette branche.
