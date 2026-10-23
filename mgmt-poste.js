@@ -87,17 +87,19 @@ function mgmtOffresCreer(m){
   const ranks=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m),rang=(ranks.find(x=>x.id===active)||{}).rang||4;
   const pool=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(ranks.find(x=>x.id===o.id)||{}).rang||8}));
   const candidats=pool.filter(x=>rang<=2?x.r<rang:x.r>rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r).slice(0,rang<=2?1:3);
-  m.offres=candidats.map(({o,r})=>({orgId:o.id,poste:'Matchmaker',salaire:3200+Math.max(0,8-r)*200,texte:'Nous aimerions te confier le poste de matchmaker.',relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)}));
+  m.offres=candidats.map(({o,r})=>({orgId:o.id,poste:'Matchmaker',salaire:3200+Math.max(0,8-r)*200,texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de matchmaker chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)}));
   return m.offres;
 }
 function mgmtPosteRaisons(m,orgId){
   const ranks=mgmtOrgClassement(m)||[],org=mgmtOrgParId(orgId),profil=org&&org.profil, n=mgmtOrgNiveaux(m,orgId)||{};
   const puissance=(ranks.find(x=>x.id===orgId)||{}).rang||8;
+  const roster=m.orgs&&m.orgs[orgId]&&Array.isArray(m.orgs[orgId].roster)?m.orgs[orgId].roster:[];
+  const top=roster.map(f=>({f,r:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.r>=0).sort((a,b)=>a.r-b.r)[0];
   return [
     `Scène : salle de ${Math.max(0,Math.round(n.stade||0))} places, diffuseur ${puissance<=2?'de premier rang':'en développement'}, budget de recrutement ${Math.max(1,Math.round((profil&&profil.caisse||0)/1000))} k€.`,
-    `Classement : ${puissance<=1?'organisation la mieux classée':`organisation classée ${puissance}e`}; ses meilleurs combattants sont mesurés au classement mondial.`,
-    `Agents libres : priorité d’approche liée au rang ${puissance}, sans garantie de signature.`,
-    `Choc des organisations : ${puissance<=4?'une proposition commune peut être envisagée':'les propositions restent possibles selon le rang'}.`
+    `Meilleurs du monde : ${top?`${top.f.nom||'Un combattant'} est classé ${top.r+1}e de sa catégorie mondiale`:'aucun combattant de cette organisation ne figure au classement mondial disponible'}.`,
+    `Agents libres : le rang ${puissance} place ${org.nom} ${puissance<=2?'parmi les premières organisations approchées':'dans une position moins prioritaire'} pour les meilleurs libres.`,
+    `Choc des organisations : ${puissance<=4?`${org.nom} est assez bien classée pour recevoir plus souvent une proposition et voir ses propres offres acceptées`:`${org.nom} peut proposer un choc, mais son rang rend l'accord moins fréquent`}.`
   ];
 }
 function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}

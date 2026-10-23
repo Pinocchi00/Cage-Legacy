@@ -12,6 +12,14 @@ test('Monde lot 58 T1 — offres facultatives, validées et réparées sans cré
 
 test('Monde lot 58 T1 — quatre raisons de rejoindre plus fort sont des informations concrètes',()=>{
   const w=newGameWindow({runMain:true});
-  const n=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});return mgmtPosteRaisons(m,'split').length})()`);
-  assert.equal(n,4);
+  const n=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});if(!m.poste)mgmtPosteInit(m);const r=mgmtPosteRaisons(m,'split');const offers=mgmtOffresCreer(m);G.mgmt=m;return {r,offers,html:scr_mgmt_poste()}})())`));
+  assert.equal(n.r.length,4);
+  assert.equal(new Set(n.r).size,4);
+  assert.match(n.r[0],/Scène/);
+  assert.match(n.r[1],/Meilleurs du monde/);
+  assert.match(n.r[2],/Agents libres/);
+  assert.match(n.r[3],/Choc des organisations/);
+  assert.ok(n.offers.length<=3);
+  assert.ok(n.offers.every(o=>o.relu===false&&o.texte.includes('matchmaker')));
+  assert.match(n.html,/LES OFFRES/);
 });
