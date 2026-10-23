@@ -182,7 +182,8 @@ function mgmtCombatProfile(f,profil){
     if(f.generation===MGMT_IDENTITE_GENERATION) opt.style=mgmtIdentiteStyle(f);
     p=makeFighter(opt);
     /* ==== [ANCRE: MONDE34T1B_ATTRIBUTS_CREATION] — Monde lot 34 T1b ==== */
-    const org=mgmtOrgParNom(f.org);
+    const origine=/^o([0-7])mg\d+$/.exec(f.id);
+    const org=origine?MGMT_ORGANISATIONS[Number(origine[1])]:null;
     mgmtOrgAttributsTirage(p,profil===undefined?(org&&org.profil):profil);
   }finally{
     setSeed(saved);

@@ -165,6 +165,11 @@ function mgmtNewRoster(m,opts){
   const avant=m.effectifs===0;
   /* ==== [ANCRE: MONDE34T1B_PROFIL_CREATION] — Monde lot 34 T1b ==== */
   const profil=opts&&opts.profil||mgmtOrgProfil(m);
+  /* ==== [ANCRE: MONDE34T1B_ORIGINE_STABLE] — Monde lot 34 T1b ==== */
+  /* Préfixer l'identité seulement, jamais m.idPrefixe : ce dernier désigne une sous-partie
+     et inhibe saveMgmt. Le préfixe immuable voyage avec les combattants transférés. */
+  const prefixeNaissance=!m.idPrefixe&&['finisseurs','soumissions'].includes(profil.manque&&profil.manque.id)
+    ?'o'+MGMT_ORGANISATIONS.findIndex(o=>o.nom===m.org):'';
   /* Monde lot 2 T2 : les combattants sont tirés au mélange de pays de l'organisation. */
   const paysPoids=mgmtOrgPaysTirage(m,profil,mgmtOrgPaysPoids(m));
   /* Monde lot 1 T3 : sans option, rien ne change (mêmes tirages, mêmes lignes). */
@@ -187,7 +192,7 @@ function mgmtNewRoster(m,opts){
     /* Monde lot 2 T2 : un tirage pondéré au mélange de pays de l'organisation (paysPoids de
        son identité) par emplacement ; le retirage du prénom rejoue le même pays. */
     let ck=mgmtPaysTire(rnd(),paysPoids);
-    const id=mgmtNextId(m);
+    const id=prefixeNaissance+mgmtNextId(m);
     let nm=mgmtMakeName(div.gender,ck), guard=0;
     /* Corrections du 08/10, 5.1 : aucun homonyme exact, et un nom de famille déjà porté ne revient que pour une fratrie voulue (même pays, tirée comme
        mgmtFratrie la lit, au plus MGMT_FRATRIES_VOULUES par effectif). Le chemin d'avant (effectifs 0) garde ses tirages tels quels. */

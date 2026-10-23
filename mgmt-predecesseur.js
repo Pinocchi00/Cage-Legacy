@@ -109,7 +109,7 @@ function mgmtPredecesseurRecrute(m,k,cfg){
       /* ==== [ANCRE: MONDE34T1B_RECRUES] — Monde lot 34 T1b ==== */
       const profil=mgmtOrgProfil(m), espoirs=profil.manque&&profil.manque.id==='espoirs';
       const x=cfg.renom?(m.roster.some(f=>f.div===d.id&&(f.libre||mgmtIsRetired(f)))?dispo.reduce((meilleur,y)=>(meilleur&&mgmtStar(meilleur)>=mgmtStar(y)?meilleur:y),null):null)
-                        :(m.roster.filter(f=>f.div===d.id&&!mgmtIsRetired(f)).length<(cfg.plan[d.id]||0)?mgmtOrgRecrueTirage(m,dispo.filter(y=>y.age<=(espoirs?38:ageMax)),profil):null);
+                        :(m.roster.filter(f=>f.div===d.id&&!mgmtIsRetired(f)).length<(cfg.plan[d.id]||0)?mgmtOrgRecrueTirage(m,dispo,profil,espoirs?38:ageMax):null);
       const cible=x&&mgmtExteriorPourOffre(m,x.id);
       if(!cible) return;
       if(mgmtContratSigner(m,x.id,3,mgmtBourseSouhaitee(m,cible,false)).ok) n++; else return;

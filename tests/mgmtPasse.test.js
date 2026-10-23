@@ -46,7 +46,10 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
   /* Monde lot 16 — décision d'Anthony du 17/10/2026 (palmarès réalistes : bilans plafonnés à 90 % avec une défaite au moins dès 12 combats, âge médian ≈ 29,7, classement qui compte la carrière, champion initial réaliste) : empreintes de création et de trois soirées recalculées le 18/10/2026 ; le nombre de tirages ne change pas (seuls les bilans, les âges et les titres changent). */
   const AVANT = {
     'split|20261008': '818706c1ca24e1aa', 'split|20261009': '74731cb3b87415c4',
-    'ultimate-rim|20261008': 'e04c79c0e03a267f', 'ultimate-rim|20261009': '503f21eb7047f705',
+    /* ==== [ANCRE: MONDE34T1B_EMPREINTES] — Monde lot 34 T1b ==== */
+    /* brief du 22/10, P4 T1b : les manques de style changent la génération.
+       Rim : âge tiré 20–30 ans ; empreintes mesurées après comparaison JSON des trois mondes avec origin/main. */
+    'ultimate-rim|20261008': '3e4c8b349737bd93', 'ultimate-rim|20261009': '88fa117b84005100',
     'fighting-pacific-championship|20261008': 'f020fff72ce4d9a9', 'fighting-pacific-championship|20261009': 'c2612f3e054a41da',
     jouee3: '5280d7d504885a51', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
   };

@@ -261,13 +261,13 @@ function mgmtOrgAttributsTirage(p,profil){
   if(keys.length) p.overall=overall(p);
 }
 /** Préférence de recrutement : tri pondéré déterministe du vivier existant, jamais un retrait du roster. */
-function mgmtOrgRecrueTirage(m,candidats,profil){
+function mgmtOrgRecrueTirage(m,candidats,profil,ageMax){
   const id=profil.manque&&profil.manque.id;
-  if(!['espoirs','experimentes','a-domicile'].includes(id)) return candidats[0]||null;
+  if(!['espoirs','experimentes','a-domicile'].includes(id)) return candidats.find(f=>f.age<=ageMax)||null;
   const pays=mgmtOrgPaysDomicile(m);
-  if(id==='a-domicile'&&!pays) return candidats[0]||null;
+  if(id==='a-domicile'&&!pays) return candidats.find(f=>f.age<=ageMax)||null;
   const poids=f=>id==='espoirs'?(f.age<25?0.05:1):id==='experimentes'?(f.age>=32?0.05:f.age<25?2:1):(f.ck===pays?0.1:1);
-  return candidats.map(f=>({f,score:-Math.log(Math.max(1e-9,mgmtIdentiteStream(f.id,'manque-recrue|'+m.cycle,m)()))/poids(f)}))
+  return candidats.filter(f=>f.age<=ageMax).map(f=>({f,score:-Math.log(Math.max(1e-9,mgmtIdentiteStream(f.id,'manque-recrue|'+m.cycle,m)()))/poids(f)}))
     .sort((a,b)=>a.score-b.score)[0]?.f||null;
 }
 

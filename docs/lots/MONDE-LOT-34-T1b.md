@@ -55,7 +55,7 @@ Fichiers et rôle ; tableau des mesures (par manque, trois graines) et réglages
 - Premier essai sur 20261008 : espoirs 0,417 / 0,508 = 0,821 (hors cible) ; potentiel 66 / 70,362 (−4,362) ; expérimentés 0 / 0,136 ; jeunes-partout 0,776 / 0,457 = 1,699 ; finisseurs 37,468 / 56,255 = 0,666, finitions passées 0,333 / 0,513 = 0,649 ; soumissions 36,922 / 55,799 = 0,662, passé 0,111 / 0,172 = 0,646. Pure Impact : indicateur structurellement nul, marqué NON MESURABLE.
 - Deuxième vérification rapide terminée : 1 344 succès, deux assertions en échec (`mgmtMondeVivant` loi du score, `mgmtReleveReduit` poids 1,9 Mo), un todo préexistant ; pas d'erreur de chargement/OOM. Audit versions vert. Ces deux échecs restent à diagnostiquer aux garde-fous.
 
-### Point 3 — réglage et rapport
+### Point 3 — réglage et rapport (mesures intermédiaires, remplacées par le bilan d'arrêt ci-dessous)
 
 - Rapport détaillé versionné : `tools/reports/MANQUES-MESURES.md` (valeurs brutes, sept autres, rapports et verdicts). Les scripts de sondage et JSON de travail de ce dossier restent ignorés.
 - Réglages retenus : espoirs, tirage de 28 à 38 ans (premier essai 25–38 insuffisant au passé court : rapport 0,821) ; expérimentés, 20–30 ans avec exposant 1,5 favorisant les jeunes ; potentiel/pic de niveau plafonné à 66 ; finisseurs, attributs ×(0,45+0,08u) ; soumission ×(0,35+0,08u). Le premier essai commun ×(0,60+0,08u) passait les attributs mais pas toutes les méthodes historiques (finition 4242 : 0,837 ; soumission 777 : 0,940). Un réglage supplémentaire des attributs a suffi.
@@ -72,7 +72,58 @@ Fichiers et rôle ; tableau des mesures (par manque, trois graines) et réglages
 | soumissions, rapport victoires par soumission | 0,300 | 0,395 | 0,269 |
 | à domicile | non mesurable | non mesurable | non mesurable |
 
-- Tous les indicateurs mesurables passent sur les trois graines ; `a-domicile` est explicitement signalé, pas présenté comme une réussite.
+- À cette étape intermédiaire, tous les indicateurs mesurables passaient sur les trois graines ; ce constat est invalidé par la correction d'origine immuable ci-dessous. `a-domicile` est explicitement signalé, pas présenté comme une réussite.
 - Comparaison JSON contre les fonctions originales d'`origin/main`, dans des fenêtres neuves et avec des initialisations identiques : Split, Pure Impact et Undisputed Cage identiques intégralement sur chacune des trois graines. Seules les cinq autres sous-parties changent. Le premier sondage mélangeait une référence après 62 soirées avec un état neuf ; il a été corrigé, puis les trois comparaisons ont été entièrement refaites.
 - Ancien profil sans manque ni force, huit organisations, graine 20261008 : SHA-256 de la génération originale `515d22c6a1059c577168488fa1559420d0bc4365ac6fda4f800b4fcd91c56581`, identique avec le code neuf.
 - Nouveau test local achevé en arrière-plan après un essai interrompu à 110 s : 5/5 (164,4 s sous concurrence). L'audit versions est vert. Dernier check rapide : 981 succès, 38 échecs dont 36 fichiers interrompus et un export temporaire refusé ; le score `mgmtMondeVivant` reste un vrai échec à corriger. Pas de résultat global vert revendiqué.
+
+### Bilan d'arrêt — INACHEVÉ, limite de deux heures
+
+La tranche n'atteint pas son critère de fin. Trois commits intermédiaires ont été réalisés (données/biais, outil, réglage/rapport). Les points 4–6 sont regroupés dans un commit d'état atteint **(inachevé)**, et non présentés comme trois points terminés. Aucun push.
+
+#### Corrections de relecture et état du code
+
+- Premier avis `@relecteur` : À REPRENDRE, principalement parce que lire `f.org` à la régénération changeait les attributs lors d'un transfert. Correction : l'origine des profils de style est encodée dans l'identifiant immuable existant `o4mg…` / `o5mg…`, et le générateur lit cette origine plutôt que l'employeur courant. Le test de transfert conserve âge et niveau.
+- Second avis : À REPRENDRE. Le premier correctif posait aussi `m.idPrefixe` sur une partie jouée, ce qui faisait sortir `saveMgmt()` sans écrire. **Ce défaut a été retiré avant le commit d'arrêt** : seul l'identifiant du combattant est désormais préfixé, pas la partie jouée. Le test de transfert a été étendu à une sauvegarde réellement écrite et rechargée pour Fighting Pacific et Knuckle Gate : test ciblé vert. Aucun nouveau champ de sauvegarde, aucune migration ; `MGMT_SAVE_VERSION` inchangé.
+- Cette dernière correction de sûreté n'a pas eu de nouvelle mesure complète ni de troisième relecture (limite de deux tours). Il reste notamment à examiner les recrues historiques, dont les identifiants ne naissent plus tous sous le préfixe d'organisation avant la clôture du monde. Ne pas considérer ce chemin comme achevé.
+
+#### Dernière mesure complète disponible — origine immuable, avant correction finale de sauvegarde
+
+| Indicateur, rapport aux sept autres sauf niveau | 20261008 | 777 | 4242 |
+| --- | ---: | ---: | ---: |
+| espoirs, jeunes | 0,498 | 0,628 | 0,508 |
+| expérimentés, 32+ | 0 | 0 | 0 |
+| jeunes-partout, jeunes | 1,836 | 1,758 | 2,091 |
+| potentiel-champion, écart niveau | −4,625 | −4,086 | −4,241 |
+| finisseurs, attributs | 0,508 | 0,508 | 0,510 |
+| finisseurs, finitions passées | 0,484 | **0,717 HORS CIBLE** | **0,786 HORS CIBLE** |
+| soumissions, attribut | 0,410 | 0,410 | 0,397 |
+| soumissions, victoires par soumission | 0,301 | 0,573 | 0,438 |
+| à domicile | non mesurable | non mesurable | non mesurable |
+
+Il reste donc le réglage des finitions historiques de Fighting Pacific sur deux graines et la remesure après correction de sauvegarde. Le rapport versionné contient les échecs, ainsi qu'un avertissement sur la révision effectivement mesurée. Aucune troisième tentative de réglage n'a été masquée.
+
+#### Garde-fous obtenus et limites
+
+- Finitions, 40 soirées × trois graines, 1 080 combats : **avant et après identiques**, 375 KO/TKO (34,7 %), 175 soumissions (16,2 %), 55 arrêts médicaux (5,1 %), soit 605 finitions (56,0 %). Toutes les bandes passent. La référence fraîche utilise le code du point de départ `4731874`, équivalent à `origin/main` au début de la session. Une première référence réutilisait incorrectement la même fenêtre entre graines ; elle a été écartée et refaite avec une fenêtre neuve par graine, comme l'outil réel. La fiche T1 conservait des relevés plus anciens (53,9/32,1 sur main avant P4 ; 56,1/34,7 après P4), pas la même révision de référence.
+- Temps Split, 62 soirées : première paire 42,920 → 54,581 s (+27,2 %, hors cible). Le parcours sans biais a été remis sur `.find` au lieu d'un `.filter` préalable. Deux nouvelles paires, ordre avant/après puis après/avant : 87,284 → 78,761 s (−9,77 %), puis 80,241 → 85,150 s (+6,12 %). Le seuil +10 % passe sur ces deux paires ; les temps absolus varient fortement avec la charge de la machine. Ces mesures précèdent la dernière correction de sûreté, qui ne modifie pas le chemin Split.
+- Bornes 28–32 et 10–20 pour Split heavy : testées sur l'effectif brut du premier jour, comme les tests existants. Après le passé réduit à six soirées, le recul reste six ans : Split compte déjà 299 vivants, catégories 21–30 et heavy 15, à la référence. Le contrôle historique du nouveau test ne vérifie que présence et champion, pas une absence de régression quantitative du passé. Le relecteur a retiré la demande de reconstruire artificiellement 28–32 après ce passé réduit ; cette limite de couverture reste ouverte.
+- Les comparaisons JSON avec `origin/main` sur les trois graines avaient attesté l'identité intégrale de Split, Pure Impact et Undisputed Cage, et des changements seulement dans les cinq sous-parties concernées. À refaire après la dernière correction d'identifiants.
+
+#### Tests ajoutés et adaptés
+
+- `tests/mgmtLot34T1b.test.js`, inscrit dans `test` ET `test:watch` : « Un profil sans manque : même monde qu’avant (comparaison avec un profil ancien) » ; « Pour chaque manque du tableau §1 : indicateur ≤ 0,70 × les autres et force jeunes-partout ≥ 1,2 × » ; « Les effectifs restent dans leurs bornes ; chaque catégorie a un champion » ; « Déterminisme : deux générations de même graine donnent le même JSON » ; « Le fichier tools/reports/MANQUES-MESURES.md existe et liste les six manques » ; « Les biais de création restent stables lors des transferts à âge et niveau identiques ».
+- Résultat complet 6/6 en 106,5 s avant le tout dernier correctif de sauvegarde. Après celui-ci : seul le test transfert/sauvegarde a été relancé (1/1). Ce n'est pas une validation complète du dernier état.
+- `tests/mgmtPasse.test.js` : empreintes Rim mesurées `3e4c8b349737bd93` et `88fa117b84005100`, au lieu de `e04c79c0e03a267f` et `503f21eb7047f705`. Citation « brief du 22/10, P4 T1b : les manques de style changent la génération ». Le premier lancement complet donnait 12/13, avec uniquement l'empreinte Rim comme échec ; le fichier adapté n'a pas été entièrement revalidé. Les nouvelles identités FPC nécessiteront probablement de nouvelles empreintes : ne pas les ajuster sans remesure.
+- `tests/mgmtMondeVivant.test.js` : même citation, fixture de loi commune normalisée sur des bilans identiques 10–5 et un historique vide, sans baisser le seuil 1e−9. Variation unitaire mesurée : 4,04934890528 → 4,66934890528, soit +0,62. Validation complète adaptée encore ouverte.
+- Fichiers ciblés verts avant les dernières corrections : `mgmtLot34T1` 5/5 ; `mgmtEffectif30` 3/3 ; `mgmtEffectifs` 7/7 ; `mgmtPaysOrganisations` 5/5 ; `mgmtOrganisations` 9/9. `mgmtPasseSixAns`, `mgmtTop5` et `combatFinitionsJeu` n'ont pas été relancés individuellement dans cette session ; ne pas déduire leur succès des contrôles interrompus.
+- `mgmtReleveReduit` a produit un vrai échec de budget lors d'un check antérieur : 1 906 151 caractères pour un plafond 1 900 000 (relevé moyen 102,817). Le test n'a pas été assoupli. La mesure de budget complète sur le dernier état reste ouverte.
+- Dernier `@verif` : lint sans erreur, audit versions vert, check rapide interrompu par la limite de 300 s (809 succès, 57 fichiers interrompus, sans résultat global vert). `npm run lint` a aussi été lancé directement avec succès ; `npx eslint .` était refusé par les permissions. Aucun `npm run check` lancé.
+
+#### Écarts et questions pour Anthony
+
+- Livraison inachevée, quatre commits de travail au lieu des six demandés ; les étapes 4–6 restent à achever et à revalider. Les probes/scripts de débogage sont restés dans `tools/reports/`, ignorés et non commités ; seul le rapport Markdown demandé est versionné.
+- `sw.js`, `mgmt-retraits-data.js` et `mgmt-voix-data.js` peuvent apparaître modifiés à cause des fins de ligne réécrites par les contrôles : aucun changement textuel voulu et aucun de ces fichiers n'est ajouté. Le brief, les planches, `.opencode/` et `opencode.json` ne sont pas embarqués.
+- Des avancées d'`origin/main` sont arrivées pendant la session ; aucune fusion ni suppression de ces apports n'est faite ici. Le superviseur doit préserver ces fichiers à l'intégration.
+- Décision requise : ajouter les Émirats au catalogue de pays/noms pour mesurer `a-domicile`, ou accepter explicitement ce manque déjà structurel. Aucun pays de substitution inventé.
+- Clarifier séparément la portée des bornes d'effectif après un passé de six soirées conservant un recul de six ans. Aucun remplissage artificiel ajouté pour satisfaire une borne inadaptée.
