@@ -20,7 +20,8 @@ function scr_mgmt_semaine(){
   const frise=MGMT_SE_JOURS.map((d,i)=>`<button class="se-jour${i===index?' se-actif':''}" onclick="CL.mgmtSemaineJour(${i})"><b>${d.toLocaleUpperCase('fr')}</b><span>${i===0?esc('Arrivée à '+(m.ville||'la ville')):esc(['','Journée des médias','Conférence de presse','Face-à-face','La pesée','La soirée'][i])}</span>${mgmtSeEvenement(m,d)?`<small>${esc(mgmtSeTitre(m,i))}</small>`:''}</button>`).join('');
   const heure=e&&e.f==='poids'?'11 H 40 · ':'';
   const html=`<main class="mf-contenu se-ecran"><nav class="se-frise" aria-label="La semaine">${frise}</nav><div class="se-colonnes"><section class="se-principal">${mfPanneau(`<div class="se-surtitre">${jour.toLocaleUpperCase('fr')} · ${heure}${titre}</div><h1 class="se-titre">${titre}</h1><div class="se-texte">${texte}</div>${choix}`,'normal','se-panneau')}<section class="se-principal">${mfPanneau(`<h2>La semaine en bref</h2>${evHtml}`,'normal','se-panneau')}</section></section><aside class="se-cote">${mfPanneau(`<h2>La carte de samedi</h2>${mgmtSeCarte(m)}`,'normal','se-panneau')}</aside></div></main>`;
-  return mfEcran(html,'La semaine');
+   const org=mgmtOrgNom(m);
+   return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'La semaine du combat',droite:`${org} Fight Night ${(m.eventsPlayed||0)+1}`,touches:[{ks:['←','→'],t:'Jour de la semaine'},{ks:['A'],t:'Le combat a lieu'},{ks:['B'],t:'Annuler le combat'},{ks:['Échap'],t:'Accueil'}]});
 }
 SCREENS.mgmt_semaine=scr_mgmt_semaine;
 Object.assign(CL,{mgmtSemaineJour(i){MGMT_SE_JOUR=(i+6)%6;render();},mgmtSemaineDeplacer(d){MGMT_SE_JOUR=(MGMT_SE_JOUR+d+6)%6;render();},mgmtSemaineChoix(r){const m=G&&G.mgmt,e=m&&m.semaine&&m.semaine.ev.findIndex(x=>x.j===MGMT_SE_JOURS[MGMT_SE_JOUR]);if(e>=0)mgmtSeChoisir(e,r);}});

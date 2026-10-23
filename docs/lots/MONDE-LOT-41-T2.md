@@ -48,3 +48,12 @@ Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie 
 - Vérifications : `node --test tests/mgmtLot41T2.test.js` (9/9), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis.
 - Écarts à la maquette : comparaison visuelle réelle à 1920×1080 après 2,5 s non effectuée ; aucun écart mesuré ne peut être avancé. Performance sous 200 ms non mesurée. Tests d'ouverture via `mgmtPasseGenerer` et fiabilité sur 30 soirées/sauvegarde rechargée non exécutés. Ils restent explicitement non validés. Blessure au camp et visa non implémentés, conformément au périmètre de reprise.
 - Textes à relire : textes T1 existants marqués `relu:false` ; aucun texte narratif ajouté. Modifications `.opencode/*` et `opencode.json` préexistantes exclues ; `sw.js` restauré depuis `origin/main` et non inclus.
+
+### Reprise 5 — textes par famille et en-tête
+
+- `mgmt-semaine-evenements-data.js` : les 22 familles ont désormais chacune trois variantes distinctes (66 au total), propres à leur sujet, courtes, avec les jetons de substitution et `relu:false`. Les trois variantes de poids disent explicitement que le combattant manque le poids.
+- `mgmt-ecran-semaine-combat.js` : l'écran passe les options attendues à `mfEcran`, avec plaque « La semaine du combat », nom d'organisation et indication de Fight Night, plus les touches.
+- `tests/mgmtLot41T2.test.js` : couverture de l'ouverture depuis une passe `mgmtPasseGenerer` de trois soirées, des 66 textes (unicité, mot-clé familial, longueur, jetons), et de douze soirées successives avec validation et recharge.
+- `index.html` : versions `?v=` mises à jour à la main pour les deux scripts modifiés.
+- Vérifications : `node --test tests/mgmtLot41T2.test.js` (12/12), `node --test tests/mgmtLot41T1.test.js` (4/4), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis. `package.json` contient T2 dans `test` et `test:watch`.
+- Écarts maquette : aucune nouvelle comparaison visuelle dans le jeu à 1920×1080 après 2,5 s ; aucun écart mesuré ne peut donc être déclaré. Les textes narratifs ont été remplacés, tous gardés `relu:false` en attente de relecture. Blessure au camp et visa restent non implémentés selon le périmètre explicite de la reprise. Les modifications préexistantes `.opencode/*` et `opencode.json` restent hors de ce commit ; aucun changement à `sw.js`.
