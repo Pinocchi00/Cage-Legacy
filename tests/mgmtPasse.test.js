@@ -28,7 +28,9 @@ const json = win => win.eval('JSON.stringify(G.mgmt)');
 /* Renumérotation de version à la fusion du lot 8 (12/10/2026) : la partie neuve porte maintenant `visites:{}` (monde lot 8 T1) ; l'empreinte est calculée sans ce champ, les empreintes d'avant restent donc valables. */
 /* Monde lot 24 T1 : le champ facultatif echelleExt (échelle des organisations extérieures, 7 pour une partie neuve) n'entre pas dans l'empreinte — tout le reste de l'état doit rester identique. */
 /* Monde lot 31 T1 (brief du 22/10/2026, P1 T1) : la clé facultative `s` (le relevé de chaque combat) est ajoutée à chaque entrée de m.hist ; elle n'entre pas dans l'empreinte — tout le reste de l'état doit rester identique à main (vérifié : les empreintes d'avant restent valables sans `s`). */
-const sansVisites = j => { const o = JSON.parse(j); delete o.visites; delete o.echelleExt; if (Array.isArray(o.hist)) for (const t of o.hist) delete t.s; return JSON.stringify(o); };
+/* Décision du brief du 22/10, P6 T3 : la mémoire des combattants (`m.memoire`) est un état annexe facultatif, calculé à la clôture de chaque soirée ; l'empreinte l'ignore,
+   comme les autres états annexes ; les valeurs historiques du test restent intactes. */
+const sansVisites = j => { const o = JSON.parse(j); delete o.visites; delete o.echelleExt; delete o.memoire; if (Array.isArray(o.hist)) for (const t of o.hist) delete t.s; return JSON.stringify(o); };
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
