@@ -24,17 +24,42 @@ function mgmtManque(m){
     const meilleur=own[0], championIds=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]);
     const top=own.filter(r=>ranked.indexOf(r)<15).length;
     lignes=[{libelle:'Le meilleur de la catégorie',valeur:meilleur?(championIds.has(meilleur.id)?'le champion':(ranked.indexOf(meilleur)+1)+'e MONDIAL'):'AUCUN',sous:null},{libelle:'Dans le top 15 mondial',valeur:top?top+' DU TOP 15':'AUCUN',sous:null}];
-    const orgs=MGMT_ORGANISATIONS.map(o=>({nom:o.nom,n:(o.nom===mgmtOrgNom(m)?roster:((m.orgs&&m.orgs[o.id]&&m.orgs[o.id].roster)||mgmtExteriorEffectifs(m,div))).filter(f=>f&&f.div===div&&ranked.findIndex(r=>r.id===f.id)<15).length})).sort((a,b)=>b.n-a.n||a.nom.localeCompare(b.nom));
+    const orgs=MGMT_ORGANISATIONS.map(o=>({nom:o.nom,n:(o.nom===mgmtOrgNom(m)?roster:(m.mondeVivant===true?((m.orgs&&m.orgs[o.id]&&m.orgs[o.id].roster)||[]):mgmtExteriorEffectifs(m,div))).filter(f=>f&&f.div===div&&ranked.findIndex(r=>r.id===f.id)>=0&&ranked.findIndex(r=>r.id===f.id)<15).length})).sort((a,b)=>b.n-a.n||a.nom.localeCompare(b.nom));
     if(orgs.length)lignes.push({libelle:'Chez '+orgs[0].nom,valeur:orgs[0].n+' DU TOP 15',sous:null});
   } else if(man.id==='espoirs'||man.id==='experimentes') {
     const age=man.id==='espoirs'?24:32, pick=f=>man.id==='espoirs'?f.age<age:f.age>=age, count=roster.filter(pick).length;
-    lignes=[{libelle:man.id==='espoirs'?'Moins de 25 ans':'32 ans et plus',valeur:roster.length?Math.round(count*100/roster.length)+' %':'0 %',sous:null},{libelle:'Chez les autres organisations',valeur:'—',sous:null}];
+    const others=mgmtManqueEffectifsAutres(m), proportions=others.map(xs=>xs.length?xs.filter(pick).length/xs.length:null).filter(Number.isFinite);
+    const moyenne=proportions.length?Math.round(100*proportions.reduce((a,b)=>a+b,0)/proportions.length)+' %':null;
+    lignes=[{libelle:man.id==='espoirs'?'Moins de 25 ans':'32 ans et plus',valeur:roster.length?Math.round(count*100/roster.length)+' %':'0 %',sous:null}];
+    if(moyenne!==null)lignes.push({libelle:'Chez les autres organisations',valeur:moyenne,sous:null});
     if(roster.length)lignes.push({libelle:man.id==='espoirs'?'Le plus jeune':'Le plus ancien',valeur:(man.id==='espoirs'?Math.min(...roster.map(f=>f.age)):Math.max(...roster.map(f=>f.age)))+' ans',sous:null});
-  } else if(man.id==='a-domicile') lignes=[{libelle:'Le pays du siège n’est pas encore représenté',valeur:'',sous:null}];
+  } else if(man.id==='a-domicile') {
+    const pays=profil.pays||profil.ck||profil.paysSiege;
+    const catalogue=typeof COUNTRY_KEYS!=='undefined'&&COUNTRY_KEYS.includes(pays);
+    if(!catalogue)lignes=[{libelle:'Le pays du siège n’est pas encore représenté',valeur:'',sous:null}];
+    else {
+      const count=roster.filter(f=>f.ck===pays).length, others=mgmtManqueEffectifsAutres(m), props=others.map(xs=>xs.length?xs.filter(f=>f.ck===pays).length/xs.length:null).filter(Number.isFinite);
+      lignes=[{libelle:'Nés dans le pays du siège',valeur:roster.length?Math.round(count*100/roster.length)+' %':'0 %',sous:null}];
+      if(props.length)lignes.push({libelle:'Chez les autres organisations',valeur:Math.round(100*props.reduce((a,b)=>a+b,0)/props.length)+' %',sous:null});
+      const proches=roster.filter(f=>f.ck===pays).sort((a,b)=>(b.age||0)-(a.age||0)||a.id.localeCompare(b.id));
+      if(proches[0])lignes.push({libelle:'Le plus proche',valeur:proches[0].name||proches[0].id,sous:null});
+    }
+  } else if(man.id==='potentiel-champion') {
+    const best=roster.map(f=>({f,rank:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)+1})).filter(x=>x.rank>0).sort((a,b)=>a.rank-b.rank||a.f.id.localeCompare(b.f.id));
+    const champCount=roster.filter(f=>typeof mgmtChampionIds==='function'&&mgmtChampionIds(m).includes(f.id)).length;
+    lignes=[{libelle:'Meilleur rang mondial',valeur:best[0]?best[0].rank+'e MONDIAL':'AUCUN',sous:null},{libelle:'Meilleur classé de l’effectif',valeur:best[0]?(best[0].f.name||best[0].f.id):'AUCUN',sous:null},{libelle:'Champions mondiaux',valeur:String(champCount),sous:null}];
+  }
   else {
     const fighters=roster.map(f=>({f,s:mgmtStatsCarriere(m,f.id)})).filter(x=>x.s);
-    if(fighters.length){const val=man.id==='soumissions'?fighters.reduce((n,x)=>n+x.s.vParMethode.sub,0):fighters.reduce((n,x)=>n+x.s.vParMethode.ko+x.s.vParMethode.sub+x.s.vParMethode.stop,0), total=fighters.reduce((n,x)=>n+x.s.victoires,0);
-      lignes=[{libelle:'Victoires par '+(man.id==='soumissions'?'soumission':'finition'),valeur:total?Math.round(100*val/total)+' %':'0 %',sous:null},{libelle:'Chez les autres organisations',valeur:'—',sous:null},{libelle:'Combattant le plus prolifique',valeur:fighters.sort((a,b)=>b.s.victoires-a.s.victoires||a.f.id.localeCompare(b.f.id))[0].f.name,sous:null}];}
+    if(fighters.length){const calc=xs=>{const fs=xs.map(f=>mgmtStatsCarriere(m,f.id)).filter(Boolean), total=fs.reduce((n,s)=>n+s.victoires,0),val=fs.reduce((n,s)=>n+(man.id==='soumissions'?s.vParMethode.sub:s.vParMethode.ko+s.vParMethode.sub+s.vParMethode.stop),0);return total?val/total:null;}, part=calc(roster),props=mgmtManqueEffectifsAutres(m).map(calc).filter(Number.isFinite);
+      const tri=fighters.slice().sort((a,b)=>{const score=x=>man.id==='soumissions'?x.s.vParMethode.sub:x.s.vKO+x.s.vSub+x.s.vStop;return score(b)-score(a)||a.f.id.localeCompare(b.f.id);});
+      lignes=[{libelle:'Victoires par '+(man.id==='soumissions'?'soumission':'finition'),valeur:part===null?'0 %':Math.round(100*part)+' %',sous:null}];
+      if(props.length)lignes.push({libelle:'Chez les autres organisations',valeur:Math.round(100*props.reduce((a,b)=>a+b,0)/props.length)+' %',sous:null});
+      lignes.push({libelle:man.id==='soumissions'?'Le plus prolifique en soumissions':'Le meilleur finisseur',valeur:tri[0].f.name||tri[0].f.id,sous:null});}
   }
   const value={id:man.id,titre,lignes,objectif,leila:def.leila}; MGMT_MANQUE_MEMO.set(m,{len:hist.length,org:m.org,id:man.id,value}); return value;
+}
+function mgmtManqueEffectifsAutres(m){
+  const own=mgmtOrgNom(m), orgs=MGMT_ORGANISATIONS.filter(o=>o.nom!==own);
+  return orgs.map(o=>m.mondeVivant===true?((m.orgs&&m.orgs[o.id]&&m.orgs[o.id].roster)||[]):mgmtExteriorEffectifs(m,o.id).map(f=>mgmtExteriorCombattant(m,f.id)).filter(Boolean)).map(xs=>xs.filter(f=>f&&!mgmtIsRetired(f)));
 }
