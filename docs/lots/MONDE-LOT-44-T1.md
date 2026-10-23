@@ -69,3 +69,7 @@ Règles communes : **additif** ; **aucun écran** ici (l'écran de la soirée av
 **Questions pour Anthony**
 - Les 90 phrases et les annonces sont-elles au ton voulu (salle froide → salle debout) ?
 - La maquette affiche 50 000 € par prime ; on garde le calibrage à 1,6 % des recettes, ou tu veux un montant fixe plus spectaculaire au prix de l'économie ?
+- Le passé du prédécesseur ne paie pas de prime (écart ci-dessus, pour ne pas réécrire sa caisse ni ses retraites). Si tu veux que ses soirées paient aussi, il faudra accepter de recalculer les six empreintes du passé et la carte des six ans : dis-le et je le fais dans une tranche dédiée.
+
+**Désaccord de relecture (2e tour)**
+- Le relecteur demande de payer les primes aussi sur le passé du prédécesseur. Le code garde l'exclusion : elle est documentée ci-dessus et son retrait changerait la caisse du passé, les retraites et la carte des six ans, donc des empreintes hors du périmètre de cette tranche. Décision à Anthony (question ci-dessus).
