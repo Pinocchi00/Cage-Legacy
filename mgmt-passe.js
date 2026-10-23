@@ -389,6 +389,8 @@ function mgmtMondeVivantValide(m){
 /** Les trois pas d'un coup, pour les tests et les outils. @returns {object} la partie close, posée en G.mgmt */
 function mgmtPasseGenerer(orgId,opts){
   const m=mgmtPassePreparer(orgId,opts);
+  /* ==== [ANCRE: POSTE_PARTIE_NEUVE] — Monde lot 48 T1 ==== */
+  if(typeof mgmtPosteInit==='function'&&!m.poste) mgmtPosteInit(m);
   let k=0, r;
   do{ r=mgmtPasseSoiree(m,k); k=r.k; }while(!r.termine);
   return mgmtPasseCloturer(m);
