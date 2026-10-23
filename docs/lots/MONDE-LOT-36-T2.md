@@ -105,3 +105,12 @@ Un commit après chaque point (A : vue et libellés ; A : style planche ; B : bl
 - `index.html` : cache monté à `monde36t2c` pour le JS et le CSS modifiés.
 - Tests ciblés : `timeout 110 node --test tests/mgmtCombatChiffresEcrans.test.js` (5/5) et `node --test tests/mgmtCombatChiffres.test.js` (5/5). `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` vert.
 - Les combattants du management n’ont pas de taille/allonge/garde (question pour Anthony : les tirer de la graine du combattant ?).
+
+### Compte rendu — lecture des attributs physiques par le profil (23/10/2026)
+
+- `mgmt-combat-chiffres.js` : `mgmtFaceAFace` lit désormais `phys` depuis `mgmtCombatProfile(f)`, comme la fiche, pour fournir taille, allonge et garde sans introduire de valeurs propres.
+- `tests/mgmtCombatChiffres.test.js` : assertion du physique contre le profil de combat effectivement produit, y compris la comparaison de taille/allonge.
+- `tests/mgmtCombatChiffresEcrans.test.js` : vérification de l’affichage français à deux décimales (« 1,88 m », « 1,90 m »).
+- `index.html` : version cache de `mgmt-combat-chiffres.js` montée à `monde36t2d`.
+- Vérifications : les deux tests ciblés passent (5/5 chacun) ; `node_modules/.bin/eslint .` passe ; `node tools/verif-versions.js origin/main` ne signale aucun écart après la mise à jour cache des deux scripts concernés.
+- Migration de sauvegarde : aucune. Écart/questions : le précédent rapport affirmait que les combattants n’avaient pas de physique ; la fiche de management expose les valeurs via `mgmtCombatProfile(f).phys`.
