@@ -15,10 +15,11 @@ Branche : `p6-memoire` (la branche courante de ce dossier ; commits ICI ; le sup
 
 ## Compte rendu
 
-- Changements présents dans l'arbre de travail : `mgmt-memoire-data.js` (sept types, six niveaux et textes `relu:false`), `mgmt-memoire.js` (stockage borné, calcul pondéré et rendu déterministe), raccords d'appel/clôture et validation/sauvegarde, affichage conditionnel sur l'aperçu avec style `.me-*` ; scripts d'inclusion/cache dans `index.html`.
+- Changements livrés : `mgmt-memoire-data.js` (sept types, six niveaux et textes `relu:false`), `mgmt-memoire.js` (stockage borné, calcul pondéré et rendu déterministe), raccords d'appel/clôture et validation/sauvegarde, affichage conditionnel sur l'aperçu avec style `.me-*` ; scripts d'inclusion/cache dans `index.html`. Cette reprise ajoute le registre de nouvelles de mémoire via `mgmtActuSourceAjouter`, limité à une plainte par combattant tous les dix cycles.
 - Test ajouté : « Lot 47 T1 — données de mémoire déterministes, sans promesse ni compteur », « Lot 47 T1 — attente longue produit une pensée de mécontentement », « Lot 47 T1 — validation mémoire borne les données ».
 - Vérification ciblée : `node --test tests/mgmtLot47T1.test.js` passe (3 tests).
-- Écarts non réalisés à cette reprise : effets sur prolongation et exigence de bourse, nouvelle de presse limitée à dix soirées, balayage du chemin complet de sauvegarde/soirées, couverture fiche/échappement/tailles, tests de partie ancienne et suites empreintes. Le travail repris n'a donc pas atteint la spécification complète ; aucun changement de version de sauvegarde annoncé.
-- Questions pour Anthony : aucune question de spécification identifiée ; les effets manquants restent à implémenter, non à trancher.
+- Écarts non réalisés : effets sur prolongation et exigence de bourse, balayage du chemin complet de sauvegarde/soirées, couverture fiche/échappement/tailles, test de partie ancienne et suites empreintes. La mémoire événementielle est en place, mais la tranche ne satisfait donc pas encore toutes ses cases. Aucun changement de version de sauvegarde.
+- Vérification de reprise : `node --test tests/mgmtLot47T1.test.js` (3 tests) et `node tools/verif-versions.js origin/main` passent. Les modifications préexistantes hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) n'ont pas été incluses.
+- Questions pour Anthony : aucune question de spécification identifiée ; les effets non réalisés restent à implémenter.
 
 Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js`.

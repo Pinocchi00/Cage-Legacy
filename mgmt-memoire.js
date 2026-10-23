@@ -31,5 +31,14 @@ function mgmtMemoireSoiree(m){
     let p=0;for(let i=1;i<MGMT_MEMOIRE.niveaux.length;i++)if(score>=MGMT_MEMOIRE.niveaux[i].seuil)p=i;e.p=p;
   }
   if(m.memoire){for(const id of Object.keys(m.memoire))if(!mgmtFighterById(m,id))delete m.memoire[id];const idsM=Object.keys(m.memoire);while(idsM.length>120)delete m.memoire[idsM.shift()];}
+  if(typeof mgmtActuSourceAjouter==='function'){
+    const complaints=Object.entries(m.memoire||{}).filter(([,e])=>e&&e.p>=4&&(!Number.isSafeInteger(e.d)||c-e.d>=MGMT_MEMOIRE.effets.intervallePresse));
+    for(const [id,e] of complaints)e.d=c;
+    if(complaints.length)m.facts=(m.facts||[]).concat(complaints.map(([id])=>({c,k:'memoire-presse',a:id})));
+  }
   return m;
 }
+/* ==== [ANCRE: P6_T3_MEMOIRE_PRESSE] — Monde lot 47 T1 ==== */
+if(typeof mgmtActuSourceAjouter==='function')mgmtActuSourceAjouter({type:'memoire',lire(m,ids,depuis){
+  return (m.facts||[]).filter(x=>x&&x.k==='memoire-presse'&&ids.includes(x.a)&&x.c>=depuis).map(x=>{const p=mgmtMemoirePense(m,x.a);return p?{type:'memoire',c:x.c,id:x.a,donnees:{phrase:p.presse,niveau:p.niveau}}:null;}).filter(Boolean);
+}});
