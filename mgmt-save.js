@@ -341,6 +341,8 @@ function mgmtDuoValide(d,raw){
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
+  if(raw.surnomsGagnes!==undefined&&typeof raw.surnomsGagnes!=='boolean') return false;
+  if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
   if(!mgmtOrgValide(raw.org)) return false;
@@ -658,6 +660,11 @@ function mgmtMigrate(raw){
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'surnoms')){
+    const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
+    if(surnoms===undefined) delete m.surnoms;
+    else m.surnoms=surnoms;
+  }
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];

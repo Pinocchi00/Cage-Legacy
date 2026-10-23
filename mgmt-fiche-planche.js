@@ -141,7 +141,8 @@ function mgmtFicheApercuHtml(m,f,line){
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
   const depuis=f.ct&&Number.isFinite(f.ct.since)?(f.ct.since===0?'LE DÉBUT':'SOIRÉE '+f.ct.since):'—';
   const restant=f.libre?'LIBRE':(f.ct?mgmtContratRestants(f)+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—');
-  const cases=[['Âge',f.age+' ANS'],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE'],['Taille',taille],['Allonge',allonge],['Chez '+mgmtOrgNom(m)+' depuis',depuis],['Contrat restant',restant]];
+   const gagne=m.surnoms&&m.surnoms[f.id];
+   const cases=[['Âge',f.age+' ANS'],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE'],['Taille',taille],['Allonge',allonge],['Chez '+mgmtOrgNom(m)+' depuis',depuis],['Contrat restant',restant],...(gagne?[['Surnom','SOIRÉE '+gagne.s]]:[])];
   const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan');
   const suite=prochain
     ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
