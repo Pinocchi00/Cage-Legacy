@@ -34,3 +34,11 @@ Object.assign(CL,{
   mgmtActualitesToutLire(){mgmtActuToutLire(G.mgmt);saveMgmt();render();},
   mgmtActualitesRetirer(id){mgmtSuiviToggle(G.mgmt,id);MGMT_ACTUALITES_UI.id=null;MGMT_ACTUALITES_UI.cle=null;saveMgmt();render();}
 });
+keysRegister('mgmt_actualites',{
+  Tab(){const cols=['.mgmt-ac-follow','.mgmt-ac-item','.mgmt-ac-detail button'];MGMT_ACTUALITES_UI.col=((MGMT_ACTUALITES_UI.col||0)+1)%3;const el=document.querySelector(cols[MGMT_ACTUALITES_UI.col]);if(el)el.focus();},
+  ArrowUp(){mgmtActualitesMove(-1);},ArrowDown(){mgmtActualitesMove(1);},
+  Enter(){const el=document.activeElement;if(el&&el.classList.contains('mgmt-ac-follow')){const id=(el.getAttribute('onclick')||'').match(/\('([^']+)'\)/);if(id)CL.mgmtFiche(id[1]);}else if(el&&el.classList.contains('mgmt-ac-item'))el.click();},
+  s(){mgmtActualitesUnfollowActive();},S(){mgmtActualitesUnfollowActive();},Escape(){CL.go('mgmt_accueil');}
+});
+function mgmtActualitesMove(delta){const els=[...document.querySelectorAll('.mgmt-ac-follow,.mgmt-ac-item')];if(!els.length)return;const i=els.indexOf(document.activeElement);els[Math.max(0,Math.min(els.length-1,i<0?0:i+delta))].focus();}
+function mgmtActualitesUnfollowActive(){const el=document.activeElement;if(el&&el.classList.contains('mgmt-ac-follow')){const id=(el.getAttribute('onclick')||'').match(/\('([^']+)'\)/);if(id)CL.mgmtActualitesRetirer(id[1]);}}
