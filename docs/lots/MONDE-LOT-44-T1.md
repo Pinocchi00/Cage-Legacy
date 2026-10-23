@@ -82,3 +82,10 @@ Règles communes : **additif** ; **aucun écran** ici (l'écran de la soirée av
 - `node tools/verif-versions.js origin/main` : aucun écart (25 fichiers examinés).
 - `node_modules/.bin/eslint .` : aucune erreur.
 - Seul reste non commité hors tranche : les prompts `.opencode/agents/*.md` et `opencode.json` (réécriture d'encodage de l'outillage, hors périmètre) et `mgmt-leaders.js` (fins de ligne seules, `git diff --ignore-all-space` vide).
+
+**Contrôle de clôture (reprise du 23/10/2026)**
+- `node --test tests/mgmtLot44T1.test.js` : 10/10 verts.
+- `node --test tests/mgmtPasse.test.js` : 13/13 verts ; `tests/mgmtReleveReduit.test.js` : 6/6 verts.
+- `node tools/verif-versions.js origin/main` : aucun écart (25 fichiers examinés).
+- `node_modules/.bin/eslint .` : aucune erreur.
+- Rien de la tranche n'est resté non commité. Hors périmètre, non ajoutés : les prompts `.opencode/agents/*.md` et `opencode.json` (réécriture d'encodage de l'outillage) et `mgmt-leaders.js` (fins de ligne seules, `git diff --ignore-all-space` vide).
