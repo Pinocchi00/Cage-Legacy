@@ -56,3 +56,19 @@ test('Monde lot 39 T1 — le rendu de l’histoire échappe les noms injectés',
   })()`);
   assert.equal(r.fixture,true);assert.equal(r.escaped,true);
 });
+
+test('Monde lot 39 T1 — une amenée cite le trait visible de X, avec les plafonds par round et par combat',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+    const id='fixture-tombeur';G.mgmt={};
+    const original=mgmtTraitsFiche;
+    mgmtTraitsFiche=(m,x)=>({vus:x===id?[{id:'tombeur'}]:[]});
+    const segs=[];for(let r=1;r<=5;r++){segs.push({t0:(r-1)*300,r,phase:'debout'});segs.push({t0:(r-1)*300+40,r,phase:'sol',top:'A'});}
+    const S={finT:1500,vainqueur:'D',methode:'Décision',roundLen:300,echelle:1,noms:{a:{court:'X'},b:{court:'Y'}},res:{stats:{}},segs,tapis:[],mgmtIds:{A:id,B:'sans-trait'},mgmtCycle:1};
+    areneCoupsConstruire(S);mgmtTraitsFiche=original;
+    const phrases=MGMT_COMMENTAIRE_TRAITS.tombeur.phrases.map(p=>p.replace('{X}','X').replace('{Y}','Y'));
+    const hits=S.voix.filter(v=>phrases.includes(v.a));
+    return {fixture:true,hits:hits.map(v=>v.a),count:hits.length};
+  })())`));
+  assert.equal(r.fixture,true);assert.ok(r.count>=1,'au moins une amenée de X cite tombeur');assert.ok(r.count<=4,'quatre phrases au plus dans le combat');
+});
