@@ -6,15 +6,22 @@ function mgmtEspoirsCandidats(m){
   const champions=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]), seen=new Set(); return all.filter(f=>f&&typeof f.id==='string'&&!seen.has(f.id)&&seen.add(f.id)&&!mgmtIsRetired(f)&&!champions.has(f.id)).sort((a,b)=>a.id.localeCompare(b.id));
 }
 function mgmtEspoirsFabrique(m,ids){
- const fs=mgmtEspoirsCandidats(m), used=new Set(), angles=Object.keys(MGMT_ESPOIRS_LIBELLES.angles), out=[];
- const profils=[f=>f.div===((mgmtOrgProfil(m).manque.categories||[])[0]),f=>true,f=>true,f=>true,f=>true,f=>f.org!==mgmtOrgNom(m)];
- for(let i=0;i<angles.length;i++){
-   let f=ids&&ids[i]?fs.find(x=>x.id===ids[i]):null;
-   if(!f) f=fs.filter(x=>!used.has(x.id)&&profils[i](x)).sort((a,b)=>{
+  const fs=mgmtEspoirsCandidats(m), used=new Set(), angles=Object.keys(MGMT_ESPOIRS_LIBELLES.angles), out=[];
+  const manque=mgmtOrgProfil(m).manque||{}, categorie=(manque.categories||[])[0];
+  const profils=[f=>!categorie||f.div===categorie,f=>f.org===mgmtOrgNom(m),f=>f.org===mgmtOrgNom(m)&&Number(f.age)<25&&!!mgmtStatsDocumentes(m,f.id),f=>true,f=>f.org===mgmtOrgNom(m),f=>f.org!==mgmtOrgNom(m)];
+  for(let i=0;i<angles.length;i++){
+    let f=ids&&ids[i]?fs.find(x=>x.id===ids[i]):null;
+    if(!f) f=fs.filter(x=>!used.has(x.id)&&profils[i](x)).sort((a,b)=>{
+       const sa=mgmtStatsCarriere(m,a.id),sb=mgmtStatsCarriere(m,b.id);
+       const score=x=>{const s=mgmtStatsCarriere(m,x.id);if(i===2)return -(x.age||99);if(i===3)return s?(s.sigParMin||0)*100+(s.precision||0)*100:0;if(i===4)return Math.max((m.cycle||0)-(x.lastFightCycle||0),s?0:0);if(i===1)return s?s.serieMax:0;return s?s.victoires:0;};
+       const aCat=used.has(a.id)?1:0,bCat=used.has(b.id)?1:0;
+       return aCat-bCat||score(b)-score(a)||a.id.localeCompare(b.id);
+    })[0];
+    if(!f) f=fs.filter(x=>!used.has(x.id)).sort((a,b)=>{
       const sa=mgmtStatsCarriere(m,a.id),sb=mgmtStatsCarriere(m,b.id);
-      const score=x=>{const s=mgmtStatsCarriere(m,x.id);return i===2?-(x.age||99):i===3?(s?(s.sigParMin||0)*100+(s.precision||0)*100:0):i===4?((m.cycle||0)-(x.lastFightCycle||0)):i===1?(s?s.serieMax:0):s?s.victoires:0;};
+      const score=x=>i===2?-(x.age||99):i===1?(x.lastFightCycle||0):i===4?(m.cycle||0)-(x.lastFightCycle||0):i===3?(mgmtStatsCarriere(m,x.id)?.sigParMin||0):mgmtStatsCarriere(m,x.id)?.victoires||0;
       return score(b)-score(a)||a.id.localeCompare(b.id);
-   })[0];
+    })[0];
    if(!f||used.has(f.id))continue; used.add(f.id);
    const s=mgmtStatsCarriere(m,f.id), trait=mgmtTraitsDe(m,f.id), doc=mgmtStatsDocumentes(m,f.id),
      record=doc&&doc.bilan?`${doc.bilan.W}-${doc.bilan.L}${doc.bilan.D?'-'+doc.bilan.D:''}`:`${f.W||0}-${f.L||0}`;
