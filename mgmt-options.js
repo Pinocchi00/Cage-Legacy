@@ -24,6 +24,8 @@ const MGMT_OP_LIGNES={
     {cle:'taille',lib:'TAILLE DE L’IMAGE',aide:'Les écrans sont dessinés en 1920 × 1080 et s’adaptent aux autres tailles.',choix:[[1280,'1280 × 720'],[1920,'1920 × 1080'],[2560,'2560 × 1440']]},
     {cle:'fps',lib:'IMAGES PAR SECONDE',aide:'Moins d’images soulage les petites machines.',choix:[[30,'30'],[60,'60']]},
     {cle:'mouvement',lib:'MOUVEMENT DE L’INTERFACE',aide:'Les écrans arrivent en biais, une bande les relie. À couper si ça te gêne.',choix:[[true,'OUI'],[false,'NON']]},
+    /* Monde lot 44 T1 : l'option masque la salle, jamais les primes. */
+    {cle:'salleAmbiance',lib:'AMBIANCE DE SALLE',aide:'La salle réagit aux combats, entre deux combats. Masquée, elle continue de vivre ; les primes ne changent pas.',choix:[[true,'AFFICHÉE'],[false,'MASQUÉE']]},
   ],
   son:[
     {cle:'general',lib:'VOLUME GÉNÉRAL',aide:'Tout le son du jeu.',niveau:true},

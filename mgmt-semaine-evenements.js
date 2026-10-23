@@ -4,7 +4,7 @@ function mgmtSemaineHash(s){let h=2166136261;for(const c of String(s)){h^=c.char
 function mgmtSemaineStream(m,n,id){return mulberry32(mgmtSemaineHash('semaine|'+(m.graine||'')+'|'+n+'|'+id));}
 function mgmtSemaineValide(s){
   if(!s||typeof s!=='object'||Array.isArray(s)||!Number.isSafeInteger(s.n)||s.n<1||!Array.isArray(s.ev)||s.ev.length>6)return false;
-  return s.ev.every(e=>{const f=MGMT_SEMAINE_FAMILLES.find(x=>x.id===e?.f);return !!f&&['lundi','mardi','mercredi','jeudi','vendredi','samedi'].includes(e.j)&&(e.a===null||typeof e.a==='string'&&e.a.length<=80)&&(e.b===null||typeof e.b==='string'&&e.b.length<=80)&&Number.isSafeInteger(e.v)&&e.v>=0&&e.v<f.textes.length&&typeof e.p==='boolean'&&(!e.p||f.ton==='probleme');});
+   return s.ev.every(e=>{const f=MGMT_SEMAINE_FAMILLES.find(x=>x.id===e?.f);return !!f&&['lundi','mardi','mercredi','jeudi','vendredi','samedi'].includes(e.j)&&(e.a===null||typeof e.a==='string'&&e.a.length<=80)&&(e.b===null||typeof e.b==='string'&&e.b.length<=80)&&Number.isSafeInteger(e.v)&&e.v>=0&&e.v<f.textes.length&&typeof e.p==='boolean'&&(!('r'in e)||e.r==='A'||e.r==='B')&&(!e.p||f.ton==='probleme');});
 }
 /* ==== [ANCRE: P6_T2_SEMAINE_FACTEURS] — Monde lot 41 T1 ==== */
 function mgmtSemaineFacteurs(m,id){
