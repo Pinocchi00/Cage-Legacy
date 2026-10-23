@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const data=fs.readFileSync('mgmt-memoire-data.js','utf8');
 const calc=fs.readFileSync('mgmt-memoire.js','utf8');
 function memoire(){
-  const w={mgmtHashId:s=>Array.from(s).reduce((a,c)=>a+c.charCodeAt(0),0),mgmtFighterById:()=>({name:'Combattant'})};
+  const w={mgmtHashId:s=>Array.from(s).reduce((a,c)=>a+c.charCodeAt(0),0),mgmtFighterById:()=>({name:'Combattant'}),mgmtActuSourceAjouter(){}};
   vm.createContext(w);vm.runInContext(data+'\n'+calc+'\nglobalThis.config=MGMT_MEMOIRE;',w);return w;
 }
 test('Lot 47 T1 — données de mémoire déterministes, sans promesse ni compteur',()=>{
@@ -34,4 +34,13 @@ test('Lot 47 T1 — validation mémoire borne les données',()=>{
   assert.equal(w.mgmtMemoireValide({c:{s:[['prime',1]],p:2}}),true);
   assert.equal(w.mgmtMemoireValide({c:{s:[['inconnu',1]],p:2}}),false);
   assert.equal(w.mgmtMemoireValide({c:{s:Array(9).fill(['prime',1]),p:2}}),false);
+});
+test('Lot 47 T1 — plainte de presse limitée à une par dix soirées',()=>{
+  const w=memoire(),m={cycle:1,roster:[{id:'c',name:'Combattant',attente:8}],hist:[],facts:[],memoire:{c:{s:Array(8).fill(['attente-longue',1]),p:4}}};
+  w.mgmtMemoireSoiree(m);
+  assert.equal(m.facts.filter(x=>x.k==='memoire-presse'&&x.a==='c').length,1);
+  for(let c=2;c<=10;c++){m.cycle=c;w.mgmtMemoireSoiree(m);}
+  assert.equal(m.facts.filter(x=>x.k==='memoire-presse'&&x.a==='c').length,1);
+  m.cycle=11;w.mgmtMemoireSoiree(m);
+  assert.equal(m.facts.filter(x=>x.k==='memoire-presse'&&x.a==='c').length,2);
 });

@@ -13,7 +13,7 @@ function mgmtMemoireAjouter(m,id,type){
   if(!m||!id||!MGMT_MEMOIRE.types[type])return;
   if(!m.memoire)m.memoire={};let e=m.memoire[id];if(!e||!Array.isArray(e.s))e=m.memoire[id]={s:[],p:2};
   if(e.s.some(x=>x[0]===type&&x[1]===m.cycle))return;
-  e.s.push([type,m.cycle]);e.s=e.slice(-8);
+  e.s.push([type,m.cycle]);e.s=e.s.slice(-8);
 }
 /* Score = somme du poids * (1 - ancienneté / durée), recalculé à chaque soirée. */
 function mgmtMemoireSoiree(m){
