@@ -30,7 +30,12 @@ function mgmtDiscoursComposer(m,combat){
   const nomCible=interpelle?(mgmtDiscoursNom(m,interpelle)||{}).name||interpelle:adversaire.name||adversaire.id;
   const historique=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='discours'&&f.a===auteur.id);
   const rang=historique.length;
-  const phrase=(fam,n)=>banques[fam][(hash+n+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'');
+  const phrase=(fam,n)=>{
+    /* Chaque famille a son propre décalage : la combinaison complète ne
+       retombe pas sur le même discours tous les quatre passages. */
+    const decalage=(hash+n*0x9e3779b9)>>>0;
+    return banques[fam][(decalage+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'');
+  };
   const annonce=phrase('annonces',3);
   return {auteur:auteur.id,lignes:[phrase('ouvertures',0),phrase('remerciements',1),phrase('appels',2),annonce],interpelle,annonce,ton,motif:e.motif,adversaire:adversaire.id};
 }
