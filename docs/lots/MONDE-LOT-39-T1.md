@@ -34,3 +34,10 @@ Règles communes : cherche toi-même dans le code ; **rien ne se stocke** (aucun
 - Écart restant : les tests de comportement demandés sur le branchement/quota des commentaires, révélation du trait caché, rejeu strictement identique et comparaison de performance n'ont pas été ajoutés dans cette reprise. La présentation est couverte sur une partie générée, pas sur la fixture entièrement fabriquée demandée ; la vérification d'échappement cible la fonction d'étiquette de nom.
 - Pas de migration de sauvegarde. Rendu manuel à 1920×1080 non mesuré. Textes `relu:false` à relire dans `mgmt-commentaire-traits-data.js`.
 - Questions pour Anthony : aucune nouvelle question ; restent celles consignées plus haut.
+
+### Reprise 3
+
+- Fichiers modifiés : `tests/mgmtLot39T1.test.js` — ajout d’un test de branchement utilisant une session d’arène fabriquée, qui vérifie la citation du trait `tombeur` sur une amenée et le plafond de quatre citations par combat. `package.json` était déjà inscrit dans `test` et `test:watch` par le commit antérieur ; aucun `pretest`/`pretest:watch` n’existe.
+- Tests réussis : `tests/mgmtLot39T1.test.js` (7/7), `tests/mgmtCadre.test.js` (12/12), `tests/mgmtPresentationCombat.test.js` (7/7), `tests/mgmtTraitsFiche.test.js` (3/3). Vérifications : `node tools/verif-versions.js origin/main` sans écart ; ESLint sans erreur.
+- Couverture encore incomplète par rapport à la case 5 : le test de branchement vérifie la présence de citations de tombeur et le plafond du combat, mais ne démontre pas l’unicité par combattant et par round ; les tests de non-révélation/révélation d’un trait caché, de rejeu strict (résultat/trace/SEED/G.mgmt) et de comparaison de performance (< 50 ms) ne sont pas ajoutés. La fixture de présentation antérieure n’est pas la fixture entièrement fabriquée de la fiche. Le rendu à 1920×1080 n’a pas été vérifié manuellement.
+- Pas de migration de sauvegarde. Textes `relu:false` à relire dans `mgmt-commentaire-traits-data.js`. Questions pour Anthony : aucune nouvelle question ; celles de la reprise précédente restent inscrites ci-dessus.
