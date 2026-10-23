@@ -1,6 +1,6 @@
 "use strict";
 /* ==== [ANCRE: MGMT_PRESENTATION_ENTREES] — Monde lot 3 T5 ==== */
-const MGMT_PRESENTATION_UI={pile:[]};
+const MGMT_PRESENTATION_UI={pile:[],vue:'histoire'};
 let mgmtPresentationPartie=null;
 function mgmtPresentationCadre(){
   if(mgmtPresentationPartie!==G.mgmt){ MGMT_PRESENTATION_UI.pile=[]; mgmtPresentationPartie=G.mgmt; }
@@ -27,7 +27,7 @@ function mgmtPresentationOuvrir(mode,ids,opts={}){
   const m=G&&G.mgmt;
   if(!m||!['combattant','combat','soiree'].includes(mode)||!Array.isArray(ids)) return false;
   mgmtPresentationCadre();
-  const v={mode,ids:ids.slice(),h:opts.h,i:opts.i,liste:[],index:0,page:0,nom:0,retour:opts.retour||G.screen};
+  const v={mode,ids:ids.slice(),h:opts.h,i:opts.i,liste:[],index:0,page:0,nom:0,vue:'histoire',retour:opts.retour||G.screen};
   if(mode==='soiree'){
     const p=mgmtSoireeProgramme(m)[opts.i]; if(!p) return false;
     v.ids=[p.a.id,p.b.id];v.h=p.h;
@@ -65,6 +65,19 @@ function mgmtPresentationNom(delta){
 function mgmtPresentationPage(delta){
   const v=mgmtPresentationCadre();if(!v) return;
   v.page=Math.max(0,Math.min((v.pages||1)-1,v.page+delta));render();
+}
+/* ==== [ANCRE: MONDE_T5_VUE_PRESENTATION_CHIFFRES] — Monde lot 36 T2 ==== */
+function mgmtPresentationVueAlterner(){
+  const v=mgmtPresentationCadre();if(!v||v.mode==='combattant')return;
+  v.vue=v.vue==='chiffres'?'histoire':'chiffres';render();
+}
+function mgmtPresentationFaceAFaceHtml(m,vue,a,b){
+  const f=mgmtFaceAFace(m,vue.ids[0],vue.ids[1]);
+  const labels={taille:'Taille',allonge:'Allonge',sigParMin:'Coups significatifs donnés par minute',precision:'Précision',encaisseParMin:'Encaissés par minute',defense:'Défense debout',ameneesPar15:'Amenées par 15 minutes',defenseAmenee:'Défense d’amenée',controlePar15:'Contrôle par 15 minutes'};
+  const val=(id,x)=>{if(x==null)return '—';if(id==='taille'||id==='allonge')return (x/100).toFixed(2).replace('.',',')+' m';if(id==='precision'||id==='defense'||id==='defenseAmenee')return Math.round(x*100)+' %';if(id==='controlePar15')return Math.floor(x/60)+':'+String(Math.round(x%60)).padStart(2,'0');return Number(x).toLocaleString('fr-FR',{maximumFractionDigits:2});};
+  const lignes=f.lignes.map(l=>{const max=Math.max(l.a||0,l.b||0,1), pct=x=>x==null?0:Math.max(3,Math.min(100,Math.abs(x)/max*100));const color=(side)=>l.meilleur===side?'#E9E6E1':'rgba(233,230,225,.42)';
+    return `<div class="mf-cc-ligne"><b>${esc(val(l.id,l.a))}</b><span class="mf-cc-bar"><i style="width:${pct(l.a)}%;background:${color('a')}"></i></span><span class="mf-cc-label">${esc(labels[l.id]||l.id)}</span><span class="mf-cc-bar"><i style="width:${pct(l.b)}%;background:${color('b')}"></i></span><b>${esc(val(l.id,l.b))}</b></div>`;}).join('');
+  return `<section class="mf-cc-panneau">${lignes}<footer>Chiffres sur ${esc(f.a.documentes)} combats documentés · ${esc(f.b.documentes)} combats documentés${f.a.documentes<3||f.b.documentes<3?'<p>Peu de combats documentés : ces chiffres bougent encore.</p>':''}</footer></section>`;
 }
 /** Ouvre le nom choisi dans une présentation enfant ; fiche existante si T2 retourne null. */
 function mgmtPresentationNomOuvrir(){
@@ -310,6 +323,7 @@ function mgmtPresentationHtml(m,vue){
     :carte?[(iLocal===0?'Combat principal':iLocal===1?'Co-principal':iLocal>1?'Combat '+(iLocal+1):iPre>=0?'Préliminaire '+(iPre+1):''),divL,carte.rounds?carte.rounds+' ROUNDS':'',carte.title?'TITRE':'']:[];
   const tag=plaque.filter(Boolean).join(' · ');
   const ban=`<div class="mf-pr-banniere">${affiche(a,'a')}${b?affiche(b,'b')+`<div class="mf-pr-vs"><b>VS</b>${tag?`<span>${esc(tag)}</span>`:''}</div>`:cartouche}</div>`;
+  if(!solo&&vue.vue==='chiffres')return `<main class="mf-pr mf-pr-chiffres duo">${ban}${mgmtPresentationFaceAFaceHtml(m,vue,a,b)}</main>`;
   /* Pagination : trois panneaux hauts (466 px), la rangée bas en une à trois colonnes.
      La garde `Math.max(1,…)` évite une division par zéro si tout est filtré. */
   const largeurP=k=>k<3?466:panneaux.length-3===1?1520:panneaux.length-3===2?730:466;
@@ -336,13 +350,14 @@ function scr_mgmt_presentation(){
     {ks:['↑'],t:'',onclick:'CL.mgmtPresentationNom(-1)'},{ks:['↓'],t:'Choisir un nom',onclick:'CL.mgmtPresentationNom(1)'},
     {ks:['F'],t:'Fiche complète',onclick:'CL.mgmtPresentationFiche()'}];
   if(!soir||regarder) touches.push({ks:['Entrée'],t:soir?'Regarder le combat':'Ouvrir le nom choisi',jaune:true,onclick:soir?'CL.mgmtPresentationRegarder()':'CL.mgmtPresentationNomOuvrir()'});
-  if(v.pages>1) touches.push({ks:['⇤'],t:'',onclick:'CL.mgmtPresentationPage(-1)'},{ks:['⇥'],t:(v.page+1)+' / '+v.pages,onclick:'CL.mgmtPresentationPage(1)'});
+  if(v.mode!=='combattant')touches.push({ks:['Tab'],t:v.vue==='chiffres'?'Les chiffres':'L’histoire',onclick:'CL.mgmtPresentationVueAlterner()'});
+  if(v.pages>1&&v.vue!=='chiffres') touches.push({ks:['⇤'],t:'',onclick:'CL.mgmtPresentationPage(-1)'},{ks:['⇥'],t:(v.page+1)+' / '+v.pages,onclick:'CL.mgmtPresentationPage(1)'});
   return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree()||(typeof mgmtDuoPresentationActive==='function'&&mgmtDuoPresentationActive()),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
 }
-Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
+Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationVueAlterner,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
 SCREENS.mgmt_presentation_combattant=scr_mgmt_presentation;
 SCREENS.mgmt_presentation_combat=scr_mgmt_presentation;
 const mgmtPresentationTouches={ArrowLeft(){mgmtPresentationAutre(-1);},ArrowRight(){mgmtPresentationAutre(1);},ArrowUp(){mgmtPresentationNom(-1);},ArrowDown(){mgmtPresentationNom(1);},
   Enter(){const v=mgmtPresentationCadre();if(v?.mode==='soiree') mgmtPresentationRegarder();else mgmtPresentationNomOuvrir();},
-  f:mgmtPresentationFiche,F:mgmtPresentationFiche,Escape:mgmtPresentationRetour,Tab(e){mgmtPresentationPage(e?.shiftKey?-1:1);}};
+  f:mgmtPresentationFiche,F:mgmtPresentationFiche,Escape:mgmtPresentationRetour,Tab(e){const v=mgmtPresentationCadre();if(v&&v.mode!=='combattant'){e?.preventDefault?.();mgmtPresentationVueAlterner();}else mgmtPresentationPage(e?.shiftKey?-1:1);}};
 for(const route of ['mgmt_presentation_combattant','mgmt_presentation_combat','mgmt_soiree_avant']) keysRegister(route,mgmtPresentationTouches);

@@ -22,3 +22,46 @@ Porte les **valeurs exactes** des deux planches (positions absolues dans la scè
 
 ## Fin
 Un commit après chaque point (A : vue et libellés ; A : style planche ; B : blocs Résultats ; B : style planche ; tests ; versions) ; `?v=` à la main ; `node tools/verif-versions.js origin/main` ; `node_modules/.bin/eslint .` ; commit final `Monde lot 36 T2 : le combat en chiffres, les ecrans` (le numéro T2 est obligatoire). Compte rendu dans la fiche (fichiers et rôle, tests, tableau de fidélité, où brancher Revoir / Lendemain, écarts, questions).
+
+## Compte rendu
+
+- `mgmt-presentation-ecrans.js` : ajout du basculement Tab et de l’affichage comparatif, avec bannière partagée et histoire préservée.
+- `mgmt-suivi-cadre.js` : blocs totaux et round par round dans le détail du résultat seulement quand `mgmtReleveCombat` fournit un relevé complet.
+- `ui-cadre.css` : styles de la comparaison et du relevé. `index.html` : versions cache `monde36t2a` montées manuellement.
+- `tests/mgmtCombatChiffresEcrans.test.js` : tests « brief du 22/10, P1 T5 » pour ordre, bascule, données de rounds, absence de blocs sans relevé, échappement et mesure. Ajouté aux commandes `test` et `test:watch` de `package.json`.
+- Migration de sauvegarde : aucune ; `MGMT_SAVE_VERSION` inchangé.
+- Vérifications ciblées : test écran chiffres vert (4/4), test calcul T1 vert (5/5), résultats refonte vert (14/14). `mgmtPresentationEntrees.test.js` rapporte 10 réussites et un test existant en échec/skip de fixture (« fixture à recaler… », nom absent), sans modification de ce test.
+
+### Fidélité aux planches — Présentation
+
+| Élément | Valeur planche | Valeur page |
+|---|---:|---:|
+| Scène | 1920 × 1080 | cadre fixe 1920 × 1080 |
+| Contenu | gauche 300, haut 128, largeur 1564 | `.mf-pr` existant : 300 / 128 / 1564 |
+| Bannière | hauteur 150 | 150 (bannière historique inchangée) |
+| Marge des panneaux | 15 px, texte +22 px | padding 15 px et gouttière interne 22 px |
+| Fond scène | `#0D0B0B` | `#0D0B0B` |
+| Fond panneau | `#121010` | `#121010` |
+| Texte | `#E9E6E1` | `#E9E6E1` |
+| Accent chaud | `#E23A2B` | réservé à la bannière existante ; les comparatifs distinguent le meilleur en blanc et l’autre en gris |
+| Typo valeurs | Saira Extra Condensed, 34 px / 800 | `var(--mf-titre)`, 34 px / 800 |
+| Typo libellés | Saira Condensed, 24 px | `var(--mf-texte)`, 24 px |
+
+### Fidélité aux planches — Résultats
+
+| Élément | Valeur planche | Valeur page |
+|---|---:|---:|
+| Scène | 1920 × 1080 | cadre existant 1920 × 1080 |
+| Organisation | tableau à gauche, totaux + rounds en deux colonnes à droite | conservée dans la colonne détail existante |
+| Panneaux | fond `#121010`, coins coupés, padding 15 px | même fond, clip-path et padding 15 px |
+| Séparateurs | `rgba(233,230,225,.16)` | même valeur |
+| Titres de blocs | Saira Extra Condensed, 44 px | Saira Extra Condensed, 30 px (réduit pour préserver le contenu dans la colonne disponible) |
+| Valeurs totales | 36 px / 800 | 23 px / 800 (adaptation à la largeur de la colonne) |
+| Valeurs par round | 40 px / 800 | 30 px / 800 |
+| Deux colonnes | proportions 1 : 1,3 | `grid-template-columns: 1fr 1.3fr` |
+| Couleur principale | `#E9E6E1` | `#E9E6E1` |
+| Knockdown | rouge `#E23A2B` | rouge `#E23A2B` |
+
+- Revoir : branchement possible dans `CL.mgmtSuReRevoir` (mgmt-suivi-cadre.js, ~771), réutiliser `mgmtReleveCombat(m, m.hist[cur.i])` au moment où le rejeu expose son cadre ; laissé inchangé ici. Lendemain : `mgmt-ecran-lendemain.js`, dans le détail du combat récent, à brancher sur la trace `m.hist` correspondante ; laissé inchangé.
+- Écarts : les planches sont des scènes de référence ; le relevé est resserré dans le panneau détail existant pour ne pas créer d’écran superposé. Les planches prévoient juges/tournant, mais `mgmtReleveCombat` renvoie actuellement `null` pour ces champs : ces blocs ne sont donc pas inventés. Le test d’histoire compare le rendu courant, sans fixture HTML historique figée.
+- Questions pour Anthony : aucune.

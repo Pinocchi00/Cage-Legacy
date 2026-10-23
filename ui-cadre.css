@@ -1210,6 +1210,27 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-tac{display:flex;align-items:center;gap:8px;min-width:0}
 .mf-pr-tac .mf-pr-sous{overflow-wrap:anywhere}
 .mf-pr-foot{margin-top:auto;padding-top:10px;font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+/* ==== [ANCRE: MONDE_T5_STYLE_CHIFFRES] — Monde lot 36 T2 ==== */
+.mf-pr-chiffres .mf-cc-panneau{box-sizing:border-box;position:absolute;left:0;top:166px;width:100%;height:690px;padding:15px 22px;background:#121010;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.mf-cc-ligne{display:grid;grid-template-columns:120px 1fr 380px 1fr 120px;align-items:center;gap:16px;height:48px}
+.mf-cc-ligne>b{font:800 34px/1 var(--mf-titre);text-align:right;white-space:nowrap}
+.mf-cc-ligne>b:last-child{text-align:left}
+.mf-cc-bar{height:16px;display:flex;justify-content:flex-end}
+.mf-cc-bar:nth-of-type(4){justify-content:flex-start}
+.mf-cc-bar i{display:block;height:100%}
+.mf-cc-label{text-align:center;font:500 24px/1 var(--mf-texte);white-space:nowrap}
+.mf-cc-panneau footer{margin-top:auto;text-align:center;font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.mf-cc-panneau footer p{margin:8px 0 0;color:#E9E6E1}
+.mf-re-chiffres{display:flex;gap:12px;min-width:0;max-height:390px;overflow:auto}
+.mf-re-chiffres .mf-cc-totaux,.mf-re-chiffres .mf-cc-par-round{box-sizing:border-box;background:#121010;padding:15px;min-width:0;border:2px solid rgba(233,230,225,.5);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-cc-totaux{flex:1.05}.mf-cc-par-round{flex:1.45}
+.mf-cc-totaux h2,.mf-cc-par-round h2{margin:0 0 10px;font:800 30px/.8 var(--mf-titre);color:#E9E6E1}
+.mf-cc-total{display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;min-height:36px;border-bottom:2px solid rgba(233,230,225,.16);gap:5px}
+.mf-cc-total span{font:800 23px/.9 var(--mf-titre);white-space:nowrap}.mf-cc-total span:last-child{text-align:right;color:rgba(233,230,225,.74)}
+.mf-cc-total b{text-align:center;font:500 17px/1 var(--mf-texte)}
+.mf-cc-round{display:inline-flex;vertical-align:top;box-sizing:border-box;flex-direction:column;width:32%;min-width:110px;margin:0 1% 8px 0;padding:8px;background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.mf-cc-round h3{margin:0;font:800 20px/.8 var(--mf-titre)}.mf-cc-grands,.mf-cc-meta{display:flex;justify-content:space-between;gap:4px}.mf-cc-grands b{font:800 30px/.8 var(--mf-titre)}.mf-cc-meta{font:500 14px/1.05 var(--mf-texte);color:rgba(233,230,225,.74)}.mf-cc-kd{font:600 14px/1 var(--mf-texte);color:#E23A2B}
+.mf-re-chiffres{margin:0}
 .mf-pr-cs{display:block;margin-top:2px;font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
 .mf-stage:has(.mf-pr){background:#0D0B0B url('images/cendre.jpg?v=b29') 0 0/1920px 1080px no-repeat}
 .mf-stage:has(.mf-pr) .mf-touches{gap:14px;width:1564px}
