@@ -36,6 +36,6 @@ Mesure fixe du 22/10/2026 : 1 500 combats par trait, même combattant H-light mo
 
 ## Catalogue après retrait
 
-8 traits mesurables conservés : `menton-granit`, `menton-fele`, `ne-se-releve-pas`, `chasseur-de-cou`, `tombeur`, `foudroyant`, `poings-de-marbre`, `specialiste-soumission`.
+32 traits gardés, dont 8 avec un effet mesuré ; les 24 autres sont de pure identité (effet nul, non mesurable à ±5 points d'attribut). Les 8 effets mesurés sont ceux listés ci-dessus ; les 24 autres restent dans `MGMT_TRAITS` avec `effet:null`.
 
-21 traits retirés : `encaisseur`, `fragile-apres-ko`, `diesel`, `s-eteint`, `rythme-infernal`, `sous-pression`, `revanchard`, `hesite-apres-ko`, `grands-soirs`, `serie-noire`, `sur-sa-lancee`, `mur`, `etouffeur`, `finisseur`, `juge-dependant`, `guerrier`, `vieux-briscard`, `jeune-loup`, `roi`, `invaincu`, `comeback`. Les effets retirés n'ont atteint ni le seuil de victoire ni le seuil de signature sur les mesures finales. Le catalogue conserve donc 11 traits : les 8 mesurables et les trois états exemptés `rouille`, `debutant`, `routinier`.
+Le cardio (`diesel`, `s-eteint`) ne change pas le rapport des coups significatifs du round 3 au round 1 dans la mesure (0,74 → 0,74 pour diesel ; 0,77 → 0,77 pour s'éteint). Le moteur lit `a.cardio`/`b.cardio` sur le combattant préparé (et sauvegarde leur valeur initiale dans `baseCardioA`/`baseCardioB`) : c'est la propriété racine, pas `c.attrs.cardio`. L'effet appliqué uniquement à `c.attrs.cardio` ne peut donc pas affecter la fatigue/endurance du moteur ; aucune modification du moteur n'est faite dans cette tranche.
