@@ -73,3 +73,12 @@ Règles communes : **additif** ; **aucun écran** ici (l'écran de la soirée av
 
 **Désaccord de relecture (2e tour)**
 - Le relecteur demande de payer les primes aussi sur le passé du prédécesseur. Le code garde l'exclusion : elle est documentée ci-dessus et son retrait changerait la caisse du passé, les retraites et la carte des six ans, donc des empreintes hors du périmètre de cette tranche. Décision à Anthony (question ci-dessus).
+
+**Vérification finale (reprise du 23/10/2026)**
+- `node --test tests/mgmtLot44T1.test.js` : 10/10 verts.
+- `node --test tests/mgmtPasse.test.js` : 13/13 verts, empreintes du passé inchangées.
+- `node --test tests/mgmtReleveReduit.test.js` : 6/6 verts, partie neuve à 1 899 325 octets (plafond 1 900 000).
+- `node --test tests/mgmtEconomie.test.js tests/mgmtSalles.test.js` : 25/25 verts.
+- `node tools/verif-versions.js origin/main` : aucun écart (25 fichiers examinés).
+- `node_modules/.bin/eslint .` : aucune erreur.
+- Seul reste non commité hors tranche : les prompts `.opencode/agents/*.md` et `opencode.json` (réécriture d'encodage de l'outillage, hors périmètre) et `mgmt-leaders.js` (fins de ligne seules, `git diff --ignore-all-space` vide).
