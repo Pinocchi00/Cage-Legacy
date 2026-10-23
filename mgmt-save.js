@@ -467,6 +467,7 @@ function validateMgmt(raw){
      à une partie qui ne l'a pas. Tolérée absente, stricte si présente. */
   if(raw.guerre!==undefined){
     if(!raw.guerre||typeof raw.guerre!=='object'||Array.isArray(raw.guerre)) return false;
+    if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))) return false;
     if(raw.guerre.rival!==null&&(typeof raw.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===raw.guerre.rival))) return false;
     if(!Number.isSafeInteger(raw.guerre.depuis)||raw.guerre.depuis<0) return false;
     if(!Array.isArray(raw.guerre.ev)) return false;
@@ -479,6 +480,14 @@ function validateMgmt(raw){
       if(ev.x!==null&&(typeof ev.x!=='string'||!mgmtValidId(ev.x))) return false;
       if(!Number.isFinite(ev.p)||ev.p<0||ev.p>50) return false;
       if(Object.keys(ev).sort().join(',')!=='c,o,p,t,x') return false;
+    }
+    if(raw.guerre.fondu!==undefined){
+      if(!raw.guerre.fondu||typeof raw.guerre.fondu!=='object'||Array.isArray(raw.guerre.fondu)) return false;
+      for(const [id,compte] of Object.entries(raw.guerre.fondu)){
+        if(!MGMT_ORGANISATIONS.some(o=>o.id===id)||!compte||typeof compte!=='object'||Array.isArray(compte)
+          ||Object.keys(compte).sort().join(',')!=='n,p'||!Number.isSafeInteger(compte.n)||compte.n<0
+          ||!Number.isFinite(compte.p)||compte.p<0||compte.p>Number.MAX_SAFE_INTEGER) return false;
+      }
     }
   }
   return true;
@@ -780,6 +789,7 @@ function mgmtRepair(m){
      Si présente et malformée, on la supprime (jamais de plantage au chargement). */
   if(m.guerre!==undefined){
     if(!m.guerre||typeof m.guerre!=='object'||Array.isArray(m.guerre)
+      ||Object.keys(m.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))
       ||m.guerre.rival!==null&&(typeof m.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===m.guerre.rival))
       ||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<0
       ||!Array.isArray(m.guerre.ev)
@@ -789,11 +799,23 @@ function mgmtRepair(m){
         ||!Number.isSafeInteger(ev.c)||ev.c<0
         ||ev.x!==null&&(typeof ev.x!=='string'||!mgmtValidId(ev.x))
         ||!Number.isFinite(ev.p)||ev.p<0||ev.p>50
-        ||Object.keys(ev).sort().join(',')!=='c,o,p,t,x')){
+        ||Object.keys(ev).sort().join(',')!=='c,o,p,t,x')
+      ||m.guerre.fondu!==undefined&&(!m.guerre.fondu||typeof m.guerre.fondu!=='object'||Array.isArray(m.guerre.fondu)
+        ||Object.entries(m.guerre.fondu).some(([id,compte])=>!MGMT_ORGANISATIONS.some(o=>o.id===id)
+          ||!compte||typeof compte!=='object'||Array.isArray(compte)||Object.keys(compte).sort().join(',')!=='n,p'
+          ||!Number.isSafeInteger(compte.n)||compte.n<0||!Number.isFinite(compte.p)||compte.p<0||compte.p>Number.MAX_SAFE_INTEGER))){
       delete m.guerre;
     }else{
-      /* Plafonner à 40 événements les plus récents */
-      if(m.guerre.ev.length>40) m.guerre.ev=m.guerre.ev.slice(-40);
+      /* Plafonner à 40 événements en fondant les anciens par organisation. */
+      if(m.guerre.ev.length>40){
+        if(!m.guerre.fondu) m.guerre.fondu={};
+        for(const ev of m.guerre.ev.splice(0,m.guerre.ev.length-40)){
+          const compte=m.guerre.fondu[ev.o]||{n:0,p:0};
+          compte.n=Math.min(Number.MAX_SAFE_INTEGER,compte.n+1);
+          compte.p=Math.min(Number.MAX_SAFE_INTEGER,compte.p+ev.p);
+          m.guerre.fondu[ev.o]=compte;
+        }
+      }
     }
   }
   if(Array.isArray(m.card.main)&&Array.isArray(m.roster)){

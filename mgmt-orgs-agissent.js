@@ -6,7 +6,7 @@
  *  vise un agent libre, approche un combattant en fin de contrat, pose sa soirée.
  *  Les actions sont enregistrées dans m.guerre.ev (voir mgmt-rivalite-orgs.js).
  *  Ne retire jamais un combattant sous contrat du roster du joueur.
- *  Tirages déterministes via mgmtIdentiteStream (jamais rnd()). */
+ *  Tirages déterministes via mgmtIdentiteStream. */
 function mgmtOrgsAgir(m){
   if(!m||m.mondeVivant!==true||!m.orgs) return;
   if(!m.guerre) m.guerre={ev:[],rival:null,depuis:0};
@@ -33,40 +33,36 @@ function mgmtOrgsAgir(m){
     /* 3. Pose sa soirée un week-end donné (collision possible) */
     mgmtOrgsAgir_PoserSoiree(m,orgId,sous,maniere,graine);
   }
-  /* Fondre les événements anciens si > 40 */
+  /* Fondre chaque événement ancien dans un compteur borné par organisation. */
   if(m.guerre.ev.length>40){
-    const parOrg={};
-    for(const ev of m.guerre.ev){
-      if(!parOrg[ev.o]) parOrg[ev.o]={count:0,points:0};
-      parOrg[ev.o].count++;
-      parOrg[ev.o].points+=ev.p||0;
+    if(!m.guerre.fondu||typeof m.guerre.fondu!=='object'||Array.isArray(m.guerre.fondu)) m.guerre.fondu={};
+    const anciens=m.guerre.ev.splice(0,m.guerre.ev.length-40);
+    for(const ev of anciens){
+      if(!ev||!MGMT_MATCHMAKERS[ev.o]) continue;
+      const compte=m.guerre.fondu[ev.o]||{n:0,p:0};
+      compte.n=Math.min(Number.MAX_SAFE_INTEGER,compte.n+1);
+      compte.p=Math.min(Number.MAX_SAFE_INTEGER,compte.p+(Number.isFinite(ev.p)?ev.p:0));
+      m.guerre.fondu[ev.o]=compte;
     }
-    m.guerre.ev=m.guerre.ev.slice(-40);
-    /* On garde une trace agrégée via le compteur implicite (longueur + points) */
   }
 }
 
 /** Vise un agent libre : un combattant sans contrat disponible sur le marché.
  *  L'acheteur tente plus souvent, le prudent moins. */
 function mgmtOrgsAgir_ViserAgentLibre(m,orgId,sous,maniere,graine){
-  /* Récupère les agents libres du marché (sans contrat, pas chez Split) */
+  /* Récupère directement les lignes libres du monde : le classement mondial
+     complet serait un recalcul coûteux pour une action qui ne signe personne. */
   const agentsLibres=[];
-  for(const div of allDivisions()){
-    const ranking=mgmtDivisionRanking(m,div.id,'world');
-    for(const r of ranking){
-      if(r.rang>15) break; /* top 15 mondial seulement */
-      const f=mgmtExteriorCombattant(m,r.id);
-      if(!f||f.orgId===mgmtPredecesseurOrgId(m)) continue;
-      if(f.libre!==true) continue;
-      agentsLibres.push({f,div:div.id,rang:r.rang});
-    }
+  for(const f of mgmtExteriorEffectifs(m)){
+    if(!f||f.orgId===mgmtPredecesseurOrgId(m)||f.libre!==true||mgmtIsRetired(f)) continue;
+    agentsLibres.push({f,div:f.div,rang:mgmtStar(f)||0});
   }
   if(!agentsLibres.length) return false;
   /* Probabilité selon la manière */
   const proba={acheteur:0.6,formateur:0.35,prudent:0.15}[maniere]||0.2;
   if(graine()>=proba) return false;
-  /* Choisit un agent libre (meilleur rang = plus attractif) */
-  agentsLibres.sort((a,b)=>a.rang-b.rang);
+  /* Choisit un agent libre (profil prêt = plus attractif pour l'acheteur). */
+  agentsLibres.sort((a,b)=>b.rang-a.rang);
   const idx=Math.floor(graine()*Math.min(3,agentsLibres.length));
   const cible=agentsLibres[idx];
   if(!cible) return false;

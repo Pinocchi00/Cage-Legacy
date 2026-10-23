@@ -87,9 +87,11 @@ function mgmtRivaleRaisons(m,idOrg){
     .map(x=>{
       const ev=x.ev;
       const template=MGMT_RIVALITE_RAISONS_PHRASES[ev.t]?.[0]||'';
+      const combattant=ev.x?mgmtExteriorCombattant(m,ev.x)?.name||'un combattant':'un agent libre';
+      const nomSecurise=typeof esc==='function'?esc(combattant):String(combattant);
       let raison=template
-        .replace('{combattant}',ev.x?mgmtExteriorCombattant(m,ev.x)?.name||'un combattant':'un agent libre')
-        .replace('{ville}',ev.x?mgmtExteriorCombattant(m,ev.x)?.name||'une ville':'Rotterdam')
+        .replace('{combattant}',nomSecurise)
+        .replace('{ville}',ev.x?nomSecurise:'une ville')
         .replace('{matchmaker}',MGMT_MATCHMAKERS[ev.o]?.nom||'son matchmaker');
       return {raison,soiree:ev.c,type:ev.t};
     });

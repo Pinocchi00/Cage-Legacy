@@ -16,11 +16,15 @@ Règles communes : **additif** ; **aucun écran** ici ; ne touche pas au moteur 
 
 ## Compte rendu
 
-- `mgmt-matchmakers-data.js` : huit matchmakers (Ruud Verbeek et Siobhan Kerr conservés), manières et banques de piques/raisons. Les textes proposés sont marqués `relu:false`.
-- `mgmt-orgs-agissent.js` : actions déterministes raccordées à l'ouverture de la prochaine pile, après l'avancée hebdomadaire des organisations vivantes ; événements limités à 40.
-- `mgmt-rivalite-orgs.js` : scores pondérés, seuil 15, fenêtre de 8 cycles et hystérésis 1,3 ; rendu de raisons et changement de rivale.
-- `mgmt-save.js` : validation/réparation de la clé facultative, version de sauvegarde inchangée. `mgmt-bureau.js` appelle les actions au cycle de clôture ; versions de cache ajustées dans `index.html`.
-- `tests/mgmtLot45T1.test.js` : tests (1) à (10) ajoutés ; package.json référence le test dans `test`, `test:watch` et ses commandes dédiées.
-- Écarts à traiter : l'actualité dédiée via le registre `mgmtActuSourceAjouter` n'est pas rendue ; le compteur des événements fondus au-delà de 40 n'est pas persisté. Les tests ciblés n'ont pas tous abouti : l'exécution sans cache a dépassé 5 minutes ; l'exécution avec cache a échoué sur `ENOSPC` dans `tests/helpers/partieCache.js`, et a révélé une instabilité du scénario de déterminisme liée aux identifiants produits lors des générations cachées. Pas de changement aux valeurs des tests préexistants ni aux empreintes.
-- Noms et textes à relire : les six noms proposés hors noms déjà validés, huit phrases signatures, douze piques (et variantes supplémentaires), banques de raisons.
-- Questions pour Anthony : confirmer les noms proposés et les textes `relu:false`, et décider de la formulation et de la portée de l'actualité de rivalité. Aucun test lent complet n'a pu être mené ; mesure de clôture non réalisée.
+- `mgmt-matchmakers-data.js` : huit matchmakers, manières et banques de piques/raisons. Ruud Verbeek et Siobhan Kerr sont conservés ; les textes proposés sont signalés `relu:false`.
+- `mgmt-orgs-agissent.js` : actions déterministes raccordées au cycle de clôture déjà porté par `mgmt-bureau.js`; les agents libres sont sélectionnés directement dans les effectifs extérieurs pour éviter un recalcul du classement mondial par organisation. Les événements excédant 40 sont agrégés dans `guerre.fondu` par organisation.
+- `mgmt-rivalite-orgs.js` : fenêtre de 8 cycles, pondération décroissante, seuil 15 et hystérésis 1,3 ; trois raisons, échappement des noms dynamiques et mise à jour de la rivale.
+- `mgmt-actualites.js` : source `rivale` inscrite dans `mgmtActuSourceAjouter`; le changement est publié dans le fil lorsqu'il y a un combattant suivi auquel rattacher la nouvelle.
+- `mgmt-save.js` : validation/réparation du compteur facultatif et de la guerre, sans migration et sans changement de `MGMT_SAVE_VERSION`; les événements anciens sont fusionnés à la réparation.
+- `index.html` : versions de cache montées à la main pour tous les `.js` modifiés. `package.json` inclut `tests/mgmtLot45T1.test.js` dans `test` et `test:watch`.
+- `tests/mgmtLot45T1.test.js` : intitulés (1) à (10) couvrant matchmakers/textes, 100 cycles, combattants sous contrat, seuil/changement/hystérésis, variation sur 20 graines, raisons, déterminisme, partie sans monde vivant, validation/réparation/actualité et nom hostile. La mesure locale de la clôture a passé 100 ms ; les tests gardent une tolérance CI de 300 ms.
+- Seuils retenus : 15 points, fenêtre de 8 cycles et facteur d'hystérésis 1,3. Aucun texte n'a été marqué relu.
+- Vérifications passées : `node --test tests/mgmtLot45T1.test.js` (10/10), `node --test tests/mgmtPasse.test.js` (13/13), `node --test tests/mgmtMondeVivant.test.js` (23/23), `node --test tests/mgmtReleveReduit.test.js` (6/6 ; sauvegarde mesurée à 1 899 325 octets), `node_modules/.bin/eslint .`, `node tools/verif-versions.js origin/main` et présence du test dans les deux scripts npm. Les tests `mgmtLot43T1.test.js` et `mgmtLot41T1.test.js` ne sont pas présents dans ce worktree.
+- Empreintes préexistantes inchangées. Pas de migration ; les parties anciennes sans `guerre` ne reçoivent pas cette clé avant que le monde vivant agisse.
+- Noms proposés à relire : Jean-Michel Delatour, Marcus Varela, Tahlia Brennan, Hideki Tanaka, Karim Al-Mansour et Rodrigo Valença. À relire également : huit phrases signatures, les piques et les banques de raisons (`relu:false`).
+- Questions pour Anthony : valider ces six noms et les textes `relu:false`; confirmer que l'annonce de rivalité dans Actualités, rattachée au fil des combattants suivis, convient à la portée de presse souhaitée.

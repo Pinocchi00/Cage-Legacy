@@ -8,6 +8,11 @@ const path=require('path');
 
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 
+/** Historiques minimaux : le calcul de rivalité ne dépend pas de la génération du monde. */
+function historiqueRivalite(win,ev,rival=null,cycle=5){
+  return result(win,`return mgmtRivaleDuMoment({cycle:${cycle},org:'Split',guerre:${JSON.stringify({ev,rival,depuis:0})}});`);
+}
+
 /** Crée une partie neuve avec monde vivant dans la fenêtre de test. */
 function partieNeuve(win,graine='test123'){
   return result(win,`setSeed(duelFnv1a32('${graine}')); const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); return m;`);
@@ -15,36 +20,45 @@ function partieNeuve(win,graine='test123'){
 
 test('(1) Huit matchmakers, noms validés conservés, trois manières représentées, relu:false',()=>{
   const win=newGameWindow();
-  const r=result(win,`return {ids:Object.keys(MGMT_MATCHMAKERS),count:Object.keys(MGMT_MATCHMAKERS).length,manieres:[...new Set(Object.values(MGMT_MATCHMAKERS).map(m=>m.maniere))],relus:Object.values(MGMT_MATCHMAKERS).every(m=>m.relu===false),korner:MGMT_MATCHMAKERS['mma-korner'].nom,knuckle:MGMT_MATCHMAKERS['organisation-6'].nom};`);
+  const r=result(win,`return {ids:Object.keys(MGMT_MATCHMAKERS),count:Object.keys(MGMT_MATCHMAKERS).length,manieres:[...new Set(Object.values(MGMT_MATCHMAKERS).map(m=>m.maniere))],relus:Object.values(MGMT_MATCHMAKERS).every(m=>m.relu===false)&&MGMT_MATCHMAKER_PIQUES_RELU===false&&MGMT_RIVALITE_RAISONS_RELU===false,piques:Object.values(MGMT_MATCHMAKER_PIQUES).every(x=>x.length>=3),raisons:Object.values(MGMT_RIVALITE_RAISONS_PHRASES).every(x=>x.length>=3),korner:MGMT_MATCHMAKERS['mma-korner'].nom,knuckle:MGMT_MATCHMAKERS['organisation-6'].nom};`);
   assert.equal(r.count,8,'Huit organisations ont un matchmaker');
   assert.ok(r.manieres.includes('acheteur'),'Acheteur représenté');
   assert.ok(r.manieres.includes('formateur'),'Formateur représenté');
   assert.ok(r.manieres.includes('prudent'),'Prudent représenté');
   assert.ok(r.relus,'Tous ont relu:false');
+  assert.ok(r.piques,'Au moins trois piques par manière');
+  assert.ok(r.raisons,'Au moins trois phrases par raison');
   assert.equal(r.korner,'Ruud Verbeek','MMA Korner garde Ruud Verbeek');
   assert.equal(r.knuckle,'Siobhan Kerr','Knuckle Gate garde Siobhan Kerr');
 });
 
-test('(2) L\'acheteur agit plus souvent que le prudent sur 20 soirées simulées',()=>{
+test('(2) L\'acheteur agit plus souvent que le prudent sur 100 soirées simulées',()=>{
   const win=newGameWindow();
-  let actionsAcheteur=0, actionsPrudent=0;
-  for(let seed=1;seed<=20;seed++){
-    const m=partieNeuve(win,'seed'+seed);
+  let actionsAcheteur=0, actionsPrudent=0, dureeMaxMs=0;
+  const m=partieNeuve(win,'seed1');
+  for(let soiree=1;soiree<=100;soiree++){
+    m.cycle=soiree;
+    const debut=process.hrtime.bigint();
     win.eval(`G.mgmt=${JSON.stringify(m)}; mgmtOrgsAgir(G.mgmt); mgmtRivaleMettreAJour(G.mgmt);`);
+    dureeMaxMs=Math.max(dureeMaxMs,Number(process.hrtime.bigint()-debut)/1e6);
     const r=result(win,`return {ev:G.mgmt.guerre?.ev||[],orgs:MGMT_MATCHMAKERS};`);
     for(const ev of r.ev){
       const mk=r.orgs[ev.o];
       if(mk && mk.maniere==='acheteur') actionsAcheteur++;
       if(mk && mk.maniere==='prudent') actionsPrudent++;
     }
+    m.guerre=null;
   }
   assert.ok(actionsAcheteur>actionsPrudent,`Acheteur ${actionsAcheteur} > Prudent ${actionsPrudent}`);
+  assert.ok(dureeMaxMs<300,`Clôture simulée sous 300 ms (${dureeMaxMs.toFixed(1)} ms max)`);
 });
 
 test('(3) Un combattant sous contrat n\'est JAMAIS pris',()=>{
   const win=newGameWindow();
-  for(let seed=1;seed<=10;seed++){
-    const m=partieNeuve(win,'seed'+seed);
+  const base=partieNeuve(win,'contract-base');
+  for(let seed=1;seed<=20;seed++){
+    const m=JSON.parse(JSON.stringify(base));
+    m.graine='seed'+seed;
     win.eval(`G.mgmt=${JSON.stringify(m)}; mgmtOrgsAgir(G.mgmt); mgmtRivaleMettreAJour(G.mgmt);`);
     const r=result(win,`return {ev:G.mgmt.guerre?.ev||[],roster:G.mgmt.roster||[]};`);
     for(const ev of r.ev){
@@ -63,27 +77,33 @@ test('(3) Un combattant sous contrat n\'est JAMAIS pris',()=>{
 test('(4) Aucune rivale avant le seuil ; la rivale change quand les événements changent ; hystérésis',()=>{
   const win=newGameWindow();
   /* Cas 1 : pas d'événements -> pas de rivale */
-  let r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[],rival:null,depuis:0}; return mgmtRivaleDuMoment(m);`);
+  let r=historiqueRivalite(win,[]);
   assert.equal(r,null,'Pas de rivale sans événements');
   /* Cas 2 : événements faibles (< seuil) -> pas de rivale */
-  r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[{c:1,o:'garden-of-blood',t:'pique',x:null,p:3}],rival:null,depuis:0}; return mgmtRivaleDuMoment(m);`);
+  r=historiqueRivalite(win,[{c:1,o:'garden-of-blood',t:'pique',x:null,p:3}]);
   assert.equal(r,null,'Pas de rivale sous le seuil');
   /* Cas 3 : rivale apparait au-dessus du seuil */
-  r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:4,o:'garden-of-blood',t:'meme-soir',x:null,p:6}],rival:null,depuis:0}; return mgmtRivaleDuMoment(m);`);
+  r=historiqueRivalite(win,[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:4,o:'garden-of-blood',t:'meme-soir',x:null,p:6}]);
   assert.equal(r,'garden-of-blood','Rivale apparait au-dessus du seuil');
   /* Cas 4 : rivale change quand une autre prend nettement le dessus */
-  r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:5,o:'mma-korner',t:'pris',x:'f3',p:10},{c:5,o:'mma-korner',t:'agent',x:'f4',p:5},{c:5,o:'mma-korner',t:'parti',x:'f5',p:8},{c:5,o:'mma-korner',t:'voisin',x:null,p:4}],rival:'garden-of-blood',depuis:4}; return mgmtRivaleDuMoment(m);`);
+  r=historiqueRivalite(win,[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:5,o:'mma-korner',t:'pris',x:'f3',p:10},{c:5,o:'mma-korner',t:'agent',x:'f4',p:5},{c:5,o:'mma-korner',t:'parti',x:'f5',p:8},{c:5,o:'mma-korner',t:'voisin',x:null,p:4}], 'garden-of-blood');
   assert.equal(r,'mma-korner','Rivale change quand une autre dépasse');
   /* Cas 5 : hystérésis - la rivale ne change pas à chaque soirée pour un petit écart */
-  r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:5,o:'mma-korner',t:'pris',x:'f3',p:10},{c:5,o:'mma-korner',t:'agent',x:'f4',p:5}],rival:'garden-of-blood',depuis:4}; return mgmtRivaleDuMoment(m);`);
+  r=historiqueRivalite(win,[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:5,o:'mma-korner',t:'pris',x:'f3',p:10},{c:5,o:'mma-korner',t:'agent',x:'f4',p:5}], 'garden-of-blood');
   assert.equal(r,'garden-of-blood','Hystérésis empêche le changement pour écart faible');
+  const debut=process.hrtime.bigint();
+  historiqueRivalite(win,[{c:5,o:'garden-of-blood',t:'pris',x:'f1',p:10},{c:5,o:'garden-of-blood',t:'agent',x:'f2',p:5},{c:4,o:'garden-of-blood',t:'meme-soir',x:null,p:6}]);
+  const dureeMs=Number(process.hrtime.bigint()-debut)/1e6;
+  assert.ok(dureeMs<300,`Calcul de rivalité sous 300 ms (${dureeMs.toFixed(1)} ms)`);
 });
 
 test('(5) La rivale diffère d\'une partie à l\'autre (aucune rivale imposée)',()=>{
   const win=newGameWindow();
   const rivales=new Set();
-  for(let seed=1;seed<=10;seed++){
-    const m=partieNeuve(win,'diff'+seed);
+  const base=partieNeuve(win,'rival-base');
+  for(let seed=1;seed<=20;seed++){
+    const m=JSON.parse(JSON.stringify(base));
+    m.graine='diff'+seed;
     win.eval(`G.mgmt=${JSON.stringify(m)}; mgmtOrgsAgir(G.mgmt); mgmtRivaleMettreAJour(G.mgmt);`);
     const r=result(win,`return mgmtRivaleDuMoment(G.mgmt);`);
     if(r) rivales.add(r);
@@ -93,9 +113,9 @@ test('(5) La rivale diffère d\'une partie à l\'autre (aucune rivale imposée)'
 
 test('(6) Les trois raisons sont des phrases lisibles sans undefined',()=>{
   const win=newGameWindow();
-  const r=result(win,`const m=mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(m,{soirees:6}); m.guerre={ev:[{c:5,o:'mma-korner',t:'pris',x:'mg1',p:10},{c:5,o:'mma-korner',t:'meme-soir',x:null,p:6},{c:4,o:'mma-korner',t:'voisin',x:null,p:4}],rival:'mma-korner',depuis:5}; return mgmtRivaleRaisons(m,'mma-korner');`);
+  const r=result(win,`const m={cycle:5,guerre:{ev:[{c:5,o:'mma-korner',t:'pris',x:'mg1',p:10},{c:5,o:'mma-korner',t:'meme-soir',x:null,p:6},{c:4,o:'mma-korner',t:'voisin',x:null,p:4}],rival:'mma-korner',depuis:5}}; return mgmtRivaleRaisons(m,'mma-korner');`);
   assert.ok(r.length>0,'Au moins une raison');
-  assert.ok(r.length<=3,'Au plus trois raisons');
+  assert.equal(r.length,3,'Les trois raisons les plus lourdes sont rendues');
   for(const raison of r){
     assert.ok(typeof raison.raison==='string' && raison.raison.length>0,`Raison est une string non vide: ${raison.raison}`);
     assert.ok(!raison.raison.includes('undefined'),`Raison sans undefined: ${raison.raison}`);
@@ -120,8 +140,8 @@ test('(7) Déterminisme et aucun rnd()',()=>{
   /* Vérifie qu'aucun rnd() n'est appelé dans les nouvelles fonctions */
   const codeOrgs=fs.readFileSync(path.resolve(__dirname,'..','mgmt-orgs-agissent.js'),'utf8');
   const codeRiv=fs.readFileSync(path.resolve(__dirname,'..','mgmt-rivalite-orgs.js'),'utf8');
-  assert.ok(!codeOrgs.includes('rnd()'),'mgmt-orgs-agissent.js n\'utilise pas rnd()');
-  assert.ok(!codeRiv.includes('rnd()'),'mgmt-rivalite-orgs.js n\'utilise pas rnd()');
+  assert.ok(!/\brnd\s*\(/.test(codeOrgs),'mgmt-orgs-agissent.js n\'utilise pas de RNG globale');
+  assert.ok(!/\brnd\s*\(/.test(codeRiv),'mgmt-rivalite-orgs.js n\'utilise pas de RNG globale');
 });
 
 test('(8) Partie ancienne inchangée (empreintes identiques)',()=>{
@@ -156,15 +176,29 @@ test('(9) Validation et réparation de m.guerre',()=>{
   r=result(win,`const m=${JSON.stringify(m)}; return mgmtRepair(m);`);
   assert.ok(r.guerre,'Guerre valide conservée en réparation');
   assert.equal(r.guerre.ev.length,1,'Événement conservé');
+  m.guerre.fondu={'garden-of-blood':{n:2,p:17}};
+  r=result(win,`const m=${JSON.stringify(m)}; return validateMgmt(m);`);
+  assert.ok(r,'Compteur fondu valide');
+  const malformedCounter=JSON.parse(JSON.stringify(m));
+  malformedCounter.guerre.fondu['garden-of-blood'].n=-1;
+  r=result(win,`const m=${JSON.stringify(malformedCounter)}; return mgmtRepair(m);`);
+  assert.ok(!r.guerre,'Compteur fondu malformé supprimé avec la guerre');
+  const overflowing=JSON.parse(JSON.stringify(m));
+  overflowing.guerre.ev=Array.from({length:41},(_,i)=>({c:i,o:'garden-of-blood',t:'pique',x:null,p:3}));
+  r=result(win,`const m=${JSON.stringify(overflowing)}; return mgmtRepair(m);`);
+  assert.equal(r.guerre.ev.length,40,'Réparation conserve au plus 40 événements');
+  assert.equal(r.guerre.fondu['garden-of-blood'].n,3,'Événement ancien fondu dans le compteur');
+  const source=result(win,`const src=MGMT_ACTU_SOURCES.find(x=>x.type==='rivale'); return src&&src.lire({guerre:{rival:'mma-korner',depuis:5}},['fighter'],0);`);
+  assert.equal(source[0].type,'rivale','L’annonce de rivalité passe par le registre de presse');
+  m.suivis=[m.roster[0].id];
+  r=result(win,`const m=${JSON.stringify(m)}; return mgmtActualites(m).filter(x=>x.type==='rivale');`);
+  const orgName=result(win,`return MGMT_ORGANISATIONS.find(o=>o.id==='garden-of-blood').nom;`);
+  assert.ok(r.some(x=>x.titre===orgName+' devient ta rivale du moment'),'La presse publie le changement de rivale');
 });
 
 test('(10) Échappement d\'un nom hostile',()=>{
   const win=newGameWindow();
-  const m=partieNeuve(win,'escape1');
-  m.guerre={ev:[{c:1,o:'garden-of-blood',t:'pris',x:null,p:10}],rival:'garden-of-blood',depuis:1};
-  win.eval(`G.mgmt=${JSON.stringify(m)};`);
-  const r=result(win,`return mgmtRivaleRaisons(G.mgmt,'garden-of-blood');`);
-  for(const raison of r){
-    assert.ok(!raison.raison.includes('<script>'),`Raison sans HTML: ${raison.raison}`);
-  }
+  const r=result(win,`const original=mgmtExteriorCombattant; mgmtExteriorCombattant=()=>({name:'<script>alert(1)</script>'}); const m={cycle:1,guerre:{ev:[{c:1,o:'garden-of-blood',t:'pris',x:'hostile',p:10}],rival:'garden-of-blood',depuis:1}}; const out=mgmtRivaleRaisons(m,'garden-of-blood'); mgmtExteriorCombattant=original; return out;`);
+  assert.ok(r[0].raison.includes('&lt;script&gt;'),'Le nom hostile est échappé avant son insertion dans la phrase');
+  assert.ok(!r[0].raison.includes('<script>'),'La phrase ne contient pas de balise active');
 });
