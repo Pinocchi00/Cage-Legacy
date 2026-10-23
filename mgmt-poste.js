@@ -1,5 +1,10 @@
 "use strict";
 /* ==== [ANCRE: P9_T2_POSTE_CALCUL] — Monde lot 43 T1 ==== */
+/** Niveau de confiance en mots : conf 4 est le meilleur (« Il est ravi », indice 0 des données), conf 0 le pire (« Il n’y croit plus », indice 4). */
+function mgmtPosteNiveau(conf){
+  const l=MGMT_POSTE.seuils.phrases, i=4-(Number.isSafeInteger(conf)?Math.max(0,Math.min(4,conf)):2);
+  return l[i]||l[2];
+}
 function mgmtPostePatron(m){
   const o=typeof mgmtOrgParNom==='function'?mgmtOrgParNom(mgmtOrgNom(m)):null;
   if(o&&typeof o.patron==='string'&&o.patron.trim()) return o.patron.trim();
