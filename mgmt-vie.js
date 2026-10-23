@@ -158,6 +158,7 @@ function mgmtVieRisqueBlessure(m,f,cycle){
 
 /** Forme en baisse (points de `dynamic`, ≤ 0) selon la charge. */
 function mgmtVieFormeBaisse(m,f,cycle){
+  if(f&&Number.isSafeInteger(f.diminue)&&f.diminue===cycle) return -6;
   const ch=mgmtVieCharge(m,f,cycle,true);
   return ch>MGMT_CHARGE_BORD?-MGMT_VIE_FORME_BORD:(ch>MGMT_CHARGE_SEUIL?-MGMT_VIE_FORME_CHARGE:0);
 }
