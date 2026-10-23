@@ -70,7 +70,7 @@ test('Pendant la soirée, aucune section de la barre ne s\'ouvre ; elles se rouv
   win.eval(`CL.mgmtSoRegarder()`); assert.equal(win.eval(`document.querySelectorAll('.mf-barre').length`),0,'le combat : plein écran, pas de barre');
   win.eval(`CL.mgmtCbPasser(); CL.mgmtCbRetour()`); assert.equal(win.eval(`G.screen`),'mgmt_soiree'); assert.equal(etat().ouvertes,0,'après un combat vu : grisée');
   for(let i=0;i<8;i++) touche(win,'p');
-  touche(win,'p'); assert.equal(etat().ouvertes,12,'la fin de soirée rouvre les sections');
+  touche(win,'p'); assert.equal(etat().ouvertes,13,'la fin de soirée rouvre les sections');
   /* A et E passent d'une section à l'autre quand la barre est ouverte. */
   const avant=win.eval(`G.screen`);
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'e',bubbles:true}))`);
