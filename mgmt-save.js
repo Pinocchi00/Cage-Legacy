@@ -834,6 +834,8 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
+  if(raw.charAt(0)==='\u0001') raw=mgmtDecompresser(raw);
+  if(raw===null) return null;
   try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); if(mgr&&mgr.orgs&&typeof mgr.orgs==='object'&&!Array.isArray(mgr.orgs)){ for(const id of Object.keys(mgr.orgs)){ if(!mgmtPasseDeployer(mgr.orgs[id])) return null; } }   /* Monde lot 9 T2a : chaque organisation redéploie son archive */
     return mgr&&validateMgmt(mgr)&&mgmtMondeVivantValide(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
@@ -856,6 +858,12 @@ function mgmtSlotValide(n){ return Number.isSafeInteger(n)&&n>=1&&n<=MGMT_SLOTS;
 /** La clé d'un emplacement : l'historique pour le 1, la sienne pour les autres. */
 function mgmtSlotKey(n){ return n===1?MGMT_KEY:MGMT_KEY+'-'+n; }
 function mgmtSlotBackupKey(n){ return mgmtSlotKey(n)+'_backup'; }
+
+/* ==== [ANCRE: SAUVEGARDE_COMPRESSION_LECTURE] — Monde lot 52 T1 ==== */
+function mgmtLireSauvegarde(cle){
+  const valeur=stockageLire(cle);
+  return typeof valeur==='string'&&valeur.charAt(0)==='\u0001'?mgmtDecompresser(valeur):valeur;
+}
 
 /** Le registre : {dernier:1..3|null, dates:{'1':ms,…}}. Toujours une forme saine. */
 function mgmtRegistre(){

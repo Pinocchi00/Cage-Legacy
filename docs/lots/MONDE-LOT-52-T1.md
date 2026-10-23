@@ -13,4 +13,12 @@ Lis d'abord : `mgmt-save.js` (`saveMgmt`, `loadMgmt`, `mgmtSerialiser`, `mgmtDes
 **[ ] 6. Tests** (nouveau `tests/mgmtLot52T1.test.js`, dans `test` ET `test:watch` de `package.json`) : (1) aller-retour exact sur 200 chaînes variées (vides, très courtes, Unicode, 2 Mo répétitifs, aléatoires) ; (2) sortie compatible `localStorage` (aucune substitution isolée : `encodeURIComponent` ne lève pas) ; (3) entrée corrompue → `null` sans exception (tronquée, modifiée, marqueur seul) ; (4) une sauvegarde ancienne non compressée se charge ; (5) une sauvegarde compressée se recharge à l'identique (même `JSON.stringify` de l'état) ; la principale corrompue → le secours ; (6) sur une partie neuve : ratio ≤ 60 %, sauvegarde < 400 ms, chargement < 400 ms ; (7) une partie jouée de **six soirées** (`tests/helpers/jouerSoirees.js`, une à une) se sauvegarde et se recharge sans perte ; (8) tous les tests de sauvegarde existants restent verts.
 **[ ] 7. Fin.** `?v=` de chaque `.js` modifié ou ajouté, `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, **toute la liste des tests de sauvegarde** relancée (`tests/mgmtSauvegarde*.test.js`, `mgmtEmplacements*.test.js`, `saveSystem.test.js`, `mgmtReleveReduit.test.js` en arrière-plan : il est lent), compte rendu **honnête** avec les chiffres de la case 1, commit final `Monde lot 52 T1 : la compression de la sauvegarde`, puis `TOUT_EST_FINI` seulement si TOUT est vert.
 
+## Compte rendu
+
+- Travail inachevé : ajout initial de `mgmt-compression.js`, inscription dans `index.html` et amorce de la décompression dans `mgmtParseAndValidate`.
+- Vérification effectuée : essai direct de round-trip (`'', 'abc', 'été 😀', 2 Mo répétitifs`) en échec. L'algorithme n'est donc pas livrable et aucune donnée n'est encore écrite compressée.
+- Non réalisés : intégration des écritures et lecteurs, outils de mesure, tests de tranche, mesure des tailles et durées, tests complets et audit final.
+- Chiffres case 1 : non mesurés, l'algorithme n'ayant pas passé son round-trip.
+- Questions pour Anthony : aucune question de spécification ; il faut corriger et valider le codage LZW/flux de bits avant la poursuite.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat ni à `mgmt-traits*.js` ni à `mgmt-attention.js` ; **jamais `sw.js`** ; `git add` précis, jamais `git commit -a`.
