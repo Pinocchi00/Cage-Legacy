@@ -111,6 +111,6 @@ function scr_mgmt_organisation(){
      +groupes+`</section>`,'normal','mf-sem-p')
       /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
       +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-        +mgmtOrgMoneyHtml(m)+`<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
+       +mgmtOrgMoneyHtml(m)+`${m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

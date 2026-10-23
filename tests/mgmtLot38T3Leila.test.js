@@ -5,9 +5,10 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
+/* Décision du 23/10/2026 (brief du 22/10, P9 T1 : le contrat du matchmaker) : une partie neuve porte `m.poste` et son arrivée compte trois étapes ; ce test décrit les étapes d'une partie sans poste (voir mgmtLot43T2.test.js pour le chemin à trois étapes). */
 test('Monde lot 38 T3 — la ligne de Leïla est dans le panneau Ce qui manque, avec ses guillemets, sans position absolue',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);CL.mgmtEnter(1);MGMT_ESP_ARRIVEE.etape=1;const h=SCREENS.mgmt_espoirs_arrivee();
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);CL.mgmtEnter(1);delete G.mgmt.poste;MGMT_ESP_ARRIVEE.etape=1;const h=SCREENS.mgmt_espoirs_arrivee();
     return {h,iLeila:h.indexOf('class="ma-leila-nom"'),iSide:h.indexOf('mf-panneau normal ma-side'),iPanel:h.indexOf('mf-panneau choisi ma-panel')};})())`));
   assert.ok(r.iLeila>r.iPanel&&r.iLeila<r.iSide,'LEÏLA entre le début du panneau Ce qui manque et le panneau de l\'objectif');
   assert.match(r.h,/LEÏLA<\/div><div>« [^<]+ »<\/div>/);

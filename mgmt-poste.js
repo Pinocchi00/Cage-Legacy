@@ -1,8 +1,15 @@
 "use strict";
 /* ==== [ANCRE: P9_T2_POSTE_CALCUL] — Monde lot 43 T1 ==== */
+/** Niveau de confiance en mots : conf 4 est le meilleur (« Il est ravi », indice 0 des données), conf 0 le pire (« Il n’y croit plus », indice 4). */
+function mgmtPosteNiveau(conf){
+  const l=MGMT_POSTE.seuils.phrases, i=4-(Number.isSafeInteger(conf)?Math.max(0,Math.min(4,conf)):2);
+  return l[i]||l[2];
+}
 function mgmtPostePatron(m){
   const o=typeof mgmtOrgParNom==='function'?mgmtOrgParNom(mgmtOrgNom(m)):null;
-  return o&&typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'le patron';
+  if(o&&typeof o.patron==='string'&&o.patron.trim()) return o.patron.trim();
+  /* Le patron de Split existe déjà dans les textes du jeu (mgmt-retraits.js : « Jean-Michel Delatour (le patron) »). */
+  return mgmtOrgNom(m)==='Split'?'Jean-Michel Delatour':'le patron';
 }
 function mgmtPosteValide(p){
   if(!p||typeof p!=='object'||Array.isArray(p)||!Number.isSafeInteger(p.debut)||!Number.isSafeInteger(p.fin)||p.fin<=p.debut||!Number.isSafeInteger(p.salaire)||p.salaire<0||!Number.isSafeInteger(p.saison)||p.saison<1||!Array.isArray(p.obj)||p.obj.length<3||p.obj.length>5||!Number.isInteger(p.conf)||p.conf<0||p.conf>4||typeof p.mi!=='boolean'||!Array.isArray(p.hist)||p.hist.length>12)return false;
@@ -68,4 +75,18 @@ function mgmtPosteBilan(m){
   const aug=p.conf>=MGMT_POSTE.seuils.augmente.conf&&ratio>=MGMT_POSTE.seuils.augmente.tenus;
   const condition=p.conf>=MGMT_POSTE.seuils.condition.conf&&ratio>=MGMT_POSTE.seuils.condition.tenus;
   return {issue:aug?'prolonge-augmente':condition?'prolonge-condition':'renvoi',salaire:aug?Math.round(p.salaire*1.25):p.salaire,duree:MGMT_POSTE.duree,objTenus,objTotal};
+}
+/* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
+function mgmtPosteRenouveler(m,issue){
+  if(!m||!m.poste||!['prolonge-augmente','prolonge-condition'].includes(issue)) return null;
+  const ancien=m.poste, bilan=mgmtPosteBilan(m);
+  const salaire=issue==='prolonge-augmente'?bilan.salaire:ancien.salaire;
+  const debut=ancien.fin;
+  delete m.poste;
+  mgmtPosteInit(m);
+  m.poste.debut=debut;
+  m.poste.fin=debut+MGMT_POSTE.duree;
+  m.poste.saison=ancien.saison+1;
+  m.poste.salaire=salaire;
+  return m.poste;
 }

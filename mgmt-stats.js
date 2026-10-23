@@ -5,6 +5,13 @@ const MGMT_STATS_CHIFFRES=['sigParMin','precision','defense','sigEncaisseParMin'
 const MGMT_STATS_SENS={sigParMin:'haut',precision:'haut',defense:'haut',sigEncaisseParMin:'bas',ameneesPar15:'haut',reussiteAmenee:'haut',defenseAmenee:'haut',soumissionsPar15:'haut',controlePar15:'haut',kdDonnes:'haut',kdRecus:'bas',dureeMoyenne:'bas'};
 const MGMT_STATS_MEMO=new WeakMap();
 const MGMT_STATS_CATEGORIE_MEMO=new WeakMap();
+/* ==== [ANCRE: P7_T1_PRIMES_STATS] — Monde lot 44 T1 ==== */
+/** Les primes changent sans allonger m.hist : le mémo des statistiques est
+ *  invalidé à la clôture, une fois les faits écrits. */
+function mgmtStatsInvalider(m){
+  MGMT_STATS_MEMO.delete(m);
+  MGMT_STATS_CATEGORIE_MEMO.delete(m);
+}
 const MGMT_STATS_KEYS=['sig','sigAtt','total','totalAtt','head','body','leg','dist','clinch','ground','td','tdAtt','tdDef','subAtt','kd','ctrlSec','pwr'];
 function mgmtStatsNouveau(){
   const z=()=>Object.fromEntries(MGMT_STATS_KEYS.map(k=>[k,0]));
@@ -41,10 +48,15 @@ function mgmtStatsIndex(m){
     }
   }};
   parcourir(m.hist,incr?memo.debut:0); for(const o of orgs) parcourir(o&&o.hist);
-  for(const x of index.values()) x.titres=0;
+  for(const x of index.values()){ x.titres=0; x.primes=0; }
   for(const fact of m.facts||[]) if(fact&&fact.k==='title_fight'&&Number.isSafeInteger(fact.fight)){
     const t=(m.hist||[])[fact.fight]; if(!t||!t.a||!t.b||t.winner==='D') continue;
     const x=index.get(t.winner==='A'?t.a.id:t.b.id); if(x)x.titres++;
+  }
+  /* Monde lot 44 T1 : un fait prime par versement (le combat de la soirée en
+     porte deux, un par combattant). */
+  for(const fact of m.facts||[]) if(fact&&fact.k==='prime'&&mgmtValidId(fact.a)){
+    const x=index.get(fact.a); if(x)x.primes++;
   }
   /* Le bilan officiel (x.tot) se lit à la demande (mgmtStatsTotal) : le calculer pour tous les combattants à chaque combat rendait la génération quadratique. */
   MGMT_STATS_MEMO.set(m,{vigueur,index,vus,nbOrgs:orgs.length,debut:hist.length,dernier:hist.length?hist[hist.length-1]:null}); return index;

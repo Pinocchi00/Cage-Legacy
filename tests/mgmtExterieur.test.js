@@ -470,7 +470,7 @@ test('MGMT lot 2B T3 bis — une partie neuve se sauvegarde, se recharge et gard
     const bornes=m.exterieur.map(o=>o.born);
     G={theme:'dark',mgmt:m};
     saveMgmt();
-    const disque=JSON.parse(localStorage.getItem(MGMT_KEY));
+    const disque=JSON.parse(mgmtLireSauvegarde(MGMT_KEY));
     G={theme:'dark'};
     const charge=loadMgmt();
     const apres=charge?JSON.stringify(G.mgmt.exterieur):null;
@@ -604,7 +604,7 @@ test('MGMT lot 2B T1 bis — une soirée rétablit le quota avant de sauvegarder
     for(let i=0;i<5;i++) m.card.main.push({a:pris[i*2].id,b:pris[i*2+1].id,cycle:m.cycle,slot:'main'});
     for(let i=5;i<9;i++) m.card.prelims.push({a:pris[i*2].id,b:pris[i*2+1].id,cycle:m.cycle,slot:'prelim'});
     const event=mgmtRunEvent(m);
-    const saved=JSON.parse(localStorage.getItem(MGMT_KEY));
+    const saved=JSON.parse(mgmtLireSauvegarde(MGMT_KEY));
     return {event:!!event,retraites:m.roster.filter(o=>o.retired==='medical').length,
       memoire:allDivisions().map(d=>mgmtWorldLivingCount(m,d.id)),
       disque:allDivisions().map(d=>mgmtWorldLivingCount(saved,d.id))};
