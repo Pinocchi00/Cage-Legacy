@@ -128,16 +128,14 @@ function mgmtFicheBanniereHtml(m,f,champion){
 
 /* ---- Les onglets ---------------------------------------------------------------------------------------------------------- */
 
-/** Aperçu : ce que tu as vu, la cage, ses chiffres, son prochain combat. */
+/** Aperçu : ses traits, la cage, ses chiffres, son prochain combat. */
 function mgmtFicheApercuHtml(m,f,line){
-  const lec=mgmtFicheLecture(m,f), phys=mgmtCombatProfile(f).phys||{}, prochain=mgmtEffectifProchain(m,f), inf=mfSoireeInfos(m);
-  const profil=lec.profil, phrase=MGMT_FICHE_TEXTES.profils[profil]||'';
-  const lignes=lec.detail.slice(0,3).map(l=>`<div class="mf-fi-lg">${mgmtFicheSigne(l.s)}<div>${esc(l.txt)}</div></div>`).join('');
-  const inconnus=lec.detailInconnus.slice(0,3).map(l=>`<div class="mf-fi-lg"><b class="q">?</b><div>${esc(l.txt)}</div></div>`).join('');
-  const vus=lec.vus;
-  const p1=mgmtFichePanneau('Ce que tu as vu',vus+' combat'+(vus>1?'s':''),
-    `<div class="mf-fi-profil">${esc(profil)}</div><div class="mf-fi-lgs">${lignes}</div>`
-    +(inconnus?`<div class="mf-fi-bas"><div class="mf-fi-bt">CE QUE TU NE SAIS PAS</div>${inconnus}</div>`:''));
+  const phys=mgmtCombatProfile(f).phys||{}, prochain=mgmtEffectifProchain(m,f), inf=mfSoireeInfos(m);
+  /* ==== [ANCRE: P2_T3_TRAITS_PANNEAU] — Monde lot 37 T1 ==== */
+  const traits=mgmtTraitsFiche(m,f.id,m.cycle);
+  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone" aria-hidden="true">+</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
+  const cache=traits.caches?`<div class="mf-fi-trait-cache"><div class="mf-fi-trait-entete"><b>PAS ENCORE VU</b><span>caché</span></div><div>${esc(traits.indice||'')}</div></div>`:'';
+  const distinction=mgmtFichePanneau('Ce qui le distingue',traits.vus.length+' TRAITS',traitsLignes+cache,'mf-fi-traits');
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
@@ -149,8 +147,8 @@ function mgmtFicheApercuHtml(m,f,line){
     ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
     :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
   const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
-  void phrase; void line;
-  return `<div class="mf-fi-ligne"><div class="mf-fi-c1">${p1}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
+  void line;
+  return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
 }
 
 /** Style : la cage et les lignes façon, force, faille, inconnu, allonge. */
