@@ -18,3 +18,10 @@ Règles communes : cherche toi-même dans le code ; **rien ne se stocke** (aucun
 - Vérifications de reprise : `timeout 110 node --test tests/mgmtLot39T1.test.js` (4 tests), `tests/mgmtTraitsFiche.test.js` et `tests/mgmtPresentationCombat.test.js` verts ; `node_modules/.bin/eslint .` vert ; `node tools/verif-versions.js origin/main` sans écart.
 - Écarts et reste à faire : les tests exigés de combat fabriqué (quota exact par combattant/round, révélation, rejeu identique et options), la présentation fabriquée avec échappement vérifié en DOM, et la mesure de temps comparative ne sont toujours pas couverts. Le test ajouté valide les textes et vérifie seulement l'existence des interfaces, pas leur comportement. Le test reste enregistré en script dédié `test:lot39t1`/`test:watch:lot39t1` et n'est pas ajouté aux listes globales `test`/`test:watch`. Le rendu réel à 1920×1080 n'a pas été mesuré. Aucun texte n'a été versé à `docs/TEXTES-A-RELIRE.md` ; tous les textes de données portent `relu:false`.
 - Questions pour Anthony : valider les textes et les moments associés aux traits d'état ; préciser si les traits d'état doivent aussi remplacer les annonces directes d'ouverture/round, qui ne passent pas par `dire()` aujourd'hui.
+
+### Reprise
+
+- `mgmt-commentaire-traits-data.js` : quatre variantes par trait, soit 52 phrases uniques, textes toujours `relu:false`. `index.html` : version du fichier de données montée à `lot39t1b`.
+- Vérifications après reprise : `timeout 110 node --test tests/mgmtLot39T1.test.js`, `node --test tests/mgmtTraitsFiche.test.js`, `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis.
+- Les lacunes de couverture énumérées ci-dessus demeurent ; listes `test`/`test:watch` non modifiées. Rendu 1920×1080 non mesuré. Textes à relire : `mgmt-commentaire-traits-data.js` (`relu:false`).
+- Aucun changement de sauvegarde. Aucune question supplémentaire ; questions en suspens conservées ci-dessus.
