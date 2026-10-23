@@ -11,7 +11,7 @@ function mgmtDiscoursEligibilite(m,combat){
   if(!motif&&winChance!==null&&winChance<0.25)motif='surprise';
   const finish=combat.family&&combat.family!=='dec';
   const limite=(Number.isSafeInteger(combat.round)?combat.round:1)*300;
-  const dernieres=finish&&combat.s.d>=limite-10;
+  const dernieres=finish&&Number.isFinite(combat.s.d)&&combat.s.d>=limite-10;
   const retournement=finish&&combat.round>=2&&Number.isFinite(combat.scoreAvantDernier)&&combat.scoreAvantDernier<0;
   if(!motif&&((ca&&ca.kd>0&&cb&&cb.kd>0)||dernieres||retournement))motif='combat-fou';
   return motif?{motif,force:motif==='principal'||motif==='co-principal'}:null;
@@ -28,6 +28,9 @@ function mgmtDiscoursComposer(m,combat){
   const ton=e.motif==='surprise'?'emu':nomInter?'provocateur':e.motif==='principal'||e.motif==='co-principal'?'humble':'fier';
   const banques=MGMT_DISCOURS_DATA.tons[ton], hash=(String(m.graine||'')+'|'+(m.eventsPlayed||0)+'|'+auteur.id+'|'+adversaire.id).split('').reduce((h,c)=>(Math.imul(h^c.charCodeAt(0),16777619)>>>0),2166136261);
   const nomCible=interpelle?(mgmtDiscoursNom(m,interpelle)||{}).name||interpelle:adversaire.name||adversaire.id;
-  const phrase=(fam,n)=>banques[fam][(hash+n)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'');
-  return {auteur:auteur.id,lignes:[phrase('ouvertures',0),phrase('remerciements',1),phrase('appels',2),phrase('annonces',3)],interpelle,annonce:phrase('annonces',3),ton,motif:e.motif,adversaire:adversaire.id};
+  const historique=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='discours'&&f.a===auteur.id);
+  const rang=historique.length;
+  const phrase=(fam,n)=>banques[fam][(hash+n+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'');
+  const annonce=phrase('annonces',3);
+  return {auteur:auteur.id,lignes:[phrase('ouvertures',0),phrase('remerciements',1),phrase('appels',2),annonce],interpelle,annonce,ton,motif:e.motif,adversaire:adversaire.id};
 }
