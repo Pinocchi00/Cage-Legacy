@@ -19,15 +19,36 @@ const MGMT_TRAITS_SEUILS=Object.freeze({
 const MGMT_TRAITS=Object.freeze([
   {id:'menton-granit',famille:'menton',nom:'Menton de granit',public:true,temporaire:false,effet:{chin:5.25,durability:2.25},condition:c=>c.k.kdRecus>=3&&c.k.dKO===0&&c.k.n>=5,conserve:c=>c.k.dKO6===0},
   {id:'menton-fele',famille:'menton',nom:'Menton fêlé',public:false,temporaire:false,effet:{chin:-5.25},condition:c=>c.k.dKO6>=2,conserve:c=>c.k.koSansDefaite<4},
+  {id:'encaisseur',famille:'menton',nom:'Encaisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.sigEncaisseParMin>=3.5&&c.k.n>=4&&c.k.tauxVictoires>=.45,conserve:c=>c.k.sigEncaisseParMin>=3},
+  {id:'fragile-apres-ko',famille:'menton',nom:'Fragile après un KO',public:false,temporaire:true,effet:null,condition:c=>c.k.dernierKOsubi&&c.k.kdRecus>=2&&c.k.dernier.index>=Math.max(0,c.k.n-2),conserve:()=>false},
+  {id:'diesel',famille:'cardio',nom:'Diesel',public:true,temporaire:false,effet:null,condition:c=>c.k.victoiresRound3>=3,conserve:c=>c.k.victoiresRound3>=2},
+  {id:'s-eteint',famille:'cardio',nom:"S'éteint au troisième",public:false,temporaire:false,effet:null,condition:c=>c.k.defaitesRound3>=3,conserve:c=>c.k.defaitesRound3>=2},
+  {id:'rythme-infernal',famille:'cardio',nom:'Rythme infernal',public:true,temporaire:false,effet:null,condition:c=>c.k.sigParMin>=4.2&&c.k.n>=4,conserve:c=>c.k.sigParMin>=3.8},
+  {id:'sous-pression',famille:'mental',nom:'Perd ses moyens sous la pression',public:false,temporaire:false,effet:null,condition:c=>c.k.principal.n>=3&&c.k.principal.taux<=.34,conserve:c=>c.k.principal.n>=4&&c.k.principal.taux<=.45},
+  {id:'revanchard',famille:'mental',nom:'Revanchard',public:false,temporaire:false,effet:null,condition:c=>c.k.revancheVictoires>=2,conserve:c=>c.k.revancheVictoires>=1},
+  {id:'hesite-apres-ko',famille:'mental',nom:'Hésite après un KO',public:false,temporaire:true,effet:null,condition:c=>c.k.dernierKOsubi,conserve:()=>false},
+  {id:'grands-soirs',famille:'mental',nom:'Se lève pour les grands soirs',public:false,temporaire:false,effet:null,condition:c=>c.k.principal.n>=3&&c.k.principal.taux>=.67,conserve:c=>c.k.principal.taux>=.60},
+  {id:'serie-noire',famille:'mental',nom:'En plein doute',public:true,temporaire:true,effet:null,condition:c=>c.k.serieDefaites>=3,conserve:()=>false},
+  {id:'sur-sa-lancee',famille:'mental',nom:'Sur sa lancée',public:true,temporaire:true,effet:null,condition:c=>c.k.serieVictoires>=4,conserve:()=>false},
   {id:'ne-se-releve-pas',famille:'sol',nom:'Ne se relève pas',public:false,temporaire:false,effet:{tdd:-4.5,guardWork:-4.5},condition:c=>c.k.defaitesControle>=2,conserve:c=>c.k.defaitesControle>=1},
   {id:'chasseur-de-cou',famille:'sol',nom:'Chasseur de cou',public:true,temporaire:false,effet:{submission:5.25},condition:c=>c.k.vSub>=2,conserve:c=>c.k.vSub>=1},
   {id:'tombeur',famille:'sol',nom:'Tombeur',public:true,temporaire:false,effet:{takedown:4.5},condition:c=>c.k.ameneesPar15>=2.5&&c.k.reussiteAmenee>=.40&&c.k.n>=3,conserve:c=>c.k.ameneesPar15>=2},
+  {id:'mur',famille:'sol',nom:'Mur anti-lutte',public:true,temporaire:false,effet:null,condition:c=>c.k.defenseAmenee>=.80&&c.k.ameneesAdverses>=10,conserve:c=>c.k.defenseAmenee>=.75},
+  {id:'etouffeur',famille:'sol',nom:'Étouffeur',public:true,temporaire:false,effet:null,condition:c=>c.k.controlePar15>=180&&c.k.n>=3,conserve:c=>c.k.controlePar15>=150},
+  {id:'finisseur',famille:'finition',nom:'Finisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.victoires>=3&&c.k.tauxFinition>=.67,conserve:c=>c.k.tauxFinition>=.50},
+  {id:'juge-dependant',famille:'finition',nom:'Juge-dépendant',public:true,temporaire:false,effet:null,condition:c=>c.k.n>=4&&c.k.tauxDecision>=.75,conserve:c=>c.k.tauxDecision>=.60},
   {id:'foudroyant',famille:'finition',nom:'Foudroyant',public:true,temporaire:false,effet:{explosiveness:3.75,killer:2.25},condition:c=>c.k.finitionsR1>=2,conserve:c=>c.k.finitionsR1>=1},
   {id:'poings-de-marbre',famille:'finition',nom:'Poings de marbre',public:true,temporaire:false,effet:{power:3.75},condition:c=>c.k.vKO>=3,conserve:c=>c.k.vKO>=2},
   {id:'specialiste-soumission',famille:'finition',nom:'Spécialiste de la soumission',public:true,temporaire:false,effet:{submission:4.5},condition:c=>c.k.vSub>=2&&c.k.partVictoiresSub>=.40,conserve:c=>c.k.partVictoiresSub>=.30},
+  {id:'guerrier',famille:'finition',nom:'Guerrier',public:false,temporaire:false,effet:null,condition:c=>c.k.guerres>=1,conserve:c=>c.k.guerres>=1},
   {id:'rouille',famille:'moment',nom:'Rouillé',public:true,temporaire:true,effet:null,condition:c=>c.k.n>=1&&c.k.cyclesDepuisDernier>=39,conserve:()=>false},
+  {id:'vieux-briscard',famille:'moment',nom:'Vieux briscard',public:true,temporaire:false,effet:null,condition:c=>c.k.age>=36&&c.k.n>=20,conserve:c=>c.k.age>=34},
+  {id:'jeune-loup',famille:'moment',nom:'Jeune loup',public:true,temporaire:false,effet:null,condition:c=>c.k.age<=24&&c.k.victoires>=3&&c.k.dKO===0,conserve:c=>c.k.age<=26},
+  {id:'roi',famille:'moment',nom:'Roi de la catégorie',public:true,temporaire:false,effet:null,condition:c=>c.k.titres>=3,conserve:c=>c.k.titres>=2},
+  {id:'invaincu',famille:'moment',nom:'Invaincu',public:true,temporaire:false,effet:null,condition:c=>c.k.victoires>=5&&c.k.defaites===0&&c.k.nuls===0,conserve:c=>c.k.defaites===0},
   {id:'debutant',famille:'moment',nom:'Débutant',public:true,temporaire:false,effet:null,condition:c=>c.k.bilanCombats<3,conserve:c=>c.k.bilanCombats<6},
-  {id:'routinier',famille:'moment',nom:'Routinier',public:true,temporaire:false,effet:null,condition:c=>c.k.bilanCombats>=10,conserve:()=>false}
+  {id:'routinier',famille:'moment',nom:'Routinier',public:true,temporaire:false,effet:null,condition:c=>c.k.bilanCombats>=10,conserve:()=>false},
+  {id:'comeback',famille:'mental',nom:'Revenu de loin',public:true,temporaire:true,effet:null,condition:c=>c.k.serieAvantDerniereDefaites>=2&&c.k.serieVictoires===1,conserve:()=>false}
 ]);
 function mgmtTraitInfo(id){const x=MGMT_TRAITS.find(t=>t.id===id);return x?Object.freeze({...x}):null;}
 /* ==== [ANCRE: P2_T2_APPLIQUER_TRAITS] — Monde lot 32 T2 ==== */
