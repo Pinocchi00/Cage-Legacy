@@ -925,6 +925,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so-bil>div{display:flex;align-items:center;gap:10px}
 .mf-so-bil b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:32px;line-height:1}
 .mf-so-fp{display:flex;justify-content:space-between;align-items:center}
+/* ==== [ANCRE: P7_T1_PRIMES_FIN_STYLE] — Monde lot 53 T1 ==== */
+.so3-primes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 28px}
+.so3-prime{min-height:76px;padding:12px 16px;box-sizing:border-box;background:var(--mf-ligne);display:flex;flex-direction:column;justify-content:center;gap:8px}
+.so3-prime span{font-size:22px;line-height:1;color:var(--mf-or)}
+.so3-prime b{font-family:var(--mf-titre);font-size:26px;line-height:1.05}
 .mf-so-avant{gap:16px;justify-content:flex-start}
 .mf-so-ban3{position:relative;width:1564px;height:150px;flex:none;background:var(--mf-noir)}
 .mf-so-ban3 .mf-so-diag.r{clip-path:polygon(877px 0,100% 0,100% 100%,687px 100%)}

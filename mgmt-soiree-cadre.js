@@ -114,6 +114,26 @@ function mgmtSoBandeHtml(prog,index,focus){
   }).join('')+`</div>`;
 }
 
+/* ==== [ANCRE: P7_T1_PRIMES_FIN] — Monde lot 53 T1 ==== */
+/** Affiche les trois attributions de la soirée à partir des seuls relevés. */
+function mgmtSoPrimesFinHtml(m){
+  const hist=Array.isArray(m&&m.hist)?m.hist:[];
+  const cycle=m&&m.lastEvent&&m.lastEvent.cycle;
+  const vus=new Set(), lignes=[];
+  for(const t of hist){
+    if(!t||t.c!==cycle||(t.pr!=='cs'&&t.pr!=='pf')) continue;
+    const type=t.pr;
+    const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
+    const cle=type+':'+(t.a&&t.a.id)+':'+(t.b&&t.b.id);
+    if(vus.has(cle)) continue;
+    vus.add(cle);
+    const award=type==='cs'?`<b>${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}</b>`:`<b>${esc(nom(t.winner==='A'?t.a&&t.a.id:t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id))}</b>`;
+    lignes.push(`<div class="so3-prime"><span>${type==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span>${award}</div>`);
+  }
+  if(!lignes.length) return '';
+  return `<section class="so3-primes" aria-label="Primes annoncées">${lignes.join('')}</section>`;
+}
+
 /** Ce que dit Leïla à l'ouverture : combien de préliminaires, et qui attend. */
 function mgmtSoLeila(m,prog){
   const L=MGMT_SOIREE_ECRAN.leila, pre=prog.filter(p=>p.slot==='prelim');
@@ -196,6 +216,7 @@ function mgmtSoFinHtml(m,prog){
   const lieu=mgmtCalendrierLieu(m,num+1);
   const gauche=dernier?mgmtSoResultatHtml(m,dernier,'TERMINÉ'):'';
   const centre=`<div class="mf-so-ban2 fin"><div><div class="mf-so-s2">${esc(date)}${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div><div class="mf-so-n"><b>${esc(num)}</b><span>${F.terminee}</span></div></div>`
+    +mgmtSoPrimesFinHtml(m)
     +`<div class="mf-so-fcw"><div class="mf-so-fc"><div class="mf-so-fcl"><div class="mf-so-fb"><div class="mf-so-s">${F.lieu}</div><div class="mf-so-big">${esc(mfNet(salle||'—')).replace(' ','<br>')}</div></div>`
     +`<div class="mf-so-fb"><div class="mf-so-s">${F.maintenant}</div><div class="mf-so-big">${F.resultats[0]}<br>${F.resultats[1]}</div></div></div>`
     +`<div class="mf-so-fcr"><div class="mf-so-s">${F.etat}</div>${ligne(F.prelims,nPre+' / '+nPre)}${ligne(F.main,nMain+' / '+nMain)}${ligne(F.principal,F.joue)}</div></div>`
