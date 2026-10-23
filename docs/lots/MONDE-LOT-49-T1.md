@@ -26,6 +26,14 @@ Branche : `p7-temps-forts` (la branche courante de ce dossier ; commits ICI ; le
 - Reste non livré : lecture en fenêtres avec frise de lecture et fondu, bascule de résultat sous forme de carte, composition exacte du panneau « LE PROCHAIN » et conformité complète à la maquette. Les commandes ajoutées à la frise ne remplacent pas ces éléments. La vitesse x4 existante pour la vue forts couvre tout le déroulé et ne garantit pas 45 secondes ; aucun mécanisme de fenêtre n'a été raccordé. Manquent aussi les vingt combats réels, la mesure de neuf combats, les tests complets d'écran/style/échappement, les empreintes mgmtPasse et la vérification de clôture de soirée. La tranche demeure inachevée.
 - Questions pour Anthony : aucune question de spécification ; reprise nécessaire pour achever les points non terminés ci-dessus.
 
+### Reprise 9 — état vérifié
+
+- État initial : branche `p7-temps-forts`; HEAD `cd20556` (« lecture par fenêtres »). La différence commitée depuis `origin/main` dans `mgmt-combat.js` et `mgmt-soiree-cadre.js` confirme la présence du saut entre fenêtres dans le lecteur arène existant. Les modifications locales antérieures dans `mgmt-combat.js`, `mgmt-temps-forts.js` et `tests/mgmtLot49T1.test.js` ont été examinées, pas présumées livrées.
+- Tentative de mesure automatisée sur 27 combats simulés : le test des durées calculées échoue (exemple observé : 14 s, précédemment 25 s). Ajustement expérimental de `mgmtTempsFortsLargeur` au calcul d'une durée cible, mais le contrôle ciblé reste rouge ; cette formule n'est donc pas validée. La lecture manuelle dans une fenêtre `newGameWindow({runMain:true})` n'a pas été mesurée indépendamment.
+- `node tools/verif-versions.js origin/main` passe. Vérification du package : `mgmtLot49T1` est absent des scripts `test` et `test:watch`.
+- Les exigences majeures restent inachevées : panneau « LE PROCHAIN » aux valeurs de la planche, lecture fiable de 30–60 s mesurée, test complet d'écran et d'échappement, cumul de soirée, empreintes `mgmtPasse`, fermeture de soirée testée et inclusion dans les deux scripts npm. Pas de prétention de conformité à la maquette.
+- Les changements expérimentaux des fichiers de code et du test demeurent locaux ; aucun commit final vert n'a été produit. Modifications étrangères `.opencode/agents/*` et `opencode.json` laissées intactes et hors tranche.
+
 ### Reprise 7 — bilan de la tentative
 
 - Maquette `UniSoiree.dc.html` relue : la composition de référence comprend une carte de neuf combats, commandes COMPLET / TEMPS FORTS / RÉSULTAT et un panneau « LE PROCHAIN ». L’écran d’avant-soirée déjà présent garde ses panneaux et ajoute ses commandes de vue en bandeau ; il ne porte pas encore cette composition exacte.

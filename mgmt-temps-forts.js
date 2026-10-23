@@ -1,6 +1,8 @@
 "use strict";
 /* ==== [ANCRE: P7_T2_TEMPS_FORTS] — Monde lot 49 T1 ==== */
 const MGMT_TF_TYPES=['ko','knockdown','soumission','coup-lourd','reprise','finition'];
+const MGMT_TF_VITESSE=8;
+function mgmtTempsFortsLargeur(nombre,duree){return Math.max(3,Math.min(6,(45-duree/MGMT_TF_VITESSE)*MGMT_TF_VITESSE/(Math.max(1,nombre)*(MGMT_TF_VITESSE-1))));}
 const MGMT_TF_TEXTES={relu:false, debut:['Le combat s’ouvre','Les deux combattants prennent place','La première reprise commence'],ko:['Le KO met fin au combat','Le KO conclut l’échange','Le KO change la soirée'],knockdown:['Un knockdown fait basculer le round','Le knockdown envoie son adversaire au tapis','Un knockdown marque le combat'],soumission:['La soumission force l’arrêt','La tentative de soumission devient décisive','La soumission trouve son issue'], 'coup-lourd':['Un coup lourd secoue le combat','Le coup lourd fait reculer son adversaire','Un impact lourd marque l’échange'],reprise:['La reprise relance le combat','Les combattants repartent pour un round','La reprise ouvre une nouvelle séquence'],finition:['La finition arrête le combat','La finition scelle l’issue','Le combat s’achève sur cette finition']};
 function mgmtTempsFortsChoisir(m,combat){
   const trace=combat&&combat.trace?combat.trace:combat;
@@ -30,11 +32,34 @@ function mgmtTempsFortsChoisir(m,combat){
   kept.sort((a,b)=>a.t-b.t); kept[kept.length-1]=end;
   return kept.slice(0,8).map((x,i)=>{const type=x.type==='debut'?'reprise':x.type;const bank=MGMT_TF_TEXTES[type]||MGMT_TF_TEXTES.reprise;return {t:x.t,round:x.round,type:x.type,poids:x.poids,raison:MGMT_TF_TEXTES[x.type==='debut'?'debut':type][i%bank.length]};});
 }
+/* ==== [ANCRE: P7_T2_DUREE_TEMPS_FORTS] — Monde lot 49 T1 ==== */
+function mgmtTempsFortsDuree(m,combat){
+  const moments=mgmtTempsFortsChoisir(m,combat);
+  const trace=combat&&combat.trace?combat.trace:combat;
+  const replay=trace&&typeof mgmtReplayFight==='function'?mgmtReplayFight(trace):null;
+  const scale=typeof MGMT_COMBAT_ECHELLE==='number'&&MGMT_COMBAT_ECHELLE>0?MGMT_COMBAT_ECHELLE:7;
+  let duree=Number.isFinite(combat&&combat.dureeAffichage)?combat.dureeAffichage:Number.isFinite(trace&&trace.dureeAffichage)?trace.dureeAffichage:0;
+  if(!duree&&replay&&typeof areneConstruire==='function'){
+    const session=areneConstruire(replay,{a:trace.a.name,b:trace.b.name},{echelle:scale,pause:0});
+    duree=session.dureeAffichage;
+  }
+  if(!duree)duree=moments[moments.length-1].t/scale;
+  const fenetre=mgmtTempsFortsLargeur(moments.length,duree);
+  const debut=moments.map(x=>Math.max(0,x.t/scale-fenetre/2)).sort((a,b)=>a-b);
+  let temps=0, curseur=0;
+  for(const start of debut){
+    if(start>curseur) temps+=(start-curseur)/MGMT_TF_VITESSE;
+    const end=Math.min(duree,start+fenetre);
+    if(end>curseur){temps+=end-Math.max(curseur,start);curseur=end;}
+  }
+  if(duree>curseur)temps+=(duree-curseur)/MGMT_TF_VITESSE;
+  return Math.round(temps);
+}
 function mgmtVueDuCombat(m,i){
   const options=typeof MGMT_REGLAGES!=='undefined'?MGMT_REGLAGES:null;
+  const v=m&&m.vues&&m.vues[i]; if(['complet','forts','resultat'].includes(v))return v;
   if(options&&options.soiree&&options.soiree.vue==='entier')return 'complet';
   if(options&&options.soiree&&options.soiree.vue==='resultat')return 'resultat';
-  const v=m&&m.vues&&m.vues[i]; if(['complet','forts','resultat'].includes(v))return v;
   const p=typeof mgmtSoireeProgramme==='function'?mgmtSoireeProgramme(m)[i]:null;
   return p&&p.nom===MGMT_SOIREE_TEXTES.principal||p&&p.nom===MGMT_SOIREE_TEXTES.coprincipal?'complet':'forts';
 }

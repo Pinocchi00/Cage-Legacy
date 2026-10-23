@@ -3,6 +3,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 
 test('Monde lot 49 T1 — sélection pure et déterministe de quatre temps forts même sans relevé',()=>{
   const w=newGameWindow({runMain:true});
@@ -28,6 +29,20 @@ test('Monde lot 49 T1 — les commandes de vue sont présentes dans le bandeau d
   const fs=require('node:fs');
   const source=fs.readFileSync(require.resolve('../mgmt-soiree-cadre.js'),'utf8');
   assert.match(source,/mf-so-views/); assert.match(source,/COMPLET/); assert.match(source,/TEMPS FORTS/); assert.match(source,/RÉSULTAT/);
+});
+
+test('Monde lot 49 T1 — temps forts calculés sur vingt combats réels durant de 30 à 60 secondes',()=>{
+  const w=newGameWindow({runMain:true});
+  w.eval(`setSeed(4901);mgmtPasseGenerer('split',{soirees:3});`);
+  assert.equal(jouerSoirees(w,3),3);
+  const r=JSON.parse(w.eval(`JSON.stringify(G.mgmt.hist.slice(-27).map(c=>({moments:mgmtTempsFortsChoisir(G.mgmt,c),duree:mgmtTempsFortsDuree(G.mgmt,c)})))`));
+  assert.ok(r.length>=20);
+  for(const {moments,duree} of r){
+    assert.ok(moments.length>=4&&moments.length<=8);
+    assert.deepEqual(moments.map(x=>x.t),moments.map(x=>x.t).slice().sort((a,b)=>a-b));
+    assert.ok(moments.slice(1).every((x,i)=>x.t-moments[i].t>=8));
+    assert.ok(duree>=30&&duree<=60,`durée calculée ${duree}s`);
+  }
 });
 
 test('Monde lot 49 T1 — le lecteur accélère entre les fenêtres de temps forts',()=>{

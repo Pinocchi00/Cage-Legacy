@@ -125,14 +125,14 @@ function mgmtCombatAvancer(dt){
     /* En temps forts, les intervalles entre fenêtres sont sautés sur la trace déjà rejouée.
        Les fenêtres restent celles de l'arène, sans simulation ni animation parallèle. */
     if(C.tempsForts&&C.tempsForts.length){
-      const width=4, scale=MGMT_COMBAT_ECHELLE;
+      const width=mgmtTempsFortsLargeur(C.tempsForts.length,S.dureeAffichage), scale=MGMT_COMBAT_ECHELLE;
       let i=C.tempsForts.findIndex(x=>C.d<(x.t/scale)+width/2);
       if(i<0) i=C.tempsForts.length-1;
       const start=Math.max(0,C.tempsForts[i].t/scale-width/2), end=start+width;
       if(C.d<start){ C.d=start; C.tempsFortActif=i; }
       else if(C.d>=end&&i<C.tempsForts.length-1){ C.d=Math.max(C.d,C.tempsForts[i+1].t/scale-width/2); C.tempsFortActif=i+1; }
       else C.tempsFortActif=i;
-      C.vitesse=C.d>=start&&C.d<end?1:4;
+      C.vitesse=C.d>=start&&C.d<end?1:MGMT_TF_VITESSE;
     }
     if(C.d<S.dureeAffichage) C.d=Math.min(S.dureeAffichage,C.d+dt*C.vitesse);
     else{
