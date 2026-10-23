@@ -92,8 +92,8 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
     MGMT_FICHE={id:m.roster[0].id,retour:'mgmt_classements',cursor:0}; G.screen='mgmt_fiche'; render(); const fiche=items();
     G.screen='mgmt_soiree'; render(); const soir=items();
     return {carte,bureau,fiche,soir,sections:MF_SECTIONS.map(s=>s.id)};`);
-  assert.deepEqual(r.sections,['accueil','carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
-  assert.equal(r.carte.length,14,'douze sections, Options, Menu principal ('+"décision du 12/10/2026 : l’Accueil est la première section (lot 7)"+')');
+  assert.deepEqual(r.sections,['accueil','actualites','carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
+  assert.equal(r.carte.length,15,'treize sections, Options, Menu principal ('+"brief du 22/10, P3 T2b : une section Actualites de plus (12 -> 13)"+')');
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
   assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),[],'plus aucune section n’est grisée sur la carte : Options est livrée au lot 12 (décision du brief : Options ne se grise que pendant la soirée, comme la barre entière)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);

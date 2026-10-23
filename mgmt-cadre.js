@@ -46,11 +46,13 @@ function mfLogoHtml(){
 
 /* ---- Les sections de la barre --------------------------------------------- */
 
-/** Les douze sections, dans l'ordre de la barre (Accueil en tête depuis le lot 7). `ecran` : l'écran ancien qui la porte tant que
+/** Les treize sections, dans l'ordre de la barre (Accueil en tête depuis le lot 7). `ecran` : l'écran ancien qui la porte tant que
  *  son remplaçant n'est pas livré ; null : la section reste grisée. */
 const MF_SECTIONS=[
   /* Monde lot 7 (décision du 12/10/2026) : l'Accueil est la première section et l'écran d'arrivée. */
   {id:'accueil',libelle:'Accueil',ecran:'mgmt_accueil'},
+  /* brief du 22/10, P3 T2b : une section Actualites de plus (12 -> 13) */
+  {id:'actualites',libelle:'Actualités',ecran:'mgmt_actualites'},
   {id:'carte',libelle:'Carte',ecran:'mgmt_carte'},
   {id:'preliminaires',libelle:'Préliminaires',ecran:'mgmt_prelims'},
   {id:'effectif',libelle:'Effectif',ecran:'mgmt_effectif'},
@@ -64,7 +66,7 @@ const MF_SECTIONS=[
   {id:'finances',libelle:'Finances',ecran:'mgmt_finances'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
-const MF_ECRAN_SECTION={mgmt_accueil:'accueil',mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
+const MF_ECRAN_SECTION={mgmt_accueil:'accueil',mgmt_actualites:'actualites',mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
   mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats',mgmt_ceintures:'ceintures',mgmt_camps:'camps',mgmt_presse:'presse',mgmt_resultats:'resultats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
@@ -79,10 +81,11 @@ function mfAttentes(m){
   if(!m) return out;
   if(m.card&&Number.isSafeInteger(m.card.sizeMain)&&Array.isArray(m.card.main)&&m.card.main.length<m.card.sizeMain) out.add('carte');
   if(typeof mgmtOpenCount==='function'&&mgmtOpenCount(m)>0) out.add('preliminaires');
+  if(typeof mgmtActuNonLues==='function'&&mgmtActuNonLues(m)>0) out.add('actualites');
   return out;
 }
 
-/** La barre. mode 'jeu' : les douze sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
+/** La barre. mode 'jeu' : les treize sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
  *  `grise` : toute la barre est grisée (le soir). */
 function mfBarreHtml({mode='jeu',courant=null,grise=false,m=null}={}){
   const attend=mfAttentes(m);
