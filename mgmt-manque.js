@@ -46,7 +46,7 @@ function mgmtManque(m){
     }
   } else if(man.id==='potentiel-champion') {
     const best=roster.map(f=>({f,rank:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)+1})).filter(x=>x.rank>0).sort((a,b)=>a.rank-b.rank||a.f.id.localeCompare(b.f.id));
-    const champCount=roster.filter(f=>typeof mgmtChampionIds==='function'&&mgmtChampionIds(m).includes(f.id)).length;
+    const champCount=roster.filter(f=>typeof mgmtChampionIds==='function'&&mgmtChampionIds(m).has(f.id)).length;
     lignes=[{libelle:'Meilleur rang mondial',valeur:best[0]?best[0].rank+'e MONDIAL':'AUCUN',sous:null},{libelle:'Meilleur classé de l’effectif',valeur:best[0]?(best[0].f.name||best[0].f.id):'AUCUN',sous:null},{libelle:'Champions mondiaux',valeur:String(champCount),sous:null}];
   }
   else {
