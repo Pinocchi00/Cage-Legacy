@@ -51,4 +51,12 @@ Branche : `p7-temps-forts` (la branche courante de ce dossier ; commits ICI ; le
 - Vérification des commandes : les alias dédiés `test:lot49t1` et `test:watch:lot49t1` existent, mais le test de présence demandé révèle que `mgmtLot49T1` n'est pas inclus dans les scripts globaux `test` et `test:watch` ; ce point demeure à corriger.
 - Fichiers de cette reprise : `mgmt-combat.js` — lecture des fenêtres sur le lecteur existant ; `index.html` — version du script montée ; `tests/mgmtLot49T1.test.js` — test des fenêtres ; cette fiche — bilan et écarts. Les modifications préexistantes de `.opencode/agents/*` et `opencode.json` restent hors tranche et ne sont pas ajoutées.
 
+### Reprise 9 — diagnostic
+
+- État de départ : HEAD `01b67ca`, branche `p7-temps-forts`. Le seul changement local pertinent est le bump de version provoqué par l'essai de mesure ; les changements `.opencode/agents/*` et `opencode.json` sont étrangers. `sw.js` a été réécrit par l'outil de bump et n'est volontairement pas inclus.
+- Lecture de la différence depuis `origin/main` : `mgmt-combat.js` raccorde bien les sauts d'intervalles sur le lecteur d'arène existant ; `mgmt-soiree-cadre.js` présente des commandes de vue dans la bande de navigation, mais pas l'écran de planche complet.
+- Test rapide demandé : `node --test tests/mgmtLot49T1.test.js` échoue sur le test des durées réelles. Sur l'échantillon seedé de 27 combats, les durées calculées vont de 9 à 47 secondes avec l'accélération x8. Un essai x4 produit aussi des durées hors bornes (exemple 73 s). La mesure n'est pas artificiellement bornée : cela masquerait l'écart entre durée calculée et lecture effective. Le test des fenêtres ne mesure pas une lecture manuelle dans `newGameWindow({runMain:true})`.
+- Reste non livré : durée fiable entre 30 et 60 secondes, cumul de neuf combats, composition complète « LE PROCHAIN », styles/tailles/échappement vérifiés, empreintes de `mgmtPasse.test.js`, intégration du fichier dans les scripts globaux `test` et `test:watch`, et contrôle ESLint global. La fidélité complète aux maquettes n'est donc pas acquise.
+- Tentative x4 annulée : elle a empiré les résultats et a été retirée. Le bump de `mgmt-temps-forts.js`/`index.html` demeure, car il reflète une version du script différente de l'ancienne. Aucun changement du moteur de combat. Pas de vérification complète ni de commit final conforme aux critères : ne pas considérer cette reprise comme terminée.
+
 Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js`.
