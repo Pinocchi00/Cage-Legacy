@@ -93,7 +93,7 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
   const actes=joue
     ?`<div class="mf-so-actes">${mfBouton('Revoir le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtSoRevoir(${k})`})}${mfBouton('Revenir au prochain combat',{touche:'Échap',onclick:'CL.mgmtSoAutre(0)'})}</div>`
     :libre
-    ?`<div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
+     ?`<div class="mf-so-actes">${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}</div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
   return mgmtSoBanniereHtml(av)
     +`<div class="mf-so-cp"><div class="mf-so-rs">`
@@ -246,9 +246,11 @@ Object.assign(CL,{
     if(!mgmtSoAgenda()) return;
     const m=G.mgmt, p=mgmtSoireeProgramme(m)[MGMT_SOIREE.index];
     if(!p||!p.trace) return;
-    const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
-    mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
-      salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir});
+     const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
+     const vue=mgmtVueDuCombat(m,p.i);
+     if(vue==='resultat'){ sortir(); render(); return; }
+     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
+       salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
   },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){

@@ -79,7 +79,7 @@ function mgmtCombatOuvrir(o){
   const R=MGMT_COMBAT_REGLAGES, salle=o.salle||mgmtCombatSalleDeTrace(m,t);
   C.sonT=-1;
   C.session=S; C.d=0; C.pause=false; C.mode='fight'; C.fin=0; C.decT=0; C.real=0; C.last=0; C.decalRefait=false;
-  C.vitesse=MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1;
+  C.vitesse=o.vue==='forts'?4:(MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1);
   C.plan=ARENE_SALLE_PLANS.includes(R.camera)?R.camera:'cable';
   C.queue=S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0?MGMT_COMBAT_QUEUE_DECISION:MGMT_COMBAT_QUEUE_FINITION;
   C.decision=areneSalleDecision(S);
