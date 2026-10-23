@@ -53,16 +53,15 @@ function mgmtPosteSoiree(m){
   if(m.treasury<0)negatif++;else if(m.treasury>0)positif++;
   const aud=m.audiences&&m.audiences[m.audiences.length-1]||0;
   if(aud>=MGMT_MAIN_SIZE)positif++;else if(aud>0&&aud<=MGMT_MAIN_SIZE/2)negatif++;
-  const rang=mgmtPosteRang(m), prev=MGMT_POSTE_RANGS.get(m);
+  const rang=mgmtPosteRang(m), prev=Number.isSafeInteger(p.rg)?p.rg:rang;   /* le rang précédent vit dans la sauvegarde : une partie rechargée se comporte comme une session continue */
   if(rang<prev)positif++;else if(rang>prev)negatif++;
-  MGMT_POSTE_RANGS.set(m,rang);
+  p.rg=rang;
   const avant=p.conf; p.conf=Math.max(0,Math.min(4,avant+(positif>negatif?1:negatif>positif?-1:0)));
   const jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):m.eventsPlayed*35;
   if(!p.mi&&jour-p.debut>=MGMT_POSTE.mi)p.mi=true;
   p.hist.push({s:m.eventsPlayed,conf:p.conf,note:positif>negatif?'progres':negatif>positif?'recul':'stable'});
   if(p.hist.length>12)p.hist.shift(); return p;
 }
-const MGMT_POSTE_RANGS=new WeakMap();
 function mgmtPosteBilan(m){
   const p=m&&m.poste;if(!p)return null;
   const objTenus=p.obj.filter(o=>o.e==='tenu'||o.e==='fait').length,objTotal=p.obj.length,ratio=objTotal?objTenus/objTotal:0;
