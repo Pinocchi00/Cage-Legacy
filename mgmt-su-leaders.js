@@ -32,11 +32,11 @@ function scr_mgmt_meilleurs_cadre(){
 function mgmtRecordsRendu(m){
   const L=MGMT_MEILLEURS_LABELS,r=mgmtRecords(m),hist=(m.hist||[]).filter(x=>x&&x.date).map(x=>new Date(x.date).getFullYear()).filter(Number.isFinite),year=hist.length?Math.min(...hist):null;
   const groups=[['EN UN COMBAT',['sigAtt','koRapide','amenees','knockdowns','controle3','corps']],['EN CARRIÈRE',['finitions','defensesTitre','victoiresSuite','combats','plusJeuneChampion']]];
-  const format=(id,v)=>id==='koRapide'?`0:${String(v).padStart(2,'0')}`:id==='controle3'?`${Math.floor(v/60)}:${String(v%60).padStart(2,'0')}`:String(v);
+  const format=(id,v)=>id==='koRapide'||id==='controle3'?`${Math.floor(v/60)}:${String(v%60).padStart(2,'0')}`:String(v);
   let count=0;
   const html=groups.map(([title,ids])=>{const rows=ids.map(id=>{const rec=[...r.unCombat,...r.carriere].find(x=>x.id===id&&x.combattant);if(!rec)return '';count++;const beaten=r.battu&&r.battu.id===id?r.battu:null;
     const before=beaten&&beaten.avant?`<span class="mf-re-avant">avant : ${esc(beaten.avant.combattant.nom)}, ${esc(beaten.avant.valeur)}</span>`:'';
-    return `<div class="mf-re-ligne"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small>${esc(rec.combattant.nom)} · Split Fight Night ${esc(rec.soiree)}${year?`, ${esc(year)}`:''} ${before}</small></div></div>`;
+    return `<div class="mf-re-ligne"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small><button type="button" onclick="CL.mgmtFiche('${escJsAttr(rec.combattant.id)}')">${esc(rec.combattant.nom)}</button> · Split Fight Night ${esc(rec.soiree)}${year?`, ${esc(year)}`:''} ${before}</small></div></div>`;
   }).join('');return rows?`<section class="mf-re-groupe"><h2>${title}</h2>${rows}</section>`:'';}).join('');
   return `<main class="mf-contenu mf-re"><div class="mf-re-intro">${year?`Tous les combats de Split depuis ${esc(year)}, toutes catégories`:''}</div>${html||`<p>${esc(L.empty)}</p>`}</main>`;
 }
