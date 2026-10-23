@@ -58,50 +58,11 @@ const MGMT_CLASSEMENTS_LABELS={
   sur:'sur',
 };
 
-/* ==== [ANCRE: P1_T6B_MEILLEURS_LIBELLES] — Monde lot 31 T6b ==== */
-const MGMT_MEILLEURS_LABELS={
-  tabs:{meilleurs:'LES MEILLEURS',records:'LES RECORDS'},gender:{H:'HOMMES',F:'FEMMES'},
-  categories:[['finitions','LE PLUS DE FINITIONS',''],['volume','LE PLUS GROS VOLUME','/ MIN'],['precis','LE PLUS PRÉCIS','%'],['defense','LA MEILLEURE DÉFENSE','%'],['lutteur','LE LUTTEUR','/ 15 MIN'],['mur','LE MUR','%'],['cou','LE CHASSEUR DE COU','/ 15 MIN'],['serie','LA PLUS LONGUE SÉRIE','V']],
-  insufficient:'3 combats documentés minimum', precise:'5 pour la précision', empty:'Pas encore de combat documenté.',
-  recordLabels:{sigAtt:'Coups significatifs tentés en un combat',koRapide:'Le KO le plus rapide',amenees:'Amenées réussies en un combat',knockdowns:'Knockdowns dans un même combat',controle3:'Contrôle au sol en trois rounds',corps:'Coups au corps en un combat',finitions:'Finitions chez Split',defensesTitre:'Défenses de titre de suite',victoiresSuite:'Victoires de suite',combats:'Combats chez Split',plusJeuneChampion:'Le plus jeune champion'},
-  beaten:{sigAtt:'{nom}, {valeur} coups significatifs tentés à Split Fight Night {soiree}.{avant}',koRapide:'{nom}, {valeur} secondes à Split Fight Night {soiree}.{avant}',amenees:'{nom}, {valeur} amenées réussies à Split Fight Night {soiree}.{avant}',knockdowns:'{nom}, {valeur} knockdowns à Split Fight Night {soiree}.{avant}',controle3:'{nom}, {valeur} de contrôle au sol à Split Fight Night {soiree}.{avant}',corps:'{nom}, {valeur} coups au corps à Split Fight Night {soiree}.{avant}'}
-};
-
 const MGMT_CL_TOP=15;
 
 /** État de l'écran (trace de rendu, jamais persistée) : catégorie et
  *  portée courantes. ==== */
-let MGMT_CLASSEMENTS={div:'H-fly',scope:'world',vue:'liste',selection:0};
-
-/* ==== [ANCRE: P1_T6B_VUES] — Monde lot 31 T6b ==== */
-function mgmtClassementsVueBtnsHtml(){
-  const L=MGMT_MEILLEURS_LABELS;
-  return Object.entries(L.tabs).map(([vue,label])=>`<button type="button" class="mgmt-cl-tab${MGMT_CLASSEMENTS.vue===vue?' cur':''}" onclick="CL.mgmtClassementsVue('${vue}')">${esc(label)}</button>`).join('');
-}
-function mgmtMeilleursHtml(m){
-  const L=MGMT_MEILLEURS_LABELS, cats=L.categories, d=divById(MGMT_CLASSEMENTS.div), gender=d&&d.gender==='F'?'F':'H';
-  const cards=mgmtMeilleurs(m,{divId:MGMT_CLASSEMENTS.div,portee:MGMT_CLASSEMENTS.scope==='split'?'split':'monde'});
-  const html=cats.map(([id,label,unit],i)=>{
-    const row=cards.find(x=>x.id===id), first=row&&row.rang[0], fmt=v=>Number.isInteger(v)?String(v):String(Number(v.toFixed(2))).replace('.',',');
-    const ranks=row?row.rang:[], top=first?`<button class="mgmt-me-name" onclick="CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toUpperCase())}</button>`:`<div class="mgmt-me-empty">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
-    return `<article class="mgmt-me-card${MGMT_CLASSEMENTS.selection===i?' selected':''}"><h3>${esc(label)}</h3><div class="mgmt-me-value">${first?esc(fmt(first.valeur)):''}${first&&unit?` <small>${esc(unit)}</small>`:''}</div>${top}<div class="mgmt-me-ranks">${ranks.slice(1,3).map((r,n)=>`<div><button onclick="CL.mgmtFiche('${escJsAttr(r.id)}')">${n+2}. ${esc((r.nom.split(/\\s+/).pop()||r.nom))}</button><span>${esc(fmt(r.valeur))}</span></div>`).join('')}</div></article>`;
-  }).join('');
-  const battu=mgmtRecords(m).battu;
-   const family=x=>(x||'').trim().split(/\s+/).pop();
-   const unit={sigAtt:'coups significatifs tentés',koRapide:'secondes',amenees:'amenées réussies',knockdowns:'knockdowns',controle3:'de contrôle au sol',corps:'coups au corps'};
-   const ancien=battu&&battu.avant?` L'ancien record était de ${battu.avant.valeur} (${family(battu.avant.combattant.nom)}).`:'';
-   const phrase=battu&&L.beaten[battu.id]?L.beaten[battu.id].replace('{nom}',family(battu.combattant.nom)).replace('{valeur}',battu.valeur+' '+unit[battu.id]).replace('{soiree}',battu.soiree).replace('{avant}',ancien):'';
-   const rec=phrase?`<aside class="mgmt-me-battu"><b>RECORD BATTU</b><span>${esc(phrase)}</span></aside>`:'';
-  return `<div class="mgmt-me"><div class="mgmt-me-gender">${esc(L.gender[gender])}</div><div class="mgmt-me-grid">${html}</div>${rec}</div>`;
-}
-function mgmtRecordsHtml(m){
-  const L=MGMT_MEILLEURS_LABELS,r=mgmtRecords(m),years=(m.hist||[]).filter(x=>x&&x.date).map(x=>new Date(x.date).getFullYear()).filter(Number.isFinite),year=years.length?Math.min(...years):'';
-  const orders=[['unCombat',['sigAtt','koRapide','amenees','knockdowns','controle3','corps']],['carriere',['finitions','defensesTitre','victoiresSuite','combats','plusJeuneChampion']]];
-  const format=(id,v)=>id==='koRapide'?`0:${String(v).padStart(2,'0')}`:id==='controle3'?`${Math.floor(v/60)}:${String(v%60).padStart(2,'0')}`:String(v);
-  let count=0;
-  const groups=orders.map(([group,ids])=>{const rows=ids.map(id=>{const rec=r[group].find(x=>x.id===id&&x.combattant);if(!rec)return '';count++;const battu=r.battu&&r.battu.id===id?`<span class="mgmt-re-new">NOUVEAU</span><small>avant : ${esc(r.battu.avant.combattant.nom)}, ${esc(r.battu.avant.valeur)}</small>`:'';return `<div class="mgmt-re-row"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])} ${battu}</div><small>${esc(rec.combattant.nom)} · Split Fight Night ${esc(rec.soiree)}${year?`, ${esc(year)}`:''}</small></div></div>`;}).join('');return rows?`<section class="mgmt-re-group"><h3>${group==='unCombat'?'EN UN COMBAT':'EN CARRIÈRE'}</h3>${rows}</section>`:'';}).join('');
-  return `<div class="mgmt-re">${year?`<p>Tous les combats de Split depuis ${esc(year)}, toutes catégories</p>`:''}${groups||`<p>${esc(L.empty)}</p>`}</div>`;
-}
+let MGMT_CLASSEMENTS={div:'H-fly',scope:'world'};
 
 /** Le compte global de Split dans le top 15 mondial : la même dérivation
  *  que l'écran de l'organisation (mgmtOrgEffectifRows), jamais une seconde
@@ -267,10 +228,6 @@ function scr_mgmt_classements(){
   if(MGMT_CLASSEMENTS.scope!=='world'&&MGMT_CLASSEMENTS.scope!=='split'){
     MGMT_CLASSEMENTS.scope='world';
   }
-  if(MGMT_CLASSEMENTS.vue==='meilleurs'||MGMT_CLASSEMENTS.vue==='records'){
-    const records=MGMT_CLASSEMENTS.vue==='records';
-    return `<div class="scr mgmt-wrap mgmt-cl"><div class="mgmt-head bar"><div><div class="eyebrow gold">${esc(mgmtOrgNom(m))} — Management</div><h2 class="disp">${esc(L.title)}</h2></div><div class="mgmt-cl-scopebtns">${mgmtClassementsVueBtnsHtml()}${!records?mgmtClassementsScopeBtnsHtml():''}</div></div>${!records?`<div class="mgmt-cl-tabs">${mgmtClassementsTabsHtml()}</div>`:''}${records?mgmtRecordsHtml(m):mgmtMeilleursHtml(m)}</div>`;
-  }
   const scope=MGMT_CLASSEMENTS.scope;
   /* Les deux portées du classement (lot 2B T1 bis) : la bascule d'écran
      porte « mondial » ou « split », la loi attend « world » ou
@@ -293,7 +250,7 @@ function scr_mgmt_classements(){
   return `<div class="scr mgmt-wrap mgmt-cl">`
     +`<div class="mgmt-head bar"><div><div class="eyebrow gold">${esc(mgmtOrgNom(m))} — Management</div>`
     +`<h2 class="disp">${esc(L.title)}</h2></div>`
-     +`<div class="mgmt-cl-scopebtns">${mgmtClassementsVueBtnsHtml()}${mgmtClassementsScopeBtnsHtml()}</div></div>`
+    +`<div class="mgmt-cl-scopebtns">${mgmtClassementsScopeBtnsHtml()}</div></div>`
     +`<div class="mgmt-cl-tabs">${mgmtClassementsTabsHtml()}</div>`
     +`<div class="mgmt-cl-cols">`
     +`<section class="mgmt-cl-pane mgmt-cl-list">`
@@ -318,7 +275,6 @@ function scr_mgmt_classements(){
  *  échap (mgmt-screens.js) ramène à la semaine, le clavier n'est jamais
  *  exclusif. Aucun état persisté : une trace de rendu. ==== */
 Object.assign(CL,{
-  mgmtClassementsVue(vue){if(!['liste','meilleurs','records'].includes(vue))return;MGMT_CLASSEMENTS.vue=vue;render();},
   mgmtClassementsTab(divId){
     if(!G||!G.mgmt) return;
     if(!divById(divId)) return;
