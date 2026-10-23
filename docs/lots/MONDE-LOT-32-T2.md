@@ -72,4 +72,9 @@ Versions à la main dans `index.html` (`mgmt-traits.js`, `mgmt-corps.js`), `node
 - `tests/mgmtTraits.test.js` : table restaurée à 32 traits depuis `origin/main`, test de retrait de « série noire » supprimé et assertions de 32/8 ajoutées. Test ciblé échoue sur une contradiction à clarifier : les 32 entrées réelles utilisent **six** valeurs de `famille` (`menton`, `cardio`, `mental`, `sol`, `finition`, `moment`), alors que la demande de reprise exige « quatre familles ». Aucun remaniement de catégories n'est fait sans décision.
 - Non réalisés : mesure de garde-fou et de génération avant/après, tests `mgmtTraitsEffets.test.js`, adaptations de tests d'empreinte, vérifications de versions/lint et commit final.
 
-Fichiers et rôle ; le tableau des mesures (les traits gardés, les traits retirés et pourquoi) ; mesure du garde-fou avant/après (finitions, KO, soumissions, temps de génération) et le facteur retenu ; tests ajoutés et adaptés (citations, chiffres) ; écarts à la fiche ; questions pour Anthony.
+## Compte rendu de reprise (23/10/2026)
+
+- Mesure d'avant et mesure d'après reprises dans `tools/reports/TRAITS-MESURES.md`. La distribution de combats reste dans les bandes avec le facteur 0,75 déjà appliqué aux effets (finitions 54,3 %, KO/TKO 32 %, soumissions 18,3 %). Le temps 62 soirées est de 96 664 ms contre 52 911 ms (+82,9 %), hors seuil de +25 %.
+- L'amplitude des deltas n'a aucun lien démontré avec le temps de génération; je ne réduis pas arbitrairement les effets et ne prétends pas satisfaire le garde-fou runtime. Le point 3 reste bloqué par ce dépassement.
+- Points 4 à 6 non réalisés dans cette reprise. Aucun test d'effet ajouté ni test d'empreinte lancé.
+- Fichiers modifiés dans cette reprise : rapport de mesure (résultats et écart au garde-fou), cette fiche (compte rendu). Questions pour Anthony : aucune question ouverte; blocage objectif du runtime noté ci-dessus.
