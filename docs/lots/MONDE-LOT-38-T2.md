@@ -57,3 +57,26 @@ Les valeurs de planche ci-dessous sont lues dans les styles inline des fichiers 
 | Métadonnées | 22 px | 22 px |
 
 Écarts/points sautés : pas de panneau Organisation (place sûre non établie), pas de presse (aucun point d'entrée dérivé confirmé), description complète des états espoirs de la planche à compléter ; tests globaux `test` / `test:watch`, tests de reprise/espoirs complémentaires, mesure DOM et vérification visuelle à faire. Aucun test portant sur Organisation/Accueil n'a été modifié. Textes visibles écrits dans cette tranche : libellés d'arrivée marqués `relu:false`; libellés du lien Organisation et du bloc Accueil à faire relire. Questions pour Anthony : confirmer le libellé d'état d'espoir sur l'Accueil pour les statuts de soin/durée et date de signature que le modèle actuel ne calcule pas ; préciser l'emplacement Organisation si un panneau est attendu malgré les 792 px de colonnes.
+
+### Complément de reprise (23/10/2026)
+
+- Mesure/correction de l'étape 2 : grille déclarée en trois colonnes de 511 × 337 px, deux rangées, écart vertical 16 px (hauteur totale 690 px), dans la scène de 856 px commençant à y=128. La page n'a pas été rendue dans un navigateur durant cette reprise ; ces valeurs sont les règles CSS, pas un nouvel échantillon DOM.
+- Étape 1 : hauteur de scène 856 px à y=128 ; titre « Ce qui manque » en 72 px/800 rouge ; lignes avec 14 px de padding vertical ; Leïla positionnée à x=328, y=228 dans la scène, étiquette 30 px/800 jaune, citation 26 px/500. Le CSS reprend le padding intérieur de 15 px des panneaux.
+- Tableau planche/page (dix éléments, page = règles déclarées et non mesure DOM) :
+
+| Élément | Planche/cible | Page après reprise |
+|---|---:|---:|
+| Scène | 1920 × 1080 | 1920 × 1080 via `.mf-stage` |
+| Origine horizontale du contenu | x=300 | x=300 |
+| Départ vertical de l'étape 1 | y=128 | y=128 |
+| Titre « manque » | 72 px, rouge | 72 px, `#E23A2B` |
+| Padding intérieur | 15 px (texte à +22 via cadre) | 15 px sur `.mf-p3` d'arrivée |
+| Lignes du manque | lignes séparées, texte ≥22 px | padding vertical 14 px, séparateur 2 px |
+| Étiquette Leïla | x=328, y=228, 30 px, jaune | x=328, y=228, 30 px, `#F0B220` |
+| Citation de Leïla | x=394, y=228, 26 px/500 | 26 px/500 ; x selon le flux de la réplique |
+| Carte espoir | 511 × 337 px | 511 × 337 px (CSS déclaré) |
+| Grille espoirs | 3 × 2, hauteur 690 px | 3 × 2, gap 16 px, hauteur 690 px |
+
+- Vérifications réalisées : `node --test tests/mgmtLot38T2.test.js` (8/8), `mgmtCadre.test.js` (12/12), `mgmtAccueil.test.js` (19/19), `mgmtOrganisation.test.js` (3/3), `mgmtPriseEnMain.test.js` (8/8), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (succès).
+- Commits de reprise : `98d2b33` géométrie étape 1 ; `897c689` placement de Leïla. Les commits antérieurs `96d7929`, `98993fb` et `29ca683` avaient livré les données, la grille et l'écran.
+- Aucun changement de sauvegarde. Aucun DOM réel post-animation n'a été instrumenté. Le panneau Organisation et la ligne de presse restent sautés pour les raisons documentées ci-dessus.
