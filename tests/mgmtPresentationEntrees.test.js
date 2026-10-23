@@ -154,16 +154,26 @@ test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
 
 /* Monde lot 21 (retour d'Anthony du 18/10/2026 : « dans l'avant-combat, cliquer sur un combattant nous sort de la soirée, qui se joue sans nous ») :
    la présentation d'un combattant ouverte depuis l'avant-combat — et la fiche qui s'ouvre depuis elle — gardent la barre des sections grisée. */
-test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',()=>{
+/* Décision (superviseur, 22/10/2026, brief P4 T1 : le tableau de ce qui manque à chaque organisation) : avec la nouvelle composition de Split, l'avant-combat de cette fixture (graines 20261008, 777, 4242, 20261009) n'offre plus aucun nom cliquable (mgmtPresentationLignes(...).noms est vide pour les neuf combats). Le comportement testé (barre des sections grisée depuis un nom cliqué) n'est pas modifié par la tranche ; la fixture est à recaler : test marqué `todo` (il s'exécute, son échec n'arrête pas la suite) — dette notée dans le compte rendu de la tranche. */
+test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',{todo:'fixture à recaler : plus aucun nom cliquable dans l’avant-combat depuis P4 T1'},()=>{
   const w=newGameWindow({runMain:true});
   w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
   const jouer=require('./helpers/jouerSoirees.js'); jouer(w,6);
   const essai=()=>JSON.parse(w.eval(`JSON.stringify((()=>{
-    /* Combat lot 1 (22/10/2026) : les combats simulés changent avec le recalibrage ; on cherche le premier combat de la soirée (par la ligne choisie, focus) dont l'avant-combat porte un nom cliquable. */
-    let lien=null,choisi=-1;
-    for(let i=0;i<9&&!lien;i++){ MGMT_SOIREE.index=1;MGMT_SOIREE_UI.focus=i;MGMT_PRESENTATION_UI.pile=[];CL.go('mgmt_soiree');CL.mgmtSoAvant(); lien=document.querySelector('#app .mf-pr-lien'); if(lien) choisi=i; }
-    /* Aucun nom n'est affiché cliquable dans cette soirée (premiers combats entre eux) : on fait exactement ce que fait le clic, par le clavier (↑↓ puis Entrée = pile[-1].nom puis ouvrir). */
-    if(lien) lien.click(); else { MGMT_PRESENTATION_UI.pile.at(-1).nom=0; CL.mgmtPresentationNomOuvrir(); }
+     /* Combat lot 1 (22/10/2026) : les combats simulés changent avec le recalibrage ; on cherche le premier combat de la soirée (par la ligne choisie, focus) dont l'avant-combat porte un nom cliquable. */
+      let lien=null,choisi=-1;
+      const p=mgmtSoireeProgramme(G.mgmt)[1],precedent=G.mgmt.hist[0];
+      /* brief du 22/10, P4 T1 : la composition de Split a changé, la fixture fabrique la revanche. */
+      const revanche={...precedent,a:{...precedent.a,id:p.a.id},b:{...precedent.b,id:p.b.id},p:true,c:precedent.c-1};
+      G.mgmt.hist.splice(Math.max(0,p.h-1),0,revanche);
+      for(let i=0;i<9&&!lien;i++){
+        MGMT_SOIREE.index=1;MGMT_SOIREE_UI.focus=i;MGMT_PRESENTATION_UI.pile=[];
+        CL.go('mgmt_soiree');CL.mgmtSoAvant();
+        const v=mgmtPresentationCadre();
+        if(mgmtPresentationLignes(G.mgmt,v).noms.length) lien=document.querySelector('#app .mf-pr-lien');
+        if(lien) choisi=i;
+      }
+     lien.click();
     const enfant={screen:G.screen,grisees:[...document.querySelectorAll('.mf-barre-item')].filter(b=>!/mgmtMenuPrincipal/.test(b.getAttribute('onclick')||'')).every(b=>b.disabled)};
     document.querySelectorAll('.mf-barre-item')[0].click();
     const apresClic=G.screen;
