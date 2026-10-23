@@ -60,9 +60,10 @@ test('Salles — la caisse après une soirée vaut la caisse d’avant, plus les
       for(const a of rows){ const b=rows.find(x=>x.id!==a.id&&x.div===a.div&&mgmtSelectable(m,x,a.id)); if(b&&mgmtBookMain(m,a.id,b.id)){ ok=true; break; } } if(!ok) break; }
     const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk) mgmtDecide(m,bulk.id,'validate');
     const t0=m.treasury, pop0=m.pop; const ev=mgmtAgendaJouer(m); const f=ev.finance;
-    return {t0,t1:m.treasury,recette:f.recette,calc:f.ticketing+f.tv-f.purses-f.bonuses-f.location,loc:f.location,sp:f.spectateurs,cap:f.capacite,sat:f.satisfaction,pop0,pop1:m.pop,
+    return {t0,t1:m.treasury,recette:f.recette,calc:f.ticketing+f.tv-f.purses-f.bonuses-f.location-f.primes,loc:f.location,sp:f.spectateurs,cap:f.capacite,sat:f.satisfaction,pop0,pop1:m.pop,
       compte:m.comptes.length,salle:f.salle,valide:validateMgmt(JSON.parse(JSON.stringify(m)))};`);
-  assert.equal(r.t1,r.t0+r.recette); assert.equal(r.recette,r.calc,'recettes moins dépenses'); assert.ok(r.loc>0,'la salle se loue');
+  assert.equal(r.t1,r.t0+r.recette); /* Brief du 22/10, P7 T3 : les primes sont une dépense de la soirée, déduite de la recette nette. */
+  assert.equal(r.recette,r.calc,'recettes moins dépenses, primes comprises'); assert.ok(r.loc>0,'la salle se loue');
   assert.ok(r.sp>0&&r.sp<=r.cap); assert.equal(r.compte,1); assert.ok(r.salle.length>0); assert.ok(r.valide);
 });
 
