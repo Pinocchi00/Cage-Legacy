@@ -45,19 +45,27 @@ Tranche livrée sur l’écran réel du cadre. `MGMT_SU_CL.vue` vaut `liste` par
 ### Fidélité aux planches (valeurs déclarées dans les styles ; pas de mesure DOM automatisée)
 | Élément | Valeur planche | Valeur page |
 |---|---|---|
-| Titre de carte | 22 px, Saira Condensed 600 | 22 px, graisse 600 |
-| Valeur principale | 96 px, Saira Extra Condensed 800 | 96 px, graisse 800 |
-| Nom du 1er | 40 px, Saira Extra Condensed 800 | 40 px, graisse 800 |
-| Lignes 2/3 | 22 px, opacité .74 | 22 px, rgba(...,.74) |
-| Grille des cartes | 4 colonnes × 2 rangées, écart 16 px | 4 × 2, gap 16 px |
-| Cartes | fond #1B1818, contour 2 px, coins coupés 14 px, padding 20 px | mêmes couleurs, contour, clip-path et padding |
-| Onglets actif/inactif | jaune #F0B220 / gris clair | actif jaune ; inactif transparent, texte et bordure gris clair |
-| Encadré RECORD BATTU | hauteur 84 px, fond clair, badge rouge | 84 px, fond #E9E6E1, badge #E23A2B |
-| Ligne de record / séparateur | grille 210 px + 1fr, padding vertical 14 px, séparateur 2 px rgba(...,.16) | mêmes valeurs |
-| Pastille NOUVEAU | fond jaune, 22 px, clip-path 6 px | #F0B220, 22 px, clip-path 6 px |
-| Pied de page des touches | touches 24 px | rendu par `mfEcran` ; Échap, Tab, G, M, V et Entrée selon la vue |
+| Titre de carte | 22 px / 600, gris .74 | 22 px / 600, gris .74 |
+| Valeur principale | 96 px / 800 | 96 px / 800 ; fractions de précision/défense en pourcentage entier |
+| Nom du 1er | 40 px / 800 | 40 px / 800 |
+| Lignes 2/3 | 22 px / 500, gris .74 | 22 px / 500, gris .74 ; suffixe « % » sur les fractions |
+| Grille Meilleurs | x=300/695/1090/1485, y=200/550 ; cartes 379×334, gap 16 | grille 4×2, gap 16, grille sous la rangée d’onglets de 56 px |
+| Padding intérieur des cartes | texte à +22 px | `.mf-p3` padding 15 px, texte recadré par le cadre imbriqué |
+| Rangée d’onglets | y=128, hauteur 56, actif clair/sombre, 32 px/800 | rangée de contenu dédiée, SPLIT/MONDIAL/MEILLEURS/RECORDS et sélecteur hommes/femmes ; actif clair/sombre |
+| Encadré RECORD BATTU | rectangle clair, libellé 30 px/800, phrase 26 px/700 ; touche R / LES RECORDS | rectangle #E9E6E1, hauteur 54 px, mêmes tailles ; bouton et raccourci R vers Records |
+| Panneaux Records | x=300/1090, y=200, 774×784 ; titre à +22 | deux colonnes flex sous la rangée d’onglets, padding intérieur 15 px |
+| Ligne de record | valeur claire 72 px/800, libellé 26 px/500, pas 117 px | valeur claire ; seule la ligne nouvelle devient jaune ; ligne minimum 117 px, libellé 26 px |
+| Pastille NOUVEAU | fond clair, texte sombre 22 px/800 | fond #E9E6E1, texte sombre 22 px/800, affichée uniquement sur le record battu |
+| Sous-ligne / unités | nom · Split Fight Night n, année si connue ; ANS 30 px | soirée et année historiquement disponibles ; ANS 30 px gris .74 |
 
 ### Écarts et questions
 - Pas de relevé annuel fiable sur tous les enregistrements : l’année est rendue seulement si `m.hist` fournit une date pour le même `Fight Night`; sinon l’année (y compris dans « avant : … ») est omise, jamais inférée de `c`/du numéro de soirée. La phrase du record battu reste factuelle et n’invente ni année ni détenteur.
 - Le test de rendu mesure les fonctions de rendu à <300 ms sur la partie de six soirées ; la construction du DOM jsdom du test est beaucoup plus lente et n’est pas assimilée au temps de rendu du jeu.
 - Aucun autre écart ni question ouverte pour Anthony.
+
+### Compte rendu — ajustements de fidélité T6b
+- Fichiers modifiés : `mgmt-su-leaders.js` (rangée d’onglets, formats, détenteur et mise en évidence des records, bouton Records) ; `mgmt-suivi-cadre.js` (raccourci R réservé à Meilleurs) ; `ui-cadre.css` (géométrie de la rangée, cartes et panneaux, typographie et couleurs des records) ; `index.html` (versions manuelles CSS/JS) ; `tests/mgmtLeadersEcran.test.js` (sélecteurs d’onglets et format de précision) ; cette fiche (tableau de fidélité).
+- Tests ciblés demandés : `tests/mgmtLeadersEcran.test.js` — 8/8 ; `tests/mgmtCadre.test.js` — 12/12.
+- Sauvegarde : aucune donnée persistée, aucune migration, `MGMT_SAVE_VERSION` inchangé.
+- Versions : `ui-cadre.css?v=monde31t6b9`, `mgmt-suivi-cadre.js?v=m5xxxxxxxx5`, `mgmt-su-leaders.js?v=7`.
+- Écarts : la fidélité géométrique a été alignée avec les mesures transmises. L’année d’un record reste omise lorsqu’aucune date fiable n’existe dans l’historique, comme indiqué plus haut.

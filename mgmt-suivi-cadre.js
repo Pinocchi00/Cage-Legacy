@@ -803,6 +803,7 @@ keysRegister('mgmt_classements',{
   },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
   v(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); }, V(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); },
+  r(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClVue('records'); }, R(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClVue('records'); },
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_ceintures',{

@@ -11,6 +11,8 @@ test('T6b — huit cartes Meilleurs dans l’ordre, valeurs et fiche du premier'
   const row=JSON.parse(w.eval(`JSON.stringify(mgmtMeilleurs(G.mgmt,{divId:mgmtSuDiv(MGMT_SU_CL),portee:'monde'})[0].rang[0])`));
   assert.equal(w.document.querySelector('.mf-me-nom').textContent,row.nom.toLocaleUpperCase('fr'));
   assert.ok(w.document.querySelector('.mf-me-nom').getAttribute('onclick').includes(row.id));
+  const precision=JSON.parse(w.eval(`JSON.stringify((mgmtMeilleurs(G.mgmt,{divId:mgmtSuDiv(MGMT_SU_CL),portee:'split'}).find(x=>x.id==='precis')||{}).rang?.[0]||null)`));
+  if(precision)assert.equal(w.document.querySelectorAll('.mf-me-carte')[2].querySelector('.mf-me-valeur').textContent,`${Math.round(precision.valeur*100)}%`);
 });
 test('T6b — la portée mondiale et la portée Split pilotent le calcul',()=>{
   const w=newGameWindow({runMain:true});w.eval(`setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});MGMT_SU_CL.div='H-heavy';mgmtAgendaActif=()=>true;CL.go('mgmt_classements');CL.mgmtSuClVue('meilleurs')`);
@@ -23,6 +25,7 @@ test('T6b — Records rend les détenteurs dans l’ordre, sans primes',()=>{
   assert.ok(w.document.querySelector('.mf-re'));
   assert.ok(!w.document.getElementById('app').textContent.includes('Primes de la soirée'));
   assert.deepEqual([...w.document.querySelectorAll('.mf-re-groupe h2')].map(x=>x.textContent),['EN UN COMBAT','EN CARRIÈRE']);
+  assert.equal(w.document.querySelectorAll('.mf-leader-tabs button').length,4);
 });
 test('T6b — un record battu seul porte NOUVEAU et le record antérieur',()=>{
   const w=newGameWindow({runMain:true});w.eval(`setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});MGMT_SU_CL.div='H-heavy';mgmtAgendaActif=()=>true;CL.go('mgmt_classements');CL.mgmtSuClVue('records')`);
