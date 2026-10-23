@@ -38,7 +38,7 @@ test('Monde lot 38 T2 — fiches espoirs : bilan extérieur, catégorie, chiffre
 });
 test('Monde lot 38 T2 — six cartes bornées dans la scène',()=>{
   const w=newGameWindow();const r=result(w,`setSeed(9);CL.mgmtEnter(1);mgmtEspoirsFixer(G.mgmt);MGMT_ESP_ARRIVEE.etape=2;return SCREENS.mgmt_espoirs_arrivee();`);
-  assert.equal((r.match(/class="mf-esp-card"/g)||[]).length,6);
+  assert.equal((r.match(/class="ma-card"/g)||[]).length,6);
   assert.match(r,/grid-template-rows:repeat\(2,337px\)/);assert.match(r,/\.ma-card\{height:337px/);
 });
 test('Monde lot 38 T2 — étape 1 reprend la géométrie mesurée de la planche',()=>{
