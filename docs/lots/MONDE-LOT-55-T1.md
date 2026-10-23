@@ -15,8 +15,8 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
-- État constaté à la reprise : seul le commit de la fiche (`645a108`) figure dans l’historique de cette branche ; aucun fichier de la tranche ni test n’était présent dans le dépôt. Les modifications Git préexistantes des fichiers `.opencode/agents/*` et `opencode.json` sont étrangères à cette tranche et sont laissées intactes.
-- Vérifications documentaires faites : sections P9 et P11 du brief, maquettes `UniCeremonie` et `UniCarnet`, et points d’entrée de validation/réparation des sauvegardes. Les maquettes requièrent une implémentation d’écran complète, et la fin d’année doit être raccordée au flux existant.
-- Non réalisé : calcul et persistance des prix, écran de cérémonie et carnet, tests exigés, audit et vérification de la tranche. Aucun code n’a été ajouté ni présenté comme achevé.
-- Écart à la fiche : la tranche reste entièrement à faire ; aucun commit de livraison n’a été produit. Il serait trompeur de déclarer les tests verts ou d’émettre `TOUT_EST_FINI`.
-- Questions pour Anthony : aucune question de spécification précise identifiée dans la fiche ; le point restant est l’implémentation complète de la tranche sur cette branche.
+- Reprise : branche `p11-ceremonie-carnet`, dernier commit `c794d4e` (« Monde lot 55 T1 (inachevé) : cérémonie et carnet non implémentés »). Aucun fichier de code ni test de cette tranche n’est présent dans l’arbre courant. Les modifications préexistantes de `.opencode/agents/*` et `opencode.json` sont étrangères à la tranche et laissées intactes.
+- Lecture faite lors de cette reprise : sections P9 et P11 du brief. Elles confirment la cérémonie annuelle et le carnet comme livrables ; les points d’entrée existants se trouvent notamment dans `mgmt-accueil.js` et les fonctions de sauvegarde dans `mgmt-save.js`. Le calcul, les écrans et le raccordement au flux annuel n’ont pas été codés.
+- Tests : `tests/mgmtLot55T1.test.js` absent ; aucune vérification ciblée de la tranche n’a pu être exécutée. Aucun audit de livraison n’a été réalisé.
+- Écart à la fiche : tranche toujours inachevée ; aucune fonctionnalité ne peut être déclarée faite et aucun test n’est déclaré vert. Aucun commit de livraison n’est produit par cette reprise.
+- Questions pour Anthony : aucune question précise de spécification identifiée. La suite nécessite l’implémentation complète des prix et leur inscription sur les fiches, des deux écrans, du raccordement à la fin d’année, puis des tests demandés.
