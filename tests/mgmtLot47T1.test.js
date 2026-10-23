@@ -14,6 +14,9 @@ test('Lot 47 T1 — données de mémoire déterministes, sans promesse ni compte
   const w=memoire(),cfg=w.config;
   assert.ok(Object.keys(cfg.types).length>=7);
   assert.ok(cfg.niveaux.length>=6);
+  assert.ok(Object.isFrozen(cfg)&&Object.isFrozen(cfg.types)&&Object.isFrozen(cfg.niveaux));
+  assert.ok(Object.values(cfg.types).every(Object.isFrozen));
+  assert.ok(cfg.niveaux.every(n=>Object.isFrozen(n)&&Object.isFrozen(n.fiche)&&Object.isFrozen(n.presse)));
   for(const n of cfg.niveaux)for(const groupe of [n.fiche,n.presse]){
     assert.equal(groupe.length,3);assert.equal(new Set(groupe).size,3);
     for(const phrase of groupe){assert.doesNotMatch(phrase,/[0-9]/);assert.doesNotMatch(phrase,/promets|promis/i);assert.match(phrase,/{nom}/);}
