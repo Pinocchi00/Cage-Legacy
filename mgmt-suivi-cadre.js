@@ -589,6 +589,15 @@ function mgmtSuReDetailHtml(m,x,rang,revoyable,derniere){
     +(ch?`<div class="mf-re-sous haut">Ce que ça change</div>${ch}`:'')
     +`<div class="mf-re-actions">${actions}</div>`;
 }
+/* ==== [ANCRE: MONDE_T5_RELEVE_RESULTATS] — Monde lot 36 T2 ==== */
+function mgmtSuReChiffresHtml(m,entree){
+  const r=mgmtReleveCombat(m,entree);if(!r)return '';
+  const labels=[['sigTouches','sigTentes','Coups significatifs touchés / tentés'],['precision',null,'Précision'],['zones',null,'Tête · corps · jambes'],['amenees','amTentees','Amenées réussies / tentées'],['controle',null,'Contrôle'],['kd',null,'Knockdowns'],['sub',null,'Soumissions tentées']];
+  const fmt=(k,v)=>k==='precision'?(v==null?'—':Math.round(v*100)+' %'):k==='controle'?Math.floor(v/60)+':'+String(v%60).padStart(2,'0'):String(v);
+  const rows=labels.map(([k,k2,label])=>{const v=c=>k==='zones'?`${c.tete} · ${c.corps} · ${c.jambes}`:k2?`${c[k]} / ${c[k2]}`:fmt(k,c[k]);return `<div class="mf-cc-total"><span>${esc(v(r.total.a))}</span><b>${esc(label)}</b><span>${esc(v(r.total.b))}</span></div>`;}).join('');
+  const rounds=r.parRound.map((q,i)=>`<section class="mf-cc-round"><h3>ROUND ${i+1}</h3><div class="mf-cc-grands"><b>${esc(q.a.sigTouches)}</b><b>${esc(q.b.sigTouches)}</b></div><div class="mf-cc-meta"><span>${esc(q.a.amenees)} amenées · ${esc(fmt('controle',q.a.controle))}</span><span>${esc(q.b.amenees)} amenées · ${esc(fmt('controle',q.b.controle))}</span></div>${q.a.kd||q.b.kd?'<strong class="mf-cc-kd">KNOCKDOWN</strong>':''}</section>`).join('');
+  return `<section class="mf-re-chiffres"><div class="mf-cc-totaux"><h2>LE COMBAT EN CHIFFRES</h2>${rows}</div><div class="mf-cc-par-round"><h2>ROUND PAR ROUND</h2>${rounds}</div></section>`;
+}
 /** Le bloc jaune du bas à droite : la prochaine chose à faire (même source que l'Accueil), cliquable, sur Entrée. */
 function mgmtSuReJauneHtml(p){
   if(!p) return '';
@@ -633,9 +642,10 @@ function scr_mgmt_resultats(){
     const cur=lst[F.i];
     revoyable=!!cur&&!!cur.d&&mgmtCombatRevoyable(m.hist[cur.i]);
     fiche=!!cur&&!!cur.d&&!!mgmtFicheLigne(m,cur.d.gagnant.id);
-    const det=cur?mgmtSuReDetailHtml(m,cur,rangs[cur.k]-1,revoyable,derniere):'';
+     const det=cur?mgmtSuReDetailHtml(m,cur,rangs[cur.k]-1,revoyable,derniere):'';
+     const chiffres=cur?mgmtSuReChiffresHtml(m,m.hist[cur.i]):'';
     corps=`<div class="mf-re-m"><div class="mf-re-sdt"><div class="mf-re-sdt-h"><div class="mf-re-T">${esc(org+' Fight Night '+s.n)}</div><div class="mf-re-puce${joueur?' a-toi':''}">${esc(puce)}</div></div>${ligneTete?`<div class="mf-re-l1 t2">${esc(ligneTete)}</div>`:''}</div>${pan('mf-re-tab',tab)}</div>`
-      +`<div class="mf-re-d">${pan('mf-re-det',det)}${jaune}</div>`;
+       +`<div class="mf-re-d">${pan('mf-re-det',det)}${chiffres}${jaune}</div>`;
     libelle=org+' Fight Night '+s.n+(dateLongue?' · '+dateLongue:'');
   }
   const contenu=`<main class="mf-contenu mf-re">${gauche}${corps}</main>`;
