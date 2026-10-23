@@ -29,3 +29,11 @@ Règles communes : cherche toi-même dans le code ; **additif** : une partie anc
 - Relancés séparément : `tests/mgmtLot40T1.test.js` (6/6) et `tests/mgmtTrace.test.js` (15/15), verts. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` sont verts.
 - `tests/mgmtReleveReduit.test.js` a expiré à 110 secondes, comme précédemment ; aucune preuve que le plafond de poids soit passé. Les tests exhaustifs de 12 soirées, de la case fiche échappée, et l’inscription du test dédié aux listes globales `test`/`test:watch` restent non réalisés. La version présente ne satisfait donc pas encore toutes les cases de la fiche.
 - Déclencheurs non simulables : arrêts sur coupures et KO par coup de pied retourné restent exclus. Les gabarits et surnoms sont des textes `relu:false`, à relire. Aucun fichier hors tranche n’est ajouté au commit de reprise.
+
+### Reprise 6 — état après vérification
+
+- Branche confirmée : `p2-surnoms`. Les commits `5905d69` et `116398d` contiennent déjà l’implémentation et les comptes rendus ; aucun code de tranche non commité n’était présent au début de cette reprise.
+- Contrôles relancés : `tests/mgmtLot40T1.test.js` passe (6/6) ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- `tests/mgmtReleveReduit.test.js` échoue toujours au délai explicite de 110 secondes, sans sortie de test. Ce résultat ne permet pas de confirmer le plafond de 1,9 Mo.
+- Les critères de couverture restent incomplets : test des 12 soirées, case de fiche et actualité avec texte hostile/échappement, contrôles exhaustifs de validation/réparation et poids neuf. Le test dédié figure dans `test:lot40t1` et `test:watch:lot40t1`, mais pas dans les commandes générales `test` / `test:watch`. Les faits demandés ne sont donc pas tous démontrés ; les commits antérieurs ne constituent pas une validation complète de la fiche.
+- Modifications préexistantes laissées intactes et non ajoutées : `.opencode/`, `opencode.json` et `mgmt-bureau.js`. Aucune modification supplémentaire n’a été faite dans cette reprise, afin de ne pas masquer ces travaux indépendants ni présenter la tranche comme entièrement validée.
