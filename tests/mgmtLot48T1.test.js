@@ -22,3 +22,15 @@ test('Monde lot 48 T1 — bilan expose les trois issues sans bloquer la partie',
   const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;if(!m.poste)mgmtPosteInit(m);const p=m.poste;p.fin=mgmtCalAujourdhui(m);p.conf=4;p.obj.forEach((o,i)=>o.e=i<3?'tenu':'cours');const a=mgmtPosteBilan(m).issue;p.conf=2;p.obj.forEach((o,i)=>o.e=i<2?'tenu':'cours');const b=mgmtPosteBilan(m).issue;p.conf=0;p.obj.forEach(o=>o.e='cours');const c=mgmtPosteBilan(m).issue;return {a,b,c,screen:scr_mgmt_poste_bilan(),carte:typeof scr_mgmt_carte==='function'}})()`);
   assert.deepEqual([r.a,r.b,r.c],['prolonge-augmente','prolonge-condition','renvoi']);assert.match(r.screen,/CONTINUER/);assert.equal(r.carte,true);
 });
+
+test('Monde lot 48 T1 — partie réelle, lien absent sans poste et lecture du bilan',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;const sansPoste={...m};delete sansPoste.poste;G.mgmt=sansPoste;const accueilSansPoste=scr_mgmt_accueil();G.mgmt=m;m.poste.fin=mgmtCalAujourdhui(m);const accueil=scr_mgmt_accueil();const carte=typeof scr_mgmt_carte==='function';const avant={...m};const issue=mgmtPosteBilan(m).issue;mgmtPosteRenouveler(m,issue);mgmtPosteBilanLu=true;const apres=scr_mgmt_accueil();return {accueilSansPoste,accueil,carte,avant,apres,poste:!!m.poste,issue,renewed:m.poste.fin>avant.poste.fin}})()`);
+  assert.equal(r.poste,true);
+  assert.equal(r.carte,true);
+  assert.match(r.accueil,/Le bilan du patron/);
+  assert.doesNotMatch(r.accueilSansPoste,/Ton poste/);
+  assert.ok(['prolonge-augmente','prolonge-condition'].includes(r.issue));
+  assert.equal(r.renewed,true);
+  assert.doesNotMatch(r.apres,/Le bilan du patron/);
+});

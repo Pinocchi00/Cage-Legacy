@@ -20,3 +20,10 @@ Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie 
 - Écarts maquettes à 1920×1080 : aucune comparaison par capture ni mesure pixel n'a été réalisée. Styles typographiques et structure restent une adaptation simplifiée : pas de mesure de position, taille de panneau, contraste, ni différence chiffrée. Les planches montrent davantage de blocs et détails visuels que cette version. Aucun écart pixel ne peut donc être honnêtement chiffré.
 - Pas de migration de sauvegarde : aucune nouvelle clé persistante ajoutée; `MGMT_SAVE_VERSION` inchangé.
 - Questions pour Anthony : faut-il rendre persistante la lecture du bilan? La fiche exige la disparition après lecture, sans spécifier où la marque de lecture se sauvegarde; cette implémentation ne la conserve que pour la session.
+
+### Reprise 7 — vérification de l'état
+
+- Complété depuis le précédent compte rendu : tests portant le chemin généré réel sans initialisation manuelle, absence du lien dans une partie sans poste, et lecture/renouvellement du bilan. La carte demeure disponible. Les quatre tests ciblés passent.
+- Validation : `node --test tests/mgmtLot48T1.test.js` (4/4) et `node tools/verif-versions.js origin/main` (aucun écart). Le contrôle exact des listes agrégées confirme que le nouveau fichier n'est dans ni `scripts.test` ni `scripts.test:watch`; il reste uniquement sous `test:lot48t1` et `test:watch:lot48t1`.
+- Travail restant pour satisfaire la fiche : compléter la couverture exhaustive du rendu (année de date, styles pour chaque classe, mesure <200 ms, mesure des polices/échappement, véritable changement Tab/Maj+Tab via le contrôleur, renouvellement sans perte détaillée), ajouter le fichier aux deux listes agrégées, et mesurer les écarts visuels des deux maquettes à 1920×1080. Aucune comparaison d'image n'a été effectuée; les écarts ne sont donc pas mesurés.
+- État de livraison : la tranche n'est pas entièrement conforme et aucun commit final de reprise n'a été fait. Les modifications préexistantes de `.opencode/agents/*` et `opencode.json` sont hors tranche et laissées intactes.
