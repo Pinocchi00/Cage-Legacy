@@ -713,6 +713,7 @@ function mgmtRunEvent(m){
      est encore entière mais on lit m.hist.slice(premier), jamais m.card
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
+  if(m.memoire!==undefined||typeof mgmtMemoireSoiree==='function') mgmtMemoireSoiree(m);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   m.card.main=[];
   m.card.prelims=[];
