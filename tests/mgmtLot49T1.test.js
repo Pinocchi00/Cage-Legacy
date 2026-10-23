@@ -17,3 +17,15 @@ test('Monde lot 49 T1 — choix global de la vue et priorité au réglage de com
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m={lastEvent:{fights:[{}]}};MGMT_REGLAGES.soiree.vue='defaut';const d=mgmtVueDuCombat(m,0);MGMT_REGLAGES.soiree.vue='entier';const g=mgmtVueDuCombat(m,0);MGMT_REGLAGES.soiree.vue='resultat';const z=mgmtVueDuCombat(m,0);MGMT_REGLAGES.soiree.vue='defaut';m.vues={0:'forts'};return {d,g,z,p:mgmtVueDuCombat(m,0)}})())`));
   assert.equal(r.d,'forts'); assert.equal(r.g,'complet'); assert.equal(r.z,'resultat'); assert.equal(r.p,'forts');
 });
+
+test('Monde lot 49 T1 — validation et réparation facultatives des vues de soirée',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m={};const absent=mgmtRepair(m);const valide={vues:{0:'complet',11:'resultat'}};const invalide={vues:{0:'inconnu',12:'forts'}};mgmtRepair(invalide);return {absent:Object.hasOwn(m,'vues'),valide:validateMgmt(valide),repare:invalide.vues,ancien:validateMgmt({})}})())`));
+  assert.equal(r.absent,false); assert.equal(r.valide,false); assert.equal(r.repare,undefined); assert.equal(r.ancien,false);
+});
+
+test('Monde lot 49 T1 — les commandes de vue sont présentes dans le bandeau de soirée',()=>{
+  const fs=require('node:fs');
+  const source=fs.readFileSync(require.resolve('../mgmt-soiree-cadre.js'),'utf8');
+  assert.match(source,/mf-so-views/); assert.match(source,/COMPLET/); assert.match(source,/TEMPS FORTS/); assert.match(source,/RÉSULTAT/);
+});

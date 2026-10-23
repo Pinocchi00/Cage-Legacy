@@ -108,7 +108,9 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
 function mgmtSoBandeHtml(prog,index,focus){
   return `<div class="mf-so-bande">`+prog.map((p,k)=>{
     const fait=k<index, cur=k===focus;
-    return `<button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`;
+    const vue=mgmtVueDuCombat(G.mgmt,k);
+    return `<div class="mf-so-card${cur?' cur':''}${fait?' fait':''}"><button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`
+      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">`+[['complet','COMPLET'],['forts','TEMPS FORTS'],['resultat','RÉSULTAT']].map(([v,l])=>mfBouton(l,{jaune:vue===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')+`</div></div>`;
   }).join('')+`</div>`;
 }
 
