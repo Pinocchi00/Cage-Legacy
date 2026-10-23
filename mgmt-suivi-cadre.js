@@ -781,7 +781,12 @@ keysRegister('mgmt_classements',{
   ArrowDown(){ if(mgmtSuAgenda()) CL.mgmtSuClChoisir(MGMT_SU_CL.curseur+1); },
   g(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); }, G(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); },
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
-  Tab(){ if(mgmtSuAgenda()) CL.mgmtSuClCategorie(1); },
+  Tab(){
+    if(MGMT_CLASSEMENTS.vue!=='liste'){
+      if(MGMT_CLASSEMENTS.vue==='meilleurs')CL.mgmtClassementsVue('records');
+      else CL.mgmtClassementsVue('liste');
+    }else if(mgmtSuAgenda())CL.mgmtSuClCategorie(1);
+  },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
   Escape(){ CL.go('mgmt_accueil'); },
 });
