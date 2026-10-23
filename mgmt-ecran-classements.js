@@ -64,7 +64,7 @@ const MGMT_MEILLEURS_LABELS={
   categories:[['finitions','LE PLUS DE FINITIONS',''],['volume','LE PLUS GROS VOLUME','/ MIN'],['precis','LE PLUS PRÉCIS','%'],['defense','LA MEILLEURE DÉFENSE','%'],['lutteur','LE LUTTEUR','/ 15 MIN'],['mur','LE MUR','%'],['cou','LE CHASSEUR DE COU','/ 15 MIN'],['serie','LA PLUS LONGUE SÉRIE','V']],
   insufficient:'3 combats documentés minimum', precise:'5 pour la précision', empty:'Pas encore de combat documenté.',
   recordLabels:{sigAtt:'Coups significatifs tentés en un combat',koRapide:'Le KO le plus rapide',amenees:'Amenées réussies en un combat',knockdowns:'Knockdowns dans un même combat',controle3:'Contrôle au sol en trois rounds',corps:'Coups au corps en un combat',finitions:'Finitions chez Split',defensesTitre:'Défenses de titre de suite',victoiresSuite:'Victoires de suite',combats:'Combats chez Split',plusJeuneChampion:'Le plus jeune champion'},
-  beaten:{sigAtt:'{nom}, {valeur} coups significatifs tentés à Split Fight Night {soiree}.',koRapide:'{nom}, {valeur} secondes à Split Fight Night {soiree}.',amenees:'{nom}, {valeur} amenées réussies à Split Fight Night {soiree}.',knockdowns:'{nom}, {valeur} knockdowns à Split Fight Night {soiree}.',controle3:'{nom}, {valeur} de contrôle au sol à Split Fight Night {soiree}.',corps:'{nom}, {valeur} coups au corps à Split Fight Night {soiree}.'}
+  beaten:{sigAtt:'{nom}, {valeur} coups significatifs tentés à Split Fight Night {soiree}.{avant}',koRapide:'{nom}, {valeur} secondes à Split Fight Night {soiree}.{avant}',amenees:'{nom}, {valeur} amenées réussies à Split Fight Night {soiree}.{avant}',knockdowns:'{nom}, {valeur} knockdowns à Split Fight Night {soiree}.{avant}',controle3:'{nom}, {valeur} de contrôle au sol à Split Fight Night {soiree}.{avant}',corps:'{nom}, {valeur} coups au corps à Split Fight Night {soiree}.{avant}'}
 };
 
 const MGMT_CL_TOP=15;
@@ -87,8 +87,11 @@ function mgmtMeilleursHtml(m){
     return `<article class="mgmt-me-card${MGMT_CLASSEMENTS.selection===i?' selected':''}"><h3>${esc(label)}</h3><div class="mgmt-me-value">${first?esc(fmt(first.valeur)):''}${first&&unit?` <small>${esc(unit)}</small>`:''}</div>${top}<div class="mgmt-me-ranks">${ranks.slice(1,3).map((r,n)=>`<div><button onclick="CL.mgmtFiche('${escJsAttr(r.id)}')">${n+2}. ${esc((r.nom.split(/\\s+/).pop()||r.nom))}</button><span>${esc(fmt(r.valeur))}</span></div>`).join('')}</div></article>`;
   }).join('');
   const battu=mgmtRecords(m).battu;
-  const family=x=>(x||'').trim().split(/\\s+/).pop();
-  const rec=battu&&L.beaten[battu.id]?`<aside class="mgmt-me-battu"><b>RECORD BATTU</b><span>${esc(L.beaten[battu.id].replace('{nom}',family(battu.combattant.nom)).replace('{valeur}',battu.valeur).replace('{soiree}',battu.soiree))}</span></aside>`:'';
+   const family=x=>(x||'').trim().split(/\s+/).pop();
+   const unit={sigAtt:'coups significatifs tentés',koRapide:'secondes',amenees:'amenées réussies',knockdowns:'knockdowns',controle3:'de contrôle au sol',corps:'coups au corps'};
+   const ancien=battu&&battu.avant?` L'ancien record était de ${battu.avant.valeur} (${family(battu.avant.combattant.nom)}).`:'';
+   const phrase=battu&&L.beaten[battu.id]?L.beaten[battu.id].replace('{nom}',family(battu.combattant.nom)).replace('{valeur}',battu.valeur+' '+unit[battu.id]).replace('{soiree}',battu.soiree).replace('{avant}',ancien):'';
+   const rec=phrase?`<aside class="mgmt-me-battu"><b>RECORD BATTU</b><span>${esc(phrase)}</span></aside>`:'';
   return `<div class="mgmt-me"><div class="mgmt-me-gender">${esc(L.gender[gender])}</div><div class="mgmt-me-grid">${html}</div>${rec}</div>`;
 }
 function mgmtRecordsHtml(m){
