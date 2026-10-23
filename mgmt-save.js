@@ -361,6 +361,7 @@ function validateMgmt(raw){
     if(!Array.isArray(raw[cle])||raw[cle].length>max||new Set(raw[cle]).size!==raw[cle].length) return false;
     for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
   }
+  if(raw.reserves!==undefined&&(!Array.isArray(raw.reserves)||raw.reserves.length>15||new Set(raw.reserves).size!==raw.reserves.length||raw.reserves.some(id=>!mgmtValidId(id)||id.length>80)))return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -658,6 +659,7 @@ function mgmtRepair(m){
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
   m.suivis=[...new Set([...cercleAncien,...suivisExistants])].filter(mgmtValidId);
   m.cercle=[];
+  if(m.reserves!==undefined) m.reserves=Array.isArray(m.reserves)?[...new Set(m.reserves.filter(id=>mgmtValidId(id)&&id.length<=80))].slice(0,15):[];   /* facultative : une ancienne partie n'en porte pas */
   if(Object.prototype.hasOwnProperty.call(m,'actuLu')&&(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80))) m.actuLu=[];
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;

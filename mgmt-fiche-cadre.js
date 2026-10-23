@@ -53,7 +53,7 @@ function mgmtFicheCorpsOnglet(m,f,line,id){
 function mgmtFicheSuiviBouton(m,f){
   const cercle=mgmtCercle(m).includes(f.id),suivi=mgmtSuivis(m).includes(f.id);
   if(cercle) return '';
-  return `<div class="mf-fiche-suivi"><span class="mf-fb-suivi-count">${esc(mgmtSuivis(m).length)}/60</span><span class="mf-fb-key">S</span><button type="button" class="mf-fb-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${esc(f.id)}')">${suivi?'<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="4"/></svg>':''}<b>${suivi?'SUIVI':'SUIVRE'}</b></button></div>`;
+  return `<div class="mf-fiche-suivi"><span class="mf-fb-suivi-count">${esc(mgmtSuivis(m).length)}/60</span><span class="mf-fb-key">S</span><button type="button" class="mf-fb-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${escJsAttr(f.id)}')">${suivi?'<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6" fill="none" stroke="currentColor" stroke-width="4"/></svg>':''}<b>${suivi?'SUIVI':'SUIVRE'}</b></button>${suivi?`<label><input type="checkbox" aria-label="Je le booke moi-même" ${mgmtEstReserve(m,f.id)?'checked':''} onchange="CL.mgmtReserveToggle('${escJsAttr(f.id)}')"> Je le booke moi-même</label>`:''}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -110,6 +110,8 @@ keysRegister('mgmt_fiche',{
   Tab(){ CL.mgmtFicheOnglet(1); },
   s(){ CL.mgmtSuivre(MGMT_FICHE.id); },
   S(){ CL.mgmtSuivre(MGMT_FICHE.id); },
+  b(){ CL.mgmtReserveToggle(MGMT_FICHE.id); },
+  B(){ CL.mgmtReserveToggle(MGMT_FICHE.id); },
   ArrowLeft(){ CL.mgmtFicheAutre(-1); },
   ArrowRight(){ CL.mgmtFicheAutre(1); },
   ArrowDown(){ CL.mgmtFicheDeplacer(1); },
