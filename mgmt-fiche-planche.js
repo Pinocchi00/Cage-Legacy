@@ -138,6 +138,11 @@ function mgmtFicheApercuHtml(m,f,line){
   const p1=mgmtFichePanneau('Ce que tu as vu',vus+' combat'+(vus>1?'s':''),
     `<div class="mf-fi-profil">${esc(profil)}</div><div class="mf-fi-lgs">${lignes}</div>`
     +(inconnus?`<div class="mf-fi-bas"><div class="mf-fi-bt">CE QUE TU NE SAIS PAS</div>${inconnus}</div>`:''));
+  /* ==== [ANCRE: P2_T3_TRAITS_PANNEAU] — Monde lot 37 T1 ==== */
+  const traits=mgmtTraitsFiche(m,f.id,m.cycle);
+  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><div class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</div><div class="mf-fi-trait-fait">${esc(t.fait)}</div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div>`).join('');
+  const cache=traits.caches?`<div class="mf-fi-trait-cache"><div class="mf-fi-trait-entete"><b>PAS ENCORE VU</b><span>caché</span></div><div>${esc(traits.indice||'')}</div></div>`:'';
+  const distinction=mgmtFichePanneau('Ce qui le distingue',traits.vus.length+' TRAITS',traitsLignes+cache,'mf-fi-traits');
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
@@ -150,7 +155,7 @@ function mgmtFicheApercuHtml(m,f,line){
     :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
   const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
   void phrase; void line;
-  return `<div class="mf-fi-ligne"><div class="mf-fi-c1">${p1}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
+  return `<div class="mf-fi-ligne"><div class="mf-fi-c1 mf-fi-col">${p1}${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
 }
 
 /** Style : la cage et les lignes façon, force, faille, inconnu, allonge. */

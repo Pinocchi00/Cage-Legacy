@@ -39,18 +39,19 @@ const MGMT_TRAITS_INDICES=Object.freeze({menton:'Personne ne l’a encore touch�
 /* ==== [ANCRE: P2_T3_TRAITS_TEXTE_FONCTIONS] — Monde lot 37 T1 ==== */
 function mgmtTraitTexte(id,k){
   const t=MGMT_TRAITS_TEXTES[id]; if(!t)return {fait:'',phrase:''};
-  const valeur=chemin=>String(chemin.split('.').reduce((o,p)=>o==null?undefined:o[p],k)||0);
-  const format=(s)=>s.replace(/\{(pct|dec|mmss):([\w.]+)\}|\{([\w.]+)\}/g,(_m,type,path)=>{
-    const n=Number(path.split('.').reduce((o,p)=>o==null?undefined:o[p],k));
+  const valeur=chemin=>String(chemin.split('.').reduce((o,p)=>o==null?undefined:o[p],k)??0);
+  const format=(s)=>s.replace(/\{(pct|dec|mmss):([\w.]+)\}|\{([\w.]+)\}/g,(_m,type,path,champSimple)=>{
+    const champ=path||champSimple, n=Number(champ.split('.').reduce((o,p)=>o==null?undefined:o[p],k));
     if(type==='pct')return `${Math.round(n*100)} %`;
     if(type==='dec')return (Number.isFinite(n)?n:0).toFixed(1).replace('.',',');
     if(type==='mmss'){const sec=Math.max(0,Math.round(Number.isFinite(n)?n:0));return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}
-    return valeur(path);
+    return valeur(champ);
   });
   return {fait:format(t.fait),phrase:t.phrase};
 }
 function mgmtTraitsFiche(m,id,cycle){
-  const ids=mgmtTraitsDe(m,id,cycle),ctx=mgmtTraitsContexte(m,id,cycle), docs=ctx.k.n;
+  const ids=mgmtTraitsDe(m,id,cycle),ctx=mgmtTraitsContexte(m,id,cycle),hist=new Set(Array.isArray(m&&m.hist)?m.hist:[]);
+  const docs=ctx.combats.filter(x=>hist.has(x.t)).length;
   const vus=[], caches=[];
   for(const idTrait of ids){const trait=MGMT_TRAITS.find(t=>t.id===idTrait);if(!trait)continue;
     if(!trait.public&&docs<3){caches.push(trait);continue;}

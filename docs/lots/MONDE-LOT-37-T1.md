@@ -54,3 +54,24 @@ Porte les **valeurs exactes** de la planche (positions absolues dans la scène 1
 
 ## Fin
 Un commit après chaque point (fichier de textes ; fonctions pures ; panneau ; style planche ; tests ; versions) ; `?v=` à la main ; `node tools/verif-versions.js origin/main` ; `node_modules/.bin/eslint .` ; commit final `Monde lot 37 T1 : les traits sur la fiche` (le numéro T1 est obligatoire). Compte rendu dans la fiche (fichiers et rôle, champs de `c.k` remplacés, tableau de fidélité, écarts, questions).
+
+## Compte rendu
+
+- `mgmt-traits-textes.js` : textes `relu:false`, indices par famille, remplissage des gabarits et dérivation de la fiche. Champs directement présents dans `c.k` vérifiés sur `mgmtTraitsContexte` : tous ceux de la fiche de tranche (`kdRecus`, `dKO6`, `sigEncaisseParMin`, `victoiresRound3`, `defaitesRound3`, `sigParMin`, `principal.taux`, `revancheVictoires`, `serieDefaites`, `serieVictoires`, `defaitesControle`, `vSub`, `ameneesPar15`, `defenseAmenee`, `controlePar15`, `victoires`, `tauxFinition`, `tauxDecision`, `finitionsR1`, `vKO`, `partVictoiresSub`, `guerres`, `cyclesDepuisDernier`, `age`, `n`, `titres`, `bilanCombats`, `serieAvantDerniereDefaites`). Aucun champ substitué.
+- `mgmt-fiche-planche.js` : intégration des traits dans l’Aperçu, sans retirer de bloc existant ; texte injecté échappé avec `esc()`.
+- `ui-cadre.css` : style du panneau/traits. `index.html` : script après `mgmt-traits.js` et versions cache incrémentées à la main.
+- `tests/mgmtTraitsFiche.test.js` : « textes présents, champs de contexte résolus et formats chiffrés », « l’Aperçu affiche le panneau de traits et échappe les contenus injectés », « six soirées : chaque combattant produit un à quatre traits en moins de 300 ms ». Lancement ciblé via le script dédié.
+- `package.json` : `pretest` intègre ce fichier à `npm test`; scripts dédiés `test:traits-fiche` et `test:watch:traits-fiche`. Aucun changement de sauvegarde ni de `MGMT_SAVE_VERSION`.
+
+| Élément | Valeur planche | Valeur page |
+| --- | --- | --- |
+| Scène | 1920 × 1080 | Cadre `.mf-fi-ligne` existant |
+| Fond du panneau | `#121010` | `mfPanneau` normal (`#121010`) |
+| Texte principal | `#E9E6E1` | `#E9E6E1` hérité |
+| Accent / barre | `#E23A2B` | barre de `mgmtFichePanneau` |
+| Remplissage ligne | `#252121` | `#252121` |
+| En-tête ligne | 30 px Saira Extra Condensed 800 | 23 px Saira Extra Condensed 800 (réduit) |
+| Preuve | 22 px, gris 74 % | 18 px, gris 74 % (réduit) |
+| Phrase | 24 px | 19 px (réduit) |
+
+Écart : l’Aperçu courant n’offre pas de panneau libre au même emplacement de la planche. Le nouveau bloc a été placé sous « Ce que tu as vu » dans la première colonne pour conserver les autres panneaux ; le corps de panneau reprend le padding de 15 px de la planche, mais les lignes sont compactées par rapport à la planche et aucune position absolue nouvelle n’a été imposée à la scène existante. Le compte apparaît comme `N TRAITS` ; les traits cachés restent une ligne d’indice. Le test sur le roster valide la dérivation et sa durée (< 300 ms), sans vérifier explicitement la règle 2-versus-3 combats dans un historique fabriqué ni les 100 ms de rendu. Tests ciblés verts ; `node tools/verif-versions.js origin/main` sans écart ; ESLint sans sortie. Questions pour Anthony : faut-il réserver un écran/planche distincte pour reproduire les positions absolues 1920 × 1080 sans compresser la première colonne ?
