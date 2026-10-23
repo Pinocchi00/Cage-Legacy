@@ -106,7 +106,7 @@ function scr_mgmt_classements_cadre(){
   return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',onglets,libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuClSexe()'},
-      {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},
+      {ks:['Tab'],t:'Catégorie / onglet',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},{ks:['V'],t:'Changer de vue',onclick:'CL.mgmtSuClVueSuivante()'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtSuClOuvrir()'}]});
 }
 
@@ -673,6 +673,13 @@ Object.assign(CL,{
   mgmtSuClVue(v){ if(['liste','meilleurs','records'].includes(v)){ MGMT_SU_CL.vue=v; MGMT_SU_CL.curseur=0; render(); } },
   mgmtSuClVueSuivante(){ const a=['liste','meilleurs','records'],i=a.indexOf(MGMT_SU_CL.vue); CL.mgmtSuClVue(a[(i+1)%a.length]); },
   mgmtSuClOuvrir(){
+    if(MGMT_SU_CL.vue==='meilleurs'){
+      const r=mgmtMeilleurs(G.mgmt,{divId:mgmtSuDiv(MGMT_SU_CL),portee:MGMT_SU_CL.portee==='world'?'monde':'split'});
+      const rank=(r.find(x=>x.id==='finitions')||{}).rang||[]; if(rank[0]) CL.mgmtFiche(rank[0].id); return;
+    }
+    if(MGMT_SU_CL.vue==='records'){
+      const r=mgmtRecords(G.mgmt),first=[...r.unCombat,...r.carriere].find(x=>x&&x.combattant); if(first) CL.mgmtFiche(first.combattant.id); return;
+    }
     const l=mgmtClassementLignes(G.mgmt,mgmtSuDiv(MGMT_SU_CL),MGMT_SU_CL.portee)[MGMT_SU_CL.curseur];
     if(l) CL.mgmtFiche(l.id);
   },
@@ -787,12 +794,13 @@ keysRegister('mgmt_classements',{
   g(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); }, G(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); },
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
   Tab(){
-    if(MGMT_CLASSEMENTS.vue!=='liste'){
-      if(MGMT_CLASSEMENTS.vue==='meilleurs')CL.mgmtClassementsVue('records');
-      else CL.mgmtClassementsVue('liste');
-    }else if(mgmtSuAgenda())CL.mgmtSuClCategorie(1);
+    if(mgmtSuAgenda()){
+      if(MGMT_SU_CL.vue==='liste')CL.mgmtSuClCategorie(1);
+      else CL.mgmtSuClVueSuivante();
+    }
   },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
+  v(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); }, V(){ if(mgmtSuAgenda()) CL.mgmtSuClVueSuivante(); },
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_ceintures',{
