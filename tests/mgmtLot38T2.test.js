@@ -41,3 +41,10 @@ test('Monde lot 38 T2 — six cartes bornées dans la scène',()=>{
   assert.equal((r.match(/class="ma-card"/g)||[]).length,6);
   assert.match(r,/grid-template-rows:repeat\(2,337px\)/);assert.match(r,/\.ma-card\{height:337px/);
 });
+test('Monde lot 38 T2 — étape 1 reprend la géométrie mesurée de la planche',()=>{
+  const w=newGameWindow();const r=result(w,`CL.mgmtEnter(1);MGMT_ARRIVEE.etape=1;return SCREENS.mgmt_arrivee();`);
+  assert.match(r,/\.ma-title\{font:800 72px\/\.85/);
+  assert.match(r,/\.ma-line\{padding:14px 0/);
+  assert.match(r,/\.ma-leila\{position:absolute;left:28px;top:100px/);
+  assert.match(r,/\.ma-leila:before\{content:"LEÏLA"/);
+});
