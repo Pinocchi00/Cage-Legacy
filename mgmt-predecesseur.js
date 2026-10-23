@@ -106,8 +106,10 @@ function mgmtPredecesseurRecrute(m,k,cfg){
       /* Une place libre, ce n'est pas la place d'un recrue attendue : c'est une place LAISSÉE par quelqu'un — parti sans contrat, ou retiré.
          C'est ce qui distingue la main « recrute des noms » du recrutement de jeunes, qui remplit les places prévues par le plan du passé. */
       const dispo=mgmtRecrutables(m,d.id);
+      /* ==== [ANCRE: MONDE34T1B_RECRUES] — Monde lot 34 T1b ==== */
+      const profil=mgmtOrgProfil(m), espoirs=profil.manque&&profil.manque.id==='espoirs';
       const x=cfg.renom?(m.roster.some(f=>f.div===d.id&&(f.libre||mgmtIsRetired(f)))?dispo.reduce((meilleur,y)=>(meilleur&&mgmtStar(meilleur)>=mgmtStar(y)?meilleur:y),null):null)
-                       :(m.roster.filter(f=>f.div===d.id&&!mgmtIsRetired(f)).length<(cfg.plan[d.id]||0)?dispo.find(y=>y.age<=ageMax):null);
+                        :(m.roster.filter(f=>f.div===d.id&&!mgmtIsRetired(f)).length<(cfg.plan[d.id]||0)?mgmtOrgRecrueTirage(m,dispo,profil,espoirs?38:ageMax):null);
       const cible=x&&mgmtExteriorPourOffre(m,x.id);
       if(!cible) return;
       if(mgmtContratSigner(m,x.id,3,mgmtBourseSouhaitee(m,cible,false)).ok) n++; else return;

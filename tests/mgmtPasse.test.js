@@ -46,8 +46,17 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
   /* Monde lot 16 — décision d'Anthony du 17/10/2026 (palmarès réalistes : bilans plafonnés à 90 % avec une défaite au moins dès 12 combats, âge médian ≈ 29,7, classement qui compte la carrière, champion initial réaliste) : empreintes de création et de trois soirées recalculées le 18/10/2026 ; le nombre de tirages ne change pas (seuls les bilans, les âges et les titres changent). */
   const AVANT = {
     'split|20261008': '818706c1ca24e1aa', 'split|20261009': '74731cb3b87415c4',
-    'ultimate-rim|20261008': 'e04c79c0e03a267f', 'ultimate-rim|20261009': '503f21eb7047f705',
-    'fighting-pacific-championship|20261008': 'f020fff72ce4d9a9', 'fighting-pacific-championship|20261009': 'c2612f3e054a41da',
+    /* ==== [ANCRE: MONDE34T1B_EMPREINTES] — Monde lot 34 T1b ==== */
+    /* brief du 22/10, P4 T1b : les manques de style changent la génération.
+       Reprise : Rim 20–27 ans (budget monde 1 902 024 → 1 891 731 caractères),
+       empreintes 3e4c8b349737bd93/88fa117b84005100 → 658ce68e78f452a4/b153a42da14353d7.
+       Pacific : origine immuable o4mg dès la naissance (avant f020fff72ce4d9a9/c2612f3e054a41da),
+       mesurée ff903675a846298e/c11eaada7162a87f. Les deux empreintes Split restent identiques.
+       Reprise du 23/10/2026 (commit cd857b5, « biais adoucis » : niveau de création et attributs tirés selon le profil de l'organisation) :
+       le tirage de Rim a encore bougé après le relevé ci-dessus ; empreintes remesurées sur la tête de la PR, stables sur deux exécutions :
+       658ce68e78f452a4/b153a42da14353d7 → 7277e3fc6f365200/b751300f43c7e2ef. Split et Pacific inchangés. */
+    'ultimate-rim|20261008': '7277e3fc6f365200', 'ultimate-rim|20261009': 'b751300f43c7e2ef',
+    'fighting-pacific-championship|20261008': 'ff903675a846298e', 'fighting-pacific-championship|20261009': 'c11eaada7162a87f',
     jouee3: '5280d7d504885a51', /* Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : la génération du roster Split (notamment moins de poids lourds) change l'état des trois soirées ; nouvelle empreinte mesurée. */
   };
   const win = newGameWindow({ runMain: true });
