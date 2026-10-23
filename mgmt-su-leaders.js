@@ -50,7 +50,7 @@ function mgmtRecordsRendu(m){
     const before=beaten&&beaten.avant?`<span class="mf-re-avant">avant : ${esc(beaten.avant.combattant.nom)}, ${esc(beaten.avant.valeur)}</span>`:'';
     const recordYear=mgmtLeaderAnnee(m,rec.soiree);
     return `<div class="mf-re-ligne"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small><button type="button" onclick="CL.mgmtFiche('${escJsAttr(rec.combattant.id)}')">${esc(rec.combattant.nom)}</button> · Split Fight Night ${esc(rec.soiree)}${recordYear?`, ${esc(recordYear)}`:''}${id==='victoiresSuite'?' · en cours':''} ${before}</small></div></div>`;
-  }).join('');return rows?mfPanneau(`<h2>${title}</h2>${rows}`,'normal','mf-re-groupe'):'';}).join('');
+  }).join('');return rows?mfPanneau(`<div class="mf-re-titre"><h2>${title}</h2><div class="mf-re-trait"></div></div>${rows}`,'normal','mf-re-groupe'):'';}).join('');
   return `<main class="mf-contenu mf-re"><div class="mf-re-intro">${year?`Tous les combats de Split depuis ${esc(year)}, toutes catégories`:''}</div>${html||`<p>${esc(L.empty)}</p>`}</main>`;
 }
 function scr_mgmt_records_cadre(){
