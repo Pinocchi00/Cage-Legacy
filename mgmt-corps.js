@@ -219,6 +219,7 @@ function mgmtFightReady(f,cycle){
   const baisse=(partie?mgmtVieFormeBaisse(partie,f,cycle):0)+(partie&&typeof mgmtCampForme==='function'?mgmtCampForme(partie,f,cycle):0)
     -(partie&&typeof mgmtRouille==='function'?mgmtRouille(partie,f,cycle):0);
   if(baisse!==0&&c){ c.dynamic=num(c.dynamic)+baisse; c.overall=overall(c); }
+  if(partie&&typeof mgmtTraitsAppliquer==='function')mgmtTraitsAppliquer(partie,f,cycle,c);
   return c;
 }
 

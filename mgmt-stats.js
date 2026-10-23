@@ -21,8 +21,12 @@ function mgmtStatsIndex(m){
   const lengths=[Array.isArray(m.hist)?m.hist.length:0,...orgs.map(o=>Array.isArray(o.hist)?o.hist.length:0)];
   const vigueur=lengths.join(',');
   const memo=MGMT_STATS_MEMO.get(m); if(memo&&memo.vigueur===vigueur) return memo.index;
-  const index=new Map(), vus=new Set();
-  const parcourir=h=>{for(const t of Array.isArray(h)?h:[]){
+  /* Pendant la génération du passé, m.hist ne fait que grandir d'un combat à la fois : on ne relit que les nouveaux (sans monde vivant, la liste est append-only ;
+     on vérifie que le dernier combat déjà lu est toujours le même objet, sinon on recompte tout). */
+  const hist=Array.isArray(m.hist)?m.hist:[];
+  const incr=!!(memo&&!orgs.length&&memo.nbOrgs===0&&hist.length>=memo.debut&&memo.debut>0&&hist[memo.debut-1]===memo.dernier);
+  const index=incr?memo.index:new Map(), vus=incr?memo.vus:new Set();
+  const parcourir=(h,depuis)=>{for(let i=depuis||0;i<(Array.isArray(h)?h.length:0);i++){ const t=h[i];
     if(!t||!t.a||!t.b||!mgmtReleveValide(t.s)) continue;
     const key=mgmtStatsPaire(t); if(vus.has(key)) continue; vus.add(key);
     const a=mgmtReleveCoin(t.s,'A'),b=mgmtReleveCoin(t.s,'B'); if(!a||!b) continue;
@@ -36,14 +40,16 @@ function mgmtStatsIndex(m){
       x._combats.push({t,slot:t.slot||'main',adversaire:{id:opp.id,name:opp.name||''},resultat:win,famille:t.family||null,round:t.round,rounds:t.rounds,pour:coin,contre:against,d:a.d});
     }
   }};
-  parcourir(m.hist); for(const o of orgs) parcourir(o&&o.hist);
+  parcourir(m.hist,incr?memo.debut:0); for(const o of orgs) parcourir(o&&o.hist);
+  for(const x of index.values()) x.titres=0;
   for(const fact of m.facts||[]) if(fact&&fact.k==='title_fight'&&Number.isSafeInteger(fact.fight)){
     const t=(m.hist||[])[fact.fight]; if(!t||!t.a||!t.b||t.winner==='D') continue;
     const x=index.get(t.winner==='A'?t.a.id:t.b.id); if(x)x.titres++;
   }
-  for(const [id,x] of index) x.tot=mgmtStatsCombattant(m,id);
-  MGMT_STATS_MEMO.set(m,{vigueur,index}); return index;
+  /* Le bilan officiel (x.tot) se lit à la demande (mgmtStatsTotal) : le calculer pour tous les combattants à chaque combat rendait la génération quadratique. */
+  MGMT_STATS_MEMO.set(m,{vigueur,index,vus,nbOrgs:orgs.length,debut:hist.length,dernier:hist.length?hist[hist.length-1]:null}); return index;
 }
+function mgmtStatsTotal(m,id){return mgmtStatsCombattant(m,id);}
 function mgmtStatsCarriere(m,id){
   const x=mgmtStatsIndex(m).get(id); if(!x||!x.n)return null;
   const p=x.pour,c=x.contre,min=x.sec/60,quinze=x.sec/900;
@@ -52,7 +58,7 @@ function mgmtStatsCarriere(m,id){
     sigEncaisseParMin=pct(c.sig,min), ameneesPar15=pct(p.td,quinze), reussiteAmenee=pct(p.td,p.tdAtt),
     defenseAmenee=c.tdAtt?1-c.td/c.tdAtt:null, soumissionsPar15=pct(p.subAtt,quinze), controlePar15=pct(p.ctrlSec,quinze),
     kdDonnes=p.kd,kdRecus=c.kd,dureeMoyenne=pct(x.sec,x.n);
-  return {docs:x.n,bilan:x.tot,sigParMin,precision,defense,sigEncaisseParMin,ameneesPar15,reussiteAmenee,defenseAmenee,soumissionsPar15,controlePar15,kdDonnes,kdRecus,dureeMoyenne,
+  return {docs:x.n,bilan:mgmtStatsTotal(m,id),sigParMin,precision,defense,sigEncaisseParMin,ameneesPar15,reussiteAmenee,defenseAmenee,soumissionsPar15,controlePar15,kdDonnes,kdRecus,dureeMoyenne,
     vParMethode:{ko:x.vKO,sub:x.vSub,stop:x.vStop,dec:x.vDec},dParMethode:{ko:x.dKO,sub:x.dSub,stop:x.dStop,dec:x.dDec},finitionsR1:x.finitionsR1,serieMax:x.serieMax,titres:x.titres,primes:x.primes,
     repartition:{cibles:{head:p.sig?p.head/p.sig:null,body:p.sig?p.body/p.sig:null,leg:p.sig?p.leg/p.sig:null},positions:{dist:p.sig?p.dist/p.sig:null,clinch:p.sig?p.clinch/p.sig:null,ground:p.sig?p.ground/p.sig:null}}};
 }
@@ -69,4 +75,4 @@ function mgmtStatsCategorie(m,divId){
   categories.set(divId,result); MGMT_STATS_CATEGORIE_MEMO.set(m,{index:idx,categories}); return result;
 }
 function mgmtStatsCombats(m,id){const x=mgmtStatsIndex(m).get(id);return x?x._combats.slice().reverse().map(({_index,...c})=>c):[];}
-function mgmtStatsDocumentes(m,id){const x=mgmtStatsIndex(m).get(id);return x?{docs:x.n,bilan:x.tot}:null;}
+function mgmtStatsDocumentes(m,id){const x=mgmtStatsIndex(m).get(id);return x?{docs:x.n,bilan:mgmtStatsTotal(m,id)}:null;}

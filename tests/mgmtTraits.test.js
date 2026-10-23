@@ -54,10 +54,11 @@ const CODE_HIST = `
   const partie=(f,hist)=>({cycle:6,roster:[Object.assign({id:'x',W:0,L:0,D:0,age:28,div:'H-light'},f||{})],hist:hist,facts:[]});`;
 const lance = (w, code) => JSON.parse(w.eval(`(function(){${CODE_HIST}${code}})()`));
 
-test('Monde lot 32 T1 — le catalogue : 32 traits, identifiants uniques, six familles, aucun effet, aucune phrase', () => {
+test('Monde lot 32 T1 — le catalogue : 32 traits, identifiants uniques, six familles, effets mesurés ou neutres, aucune phrase', () => {
   const w = jeu();
-  const r = JSON.parse(w.eval(`JSON.stringify({n:MGMT_TRAITS.length,ids:MGMT_TRAITS.map(x=>x.id),familles:[...new Set(MGMT_TRAITS.map(x=>x.famille))],effets:MGMT_TRAITS.every(x=>x.effet===null),cles:[...new Set(MGMT_TRAITS.flatMap(x=>Object.keys(x)))].sort(),info:!!mgmtTraitInfo('etouffeur')})`));
-  assert.equal(r.n, 32); assert.equal(new Set(r.ids).size, 32); assert.equal(r.familles.length, 6); assert.ok(r.effets); assert.ok(r.info);
+  const r = JSON.parse(w.eval(`JSON.stringify({n:MGMT_TRAITS.length,ids:MGMT_TRAITS.map(x=>x.id),familles:[...new Set(MGMT_TRAITS.map(x=>x.famille))],effets:MGMT_TRAITS.every(x=>x.effet===null||typeof x.effet==='object'),mesures:MGMT_TRAITS.filter(x=>x.effet!==null).map(x=>x.id),cles:[...new Set(MGMT_TRAITS.flatMap(x=>Object.keys(x)))].sort(),info:!!mgmtTraitInfo('chasseur-de-cou')})`));
+  assert.equal(r.n, 32); assert.equal(new Set(r.ids).size, 32); assert.equal(r.familles.length, 6); assert.ok(r.effets); assert.equal(r.mesures.length, 8); assert.ok(r.info);
+  assert.deepEqual(r.mesures.sort(), ['menton-granit','menton-fele','ne-se-releve-pas','chasseur-de-cou','tombeur','foudroyant','poings-de-marbre','specialiste-soumission'].sort());
   assert.deepEqual(r.cles, ['condition', 'conserve', 'effet', 'famille', 'id', 'nom', 'public', 'temporaire'].sort(), 'aucune phrase dans le catalogue');
   assert.deepEqual(TABLE.map(x => x[0]).sort(), r.ids.slice().sort(), 'la table de ce test couvre chaque trait du catalogue, une fois');
 });
@@ -88,8 +89,8 @@ test('Monde lot 32 T1 — l’hystérésis : un trait acquis ne se perd que sous
     const c=mgmtTraitsDe(partie({W:1,L:3},h2.concat([dec(4,'V')])),'x');
     return JSON.stringify({a:a,b:b,c:c});`);
   assert.ok(r.a.includes('chasseur-de-cou'), 'acquis, gardé après une défaite : ' + r.a.join(','));
-  assert.ok(r.b.includes('serie-noire'), 'trois défaites d’affilée : « En plein doute » : ' + r.b.join(','));
-  assert.ok(!r.c.includes('serie-noire'), 'une victoire : le trait temporaire cesse');
+  assert.ok(r.b.includes('serie-noire'), 'trois défaites d’affilée dérivent le trait d’identité : ' + r.b.join(','));
+  assert.ok(!r.c.includes('serie-noire'), 'une victoire fait cesser le trait temporaire');
 });
 
 test('Monde lot 32 T1 — le plafond : jamais plus de quatre traits ; « Débutant » et « Routinier » n’apparaissent jamais avec un autre trait', () => {

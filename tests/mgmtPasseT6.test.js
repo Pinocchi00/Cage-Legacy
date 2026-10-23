@@ -10,7 +10,8 @@ const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
 
 const win = newGameWindow({ runMain: true });
-win.eval(`setSeed(20261008); mgmtPasseGenerer('split');`);
+/* Brief du 22/10, P2 T2 (les traits changent les combats, donc le flux du RNG du passé) : sur la graine 20261008 le monde n'allume plus ni « revenant » ni rivalité (0 et 0) ; mesure sur cinq autres graines : revenant 2-3 sur quatre d'entre elles, rivalités 0 à 2. La graine du fichier passe à 20261009 (revenant 2, rivalités 1, les quatre autres rôles >= 6), les assertions restent celles d'origine. */
+win.eval(`setSeed(20261009); mgmtPasseGenerer('split');`);
 const ev = code => JSON.parse(win.eval(`JSON.stringify((function(){ ${code} })())`));
 
 test('Monde lot 1 T6 — chaque catégorie a un champion et sa ceinture a au moins un règne passé, daté', () => {
