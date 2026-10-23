@@ -149,7 +149,7 @@ function scr_mgmt_recrutement(){
   const vue=tous.slice(F.page*MGMT_RECRUTEMENT_PAGE,(F.page+1)*MGMT_RECRUTEMENT_PAGE);
   if(F.curseur>=vue.length) F.curseur=Math.max(0,vue.length-1);
   const chips=allDivisions().map(d=>`<button type="button" class="mgmt-vest-chip${d.id===div?' on':''}" aria-pressed="${d.id===div}" onclick="CL.mgmtRecrutementFiltre('${esc(d.id)}')">${esc(mgmtDivisionLabel(d.id))}</button>`).join('');
-  return `<div class="scr mgmt-wrap mgmt-recrutement"><div class="mgmt-head bar"><h2 class="disp">Le recrutement</h2>`
+  return `<div class="scr mgmt-wrap mgmt-recrutement"><div class="rc-tabs">${[['LES LIBRES','mgmt_recrutement'],['ENVOYER LE RECRUTEUR','mgmt_recruteur_mission'],['SES RETOURS','mgmt_recruteur_retours']].map(([t,s])=>`<button class="rc-tab${G.screen===s?' rc-on':''}" onclick="CL.go('${s}')">${t}</button>`).join('')}</div><div class="mgmt-head bar"><h2 class="disp">Le recrutement</h2>`
     +`<span class="mgmt-week-event">Hors de ${esc(mgmtOrgNom(m))} · ${esc(tous.length)} dans la catégorie</span></div>`
     +`<div class="mgmt-vest-chips">${chips}</div>`
     +(F.message?`<p class="mgmt-recru-msg" role="status">${esc(F.message)}</p>`:'')
