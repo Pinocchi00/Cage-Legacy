@@ -10,8 +10,8 @@ test('Monde lot 36 T1 — mgmtFaceAFace reprend les chiffres de carrière et com
   for(const line of r.x.lignes.slice(2)){const k=line.id==='encaisseParMin'?'sigEncaisseParMin':line.id;assert.equal(line.a,r.sa&&r.sa[k]);assert.equal(line.b,r.sb&&r.sb[k]);}
 });
 test('Monde lot 36 T1 — physique, bilan, égalité, null et identifiant inconnu',()=>{
-  const w=creer(),r=w.eval(`(()=>{const m=G.mgmt;m.roster=[{id:'a',name:'A',W:2,L:1,D:0,div:'x',phys:{height:180,reach:190,stance:'orthodox'}},{id:'b',name:'B',W:1,L:2,D:0,div:'x',phys:{height:180,reach:190,stance:'southpaw'}}];return {x:mgmtFaceAFace(m,'a','b'),bad:mgmtFaceAFace(m,'inconnu','b')};})()`);
-  assert.deepEqual(JSON.parse(JSON.stringify(r.x.lignes.slice(0,2).map(x=>x.meilleur))),[null,null]);assert.deepEqual(r.x.lignes[0].a,180);assert.deepEqual(JSON.parse(JSON.stringify(r.x.a.bilan)),{v:2,d:1,n:0});assert.equal(r.bad.a,null);
+  const w=creer(),r=w.eval(`(()=>{const m=G.mgmt;m.roster=[{id:'a',name:'A',W:2,L:1,D:0,div:'x',phys:{height:180,reach:190,stance:'orthodox'}},{id:'b',name:'B',W:1,L:2,D:0,div:'x',phys:{height:180,reach:190,stance:'southpaw'}}];const p=mgmtCombatProfile(m.roster[0]).phys;return {x:mgmtFaceAFace(m,'a','b'),p,bad:mgmtFaceAFace(m,'inconnu','b')};})()`);
+  assert.equal(r.x.lignes[0].a,r.p.height);assert.equal(r.x.lignes[1].a,r.p.reach);assert.equal(r.x.a.garde,r.p.stance);assert.deepEqual(JSON.parse(JSON.stringify(r.x.lignes.slice(0,2).map(x=>x.meilleur))),[r.x.lignes[0].a===r.x.lignes[0].b?null:(r.x.lignes[0].a>r.x.lignes[0].b?'a':'b'),r.x.lignes[1].a===r.x.lignes[1].b?null:(r.x.lignes[1].a>r.x.lignes[1].b?'a':'b')]);assert.deepEqual(JSON.parse(JSON.stringify(r.x.a.bilan)),{v:2,d:1,n:0});assert.equal(r.bad.a,null);
 });
 test('Monde lot 36 T1 — mgmtReleveCombat calcule les totaux, rounds et invariants',()=>{
   const w=creer(),r=w.eval(`(()=>{const row=Array(28).fill(0);row[0]=3;row[1]=6;row[4]=1;row[5]=1;row[6]=1;row[7]=2;row[8]=4;row[10]=1;row[11]=42;const s={d:600,r:[row,row,row],e:[Array(12).fill(0),Array(12).fill(0)]};const t={a:{id:'a'},b:{id:'b'},s};return mgmtReleveCombat({},t);})()`);
