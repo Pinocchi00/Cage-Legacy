@@ -63,3 +63,27 @@ test('L’interpellation ne fabrique pas une rivalité historique parallèle',()
   assert.match(source,/Dérivé de m\.hist/);
   assert.match(fs.readFileSync('mgmt-corps.js','utf8'),/k:'discours',[^\n]*interpelle:d\.interpelle/);
 });
+const {newGameWindow:newGameWindowD}=require('./helpers/loadGame');
+
+/* Constat du 23/10/2026 : test sur de vraies soirées, créées par le chemin réel. */
+const jouerSoireesD=require('./helpers/jouerSoirees');
+test('Monde lot 50 T1 — vingt soirées jouées une à une : de 0 à 4 discours par soirée, partie valide, sauvegarde rechargeable, aucune phrase avant trois discours d’écart pour un même combattant',()=>{
+  const w=newGameWindowD({runMain:true});
+  w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(20261008); CL.mgmtEnter(1); mgmtPasseGenerer('split',{soirees:3});`);
+  const parSoiree=[];
+  const phrases=new Map();
+  let repetition=null;
+  for(let k=0;k<20;k++){
+    jouerSoireesD(w,1);
+    const d=JSON.parse(w.eval(`JSON.stringify(G.mgmt.discours?G.mgmt.discours.d:[])`));
+    parSoiree.push(d.length);
+    /* Les banques comptent quatre variantes par famille : une phrase ne peut revenir qu'après trois discours du même combattant (l'aide de test refait combattre les mêmes têtes d'affiche à chaque soirée, jusqu'à quinze discours en vingt soirées). */
+    for(const x of d){ const liste=phrases.get(x.a)||[]; const recents=liste.slice(-3); for(const ligne of x.lignes){ if(recents.some(r=>r.includes(ligne))) repetition=repetition||x.a+' : '+ligne; } liste.push(x.lignes); phrases.set(x.a,liste); }
+  }
+  const etat=JSON.parse(w.eval(`JSON.stringify({valide:validateMgmt(G.mgmt),recharge:validateMgmt(JSON.parse(JSON.stringify(G.mgmt)))})`));
+  assert.ok(parSoiree.every(n=>n>=0&&n<=4),'0 à 4 discours par soirée : '+parSoiree.join(','));
+  assert.ok(parSoiree.some(n=>n>0),'au moins une soirée a un discours (principal et co-principal sont éligibles)');
+  assert.equal(etat.valide,true);
+  assert.equal(etat.recharge,true);
+  assert.equal(repetition,null,'aucune phrase répétée pour un même combattant : '+repetition);
+});

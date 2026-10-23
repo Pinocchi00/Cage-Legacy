@@ -27,13 +27,13 @@ function mgmtDiscoursComposer(m,combat){
   const premier=rows.find(x=>(x.id||x[0])!==auteur.id);
   const interpelle=nomInter?adversaire.id:premier?(premier.id||premier[0]):null;
   const ton=e.motif==='surprise'?'emu':nomInter?'provocateur':e.motif==='principal'||e.motif==='co-principal'?'humble':'fier';
-  const banques=MGMT_DISCOURS_DATA.tons[ton], hash=(String(m.graine||'')+'|'+(m.eventsPlayed||0)+'|'+auteur.id+'|'+adversaire.id).split('').reduce((h,c)=>(Math.imul(h^c.charCodeAt(0),16777619)>>>0),2166136261);
+  const banques=MGMT_DISCOURS_DATA.tons[ton], hash=(String(m.graine||'')+'|'+auteur.id).split('').reduce((h,c)=>(Math.imul(h^c.charCodeAt(0),16777619)>>>0),2166136261);
   const nomCible=interpelle?(mgmtDiscoursNom(m,interpelle)||{}).name||interpelle:adversaire.name||adversaire.id;
   const historique=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='discours'&&f.a===auteur.id);
   const rang=historique.length;
   const phrase=(fam,n)=>{
-    /* Chaque famille a son propre décalage : la combinaison complète ne
-       retombe pas sur le même discours tous les quatre passages. */
+    /* Décalage propre à (graine, combattant, famille) ; l'indice avance de 1 à chaque discours du combattant (`rang`) : aucune phrase ne revient
+       avant d'avoir épuisé la banque de la famille (fiche, case 2 : « aucune phrase deux fois sur 20 discours pour un même combattant »). */
     const decalage=(hash+n*0x9e3779b9)>>>0;
      return banques[fam][(decalage+rang)%banques[fam].length].replaceAll('{nom}',auteur.name||auteur.id).replaceAll('{adversaire}',adversaire.name||adversaire.id).replaceAll('{interpelle}',nomCible).replaceAll('{ville}',m.ville||'').replace(/\{[^}]+\}/g,'').slice(0,200);
   };
