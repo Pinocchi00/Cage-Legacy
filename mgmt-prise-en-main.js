@@ -308,7 +308,7 @@ SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
 
 Object.assign(CL,{
   mgmtArriveeOuvrir,
-  mgmtArriveeFin(){ if(G.mgmt&&mgmtSoireesJoueur(G.mgmt)===0&&(!Array.isArray(G.mgmt.espoirs)||!G.mgmt.espoirs.length)&&!Array.isArray(G.mgmt.espoirsPropose)){mgmtEspoirsFixer(G.mgmt);saveMgmt();mgmtEspArriveeOuvrir(1,'mgmt_carte');return;} if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
+  mgmtArriveeFin(){ if(G.mgmt&&mgmtSoireesJoueur(G.mgmt)===0&&!G.mgmt.passe&&(!Array.isArray(G.mgmt.espoirs)||!G.mgmt.espoirs.length)&&!Array.isArray(G.mgmt.espoirsPropose)){mgmtEspoirsFixer(G.mgmt);saveMgmt();mgmtEspArriveeOuvrir(1,'mgmt_carte');return;} if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
 });
 keysRegister('mgmt_arrivee',{ ArrowUp(){mgmtArriveeChoisir(-1,false);}, ArrowDown(){mgmtArriveeChoisir(1,false);}, Tab(e){mgmtArriveeChoisir(e&&e.shiftKey?-1:1,true);}, Enter(){mgmtArriveeOuvrir();}, Escape(){CL.go('mgmt_accueil');} });
 /* ==== [FIN ANCRE] ==== */
