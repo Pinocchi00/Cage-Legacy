@@ -1,0 +1,42 @@
+# Monde lot 36 T1 (P1 T5a du brief « Des combattants uniques ») — le combat en chiffres : le calcul (face-à-face et relevé round par round)
+
+Branche : `p1-chiffres` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). Worktree : `C:\Users\antho\Documents\cage-legacy-p1c` (créé depuis `origin/main`, qui contient déjà le relevé, les chiffres de carrière et l'onglet Statistiques). Brief : `docs/BRIEF-22-10-DES-COMBATTANTS-UNIQUES.md`, lot P1, tranche T5. Cette fiche est la **première moitié (T5a) : aucun écran, aucun texte** ; les écrans sont T5b (Présentation) et T5c (Résultats / Revoir). Planches (valeurs et libellés à connaître, pas à coder ici) : `docs/planches-uniques/UniCombatChiffres.dc.html` (le face-à-face avant le combat), `UniReleve.dc.html` (le relevé après). S'appuie sur `mgmt-stats.js` (`mgmtStatsCarriere`, `mgmtStatsCategorie`, `mgmtStatsCombats`, `mgmtStatsDocumentes`), `mgmt-releve.js` (format du relevé `s` : `{d,r,e}` complet ou `{d,c:[[17],[17]]}` réduit ; `MGMT_RELEVE_ROUND`, `MGMT_RELEVE_TOTAL`) : **lis-les en entier avant d'écrire**.
+
+Règles communes : cherche toi-même dans le code ; fonctions **pures et dérivées** (rien ne se stocke, aucun changement de sauvegarde, `MGMT_SAVE_VERSION` inchangé) ; aucun texte affiché (les libellés viennent en T5b/T5c) ; aucun `Math.random()` ; aucune modification de `engine-combat*.js` ; monte à la main le `?v=` de chaque `.js` modifié dans `index.html` (ne lance PAS `node tools/_bump.js`) ; `node tools/verif-versions.js origin/main` ; `npx eslint .` ; **tests UN PAR UN** avec `timeout 110 node --test tests/<f>.test.js`, les longs en arrière-plan (`nohup … > $TEMP/x.log 2>&1 &` puis `sleep 60` répétés ; tu ATTENDS). **Règle d'arrêt : deux heures sans atteindre la cible → commit « (inachevé) » avec un rapport précis.** NE retire, ne modifie et ne commite PAS `docs/BRIEF-22-10-DES-COMBATTANTS-UNIQUES.md`, `docs/planches-uniques/`, `.opencode/`, `opencode.json`, `sw.js`, `mgmt-retraits-data.js`, `mgmt-voix-data.js`. N'utilise pas `git checkout --`. Ne lance pas `npm run check`.
+
+## Ce que la tranche apporte
+Deux fonctions pures : le **face-à-face** de deux combattants avant le combat, et le **relevé détaillé** d'un combat terminé, round par round.
+
+## 1. Nouveau fichier `mgmt-combat-chiffres.js` (`"use strict";`, ancre `/* ==== [ANCRE: P1_T5A_COMBAT_CHIFFRES] — Monde lot 36 T1 ==== */`), inscrit dans `index.html` après `mgmt-stats.js`
+
+### `mgmtFaceAFace(m,idA,idB)` → `{a:{…}, b:{…}, lignes:[…]}`
+- `a` / `b` : `{id, nom, surnom|null, bilan:{v,d,n} (l'enregistrement officiel du combattant), rang (rang dans sa catégorie à Split ou, pour un combattant extérieur, dans son organisation ; null si non classé), age, ville|null, taille (cm, `phys.height`), allonge (cm, `phys.reach`), garde (`phys.stance`), documentes (nombre de combats documentés, `mgmtStatsDocumentes`)}`. Un combattant extérieur (autre organisation) est lu comme le fait `mgmtExteriorCombattant` / la fiche ; un identifiant inconnu rend `null` du côté concerné, jamais d'exception.
+- `lignes` : dans l'ordre de la planche, chacune `{id, a, b, meilleur:'a'|'b'|null, ecart}` où `a`/`b` sont les valeurs de carrière (`mgmtStatsCarriere`) : `sigParMin`, `precision`, `encaisseParMin`, `defense`, `ameneesPar15`, `defenseAmenee`, `controlePar15` (en secondes ; l'écran le mettra en m:ss), plus les deux lignes physiques `taille` et `allonge` (en tête, comme la planche). `meilleur` = le côté qui a la meilleure valeur (pour `encaisseParMin`, la plus **basse**), `null` si égalité ou si l'un des deux est `null`. Une valeur `null` (moins de combats documentés qu'il n'en faut) reste `null` — l'écran écrira « — ».
+- `ecart` : écart relatif `|a−b| / max(a,b)` pour dimensionner les barres ; 0 si une valeur est `null`.
+
+### `mgmtReleveCombat(m,entree)` → relevé détaillé d'un combat de `m.hist` (ou `m.orgs[*].hist`) ; l'entrée est l'objet de l'historique
+Rend `null` si le combat n'a pas de relevé complet (`s.r` absent : combat du passé réduit, combat d'avant). Sinon `{rounds:n, a:{…}, b:{…}, parRound:[{r, a:{sigTouches,sigTentes,amenees,amTentees,controle,kd,sub}, b:{…}}], total:{a:{…},b:{…}}, juges:[…]|null, tournant:{r,t}|null}` : pour chaque coin et pour le combat, les **dix** chiffres de la planche — coups significatifs touchés / tentés, précision (`null` si 0 tenté), tête · corps · jambes, amenées réussies / tentées, contrôle (secondes), knockdowns, soumissions tentées — plus, par round, les touchés, les amenées, le contrôle et si un knockdown a eu lieu. `juges` : les trois cartes round par round si le combat s'est terminé à la décision et que la carte est dans l'entrée (lis comment la trace garde les cartes ; sinon `null`) ; `tournant` : le round et l'instant du knockdown ou de la finition (l'instant `t` en secondes depuis le début du round, sinon `null`). **Invariants testés** : la somme des rounds égale le total pour chaque chiffre ; les coups tête+corps+jambes égalent les coups significatifs touchés ; `a` est bien le coin de l'entrée (ne retourne jamais les côtés).
+
+### Performance et pureté
+Aucune boucle imbriquée sur `m.hist` ; `mgmtFaceAFace` < 5 ms une fois `mgmtStatsIndex` chaud ; `mgmtReleveCombat` ne rejoue rien, il lit `s`. `JSON.stringify(m)` identique avant/après tout appel.
+
+## 2. Tests (nouveau `tests/mgmtCombatChiffres.test.js`, inscrit dans `test` ET `test:watch` de `package.json`, commande `test:chiffres`)
+Fixtures : entrées de `m.hist` **fabriquées à la main** avec des relevés `s` complets de valeurs connues (comme `tests/mgmtReleve.test.js` / `tests/mgmtTraits.test.js`) pour les valeurs exactes, et `mgmtPasseGenerer('split',{soirees:6})` (graine 20261008) pour la cohérence. (1) `mgmtFaceAFace` : chaque ligne reprend `mgmtStatsCarriere` ; `meilleur` correct (dont le cas inversé `encaisseParMin`) ; égalité et `null` donnent `meilleur:null` ; physique et bilan exacts ; identifiant inconnu → côté `null` sans exception ; combattant extérieur résolu. (2) `mgmtReleveCombat` : valeurs exactes sur un combat fabriqué à trois rounds ; somme des rounds = total ; tête+corps+jambes = touchés ; combat réduit ou sans `s` → `null` ; combat de cinq rounds ; décision avec cartes de juges / finition sans cartes. (3) Sur la partie de six soirées, **pour tous les combats de `m.hist` avec relevé complet**, les invariants de somme tiennent. (4) Pureté (JSON identique) et temps (< 5 ms le face-à-face chaud, < 1 ms par relevé).
+
+## Fin
+Versions à la main dans `index.html`, `node tools/verif-versions.js origin/main`, tests un par un, commit `Monde lot 36 T1 : le combat en chiffres, le calcul` (le numéro T1 est obligatoire). Un commit après chaque point (face-à-face ; relevé ; tests).
+
+## Compte rendu
+Fichiers et rôle ; tests (intitulés) ; temps mesurés ; ce que la trace garde pour les cartes de juges et le tournant (ou ne garde pas) ; écarts ; questions pour Anthony.
+
+## Compte rendu
+
+- `mgmt-combat-chiffres.js` — face-à-face dérivé des stats/caractéristiques et extraction pure des données détaillées du relevé ; chargé après `mgmt-stats.js`.
+- `index.html` — inscription du script avec version `lot36t1a`.
+- `tests/mgmtCombatChiffres.test.js` — groupes « mgmtFaceAFace reprend les chiffres de carrière et compare correctement », « physique, bilan, égalité, null et identifiant inconnu », « mgmtReleveCombat calcule les totaux, rounds et invariants », « relevé absent ou réduit, cinq rounds et trace de référence », « pureté, invariants de six soirées et temps de calcul ».
+- `package.json` — suites `test` et `test:watch` inscrivent le test ; commandes `test:chiffres` et `test:watch:chiffres` ajoutées.
+- Test ciblé `timeout 110 node --test tests/mgmtCombatChiffres.test.js` : 5/5 passent, environ 33,7 s.
+- Cartes/tournant : `engine-combat-officials.js` produit `judgeVerdicts` à partir des scores de juges. La trace de `mgmt-duo.js` n'enregistre toutefois que les côtés, vainqueur, famille, round, rounds, contexte Duo et `s` ; les éléments ne sont pas dans l'entrée d'historique disponible. `mgmtReleveCombat` rend donc `juges:null` et `tournant:null`, comme prévu par la décision. Les données `s.r` contiennent des agrégats de round mais pas l'instant du knockdown/finition.
+- `node tools/verif-versions.js origin/main` passe ; `npm exec -- eslint .` passe.
+- Migration de sauvegarde : aucune (calculs dérivés uniquement). Écarts : aucun.
+- Questions pour Anthony : aucune.

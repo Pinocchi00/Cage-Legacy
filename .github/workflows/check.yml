@@ -41,6 +41,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: tests, lot ${{ matrix.lot }} sur 8
+        # Le cache des parties générées sert aux relances locales ; la CI tourne à froid, comme la vérité de référence.
+        env:
+          CL_TEST_CACHE: "0"
         run: node --test $(node tools/repartir-tests.js ${{ matrix.lot }} 8)
 
   resultat:

@@ -131,6 +131,7 @@ function newGameWindow(opts){
     scriptEl.textContent = code;
     document.body.appendChild(scriptEl);
   }
+  require('./partieCache').installer(window, files);
   /* ==== [ANCRE: TESTS_LOADGAME_AVANT_H4] — Lot 5 H4 : état management au format
      d'avant H4 (monde à 30 par catégorie, vestiaire de 40 à 60, carte 5 + 4).
      Les tests de mécanique (carte, argent, monde, trace) s'y appuient : ce
