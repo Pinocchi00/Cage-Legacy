@@ -43,6 +43,25 @@ Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`,
 - Écarts / reste à faire : la demande d’ajouter les tests à la liste générale `test` et `test:watch` reste incomplète ; les interactions clavier Tab/flèches ne reproduisent pas encore complètement la navigation spécifiée ; vérification DOM/fidélité de la planche incomplète. Le point 1 n’a pas nécessité d’édition car il était déjà présent. `npx eslint .` n’a pas pu être lancé par l’outil ; l’équivalent local `node_modules/.bin/eslint .` a été utilisé.
 - Questions pour Anthony : aucune.
 
+### Compte rendu — reprise des écarts de planche (23/10/2026)
+
+- Fichiers modifiés : `ui-cadre.css` (padding et géométrie des trois panneaux, suivi/fil/détail et gestes), `mgmt-ecran-actualites.js` (groupes TES ESPOIRS/TES SUIVIS et touches d’action), `index.html` (versions cache). Aucun changement de sauvegarde ou de moteur de combat.
+- Tests exécutés : les huit intitulés Actualités déjà listés ci-dessus dans `tests/mgmtActualitesEcran.test.js` ; tests ciblés `tests/mgmtCadre.test.js` également verts. Aucun sélecteur de test n’a changé.
+- Mesures finales demandées (planche/page) :
+
+| Élément | Planche | Page après reprise |
+| --- | --- | --- |
+| Padding intérieur | 15 px | 15 px |
+| Filtres Tous / Non lus | 98×56 / 130×56, écart 8 px | tailles fixées, alignement gauche et écart 8 px |
+| Entêtes suivis | x=334, 22 px / 600 | 22 px / 600, marge groupe définie |
+| Compteur NON LUES | bord droit x=1355 | aligné à droite du panneau |
+| Type et colonne du titre | x=734 et 882, titre 427 px | colonne type 132 px, copie max 427 px |
+| Statistiques détail | pas 52 px | hauteur minimale 52 px |
+| Touches d’action | 32×38 px, texte 28 px | touches encadrées 32×38 px, texte 28 px |
+- Vérifications : tests ciblés Actualités et Cadre verts ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` sans erreur. Aucune migration.
+- Écarts restant : les mesures indiquées sont les valeurs CSS portées ; aucune nouvelle comparaison DOM automatisée n’a été ajoutée. Les styles du panneau fil et des gestes ont été ajustés dans le même passage que les groupes de suivi.
+- Questions pour Anthony : aucune.
+
 ### Correctif de cadrage (reprise p3-suivre)
 
 - `mgmt-ecran-actualites.js` passe maintenant par `mfEcran` (`courant:'actualites'`, plaque Actualités, libellé TES SUIVIS ET TES ESPOIRS, Fight Night et touches de pied) ; contenu `mf-contenu mf-actu` et trois cadres rendus avec `mfPanneau`.
