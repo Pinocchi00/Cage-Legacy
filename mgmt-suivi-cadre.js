@@ -80,6 +80,7 @@ function mgmtSuLigneClassement(m,x,selectionne,k){
 
 function scr_mgmt_classements_cadre(){
   const m=G.mgmt, F=MGMT_SU_CL, div=mgmtSuDiv(F); F.div=div;
+  if(!['liste','meilleurs','records'].includes(F.vue)) F.vue='liste';
   if(F.vue==='meilleurs') return scr_mgmt_meilleurs_cadre();
   if(F.vue==='records') return scr_mgmt_records_cadre();
   const lignes=mgmtClassementLignes(m,div,F.portee);
@@ -669,7 +670,8 @@ Object.assign(CL,{
     const liste=allDivisions().filter(d=>d.gender===MGMT_SU_CL.sexe).map(d=>d.id), i=liste.indexOf(mgmtSuDiv(MGMT_SU_CL));
     CL.mgmtSuClDiv(liste[(i+(delta||1)+liste.length)%liste.length]);
   },
-  mgmtSuClPortee(){ MGMT_SU_CL.portee=MGMT_SU_CL.portee==='world'?'organization':'world'; MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClPortee(p){ MGMT_SU_CL.portee=p==='world'||p==='organization'?p:(MGMT_SU_CL.portee==='world'?'organization':'world'); MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClListePortee(p){ if(p!=='world'&&p!=='organization')return; MGMT_SU_CL.vue='liste'; MGMT_SU_CL.portee=p; MGMT_SU_CL.curseur=0; render(); },
   mgmtSuClVue(v){ if(['liste','meilleurs','records'].includes(v)){ MGMT_SU_CL.vue=v; MGMT_SU_CL.curseur=0; render(); } },
   mgmtSuClVueSuivante(){ const a=['liste','meilleurs','records'],i=a.indexOf(MGMT_SU_CL.vue); CL.mgmtSuClVue(a[(i+1)%a.length]); },
   mgmtSuClOuvrir(){

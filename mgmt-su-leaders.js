@@ -1,6 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P1_T6B_CADRE_LEADERS] — Monde lot 31 T6b ==== */
 const MGMT_MEILLEURS_LABELS={
+  relu:false,
   tabs:{liste:'SPLIT',monde:'MONDIAL',meilleurs:'LES MEILLEURS',records:'LES RECORDS'},
   categories:[['finitions','LE PLUS DE FINITIONS',''],['volume','LE PLUS GROS VOLUME','/ MIN'],['precis','LE PLUS PRÉCIS','%'],['defense','LA MEILLEURE DÉFENSE','%'],['lutteur','LE LUTTEUR','/ 15 MIN'],['mur','LE MUR','%'],['cou','LE CHASSEUR DE COU','/ 15 MIN'],['serie','LA PLUS LONGUE SÉRIE','V']],
   insufficient:'3 combats documentés minimum',precise:'5 pour la précision',empty:'Pas encore de combat documenté.',
@@ -9,8 +10,16 @@ const MGMT_MEILLEURS_LABELS={
 };
 function mgmtSuClOnglets(){
   const F=MGMT_SU_CL,L=MGMT_MEILLEURS_LABELS;
-  const tabs=[['liste',F.portee==='world'?'MONDIAL':'SPLIT'],['meilleurs',L.tabs.meilleurs],['records',L.tabs.records]];
-  return tabs.map(([v,t])=>({t,on:F.vue===v,onclick:`CL.mgmtSuClVue('${v}')`}));
+  return [
+    {t:'SPLIT',on:F.vue==='liste'&&F.portee==='organization',onclick:"CL.mgmtSuClListePortee('organization')"},
+    {t:'MONDIAL',on:F.vue==='liste'&&F.portee==='world',onclick:"CL.mgmtSuClListePortee('world')"},
+    {t:L.tabs.meilleurs,on:F.vue==='meilleurs',onclick:"CL.mgmtSuClVue('meilleurs')"},
+    {t:L.tabs.records,on:F.vue==='records',onclick:"CL.mgmtSuClVue('records')"}
+  ];
+}
+function mgmtLeaderAnnee(m,soiree){
+  const combat=(m.hist||[]).find(x=>x&&x.c===soiree&&x.date),year=combat&&new Date(combat.date).getFullYear();
+  return Number.isFinite(year)?year:null;
 }
 function mgmtMeilleursRendu(m){
   const F=MGMT_SU_CL,L=MGMT_MEILLEURS_LABELS,div=mgmtSuDiv(F),data=mgmtMeilleurs(m,{divId:div,portee:F.portee==='world'?'monde':'split'});
@@ -18,10 +27,13 @@ function mgmtMeilleursRendu(m){
     const r=data.find(x=>x.id===id),rank=r?r.rang:[],first=rank[0],value=v=>Number.isInteger(v)?String(v):String(Number(v.toFixed(2))).replace('.',',');
     const top=first?`<button class="mf-me-nom" onclick="CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toLocaleUpperCase('fr'))}</button>`:`<div class="mf-me-vide">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
     const rows=rank.slice(1,3).map((x,i)=>`<div><button onclick="CL.mgmtFiche('${escJsAttr(x.id)}')">${i+2}. ${esc(x.nom.trim().split(/\s+/).pop())}</button><span>${esc(value(x.valeur))}</span></div>`).join('');
-    return `<article class="mf-me-carte"><h3>${esc(label)}</h3><div class="mf-me-valeur">${first?esc(value(first.valeur)):''}${first&&unit?`<small>${esc(unit)}</small>`:''}</div>${top}<div class="mf-me-rangs">${rows}</div></article>`;
+    return mfPanneau(`<h3>${esc(label)}</h3><div class="mf-me-valeur">${first?esc(value(first.valeur)):''}${first&&unit?`<small>${esc(unit)}</small>`:''}</div>${top}<div class="mf-me-rangs">${rows}</div>`,'normal','mf-me-carte');
   }).join('');
   const r=mgmtRecords(m).battu, family=x=>(x||'').trim().split(/\s+/).pop();
-  const phrase=r&&L.beaten[r.id]?L.beaten[r.id].replace('{nom}',family(r.combattant.nom)).replace('{valeur}',String(r.valeur)).replace('{soiree}',String(r.soiree)).replace('{avant}',r.avant?` L'ancien record tenait depuis ${r.avant.soiree} (${family(r.avant.combattant.nom)}, ${r.avant.valeur}).`:''):'';
+  const units={sigAtt:'coups significatifs tentés',koRapide:'secondes',amenees:'amenées réussies',knockdowns:'knockdowns',controle3:'de contrôle au sol',corps:'coups au corps'};
+  const oldYear=r&&r.avant?mgmtLeaderAnnee(m,r.avant.soiree):null;
+  const old=r&&r.avant&&oldYear?` L'ancien record tenait depuis ${oldYear} (${family(r.avant.combattant.nom)}, ${r.avant.valeur}).`:'';
+  const phrase=r&&L.beaten[r.id]?L.beaten[r.id].replace('{nom}',family(r.combattant.nom)).replace('{valeur}',`${r.valeur} ${units[r.id]||''}`.trim()).replace('{soiree}',String(r.soiree)).replace('{avant}',old):'';
   const aside=phrase?`<aside class="mf-me-battu"><b>RECORD BATTU</b><span>${esc(phrase)}</span></aside>`:'';
   return `<main class="mf-contenu mf-me"><div class="mf-me-grille">${cards}</div>${aside}</main>`;
 }
@@ -36,8 +48,9 @@ function mgmtRecordsRendu(m){
   let count=0;
   const html=groups.map(([title,ids])=>{const rows=ids.map(id=>{const rec=[...r.unCombat,...r.carriere].find(x=>x.id===id&&x.combattant);if(!rec)return '';count++;const beaten=r.battu&&r.battu.id===id?r.battu:null;
     const before=beaten&&beaten.avant?`<span class="mf-re-avant">avant : ${esc(beaten.avant.combattant.nom)}, ${esc(beaten.avant.valeur)}</span>`:'';
-    return `<div class="mf-re-ligne"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small><button type="button" onclick="CL.mgmtFiche('${escJsAttr(rec.combattant.id)}')">${esc(rec.combattant.nom)}</button> · Split Fight Night ${esc(rec.soiree)}${year?`, ${esc(year)}`:''} ${before}</small></div></div>`;
-  }).join('');return rows?`<section class="mf-re-groupe"><h2>${title}</h2>${rows}</section>`:'';}).join('');
+    const recordYear=mgmtLeaderAnnee(m,rec.soiree);
+    return `<div class="mf-re-ligne"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small><button type="button" onclick="CL.mgmtFiche('${escJsAttr(rec.combattant.id)}')">${esc(rec.combattant.nom)}</button> · Split Fight Night ${esc(rec.soiree)}${recordYear?`, ${esc(recordYear)}`:''}${id==='victoiresSuite'?' · en cours':''} ${before}</small></div></div>`;
+  }).join('');return rows?mfPanneau(`<h2>${title}</h2>${rows}`,'normal','mf-re-groupe'):'';}).join('');
   return `<main class="mf-contenu mf-re"><div class="mf-re-intro">${year?`Tous les combats de Split depuis ${esc(year)}, toutes catégories`:''}</div>${html||`<p>${esc(L.empty)}</p>`}</main>`;
 }
 function scr_mgmt_records_cadre(){
