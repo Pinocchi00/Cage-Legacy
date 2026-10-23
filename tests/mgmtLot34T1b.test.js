@@ -33,15 +33,35 @@ function mondeReference(){
   return reference;
 }
 
-test('Pour chaque manque du tableau §1 : indicateur ≤ 0,70 × les autres et force jeunes-partout ≥ 1,2 ×',()=>{
+test('Pour chaque manque du tableau §1 : indicateur ≤ 0,70 × (0,80 pour finitionsPasse ; a-domicile exempté) et force jeunes-partout ≥ 1,2 ×',()=>{
   const rows=verdicts(mondeReference().organisations);
   for(const r of rows){
     if(r.manque==='a-domicile'){
-      // Le catalogue ne connaît pas les Émirats : zéro structurel, jamais présenté comme une baisse mesurée.
-      assert.equal(r.valeur,0);assert.equal(r.mesurable,false);assert.ok(r.valeur<=0.7*r.autres);
-    }else assert.ok(r.ok,JSON.stringify(r));
+      // Décision Anthony du 23/10 : aucun effet, indicateur exempté (Émirats absents du catalogue).
+      assert.equal(r.valeur,0);assert.equal(r.mesurable,false);
+    }else{
+      assert.ok(r.ok,JSON.stringify(r));
+      // Décision Anthony : seule finitionsPasse passe à 0,80 ; mesures précédentes 0,717 et 0,786.
+      if(r.indicateur==='finitionsPasse') assert.ok(r.valeur<=0.8*r.autres,JSON.stringify(r));
+    }
   }
   assert.equal(new Set(rows.map(r=>r.manque)).size,7);
+});
+
+/* ==== [ANCRE: MONDE34T1B_TEST_DOMICILE_NEUTRE] — Monde lot 34 T1b ==== */
+test('a-domicile ne biaise ni les pays ni les recrues, même avec un pays domestique au catalogue',()=>{
+  const w=newGameWindow();
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      const m=mgmtDefault('organisation-7'),profil=mgmtOrgProfil(m),ancien={...profil};delete ancien.manque;
+      mgmtOrgPaysDomicile=()=>COUNTRY_KEYS[0];
+      setSeed(777);mgmtNewRoster(m,{profil});const a=JSON.stringify(m);
+      const b=mgmtDefault('organisation-7');setSeed(777);mgmtNewRoster(b,{profil:ancien});
+      const candidats=[{id:'mg1',age:28,ck:COUNTRY_KEYS[0]},{id:'mg2',age:24,ck:COUNTRY_KEYS[1]}];
+      return {identique:a===JSON.stringify(b),recrue:mgmtOrgRecrueTirage(m,candidats,profil,30).id};
+    })())`));
+    assert.equal(r.identique,true);assert.equal(r.recrue,'mg1');
+  }finally{w.close();}
 });
 
 test('Les effectifs restent dans leurs bornes ; chaque catégorie a un champion',()=>{

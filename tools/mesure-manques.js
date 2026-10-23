@@ -36,9 +36,12 @@ function verdicts(orgs){
   for(const org of orgs){
     for(const indicateur of defs[org.manque]||[]){
       const valeur=org[indicateur],autres=MOY(orgs.filter(o=>o.id!==org.id).map(o=>o[indicateur]));
-      const mesurable=indicateur!=='domicile'||!!org.pays;
+      /* ==== [ANCRE: MONDE34T1B_CIBLES_REPRISE] — Monde lot 34 T1b ==== */
+      // Décision Anthony : a-domicile sans effet et exempté ; finitionsPasse bruité sur six soirées, cible 0,80.
+      const mesurable=org.manque!=='a-domicile';
+      const cible=indicateur==='finitionsPasse'?0.8:0.7;
       rows.push({seed:org.seed,manque:org.manque,indicateur,valeur,autres,rapport:autres?valeur/autres:null,mesurable,
-        ok:mesurable&&(indicateur==='niveau'?valeur<=autres-3:valeur<=0.7*autres)});
+        ok:mesurable&&(indicateur==='niveau'?valeur<=autres-3:valeur<=cible*autres)});
     }
     if(org.force==='jeunes-partout'){
       const autres=MOY(orgs.filter(o=>o.id!==org.id).map(o=>o.jeunes));
@@ -52,9 +55,10 @@ function rapport(resultats){
   const rows=resultats.flatMap(r=>r.verdicts);
   return '# Mesures des manques — Monde lot 34 T1b\n\n'+
     'Passé : six soirées par organisation, puis monde vivant ; moyenne arithmétique des sept autres organisations. Les taux du passé portent sur les victoires réellement jouées (hist).\n\n'+
+    'Décisions Anthony du 23/10/2026 : cible 0,80 × pour finitionsPasse (six soirées, indicateur bruité) ; 0,70 × pour les autres manques, écart de niveau −3 et force jeunes-partout ≥ 1,2 ×. a-domicile est sans aucun effet et son indicateur est exempté. Rim : âges initiaux 20–27 ans, réduction des cohortes historiques pour respecter le budget de sauvegarde.\n\n'+
     '| Graine | Manque / force | Indicateur | Organisation | Sept autres | Rapport | Verdict |\n| --- | --- | --- | ---: | ---: | ---: | --- |\n'+
-    rows.map(r=>`| ${r.seed} | ${r.manque} | ${r.indicateur} | ${r.valeur.toFixed(4)} | ${r.autres.toFixed(4)} | ${r.rapport===null?'—':r.rapport.toFixed(3)} | ${!r.mesurable?'NON MESURABLE : pays absent du catalogue':r.ok?'OK':'HORS CIBLE'} |`).join('\n')+
-    '\n\nPure Impact : siège aux Émirats arabes unis, absents du catalogue de pays ; le taux domestique est déjà nul avant le biais. Aucun effet différentiel ne peut être revendiqué.\n';
+    rows.map(r=>`| ${r.seed} | ${r.manque} | ${r.indicateur} | ${r.valeur.toFixed(4)} | ${r.autres.toFixed(4)} | ${r.rapport===null?'—':r.rapport.toFixed(3)} | ${!r.mesurable?'EXEMPTÉ / NON MESURABLE : sans effet':r.ok?'OK':'HORS CIBLE'} |`).join('\n')+
+    '\n\nPure Impact : siège aux Émirats arabes unis, absents du catalogue de pays ; le taux domestique est déjà nul. Décision : aucun biais de pays ni de recrutement pour a-domicile dans cette tranche, aucun effet différentiel revendiqué.\n';
 }
 
 if(require.main===module){

@@ -243,14 +243,6 @@ function mgmtOrgPaysDomicile(m){
   const o=mgmtOrgParNom(mgmtOrgNom(m)), identite=o&&mgmtOrgIdentite(o.id);
   return identite?COUNTRY_KEYS.find(k=>COUNTRIES[k].name===identite.pays)||null:null;
 }
-function mgmtOrgPaysTirage(m,profil,poids){
-  if(!profil.manque||profil.manque.id!=='a-domicile') return poids;
-  const pays=mgmtOrgPaysDomicile(m);
-  if(!pays) return poids;
-  const entries=Object.entries(poids).map(([k,v])=>[k,k===pays?v*0.1:v]);
-  const total=entries.reduce((n,[,v])=>n+v,0);
-  return Object.fromEntries(entries.map(([k,v])=>[k,100*v/total]));
-}
 function mgmtOrgNiveauTirage(tir,profil){
   if(tir&&profil.manque&&profil.manque.id==='potentiel-champion'){
     tir.pot=Math.min(tir.pot,66);
@@ -267,10 +259,10 @@ function mgmtOrgAttributsTirage(p,profil){
 /** Préférence de recrutement : tri pondéré déterministe du vivier existant, jamais un retrait du roster. */
 function mgmtOrgRecrueTirage(m,candidats,profil,ageMax){
   const id=profil.manque&&profil.manque.id;
-  if(!['espoirs','experimentes','a-domicile'].includes(id)) return candidats.find(f=>f.age<=ageMax)||null;
-  const pays=mgmtOrgPaysDomicile(m);
-  if(id==='a-domicile'&&!pays) return candidats.find(f=>f.age<=ageMax)||null;
-  const poids=f=>id==='espoirs'?(f.age<25?0.05:1):id==='experimentes'?(f.age>=32?0.05:f.age<25?2:1):(f.ck===pays?0.1:1);
+  /* ==== [ANCRE: MONDE34T1B_DOMICILE_SANS_EFFET] — Monde lot 34 T1b ==== */
+  /* Décision Anthony à la reprise : a-domicile n'a aucun biais, même si le catalogue évolue. */
+  if(!['espoirs','experimentes'].includes(id)) return candidats.find(f=>f.age<=ageMax)||null;
+  const poids=f=>id==='espoirs'?(f.age<25?0.05:1):(f.age>=32?0.05:f.age<25?2:1);
   return candidats.filter(f=>f.age<=ageMax).map(f=>({f,score:-Math.log(Math.max(1e-9,mgmtIdentiteStream(f.id,'manque-recrue|'+m.cycle,m)()))/poids(f)}))
     .sort((a,b)=>a.score-b.score)[0]?.f||null;
 }

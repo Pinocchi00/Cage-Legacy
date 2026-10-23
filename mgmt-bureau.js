@@ -171,7 +171,7 @@ function mgmtNewRoster(m,opts){
   const prefixeNaissance=!m.idPrefixe&&['finisseurs','soumissions'].includes(profil.manque&&profil.manque.id)
     ?'o'+MGMT_ORGANISATIONS.findIndex(o=>o.nom===m.org):'';
   /* Monde lot 2 T2 : les combattants sont tirés au mélange de pays de l'organisation. */
-  const paysPoids=mgmtOrgPaysTirage(m,profil,mgmtOrgPaysPoids(m));
+  const paysPoids=mgmtOrgPaysPoids(m);
   /* Monde lot 1 T3 : sans option, rien ne change (mêmes tirages, mêmes lignes). */
   const recul=opts&&Number.isSafeInteger(opts.reculAns)&&opts.reculAns>0?opts.reculAns:0;
   const attendus=recul>0&&Number.isSafeInteger(opts.combatsAttendus)?opts.combatsAttendus:0;
