@@ -17,6 +17,7 @@ const MGMT_REGLAGES_ORIGINE={
   affichage:{plein:false,taille:1920,fps:60,mouvement:true},
   son:{general:8,musique:6,salle:8,coups:7,silence:true},
   aide:{accompagnement:true},
+  soiree:{vue:'defaut'},
 };
 /** Ce que chaque réglage accepte : une liste de valeurs, ou un entier de 0 à 10. */
 const MGMT_REGLAGES_VALEURS={
@@ -24,8 +25,9 @@ const MGMT_REGLAGES_VALEURS={
   affichage:{plein:[true,false],taille:[1280,1920,2560],fps:[30,60],mouvement:[true,false]},
   son:{general:'niveau',musique:'niveau',salle:'niveau',coups:'niveau',silence:[true,false]},
   aide:{accompagnement:[true,false]},
+  soiree:{vue:['defaut','entier','resultat']},
 };
-const MGMT_REGLAGES_ONGLETS=['combat','affichage','son','aide'];
+const MGMT_REGLAGES_ONGLETS=['combat','affichage','son','aide','soiree'];
 
 function mgmtReglagesCopie(o){ return JSON.parse(JSON.stringify(o)); }
 /** Valide un bloc lu (stockage, import) : chaque clé garde sa valeur si elle est permise, sinon son origine. Pur. */

@@ -7,8 +7,8 @@
    Les textes de réglage sont ceux des planches. ==== */
 
 let MGMT_OP={onglet:'combat',ligne:0,retour:'title',message:''};
-const MGMT_OP_ONGLETS=[{id:'combat',lib:'COMBAT'},{id:'affichage',lib:'AFFICHAGE'},{id:'son',lib:'SON'},{id:'touches',lib:'TOUCHES'},{id:'partie',lib:'PARTIE'}];
-const MGMT_OP_TITRES={combat:'LE COMBAT',affichage:'L’AFFICHAGE',son:'LE SON',touches:'LES TOUCHES',partie:'LA PARTIE'};
+const MGMT_OP_ONGLETS=[{id:'combat',lib:'COMBAT'},{id:'affichage',lib:'AFFICHAGE'},{id:'son',lib:'SON'},{id:'soiree',lib:'SOIRÉE'},{id:'touches',lib:'TOUCHES'},{id:'partie',lib:'PARTIE'}];
+const MGMT_OP_TITRES={combat:'LE COMBAT',affichage:'L’AFFICHAGE',son:'LE SON',soiree:'LA SOIRÉE',touches:'LES TOUCHES',partie:'LA PARTIE'};
 /** Les réglages de chaque onglet, dans l'ordre de la planche. `choix` : [valeur, libellé] ; `niveau` : de 0 à 10. */
 const MGMT_OP_LIGNES={
   combat:[
@@ -32,6 +32,7 @@ const MGMT_OP_LIGNES={
     {cle:'coups',lib:'LES COUPS',aide:'Les impacts dans la cage.',niveau:true},
     {cle:'silence',lib:'SON COUPÉ HORS DU JEU',aide:'Le jeu se tait quand tu passes sur une autre fenêtre.',choix:[[true,'OUI'],[false,'NON']]},
   ],
+  soiree:[{cle:'vue',lib:'VUE DES COMBATS',aide:'Le réglage par défaut ou une vue commune à toute la soirée.',choix:[['defaut','PAR DÉFAUT'],['entier','TOUT EN ENTIER'],['resultat','TOUT EN RÉSULTAT']]}],
   partie:[
     {cle:'sauver',lib:'SAUVEGARDER',aide:'La partie s’enregistre aussi toute seule après chaque soirée.',action:'SAUVEGARDER MAINTENANT',touche:'Entrée'},
     {cle:'arrivee',lib:'REVOIR MON ARRIVÉE',aide:'L’écran de ton arrivée : l’organisation, ce que tu hérites, la première soirée.',action:'OUVRIR'},
