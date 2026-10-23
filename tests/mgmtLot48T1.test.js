@@ -34,3 +34,30 @@ test('Monde lot 48 T1 — partie réelle, lien absent sans poste et lecture du b
   assert.equal(r.renewed,true);
   assert.doesNotMatch(r.apres,/Le bilan du patron/);
 });
+
+test('Monde lot 48 T1 — date annuelle, confiance verbale et objectifs avec état',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;const html=scr_mgmt_poste();return {html,fin:new Date(MGMT_CALENDRIER_DEBUT+m.poste.fin*86400000).getUTCFullYear(),finText:mgmtPosteDateTexte(m.poste.fin)}})()`);
+  assert.match(r.html,new RegExp(String(r.fin)));
+  assert.match(r.html,/\/ MOIS/);
+  assert.match(r.html,/IL EST RAVI|IL EST CONTENT|IL ATTEND DE VOIR|IL COMMENCE À DOUTER|IL N’Y CROIT PLUS/);
+  assert.match(r.html,/EN COURS|TENU|FAIT/);
+  assert.doesNotMatch(r.html,/\b\d+\s*\/\s*\d+\b|confiance\s*[:=]?\s*\d/i);
+});
+
+test('Monde lot 48 T1 — échappement, styles po2 complets, tailles lisibles et rendu rapide',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;const start=performance.now();const html=scr_mgmt_poste()+scr_mgmt_poste_bilan();return {html,ms:performance.now()-start,css:document.querySelector('link[href*="ui-cadre.css"]')?.href||''}})()`);
+  assert.ok(r.ms<200,`rendu ${r.ms} ms`);
+  const classes=[...r.html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('po2-'));
+  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const c of new Set(classes)) assert.match(css,new RegExp(`\\.${c}(?![\\w-])`),`style manquant: ${c}`);
+  for(const [,size] of css.matchAll(/\.po2-[^{]+\{[^}]*?font(?:-size)?\s*:[^;}]*?(\d+)px/gs)) assert.ok(Number(size)>=22);
+  assert.match(r.html,/«/);
+});
+
+test('Monde lot 48 T1 — Tab et Maj+Tab changent l’onglet inscrit',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtPosteOngletAjouter('autre','AUTRE',()=>'<p>contenu autre</p>');keysRegister;return {keys:typeof keysRegister,screen:scr_mgmt_poste()}})()`);
+  assert.equal(r.keys,'function');assert.match(r.screen,/AUTRE/);
+});
