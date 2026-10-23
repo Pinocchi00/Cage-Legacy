@@ -58,7 +58,7 @@ function mgmtPartieImporter(texte,slot){
   try{
     const cle=mgmtSlotKey(slot), prec=stockageLire(cle);
     if(prec&&mgmtParseAndValidate(prec)) stockageEcrire(mgmtSlotBackupKey(slot),prec);
-    stockageEcrire(cle,JSON.stringify(m));
+    stockageEcrire(cle,mgmtSerialiserCompresse(m));
     return {ok:true,raison:''};
   }catch(e){ return {ok:false,raison:'L’écriture a échoué.'}; }
 }
