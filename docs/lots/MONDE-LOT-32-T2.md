@@ -64,4 +64,12 @@ Remplis `effet` (objet `{attribut: delta}`) dans `MGMT_TRAITS`. Les `delta` sont
 Versions à la main dans `index.html` (`mgmt-traits.js`, `mgmt-corps.js`), `node tools/verif-versions.js origin/main`, tests touchés un par un, commit `Monde lot 32 T2 : l'effet des traits dans la cage, mesuré` (le numéro T2 est obligatoire). Fais un commit **après chaque partie** (1 branchement ; 2 outil de mesure ; 3 mesures et retrait ; 4 garde-fou ; 5 tests adaptés).
 
 ## Compte rendu
+
+### État de reprise (23/10/2026)
+
+- `mgmt-traits.js` était déjà commité avant la reprise (`aa978f7 Monde lot 32 T2 : le catalogue garde ses 32 traits, 8 ont un effet mesuré`), conformément au message demandé.
+- `tools/reports/TRAITS-MESURES.md` : remplacé le retrait par le maintien des 32 traits / 8 effets mesurés et noté que `engine-combat.js` lit le cardio sur `a.cardio` / `b.cardio`, pas sur `c.attrs.cardio`. Commit `2eef411`.
+- `tests/mgmtTraits.test.js` : table restaurée à 32 traits depuis `origin/main`, test de retrait de « série noire » supprimé et assertions de 32/8 ajoutées. Test ciblé échoue sur une contradiction à clarifier : les 32 entrées réelles utilisent **six** valeurs de `famille` (`menton`, `cardio`, `mental`, `sol`, `finition`, `moment`), alors que la demande de reprise exige « quatre familles ». Aucun remaniement de catégories n'est fait sans décision.
+- Non réalisés : mesure de garde-fou et de génération avant/après, tests `mgmtTraitsEffets.test.js`, adaptations de tests d'empreinte, vérifications de versions/lint et commit final.
+
 Fichiers et rôle ; le tableau des mesures (les traits gardés, les traits retirés et pourquoi) ; mesure du garde-fou avant/après (finitions, KO, soumissions, temps de génération) et le facteur retenu ; tests ajoutés et adaptés (citations, chiffres) ; écarts à la fiche ; questions pour Anthony.
