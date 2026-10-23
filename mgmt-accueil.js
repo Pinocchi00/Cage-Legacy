@@ -241,7 +241,16 @@ function scr_mgmt_accueil(){
   const m=G.mgmt, c=mgmtAccueilContenu(m);
   if(MGMT_ACCUEIL.cur>=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)) MGMT_ACCUEIL.cur=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)-1;
   /* ==== [ANCRE: ACCUEIL_TROIS_COLONNES] — Monde lot 12 T2 ==== */
-  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>`;
+  /* ==== [ANCRE: P4_T23B_ACCUEIL_ESPOIRS] — Monde lot 38 T2 ==== */
+  const espoirs=mgmtEspoirs(m), espoirHtml=espoirs.length?mfPanneau(`<h2 class="mf-ac-titre">TES ESPOIRS</h2>`+espoirs.map(id=>{
+    const f=mgmtFighterById(m,id)||mgmtExteriorCombattant(m,id);if(!f)return '';
+    const rang=(mgmtDivisionRanking(m,f.div,'organization')||[]).findIndex(x=>x.id===id)+1;
+    const etat=!mgmtAvailable(m,f)?'blessé au camp':(f.ct?'sous contrat':'libre');
+    const combats=(m.hist||[]).filter(t=>t&&t.a&&t.b&&(t.a.id===id||t.b.id===id));
+    const dernier=combats.length?`dernier combat · soirée ${combats[combats.length-1].c}`:'à booker';
+    return `<button type="button" class="mf-ac-espoir" onclick="CL.mgmtFiche('${escJsAttr(id)}')"><b>${esc(f.name)}</b><span>N°${esc(rang||'—')} des ${esc(mgmtDivisionLabel(f.div).toLocaleLowerCase('fr'))} · ${esc(etat)}</span><span>${esc(dernier)}</span></button>`;
+  }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
+  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>${espoirHtml}`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

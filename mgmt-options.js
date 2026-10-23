@@ -182,7 +182,7 @@ Object.assign(CL,{
   mgmtOpAction(cle){
     const m=G&&G.mgmt; if(!m||MGMT_OP.onglet!=='partie') return;
     if(cle==='sauver'){ saveMgmt(); MGMT_OP.message='Partie sauvegardée.'; render(); }
-    else if(cle==='arrivee') CL.go('mgmt_arrivee');
+    else if(cle==='arrivee') CL.go('mgmt_espoirs_arrivee');
     else if(cle==='exporter'){ saveMgmt(); MGMT_OP.message=mgmtPartieTelecharger(m)?'Partie exportée.':'L’export a échoué.'; render(); }
     else if(cle==='importer') mgmtPartieChoisirFichier();
     else if(cle==='changer'){ saveMgmt(); CL.mgmtParties(); }
