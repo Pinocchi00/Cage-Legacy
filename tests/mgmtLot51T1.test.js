@@ -1,7 +1,10 @@
 "use strict";
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 
 test('Monde lot 51 T1 — la blessure au camp permet de combattre diminué une seule fois',()=>{
   const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(9);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};const html=scr_mgmt_semaine(),ok=mgmtSeChoisir(0,'A'),baisse=mgmtVieFormeBaisse(m,a,m.cycle),again=mgmtSeChoisir(0,'B');return {ok,baisse,again,html};})()`);assert.equal(r.ok,true);assert.equal(r.baisse,-6);assert.equal(r.again,false);assert.match(r.html,/blessure au camp/i);}finally{w.close();}
@@ -25,4 +28,16 @@ test('Monde lot 51 T1 — blessure B et visa B refusent le choix si la carte ne 
 
 test('Monde lot 51 T1 — les options affichent les libellés des trois familles',()=>{
   const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(31);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'visa',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};MGMT_SE_JOUR=0;return scr_mgmt_semaine();})()`);assert.match(r,/ON DÉCALE LE COMBAT/);assert.match(r,/ON LE REMPLACE/);assert.match(r,/se-option/);assert.match(r,/Le visa/);}finally{w.close();}
+});
+
+test('Monde lot 51 T1 — les trois familles rendent deux choix sur une passe Split',()=>{
+  const w=newGameWindow({runMain:true});try{const r=w.eval(`(()=>{setSeed(20261023);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;const choix={};for(const famille of ['poids','blessure_camp','visa']){const f=m.roster.find(x=>m.card.main.concat(m.card.prelims).some(c=>c.a===x.id||c.b===x.id));const adv=m.roster.find(x=>x.id!==f.id);m.semaine.ev=[{f:famille,j:'lundi',a:f.id,b:adv.id,v:0,p:true}];MGMT_SE_JOUR=0;choix[famille]=scr_mgmt_semaine();}return {choix,hasWeek:!!m.semaine};})()`);assert.equal(r.hasWeek,true);for(const famille of ['poids','blessure_camp','visa']){assert.match(r.choix[famille],/class="se-option"/);assert.equal((r.choix[famille].match(/class="se-option"/g)||[]).length,2);assert.match(r.choix[famille],/Choix A|Le combat|diminué|DÉCALE|DÉCLARE|REMPLACE/i);}}finally{w.close();}
+});
+
+test('Monde lot 51 T1 — les classes A/B ont leurs styles, le corps reste lisible et échappé',()=>{
+  const w=newGameWindow();try{const html=w.eval(`(()=>{const m={ville:'<Ville>',roster:[{id:'x',name:'<Combattant>'}],semaine:{n:1,ev:[{f:'blessure_camp',j:'lundi',a:'x',b:'x',v:0,p:true}]},card:{main:[{a:'x',b:'x'}],prelims:[]}};G={mgmt:m};MGMT_SE_JOUR=0;return scr_mgmt_semaine();})()`),css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');for(const c of ['se-ecran','se-frise','se-jour','se-actif','se-colonnes','se-principal','se-panneau','se-cote','se-surtitre','se-titre','se-texte','se-choix','se-option','se-bref','se-combat','se-diminue'])assert.match(css,new RegExp('\\.'+c+'(?:\\W|\\{)'));assert.doesNotMatch(html,/<Combattant>|<Ville>/);assert.match(html,/&lt;Combattant&gt;/);assert.match(css,/\.se-texte[^}]*font-size:\s*(?:22|2[3-9]|[3-9]\d)px/);assert.match(css,/\.se-option[^}]*font-size:\s*(?:22|2[3-9]|[3-9]\d)px/);}finally{w.close();}
+});
+
+test('Monde lot 51 T1 — douze soirées se jouent et la partie reste rechargeable',()=>{
+  const w=newGameWindow({runMain:true});try{w.eval(`setSeed(20261023);G.mgmt=mgmtPasseGenerer('split',{soirees:3});`);const jouees=jouerSoirees(w,12,{recharge:true});assert.equal(jouees,12);const ok=w.eval(`(()=>{const m=G.mgmt;return validateMgmt(m)&&!!JSON.parse(JSON.stringify(m));})()`);assert.equal(ok,true);}finally{w.close();}
 });
