@@ -36,16 +36,16 @@ Fichiers et rôle ; tests (intitulés) ; ce que la réservation faisait avant T1
 - `mgmt-actualites.js` (commit préalable `8d8a7f3`) : prises en compte des combattants extérieurs déjà suivis dans les nouvelles ; `mgmt-ecran-actualites.js` affiche leur organisation et indique une réservation.
 - `mgmt-accueil.js` : injecte des nouvelles suivies parmi quatre lignes au plus, non lues avant les lues ; clic marque la nouvelle lue et ouvre Actualités. Le libellé secondaire utilise le texte de la nouvelle, sans supposer le rôle « espoir ».
 - `mgmt-attention.js`, `mgmt-save.js`, `mgmt-agenda.js`, `mgmt-screens.js`, `mgmt-fiche-cadre.js` : table des réservations facultative/réparée, contrôle de réservation, case sur une fiche suivie et retrait de la réservation au désabonnement. `index.html` porte les versions manuelles ; `package.json` ajoute les commandes ciblées.
-- Tests ajoutés : « Réserves — validation, réparation malformée et sauvegarde ancienne sans clé » ; « Réservation — réservation bloque les propositions, suivi seul ne bloque pas » ; « Suivi — un identifiant disparu est ignoré sans exception ».
-- Tests exécutés verts : `mgmtLot33T3.test.js` (3), `mgmtLot33T1.test.js` (6), `mgmtActualites.test.js` (7). Audit `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` vert.
+- Tests ajoutés : « Réserves — validation, réparation malformée et sauvegarde ancienne sans clé » ; « Réservation — réservation bloque les propositions, suivi seul ne bloque pas » ; « Suivi — un identifiant disparu est ignoré sans exception » ; « Suivi — un combattant d’une organisation du monde apporte ses combats et son organisation » ; « Accueil — les nouvelles suivies sont limitées à quatre, prioritaires et ouvrent la nouvelle lue » ; « Fiche — la réservation suit le suivi et le nom hostile est échappé sur l’Accueil ».
+- Tests exécutés verts, chacun séparément : `mgmtLot33T3.test.js` (6), `mgmtLot33T1.test.js` (6), `mgmtActualites.test.js` (7), `mgmtActualitesEcran.test.js` (8). Audit `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` vert.
 - Avant T1, `mgmtAgendaReserve` bloquait la proposition aux combattants du cercle/suivis ; la compatibilité T1 l'a remplacé par `false`. Ici, le suivi ne réserve toujours pas : seule `m.reserves` nourrit le test de disponibilité.
 
 | Fidélité Accueil | Réalisation |
 | --- | --- |
-| Quatre lignes au plus | Oui, anciennes lignes remplacées par les nouvelles prioritaires au besoin. |
-| Non lues avant les plus récentes | Oui, tri des non lues et des lues par cycle décroissant. |
-| Sous-ligne et section à droite | Texte descriptif et « ACTUALITÉS ». |
-| Clic / clavier | Élément bouton natif ; clic ouvre Actualités et marque la ligne lue. |
+| Quatre lignes au plus et conservation des lignes historiques | Oui, l'accueil complète les emplacements disponibles et laisse la priorité aux nouvelles non lues. |
+| Non lues d'abord, puis plus récentes | Oui, tri en deux groupes par cycle décroissant. |
+| Sous-ligne et section à droite | Texte descriptif d'actualité sous la ligne, « ACTUALITÉS » à droite ; aucune supposition sur le rôle espoir. |
+| Activation | Bouton natif : clic ouvre Actualités sur la nouvelle choisie et l'enregistre comme lue. |
 
-- Écarts : le nouveau fichier de test ne couvre pas encore tous les cas de la fiche (suivi extérieur et libellé d'organisation, navigation d'Accueil intégrale, sécurité du nom fabriqué, essais sur six soirées/graine), et le fichier n'est pas intégré aux longues listes `test` / `test:watch` (commandes `test:lot33t3` dédiées ajoutées). Pas de mesure visuelle à 1920×1080 exécutée. Les commits de chacune des quatre parties n'ont pas tous été produits séparément.
-- Questions pour Anthony : aucune question ouverte identifiée ; les écarts de couverture sont à compléter dans une reprise dédiée.
+- Écarts : pas de validation visuelle instrumentée à 1920×1080. Le test de réservation vérifie la fonction d'éligibilité directement, mais ne rejoue pas six soirées complètes avec la graine demandée. Le test dédié est accessible via `test:lot33t3` et `test:watch:lot33t3`; il n'a pas été ajouté aux longues commandes globales `test` / `test:watch`. Les parties antérieures étaient déjà dans les commits de reprise `8d8a7f3` et `9b2bf8a`; ce complément est un commit dédié, pas une réécriture de leur historique.
+- Questions pour Anthony : aucune question de spécification restante.
