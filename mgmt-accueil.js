@@ -249,7 +249,7 @@ function scr_mgmt_accueil(){
     const combats=(m.hist||[]).filter(t=>t&&t.a&&t.b&&(t.a.id===id||t.b.id===id));
     const dernier=combats.length?`dernier combat · soirée ${combats[combats.length-1].c}`:'à booker';
     return `<button type="button" class="mf-ac-espoir" onclick="CL.mgmtFiche('${escJsAttr(id)}')"><b>${esc(f.name)}</b><span>N°${esc(rang||'—')} des ${esc(mgmtDivisionLabel(f.div).toLocaleLowerCase('fr'))} · ${esc(etat)}</span><span>${esc(dernier)}</span></button>`;
-  }).join('')+`<button type="button" onclick="mgmtArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
+  }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
   const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>${espoirHtml}`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
