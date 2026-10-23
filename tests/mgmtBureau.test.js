@@ -1736,7 +1736,7 @@ test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () =>
   assert.equal(win.eval(`JSON.stringify(G.mgmt.card.main)`),booked, 'le bureau dédié gagne sur la copie embarquée');
   /* Traiter une autre affaire persiste sans écraser la décision. */
   win.eval(`G.mgmt.pile.push({id:'k-r1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtIgnore('k-r1');`);
-  const after = JSON.parse(win.eval(`localStorage.getItem('cage-legacy-mgmt')`));
+  const after = JSON.parse(win.eval(`mgmtLireSauvegarde('cage-legacy-mgmt')`));
   assert.equal(after.pile.find(a=>a.id===`${id}`).decision, 'ignored', 'clôture toujours persistée après reprise');
 });
 
@@ -1753,7 +1753,7 @@ test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
   win.eval(`setSeed(11); mgmtEntrerAvantH4();`);
   win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
   const data = win.eval(`JSON.stringify((()=>{ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));
-    raw.mgmt=JSON.parse(localStorage.getItem('cage-legacy-mgmt'));
+    raw.mgmt=JSON.parse(mgmtLireSauvegarde('cage-legacy-mgmt'));
     raw.mgmt.pile[0].id="x');window.__lot1ReviewMarker=1;//"; raw.mgmt.open=raw.mgmt.pile[0].id;
     return JSON.stringify(raw); })())`);
   win.prompt = () => data;
