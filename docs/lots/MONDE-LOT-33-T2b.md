@@ -43,6 +43,13 @@ Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`,
 - Écarts / reste à faire : la demande d’ajouter les tests à la liste générale `test` et `test:watch` reste incomplète ; les interactions clavier Tab/flèches ne reproduisent pas encore complètement la navigation spécifiée ; vérification DOM/fidélité de la planche incomplète. Le point 1 n’a pas nécessité d’édition car il était déjà présent. `npx eslint .` n’a pas pu être lancé par l’outil ; l’équivalent local `node_modules/.bin/eslint .` a été utilisé.
 - Questions pour Anthony : aucune.
 
+### Correctif de cadrage (reprise p3-suivre)
+
+- `mgmt-ecran-actualites.js` passe maintenant par `mfEcran` (`courant:'actualites'`, plaque Actualités, libellé TES SUIVIS ET TES ESPOIRS, Fight Night et touches de pied) ; contenu `mf-contenu mf-actu` et trois cadres rendus avec `mfPanneau`.
+- `ui-cadre.css` place le contenu dans la scène 1920×1080 selon la planche : colonne gauche x=300, y=128, 380×856 ; fil x=696, y=128, largeur flexible (proportion 1.45) ; détail x=1394, y=128, largeur flexible (proportion 1) ; deux intervalles de 16 px. Les positions des colonnes résultent de la grille flex proportionnelle de la planche (1564 px de large au total).
+- `tests/mgmtActualitesEcran.test.js` vérifie que le rendu Actualités est dans `.mf-ecran` ; tests `mgmtActualitesEcran`, `mgmtCadre` et `mgmtAccueil` verts.
+- Cache : versions de `ui-cadre.css` et `mgmt-ecran-actualites.js` montées à la main dans `index.html`. Aucun changement de données ni du moteur de combat.
+
 ### Compte rendu final (reprise 2)
 
 - Fichiers livrés et rôle : `mgmt-cadre.js` (section Actualités, mapping et point d'attention), `mgmt-ecran-actualites.js` (rendu, actions et clavier), `ui-cadre.css` (présentation `.mgmt-ac-*`), `index.html` (ordre des scripts et versions), `tests/mgmtActualitesEcran.test.js` (huit scénarios), `package.json` (scripts de test dédiés). Aucun changement de sauvegarde ni de moteur de combat.
