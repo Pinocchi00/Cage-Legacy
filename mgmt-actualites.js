@@ -1,7 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P3_T2_ACTUALITES] — Monde lot 33 T2 ==== */
 const MGMT_ACTU_SOURCES=[];
-const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR'};
+const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE'};
 function mgmtActuSourceAjouter(src){
   if(!src||typeof src.type!=='string'||typeof src.lire!=='function'||MGMT_ACTU_SOURCES.some(x=>x.type===src.type)) return false;
   MGMT_ACTU_SOURCES.push(src); return true;
@@ -25,6 +25,11 @@ mgmtActuSourceAjouter({type:'blessure',lire(m,ids,depuis){return (m.facts||[]).f
 mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&['fin_contrat','libere','contrat'].includes(x.k)&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'contrat',c:x.c,id:x.a,donnees:x,sous:x.k}));}});
 /* ==== [ANCRE: P2_T5_SURNOMS_GAGNES_ACTUALITES] — Monde lot 40 T1 ==== */
 mgmtActuSourceAjouter({type:'surnom',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='surnom'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'surnom',c:x.c,id:x.a,donnees:x}));}});
+/* ==== [ANCRE: P10_T1_ACTUALITE_RIVALE] — Monde lot 45 T1 ==== */
+mgmtActuSourceAjouter({type:'rivale',lire(m,ids,depuis){
+  if(!m||!m.guerre||!m.guerre.rival||!ids.length||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<depuis) return [];
+  return [{type:'rivale',c:m.guerre.depuis,id:ids[0],donnees:{org:m.guerre.rival}}];
+}});
 function mgmtActualites(m,opts){
   if(!m||!Array.isArray(m.suivis)||!m.suivis.length)return [];
   opts=opts||{}; const ids=mgmtSuivis(m), cycles=Number.isSafeInteger(opts.cycles)&&opts.cycles>=0?opts.cycles:8, depuis=Math.max(0,(Number.isSafeInteger(m.cycle)?m.cycle:0)-cycles+1), brut=[];
@@ -36,10 +41,11 @@ function mgmtActualites(m,opts){
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}
       else if(x.type==='surnom'){const type=d.t,info=MGMT_SURNOMS_GAGNES[type];if(!info)continue;const medias=Array.isArray(MGMT_MEDIAS)?MGMT_MEDIAS:[],media=medias.length?medias[Math.floor(mgmtIdentiteStream(x.id,'presse-surnom',m)()*medias.length)]:null;banque=info.voix;vars={n:moi.n,surnom:d.nom,raison:info.raison};detail='Donné par '+(media?media.nom:'la presse')+' après '+info.raison+'.';}
       else if(x.type==='espoir'){banque=[''];vars={};detail='';}
+      else if(x.type==='rivale'){const rival=MGMT_ORGANISATIONS.find(o=>o.id===d.org);if(!rival)continue;banque=[''];vars={org:rival.nom};detail='La rivalité se joue soirée après soirée.';}
      else {if(d.k==='contrat')continue;banque=MGMT_ACTU_CONTRATS[d.k];if(!banque)continue;vars={n:moi.n,p:moi.p};detail=d.k==='libere'?'Il peut signer ailleurs.':'C’est le moment de lui parler.';}
     const groupe=x.type+'|'+x.id,phraseBrute=mgmtActuVariante(cle,x.type,'prev:'+String(dernier.get(groupe)||''),banque),phrase=phraseBrute.replace(/\{(\w+)\}/g,(_,key)=>vars[key]===undefined?'':String(vars[key]));dernier.set(groupe,phraseBrute);
      if(x.type==='espoir'){banque=null;}
-      rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:x.type==='surnom'?'La presse l’appelle désormais « '+d.nom+' »':phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
+      rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:x.type==='surnom'?'La presse l’appelle désormais « '+d.nom+' »':x.type==='rivale'?vars.org+' devient ta rivale du moment':phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
   }
   rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
 }
