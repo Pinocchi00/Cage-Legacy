@@ -39,3 +39,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Non réalisé : jeux sur trois années, phrase de presse renouvelée par soirée, validation/réparation du champ de prix, cérémonie et carnet rendus, raccordement à la fin d'année et test CSS/échappement. Aucun test de trois années ou test de sauvegarde lent n'a été lancé.
 - Les modifications d'outillage `.opencode/agents/*` et `opencode.json` sont étrangères. `sw.js` a été restauré depuis `origin/main`, sans être inclus.
 - Livraison partielle, engagée sous `Monde lot 55 T1 (inachevé) : critères de calcul`. Les écarts de la maquette restent complets pour les deux écrans. Questions pour Anthony : aucune question nouvelle ; les informations manquantes dans les relevés restent à préciser si l'on exige ces critères au-delà des données observables.
+
+### Reprise 4
+
+- Le calcul KO/soumission exploite désormais un pronostic public de vainqueur lorsque la trace en contient un (`publicOddsWinner`, `pronosticPublic` ou `pronostic`) et inclut le bonus de surprise ainsi que les deux points du premier round. Les traces actuelles n'exposent pas systématiquement ces champs ; absence de donnée = aucun bonus.
+- Combat de l'année : le repli utilise les champs observables knockdowns, retournement, fin tardive, titre et surprise ; un combat à poids nul n'est pas nommé prix.
+- Vérification effectuée : `node --test tests/mgmtLot55T1.test.js` (3/3 vert), `node tools/_bump.js mgmt-ceremonie.js`, `node tools/verif-versions.js origin/main` (aucun écart).
+- Toujours non réalisé : critères complets du calcul et tests sur trois années jouées, sauvegarde facultative/validation/réparation, tests phrases sans répétition sur 50 soirées, ajout aux suites `test` et `test:watch`, écran cérémonie et déclencheur, carnet et navigation, styles/échappement/CSS, bilan patron/classement intégrés, ESLint. Les trois tests actuels n'établissent pas ces critères.
+- Écarts aux planches : écran cérémonie et carnet toujours absents. Fichiers de cette reprise : `mgmt-ceremonie.js` (pondération partielle), `index.html` (version du script), cette fiche (compte rendu). Les modifications d'outillage déjà présentes restent étrangères et ne sont pas incluses.
+- État livré inachevé ; aucune question de spécification identifiée, mais les données de trace ne fournissent pas toujours les détails nécessaires aux règles de surprise/histoire.
