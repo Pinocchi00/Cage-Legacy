@@ -45,6 +45,6 @@ test('Monde lot 38 T2 — étape 1 reprend la géométrie mesurée de la planche
   const w=newGameWindow();const r=result(w,`CL.mgmtEnter(1);MGMT_ARRIVEE.etape=1;return SCREENS.mgmt_arrivee();`);
   assert.match(r,/\.ma-title\{font:800 72px\/\.85/);
   assert.match(r,/\.ma-line\{padding:14px 0/);
-  assert.match(r,/\.ma-leila\{position:absolute;left:28px;top:100px/);
+  assert.match(r,/\.ma-leila\{position:absolute;left:-810px;top:100px/);
   assert.match(r,/\.ma-leila:before\{content:"LEÏLA"/);
 });
