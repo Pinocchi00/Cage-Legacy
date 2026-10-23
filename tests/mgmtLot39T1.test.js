@@ -10,6 +10,12 @@ test('Monde lot 39 T1 — les textes de trait sont répertoriés et remplissable
   assert.ok(r.traits);assert.ok(r.fam);assert.ok(r.uniq);assert.ok(r.tokens);assert.ok(r.n>=40);
 });
 
+test('Monde lot 39 T1 — chaque famille et chaque variante est valide et distincte',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const fs=new Set(Object.keys(MGMT_COMMENTAIRE));const es=Object.entries(MGMT_COMMENTAIRE_TRAITS).filter(([id])=>id!=='relu');const phrases=es.flatMap(([,x])=>x.phrases);return {fam:es.every(([,x])=>fs.has(x.famille)),n:phrases.length,uniques:new Set(phrases).size===phrases.length,accolades:phrases.every(p=>!p.replace(/\\{[XY]\\}/g,'N').match(/[{}]/))}})())`));
+  assert.equal(r.fam,true);assert.ok(r.n>=40);assert.equal(r.uniques,true);assert.equal(r.accolades,true);
+});
+
 test('Monde lot 39 T1 — les présentations du combat conservent le balisage échappé',()=>{
   const w=newGameWindow({runMain:true});
   const r=w.eval(`(()=>({ok:typeof mgmtPresentationLignes==='function',escape:typeof esc==='function'}))()`);
