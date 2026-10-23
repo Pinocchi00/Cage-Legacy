@@ -36,15 +36,21 @@ function mgmtExtOrgs(m){
 
 /** Le poids d'une catégorie dans l'effectif de l'organisation : fortes ×1,5, faibles ×0,5. */
 function mgmtOrgPoidsCategorie(profil,divId){
-  if(profil.fortes.includes(divId)) return 1.5;
-  if(profil.faibles.includes(divId)) return 0.5;
+  const forte=profil.fortes.includes(divId)||!!(profil.force&&profil.force.categories&&profil.force.categories.includes(divId));
+  const faible=profil.faibles.includes(divId)||!!(profil.manque&&profil.manque.categories&&profil.manque.categories.includes(divId));
+  if(forte&&faible) return profil.force&&profil.force.categories&&profil.force.categories.includes(divId)?1.5:0.5;
+  if(forte) return 1.5;
+  if(faible) return 0.5;
   return 1;
 }
 
 /** Le décalage de niveau d'un combattant selon que sa catégorie est forte (+3) ou faible (−3) chez l'organisation. */
 function mgmtOrgDecalageNiveau(profil,divId){
-  if(profil.fortes.includes(divId)) return 3;
-  if(profil.faibles.includes(divId)) return -3;
+  const forte=profil.fortes.includes(divId)||!!(profil.force&&profil.force.categories&&profil.force.categories.includes(divId));
+  const faible=profil.faibles.includes(divId)||!!(profil.manque&&profil.manque.categories&&profil.manque.categories.includes(divId));
+  if(forte&&faible) return profil.force&&profil.force.categories&&profil.force.categories.includes(divId)?3:-3;
+  if(forte) return 3;
+  if(faible) return -3;
   return 0;
 }
 /* ==== [FIN ANCRE] ==== */
