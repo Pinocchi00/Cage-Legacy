@@ -28,3 +28,15 @@ Versions à la main dans `index.html`, `node tools/verif-versions.js origin/main
 
 ## Compte rendu
 Fichiers et rôle ; tests (intitulés) ; temps mesurés ; ce que la trace garde pour les cartes de juges et le tournant (ou ne garde pas) ; écarts ; questions pour Anthony.
+
+## Compte rendu
+
+- `mgmt-combat-chiffres.js` — calcul du face-à-face et extraction de chiffres du relevé par round ; chargé après `mgmt-stats.js`.
+- `index.html` — ajout du script avec version `lot36t1a`.
+- `tests/mgmtCombatChiffres.test.js` — tests des lignes de carrière, valeurs physiques/bilan, relevé multi-rounds, invariants et pureté.
+- `package.json` — ajout des commandes `test:chiffres` et `test:watch:chiffres`. **Écart** : faute d'avoir pu éditer proprement les longues commandes existantes dans cette session, le nouveau fichier n'est pas inscrit dans les listes agrégées `test` et `test:watch`.
+- Tests ciblés : `timeout 110 node --test tests/mgmtCombatChiffres.test.js` — 5/5 passent ; durée rapportée 28,8 s (initialement une assertion cross-realm a échoué, corrigée).
+- Cartes et tournant : la fonction renvoie `juges:null` et `tournant:null`. Ce calcul n'a pas extrait ces éléments de la trace, malgré la décision de la fiche ; les cas de cartes présents dans la trace restent à implémenter.
+- L'audit `node tools/verif-versions.js origin/main` passe. La tentative `npx eslint .` a été bloquée par la politique d'exécution de l'environnement, donc ESLint n'est pas vérifié.
+- Écarts fonctionnels : mesures de performance et couverture complète des scénarios de la fiche (combat extérieur et cartes de décision/finition) non vérifiées ; le relevé renvoie ses agrégats directement depuis `s.r`.
+- Questions pour Anthony : aucune question de spécification ; les limites ci-dessus demandent une reprise technique.
