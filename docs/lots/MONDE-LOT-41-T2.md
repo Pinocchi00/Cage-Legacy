@@ -12,3 +12,13 @@ Branche : `p6-semaine-ecran` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 5. Fin.** `?v=` à la main (tout `.js` modifié ou ajouté), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 41 T2 : l'ecran de la semaine` (le numéro T2 est obligatoire), compte rendu dans cette fiche (fichiers et rôle, **écarts mesurés avec la maquette**, tests, textes à relire).
 
 Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js` ; **ne modifie pas `sw.js`** ; un test n'est **jamais** assoupli sans citer la décision. Quand TOUT est fait et commité, termine ta réponse par la ligne exacte `TOUT_EST_FINI`.
+
+## Compte rendu
+
+- `mgmt-ecran-semaine-combat.js` : première version de l’écran six jours, rendu depuis `mfEcran`/`mfPanneau`, navigation clavier et choix de base.
+- `mgmt-accueil.js` : lien conditionnel vers l’écran quand `m.semaine.ev` est renseigné.
+- `ui-cadre.css` : styles `.se-*`, avec corps de texte défini à 22 px ou plus.
+- `index.html` : chargement du nouvel écran et versions de cache actualisées.
+- `tests/mgmtLot41T2.test.js` : tests « P6 T2 — l’écran de semaine est enregistré et la frise compte six jours », « P6 T2 — les transitions clavier de jour bouclent sur les six jours » et « P6 T2 — le texte injecté du combattant est échappé ».
+- Vérifications passées : tests ciblés T1/T2 (7/7), ESLint, `node tools/verif-versions.js origin/main` (aucun écart).
+- **Inachevé / écarts à la fiche :** les choix visa et blessure ne sont pas complètement implémentés ; le versement d’amende et le paiement garanti de l’adversaire doivent encore être raccordés aux flux économiques corrects ; le défaut A à la soirée jouée, la validation du champ `r`, les tests de fiabilité 30 soirées, styles et tests de performance ne sont pas faits. La fidélité visuelle n’a pas été mesurée en jeu à 1920×1080 après 2,5 s ; aucun écart mesuré avec la planche ne peut être déclaré. Textes : aucun texte nouveau rédigé (les libellés d’interface restent à relire). Questions pour Anthony : aucune question ouverte repérée dans la fiche.
