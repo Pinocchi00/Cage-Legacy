@@ -73,7 +73,7 @@ function mgmtCombatOuvrir(o){
   C.session=null; C.refuse=false; C.trace=t; C.retour=o.retour||'mgmt_soiree'; C.finRetour=typeof o.finRetour==='function'?o.finRetour:null;
   const res=mgmtReplayFight(t);
   if(!res||!areneVerdictFidele(t,res)){ C.refuse=true; CL.go('mgmt_combat'); return false; }
-  const S=areneConstruire(res,{a:t.a.name,b:t.b.name},{echelle:MGMT_COMBAT_ECHELLE,pause:MGMT_COMBAT_PAUSE});
+  const S=areneConstruire(res,{a:t.a.name,b:t.b.name},{echelle:MGMT_COMBAT_ECHELLE,pause:MGMT_COMBAT_PAUSE,mgmtIds:{A:t.a.id,B:t.b.id},mgmtCycle:m.cycle});
   if(!S){ C.refuse=true; CL.go('mgmt_combat'); return false; }
   areneCoupsConstruire(S);
   const R=MGMT_COMBAT_REGLAGES, salle=o.salle||mgmtCombatSalleDeTrace(m,t);

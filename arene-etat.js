@@ -452,7 +452,8 @@ function areneConstruire(res,noms,opts){
   const pauseS=(opts&&opts.pause>0)?opts.pause:ARENE_PAUSE_S;
   const na=(noms&&typeof noms.a==='string'&&noms.a)?noms.a:'A';
   const nb=(noms&&typeof noms.b==='string'&&noms.b)?noms.b:'B';
-  const S={echelle:ech,roundLen:len,pauseS:pauseS,res:res,noms:{a:{complet:na,court:areneNomCourt(na),coul:ARENE_COUL_A},
+   const S={echelle:ech,roundLen:len,pauseS:pauseS,res:res,mgmtIds:opts&&opts.mgmtIds||null,mgmtCycle:opts&&opts.mgmtCycle,
+      noms:{a:{complet:na,court:areneNomCourt(na),coul:ARENE_COUL_A},
       b:{complet:nb,court:areneNomCourt(nb),coul:ARENE_COUL_B}},
      _etat:{},_etatAff:{},tapis:[]};
   const vainqueur=(res.winner==='A'||res.winner==='B')?res.winner:'D';
