@@ -1716,5 +1716,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-dot,.mgmt-ac-unread{width:30px;height:30px;flex:none;background:#F0B220;color:#0D0B0B;font:800 22px/30px 'Saira Extra Condensed',sans-serif;text-align:center;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .mgmt-ac-follow-group{margin:12px 0 0 12px;font:600 22px/1 'Saira Condensed',sans-serif;letter-spacing:.04em;color:rgba(233,230,225,.74);text-transform:uppercase}
 .mgmt-ac-group{margin:8px 0 0;font-size:22px;letter-spacing:.04em;color:rgba(233,230,225,.74);text-transform:uppercase}
+.mgmt-ac-feedhead>span{font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}
+.mgmt-ac-item{min-height:94px;gap:16px;padding:14px 16px;background:transparent;border-bottom:2px solid rgba(233,230,225,.16)}
+.mgmt-ac-type{width:132px;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.mgmt-ac-item[data-type="RUMEUR"] .mgmt-ac-type{color:rgb(179,42,30)}
+.mgmt-ac-item[data-type="BLESSURE"] .mgmt-ac-type{color:rgb(226,58,43)}
+.mgmt-ac-item[data-type="TRAIT"],.mgmt-ac-item[data-type="SURNOM"],.mgmt-ac-item[data-type="RÉSULTAT"],.mgmt-ac-item[data-type="CONTRAT"],.mgmt-ac-item[data-type="RECORD"]{color:#F0B220}
+.mgmt-ac-item.choisi{background:#E9E6E1;color:#0D0B0B}
 .mgmt-ac-item{align-items:flex-start;gap:16px;padding:14px 16px;background:#1B1818}.mgmt-ac-item.choisi{background:#E9E6E1;color:#0D0B0B}.mgmt-ac-type{width:132px;flex:none;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}.mgmt-ac-item.choisi .mgmt-ac-type{color:#B32A1E}.mgmt-ac-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.mgmt-ac-copy b{font-size:26px;line-height:1.05;font-weight:600}.mgmt-ac-copy small{line-height:1.1}.mgmt-ac-detail{gap:18px}.mgmt-ac-detail h2{font-size:48px;line-height:.9}.mgmt-ac-detail p{font-size:24px;line-height:1.2}.mgmt-ac-stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px}.mgmt-ac-stat b{font:800 30px/1 'Saira Extra Condensed','Arial Narrow',sans-serif}
 /* ==== [FIN ANCRE] ==== */
