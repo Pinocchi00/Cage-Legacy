@@ -162,7 +162,8 @@ function mgmtApplyAgingWear(p,f){
  *  combattant donne exactement le même profil sans avancer la suite des
  *  tirages de la partie. L'identifiant de uniqueFighterId() n'est jamais
  *  conservé. */
-function mgmtCombatProfile(f){
+/* ==== [ANCRE: MONDE34T1B_PROFIL_ATTRIBUTS] — Monde lot 34 T1b ==== */
+function mgmtCombatProfile(f,profil){
   const saved=SEED;
   let p;
   try{
@@ -180,6 +181,9 @@ function mgmtCombatProfile(f){
     // garde exactement les options et l'ordre de tirage de makeFighter.
     if(f.generation===MGMT_IDENTITE_GENERATION) opt.style=mgmtIdentiteStyle(f);
     p=makeFighter(opt);
+    /* ==== [ANCRE: MONDE34T1B_ATTRIBUTS_CREATION] — Monde lot 34 T1b ==== */
+    const org=mgmtOrgParNom(f.org);
+    mgmtOrgAttributsTirage(p,profil===undefined?(org&&org.profil):profil);
   }finally{
     setSeed(saved);
   }

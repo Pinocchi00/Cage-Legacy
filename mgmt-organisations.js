@@ -226,4 +226,48 @@ function mgmtOrgPaysPoids(m){
   return (o&&mgmtOrgIdentite(o.id).paysPoids)||MGMT_PAYS_POIDS.split;
 }
 
+/* ==== [ANCRE: MONDE34T1B_TIRAGES] — Monde lot 34 T1b ==== */
+/** Transformations des tirages de création. Sans manque, mêmes valeurs et aucun tirage supplémentaire.
+ * Les attributs sont générés à la demande par mgmtCombatProfile : aucun attribut n'est persisté. */
+function mgmtOrgAgeTire(u,profil){
+  const id=profil.manque&&profil.manque.id;
+  if(id==='espoirs') return 25+Math.floor(14*Math.pow(u,1.25));
+  if(id==='experimentes') return 20+Math.floor(11*Math.pow(u,1.5));
+  return clamp(22+Math.floor(17*Math.pow(u,1.25))+profil.age,20,40);
+}
+function mgmtOrgPaysDomicile(m){
+  const o=mgmtOrgParNom(mgmtOrgNom(m)), identite=o&&mgmtOrgIdentite(o.id);
+  return identite?COUNTRY_KEYS.find(k=>COUNTRIES[k].name===identite.pays)||null:null;
+}
+function mgmtOrgPaysTirage(m,profil,poids){
+  if(!profil.manque||profil.manque.id!=='a-domicile') return poids;
+  const pays=mgmtOrgPaysDomicile(m);
+  if(!pays) return poids;
+  const entries=Object.entries(poids).map(([k,v])=>[k,k===pays?v*0.1:v]);
+  const total=entries.reduce((n,[,v])=>n+v,0);
+  return Object.fromEntries(entries.map(([k,v])=>[k,100*v/total]));
+}
+function mgmtOrgNiveauTirage(tir,profil){
+  if(tir&&profil.manque&&profil.manque.id==='potentiel-champion'){
+    tir.pot=Math.min(tir.pot,66);
+    tir.niv=Math.min(tir.niv,tir.pot);
+  }
+  return tir;
+}
+function mgmtOrgAttributsTirage(p,profil){
+  const id=profil&&profil.manque&&profil.manque.id;
+  const keys=id==='finisseurs'?['killer','power']:id==='soumissions'?['submission']:[];
+  for(const k of keys) p.attrs[k]=Math.max(1,Math.round(p.attrs[k]*(0.60+0.08*rnd())));
+  if(keys.length) p.overall=overall(p);
+}
+/** Préférence de recrutement : tri pondéré déterministe du vivier existant, jamais un retrait du roster. */
+function mgmtOrgRecrueTirage(m,candidats,profil){
+  const id=profil.manque&&profil.manque.id;
+  if(!['espoirs','experimentes','a-domicile'].includes(id)) return candidats[0]||null;
+  const pays=mgmtOrgPaysDomicile(m);
+  const poids=f=>id==='espoirs'?(f.age<25?0.05:1):id==='experimentes'?(f.age>=32?0.05:f.age<25?2:1):(f.ck===pays?0.1:1);
+  return candidats.map(f=>({f,score:-Math.log(Math.max(1e-9,mgmtIdentiteStream(f.id,'manque-recrue|'+m.cycle,m)()))/poids(f)}))
+    .sort((a,b)=>a.score-b.score)[0]?.f||null;
+}
+
 /* ==== [FIN ANCRE] ==== */

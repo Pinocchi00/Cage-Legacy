@@ -163,9 +163,10 @@ function mgmtNewRoster(m,opts){
      catégorie tirée à poids égaux) est conservé tel quel — mêmes bornes,
      mêmes tirages — pour les sauvegardes et fixtures d'avant H4. */
   const avant=m.effectifs===0;
-  const profil=mgmtOrgProfil(m);
+  /* ==== [ANCRE: MONDE34T1B_PROFIL_CREATION] — Monde lot 34 T1b ==== */
+  const profil=opts&&opts.profil||mgmtOrgProfil(m);
   /* Monde lot 2 T2 : les combattants sont tirés au mélange de pays de l'organisation. */
-  const paysPoids=mgmtOrgPaysPoids(m);
+  const paysPoids=mgmtOrgPaysTirage(m,profil,mgmtOrgPaysPoids(m));
   /* Monde lot 1 T3 : sans option, rien ne change (mêmes tirages, mêmes lignes). */
   const recul=opts&&Number.isSafeInteger(opts.reculAns)&&opts.reculAns>0?opts.reculAns:0;
   const attendus=recul>0&&Number.isSafeInteger(opts.combatsAttendus)?opts.combatsAttendus:0;
@@ -197,7 +198,7 @@ function mgmtNewRoster(m,opts){
     }
     if(!avant){ const c=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan); if(c.genre==='fratrie') bilan.fratries++; else if(c.genre==='partage') bilan.partages++; if(c.prenom) bilan.prenoms++; }
     /* Monde lot 16 — décision d'Anthony du 17/10/2026 : médiane autour de 29-30 ans et des carrières jusqu'à 38 ans (avant : 22 à 35, médiane 28). Un seul tirage, comme RI(22,35) : la suite des tirages ne bouge pas. */
-    const age=avant?RI(22,35):clamp(22+Math.floor(17*Math.pow(rnd(),1.25))+profil.age,20,40);
+    const age=avant?RI(22,35):mgmtOrgAgeTire(rnd(),profil);
     /* Monde lot 1 T3 : à l'ouverture du passé, l'effectif naît reculé de `reculAns` ans (plancher 18) ; `age` reste l'âge du premier jour, `ageDebut` celui de la naissance du passé. */
     const ageDebut=recul>0?Math.max(18,age-recul):age;
     /* Monde lot 1 T4 bis : les combattants qui n'auraient pas encore 18 ans à l'ouverture du passé n'y naissent pas — le prédécesseur les recrutera dans le vivier, en fin de passé. `opts.plan` (sortie) compte les places de chaque catégorie, recrues attendues comprises. */
@@ -210,6 +211,8 @@ function mgmtNewRoster(m,opts){
     const lvAvant=RI(40,80);
     const tir=m.niveaux===1?mgmtNiveauTire(id,age):null;
     if(tir) tir.niv=clamp(tir.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX);
+    /* ==== [ANCRE: MONDE34T1B_NIVEAU_CREATION] — Monde lot 34 T1b ==== */
+    mgmtOrgNiveauTirage(tir,profil);
     /* Monde lot 1 T3 : le bilan d'avant les six ans est celui d'aujourd'hui moins les combats que les six ans apporteront ; le niveau stocké est celui de l'âge reculé. */
     const total=clamp(band,age-18,(age-18)*4);
     const rec=m.niveaux===1?mgmtBilanReel(mgmtNiveauPourBilan(id,tir.niv),total):correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,total);
@@ -220,6 +223,7 @@ function mgmtNewRoster(m,opts){
       rec.W-=dW; rec.L-=dL;
     }
     if(recul>0&&tir){ const t2=mgmtNiveauTire(id,ageDebut); tir.niv=clamp(t2.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX); }
+    mgmtOrgNiveauTirage(tir,profil);
     m.roster.push({
       id,
       name:nm.name,first:nm.first,last:nm.last,ck,generation:MGMT_IDENTITE_GENERATION,

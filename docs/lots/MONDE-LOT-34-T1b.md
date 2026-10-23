@@ -36,3 +36,15 @@ Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`,
 
 ## Compte rendu
 Fichiers et rôle ; tableau des mesures (par manque, trois graines) et réglages retenus ; garde-fous avant/après ; tests ajoutés et adaptés (citations, chiffres) ; manques non mesurables ; écarts ; questions pour Anthony.
+
+### Point 1 — données et biais
+
+- `mgmt-organisations.js` : transformations de tirages d'âge, pays, niveau et attributs ; préférence pondérée des recrues, avec chemin sans manque inchangé.
+- `mgmt-bureau.js` : profil facultatif de création, âge et niveau biaisés avant établissement du bilan ; potentiel plafonné également à l'ouverture du passé.
+- `mgmt-corps.js` : le générateur de profil dérivé applique les biais d'attributs dans son flux à graine sauvegardée/restaurée. Aucun attribut nouveau dans la sauvegarde.
+- `mgmt-predecesseur.js`, `mgmt-recrutement.js` : sélection des recrues dans le vivier existant et plafond du niveau/potentiel des recrues historiques.
+- Test local provisoire `mgmtLot34T1b` : profil sans manque, âge historique et attributs inchangés (1/1) ; `mgmtLot34T1` : 5/5.
+- Aucun changement de `MGMT_SAVE_VERSION`, aucun texte joueur. Versions montées par `_bump.js`, conformément à la règle développeur prioritaire ; sa modification automatique de `sw.js` a été annulée par édition ciblée. Écart à la consigne de versions manuelles.
+- Constat à conserver dans la mesure : le siège de Pure Impact est aux Émirats arabes unis, pays absent des 30 `COUNTRY_KEYS`. Aucun pays de remplacement n'est inventé. Le taux domestique préexistant est donc nul ; son effet différentiel ne pourra pas être attesté avec les données actuelles.
+- Question pour Anthony : faut-il étendre le catalogue de pays et de noms aux Émirats pour rendre le manque `a-domicile` mesurable, ou accepter ce manque déjà structurel ?
+- Vérification du premier point : audit versions vert ; vérification rapide lancée par `@verif`, interrompue à cinq minutes (704 succès, 70 fichiers signalés en échec sans diagnostic détaillé). Les tests ciblés sont verts ; cette vérification globale n'est pas revendiquée verte. L'exécution directe de `npx eslint` a été refusée par les permissions de l'environnement ; le lint exécuté par `check:rapide` n'avait pas rapporté d'erreur.
