@@ -8,9 +8,9 @@ const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb
 
 test('T1 — partie neuve : l’arrivée passe avant la carte ; partie reprise : elle ne repasse pas', () => {
   const w=neuve();
-  const r=res(w,`const premier=G.screen, texte=document.getElementById('app').textContent; CL.mgmtArriveeFin(); const apres=G.screen;
+  const r=res(w,`const premier=G.screen; CL.mgmtArriveeFin(); const apres=G.screen, texte=document.getElementById('app').textContent;
     G.mgmt=null; CL.mgmtEnter(1); return {premier,apres,reprise:G.screen,titre:texte.toUpperCase().includes('CE QUI MANQUE À SPLIT')};`);
-  assert.deepEqual(r,{premier:'mgmt_arrivee',apres:'mgmt_carte',reprise:'mgmt_accueil',titre:true});   /* décision du 14/10/2026 (MONDE-LOT-10-DECISIONS §2) : l’arrivée porte l’héritage, Entrée mène à la Carte ; brief du 22/10, P4 T2/T3 : l’écran d’arrivée neuf montre le manque ; la partie reprise ouvre l’Accueil (lot 7) */
+  assert.deepEqual(r,{premier:'mgmt_arrivee',apres:'mgmt_espoirs_arrivee',reprise:'mgmt_accueil',titre:true});   /* brief du 22/10, P4 T2/T3 : l’écran historique mène à l’écran des espoirs quand aucune soirée ni sélection n’existent ; la partie reprise ouvre l’Accueil (lot 7) */
 });
 
 test('T2 — les moments de Leïla sortent dans l’ordre de la partie, une seule fois chacun', () => {
@@ -52,7 +52,7 @@ test('T2 — les moments déjà vus ne reviennent pas aux parties suivantes', ()
 
 test('T3 — la ligne « prochaine étape » dit la même chose que la première ligne de « Ce qui empêche la soirée »', () => {
   const w=neuve();
-  const r=res(w,`const m=G.mgmt; mgmtReglagesChanger('aide','accompagnement',false); const b=mgmtAgendaBlocages(m)[0], p=mgmtProchaineChose(m); CL.mgmtArriveeFin(); const html=document.getElementById('app').textContent;
+  const r=res(w,`const m=G.mgmt; mgmtReglagesChanger('aide','accompagnement',false); const b=mgmtAgendaBlocages(m)[0], p=mgmtProchaineChose(m); CL.go('mgmt_carte'); const html=document.getElementById('app').textContent;
     return {ok:!!b&&p.texte===b.texte&&p.onclick===b.onclick,visible:html.includes(b.texte)};`);
   assert.equal(r.ok,true); assert.equal(r.visible,true);
 });
