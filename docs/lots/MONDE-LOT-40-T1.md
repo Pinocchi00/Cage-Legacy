@@ -22,3 +22,10 @@ Règles communes : cherche toi-même dans le code ; **additif** : une partie anc
 - Échec/non-résolu : `timeout 110 node --test tests/mgmtReleveReduit.test.js` atteint le délai de 110 secondes sans résultat ; la cause n’est pas déterminée. Le test ajouté ne couvre pas encore 12 soirées, les cinq déclencheurs au complet, l’échappement hostile de la case et l’actualité, la validation/réparation exhaustive, ni le poids neuf. Le nouveau test n’est pas encore inscrit dans les commandes générales `test` et `test:watch`.
 - Déclencheurs non simulables : arrêts sur coupures et KO par coup de pied retourné ne sont pas représentés par les relevés utilisables, donc exclus. Les médias viennent de `MGMT_MEDIAS`. Textes de surnoms et gabarits à relire.
 - Questions/écarts : compléter l’intégration et les tests cités ci-dessus ; confirmer le contenu de la ligne Presse sur l’écran réel. Les arrêts sur coupures et KO par coup de pied retourné sont exclus, faute de relevés représentables. Textes et gabarits à relire. Aucun fichier interdit n’a été ajouté à ce commit ; les changements préexistants dans `.opencode/`, `opencode.json` et `mgmt-bureau.js` restent hors tranche.
+
+### Reprise 5 — contrôles complémentaires
+
+- Relecture de `git log --oneline -12` : l’implémentation du lot est déjà dans `5905d69` ; aucun nouveau code n’a été dupliqué. Branche courante confirmée : `p2-surnoms`.
+- Relancés séparément : `tests/mgmtLot40T1.test.js` (6/6) et `tests/mgmtTrace.test.js` (15/15), verts. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` sont verts.
+- `tests/mgmtReleveReduit.test.js` a expiré à 110 secondes, comme précédemment ; aucune preuve que le plafond de poids soit passé. Les tests exhaustifs de 12 soirées, de la case fiche échappée, et l’inscription du test dédié aux listes globales `test`/`test:watch` restent non réalisés. La version présente ne satisfait donc pas encore toutes les cases de la fiche.
+- Déclencheurs non simulables : arrêts sur coupures et KO par coup de pied retourné restent exclus. Les gabarits et surnoms sont des textes `relu:false`, à relire. Aucun fichier hors tranche n’est ajouté au commit de reprise.
