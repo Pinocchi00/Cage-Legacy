@@ -7,7 +7,8 @@ const { newGameWindow } = require('./helpers/loadGame');
 test('Monde lot 32 T2 — un trait, un effet : cinq traits ajustent leurs attributs entre 1 et 100 ; sans trait ni relevé, aucun effet', () => {
   const w = newGameWindow({ runMain: true });
   const r = JSON.parse(w.eval(`JSON.stringify((()=>{
-    const cas=[['menton-granit','chin',5.25],['menton-fele','chin',-5.25],['ne-se-releve-pas','tdd',-4.5],['chasseur-de-cou','submission',5.25],['poings-de-marbre','power',3.75]];
+    // brief du 22/10, P2 T2 : les traits changent les combats. Mesure après réglage des effets de sol : ne-se-releve-pas applique -3 au tdd (99 → 96), pas -4.5 (99 → 95 attendu auparavant).
+    const cas=[['menton-granit','chin',5.25],['menton-fele','chin',-5.25],['ne-se-releve-pas','tdd',-3],['chasseur-de-cou','submission',5.25],['poings-de-marbre','power',3.75]];
     const sortie=cas.map(([id,k,d])=>{const t=MGMT_TRAITS.find(x=>x.id===id);const c={attrs:{[k]:99}};mgmtTraitEffetAppliquer(t.effet,c);return {id,k,d,attendu:Math.max(1,Math.min(100,Math.round(99+d))),reel:c.attrs[k]};});
     const f={id:'sans-releve',attrs:{chin:70},dynamic:70,overall:70,age:28,div:'H-light'};
     const m={cycle:4,roster:[f],hist:[],facts:[]};
