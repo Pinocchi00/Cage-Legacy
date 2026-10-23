@@ -271,8 +271,11 @@ test('MGMT économie T1 — la soirée calcule revenus, cachets, audience et R e
      victoire part de la recette — l'ancienne égalité R = billetterie +
      droits − cachets est remplacée par R = billetterie + droits − cachets
      − bonus, le vainqueur touchant son cachet une seconde fois. */
-  assert.equal(f.recette, f.ticketing+f.tv-f.purses-f.bonuses,
-    'R = revenus − cachets − bonus de victoire, peut être négative');
+  /* Brief du 22/10, P7 T3 : les primes sortent de la caisse comme les
+     cachets et les bonus, donc de la recette nette ; la formule devient
+     R = revenus − cachets − bonus − primes. */
+  assert.equal(f.recette, f.ticketing+f.tv-f.purses-f.bonuses-f.primes,
+    'R = revenus − cachets − bonus − primes, peut être négative');
   assert.ok(f.audience>=0&&Number.isSafeInteger(f.audience), 'audience entière');
   assert.ok(f.spectacle>=0&&f.spectacle<=1, 'spectacle : part de finitions, 0..1');
   assert.ok(f.attraction>0, 'une carte complète a un attrait positif');
