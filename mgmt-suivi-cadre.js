@@ -6,7 +6,7 @@
    l'agenda (comme les contrats) ; les quatre autres sont neufs. Tout texte injecté passe par esc(). Les titres et
    phrases de presse sont des modèles relu:false (mgmt-suivi.js). ==== */
 
-let MGMT_SU_CL={sexe:'H',div:'',curseur:0,portee:'organization'};
+let MGMT_SU_CL={sexe:'H',div:'',curseur:0,portee:'organization',vue:'liste'};
 let MGMT_SU_CE={sexe:'H',div:'',i:0,ouverte:false};
 let MGMT_SU_CA={i:0};
 let MGMT_SU_PR={filtre:'',i:0};
@@ -80,6 +80,8 @@ function mgmtSuLigneClassement(m,x,selectionne,k){
 
 function scr_mgmt_classements_cadre(){
   const m=G.mgmt, F=MGMT_SU_CL, div=mgmtSuDiv(F); F.div=div;
+  if(F.vue==='meilleurs') return scr_mgmt_meilleurs_cadre();
+  if(F.vue==='records') return scr_mgmt_records_cadre();
   const lignes=mgmtClassementLignes(m,div,F.portee);
   if(F.curseur>=lignes.length) F.curseur=Math.max(0,lignes.length-1);
   if(F.curseur<0) F.curseur=0;
@@ -100,7 +102,8 @@ function scr_mgmt_classements_cadre(){
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${mgmtSuSexeHtml(F,'CL.mgmtSuClSexe')}<div class="mf-eff-trait"></div>${mgmtSuPucesHtml(F,div,'CL.mgmtSuClDiv')}</div>`
     +`<div class="mf-su-cartes">${cartes||'<div class="mf-eff-aucun">Aucun combattant classé.</div>'}</div>${table}</main>`;
   const d=divById(div);
-  return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
+  const onglets=[['liste',F.portee==='world'?'MONDIAL':'SPLIT'],['meilleurs','LES MEILLEURS'],['records','LES RECORDS']].map(([vue,t])=>({t,on:F.vue===vue,onclick:`CL.mgmtSuClVue('${vue}')`}));
+  return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',onglets,libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuClSexe()'},
       {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},
@@ -667,6 +670,8 @@ Object.assign(CL,{
     CL.mgmtSuClDiv(liste[(i+(delta||1)+liste.length)%liste.length]);
   },
   mgmtSuClPortee(){ MGMT_SU_CL.portee=MGMT_SU_CL.portee==='world'?'organization':'world'; MGMT_SU_CL.curseur=0; render(); },
+  mgmtSuClVue(v){ if(['liste','meilleurs','records'].includes(v)){ MGMT_SU_CL.vue=v; MGMT_SU_CL.curseur=0; render(); } },
+  mgmtSuClVueSuivante(){ const a=['liste','meilleurs','records'],i=a.indexOf(MGMT_SU_CL.vue); CL.mgmtSuClVue(a[(i+1)%a.length]); },
   mgmtSuClOuvrir(){
     const l=mgmtClassementLignes(G.mgmt,mgmtSuDiv(MGMT_SU_CL),MGMT_SU_CL.portee)[MGMT_SU_CL.curseur];
     if(l) CL.mgmtFiche(l.id);
