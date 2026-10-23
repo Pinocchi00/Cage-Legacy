@@ -1732,4 +1732,6 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-follow-panel .mgmt-ac-filters{margin-top:30px}.mgmt-ac-follow-group{margin-top:16px}.mgmt-ac-follow-group+.mgmt-ac-follow{margin-top:16px}.mgmt-ac-follow{padding-left:40px}.mgmt-ac-follow-group+.mgmt-ac-follow b{line-height:1}.mgmt-ac-follow b{line-height:1}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_PANNEAU_2] — Monde lot 33 T2b ==== */
 .mgmt-ac-item .mgmt-ac-copy{width:427px;max-width:427px;flex:none}
+/* ==== [ANCRE: MONDE33_T2B_ECARTS_PANNEAU_3] — Monde lot 33 T2b ==== */
+.mgmt-ac-detail-panel .mf-p3{gap:0}.mgmt-ac-detail h2+p{margin:12px 0 8px}.mgmt-ac-stat{height:24px;min-height:24px;padding:0;align-items:center;flex:none}.mgmt-ac-stat+.mgmt-ac-stat{margin-top:28px}
 /* ==== [FIN ANCRE] ==== */
