@@ -18,3 +18,11 @@ test('Monde lot 51 T1 — le catalogue des choix couvre exactement les trois pro
 test('Monde lot 51 T1 — une soirée sans décision applique A à l’ouverture',()=>{
   const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(20261023);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};const before=a.diminue;mgmtAgendaJouer=m=>{m.semaine.ev.forEach((e,i)=>{if(e.p&&!e.r)mgmtSeChoisir(i,'A');});return true;};mgmtAgendaJouer(m);return {r:m.semaine.ev[0].r,flag:a.diminue,cycle:m.cycle,before};})()`);assert.equal(r.r,'A');assert.equal(r.flag,r.cycle);assert.notEqual(r.before,r.flag);}finally{w.close();}
 });
+
+test('Monde lot 51 T1 — blessure B et visa B refusent le choix si la carte ne peut bouger',()=>{
+  const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(9);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.effectifs=2;m.card.main=[{a:a.id,b:b.id,cycle:m.cycle,slot:'main'}];m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true},{f:'visa',j:'mardi',a:a.id,b:b.id,v:0,p:true}]};return {injury:mgmtSeChoisir(0,'B'),visa:mgmtSeChoisir(1,'B'),decisions:m.semaine.ev.map(e=>e.r||null),fight:m.card.main.length};})()`);assert.equal(JSON.stringify(r),JSON.stringify({injury:false,visa:false,decisions:[null,null],fight:1}));}finally{w.close();}
+});
+
+test('Monde lot 51 T1 — les options affichent les libellés des trois familles',()=>{
+  const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(31);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'visa',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};MGMT_SE_JOUR=0;return scr_mgmt_semaine();})()`);assert.match(r,/ON DÉCALE LE COMBAT/);assert.match(r,/ON LE REMPLACE/);assert.match(r,/se-option/);assert.match(r,/Le visa/);}finally{w.close();}
+});
