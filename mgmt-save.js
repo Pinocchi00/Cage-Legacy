@@ -366,6 +366,10 @@ function validateMgmt(raw){
   if(raw.reserves!==undefined&&(!Array.isArray(raw.reserves)||raw.reserves.length>15||new Set(raw.reserves).size!==raw.reserves.length||raw.reserves.some(id=>!mgmtValidId(id)||id.length>80)))return false;
   for(const k of ['espoirsPropose','espoirs']) if(raw[k]!==undefined&&(!Array.isArray(raw[k])||raw[k].length>(k==='espoirs'?3:12)||new Set(raw[k]).size!==raw[k].length||raw[k].some(id=>typeof id!=='string'||!id||id.length>80)))return false;
   if(raw.espoirs&&raw.espoirsPropose&&raw.espoirs.some(id=>!raw.espoirsPropose.includes(id)))return false;
+  /* ==== [ANCRE: P11_T2_DEFIS_SAUVEGARDE] — Monde lot 46 T1 ==== */
+  /* Facultatif : une partie d'avant le lot n'en porte pas. Quand il est là,
+     seuls des identifiants connus, soixante entrées au plus. */
+  if(raw.defis!==undefined&&!mgmtDefisValide(raw.defis)) return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -672,6 +676,13 @@ function mgmtRepair(m){
    for(const k of ['espoirsPropose','espoirs']) if(Object.prototype.hasOwnProperty.call(m,k)&&(!Array.isArray(m[k])||m[k].length>(k==='espoirs'?3:12)||new Set(m[k]).size!==m[k].length||m[k].some(id=>typeof id!=='string'||!id||id.length>80)))delete m[k];
   if(Array.isArray(m.espoirs)&&Array.isArray(m.espoirsPropose)&&m.espoirs.some(id=>!m.espoirsPropose.includes(id)))delete m.espoirs;
   if(Object.prototype.hasOwnProperty.call(m,'actuLu')&&(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80))) m.actuLu=[];
+  /* ==== [ANCRE: P11_T2_DEFIS_REPARATION] — Monde lot 46 T1 ==== */
+  /* Présent et malformé seulement : les entrées lisibles d'un défi connu
+     restent, le reste tombe, soixante au plus. Absent, il le reste. */
+  if(Object.prototype.hasOwnProperty.call(m,'defis')){
+    const defis=mgmtDefisReparer(m.defis);
+    if(defis===null) delete m.defis; else m.defis=defis;
+  }
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */

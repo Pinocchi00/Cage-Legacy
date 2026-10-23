@@ -712,6 +712,11 @@ function mgmtRunEvent(m){
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
+  /* ==== [ANCRE: P11_T2_DEFIS_FIN_SOIREE] — Monde lot 46 T1 ==== */
+  /* Une seule évaluation par soirée jouée, à la clôture : lit m.hist,
+     m.facts et m.lastEvent.finance, n'ajoute m.defis qu'au premier succès.
+     Un défi réussi ne se perd jamais. */
+  if(typeof mgmtDefisSoiree==='function') mgmtDefisSoiree(m);
   m.card.main=[];
   m.card.prelims=[];
   /* Lot 10 : la soirée jouée entre au fil (presse, ceintures, public). */
