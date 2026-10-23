@@ -5,6 +5,8 @@
   "description": "Outillage qualité pour Cage Legacy — suite de tests (exécute le vrai code du jeu dans un DOM virtuel) et linter (ESLint) pour détecter erreurs JS et incohérences avant mise en ligne.",
   "scripts": {
     "test:watch:actu": "node --test --watch tests/mgmtActualites.test.js",
+    "test:leaders-ecran": "node --test tests/mgmtLeadersEcran.test.js",
+    "test:watch:leaders-ecran": "node --test --watch tests/mgmtLeadersEcran.test.js",
     "test:actu": "node --test tests/mgmtActualites.test.js",
     "test:lot33t1": "node --test tests/mgmtLot33T1.test.js",
     "test:watch:lot33t1": "node --test --watch tests/mgmtLot33T1.test.js",
@@ -25,7 +27,9 @@
     "test:releve2": "node --test tests/mgmtReleveReduit.test.js",
     "test:stats": "node --test tests/mgmtStats.test.js",
     "test:fichestats": "node --test tests/mgmtFicheStats.test.js",
-    "test:leaders": "node --test tests/mgmtLeaders.test.js"
+    "test:leaders": "node --test tests/mgmtLeaders.test.js",
+    "pretest": "node --test tests/mgmtLeadersEcran.test.js",
+    "pretest:watch": "node --test tests/mgmtLeadersEcran.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",
