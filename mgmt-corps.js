@@ -702,9 +702,12 @@ function mgmtRunEvent(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
+  if(m.poste) mgmtPosteSoiree(m);
   delete m.semaine;
   /* Lot 5 H7 : les décisions contraires de la soirée deviennent des faits. */
   mgmtContrariesApresSoiree(m,m.hist.slice(premier));
+  /* ==== [ANCRE: P2_T5_SURNOMS_GAGNES_FIN_SOIREE] — Monde lot 40 T1 ==== */
+  mgmtSurnomsGagnesEvaluer(m);
   /* Monde lot 8 T4a : les événements de coût petit nés de la soirée (N3, N6,
      N7, N10). Après les contraires, avant m.lastEvent et saveMgmt ; la carte
      est encore entière mais on lit m.hist.slice(premier), jamais m.card

@@ -374,8 +374,8 @@ Object.assign(CL,{
       /* Monde lot 8 T1 : une partie neuve démarre sans marque — tout est « vu » (sinon 57 combattants sur 364 s'allumeraient dès le premier cycle). */
       G.mgmt=(opts&&opts.partie)||mgmtDefault(orgId);   /* Monde lot 1 T3 : une partie au passé déjà joué */
       const chargee=loadMgmt();
-      if(!chargee&&opts&&opts.partie){ saveMgmt(); neuve=true; }
-      else if(!chargee){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); mgmtVisitesInit(G.mgmt); saveMgmt(); neuve=true; }
+      if(!chargee&&opts&&opts.partie){ mgmtPosteInit(G.mgmt); saveMgmt(); neuve=true; }
+      else if(!chargee){ G.mgmt.graine=mgmtGraineNeuve(); G.mgmt.surnomsGagnes=true; mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); mgmtVisitesInit(G.mgmt); mgmtPosteInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);

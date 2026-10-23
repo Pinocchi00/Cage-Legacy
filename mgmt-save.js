@@ -341,9 +341,12 @@ function mgmtDuoValide(d,raw){
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
+  if(raw.surnomsGagnes!==undefined&&typeof raw.surnomsGagnes!=='boolean') return false;
+  if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
   if(raw.semaine!==undefined&&!mgmtSemaineValide(raw.semaine)) return false;
+  if(raw.recruteur!==undefined&&!mgmtRecruteurValide(raw.recruteur)) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
   if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
@@ -462,6 +465,7 @@ function validateMgmt(raw){
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
   /* Retours du 09/10/2026 : la graine de la partie (facultative : une partie d'avant n'en a pas). */
   if(raw.graine!==undefined&&(typeof raw.graine!=='string'||!/^[0-9a-z]{1,16}$/.test(raw.graine))) return false;
+  if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
   return true;
 }
 
@@ -658,6 +662,14 @@ function mgmtMigrate(raw){
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
+  if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
+  if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
+  if(Object.prototype.hasOwnProperty.call(m,'surnoms')){
+    const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
+    if(surnoms===undefined) delete m.surnoms;
+    else m.surnoms=surnoms;
+  }
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
