@@ -31,3 +31,10 @@ const MGMT_SEMAINE_FAMILLES=Object.freeze([
   tension_coin:['Une tension dans le coin de {nom} complique les échanges avec l’équipe.','Le coin de {nom} doit clarifier les rôles avant le combat.','Un désaccord persiste dans le coin de {nom} à l’approche de samedi.'],
   equipement:['Les gants de {nom} doivent être vérifiés avant la pesée.','Un ajustement de tenue est demandé à {nom} avant son entrée.','L’équipe remplace un équipement de {nom} avant la soirée.']
 }[id]||[])),relu:false})));
+/* ==== [ANCRE: MONDE_51_T1_CHOIX_DATA] — Monde lot 51 T1 ====
+   Les libellés de décision restent distincts par sujet et en attente de relecture. ==== */
+const MGMT_SEMAINE_CHOIX=Object.freeze({
+  poids:Object.freeze({A:Object.freeze({titre:'LE COMBAT A LIEU',texte:'La pesée confirme un poids intermédiaire ; une part de la bourse revient à l’adversaire.',relu:false}),B:Object.freeze({titre:'ANNULER LE COMBAT',texte:'Le poids manqué entraîne un forfait ; l’adversaire reste payé et la carte perd ce duel.',relu:false})}),
+  blessure_camp:Object.freeze({A:Object.freeze({titre:'IL COMBAT DIMINUÉ',texte:'La blessure au camp réduit légèrement sa forme pour ce combat.',relu:false}),B:Object.freeze({titre:'IL DÉCLARE FORFAIT',texte:'La blessure au camp met fin à sa participation ; Leïla reprend la place libérée.',relu:false})}),
+  visa:Object.freeze({A:Object.freeze({titre:'ON DÉCALE LE COMBAT',texte:'Le visa empêche le déplacement ; le combat quitte la carte et revient comme demande.',relu:false}),B:Object.freeze({titre:'ON LE REMPLACE',texte:'Le visa bloque sa venue ; le forfait libère la place pour un autre combat.',relu:false})})
+});

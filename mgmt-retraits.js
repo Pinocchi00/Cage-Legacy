@@ -50,8 +50,8 @@ function mgmtRetraitsAvantSoiree(m){
   if((m.facts||[]).some(x=>x&&x.k==='retrait'&&x.c===m.cycle)) return null;
   /* ==== [ANCRE: P6_T2_RETRAIT_POIDS_CHOIX] — Monde lot 41 T2 ====
      Une annulation choisie avant la soirée utilise le flux de retrait existant. ==== */
-  const poids=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.find(e=>e&&e.p&&e.f==='poids'&&e.r==='B');
-  if(poids){
+   const poids=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.find(e=>e&&e.p&&['poids','blessure_camp','visa'].includes(e.f)&&e.r==='B');
+   if(poids){
     for(const slot of ['main','prelims']){
       const fight=m.card[slot].find(x=>x.a===poids.a||x.b===poids.a);
       if(!fight) continue;
