@@ -118,6 +118,8 @@ test('Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis 
    assert.ok(ajoute.k === 'booked' && ajoute.bulk === true && posesIds.has(ajoute.a), 'le seul fait ajouté est la pose en bloc des préliminaires');
    assert.deepEqual(apresReprise.roster.filter(f => !posesIds.has(f.id)), avantReprise.roster.filter(f => !posesIds.has(f.id)), 'seuls les combattants posés changent');
    delete avantReprise.card.prelims; delete apresReprise.card.prelims; delete avantReprise.roster; delete apresReprise.roster;
+  /* Décision du 23/10/2026 (brief du 22/10, P6 T1 : les événements de la semaine) : poser la prochaine date tire aussi `m.semaine` (clé facultative, déterministe) ; elle est admise en plus. */
+  delete avantReprise.semaine; delete apresReprise.semaine;
    assert.deepEqual(apresReprise, avantReprise, 'seuls lastEvent.vu et la prochaine date sont admis après reprise');
   assert.equal(win.eval('SEED'), seed);
   const traces = lire(win, 'return mgmtSoireeProgramme(G.mgmt).map(p=>p.trace);');
