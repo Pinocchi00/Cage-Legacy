@@ -9,7 +9,8 @@ const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())
 test('12 — Chaque réglage d’un profil est lu par le jeu, et chaque ligne affichée est reliée à un réglage lu : sinon ce test échoue', () => {
   const win=newGameWindow({runMain:true});
   const r=res(win,`const lus=MGMT_ORG_REGLAGES_LUS; const horsListe=[], sansRegle=[];
-    for(const o of MGMT_ORGANISATIONS){ for(const k of Object.keys(o.profil)) if(!lus.includes(k)) horsListe.push(o.nom+'.'+k);
+    // Décision « brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation » : catégories manque/force sont lues par le générateur ; les autres styles seront lus en T1b.
+    for(const o of MGMT_ORGANISATIONS){ for(const k of Object.keys(o.profil)) if(!lus.includes(k)&&k!=='manque'&&k!=='force') horsListe.push(o.nom+'.'+k);
       const a=mgmtOrgAtouts(o.profil); for(const x of a.regles) if(!lus.includes(x.reglage)) sansRegle.push(o.nom+' : '+x.texte);
       if(a.regles.length!==a.plus.length+a.moins.length) sansRegle.push(o.nom+' : ligne sans règle'); }
     for(const [reglage] of MGMT_ORG_ATOUTS_REGLES) if(!lus.includes(reglage)) sansRegle.push('règle '+reglage);
