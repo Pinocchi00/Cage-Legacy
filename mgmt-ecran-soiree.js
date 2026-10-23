@@ -56,9 +56,12 @@ function scr_mgmt_soiree(){
     const w=x.winner==='D'?'Nul':(x.winner==='A'?na:nb);
     const fam=MGMT_FAMILY_LABELS[x.family]||x.family;
      const vu=i<MGMT_SOIREE.index;
-     return `<div class="opp mgmt-fight" style="cursor:default">`
-       +`<span class="opp-nm">${esc(na)} contre ${esc(nb)}</span>`
-       +(vu?`<div class="mgmt-meta">${esc(w)} · ${esc(fam)} · Round ${esc(x.round)}</div>${mgmtSoireeResume(m,i)}`:'')
+      return `<div class="opp mgmt-fight" style="cursor:default">`
+        +`<span class="opp-nm">${esc(na)} contre ${esc(nb)}</span>`
+        +`<div aria-label="Vue du combat ${i+1}" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">`
+        +[['complet','En entier'],['forts','Temps forts'],['resultat','Résultat seul']].map(([v,label])=>`<button type="button" aria-pressed="${mgmtVueDuCombat(m,i)===v?'true':'false'}" onclick="mgmtVueCombatChoisir(${i},'${v}')" style="font-size:22px;min-height:40px">${label}</button>`).join('')
+        +`</div>`
+        +(vu?`<div class="mgmt-meta">${esc(w)} · ${esc(fam)} · Round ${esc(x.round)}</div>${mgmtSoireeResume(m,i)}`:'')
        +`</div>`;
    }).join('');
    const total=m.lastEvent.fights.length, index=MGMT_SOIREE.index;
