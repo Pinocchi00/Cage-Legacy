@@ -75,9 +75,10 @@ function mgmtPresentationFaceAFaceHtml(m,vue,a,b){
   const f=mgmtFaceAFace(m,vue.ids[0],vue.ids[1]);
   const labels={taille:'Taille',allonge:'Allonge',sigParMin:'Coups significatifs donnés par minute',precision:'Précision',encaisseParMin:'Encaissés par minute',defense:'Défense debout',ameneesPar15:'Amenées par 15 minutes',defenseAmenee:'Défense d’amenée',controlePar15:'Contrôle par 15 minutes'};
   const val=(id,x)=>{if(x==null)return '—';if(id==='taille'||id==='allonge')return (x/100).toFixed(2).replace('.',',')+' m';if(id==='precision'||id==='defense'||id==='defenseAmenee')return Math.round(x*100)+'\u00a0%';if(id==='controlePar15')return Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');if(id==='sigParMin'||id==='encaisseParMin')return Number(x).toFixed(2).replace('.',',');if(id==='ameneesPar15')return Number(x).toFixed(1).replace('.',',');return String(x);};
-  const lignes=f.lignes.map(l=>{const max=Math.max(l.a||0,l.b||0,1), pct=x=>x==null||l.a==null||l.b==null?0:Math.max(3,Math.min(100,Math.abs(x)/max*100));const color=(side)=>l.meilleur==null||l.a==null||l.b==null||l.a===l.b?'#E9E6E1':l.meilleur===side?'#E9E6E1':'rgba(233,230,225,.74)';
+  const visibles=f.lignes.filter(l=>!(['taille','allonge'].includes(l.id)&&l.a==null&&l.b==null));
+  const lignes=visibles.map(l=>{const max=Math.max(l.a||0,l.b||0,1), pct=x=>x==null||l.a==null||l.b==null?0:Math.max(3,Math.min(100,Math.abs(x)/max*100));const color=(side)=>l.meilleur==null||l.a==null||l.b==null||l.a===l.b?'#E9E6E1':l.meilleur===side?'#E9E6E1':'rgba(233,230,225,.74)';
     return `<div class="mf-cc-ligne"><b style="color:${color('a')}">${esc(val(l.id,l.a))}</b><span class="mf-cc-bar"><i style="width:${pct(l.a)}%;background:${color('a')}"></i></span><span class="mf-cc-label">${esc(labels[l.id]||l.id)}</span><span class="mf-cc-bar"><i style="width:${pct(l.b)}%;background:${color('b')}"></i></span><b style="color:${color('b')}">${esc(val(l.id,l.b))}</b></div>`;}).join('');
-  return `<section class="mf-cc-panneau">${lignes}</section>${f.a.documentes<3||f.b.documentes<3?'<p class="mf-cc-peu">Peu de combats documentés : ces chiffres bougent encore.</p>':''}`;
+   return `<section class="mf-cc-panneau" style="--mf-cc-lignes:${visibles.length}">${lignes}</section>${f.a.documentes<3||f.b.documentes<3?'<p class="mf-cc-peu">Peu de combats documentés : ces chiffres bougent encore.</p>':''}`;
 }
 /** Ouvre le nom choisi dans une présentation enfant ; fiche existante si T2 retourne null. */
 function mgmtPresentationNomOuvrir(){

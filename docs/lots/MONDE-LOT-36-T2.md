@@ -96,3 +96,12 @@ Un commit après chaque point (A : vue et libellés ; A : style planche ; B : bl
 - Vérifications : `node --test tests/mgmtCombatChiffresEcrans.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
 - Revoir : branchement reste possible dans `CL.mgmtSuReRevoir` ; Lendemain : `mgmt-ecran-lendemain.js`, au détail d’un combat récent. Aucun changement dans ces écrans.
 - Écarts/questions : aucun.
+
+### Compte rendu — disponibilité taille et allonge (23/10/2026)
+
+- `mgmt-presentation-ecrans.js` : omission de Taille/Allonge quand les deux côtés sont inconnus ; lignes conservées dès qu’un côté est renseigné.
+- `ui-cadre.css` : hauteur du panneau calculée avec 48 px de marges et 33 px par ligne (`279px` pour sept lignes, `345px` pour neuf).
+- `tests/mgmtCombatChiffresEcrans.test.js` : test « brief du 22/10, P1 T5 — taille et allonge absentes si inconnues, visibles si connues » ; les assertions de rendu existantes tiennent compte des lignes effectivement connues.
+- `index.html` : cache monté à `monde36t2c` pour le JS et le CSS modifiés.
+- Tests ciblés : `timeout 110 node --test tests/mgmtCombatChiffresEcrans.test.js` (5/5) et `node --test tests/mgmtCombatChiffres.test.js` (5/5). `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` vert.
+- Les combattants du management n’ont pas de taille/allonge/garde (question pour Anthony : les tirer de la graine du combattant ?).

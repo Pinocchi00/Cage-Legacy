@@ -1211,7 +1211,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-tac .mf-pr-sous{overflow-wrap:anywhere}
 .mf-pr-foot{margin-top:auto;padding-top:10px;font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
 /* ==== [ANCRE: MONDE_T5_STYLE_CHIFFRES] — Monde lot 36 T2 ==== */
-.mf-pr-chiffres .mf-cc-panneau{box-sizing:border-box;position:absolute;left:0;top:166px;width:100%;height:345px;padding:15px 25px;background:#121010;display:flex;flex-direction:column;justify-content:flex-start;gap:0}
+.mf-pr-chiffres .mf-cc-panneau{box-sizing:border-box;position:absolute;left:0;top:166px;width:100%;height:calc(48px + var(--mf-cc-lignes, 9) * 33px);padding:15px 25px;background:#121010;display:flex;flex-direction:column;justify-content:flex-start;gap:0}
 .mf-cc-ligne{display:grid;grid-template-columns:120px 1fr 380px 1fr 120px;align-items:center;gap:16px;height:33px;flex:none}
 .mf-cc-ligne>b{font:800 34px/1 var(--mf-titre);text-align:right;white-space:nowrap}
 .mf-cc-ligne>b:last-child{text-align:right}
