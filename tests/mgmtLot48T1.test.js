@@ -72,3 +72,11 @@ test('Monde lot 48 T1 — la confiance se lit dans le bon sens : 4 est « Il est
   assert.equal(r.hors,'Il est ravi');
   assert.equal(r.absent,'Il attend de voir');
 });
+
+/* Constat du 23/10/2026 (CI de la PR « Ton poste ») : mgmtManque appelait `.includes` sur le Set rendu par mgmtChampionIds : la création d'une partie plantait pour les organisations dont le manque compte les champions (mgmtPosteInit appelle mgmtManque). */
+test('Monde lot 48 T1 — mgmtManque et mgmtPosteInit fonctionnent pour les huit organisations',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const out=[];for(const o of MGMT_ORGANISATIONS){setSeed(5);const m=mgmtDefault(o.id);mgmtNewRoster(m);try{const man=mgmtManque(m);mgmtPosteInit(m);out.push([o.id,!!man,!!m.poste]);}catch(e){out.push([o.id,'ERREUR '+e.message]);}}return out;})())`));
+  assert.equal(r.length,8);
+  for(const x of r) assert.equal(x[2],true,x[0]+' : '+x[1]);
+});
