@@ -50,3 +50,14 @@ Le cardio (`diesel`, `s-eteint`) ne change pas le rapport des coups significatif
 `node tools/mesure-finitions-jeu.js 40 20261008,777,4242` : 1 080 combats ; KO/TKO 32 % ; soumissions 18,3 % ; arrêts médicaux 3,9 % ; décisions 45,5 % ; nuls 0,3 % ; finitions en tout 54,3 % ; combats en 5 rounds 25,6 %. Les trois mesures de finitions/KO/soumissions restent dans leurs bandes respectives (45–60 %, 25–36 %, 12–22 %) ; facteur conservé : 1.
 
 `mgmtPasseGenerer('split',{soirees:62})` (graine 20261008) : 96 664 ms, contre 52 911 ms avant (+82,9 %). Le seuil de +25 % est dépassé. La mesure de runtime ne dépend pas de l'amplitude des deltas; un facteur d'effet inférieur n'est donc pas une correction démontrée de ce dépassement. La mesure est consignée comme hors bande, sans élargir les tolérances.
+
+### Mesures comparables de reprise — étape A (23/10/2026)
+
+Outil `node tools/mesure-generation.js 62 [--sans-traits]`, même processus de jeu via `newGameWindow({runMain:true})`, graine 20261008, variantes alternées sous charge ambiante :
+
+| Essai | Avec traits | Sans traits |
+|---|---:|---:|
+| 1 | 67 144 ms | 41 868 ms |
+| 2 | 55 598 ms | 65 522 ms |
+
+La forte inversion entre répétitions confirme que la machine est chargée de façon variable ; les quatre chiffres sont conservés et ne permettent pas à eux seuls de valider le seuil. Le profil de code confirme qu'à chaque ajout à `m.hist`, `mgmtStatsIndex` invalide son cache par longueur et reconstruit l'index complet ; `mgmtTraitsCombats` appelle ce chemin pour chaque évaluation de traits.
