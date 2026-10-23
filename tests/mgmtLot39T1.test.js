@@ -72,3 +72,44 @@ test('Monde lot 39 T1 — une amenée cite le trait visible de X, avec les plafo
   })())`));
   assert.equal(r.fixture,true);assert.ok(r.count>=1,'au moins une amenée de X cite tombeur');assert.ok(r.count<=4,'quatre phrases au plus dans le combat');
 });
+
+test('Monde lot 39 T1 — le commentaire cite au plus une fois le même porteur par round',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+    const id='fixture-tombeur',original=mgmtTraitsFiche;G.mgmt={};
+    mgmtTraitsFiche=(m,x)=>({vus:x===id?[{id:'tombeur'}]:[]});
+    const segs=[];for(let r=1;r<=5;r++){segs.push({t0:(r-1)*300,r,phase:'debout'});segs.push({t0:(r-1)*300+40,r,phase:'sol',top:'A'});segs.push({t0:(r-1)*300+80,r,phase:'debout'});segs.push({t0:(r-1)*300+120,r,phase:'sol',top:'A'});}
+    const S={finT:1500,vainqueur:'D',methode:'Décision',roundLen:300,echelle:1,noms:{a:{court:'X'},b:{court:'Y'}},res:{stats:{}},segs,tapis:[],mgmtIds:{A:id,B:'sans-trait'},mgmtCycle:1};
+    areneCoupsConstruire(S);mgmtTraitsFiche=original;
+    const phrases=MGMT_COMMENTAIRE_TRAITS.tombeur.phrases.map(p=>p.replace('{X}','X').replace('{Y}','Y'));
+    const hits=S.voix.filter(v=>phrases.includes(v.a));const rounds=hits.map(v=>Math.floor(v.t/300)+1);
+    return {n:hits.length,uniques:new Set(rounds).size===rounds.length};
+  })())`));
+  assert.ok(r.n>0);assert.ok(r.n<=4);assert.equal(r.uniques,true);
+});
+
+test('Monde lot 39 T1 — un trait caché est filtré avant trois combats documentés et visible au troisième',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const id='fixture-cache',original=mgmtTraitsFiche,seen=[];G.mgmt={hist:[]};
+    mgmtTraitsFiche=(m,x)=>({vus:m.hist.length>=3&&x===id?[{id:'tombeur'}]:[]});
+    const build=n=>{G.mgmt.hist=Array.from({length:n},(_,i)=>({i}));const segs=[{t0:0,r:1,phase:'debout'},{t0:40,r:1,phase:'sol',top:'A'}];const S={finT:300,vainqueur:'D',methode:'Décision',roundLen:300,echelle:1,noms:{a:{court:'X'},b:{court:'Y'}},res:{stats:{}},segs,tapis:[],mgmtIds:{A:id,B:'y'},mgmtCycle:1};areneCoupsConstruire(S);const ps=MGMT_COMMENTAIRE_TRAITS.tombeur.phrases.map(p=>p.replace('{X}','X').replace('{Y}','Y'));return S.voix.some(v=>ps.includes(v.a));};
+    const a=build(2),b=build(3);mgmtTraitsFiche=original;return {a,b};})()`);
+  assert.equal(r.a,false);assert.equal(r.b,true);
+});
+
+test('Monde lot 39 T1 — le commentaire de trait ne modifie ni le combat, ni SEED, ni G.mgmt',()=>{
+  const w=newGameWindow({runMain:true});w.eval("setSeed(3901);mgmtPasseGenerer('split',{soirees:2});");
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=G.mgmt,avant=JSON.stringify(m),seed=SEED;
+    const make=withTraits=>{const segs=[];for(let r=1;r<=5;r++)segs.push({t0:(r-1)*300,r,phase:'debout'},{t0:(r-1)*300+40,r,phase:'sol',top:'A'},{t0:(r-1)*300+80,r,phase:'debout'});
+      const S={finT:1500,vainqueur:'A',methode:'Décision',roundLen:300,echelle:1,noms:{a:{court:'X'},b:{court:'Y'}},res:{stats:{}},segs,tapis:[],mgmtIds:withTraits?{A:m.roster[0].id,B:m.roster[1].id}:null,mgmtCycle:m.cycle};areneCoupsConstruire(S);return {result:S.vainqueur,trace:JSON.stringify(S.segs),coups:JSON.stringify(S.coups),voix:S.voix.filter(v=>v.a).map(v=>v.a)};};
+    const a=make(true);SEED=seed;const b=make(false);return {a:a,b:b,seed:SEED===seed,mgmt:JSON.stringify(m)===avant};})())`));
+  assert.equal(r.a.result,r.b.result);assert.equal(r.a.trace,r.b.trace);assert.equal(r.a.coups,r.b.coups);assert.equal(r.seed,true);assert.equal(r.mgmt,true);
+});
+
+test('Monde lot 39 T1 — préparer le commentaire de cinq rounds ajoute moins de 50 ms',()=>{
+  const w=newGameWindow({runMain:true});w.eval("setSeed(3902);mgmtPasseGenerer('split',{soirees:2});");
+  const r=w.eval(`(()=>{const m=G.mgmt,idA=m.roster[0].id,idB=m.roster[1].id,segs=[];for(let r=1;r<=5;r++)segs.push({t0:(r-1)*300,r,phase:'debout'},{t0:(r-1)*300+40,r,phase:'sol',top:'A'},{t0:(r-1)*300+80,r,phase:'debout'});
+    const make=traits=>{const S={finT:1500,vainqueur:'D',methode:'Décision',roundLen:300,echelle:1,noms:{a:{court:'X'},b:{court:'Y'}},res:{stats:{}},segs,tapis:[],mgmtIds:traits?{A:idA,B:idB}:null,mgmtCycle:m.cycle};const t=Date.now();areneCoupsConstruire(S);return Date.now()-t;};
+    const base=make(false),withTraits=make(true);return withTraits-base;})()`);
+  assert.ok(r<50,`surcoût mesuré : ${r} ms`);
+});
