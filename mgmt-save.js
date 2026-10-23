@@ -270,13 +270,15 @@ function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
   /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
   if(x.p!==undefined&&x.p!==true) return false;
+  /* Monde lot 31 T1 : s est optionnelle même si invalide ; mgmtRepair la
+     retire seule sans écarter la trace. */
   /* Duo T1 : `duo` marque un combat de super carte — {b,ca,cb}, facultatif comme `p`. */
   if(x.duo!==undefined){
     const d=x.duo;
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo').sort().join(',');
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -716,7 +718,7 @@ function mgmtRepair(m){
     /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
        des faits de titre, sans couper ni décaler leur combat par erreur. */
     const indices=new Map(),hist=[];
-    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ indices.set(i,hist.length); hist.push(x); } });
+    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
     m.hist=hist;
     m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
     for(const f of m.facts){ if(f.k==='title_fight') f.fight=indices.get(f.fight); }
