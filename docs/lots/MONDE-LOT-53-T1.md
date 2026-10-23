@@ -24,4 +24,13 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Revue/audit : aucun sous-agent disponible. `node tools/verif-versions.js origin/main` passe. ESLint ciblé rapporte que le fichier de test est ignoré par sa configuration, donc pas de lint effectif sur celui-ci. Le test ciblé est vert, mais l'assertion littérale confirme que `mgmtLot53T1` n'est pas intégré dans les longues listes `test` et `test:watch` ; seuls les hooks `pretest` / `pretest:watch` et scripts ciblés l'exécutent. La suite exigée n'est pas complète.
 - Questions pour Anthony : aucune question nouvelle ; le travail reste partiel et ne satisfait pas le critère de fin de la fiche.
 
+### Reprise 6 — audit de l’état commité
+
+- Vérifié avant reprise : HEAD `a165e52` (`Monde lot 53 T1 : l'écran de la soirée`), branche `p7-ecran-soiree`. Aucun changement de code non commité à la reprise ; les modifications présentes dans `.opencode/agents/*` et `opencode.json` sont extérieures à cette tranche et n'ont pas été ajoutées.
+- Contrôles relancés : `node --test tests/mgmtLot53T1.test.js` (3 réussis), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (réussi sans sortie).
+- Limite confirmée lors de la reprise : le lecteur d’arène contient déjà un saut des intervalles hors fenêtres (`MGMT_COMBAT.tempsForts`), mais cette tranche ne livre pas la frise, le fondu entre fenêtres, ni le comportement résultat-seul adapté. Il n'y a donc pas de test prouvant la durée 30–60 s et le caractère passable de chaque fenêtre.
+- La carte de soirée reste le rendu antérieur `mf-*`, pas le portage aux valeurs de `UniSoiree`; le panneau « Le prochain » n'a pas les informations/présentation de la maquette. La fin reste l'écran existant avec les badges ajoutés, pas `UniSoireeFin`.
+- Vérification package : les scripts spécialisés `test:lot53t1` et `test:watch:lot53t1` existent, mais `mgmtLot53T1.test.js` n'est pas inscrit dans les listes complètes `test` et `test:watch`; le test des empreintes de `mgmtPasse.test.js`, le cumul de durée, le contrôle exhaustif des classes et l'échappement de toutes les données du nouvel écran ne sont pas livrés.
+- État de livraison : incomplet. Le commit antérieur porte le message demandé, mais les critères de fin des cases 1, 2, 3 et 5 ne sont pas atteints ; ne pas déclarer `TOUT_EST_FINI`.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
