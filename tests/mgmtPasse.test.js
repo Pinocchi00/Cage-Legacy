@@ -303,7 +303,8 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
   /* Décision du brief du 22/10, P4 T1 : le tableau de ce qui manque à chaque organisation. Les empreintes Split sont recalculées après vérification que seuls roster, bilans, exterieur et leurs champs dérivés évoluent. */
   /* Monde lot 23 (audit 16/10 E3/E170) : les lignes de presse changent (étiquette « Info : » retirée, blague des croissants gardée pour le vainqueur) ; empreintes recalculées, vérifié en retirant ces deux changements : les anciennes valeurs reviennent. */
   /* Combat lots 1 et 2 (décision d'Anthony du 22/10/2026, « si ça améliore concrètement le jeu ») : le moteur et les blessures sont recalibrés (finitions 62 % -> 53 %, blessures graves -29 %) ; les combats simulés changent, empreintes recalculées. */
-  const AVANT = { 20261008: 'ee921986816aa5a8', 20261009: '413a790d63563e36' };
+  /* Brief du 22/10, P2 T2 : les traits changent les combats. Mesure : sur six soirées de prédécesseur la graine 20261009 reste identique (traits neutres, peu de combats documentés) ; la graine 20261008 change (ee921986816aa5a8 -> 8b2e000b5d88db19) parce qu'un trait à effet joue dans un combat. La propriété gardée est le déterminisme. */
+  const AVANT = { 20261008: '8b2e000b5d88db19', 20261009: '413a790d63563e36' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

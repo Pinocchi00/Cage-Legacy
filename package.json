@@ -33,6 +33,8 @@
     "check": "npm run lint && npm run lint:content && npm test",
     "check:rapide": "node tools/check-rapide.js",
     "test:traits": "node --test tests/mgmtTraits.test.js",
+    "test:watch:traits-effets": "node --test --watch tests/mgmtTraitsEffets.test.js",
+    "test:traits-effets": "node --test tests/mgmtTraitsEffets.test.js",
     "test:releve": "node --test tests/mgmtReleve.test.js",
     "test:releve2": "node --test tests/mgmtReleveReduit.test.js",
     "test:stats": "node --test tests/mgmtStats.test.js",

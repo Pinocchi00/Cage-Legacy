@@ -17,8 +17,8 @@ const MGMT_TRAITS_SEUILS=Object.freeze({
   comebackDefaites2:2
 });
 const MGMT_TRAITS=Object.freeze([
-  {id:'menton-granit',famille:'menton',nom:'Menton de granit',public:true,temporaire:false,effet:null,condition:c=>c.k.kdRecus>=3&&c.k.dKO===0&&c.k.n>=5,conserve:c=>c.k.dKO6===0},
-  {id:'menton-fele',famille:'menton',nom:'Menton fêlé',public:false,temporaire:false,effet:null,condition:c=>c.k.dKO6>=2,conserve:c=>c.k.koSansDefaite<4},
+  {id:'menton-granit',famille:'menton',nom:'Menton de granit',public:true,temporaire:false,effet:{chin:5.25,durability:2.25},condition:c=>c.k.kdRecus>=3&&c.k.dKO===0&&c.k.n>=5,conserve:c=>c.k.dKO6===0},
+  {id:'menton-fele',famille:'menton',nom:'Menton fêlé',public:false,temporaire:false,effet:{chin:-4},condition:c=>c.k.dKO6>=2,conserve:c=>c.k.koSansDefaite<4},
   {id:'encaisseur',famille:'menton',nom:'Encaisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.sigEncaisseParMin>=3.5&&c.k.n>=4&&c.k.tauxVictoires>=.45,conserve:c=>c.k.sigEncaisseParMin>=3},
   {id:'fragile-apres-ko',famille:'menton',nom:'Fragile après un KO',public:false,temporaire:true,effet:null,condition:c=>c.k.dernierKOsubi&&c.k.kdRecus>=2&&c.k.dernier.index>=Math.max(0,c.k.n-2),conserve:()=>false},
   {id:'diesel',famille:'cardio',nom:'Diesel',public:true,temporaire:false,effet:null,condition:c=>c.k.victoiresRound3>=3,conserve:c=>c.k.victoiresRound3>=2},
@@ -30,16 +30,16 @@ const MGMT_TRAITS=Object.freeze([
   {id:'grands-soirs',famille:'mental',nom:'Se lève pour les grands soirs',public:false,temporaire:false,effet:null,condition:c=>c.k.principal.n>=3&&c.k.principal.taux>=.67,conserve:c=>c.k.principal.taux>=.60},
   {id:'serie-noire',famille:'mental',nom:'En plein doute',public:true,temporaire:true,effet:null,condition:c=>c.k.serieDefaites>=3,conserve:()=>false},
   {id:'sur-sa-lancee',famille:'mental',nom:'Sur sa lancée',public:true,temporaire:true,effet:null,condition:c=>c.k.serieVictoires>=4,conserve:()=>false},
-  {id:'ne-se-releve-pas',famille:'sol',nom:'Ne se relève pas',public:false,temporaire:false,effet:null,condition:c=>c.k.defaitesControle>=2,conserve:c=>c.k.defaitesControle>=1},
-  {id:'chasseur-de-cou',famille:'sol',nom:'Chasseur de cou',public:true,temporaire:false,effet:null,condition:c=>c.k.vSub>=2,conserve:c=>c.k.vSub>=1},
-  {id:'tombeur',famille:'sol',nom:'Tombeur',public:true,temporaire:false,effet:null,condition:c=>c.k.ameneesPar15>=2.5&&c.k.reussiteAmenee>=.40&&c.k.n>=3,conserve:c=>c.k.ameneesPar15>=2},
+  {id:'ne-se-releve-pas',famille:'sol',nom:'Ne se relève pas',public:false,temporaire:false,effet:{tdd:-3,guardWork:-3},condition:c=>c.k.defaitesControle>=2,conserve:c=>c.k.defaitesControle>=1},
+  {id:'chasseur-de-cou',famille:'sol',nom:'Chasseur de cou',public:true,temporaire:false,effet:{submission:3},condition:c=>c.k.vSub>=2,conserve:c=>c.k.vSub>=1},
+  {id:'tombeur',famille:'sol',nom:'Tombeur',public:true,temporaire:false,effet:{takedown:3},condition:c=>c.k.ameneesPar15>=2.5&&c.k.reussiteAmenee>=.40&&c.k.n>=3,conserve:c=>c.k.ameneesPar15>=2},
   {id:'mur',famille:'sol',nom:'Mur anti-lutte',public:true,temporaire:false,effet:null,condition:c=>c.k.defenseAmenee>=.80&&c.k.ameneesAdverses>=10,conserve:c=>c.k.defenseAmenee>=.75},
   {id:'etouffeur',famille:'sol',nom:'Étouffeur',public:true,temporaire:false,effet:null,condition:c=>c.k.controlePar15>=180&&c.k.n>=3,conserve:c=>c.k.controlePar15>=150},
   {id:'finisseur',famille:'finition',nom:'Finisseur',public:true,temporaire:false,effet:null,condition:c=>c.k.victoires>=3&&c.k.tauxFinition>=.67,conserve:c=>c.k.tauxFinition>=.50},
   {id:'juge-dependant',famille:'finition',nom:'Juge-dépendant',public:true,temporaire:false,effet:null,condition:c=>c.k.n>=4&&c.k.tauxDecision>=.75,conserve:c=>c.k.tauxDecision>=.60},
-  {id:'foudroyant',famille:'finition',nom:'Foudroyant',public:true,temporaire:false,effet:null,condition:c=>c.k.finitionsR1>=2,conserve:c=>c.k.finitionsR1>=1},
-  {id:'poings-de-marbre',famille:'finition',nom:'Poings de marbre',public:true,temporaire:false,effet:null,condition:c=>c.k.vKO>=3,conserve:c=>c.k.vKO>=2},
-  {id:'specialiste-soumission',famille:'finition',nom:'Spécialiste de la soumission',public:true,temporaire:false,effet:null,condition:c=>c.k.vSub>=2&&c.k.partVictoiresSub>=.40,conserve:c=>c.k.partVictoiresSub>=.30},
+  {id:'foudroyant',famille:'finition',nom:'Foudroyant',public:true,temporaire:false,effet:{explosiveness:2.5,killer:1.5},condition:c=>c.k.finitionsR1>=2,conserve:c=>c.k.finitionsR1>=1},
+  {id:'poings-de-marbre',famille:'finition',nom:'Poings de marbre',public:true,temporaire:false,effet:{power:2.5},condition:c=>c.k.vKO>=3,conserve:c=>c.k.vKO>=2},
+  {id:'specialiste-soumission',famille:'finition',nom:'Spécialiste de la soumission',public:true,temporaire:false,effet:{submission:2.5},condition:c=>c.k.vSub>=2&&c.k.partVictoiresSub>=.40,conserve:c=>c.k.partVictoiresSub>=.30},
   {id:'guerrier',famille:'finition',nom:'Guerrier',public:false,temporaire:false,effet:null,condition:c=>c.k.guerres>=1,conserve:c=>c.k.guerres>=1},
   {id:'rouille',famille:'moment',nom:'Rouillé',public:true,temporaire:true,effet:null,condition:c=>c.k.n>=1&&c.k.cyclesDepuisDernier>=39,conserve:()=>false},
   {id:'vieux-briscard',famille:'moment',nom:'Vieux briscard',public:true,temporaire:false,effet:null,condition:c=>c.k.age>=36&&c.k.n>=20,conserve:c=>c.k.age>=34},
@@ -51,14 +51,31 @@ const MGMT_TRAITS=Object.freeze([
   {id:'comeback',famille:'mental',nom:'Revenu de loin',public:true,temporaire:true,effet:null,condition:c=>c.k.serieAvantDerniereDefaites>=2&&c.k.serieVictoires===1,conserve:()=>false}
 ]);
 function mgmtTraitInfo(id){const x=MGMT_TRAITS.find(t=>t.id===id);return x?Object.freeze({...x}):null;}
+/* ==== [ANCRE: P2_T2_APPLIQUER_TRAITS] — Monde lot 32 T2 ==== */
+function mgmtTraitEffetAppliquer(effet,c){
+  if(!effet||!c||!c.attrs)return c;
+  for(const [k,delta] of Object.entries(effet))c.attrs[k]=clamp(Math.round((Number(c.attrs[k])||0)+delta),1,100);
+  if(typeof overall==='function')c.overall=overall(c);
+  return c;
+}
+function mgmtTraitsAppliquer(partie,f,cycle,c){
+  if(!partie||!f||!c||!c.attrs)return c;
+  const ids=mgmtTraitsDe(partie,f.id,cycle);
+  for(const id of ids){
+    const trait=MGMT_TRAITS.find(t=>t.id===id);
+    if(!trait||!trait.effet)continue;
+    mgmtTraitEffetAppliquer(trait.effet,c);
+  }
+  return c;
+}
 /* ==== [ANCRE: P2_T1_TRAITS_DERIVES] — Monde lot 32 T1 ==== */
 /** Les combats documentés d'un combattant, du plus ancien au plus récent, chacun avec son cycle `c` (mgmtStatsCombats rend le plus récent d'abord et garde l'entrée de m.hist dans `t`). */
 function mgmtTraitsCombats(m,id,cycle){
   return mgmtStatsCombats(m,id).slice().reverse().map(x=>Object.assign({},x,{c:x.t&&Number.isSafeInteger(x.t.c)?x.t.c:0})).filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle);
 }
 const MGMT_TRAITS_MEMO=new WeakMap();
-function mgmtTraitsContexte(m,id,cycle){
-  const all=mgmtTraitsCombats(m,id,cycle);
+function mgmtTraitsContexte(m,id,cycle,base){
+  const all=base?base.filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle):mgmtTraitsCombats(m,id,cycle);
   const docs=all.filter(x=>x.pour&&x.contre), n=docs.length, bilan={W:0,L:0,D:0}, wins=[], losses=[];
   let kdRecus=0,kdDonnes=0,vKO=0,vSub=0,vStop=0,dKO=0,dSub=0,dStop=0,vDec=0,dDec=0,
     sigDonne=0,sigPris=0,secondes=0,td=0,tdAtt=0,tdSubis=0,tdAttSubis=0,ctrl=0,
@@ -109,14 +126,14 @@ function mgmtTraitsEtat(m,id,cycle){
   const signature=[Array.isArray(m.hist)?m.hist.length:0,...orgs.map(o=>Array.isArray(o&&o.hist)?o.hist.length:0)].join(',');
   let cache=MGMT_TRAITS_MEMO.get(m);if(!cache||cache.signature!==signature){cache={signature,ids:new Map()};MGMT_TRAITS_MEMO.set(m,cache);}
   const key=`${id}|${Number.isSafeInteger(cycle)?cycle:'*'}`;if(cache.ids.has(key))return cache.ids.get(key).slice();
-  const combats=mgmtTraitsCombats(m,id,cycle);
+  const tous=mgmtTraitsCombats(m,id), combats=tous.filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle);
   let actifs=[];
   for(let i=1;i<=combats.length;i++){
-    const contexte=mgmtTraitsContexte(m,id,combats[i-1].c+1), c={...contexte,k:contexte.k};
+    const contexte=mgmtTraitsContexte(m,id,combats[i-1].c+1,tous), c={...contexte,k:contexte.k};
     actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
     for(const t of MGMT_TRAITS){if(!actifs.includes(t.id)&&t.id!=='debutant'&&t.id!=='routinier'&&t.condition(c))actifs.push(t.id);}
   }
-  const contexte=mgmtTraitsContexte(m,id,cycle), c={...contexte,k:contexte.k};
+  const contexte=mgmtTraitsContexte(m,id,cycle,tous), c={...contexte,k:contexte.k};
   actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
   for(const t of MGMT_TRAITS){if(t.id!=='debutant'&&t.id!=='routinier'&&!actifs.includes(t.id)&&t.condition(c))actifs.push(t.id);}
   if(!actifs.length){const fallback=MGMT_TRAITS.find(t=>t.id==='debutant');if(fallback.condition(c))actifs.push('debutant');else if(contexte.k.bilanCombats>=10)actifs.push('routinier');else actifs.push('debutant');}
