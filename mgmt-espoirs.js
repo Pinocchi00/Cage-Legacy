@@ -35,5 +35,19 @@ function mgmtEstEspoir(m,id){return Array.isArray(m&&m.espoirs)&&m.espoirs.inclu
 function mgmtEspoirs(m){return (Array.isArray(m&&m.espoirs)?m.espoirs:[]).filter(id=>mgmtSuivis(m).includes(id));}
 function mgmtEspoirGarder(m,id){if(!m||!Array.isArray(m.espoirsPropose)||!m.espoirsPropose.includes(id))return false;if(!Array.isArray(m.espoirs))m.espoirs=[];if(m.espoirs.includes(id))return true;if(m.espoirs.length>=3)return false;if(!mgmtSuivis(m).includes(id)&&!mgmtSuivre(m,id))return false;m.espoirs.push(id);return true;}
 function mgmtEspoirRendre(m,id){if(!m||!Array.isArray(m.espoirs))return false;const n=m.espoirs.length;m.espoirs=m.espoirs.filter(x=>x!==id);return n!==m.espoirs.length;}
-function mgmtEspoirRemplacer(m,idRendu){if(!m||!Array.isArray(m.espoirsPropose))return null;mgmtEspoirRendre(m,idRendu);const nouveaux=mgmtEspoirsFabrique(m).find(x=>!m.espoirs.includes(x.id)&&!m.espoirsPropose.includes(x.id));if(!nouveaux)return null;m.espoirsPropose.push(nouveaux.id);while(m.espoirsPropose.length>12){const i=m.espoirsPropose.findIndex(id=>!m.espoirs.includes(id));if(i<0)break;m.espoirsPropose.splice(i,1);}return nouveaux;}
+function mgmtEspoirRemplacer(m,idRendu){
+  if(!m||!Array.isArray(m.espoirsPropose))return null;
+  mgmtEspoirRendre(m,idRendu);
+  const gardes=Array.isArray(m.espoirs)?m.espoirs:[];
+  const candidats=mgmtEspoirsCandidats(m).filter(x=>!gardes.includes(x.id)&&!m.espoirsPropose.includes(x.id)).sort((a,b)=>{
+    const sa=mgmtStatsCarriere(m,a.id),sb=mgmtStatsCarriere(m,b.id);
+    return (sb?sb.victoires:0)-(sa?sa.victoires:0)||a.id.localeCompare(b.id);
+  });
+  if(!candidats.length)return null;
+  const nouveaute=mgmtEspoirsFabrique(m,[candidats[0].id])[0];
+  if(!nouveaute)return null;
+  m.espoirsPropose.push(nouveaute.id);
+  while(m.espoirsPropose.length>12){const i=m.espoirsPropose.findIndex(id=>!m.espoirs.includes(id));if(i<0)break;m.espoirsPropose.splice(i,1);}
+  return nouveaute;
+}
 mgmtActuSourceAjouter({type:'espoir',lire(m,ids,depuis){const keep=mgmtEspoirs(m),out=[];for(const t of m.hist||[])if(t&&Number.isSafeInteger(t.c)&&t.c>=depuis&&t.a&&t.b)for(const id of keep)if(t.a.id===id||t.b.id===id)out.push({type:'espoir',c:t.c,id,donnees:t});return out;}});

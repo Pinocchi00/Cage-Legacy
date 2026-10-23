@@ -39,6 +39,14 @@ test('Monde lot 38 T1 — les clés facultatives ne sont pas ajoutées aux sauve
 test('Monde lot 38 T1 — la source espoir est inscrite au registre',()=>{
  const w=newGameWindow();const r=result(w,`return MGMT_ACTU_SOURCES.some(x=>x.type==='espoir');`);assert.equal(r,true);
 });
+test('Monde lot 38 T1 — validation et réparation des clés espoirs facultatives',()=>{
+ const w=newGameWindow();const r=result(w,`setSeed(20261008);CL.mgmtEnter(1);const m=G.mgmt;const valid=validateMgmt(m);m.espoirsPropose=['ok','ok'];const invalid=validateMgmt(m);mgmtRepair(m);return {valid,invalid,removed:Object.hasOwn(m,'espoirsPropose')};`);
+ assert.equal(r.valid,true);assert.equal(r.invalid,false);assert.equal(r.removed,false);
+});
+test('Monde lot 38 T1 — remplacer un espoir ajoute un nom nouveau',()=>{
+ const w=newGameWindow();const r=result(w,`setSeed(101);CL.mgmtEnter(1);const m=G.mgmt;mgmtEspoirsFixer(m);const ids=m.espoirsPropose.slice(),n=mgmtEspoirRemplacer(m,ids[0]);return {n,ids,now:m.espoirsPropose};`);
+ assert.ok(r.n);assert.ok(!r.ids.includes(r.n.id));assert.ok(r.now.includes(r.n.id));assert.ok(r.now.length<=12);
+});
 test('Monde lot 38 T1 — les fonctions rendent des données et non du HTML',()=>{
  const w=newGameWindow();const r=result(w,`setSeed(20261008);CL.mgmtEnter(1);const m=G.mgmt;const x=mgmtEspoirsProposer(m)[0];return {manque:mgmtManque(m),x};`);
  assert.equal(typeof r.x.id,'string');assert.ok(!JSON.stringify(r).includes('<img'));
