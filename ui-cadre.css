@@ -1800,6 +1800,22 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_GESTES] — Monde lot 33 T2b ==== */
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-actions{margin-top:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:30px;margin-left:26px}.mgmt-ac-actions button{gap:14px}.mgmt-ac-actions button.principale{background:#F0B220}.mgmt-ac-actions button kbd{flex:none}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: POSTE_ECRAN_STYLE] — Monde lot 48 T1 ==== */
+.po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:856px}
+.po2-lien,.po2-action,.po2-tab{font:600 24px 'Saira Condensed','Arial Narrow',sans-serif;color:#E9E6E1;background:#252121;border:2px solid rgba(233,230,225,.38);padding:12px 18px;cursor:pointer}
+.po2-tabs{display:flex;gap:12px;margin:0 0 18px}
+.po2-tab[aria-selected="true"]{color:#0D0B0B;background:#F0B220}
+.po2-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:680px;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif}
+.po2-card,.po2-bilan{box-sizing:border-box;background:#121010;border:2px solid rgba(233,230,225,.38);padding:24px;overflow:auto}
+.po2-card h2,.po2-bilan h1{font:800 44px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0 0 16px}
+.po2-card h3{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:24px 0 8px}
+.po2-card p,.po2-bilan p{font-size:24px;line-height:1.2;margin:12px 0}
+.po2-card strong{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.po2-bilan{width:min(900px,90%);margin:20px auto;font-size:24px}
+.po2-bilan h1{font-size:88px;color:#F0B220}
+.po2-bilan .po2-citation{font-style:italic}
+.po2-action{background:#F0B220;color:#0D0B0B;font:800 34px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
@@ -1822,4 +1838,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .se-heading{margin:0 0 12px}
 .se-bref{padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16)}
 .se-combat{padding:10px 0;border-bottom:1px solid rgba(233,230,225,.16)}
+.se-diminue{font-size:22px;color:#F0B220}
 .se-card{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}

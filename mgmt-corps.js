@@ -733,6 +733,11 @@ function mgmtRunEvent(m){
      (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
   mgmtMondeApresSoiree(m,premier);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
+  /* ==== [ANCRE: P11_T2_DEFIS_FIN_SOIREE] — Monde lot 46 T1 ==== */
+  /* Une seule évaluation par soirée jouée, à la clôture : lit m.hist,
+     m.facts et m.lastEvent.finance, n'ajoute m.defis qu'au premier succès.
+     Un défi réussi ne se perd jamais. */
+  if(typeof mgmtDefisSoiree==='function'){ mgmtDefisSoiree(m); mgmtRangsInvalider(m);   /* l'évaluation lit des classements : le cache de rangs repart propre */ }
   /* ==== [ANCRE: P7_T1_SALLE_PRIMES_CLOTURE] — Monde lot 44 T1 ====
      Les primes se choisissent sur les relevés de cette soirée seulement,
      puis la caisse paie ; E1 se lit après la prime, sur la recette nette.
