@@ -250,8 +250,11 @@ function scr_mgmt_accueil(){
     const dernier=combats.length?`dernier combat · soirée ${combats[combats.length-1].c}`:'à booker';
     return `<button type="button" class="mf-ac-espoir" onclick="CL.mgmtFiche('${escJsAttr(id)}')"><b>${esc(f.name)}</b><span>N°${esc(rang||'—')} des ${esc(mgmtDivisionLabel(f.div).toLocaleLowerCase('fr'))} · ${esc(etat)}</span><span>${esc(dernier)}</span></button>`;
   }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
+   const posteLien=m.poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'';
+   const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
+   const bilanLien=bilanVisible?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:'';
   const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?mfPanneau(`<h2 class="mf-ac-titre">LA SEMAINE DU COMBAT</h2><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button>`,'normal','mf-ac-p') : '';
-  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>${espoirHtml}${semaine}`;
+  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>${espoirHtml}${semaine}${posteLien}${bilanLien}`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

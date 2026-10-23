@@ -375,6 +375,10 @@ function validateMgmt(raw){
   if(raw.reserves!==undefined&&(!Array.isArray(raw.reserves)||raw.reserves.length>15||new Set(raw.reserves).size!==raw.reserves.length||raw.reserves.some(id=>!mgmtValidId(id)||id.length>80)))return false;
   for(const k of ['espoirsPropose','espoirs']) if(raw[k]!==undefined&&(!Array.isArray(raw[k])||raw[k].length>(k==='espoirs'?3:12)||new Set(raw[k]).size!==raw[k].length||raw[k].some(id=>typeof id!=='string'||!id||id.length>80)))return false;
   if(raw.espoirs&&raw.espoirsPropose&&raw.espoirs.some(id=>!raw.espoirsPropose.includes(id)))return false;
+  /* ==== [ANCRE: P11_T2_DEFIS_SAUVEGARDE] — Monde lot 46 T1 ==== */
+  /* Facultatif : une partie d'avant le lot n'en porte pas. Quand il est là,
+     seuls des identifiants connus, soixante entrées au plus. */
+  if(raw.defis!==undefined&&!mgmtDefisValide(raw.defis)) return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -692,6 +696,13 @@ function mgmtRepair(m){
    for(const k of ['espoirsPropose','espoirs']) if(Object.prototype.hasOwnProperty.call(m,k)&&(!Array.isArray(m[k])||m[k].length>(k==='espoirs'?3:12)||new Set(m[k]).size!==m[k].length||m[k].some(id=>typeof id!=='string'||!id||id.length>80)))delete m[k];
   if(Array.isArray(m.espoirs)&&Array.isArray(m.espoirsPropose)&&m.espoirs.some(id=>!m.espoirsPropose.includes(id)))delete m.espoirs;
   if(Object.prototype.hasOwnProperty.call(m,'actuLu')&&(!Array.isArray(m.actuLu)||m.actuLu.length>300||m.actuLu.some(x=>typeof x!=='string'||x.length>80))) m.actuLu=[];
+  /* ==== [ANCRE: P11_T2_DEFIS_REPARATION] — Monde lot 46 T1 ==== */
+  /* Présent et malformé seulement : les entrées lisibles d'un défi connu
+     restent, le reste tombe, soixante au plus. Absent, il le reste. */
+  if(Object.prototype.hasOwnProperty.call(m,'defis')){
+    const defis=mgmtDefisReparer(m.defis);
+    if(defis===null) delete m.defis; else m.defis=defis;
+  }
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
@@ -836,6 +847,8 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
+  if(raw.charAt(0)==='\u0001') raw=mgmtDecompresser(raw);
+  if(raw===null) return null;
   try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); if(mgr&&mgr.orgs&&typeof mgr.orgs==='object'&&!Array.isArray(mgr.orgs)){ for(const id of Object.keys(mgr.orgs)){ if(!mgmtPasseDeployer(mgr.orgs[id])) return null; } }   /* Monde lot 9 T2a : chaque organisation redéploie son archive */
     return mgr&&validateMgmt(mgr)&&mgmtMondeVivantValide(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
@@ -858,6 +871,37 @@ function mgmtSlotValide(n){ return Number.isSafeInteger(n)&&n>=1&&n<=MGMT_SLOTS;
 /** La clé d'un emplacement : l'historique pour le 1, la sienne pour les autres. */
 function mgmtSlotKey(n){ return n===1?MGMT_KEY:MGMT_KEY+'-'+n; }
 function mgmtSlotBackupKey(n){ return mgmtSlotKey(n)+'_backup'; }
+
+/* ==== [ANCRE: SAUVEGARDE_COMPRESSION_LECTURE] — Monde lot 52 T1 ==== */
+function mgmtLireSauvegarde(cle){
+  const valeur=stockageLire(cle);
+  return typeof valeur==='string'&&valeur.charAt(0)==='\u0001'?mgmtDecompresser(valeur):valeur;
+}
+
+/** La dernière valeur que saveMgmt a écrite dans cette session : {cle, valeur}. */
+let mgmtDerniereEcriture={cle:null,valeur:null};
+
+/** Les morceaux de la partie écrite : leur concaténation est une chaîne JSON de la même partie que mgmtSerialiser (le corps d'abord, puis chaque organisation vivante
+ *  à part : ce sont les gros blocs qui ne changent pas d'une sauvegarde à l'autre). Pur. @returns {string[]} */
+function mgmtSerialiserMorceaux(m){
+  const o=mgmtSerialiserCorps(m), parts=[], orgs=m.orgs&&typeof m.orgs==='object';
+  let premier=true;
+  for(const k of Object.keys(o)){
+    if(k==='orgs'&&orgs){   /* à sa place d'origine : le texte rendu est celui de mgmtSerialiser, à l'octet près */
+      parts.push((premier?'{':',')+'"orgs":{'); premier=false;
+      Object.keys(m.orgs).forEach((id,i)=>parts.push((i?',':'')+JSON.stringify(id)+':'+JSON.stringify(mgmtSerialiserCorps(m.orgs[id]))));
+      parts.push('}');
+      continue;
+    }
+    const v=JSON.stringify(o[k]);
+    if(v===undefined) continue;
+    parts.push((premier?'{':',')+JSON.stringify(k)+':'+v); premier=false;
+  }
+  parts.push(premier?'{}':'}');
+  return parts;
+}
+/** La partie telle qu'elle s'écrit sur le disque : compressée, avec les gros blocs inchangés repris du mémo. @returns {string} */
+function mgmtSerialiserCompresse(m){ return mgmtCompresserMorceaux(mgmtSerialiserMorceaux(m)); }
 
 /** Le registre : {dernier:1..3|null, dates:{'1':ms,…}}. Toujours une forme saine. */
 function mgmtRegistre(){
@@ -882,7 +926,7 @@ function mgmtSlotPeek(n){
   if(n===MGMT_SLOT&&typeof G!=='undefined'&&G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
   try{
     for(const key of [mgmtSlotKey(n),mgmtSlotBackupKey(n)]){
-      const m=mgmtParseAndValidate(stockageLire(key));
+      const m=mgmtParseAndValidate(mgmtLireSauvegarde(key));
       if(m) return m;
     }
   }catch(e){}
@@ -925,9 +969,12 @@ function saveMgmt(){
        avant sa sérialisation, jamais seulement dans la copie disque. */
     mgmtExteriorEnsure(G.mgmt);
     const cle=mgmtSlotKey(MGMT_SLOT);
-    const previous=stockageLire(cle);
-    if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    stockageEcrire(cle,mgmtSerialiser(G.mgmt));   /* Monde lot 1 T5 : la part du passé s'écrit en archive compacte */
+     const previous=stockageLire(cle);
+     /* Monde lot 52 T1 : ce que cette session vient d'écrire elle-même, relu à l'identique, n'est pas re-décompressé ni re-validé (124 ms sur une partie complète) : la première sauvegarde de la session valide le disque, les suivantes se fient à la trace de la dernière écriture. */
+     if((mgmtDerniereEcriture.cle===cle&&mgmtDerniereEcriture.valeur===previous)||mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
+     const ecrit=mgmtSerialiserCompresse(G.mgmt);   /* Monde lot 52 T1 : écriture compressée */
+     stockageEcrire(cle,ecrit);
+     mgmtDerniereEcriture={cle,valeur:ecrit};
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
     return stockageSignaler(true);
@@ -939,11 +986,11 @@ function loadMgmt(){
   try{
     const cle=mgmtSlotKey(MGMT_SLOT), secours=mgmtSlotBackupKey(MGMT_SLOT);
     for(const key of [cle,secours]){
-      const candidate=mgmtParseAndValidate(stockageLire(key));
+      const candidate=mgmtParseAndValidate(mgmtLireSauvegarde(key));
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ stockageEcrire(cle,mgmtSerialiser(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,mgmtSerialiserCompresse(G.mgmt)); }catch(e){}
       }
       return true;
     }
@@ -953,8 +1000,8 @@ function loadMgmt(){
 
 function hasMgmt(){
   try{
-    if(mgmtParseAndValidate(stockageLire(mgmtSlotKey(MGMT_SLOT)))) return true;
-    if(mgmtParseAndValidate(stockageLire(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(mgmtLireSauvegarde(mgmtSlotKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(mgmtLireSauvegarde(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
   }catch(e){}
   return false;
 }
