@@ -226,4 +226,45 @@ function mgmtOrgPaysPoids(m){
   return (o&&mgmtOrgIdentite(o.id).paysPoids)||MGMT_PAYS_POIDS.split;
 }
 
+/* ==== [ANCRE: MONDE34T1B_TIRAGES] — Monde lot 34 T1b ==== */
+/** Transformations des tirages de création. Sans manque, mêmes valeurs et aucun tirage supplémentaire.
+ * Les attributs sont générés à la demande par mgmtCombatProfile : aucun attribut n'est persisté. */
+function mgmtOrgAgeTire(u,profil){
+  const id=profil.manque&&profil.manque.id;
+  if(id==='espoirs') return 28+Math.floor(11*Math.pow(u,1.25));
+  /* ==== [ANCRE: MONDE34T1B_COHORTE_JEUNE_COMPACTE] — Monde lot 34 T1b ==== */
+  /* 20–27 plutôt que 20–30 : moins de cohortes déjà adultes à l'ouverture des six ans,
+     sans retirer de combattant ensuite. Mesure 62 soirées : Rim 246 → 226 lignes,
+     180 872 → 170 579 caractères sur disque ; le plan des recrues reste inchangé. */
+  if(id==='experimentes') return 20+Math.floor(14*Math.pow(u,1.3));
+  return clamp(22+Math.floor(17*Math.pow(u,1.25))+profil.age,20,40);
+}
+function mgmtOrgPaysDomicile(m){
+  const o=mgmtOrgParNom(mgmtOrgNom(m)), identite=o&&mgmtOrgIdentite(o.id);
+  return identite?COUNTRY_KEYS.find(k=>COUNTRIES[k].name===identite.pays)||null:null;
+}
+function mgmtOrgNiveauTirage(tir,profil){
+  if(tir&&profil.manque&&profil.manque.id==='potentiel-champion'){
+    tir.pot=Math.min(tir.pot,66);
+    tir.niv=Math.min(tir.niv,tir.pot);
+  }
+  return tir;
+}
+function mgmtOrgAttributsTirage(p,profil){
+  const id=profil&&profil.manque&&profil.manque.id;
+  const keys=id==='finisseurs'?['killer','power']:id==='soumissions'?['submission']:[];
+  for(const k of keys) p.attrs[k]=Math.max(1,Math.round(p.attrs[k]*((id==='finisseurs'?0.55:0.6)+0.08*rnd())));
+  if(keys.length) p.overall=overall(p);
+}
+/** Préférence de recrutement : tri pondéré déterministe du vivier existant, jamais un retrait du roster. */
+function mgmtOrgRecrueTirage(m,candidats,profil,ageMax){
+  const id=profil.manque&&profil.manque.id;
+  /* ==== [ANCRE: MONDE34T1B_DOMICILE_SANS_EFFET] — Monde lot 34 T1b ==== */
+  /* Décision Anthony à la reprise : a-domicile n'a aucun biais, même si le catalogue évolue. */
+  if(!['espoirs','experimentes'].includes(id)) return candidats.find(f=>f.age<=ageMax)||null;
+  const poids=f=>id==='espoirs'?(f.age<25?0.15:1):(f.age>=32?0.3:f.age<25?1.5:1);
+  return candidats.filter(f=>f.age<=ageMax).map(f=>({f,score:-Math.log(Math.max(1e-9,mgmtIdentiteStream(f.id,'manque-recrue|'+m.cycle,m)()))/poids(f)}))
+    .sort((a,b)=>a.score-b.score)[0]?.f||null;
+}
+
 /* ==== [FIN ANCRE] ==== */
