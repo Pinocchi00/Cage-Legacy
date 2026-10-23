@@ -65,3 +65,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - **Non réalisé / tranche encore incomplète** : écran cérémonie pas raccordé à la fin d'année, classement des huit et affichage intégré du bilan patron absents; carnet pas exposé via la navigation secondaire et ses sources champion/primes restent seulement les champs disponibles; pas de validation/réparation `prixAnnee`, pas de persistance annuelle/inscription automatique; critères multi-années, 50 soirées, CSS exhaustif, échappement et sauvegarde non testés. Les tests n'ont pas été ajoutés aux listes `test` et `test:watch`. Les classes `ce3-` ont été stylées mais l'intégralité de la maquette n'est pas reproduite. Aucun audit ESLint ni test réduit lent lancé.
 - Aucune migration de sauvegarde. Les seules modifications de cette reprise sont `mgmt-ceremonie.js` (lecture et écrans partiels), `index.html` (styles et script versionné) et cette fiche. Aucune question de spécification : les travaux restants sont des implémentations.
 - État commité comme inachevé ; ne pas afficher `TOUT_EST_FINI`.
+
+### Reprise 8
+
+- État initial vérifié : branche `p11-ceremonie-carnet`, HEAD `1a822a9`. Les fichiers métier antérieurs sont déjà commités ; les changements `.opencode/agents/*` et `opencode.json` restent étrangers et ne sont pas touchés.
+- Ajout de la validation et réparation facultatives du champ `prixAnnee` dans `mgmt-save.js` : partie sans champ conservée telle quelle; champ invalide réparé en conservant les entrées valides (maximum 30). Version du script montée dans `index.html`.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` vert (3/3); `node tools/verif-versions.js origin/main` vert après bump.
+- La tranche demeure inachevée : les fonctions et écrans partiels existants n'ont pas été complétés lors de cette reprise. Le raccordement cérémonie/fin d'année, classement final, carnet exposé en navigation secondaire, critères de tests multi-années et 50 soirées, styles/maquettes exhaustifs et intégration du test aux scripts généraux restent absents. Pas d'audit ESLint ni test lent de plafond exécuté.
+- Fichiers de cette reprise : `mgmt-save.js` (validation/réparation), `index.html` (version du script), cette fiche (compte rendu). Aucun changement de version de sauvegarde, donc aucune migration.
+- Écart aux maquettes : toujours complet pour les écrans cérémonie et carnet; pas de prétention de conformité. Aucun nouveau point à demander à Anthony.
