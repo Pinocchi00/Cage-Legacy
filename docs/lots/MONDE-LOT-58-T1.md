@@ -14,3 +14,13 @@ Branche : `p9-renvoi-offres` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 7. Fin.** Commit final `Monde lot 58 T1 : le renvoi, les offres et le choc` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- **État : inachevé.** Branche vérifiée : `p9-renvoi-offres`. Le journal ne contenait que le commit de création de la fiche ; aucune implémentation/tests de cette tranche n'étaient déjà livrés.
+- **Fichier ajouté :** `docs/lots/ETUDE-CHANGER-D-ORGANISATION.md`, inventaire initial et plan d'étude T5 fondés sur `mgmt-organisations.js` et `mgmt-organisations-data.js`.
+- **Tests ajoutés :** aucun. Tests ciblés : aucun lancé ; les fonctionnalités des cases 1 à 4 et 6 restent à implémenter et vérifier.
+- **Sauvegarde :** aucune modification effectuée ; version inchangée.
+- **Écarts à la fiche :** renvoi/offres, raisons, choc, écran `UniChoc`, chemin « rester », assertions de sauvegarde et intégration package ne sont pas réalisés. Aucune maquette n'a été portée.
+- **Questions pour Anthony :** aucune nouvelle question de conception soulevée par la lecture. L'étude signale les champs actifs et le traitement des contrats lors d'un changement comme points à inventorier avant T5, sans trancher leur comportement.
+- **État préalable préservé :** les modifications locales de `.opencode/agents/*` et `opencode.json` sont préexistantes et n'ont pas été incluses.
