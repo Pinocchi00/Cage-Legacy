@@ -672,7 +672,7 @@ function mgmtRunEvent(m){
     const roundF=Number.isSafeInteger(res.round)?res.round:cf.rounds;
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
-    m.hist.push({c:m.cycle,slot:cf.slot,position:cf.position,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
+    m.hist.push({c:m.cycle,slot:cf.slot,...(mgmtHorsPasse(m)&&cf.position!==null&&cf.position!==undefined?{position:cf.position}:{}),seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
     /* ==== [ANCRE: P7_T1_SALLE_PRIMES_SOIREE] — Monde lot 44 T1 ====
        L'ambiance se met à jour ENTRE deux combats, une fois le relevé écrit ;
@@ -710,7 +710,8 @@ function mgmtRunEvent(m){
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
   /* ==== [ANCRE: P7_T4_DISCOURS_ENREGISTREMENT] — Monde lot 50 T1 ==== */
-  if(typeof mgmtDiscoursEligibilite==='function'){
+  /* Poids de la sauvegarde (1,9 Mo, sacré) : les six ans de passé de chaque organisation ne reçoivent ni position ni discours, comme pour les primes. */
+  if(typeof mgmtDiscoursEligibilite==='function'&&mgmtHorsPasse(m)){
     const discours=[];
     for(const t of m.hist.slice(premier)){
       const elig=mgmtDiscoursEligibilite(m,t); if(!elig||discours.length>=4)continue;
@@ -751,3 +752,7 @@ function mgmtRunEvent(m){
 }
 
 /* ==== [FIN ANCRE] ==== */
+/** Vrai hors du passé généré d'avance (prédécesseur ou création de partie) : ce qui est nouveau n'écrit rien dans le passé. */
+function mgmtHorsPasse(m){
+  return !(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m&&m.passe&&m.passe.enCours===true);
+}
