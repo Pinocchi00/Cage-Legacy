@@ -74,8 +74,8 @@ function mgmtTraitsCombats(m,id,cycle){
   return mgmtStatsCombats(m,id).slice().reverse().map(x=>Object.assign({},x,{c:x.t&&Number.isSafeInteger(x.t.c)?x.t.c:0})).filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle);
 }
 const MGMT_TRAITS_MEMO=new WeakMap();
-function mgmtTraitsContexte(m,id,cycle){
-  const all=mgmtTraitsCombats(m,id,cycle);
+function mgmtTraitsContexte(m,id,cycle,base){
+  const all=base?base.filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle):mgmtTraitsCombats(m,id,cycle);
   const docs=all.filter(x=>x.pour&&x.contre), n=docs.length, bilan={W:0,L:0,D:0}, wins=[], losses=[];
   let kdRecus=0,kdDonnes=0,vKO=0,vSub=0,vStop=0,dKO=0,dSub=0,dStop=0,vDec=0,dDec=0,
     sigDonne=0,sigPris=0,secondes=0,td=0,tdAtt=0,tdSubis=0,tdAttSubis=0,ctrl=0,
@@ -126,14 +126,14 @@ function mgmtTraitsEtat(m,id,cycle){
   const signature=[Array.isArray(m.hist)?m.hist.length:0,...orgs.map(o=>Array.isArray(o&&o.hist)?o.hist.length:0)].join(',');
   let cache=MGMT_TRAITS_MEMO.get(m);if(!cache||cache.signature!==signature){cache={signature,ids:new Map()};MGMT_TRAITS_MEMO.set(m,cache);}
   const key=`${id}|${Number.isSafeInteger(cycle)?cycle:'*'}`;if(cache.ids.has(key))return cache.ids.get(key).slice();
-  const combats=mgmtTraitsCombats(m,id,cycle);
+  const tous=mgmtTraitsCombats(m,id), combats=tous.filter(x=>!Number.isSafeInteger(cycle)||x.c<cycle);
   let actifs=[];
   for(let i=1;i<=combats.length;i++){
-    const contexte=mgmtTraitsContexte(m,id,combats[i-1].c+1), c={...contexte,k:contexte.k};
+    const contexte=mgmtTraitsContexte(m,id,combats[i-1].c+1,tous), c={...contexte,k:contexte.k};
     actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
     for(const t of MGMT_TRAITS){if(!actifs.includes(t.id)&&t.id!=='debutant'&&t.id!=='routinier'&&t.condition(c))actifs.push(t.id);}
   }
-  const contexte=mgmtTraitsContexte(m,id,cycle), c={...contexte,k:contexte.k};
+  const contexte=mgmtTraitsContexte(m,id,cycle,tous), c={...contexte,k:contexte.k};
   actifs=actifs.filter(idTrait=>{const t=MGMT_TRAITS.find(y=>y.id===idTrait);return t&&t.temporaire?!!t.condition(c):!!(t&&t.conserve(c));});
   for(const t of MGMT_TRAITS){if(t.id!=='debutant'&&t.id!=='routinier'&&!actifs.includes(t.id)&&t.condition(c))actifs.push(t.id);}
   if(!actifs.length){const fallback=MGMT_TRAITS.find(t=>t.id==='debutant');if(fallback.condition(c))actifs.push('debutant');else if(contexte.k.bilanCombats>=10)actifs.push('routinier');else actifs.push('debutant');}
