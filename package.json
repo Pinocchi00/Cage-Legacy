@@ -4,6 +4,8 @@
   "private": true,
   "description": "Outillage qualité pour Cage Legacy — suite de tests (exécute le vrai code du jeu dans un DOM virtuel) et linter (ESLint) pour détecter erreurs JS et incohérences avant mise en ligne.",
   "scripts": {
+    "test:chiffres": "node --test tests/mgmtCombatChiffres.test.js",
+    "test:watch:chiffres": "node --test --watch tests/mgmtCombatChiffres.test.js",
     "test:watch:actu": "node --test --watch tests/mgmtActualites.test.js",
     "test:actu": "node --test tests/mgmtActualites.test.js",
     "test:lot33t1": "node --test tests/mgmtLot33T1.test.js",
