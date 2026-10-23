@@ -72,6 +72,7 @@ function areneCoupsConstruire(S){
   const court=c=>S.noms[c==='A'?'a':'b'].court;
   const autre=c=>c==='A'?'B':'A';
   const coups=[], voixC=[], coinsC=[];
+  const traitsDits=new Set();let traitsCombat=0;
 
   /* --- le choix d'un coup, d'après ce que le combattant a réellement lancé --- */
   const typeDe=(c,phase,filtre)=>{
@@ -142,7 +143,26 @@ function areneCoupsConstruire(S){
   /* --- le commentaire --- */
   const dire=(t,famille,jetons)=>{
     const liste=MGMT_COMMENTAIRE[famille]; if(!Array.isArray(liste)||!liste.length) return;
-    const m=liste[Math.floor(rng()*liste.length)];
+    let m=null;
+    if(S.mgmtIds&&typeof mgmtTraitsFiche==='function'&&typeof G!=='undefined'&&G.mgmt&&typeof MGMT_COMMENTAIRE_TRAITS!=='undefined'&&traitsCombat<4){
+      const round=Math.max(1,Math.floor(t/S.roundLen)+1), noms=[['A',jetons&&jetons.X,'X'],['B',jetons&&jetons.Y,'Y']];
+      for(const [c,nom,role] of noms){
+        const id=S.mgmtIds[c], cle=round+':'+id;
+        if(!id||traitsDits.has(cle)) continue;
+        const visibles=mgmtTraitsFiche(G.mgmt,id,S.mgmtCycle).vus||[];
+        for(const trait of visibles){
+          const entree=MGMT_COMMENTAIRE_TRAITS[trait.id];
+          if(!entree||entree.famille!==famille||(entree.role||'X')!==role) continue;
+          const variantes=entree.phrases;
+          if(!Array.isArray(variantes)||!variantes.length) continue;
+          const phrase=variantes[Math.floor(rng()*variantes.length)];
+          m={l:1,t:phrase};
+          traitsDits.add(cle);traitsCombat++;break;
+        }
+        if(m) break;
+      }
+    }
+    if(!m) m=liste[Math.floor(rng()*liste.length)];
     const j=Object.assign({},jetons);
     const l=m.l;
     voixC.push({t:t,l:l,a:areneCoupsModele(m.t,j,l>=1),b:m.u?areneCoupsModele(m.u,j,true):null});

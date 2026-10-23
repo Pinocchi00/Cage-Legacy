@@ -183,12 +183,14 @@ function mgmtPresentationLignes(m,v){
       {titre:'CE QUI LE DISTINGUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
       {titre:'SES POINTS FORTS',lignes:mgmtPointsFortLignes(m,d.id,d.h)},
       {titre:'SON HISTOIRE ICI',sous:nHistoire?nHistoire+(nHistoire>1?' combats':' combat')+' chez Split':'',
-        lignes:d.histoire.map(x=>{
-          const t=m.hist[x.index],issue=t.winner==='D'?'n':t.winner===(t.a.id===d.id?'A':'B')?'v':'d';
-          const soiree=mgmtHistoireSoireeLabel(m,x.index,lat);
-          return {texte:mgmtNomParId(m,x.adversaire).name,ids:inscrit(x.adversaire),pastille:issue,
-            sous:[MGMT_FAMILY_LABELS[t.family]||t.family||'',soiree].filter(Boolean).join(' · '),
-            sources:[{type:'hist',index:x.index}]};})}];
+         lignes:d.histoire.flatMap(x=>{
+           const t=m.hist[x.index],issue=t.winner==='D'?'n':t.winner===(t.a.id===d.id?'A':'B')?'v':'d';
+           const soiree=mgmtHistoireSoireeLabel(m,x.index,lat);
+           const base={texte:mgmtNomParId(m,x.adversaire).name,ids:inscrit(x.adversaire),pastille:issue,
+             sous:[MGMT_FAMILY_LABELS[t.family]||t.family||'',soiree].filter(Boolean).join(' · '),
+             sources:[{type:'hist',index:x.index}]};
+           const traits=(mgmtTraitsFiche(m,d.id,d.h).vus||[]).slice(0,4).map(tr=>({texte:tr.nom+' · '+tr.fait,sous:tr.phrase,sources:[{type:'hist',index:x.index}]}));
+           return [base,...traits];})}];
   }else{
     const cote=(t,id)=>t.a.id===id?'A':t.b.id===id?'B':null;
     const lui=(t,id,degaine)=>{ /* sous du côté d'un suje, ou null s'il n'y combat pas */
@@ -201,13 +203,19 @@ function mgmtPresentationLignes(m,v){
     panneaux=[
       {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
       {titre:'CE QUE CHACUN IMPOSE',sous:'D’après leurs combats',lignes:mgmtImposerLignes(m,d.ids,d.h)},
-      {titre:'LEUR HISTOIRE',lignes:d.histoire.map(x=>{
-          const t=m.hist[x.index];
-          const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);
-          const advId=entreEux?null:(t.a.id===d.ids[0]||t.a.id===d.ids[1]?t.b.id:t.a.id);
-          const tableau=d.ids.map(id=>lui(t,id)).filter(Boolean);
-          return {texte:entreEux?mgmtHistoireSoireeLabel(m,x.index,lat):mgmtNomParId(m,advId).name,
-            ids:entreEux?[]:inscrit(advId),tab:tableau,sources:[{type:'hist',index:x.index}]};})},
+       {titre:'LEUR HISTOIRE',lignes:d.histoire.flatMap(x=>{
+           const t=m.hist[x.index];
+           const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);
+           const advId=entreEux?null:(t.a.id===d.ids[0]||t.a.id===d.ids[1]?t.b.id:t.a.id);
+           const tableau=d.ids.map(id=>lui(t,id)).filter(Boolean);
+           const base={texte:entreEux?mgmtHistoireSoireeLabel(m,x.index,lat):mgmtNomParId(m,advId).name,
+             ids:entreEux?[]:inscrit(advId),tab:tableau,sources:[{type:'hist',index:x.index}]};
+           const traits=[];
+           for(const id of d.ids){
+             const fiche=mgmtTraitsFiche(m,id,d.h);
+             for(const tr of (fiche.vus||[]).slice(0,4)) traits.push({texte:tr.nom+' · '+tr.fait,sous:tr.phrase,sources:[{type:'hist',index:x.index}]});
+           }
+           return [base,...traits];})},
       {titre:'LES PRONOSTICS',sous:d.pronostics.length+' voix',
         lignes:d.pronostics.map(x=>({texte:x.texte,media:x.nom,sourcePct:x.pourcentage,sujet:x.vainqueur,
           sources:x.preuves.flatMap(p=>p.sources)}))}];
