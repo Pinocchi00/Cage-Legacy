@@ -1698,13 +1698,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so-rang{font-style:normal;margin-left:var(--mf-ecart);padding:2px 8px;border:2px solid rgba(233,230,225,.6);white-space:nowrap}
 /* ==== [ANCRE: MONDE_LOT_19_T10_CSS] — Monde lot 19 T10 ==== */
 /* ==== [ANCRE: P3_T2B_ACTUALITES_STYLE] — Monde lot 33 T2b ==== */
-.mgmt-ac{position:relative;min-height:856px;padding:0 0 0 0;color:#E9E6E1;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:500}
-.mgmt-ac-head{height:64px;margin:0 0 16px;display:flex;align-items:center;border:2px solid rgba(233,230,225,.38);padding:0 18px;background:#0D0B0B}
-.mgmt-ac-head h1{margin:0;font:800 56px/.69 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
-.mgmt-ac-head p{margin:0 0 0 18px;font-size:22px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.mgmt-ac-cols{height:calc(100% - 80px);display:flex;gap:16px;min-height:0}
-.mgmt-ac-pane{box-sizing:border-box;min-width:0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:15px;background:#121010;border:2px solid rgba(233,230,225,.5);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
-.mgmt-ac-pane:first-child{flex:0 0 380px}.mgmt-ac-pane:nth-child(2){flex:1.45}.mgmt-ac-detail{flex:1}
+.mf-actu{position:absolute;left:300px;top:128px;width:1564px;height:856px;min-height:0;box-sizing:border-box;color:#E9E6E1;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:500}
+.mgmt-ac-cols{position:absolute;inset:0;display:grid;grid-template-columns:380px 1.45fr 1fr;gap:16px;min-height:0}
+.mgmt-ac-pane{min-width:0;min-height:0;overflow:hidden;display:flex}
+.mgmt-ac-pane>.mf-panneau{flex:1;min-width:0;min-height:0}
+.mgmt-ac-pane .mf-p3{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:15px;background:#121010}
+.mgmt-ac-feed-panel .mf-p3{overflow:auto}
+.mgmt-ac-detail-panel .mf-p3{gap:18px;overflow:auto}
 .mgmt-ac-pane h2,.mgmt-ac-detail h2{margin:0;font:800 44px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .mgmt-ac-pane h2{font-size:28px}.mgmt-ac-filters,.mgmt-ac-feedhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mgmt-ac button{font:inherit;color:inherit;cursor:pointer}.mgmt-ac-follow,.mgmt-ac-item{border:0;min-height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px;background:transparent;color:#E9E6E1;text-align:left;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
