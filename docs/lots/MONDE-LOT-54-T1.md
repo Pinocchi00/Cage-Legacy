@@ -5,19 +5,20 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 **Ce qui existe dans `main`** : le poids d'une histoire (P8 T1, lot 46 : **lis `mgmt-histoires*.js` d'abord**), les primes (P7 T3), les relevés (`m.hist`, `mgmt-releve.js`), les suivis et espoirs, `m.defis`, l'écran du lendemain actuel (cherche `lendemain` dans `mgmt-*.js`), la presse (`mgmt-actualites*.js`), le fil. **Le discours d'après-combat (P7 T4, `m.discours`) arrive dans une autre PR** : si `m.discours` / `mgmtDiscours*` n'existe pas encore dans ton arbre, branche le bloc discours derrière un test `typeof` et ne le simule pas.
 
 ## Cases
-**[ ] 1.** Non implémenté (voir compte rendu).
-**[ ] 2.** Le test ajouté ne construit pas le scénario de référence 13-1 contre n°1.
-**[ ] 3.** Non implémenté.
-**[ ] 4.** L'audit reste à vérifier précisément ; test ajouté limité à la validité du rang et ne prouve pas D1.
-**[ ] 5.** Test ajouté aux scripts `test` et `test:watch`; aucun nouvel état de sauvegarde. Les critères fonctionnels principaux restent incomplets.
-**[ ] 6.** Compte rendu ajouté ; critère de tranche non atteint.
+**[ ] 1.** Non implémenté : l'écran existant n'a pas été recomposé selon les deux planches.
+**[ ] 2.** Non implémenté : le test de partie réelle vérifie le tri ordinaire des histoires, pas le scénario de référence 13-1 contre n°1.
+**[ ] 3.** Non implémenté : aucun catalogue de réactions de semaines suivantes.
+**[x] 4.** D1 est déjà appliqué dans `mgmt-carte.js` (commentaire de décision au bloc `mgmtRangScores`, correction résultat par résultat). Le test ciblé vérifie maintenant qu'une défaite réduit bien le score par rapport au vainqueur, sans toucher au moteur de combat. L'audit cité par le brief ne contient pas lui-même le constat D1 ; la décision porte cette mention dans le code.
+**[ ] 5.** Le test est référencé par `test` et `test:watch`; aucun nouvel état de sauvegarde. Les critères fonctionnels principaux restent incomplets.
+**[ ] 6.** Compte rendu actualisé ; critère de tranche non atteint.
 
 ## Compte rendu
 
-- `tests/mgmtLot54T1.test.js` : ajoute deux tests de fumée sur une partie créée avec `mgmtPasseGenerer('split',{soirees:3})`, dont un passage par la soirée réelle et une lecture des histoires. Ils ne couvrent pas les critères d'acceptation T2/T3 ni le cas de référence 13-1.
-- `package.json` : ajoute le test aux scripts agrégés `test` et `test:watch`, ainsi que `test:lot54t1` et `test:watch:lot54t1`.
-- Aucun code d'écran, catalogue de textes ou changement de classement livré ; aucune migration de sauvegarde.
-- Écart majeur à la fiche : T2 et T3 restent à faire. Les deux maquettes et le brief exigent un travail d'interface et de données non couvert par cette reprise. D1 n'est pas établi par le test actuel.
-- Questions pour Anthony : aucune nouvelle question, mais cette tranche n'est pas finie et ne satisfait pas son critère final.
+- `tests/mgmtLot54T1.test.js` : un test de fumée sur une partie réelle construite par `mgmtPasseGenerer('split',{soirees:3})`, et un test ciblé du score du perdant pour D1. Le premier ne couvre pas la soirée de référence 13-1.
+- `package.json` : le fichier est déjà référencé par les scripts agrégés `test` et `test:watch` et par les scripts ciblés.
+- Aucun code d'écran, catalogue T3 ou changement du classement ; aucune migration de sauvegarde.
+- Vérification : `node --test tests/mgmtLot54T1.test.js` passe (2 tests). D1 est déjà corrigé dans le classement depuis une tranche antérieure ; le résultat de `mgmtRangScores` est maintenant vérifié ici. La tranche reste incomplète sur T2, T3 et le scénario de référence.
+- Écarts à la fiche et aux maquettes : les deux écrans à `ld3-`, les trois moments, les blocs de presse/mouvements et l'après n'ont pas été codés. Aucun écart ne doit être interprété comme une validation de ces écrans.
+- Questions pour Anthony : le scénario de référence doit-il être fourni comme partie de fixture existante ou faut-il construire ses combattants/son combat via un autre chemin réel ? Sans réponse, aucun nom ou résultat du jeu n'a été inventé.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
