@@ -89,6 +89,16 @@ function mgmtOrgMoneyHtml(m){
   return lignes+soirees;
 }
 
+/* ==== [ANCRE: MGMT_LOT56_T1_CROISSANCE] — Monde lot 56 T1 ==== */
+function mgmtPaliersHtml(m){
+  const c=mgmtPaliersCalculer(m), avance=c.paliers.map(p=>`<span class="cr3-step cr3-done"><b>${esc(p.nom)}</b><small>${esc(p.texte)}</small></span>`).join('');
+  const n=c.next;
+  return `<section class="cr3-growth"><header class="cr3-title"><b>LA CROISSANCE</b><span>${esc(mgmtOrgNom(m).toUpperCase())} · ${esc(c.rang)}e DES HUIT</span></header>`
+    +`<div class="cr3-bar"><span class="cr3-step cr3-done"><b>Popularité</b><small>${esc(c.popularite)} / 100</small></span>${avance}`
+    +`${n?`<span class="cr3-step cr3-next"><b>${esc(n.nom)}</b><small>${esc(n.texte)} · Popularité ${esc(n.popularite)} et rang ${esc(n.rang)} ou mieux</small></span>`:'<span class="cr3-step cr3-next"><b>Le sommet atteint</b><small>Split est première des huit.</small></span>'}</div>`
+    +`<div class="cr3-effects"><span class="cr3-label">LES SALLES</span><span class="cr3-label">LE DIFFUSEUR</span><span class="cr3-label">LE RECRUTEUR</span><span class="cr3-label">LES AGENTS LIBRES</span></div></section>`;
+}
+
 function scr_mgmt_organisation(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt;
@@ -111,6 +121,6 @@ function scr_mgmt_organisation(){
      +groupes+`</section>`,'normal','mf-sem-p')
       /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
       +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-       +mgmtOrgMoneyHtml(m)+`${m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
+        +mgmtOrgMoneyHtml(m)+mgmtPaliersHtml(m)+`${m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -1131,6 +1131,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mgmt-org-pill{display:inline-flex;align-self:flex-start;height:32px;padding:0 12px;align-items:center;background:#E9E6E1;color:#0D0B0B;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase}
 .mf-ancien .mgmt-org-val{font:800 64px/.8 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);color:#E9E6E1}
 .mf-ancien .mgmt-org-line{font:600 24px/1.25 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+/* ==== [ANCRE: MGMT_LOT56_T1_CROISSANCE_CSS] — Monde lot 56 T1 ==== */
+.mf-ancien .cr3-growth{display:flex;flex-direction:column;gap:12px;margin:20px 0;padding:14px;background:#121010;box-shadow:inset 0 0 0 2px var(--mf-bord)}
+.mf-ancien .cr3-title{display:flex;justify-content:space-between;gap:12px;color:#F0B220;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em}
+.mf-ancien .cr3-title b{font:800 32px/.9 var(--mgmt-font-display)}
+.mf-ancien .cr3-title span{color:#E9E6E1}
+.mf-ancien .cr3-bar{display:flex;flex-direction:column;gap:8px}
+.mf-ancien .cr3-step{display:flex;flex-direction:column;gap:4px;padding:9px 12px;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1.1 var(--mgmt-font-body)}
+.mf-ancien .cr3-step b{font:800 28px/1 var(--mgmt-font-display);text-transform:uppercase}
+.mf-ancien .cr3-step small{font:600 22px/1.15 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mf-ancien .cr3-step.cr3-done{box-shadow:inset 4px 0 0 #F0B220}
+.mf-ancien .cr3-step.cr3-next{border:2px solid #F0B220}
+.mf-ancien .cr3-effects{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mf-ancien .cr3-label{padding:7px;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1 var(--mgmt-font-body)}
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
 .mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}

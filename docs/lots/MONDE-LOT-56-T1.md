@@ -12,3 +12,13 @@ Branche : `p11-croissance` (la branche courante de ce dossier ; commits ICI ; le
 **[ ] 5. Fin.** Commit final `Monde lot 56 T1 : la croissance visible` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- État : **inachevé**. Le critère de fin de la fiche n’est pas atteint ; ne pas fusionner comme tranche terminée.
+- Fichiers modifiés : `mgmt-salles.js` (table de cinq paliers et dérivation pure sur popularité/rang), `mgmt-ecran-organisation.js` (premier affichage de la croissance sur Organisation), `ui-cadre.css` (règles `cr3-*`), `index.html` (versions cache), `package.json` (scripts dédiés), `tests/mgmtLot56T1.test.js` (tests de dérivation et de classes).
+- Tests ajoutés : « Croissance — cinq paliers sont dérivés sans mutation et répondent à la popularité et au rang » ; « Croissance — les classes cr3 de l’écran ont des règles dédiées et aucun petit texte ».
+- Vérifications : les deux tests ciblés et `tests/mgmtPasse.test.js` passent ; ESLint ne rapporte pas d’erreur. `node tools/verif-versions.js origin/main` passe. Le test `mgmtReleveReduit.test.js` a été lancé en arrière-plan, résultat à relever dans le journal `C:/Users/antho/AppData/Local/Temp/opencode/lot56-releve.log`.
+- Migration de sauvegarde : aucune (aucune clé nouvelle persistée).
+- Écarts à la fiche : les effets déclarés par les paliers ne sont pas raccordés aux systèmes salles/diffuseur/recruteur/agents ; le franchissement n’est pas annoncé une fois dans l’Accueil et le fil de presse ; le détail visuel ne reprend pas les barres et valeurs exactes de la maquette. Les tests du chemin de progression réel, annonces, effets bornés, empreintes anciennes, validation/réparation de sauvegarde et plafond de partie neuve ne sont pas écrits. Le fichier n’a pas été ajouté aux listes exécutées par `test` et `test:watch` (seuls des scripts dédiés ont été ajoutés).
+- Questions pour Anthony : aucune question de spécification n’a été tranchée par supposition ; continuer le raccordement des effets existants et des annonces avant de considérer la tranche livrée.

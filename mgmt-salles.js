@@ -29,6 +29,26 @@ const MGMT_COMPTES_MAX=8;
    ajoute MGMT_TETE_AFFICHE_POIDS point de qualité (une carte moyenne ne change pas). */
 const MGMT_TETE_AFFICHE_POIDS=0.5;
 
+/* ==== [ANCRE: CROISSANCE_PALIERS] — Monde lot 56 T1 ====
+   Les rangs sont ceux du classement vivant des huit. Les bonus restent
+   additifs et plafonnés : ils ne retirent jamais une possibilité existante. */
+const MGMT_PALIERS=[
+  {id:'regional',nom:'Régional',popularite:0,rang:8,salle:0,diffuseur:0,recruteur:0,agents:0,texte:'Split s’installe dans sa région.'},
+  {id:'national',nom:'National',popularite:30,rang:6,salle:1,diffuseur:1,recruteur:1,agents:1,texte:'Split attire désormais l’attention du pays.'},
+  {id:'europeen',nom:'Européen',popularite:50,rang:4,salle:2,diffuseur:2,recruteur:1,agents:2,texte:'Split commence à compter au-delà des frontières.'},
+  {id:'mondial',nom:'Mondial',popularite:70,rang:2,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split rejoint les organisations qui comptent dans le monde.'},
+  {id:'sommet',nom:'Le sommet',popularite:90,rang:1,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split prend la première place parmi les huit.'}
+];
+function mgmtPaliersCalculer(m){
+  const pop=Number.isFinite(m&&m.pop)?m.pop:0;
+  const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):null;
+  const ligne=classement&&classement.find(x=>x.id===mgmtPredecesseurOrgId(m));
+  const rang=ligne&&Number.isSafeInteger(ligne.rang)?ligne.rang:8;
+  const paliers=MGMT_PALIERS.filter(p=>pop>=p.popularite&&rang<=p.rang);
+  const next=MGMT_PALIERS.find(p=>!paliers.includes(p))||null;
+  return {rang,popularite:pop,paliers,next};
+}
+
 /** Les salles d'une partie : dérivées de l'organisation et de l'ordre, jamais tirées au hasard (aucun hasard hors graine).
  *  Les capacités suivent le profil de l'organisation (taille de ses salles). Pur. */
 function mgmtSallesCreer(m){
