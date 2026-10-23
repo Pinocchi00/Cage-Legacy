@@ -1064,7 +1064,7 @@ test('MGMT T2 geste — choisir puis adversaire : premier emplacement libre, slo
   assert.equal(f.cycle, win.eval(`G.mgmt.cycle`), 'posé au cycle courant');
   assert.equal(win.eval(`MGMT_CART.pick`), null, 'le choix est effacé après la pose');
   assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'premier emplacement libre : la carte était vide');
-  const saved = JSON.parse(win.localStorage.getItem('cage-legacy-mgmt'));
+  const saved = JSON.parse(win.eval(`mgmtLireSauvegarde('cage-legacy-mgmt')`));
   assert.equal(saved.card.main.length, 1, 'le combat posé persiste');
   /* R1 (addendum 1 §5) : le booker compte — un booking est une interaction. */
   for(const id of [a,b]){
