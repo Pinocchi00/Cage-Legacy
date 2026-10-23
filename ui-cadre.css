@@ -1702,14 +1702,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-cols{position:absolute;inset:0;display:grid;grid-template-columns:380px 1.45fr 1fr;gap:16px;min-height:0}
 .mgmt-ac-pane{min-width:0;min-height:0;overflow:hidden;display:flex}
 .mgmt-ac-pane>.mf-panneau{flex:1;min-width:0;min-height:0}
-.mgmt-ac-pane .mf-p3{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:15px;background:#121010}
+.mgmt-ac-pane .mf-p3{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding:22px;background:#121010}
 .mgmt-ac-feed-panel .mf-p3{overflow:auto}
 .mgmt-ac-detail-panel .mf-p3{gap:18px;overflow:auto}
 .mgmt-ac-pane h2,.mgmt-ac-detail h2{margin:0;font:800 44px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
-.mgmt-ac-pane h2{font-size:28px}.mgmt-ac-filters,.mgmt-ac-feedhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.mgmt-ac button{font:inherit;color:inherit;cursor:pointer}.mgmt-ac-follow,.mgmt-ac-item{border:0;min-height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px;background:transparent;color:#E9E6E1;text-align:left;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.mgmt-ac-followhead{display:flex;align-items:center;justify-content:space-between}.mgmt-ac-followhead>span{font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}
+.mgmt-ac-filters,.mgmt-ac-feedhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mgmt-ac-follow-panel .mgmt-ac-filters button{height:56px;padding:0 16px;border:2px solid rgba(233,230,225,.38);background:transparent;color:#E9E6E1;font:800 32px 'Saira Extra Condensed',sans-serif;text-transform:uppercase}
+.mgmt-ac-follow-panel .mgmt-ac-filters button.actif{background:#E9E6E1;color:#0D0B0B;border-color:#E9E6E1}
+.mgmt-ac-follow-panel .mgmt-ac-filters button:first-child{width:98px}.mgmt-ac-follow-panel .mgmt-ac-filters button:last-child{width:130px}
+.mgmt-ac button{font:inherit;color:inherit;cursor:pointer}.mgmt-ac-follow,.mgmt-ac-item{border:0;min-height:58px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px;background:transparent;color:#E9E6E1;text-align:left;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
 .mgmt-ac-follow b{display:block;font:800 28px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif}.mgmt-ac-follow small,.mgmt-ac-copy small{display:block;font-size:22px;line-height:1;opacity:.8}.mgmt-ac-follow i{padding:5px 9px;background:#F0B220;color:#0D0B0B;font-style:normal}
-.mgmt-ac-dot,.mgmt-ac-unread{width:14px;height:14px;flex:none;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mgmt-ac-dot,.mgmt-ac-unread{width:30px;height:30px;flex:none;background:#F0B220;color:#0D0B0B;font:800 22px/30px 'Saira Extra Condensed',sans-serif;text-align:center;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mgmt-ac-follow-group{margin:12px 0 0 12px;font:600 22px/1 'Saira Condensed',sans-serif;letter-spacing:.04em;color:rgba(233,230,225,.74);text-transform:uppercase}
 .mgmt-ac-group{margin:8px 0 0;font-size:22px;letter-spacing:.04em;color:rgba(233,230,225,.74);text-transform:uppercase}
 .mgmt-ac-item{align-items:flex-start;gap:16px;padding:14px 16px;background:#1B1818}.mgmt-ac-item.choisi{background:#E9E6E1;color:#0D0B0B}.mgmt-ac-type{width:132px;flex:none;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}.mgmt-ac-item.choisi .mgmt-ac-type{color:#B32A1E}.mgmt-ac-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.mgmt-ac-copy b{font-size:26px;line-height:1.05;font-weight:600}.mgmt-ac-copy small{line-height:1.1}.mgmt-ac-detail{gap:18px}.mgmt-ac-detail h2{font-size:48px;line-height:.9}.mgmt-ac-detail p{font-size:24px;line-height:1.2}.mgmt-ac-stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px}.mgmt-ac-stat b{font:800 30px/1 'Saira Extra Condensed','Arial Narrow',sans-serif}
 /* ==== [FIN ANCRE] ==== */
