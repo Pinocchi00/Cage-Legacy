@@ -14,3 +14,7 @@ test('Monde lot 51 T1 — visa A retire la paire et enregistre une demande de re
 test('Monde lot 51 T1 — le catalogue des choix couvre exactement les trois problèmes connus',()=>{
   const w=newGameWindow();try{const r=w.eval(`(()=>({keys:Object.keys(MGMT_SEMAINE_CHOIX).sort(),unique:new Set(Object.values(MGMT_SEMAINE_CHOIX).flatMap(x=>[x.A.titre,x.A.texte,x.B.titre,x.B.texte])).size,unread:Object.values(MGMT_SEMAINE_CHOIX).every(x=>x.A.relu===false&&x.B.relu===false)}))()`);assert.deepEqual(Array.from(r.keys),['blessure_camp','poids','visa']);assert.equal(r.unique,12);assert.equal(r.unread,true);}finally{w.close();}
 });
+
+test('Monde lot 51 T1 — une soirée sans décision applique A à l’ouverture',()=>{
+  const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(20261023);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};const before=a.diminue;mgmtAgendaJouer=m=>{m.semaine.ev.forEach((e,i)=>{if(e.p&&!e.r)mgmtSeChoisir(i,'A');});return true;};mgmtAgendaJouer(m);return {r:m.semaine.ev[0].r,flag:a.diminue,cycle:m.cycle,before};})()`);assert.equal(r.r,'A');assert.equal(r.flag,r.cycle);assert.notEqual(r.before,r.flag);}finally{w.close();}
+});
