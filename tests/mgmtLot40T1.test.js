@@ -72,3 +72,16 @@ test('Monde lot 40 T1 — déclencheur guerre exige un relevé de cinq rounds',(
     assert.equal(r.type,'guerre');assert.equal(r.donne,1);
   }finally{w.close();}
 });
+
+/* Relevé visuel du 23/10/2026 : la planche UniFicheApercu ne met dans la case que « SOIRÉE n » (le surnom est dans l'en-tête) ;
+   le surnom répété dans la case était coupé à 1920×1080. */
+test('Monde lot 40 T1 — la case Surnom de la fiche porte seulement la soirée, le surnom reste dans l’en-tête',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(4401);CL.mgmtEnter(1);const m=G.mgmt;m.surnomsGagnes=true;m.surnoms={[m.roster[0].id]:{n:'Le Pilon',s:58,t:'ko'}};CL.mgmtFiche(m.roster[0].id);
+      const app=document.getElementById('app');const cases=[...app.querySelectorAll('div')].filter(e=>e.children.length===2&&e.children[0].textContent==='Surnom').map(e=>e.children[1].textContent);
+      return {cases,entete:mgmtIdentiteSurnom(m,m.roster[0])==='Le Pilon'};})())`));
+    assert.deepEqual(r.cases,['SOIRÉE 58']);
+    assert.equal(r.entete,true);
+  }finally{w.close();}
+});
