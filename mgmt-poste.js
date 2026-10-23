@@ -76,6 +76,31 @@ function mgmtPosteBilan(m){
   const condition=p.conf>=MGMT_POSTE.seuils.condition.conf&&ratio>=MGMT_POSTE.seuils.condition.tenus;
   return {issue:aug?'prolonge-augmente':condition?'prolonge-condition':'renvoi',salaire:aug?Math.round(p.salaire*1.25):p.salaire,duree:MGMT_POSTE.duree,objTenus,objTotal};
 }
+/* ==== [ANCRE: P9_T4_OFFRES] — Monde lot 58 T1 ==== */
+/** Offres sont un complément facultatif : elles ne changent jamais l'organisation active. */
+function mgmtOffresValide(offres){
+  if(!Array.isArray(offres)||offres.length>3)return false;
+  return offres.every(o=>o&&typeof o==='object'&&!Array.isArray(o)&&typeof o.orgId==='string'&&!!mgmtOrgParId(o.orgId)&&typeof o.poste==='string'&&o.poste.length<=80&&Number.isSafeInteger(o.salaire)&&o.salaire>=0&&typeof o.texte==='string'&&o.texte.length<=300&&o.relu===false&&typeof o.refuse==='boolean'&&Array.isArray(o.raisons)&&o.raisons.length===4&&o.raisons.every(x=>typeof x==='string'&&x.length<=120));
+}
+function mgmtOffresCreer(m){
+  if(!m||m.mondeVivant!==true||!Array.isArray(MGMT_ORGANISATIONS)||!m.poste)return [];
+  const ranks=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m),rang=(ranks.find(x=>x.id===active)||{}).rang||4;
+  const pool=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(ranks.find(x=>x.id===o.id)||{}).rang||8}));
+  const candidats=pool.filter(x=>rang<=2?x.r<rang:x.r>rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r).slice(0,rang<=2?1:3);
+  m.offres=candidats.map(({o,r})=>({orgId:o.id,poste:'Matchmaker',salaire:3200+Math.max(0,8-r)*200,texte:'Nous aimerions te confier le poste de matchmaker.',relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)}));
+  return m.offres;
+}
+function mgmtPosteRaisons(m,orgId){
+  const ranks=mgmtOrgClassement(m)||[],org=mgmtOrgParId(orgId),profil=org&&org.profil, n=mgmtOrgNiveaux(m,orgId)||{};
+  const puissance=(ranks.find(x=>x.id===orgId)||{}).rang||8;
+  return [
+    `Scène : salle de ${Math.max(0,Math.round(n.stade||0))} places, diffuseur ${puissance<=2?'de premier rang':'en développement'}, budget de recrutement ${Math.max(1,Math.round((profil&&profil.caisse||0)/1000))} k€.`,
+    `Classement : ${puissance<=1?'organisation la mieux classée':`organisation classée ${puissance}e`}; ses meilleurs combattants sont mesurés au classement mondial.`,
+    `Agents libres : priorité d’approche liée au rang ${puissance}, sans garantie de signature.`,
+    `Choc des organisations : ${puissance<=4?'une proposition commune peut être envisagée':'les propositions restent possibles selon le rang'}.`
+  ];
+}
+function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
 function mgmtPosteRenouveler(m,issue){
   if(!m||!m.poste||!['prolonge-augmente','prolonge-condition'].includes(issue)) return null;

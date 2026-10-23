@@ -483,6 +483,7 @@ function validateMgmt(raw){
   /* Retours du 09/10/2026 : la graine de la partie (facultative : une partie d'avant n'en a pas). */
   if(raw.graine!==undefined&&(typeof raw.graine!=='string'||!/^[0-9a-z]{1,16}$/.test(raw.graine))) return false;
   if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
+  if(raw.offres!==undefined&&!mgmtOffresValide(raw.offres)) return false;
   return true;
 }
 
@@ -681,6 +682,7 @@ function mgmtRepair(m){
   if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'offres')&&!mgmtOffresValide(m.offres)) delete m.offres;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
   if(Object.prototype.hasOwnProperty.call(m,'memoire')&&!mgmtMemoireValide(m.memoire)) delete m.memoire;
