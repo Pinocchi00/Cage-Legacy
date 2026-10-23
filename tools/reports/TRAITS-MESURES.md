@@ -61,3 +61,7 @@ Outil `node tools/mesure-generation.js 62 [--sans-traits]`, même processus de j
 | 2 | 55 598 ms | 65 522 ms |
 
 La forte inversion entre répétitions confirme que la machine est chargée de façon variable ; les quatre chiffres sont conservés et ne permettent pas à eux seuls de valider le seuil. Le profil de code confirme qu'à chaque ajout à `m.hist`, `mgmtStatsIndex` invalide son cache par longueur et reconstruit l'index complet ; `mgmtTraitsCombats` appelle ce chemin pour chaque évaluation de traits.
+
+### Correction de performance (23/10/2026)
+
+Cause du +83 % : `mgmtStatsIndex` (mgmt-stats.js) rebâtissait tout l'index à chaque combat ajouté à `m.hist` pendant la génération (quadratique), et recalculait le bilan officiel de tous les combattants. Il est maintenant incrémental quand seul `m.hist` grandit (sans monde vivant) et le bilan se lit à la demande (`mgmtStatsTotal`) ; `mgmtTraitsEtat` calcule la liste des combats du combattant une fois. Mesure comparable, même processus, `node tools/mesure-generation.js 62` : avec traits 49 022 ms, sans traits 48 806 ms (+0,4 %). Ancien : 67 144 ms contre 41 868 ms.
