@@ -49,7 +49,9 @@
     "test:fichestats": "node --test tests/mgmtFicheStats.test.js",
     "test:leaders": "node --test tests/mgmtLeaders.test.js",
     "test:lot42t1": "node --test tests/mgmtLot42T1.test.js",
-    "test:watch:lot42t1": "node --test --watch tests/mgmtLot42T1.test.js"
+    "test:watch:lot42t1": "node --test --watch tests/mgmtLot42T1.test.js",
+    "test:lot50t1": "node --test tests/mgmtLot50T1.test.js",
+    "test:watch:lot50t1": "node --test --watch tests/mgmtLot50T1.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",

@@ -631,6 +631,7 @@ function mgmtRunEvent(m){
   /* Lot 2 T1 : chaque combat porte son emplacement (slot:'main'|'prelim')
      et la soirée joue la carte principale d'abord, puis les préliminaires. */
   const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
+    position:f.slot==='main'?Math.max(0,m.card.main.length-1-m.card.main.findIndex(x=>x===f)):null,
     title:f.title===true,rounds:mgmtBoutRounds(m,f),source:f}));
   /* Lot 7 : avec l'agenda, l'ordre de passage est celui d'une vraie soirée — les premiers préliminaires (early prelims), les
      préliminaires, puis les combats de la carte principale en remontant, le principal en dernier. */
@@ -671,7 +672,7 @@ function mgmtRunEvent(m){
     const roundF=Number.isSafeInteger(res.round)?res.round:cf.rounds;
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
-    m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
+    m.hist.push({c:m.cycle,slot:cf.slot,position:cf.position,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
     mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le score dérive de m.hist, muté à ce combat. */
     if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});
@@ -702,6 +703,17 @@ function mgmtRunEvent(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
+  /* ==== [ANCRE: P7_T4_DISCOURS_ENREGISTREMENT] — Monde lot 50 T1 ==== */
+  if(typeof mgmtDiscoursEligibilite==='function'){
+    const discours=[];
+    for(const t of m.hist.slice(premier)){
+      const elig=mgmtDiscoursEligibilite(m,t); if(!elig||discours.length>=4)continue;
+      const d=mgmtDiscoursComposer(m,t); if(!d)continue;
+      discours.push({a:d.auteur,adv:d.adversaire,motif:elig.motif,ton:d.ton,lignes:d.lignes,interpelle:d.interpelle});
+      mgmtAddFact(m,{c:m.cycle,k:'discours',a:d.auteur,adv:d.adversaire,interpelle:d.interpelle||null,motif:elig.motif});
+    }
+    m.discours={c:m.eventsPlayed,d:discours};
+  }
   if(m.poste) mgmtPosteSoiree(m);
   delete m.semaine;
   /* Lot 5 H7 : les décisions contraires de la soirée deviennent des faits. */
