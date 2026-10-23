@@ -41,3 +41,19 @@ test('Monde lot 51 T1 — les classes A/B ont leurs styles, le corps reste lisib
 test('Monde lot 51 T1 — douze soirées se jouent et la partie reste rechargeable',()=>{
   const w=newGameWindow({runMain:true});try{w.eval(`setSeed(20261023);G.mgmt=mgmtPasseGenerer('split',{soirees:3});`);const jouees=jouerSoirees(w,12,{recharge:true});assert.equal(jouees,12);const ok=w.eval(`(()=>{const m=G.mgmt;return validateMgmt(m)&&!!JSON.parse(JSON.stringify(m));})()`);assert.equal(ok,true);}finally{w.close();}
 });
+
+/* Constat du 23/10/2026 : test sur de vraies soirées, créées par le chemin réel, avec des problèmes forcés. */
+const {newGameWindow:newGameWindowF}=require('./helpers/loadGame');
+const jouerSoireesF=require('./helpers/jouerSoirees');
+test('Monde lot 51 T1 — douze soirées jouées une à une avec une blessure ou un visa forcé : aucune exception, la partie reste valide et se recharge',()=>{
+  const w=newGameWindowF({runMain:true});
+  w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(20261008); CL.mgmtEnter(1); mgmtPasseGenerer('split',{soirees:3});`);
+  for(let k=0;k<12;k++){
+    w.eval(`(()=>{const m=G.mgmt; const c=(m.card.main||[])[0]||(m.card.prelims||[])[0]; if(c){ m.semaine={n:(m.eventsPlayed||0)+1,ev:[{f:'${k%2?'visa':'blessure_camp'}',j:'mardi',a:c.a,b:c.b,v:0,p:true}]}; if(${k%3===0}) { try{ mgmtSeChoisir(0,'B'); }catch(e){} } } })()`);
+    jouerSoireesF(w,1);
+  }
+  const r=JSON.parse(w.eval(`JSON.stringify({valide:validateMgmt(G.mgmt),recharge:validateMgmt(JSON.parse(JSON.stringify(G.mgmt))),joues:G.mgmt.eventsPlayed})`));
+  assert.equal(r.valide,true);
+  assert.equal(r.recharge,true);
+  assert.ok(r.joues>=12);
+});
