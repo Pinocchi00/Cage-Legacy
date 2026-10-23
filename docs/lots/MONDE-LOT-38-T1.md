@@ -31,8 +31,8 @@ Un commit après chaque point (A : fonction et libellés ; B : propositions ; B 
 
 ## Compte rendu
 
-- Cette reprise n’a apporté aucune modification de code : le commit antérieur `452d997` avait déjà enregistré l’état décrit ci-dessus. Les tests ciblés relancés sont verts (2/2, `mgmtLot38T1.test.js`, environ 4,2 s; `mgmtActualites.test.js`, 7/7, environ 1,6 s). `mgmtReleveReduit.test.js` a de nouveau été interrompu par `timeout 110` (110,0 s, aucun test achevé).
-- Vérifications relancées : `node tools/verif-versions.js origin/main` sans écart; `node_modules/.bin/eslint .` sans erreur.
+- Reprise 7 : aucun changement de code supplémentaire. Les tests ciblés relancés sont verts (2/2, `mgmtLot38T1.test.js`, environ 4,1 s; `mgmtActualites.test.js`, 7/7, environ 1,6 s). `timeout 110 node --test tests/mgmtReleveReduit.test.js` a échoué au délai (110,2 s, aucun test achevé).
+- Vérifications relancées : `node tools/verif-versions.js origin/main` sans écart (17 fichiers examinés); `node_modules/.bin/eslint .` sans erreur.
 - Écarts bloquant le critère de fin, non corrigés : comparaisons mesurées entre organisations pour plusieurs profils, troisième ligne des profils de catégorie, calcul « à domicile », correspondance complète des angles/critères et fiches factuelles des espoirs, tests exhaustifs listés dans la fiche et inclusion dans les listes `test`/`test:watch`, résultat concluant du test long de poids sauvegarde.
 - Textes présents dans `MGMT_MANQUE_LIBELLES` et `MGMT_ESPOIRS_LIBELLES`, à relire (`relu:false`).
 - Questions pour Anthony : la règle de calcul d’une moyenne « chez les autres organisations » (moyenne des proportions organisationnelles ou proportion agrégée) n’est pas explicitée davantage dans la fiche; décision nécessaire pour éviter de choisir arbitrairement.
