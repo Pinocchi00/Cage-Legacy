@@ -40,6 +40,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Les modifications d'outillage `.opencode/agents/*` et `opencode.json` sont étrangères. `sw.js` a été restauré depuis `origin/main`, sans être inclus.
 - Livraison partielle, engagée sous `Monde lot 55 T1 (inachevé) : critères de calcul`. Les écarts de la maquette restent complets pour les deux écrans. Questions pour Anthony : aucune question nouvelle ; les informations manquantes dans les relevés restent à préciser si l'on exige ces critères au-delà des données observables.
 
+### Reprise 6
+
+- État contrôlé : branche `p11-ceremonie-carnet`, HEAD `705f7ee`; les étapes des reprises précédentes sont déjà commitées. Les modifications `.opencode/agents/*` et `opencode.json` préexistantes restent étrangères et ne sont pas incluses.
+- Relecture des précisions P9/P11 et vérification de l’état : aucun écran cérémonie/carnet ni raccordement à l’enchaînement de fin d’année n’a été ajouté par les commits précédents. Le calcul demeure partiel : les critères fondés sur données non présentes dans `m.hist` ne sont qu’approchés et les 3 formulations par prix ne constituent pas une mémoire sans répétition sur 50 soirées.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (3/3 vert) et `node tools/verif-versions.js origin/main` (aucun écart de versions).
+- Non réalisé à cette reprise : écran et navigation, intégration des prix aux fiches avec validation/réparation, cérémonies historiques et sections carnet, tests multi-années/50 soirées/échappement/CSS, intégration à `test` et `test:watch`, ESLint et test réduit lent. La tranche reste inachevée ; ces critères ne sont pas déclarés satisfaits.
+- Écart aux maquettes : UniCeremonie et UniCarnet ne sont toujours pas implémentés. Aucun changement de sauvegarde ni migration n’a été introduit. Aucune question ouverte nouvelle ; il reste des travaux d’implémentation, pas un trou de spécification.
+
 ### Reprise 4
 
 - Le calcul KO/soumission exploite désormais un pronostic public de vainqueur lorsque la trace en contient un (`publicOddsWinner`, `pronosticPublic` ou `pronostic`) et inclut le bonus de surprise ainsi que les deux points du premier round. Les traces actuelles n'exposent pas systématiquement ces champs ; absence de donnée = aucun bonus.
