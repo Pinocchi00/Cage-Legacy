@@ -1,9 +1,6 @@
 "use strict";
 /* ==== [ANCRE: P5_T1_RECRUTEUR_CALCUL] — Monde lot 42 T1 ==== */
-function mgmtRecruteurRng(seed){
-  let x=duelFnv1a32(String(seed));
-  return ()=>{ x=(x+0x6D2B79F5)|0; let t=x; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; };
-}
+function mgmtRecruteurFlux(m,n,dest,couche){ return mgmtIdentiteStream('rc'+n+'-'+dest,couche,m); }
 function mgmtRecruteurDestination(id){ return MGMT_RECRUTEUR.destinations.find(d=>d.id===id)||null; }
 function mgmtRecruteurValide(x){
   if(!x||typeof x!=='object'||Array.isArray(x)||!Number.isSafeInteger(x.seq)||x.seq<0||!Array.isArray(x.retours)||x.retours.length>3)return false;
@@ -39,7 +36,7 @@ function mgmtRecruteurStyle(mission,d,r){
 function mgmtRecruteurRetour(m){
   const e=m?.recruteur;if(!e?.mission||mgmtRecruteurJour(m)<e.mission.retourLe)return null;
   const mission=e.mission,d=mgmtRecruteurDestination(mission.dest),n=e.seq||1;
-  const r=mgmtRecruteurRng(String(m.graine||'')+'|recruteur|'+n+'|'+d.id);
+  const r=mgmtRecruteurFlux(m,n,d.id,'retour');
   const profils=[];
   if(r()<d.bredouille){
     e.retours.unshift({n,dest:d.id,profils:[],lus:0,bredouille:MGMT_RECRUTEUR.retour.bredouille[Math.floor(r()*3)]});
@@ -50,13 +47,13 @@ function mgmtRecruteurRetour(m){
     for(let i=0;i<nombre;i++){
       const k=i+1,id='rc'+n+'-'+k,style=mgmtRecruteurStyle(mission,d,r),pepite=i===0&&r()<1/d.pepites;
       const nom=mgmtIdentitePick(id,'recruteur-nom-'+d.ck,noms,m);
-      const age=19+Math.floor(r()*13),vic=pepite?8+Math.floor(r()*7):2+Math.floor(r()*8),def=pepite?0:Math.floor(r()*4);
-      const trait=Array.isArray(traits)&&traits.length?traits[Math.floor(r()*traits.length)]:null;
+      const profilRng=mgmtRecruteurFlux(m,n,d.id,'profil-'+k),age=19+Math.floor(profilRng()*13),vic=pepite?8+Math.floor(profilRng()*7):2+Math.floor(profilRng()*8),def=pepite?0:Math.floor(profilRng()*4);
+      const trait=Array.isArray(traits)&&traits.length?traits[Math.floor(profilRng()*traits.length)]:null;
       const formule=MGMT_RECRUTEUR.retour.style[style];
       const base=typeof COUNTRIES[d.ck]!=='undefined'?d.ck:'FR';
       profils.push({id,name:nom,first:nom.split(' ')[0],last:nom.split(' ').slice(1).join(' '),ck:base,age,cat:mission.cat,style,W:vic,L:def,D:0,organisation:d.circuits[Math.floor(r()*3)],pepita:pepite,
-        chiffres:{documentes:Math.max(3,Math.min(vic+def,Math.floor(r()*8)+3)),significatifs:Math.floor(r()*40)+10,amenes:Math.floor(r()*8),finitions:pepite?vic:Math.floor(r()*Math.max(1,vic))},
-        trait:trait?(trait.id||trait):null,phrase:(pepite?MGMT_RECRUTEUR.retour.pepite:formule)[Math.floor(r()*3)],contrat:{combats:3+Math.floor(r()*3),primeCombat:1000+Math.floor(r()*4000),primeSignature:1000+Math.floor(r()*9000)}});
+        chiffres:{documentes:Math.max(3,Math.min(vic+def,Math.floor(profilRng()*8)+3)),significatifs:Math.floor(profilRng()*40)+10,amenes:Math.floor(profilRng()*8),finitions:pepite?vic:Math.floor(profilRng()*Math.max(1,vic))},
+        trait:trait?(trait.id||trait):null,phrase:(pepite?MGMT_RECRUTEUR.retour.pepite:formule)[Math.floor(profilRng()*3)],contrat:{combats:3+Math.floor(profilRng()*3),primeCombat:1000+Math.floor(profilRng()*4000),primeSignature:1000+Math.floor(profilRng()*9000)}});
     }
     e.retours.unshift({n,dest:d.id,profils,lus:0});
   }
@@ -68,7 +65,7 @@ function mgmtRecruteurSigner(m,idProfil){
   if(!profil||m.roster?.some(f=>f.id===profil.id)||typeof mgmtContratSigner!=='function')return null;
   /* La porte mgmtRecruter signe une ligne du marché et exige une trace. Les profils de mission sont une offre déjà observée : les insérer temporairement dans la même porte, puis retirer la ligne d'offre. */
   if(!Array.isArray(m.exterieur)||typeof mgmtExteriorTrace!=='function')return null;
-  const div=(typeof divById==='function'?divById(profil.cat):null)|| (typeof DIVISIONS!=='undefined'?DIVISIONS.find(x=>x.id===profil.cat):null);
+  const div=typeof divById==='function'?divById(profil.cat):null;
   if(!div)return null;
   const ligne={id:profil.id,name:profil.name,first:profil.first,last:profil.last,ck:profil.ck,div:div.id,generation:0,W:profil.W,L:profil.L,D:profil.D||0,age:profil.age,level:1,libre:true,career:[{age:profil.age,W:profil.W,L:profil.L,D:profil.D||0}]};
   m.exterieur.push(ligne);
