@@ -31,6 +31,16 @@ Un commit après chaque point (A : fonction et libellés ; B : propositions ; B 
 
 ## Compte rendu
 
+- Reprise : commits `49d6b34`, `424092b`, `70ca39c`, `6e9ba80`, `fafc1db`.
+- `mgmt-manque.js` : compléments aux proportions des autres organisations en monde vivant, aux faits de potentiel champion et de finition/soumission, et au calcul domicile lorsque le pays du siège est disponible.
+- `mgmt-espoirs.js` : orientation de la sélection par angle et renouvellement déterministe d'un nom inédit.
+- `mgmt-save.js` : validation et réparation rejettent aussi les identifiants d'espoir vides; les clés restent facultatives et la version n'a pas changé.
+- `tests/mgmtLot38T1.test.js` : 11 tests ciblés, dont faits/propositions, profils, absence de valeurs manquantes, exclusion des champions, suivi/plafond, migration facultative, registre, validation/réparation, remplacement et absence de HTML. Les listes `pretest`, `pretest:watch` et les raccourcis `test:lot38t1`/`test:watch:lot38t1` existaient déjà.
+- Tests : `node --test tests/mgmtLot38T1.test.js` (11/11); `node --test tests/mgmtActualites.test.js` (7/7); `node --test tests/mgmtTrace.test.js` (15/15, dont « migration 5 → 6 sans perte »); `node --test tests/mgmtReleveReduit.test.js` (6/6, 294 s; partie neuve 1 857 314 octets). ESLint et `node tools/verif-versions.js origin/main` passent.
+- Limites restantes : la tranche n'atteint pas toutes les exigences. Les moyennes de l'ancien monde n'ont pas pu être ventilées par organisation à partir des données disponibles dans le calcul ajouté; les critères d'angle et les fiches espoir ne couvrent pas encore tous les faits prescrits; les tests ne fournissent pas encore le calcul indépendant exhaustif des huit profils, la diversité de quatre catégories quand possible, ni l'épreuve de nouvelle « Ton espoir » issue d'une soirée réellement simulée. La source `espoir` existante est enregistrée par `mgmt-espoirs.js` et le test d'actualités général passe, mais cela ne remplace pas cette preuve dédiée.
+- Écart à la fiche : les changements et commits de reprise n'ont pas complété toutes les cases. Pas de texte joueur supplémentaire inventé pendant cette reprise.
+- Questions pour Anthony : aucune posée; les points non résolus ci-dessus sont laissés ouverts, sans choix arbitraire.
+
 - Reprise 7 : aucun changement de code supplémentaire. Les tests ciblés relancés sont verts (2/2, `mgmtLot38T1.test.js`, environ 4,1 s; `mgmtActualites.test.js`, 7/7, environ 1,6 s). `timeout 110 node --test tests/mgmtReleveReduit.test.js` a échoué au délai (110,2 s, aucun test achevé).
 - Vérifications relancées : `node tools/verif-versions.js origin/main` sans écart (17 fichiers examinés); `node_modules/.bin/eslint .` sans erreur.
 - Écarts bloquant le critère de fin, non corrigés : comparaisons mesurées entre organisations pour plusieurs profils, troisième ligne des profils de catégorie, calcul « à domicile », correspondance complète des angles/critères et fiches factuelles des espoirs, tests exhaustifs listés dans la fiche et inclusion dans les listes `test`/`test:watch`, résultat concluant du test long de poids sauvegarde.
