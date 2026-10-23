@@ -12,8 +12,9 @@ function mgmtDiscoursEligibilite(m,combat){
   const finish=combat.family&&combat.family!=='dec';
   const limite=(Number.isSafeInteger(combat.round)?combat.round:1)*300;
   const dernieres=finish&&Number.isFinite(combat.s.d)&&combat.s.d>=limite-10;
-  const retournement=finish&&combat.round>=2&&Number.isFinite(combat.scoreAvantDernier)&&combat.scoreAvantDernier<0;
-  if(!motif&&((ca&&ca.kd>0&&cb&&cb.kd>0)||dernieres||retournement))motif='combat-fou';
+  /* Le relevé conserve les statistiques cumulées par round, pas les cartes
+     de score des juges : aucun retournement fiable n'est déductible ici. */
+  if(!motif&&((ca&&ca.kd>0&&cb&&cb.kd>0)||dernieres))motif='combat-fou';
   return motif?{motif,force:motif==='principal'||motif==='co-principal'}:null;
 }
 function mgmtDiscoursComposer(m,combat){

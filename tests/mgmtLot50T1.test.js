@@ -51,3 +51,15 @@ test('L’éligibilité est pure et indépendante de toute RNG',()=>{
   assert.equal(JSON.stringify([m,c]),avant);
   assert.equal(fs.readFileSync('mgmt-discours.js','utf8').includes('rnd('),false);
 });
+test('Un scoreAvantDernier isolé ne prétend pas établir un retournement',()=>{
+  context.mgmtReleveCoin=()=>({kd:0});
+  context.mgmtClassementCategorie=()=>[];
+  const m={roster:[],hist:[]},c={a:{id:'a',div:'x'},b:{id:'b',div:'x'},winner:'A',slot:'prelim',family:'ko',round:3,scoreAvantDernier:-1,s:{d:610,A:{kd:0},B:{kd:0}}};
+  assert.equal(context.elig(m,c),null);
+});
+test('L’interpellation ne fabrique pas une rivalité historique parallèle',()=>{
+  const source=fs.readFileSync('mgmt-rivalites.js','utf8');
+  assert.match(source,/function mgmtRivalites\(m\)/);
+  assert.match(source,/Dérivé de m\.hist/);
+  assert.match(fs.readFileSync('mgmt-corps.js','utf8'),/k:'discours',[^\n]*interpelle:d\.interpelle/);
+});
