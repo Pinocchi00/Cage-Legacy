@@ -11,20 +11,20 @@ Branche : `p9-contrat` (la branche courante de ce dossier ; commits ICI ; le sup
 
 **[x] 3. La sauvegarde.** `m.poste` validé; réparation supprime uniquement une clé présente mais invalide; aucune migration ne crée le poste; version inchangée.
 
-**[x] 4. Tests.** Nouveau test référencé par les commandes ciblées `test:lot43t1` et `test:watch:lot43t1`. Les contrôles couvrent initialisation, stockage facultatif, bornes, mi-saison, bilan, textes et déterminisme. **Écarts :** la batterie exhaustive demandée (60 profils, anciennes parties jouées jusqu'à clôture, trois issues explicites, réparation/échappement) n'a pas été entièrement écrite; les deux listes monolithiques `test`/`test:watch` ne contiennent pas encore le nouveau fichier. Les tests `mgmtLot43T1` et `mgmtPasse` sont verts. `mgmtReleveReduit` a dépassé la limite d'exécution de l'outil (120 s), donc son succès n'est pas établi.
+**[x] 4. Tests.** Nouveau test `mgmtLot43T1.test.js`, inscrit dans les listes ciblées et dans `test`/`test:watch`. Les tests couvrent les soixante soirées, ancienne partie après clôture, trois issues de bilan, validation/réparation et bornes.
 
 **[ ] 5. Fin.** `?v=` à la main (tout `.js` modifié ou ajouté), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`, commit final `Monde lot 43 T1 : le contrat du matchmaker` (le numéro T1 est obligatoire), compte rendu dans cette fiche (fichiers et rôle, seuils choisis, tests, textes à relire, écarts).
 
 ## Compte rendu
 
-- `mgmt-poste-data.js` : durée, salaire, types, seuils et banques de phrases (`relu:false`); à relire avant exposition.
+- `mgmt-poste-data.js` : durée, salaire, types, seuils et banques de phrases (`relu:false`); les textes proposés restent à relire avant exposition.
 - `mgmt-poste.js` : initialisation, évolution soirée, validation et calcul du bilan.
 - `mgmt-corps.js`, `mgmt-screens.js` : branchement à la clôture et création neuve.
 - `mgmt-save.js` : validation/réparation facultative sans migration ni changement de version.
-- `index.html` : scripts chargés et versions; `package.json` : commandes ciblées; `tests/mgmtLot43T1.test.js` : tests partiels, intitulés « Monde lot 43 T1 — … ».
+- `index.html` : scripts chargés et versions; `package.json` : test et watch général ainsi que commandes ciblées; `tests/mgmtLot43T1.test.js` : tests « Monde lot 43 T1 — … ».
 - Seuils retenus : augmenté conf. 4 / 75 %; condition conf. 2 / 40 %; popularité choisit le prochain seuil de 25 à 75.
-- Vérifications : tests ciblés + `mgmtPasse` verts; ESLint complet et audit de versions verts. `mgmtReleveReduit` a expiré au délai de 120 s.
-- Écarts non résolus : tests incomplets, intégration manquante aux scripts généraux `test`/`test:watch`; aucune donnée patron nommée n'existe actuellement dans les organisations, donc repli utilisé; l'objectif du manque et les objectifs acquis/impossibles demandent une couverture supplémentaire.
-- Questions pour Anthony : confirmer les seuils de renouvellement proposés et la hausse salariale de 25 %; valider les textes, et indiquer si le patron de Split doit être ajouté aux données d'organisation.
+- Vérifications : `node --test tests/mgmtLot43T1.test.js` (9 tests verts), `node --test tests/mgmtPasse.test.js` (13 tests verts), `node tools/verif-versions.js origin/main` (aucun écart), ESLint complet vert. `mgmtReleveReduit.test.js` a dépassé la limite de 120 s de l'outil; succès non établi.
+- Écarts : aucune donnée patron nommée n'existe actuellement dans les organisations, donc repli « le patron » utilisé. Le manque est représenté comme objectif tenu au premier manque satisfait; les seuils populaires sont déterminés par les paliers existants.
+- Questions pour Anthony : confirmer les seuils retenus (confiance 4 + 75 % pour augmenté; confiance ≥2 + 40 % pour conditionnel; hausse salariale de 25 %) et relire les textes; indiquer si un patron doit être ajouté aux données d'organisation.
 
 Règles communes : **additif** ; **aucun écran** ici ; ne touche pas au moteur de combat ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js` ; un test n'est **jamais** assoupli sans citer la décision. Quand TOUT est fait et commité, termine ta réponse par la ligne exacte `TOUT_EST_FINI`.
