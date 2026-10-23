@@ -62,6 +62,14 @@ Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`,
 - Écarts restant : les mesures indiquées sont les valeurs CSS portées ; aucune nouvelle comparaison DOM automatisée n’a été ajoutée. Les styles du panneau fil et des gestes ont été ajustés dans le même passage que les groupes de suivi.
 - Questions pour Anthony : aucune.
 
+### Compte rendu — réglages finaux de planche (23/10/2026)
+
+- Fichier modifié : `ui-cadre.css`, quatre réglages ciblés pour l’alignement des groupes suivis, la largeur de copie du fil, les lignes de statistiques et l’ancrage/présentation des gestes du panneau de détail. `index.html` : version cache de `ui-cadre.css` montée à chaque point. Aucun autre fichier d’application modifié ; aucun changement de sauvegarde ou de moteur.
+- Commits par point : `aae44c5` (panneau 1), `88ef249` (panneau 2), `2ffbd41` (panneau 3), `19fc62c` (gestes du panneau 3).
+- Tests exécutés séparément : `tests/mgmtActualitesEcran.test.js` (8 tests verts) ; `tests/mgmtCadre.test.js` (12 tests verts).
+- Contrôles : `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` sans erreur.
+- Écarts/questions : aucun nouveau changement fonctionnel ; aucun fichier exclu de la demande n’a été inclus. Les modifications préexistantes sous `.opencode/` et `opencode.json` restent hors commits.
+
 ### Correctif de cadrage (reprise p3-suivre)
 
 - `mgmt-ecran-actualites.js` passe maintenant par `mfEcran` (`courant:'actualites'`, plaque Actualités, libellé TES SUIVIS ET TES ESPOIRS, Fight Night et touches de pied) ; contenu `mf-contenu mf-actu` et trois cadres rendus avec `mfPanneau`.
