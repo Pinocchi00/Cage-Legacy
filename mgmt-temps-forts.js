@@ -38,4 +38,14 @@ function mgmtVueDuCombat(m,i){
   const p=typeof mgmtSoireeProgramme==='function'?mgmtSoireeProgramme(m)[i]:null;
   return p&&p.nom===MGMT_SOIREE_TEXTES.principal||p&&p.nom===MGMT_SOIREE_TEXTES.coprincipal?'complet':'forts';
 }
+/* ==== [ANCRE: P7_T2_REGLAGE_VUE] — Monde lot 49 T1 ==== */
+function mgmtVueCombatChoisir(i,vue){
+  if(!G||!G.mgmt||!Number.isSafeInteger(i)||i<0||!['complet','forts','resultat'].includes(vue))return false;
+  const m=G.mgmt;
+  if(!m.vues)m.vues={};
+  m.vues[i]=vue;
+  if(typeof saveMgmt==='function')saveMgmt();
+  if(typeof render==='function')render();
+  return true;
+}
 /* ==== [FIN ANCRE] ==== */
