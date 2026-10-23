@@ -25,6 +25,7 @@ const MGMT_COMBAT_REGLAGES_ORIGINE={commentaire:true,coins:true,noms:true,secous
 let MGMT_COMBAT_REGLAGES=Object.assign({},MGMT_COMBAT_REGLAGES_ORIGINE);
 
 let MGMT_COMBAT={session:null,vue:null,trace:null,refuse:false,d:0,vitesse:1,pause:false,plan:'cable',mode:'fight',fin:0,queue:0,decT:0,real:0,last:0,raf:0,
+  tempsForts:null,tempsFortActif:-1,vueCombat:'complet',
   carte:null,room:null,org:'',num:'',salle:null,retour:'mgmt_soiree',finRetour:null,salleDit:'',decision:null,decalRefait:false};
 
 /** « SWAT » → « S » : l'initiale d'un pion. */
@@ -79,7 +80,9 @@ function mgmtCombatOuvrir(o){
   const R=MGMT_COMBAT_REGLAGES, salle=o.salle||mgmtCombatSalleDeTrace(m,t);
   C.sonT=-1;
   C.session=S; C.d=0; C.pause=false; C.mode='fight'; C.fin=0; C.decT=0; C.real=0; C.last=0; C.decalRefait=false;
-  C.vitesse=o.vue==='forts'?4:(MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1);
+  C.vueCombat=o.vue||'complet';
+  C.tempsForts=C.vueCombat==='forts'?mgmtTempsFortsChoisir(m,t):null; C.tempsFortActif=-1;
+  C.vitesse=MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1;
   C.plan=ARENE_SALLE_PLANS.includes(R.camera)?R.camera:'cable';
   C.queue=S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0?MGMT_COMBAT_QUEUE_DECISION:MGMT_COMBAT_QUEUE_FINITION;
   C.decision=areneSalleDecision(S);
@@ -119,6 +122,18 @@ function mgmtCombatAvancer(dt){
   C.real+=dt;
   if(C.pause) return;
   if(C.mode==='fight'){
+    /* En temps forts, les intervalles entre fenêtres sont sautés sur la trace déjà rejouée.
+       Les fenêtres restent celles de l'arène, sans simulation ni animation parallèle. */
+    if(C.tempsForts&&C.tempsForts.length){
+      const width=4, scale=MGMT_COMBAT_ECHELLE;
+      let i=C.tempsForts.findIndex(x=>C.d<(x.t/scale)+width/2);
+      if(i<0) i=C.tempsForts.length-1;
+      const start=Math.max(0,C.tempsForts[i].t/scale-width/2), end=start+width;
+      if(C.d<start){ C.d=start; C.tempsFortActif=i; }
+      else if(C.d>=end&&i<C.tempsForts.length-1){ C.d=Math.max(C.d,C.tempsForts[i+1].t/scale-width/2); C.tempsFortActif=i+1; }
+      else C.tempsFortActif=i;
+      C.vitesse=C.d>=start&&C.d<end?1:4;
+    }
     if(C.d<S.dureeAffichage) C.d=Math.min(S.dureeAffichage,C.d+dt*C.vitesse);
     else{
       C.fin+=dt*C.vitesse;

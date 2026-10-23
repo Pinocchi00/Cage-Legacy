@@ -29,3 +29,12 @@ test('Monde lot 49 T1 — les commandes de vue sont présentes dans le bandeau d
   const source=fs.readFileSync(require.resolve('../mgmt-soiree-cadre.js'),'utf8');
   assert.match(source,/mf-so-views/); assert.match(source,/COMPLET/); assert.match(source,/TEMPS FORTS/); assert.match(source,/RÉSULTAT/);
 });
+
+test('Monde lot 49 T1 — le lecteur accélère entre les fenêtres de temps forts',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const C=MGMT_COMBAT;C.session={dureeAffichage:200};C.pause=false;C.mode='fight';C.d=0;C.fin=0;C.tempsForts=[{t:0},{t:300},{t:600}];C.tempsFortActif=-1;mgmtCombatAvancer(0.1);const debut={d:C.d,v:C.vitesse,i:C.tempsFortActif};C.d=4;mgmtCombatAvancer(0.01);return {debut,saut:C.d,index:C.tempsFortActif,v:C.vitesse}})())`));
+  assert.equal(r.debut.v,1);
+  assert.ok(r.saut>35,'l’intervalle entre les moments est sauté sur la trace');
+  assert.equal(r.index,1);
+  assert.equal(r.v,1);
+});
