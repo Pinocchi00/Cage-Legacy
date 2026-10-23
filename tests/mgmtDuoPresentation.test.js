@@ -21,7 +21,9 @@ test('Duo T58 — la présentation de la super carte est sans spoiler et rend la
   win.eval('G.screen="mgmt_duo_soiree";render();CL.mgmtDuoPresentation();');
   assert.equal(win.eval('G.screen'),'mgmt_presentation_combat');
   const html=win.document.body.innerHTML;
-  assert.ok(html.includes(carte.combats[0].na)&&html.includes(carte.combats[0].nb));
+  /* Décision (superviseur, 22/10/2026, brief P4 T1) : la présentation écrit les noms en capitales, prénom et nom dans deux éléments (« SERGEI » puis « KARPOV ») ; la fixture change avec la composition de Split, le test lit donc chaque mot du nom en capitales plutôt que le nom exact. */
+  const mots=n=>String(n).toUpperCase().split(/\s+/).filter(Boolean);
+  assert.ok([...mots(carte.combats[0].na),...mots(carte.combats[0].nb)].every(w=>html.includes(w)),'les deux combattants du premier combat figurent, en capitales');
   const premier=carte.combats[0];
   assert.ok(!html.includes(`${premier.family} · ${premier.round}`));
   win.eval('CL.mgmtPresentationRetour();');
