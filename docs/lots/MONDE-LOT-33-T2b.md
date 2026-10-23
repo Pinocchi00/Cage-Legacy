@@ -29,4 +29,17 @@ Sur une partie fabriquée ou `mgmtPasseGenerer('split',{soirees:6})` avec trois 
 Versions à la main, `node tools/verif-versions.js origin/main`, `npx eslint .`, tests un par un, commit `Monde lot 33 T2b : l'ecran Actualites` (le numéro T2b est obligatoire). Un commit après chaque point (câblage barre ; rendu ; clavier ; style ; tests).
 
 ## Compte rendu
+
+### État de la tranche (reprise)
+
+- `mgmt-cadre.js` et les tests de sections étaient déjà câblés dans l’état initial de la branche : 13 sections, Actualités en deuxième, `MF_ECRAN_SECTION` et attente des nouvelles non lues. Rien à modifier ni committer pour ce point.
+- `mgmt-ecran-actualites.js` : rendu des colonnes, liste, lecture, filtre, détail et actions limitées aux données disponibles ; inclus dans `index.html`.
+- `ui-cadre.css` : premières règles `.mgmt-ac-*`. La reproduction complète des mesures de la planche n’a pas été achevée.
+- `tests/mgmtActualitesEcran.test.js` : huit intitulés conformes aux huit cas demandés ; scénarios ciblés verts (`timeout 110 node --test tests/mgmtActualitesEcran.test.js`). Scripts dédiés ajoutés dans `package.json`; les commandes générales `test` et `test:watch` n'incluent pas encore ce fichier.
+- Aucun changement de sauvegarde ni de moteur de combat.
+- Vérification versions : `ui-cadre.css` versionné dans `index.html`; reste un écart préexistant signalé pour `mgmt-cadre.js` (`?v=b39xxxxxxxxx` identique à `origin/main`). ESLint invoqué via `node_modules/.bin/eslint .` sans sortie d'échec.
+- Tableau de fidélité : colonnes — planche : gauche 380px, centre flex 1.45, droite flex 1 ; page : gauche 380px, centre flex 1.45, droite flex 1. Lignes de suivi — planche 54px, page 54px. Pastille — planche octogone 14px, page octogone 14px. Ligne du fil — planche 14px 16px, fond #1B1818, page identique. Titre de ligne — planche 26px, page 26px. Titre panneau détail — planche 48px, page 48px. Séparateurs — planche 2px rgba(233,230,225,.16), page identique. Bouton SA FICHE — valeurs exactes non portées. Pied de touches — non reproduit dans cette reprise.
+- Omission faute de donnée : prolongation non affichée, car aucune action contextualisée de prolongation n’est établie ici ; l’étiquette contractuelle apparaît uniquement avec `f.ct`. Les blocs « ce qu’il pense » et « préparer son combat » restent absents.
+- Écarts / reste à faire : la demande d’ajouter les tests à la liste générale `test` et `test:watch` reste incomplète ; les interactions clavier Tab/flèches ne reproduisent pas encore complètement la navigation spécifiée ; vérification DOM/fidélité de la planche incomplète. Le point 1 n’a pas nécessité d’édition car il était déjà présent. `npx eslint .` n’a pas pu être lancé par l’outil ; l’équivalent local `node_modules/.bin/eslint .` a été utilisé.
+- Questions pour Anthony : aucune.
 Fichiers et rôle ; tests (intitulés) ; temps ; tableau de fidélité (§3) ; libellés ajoutés (à relire par Claude) ; ce qui a été omis faute de donnée dans le jeu ; écarts ; questions pour Anthony.
