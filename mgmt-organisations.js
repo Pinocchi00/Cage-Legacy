@@ -232,7 +232,11 @@ function mgmtOrgPaysPoids(m){
 function mgmtOrgAgeTire(u,profil){
   const id=profil.manque&&profil.manque.id;
   if(id==='espoirs') return 28+Math.floor(11*Math.pow(u,1.25));
-  if(id==='experimentes') return 20+Math.floor(11*Math.pow(u,1.5));
+  /* ==== [ANCRE: MONDE34T1B_COHORTE_JEUNE_COMPACTE] — Monde lot 34 T1b ==== */
+  /* 20–27 plutôt que 20–30 : moins de cohortes déjà adultes à l'ouverture des six ans,
+     sans retirer de combattant ensuite. Mesure 62 soirées : Rim 246 → 226 lignes,
+     180 872 → 170 579 caractères sur disque ; le plan des recrues reste inchangé. */
+  if(id==='experimentes') return 20+Math.floor(8*Math.pow(u,1.5));
   return clamp(22+Math.floor(17*Math.pow(u,1.25))+profil.age,20,40);
 }
 function mgmtOrgPaysDomicile(m){
