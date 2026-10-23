@@ -1333,8 +1333,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-trait-titre{font:800 30px/.9 var(--mf-titre);color:#E9E6E1;white-space:nowrap}
 .mf-fi-trait-fait{font:500 22px/1 sans-serif;color:rgba(233,230,225,.74);text-align:right}
 .mf-fi-trait-phrase{margin-top:8px;font:500 24px/1 sans-serif;color:#E9E6E1}
-.mf-fi-trait-cache{border:2px dashed rgba(233,230,225,.38);padding:9px 14px;font-size:18px;line-height:1;color:#E9E6E1}
-.mf-fi-trait-entete{display:flex;justify-content:space-between;font:600 18px/1 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74);margin-bottom:5px}
+.mf-fi-trait-cache{border:2px dashed rgba(233,230,225,.38);padding:9px 14px;font-size:22px;line-height:1;color:#E9E6E1}
+.mf-fi-trait-entete{display:flex;justify-content:space-between;font:600 22px/1 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74);margin-bottom:5px}
 .mf-fi-p .q{width:26px;flex:none;text-align:center;font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1;color:var(--mf-blanc)}
 .mf-fi-sg{display:block;width:26px;height:26px;flex:none}
 .mf-fi-cagebox{flex:1;display:flex;justify-content:center;align-items:center;min-height:0}
