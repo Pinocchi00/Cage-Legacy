@@ -48,3 +48,9 @@ Fichiers et rôle ; tableau des mesures (par manque, trois graines) et réglages
 - Constat à conserver dans la mesure : le siège de Pure Impact est aux Émirats arabes unis, pays absent des 30 `COUNTRY_KEYS`. Aucun pays de remplacement n'est inventé. Le taux domestique préexistant est donc nul ; son effet différentiel ne pourra pas être attesté avec les données actuelles.
 - Question pour Anthony : faut-il étendre le catalogue de pays et de noms aux Émirats pour rendre le manque `a-domicile` mesurable, ou accepter ce manque déjà structurel ?
 - Vérification du premier point : audit versions vert ; vérification rapide lancée par `@verif`, interrompue à cinq minutes (704 succès, 70 fichiers signalés en échec sans diagnostic détaillé). Les tests ciblés sont verts ; cette vérification globale n'est pas revendiquée verte. L'exécution directe de `npx eslint` a été refusée par les permissions de l'environnement ; le lint exécuté par `check:rapide` n'avait pas rapporté d'erreur.
+
+### Point 2 — outil de mesure
+
+- `tools/mesure-manques.js` : CLI graines / `--json`, génération du passé et du monde vivant, huit indicateurs par organisation, comparaison à la moyenne des sept autres et rapport Markdown. Les taux de finition comptent les victoires effectivement simulées, pas le bilan antérieur dérivé.
+- Premier essai sur 20261008 : espoirs 0,417 / 0,508 = 0,821 (hors cible) ; potentiel 66 / 70,362 (−4,362) ; expérimentés 0 / 0,136 ; jeunes-partout 0,776 / 0,457 = 1,699 ; finisseurs 37,468 / 56,255 = 0,666, finitions passées 0,333 / 0,513 = 0,649 ; soumissions 36,922 / 55,799 = 0,662, passé 0,111 / 0,172 = 0,646. Pure Impact : indicateur structurellement nul, marqué NON MESURABLE.
+- Deuxième vérification rapide terminée : 1 344 succès, deux assertions en échec (`mgmtMondeVivant` loi du score, `mgmtReleveReduit` poids 1,9 Mo), un todo préexistant ; pas d'erreur de chargement/OOM. Audit versions vert. Ces deux échecs restent à diagnostiquer aux garde-fous.
