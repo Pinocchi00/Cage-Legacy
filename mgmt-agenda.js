@@ -213,6 +213,10 @@ function mgmtAgendaJouer(m){
   /* Monde lot 14 T2 (décision du 17/10/2026) : des préliminaires vides au moment de jouer (ancienne sauvegarde, remplacement introuvable libéré entre-temps)
      se composent juste avant — jamais d'erreur ; avec l'agenda actif seulement, la lecture d'une partie au calendrier hors jeu reste inchangée. */
   if(mgmtAgendaActif(m)&&mgmtCardPrelimsShort(m)) mgmtComposerPrelims(m);
+  /* ==== [ANCRE: P6_T2_DEFAUT_SEMAINE] — Monde lot 41 T2 ==== */
+  if(m.semaine&&Array.isArray(m.semaine.ev)&&typeof mgmtSeChoisir==='function'){
+    m.semaine.ev.forEach((e,i)=>{if(e&&e.p&&!e.r)mgmtSeChoisir(i,'A');});
+  }
   const ev=mgmtRunEvent(m);
   if(!ev){ c.jour=avant; return null; }
   mgmtAdvanceRosterAges(m);
