@@ -222,7 +222,7 @@ function mgmtAgendaJouer(m){
 }
 /** Compatibilité historique : le suivi ne réserve plus le combattant. Pur. */
 function mgmtAgendaReserve(m,f){
-  return false;
+  return !!(f&&mgmtEstReserve(m,f.id));
 }
 
 /** La préparation à la demande : le joueur a désigné un combattant, l'assistante lui propose l'adversaire le plus proche au
