@@ -99,6 +99,8 @@ function mgmtRecruter(m,id,interne){
     const pic=mgmtNivPic(line.id);
     ligne.niv=trace.niveau; ligne.pic=pic;
     ligne.pot=clamp(trace.niveau+Math.round(Math.max(0,pic-ligne.age)*1.8),trace.niveau,MGMT_NIV_MAX);
+    /* ==== [ANCRE: MONDE34T1B_NIVEAU_RECRUE] — Monde lot 34 T1b ==== */
+    mgmtOrgNiveauTirage(ligne,mgmtOrgProfil(m));
   }
   m.roster.push(ligne);
   mgmtRangsInvalider(m);   /* Monde lot 1 T1 : une recrue entre dans l'effectif classé. */
