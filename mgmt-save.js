@@ -461,6 +461,7 @@ function validateMgmt(raw){
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
   /* Retours du 09/10/2026 : la graine de la partie (facultative : une partie d'avant n'en a pas). */
   if(raw.graine!==undefined&&(typeof raw.graine!=='string'||!/^[0-9a-z]{1,16}$/.test(raw.graine))) return false;
+  if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
   return true;
 }
 
@@ -656,6 +657,7 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
   const suivisExistants=Array.isArray(m.suivis)?m.suivis:[];
