@@ -10,3 +10,11 @@ Branche : `p9-poste-ecran` (la branche courante de ce dossier ; commits ICI ; le
 **[ ] 5. Fin.** Commit final `Monde lot 48 T1 : Ton poste et le bilan du patron` (le numéro T1 est obligatoire), compte rendu honnête dans cette fiche (ce qui est fait, ce qui ne l'est pas, **écarts mesurés avec les maquettes à 1920×1080**), puis `TOUT_EST_FINI`.
 
 Règles communes : **additif** ; ne touche pas au moteur de combat ; ne modifie ni `mgmt-traits*.js` ni `mgmt-attention.js` ; un test n'est **jamais** assoupli sans citer la décision.
+
+## Compte rendu
+
+- Travail atteint : création de `mgmt-ecran-poste.js` avec registre d'onglets, affichage initial des informations de contrat, niveau de confiance et objectifs; déclaration de l'écran dans `mgmt-screens.js`; inclusion du nouveau script dans `index.html`.
+- Non fait : lien depuis Organisation et Accueil, bilan de fin de contrat (issues, action Rester et lecture), habillage CSS conforme, tests demandés et scripts package. Les cas n'ont donc pas été validés de bout en bout.
+- Vérifications : ESLint ciblé sur les trois scripts modifiés passe. Le test ciblé échoue car `tests/mgmtLot48T1.test.js` n'a pas encore été créé. L'audit des versions a d'abord relevé les versions périmées; elles ont été montées avec `tools/_bump.js`, audit final restant à refaire.
+- Écarts maquettes 1920×1080 : aucune mesure visuelle n'a été faite; le rendu provisoire ne reprend pas les dimensions, polices, composition et styles exacts. Le fil ne constitue pas encore un historique correctement dérivé et le rendez-vous nécessite validation fonctionnelle.
+- Questions pour Anthony : aucune question nouvelle; poursuivre l'implémentation avant de considérer la tranche terminée.
