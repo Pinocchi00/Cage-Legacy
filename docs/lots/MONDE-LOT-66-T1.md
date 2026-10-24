@@ -220,6 +220,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 4 — contrôles après dernier commit — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. HEAD `3fcb7df3`; les derniers commits de tranche sont déjà présents et aucun fichier de tranche n'est modifié à l'ouverture. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et non touchées.
+- Lu `LISEZMOI.txt` et exécuté les captures séparément à 1920×1080. `lendemain` : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=22,5 %` (cible spécifique de reprise ≤18 % non atteinte). `lendemainSuite` : `chevauchements=0`, `textesSous22px=0`, `grosBlocs=17,2 %`, avec quatre débordements des mouvements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »). Les images comparatives ont été régénérées sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Vérifié le CSS terminal : noms des moments à 80/64 px et hauteur de cartes 285 px; les règles produisent déjà les tailles minimales exigées. Aucun changement supplémentaire n'a été fait à l'aveugle, la capture démontrant que les problèmes restants sont la densité des blocs et le contenu variable de la suite, pas un oubli de règle de taille. Le balisage de la maquette `UniLendemain` confirme les proportions et les libellés de référence.
+- Écart à la fiche toujours présent : seuil renforcé ≤18 % pour le lendemain et les quatre alertes de débordement dans la suite. Captures et `node --test tests/mgmtEcranLendemain.test.js` (7/7) :
+
 ### Reprise 44 — recapture suite et essai de cellules — 24/10/2026
 
 - État initial : branche `fid-lendemain`, les commits fonctionnels sont présents ; seules les modifications hors tranche dans les fichiers de configuration/agents et `sw.js` sont laissées intactes.
