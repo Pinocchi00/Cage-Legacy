@@ -162,3 +162,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Pas de nouvelle capture post-correction.
 - Écarts à la fiche toujours ouverts : modèle/programme du choc à trois combats et preuve de son résultat, comparaison visuelle et seuil ≤20 %, scène d'arrivée dédiée, parcours complet depuis fin de contrat et validation stricte du rechargement. Le guide de capture externe ne peut toujours pas être ouvert par l'outil de lecture dans cet environnement.
 - Cette reprise n'achève pas la tranche ; aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 29
+- Fichiers modifiés : `mgmt-ecran-poste.js` lie maintenant la touche Fiche de l'écran choc à `CL.mgmtFiche` du champion Split (`c.a`), sans inventer de raccourci qui ne fonctionnait pas ; `index.html` versionné par `_bump.js` ; `tests/mgmtLot69T1.test.js` vérifie ce branchement.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (3/3, ~34 s).
+- Écarts encore présents : choc toujours mono-combat et parcours complet exigé non établi ; captures/mesures comparatives des écrans et conformité des arrivées non validées. Guide capture externe inaccessible par l'outil autorisé.
+- Pas de changement de sauvegarde. Aucun achèvement global revendiqué.
