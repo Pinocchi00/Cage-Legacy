@@ -8,6 +8,13 @@
 - Modifications applicatives/tests/cache/migration : aucune dans cette reprise. Cette fiche seule est mise à jour pour consigner les mesures et l’état réel. Reste à corriger les défauts visuels, établir une scène de cérémonie avec prix, inspecter les six comparatifs et satisfaire la cible `grosBlocs ≤ 20 %` sans chevauchements, texte trop petit ni débordement. Aucun `TOUT_EST_FINI` revendiqué.
 - Questions pour Anthony : aucune question de spécification ; ce sont des travaux de correction et validation encore à exécuter.
 
+## Compte rendu — reprise 25 (24/10/2026)
+
+- Branche `fid-organisation` confirmée ; HEAD consulté (`7694789e`), arbre propre au départ. Pas de code applicatif non commité à reprendre.
+- Correction ciblée de l'en-tête cérémonie : grille explicite séparant titre/presse et cartouche date/source, pour éviter la collision constatée lors de la reprise superviseur. Cache CSS monté avec `node tools/_bump.js ui-cadre.css`.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (49/49), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Migration de sauvegarde : aucune.
+- Fichiers : `ui-cadre.css` (réservation des colonnes de l'en-tête) et `index.html` (version de cache), cette fiche. Le PNG `cmp-ceremonie.png` n'a pas pu être ouvert ni inspecté ; aucune preuve de scène avec lauréats n'est ajoutée dans cette reprise. Les écarts Carnet/Croissance/Guerre/Bilan notés précédemment restent non certifiés comme corrigés. Il ne s'agit pas d'une clôture complète de la tranche.
+
 ## Compte rendu — reprise 20
 
 - Reprise : branche `fid-organisation`, HEAD initial `40367f66`, arbre propre. La procédure externe a été consultée via terminal. Capture Cérémonie après ajustement CSS : chevauchements=0, textes sous 22 px=0, débordements=[], `grosBlocs=19,7 %` (avant : 20,7 %). Le cmp a été généré mais non ouvert visuellement ; la scène capturée n'est pas démontrée avec prix remplis.

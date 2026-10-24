@@ -509,6 +509,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan p,.ce3-bilan li{margin:0;font-size:22px}
 .ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
 .ce3-bilan ul{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:28px;list-style:disc}
+/* ==== [ANCRE: MONDE67_T1_CEREMONIE_ENTETE_RESERVE] — Monde lot 67 T1 ==== */
+.ce3-entete{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px}
+.ce3-entete-gauche{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:center;gap:24px;min-width:0}
+.ce3-entete-gauche h1{font-size:48px;line-height:.9;white-space:nowrap}
+.ce3-entete-gauche p{min-width:0;max-width:none;white-space:nowrap}
+.ce3-entete>strong{min-width:max-content;justify-content:center}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_CEREMONIE_DIMENSIONS_PLANCHE] — Monde lot 67 T1 ==== */
 .ce3-ecran{left:300px;top:20px;width:1564px;height:1040px;padding:0;gap:16px;overflow:hidden}
 .ce3-entete{height:64px;flex:none}
