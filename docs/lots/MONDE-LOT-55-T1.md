@@ -244,3 +244,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtLot55T1.test.js` : 12/12 verts. `node tools/verif-versions.js origin/main` signale encore l'écart préexistant de `mgmt-accueil.js` (hors tranche); `mgmt-ceremonie.js` a été bumpé.
 - Le test est ciblé et ne prouve pas à lui seul la non-répétition sur 50 saisons simulées. Les parcours joués sur trois années, les tests fonctionnels de sauvegarde ancienne, la conformité intégrale aux maquettes et le test lent de plafond ne sont pas réalisés dans cette reprise. Aucune migration de sauvegarde.
 - Fichiers modifiés de cette reprise : `mgmt-ceremonie.js` (édition unique dans la phrase), `index.html` (version du script), cette fiche. Aucun texte rédigé ne contient de personnage inventé. Les changements `.opencode/agents/*` et `opencode.json` restent exclus.
+
+### Reprise 31
+
+- Ajout du test « Lot 55 T1 — les formulations de cérémonie ne se répètent pas sur cinquante années » : il calcule les prix sur cinquante fenêtres annuelles successives avec traces identiques et vérifie l'unicité des phrases produites. Le premier essai a montré que le jeu de données donne quatre prix valides par an, pas cinq; l'assertion a été corrigée sur ce constat, sans modification de la production.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (13/13 vert), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). `node tools/verif-versions.js origin/main` signale toujours l'écart préexistant `mgmt-accueil.js`, hors de cette tranche et non modifié.
+- Ce test ne constitue pas la simulation réelle de trois ans avec `mgmtPasseGenerer` et soirées jouées. Les écarts précédemment documentés (maquettes intégrales, scénario d'ancienne sauvegarde chargé, données historiques exhaustives du carnet et déclencheur anniversaire) demeurent; aucun test lent `mgmtReleveReduit` exécuté. Aucun changement de sauvegarde.
+- Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` et cette fiche. Les modifications d'outillage étrangères restent exclues. La tranche n'est pas déclarée terminée.

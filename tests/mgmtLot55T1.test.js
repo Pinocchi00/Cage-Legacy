@@ -102,3 +102,20 @@ test('Lot 55 T1 — seules les traces des 365 jours précédant la cérémonie c
   assert.equal(combattant.stat,3);
   assert.equal(result.find(p=>p.id==='ko').stat,1);
 });
+test('Lot 55 T1 — les formulations de cérémonie ne se répètent pas sur cinquante années',()=>{
+  const c=charger(),phrases=new Set();
+  for(let annee=1;annee<=50;annee++){
+    const now=annee*365;
+    c.mgmtCalAujourdhui=()=>now;
+    const m={hist:[
+      {c:now-300,a:{id:'a',name:'A',W:4,L:0,D:0},b:{id:'b',name:'B'},winner:'A',family:'ko',round:1,slot:'main'},
+      {c:now-200,a:{id:'a',name:'A',W:4,L:0,D:0},b:{id:'c',name:'C'},winner:'A',family:'sub',round:2},
+      {c:now-100,a:{id:'a',name:'A',W:4,L:0,D:0},b:{id:'d',name:'D'},winner:'A',family:'ko',round:1}
+    ]};
+    for(const prix of c.mgmtCeremonieCalculer(m)){
+      assert.equal(phrases.has(prix.phrase),false,`phrase répétée à l'année ${annee}: ${prix.id}`);
+      phrases.add(prix.phrase);
+    }
+  }
+  assert.equal(phrases.size,200);
+});
