@@ -468,6 +468,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts à la fiche : affiches du choc toujours mono-combat côté modèle, parcours complet fin de contrat → bilan → rechargement strict valide non prouvé, capture discours/bilan et scène d'arrivée non obtenues ; le choc mesuré à 25.1% de gros blocs dépasse la cible. Les changements utilisateur préexistants hors tranche restent exclus.
 - Questions pour Anthony : aucune nouvelle question ; aucune règle métier supplémentaire n'a été supposée.
 
+### Reprise 68 — reproduction des scènes et vérification ciblée
+- Scènes réellement reproduites avec `shoot.js` : choc, discours et bilan. Choc : écran visible, `chevauchements=0`, `textesSous22px=0`, aucun débordement, `grosBlocs=25.1%` (cible ≤20% manquée). Discours : aucun défaut géométrique et `grosBlocs=18.1%`. Bilan : `grosBlocs=12.9%`, mais chevauchement détecté entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22). Je n'ai pas trouvé de correction CSS validée pour ce chevauchement ; une tentative d'augmenter l'espacement n'a pas changé les mesures et a été annulée.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4 : scénario offre/changement/arrivée/rechargement/soirée/lendemain, rendu choc, booking/exécution des trois paires, raisons d'offre et inscription aux scripts standards/watch.
+- `node tools/verif-versions.js origin/main` passe (20 fichiers examinés) ; `node_modules/.bin/eslint .` passe.
+- Aucune scène dédiée arrivée n'a été capturée ; les images externes générées par `shoot.js` n'ont pas été ouvertes visuellement dans cette interface. Pas de migration de sauvegarde.
+- Écarts à la fiche toujours réels : seuil de gros blocs du choc et chevauchement du bilan ; arrivée non comparée par capture ; parcours existant testé ne démarre pas d'une fin de contrat réelle générée avec bilan complet. Le code multi-paires existe et le test cible fait jouer trois affiches, mais les critères visuels ci-dessus empêchent de déclarer toutes les cases finies. Aucun `TOUT_EST_FINI` revendiqué.
+- Fichiers fonctionnels modifiés et conservés : aucun. La retouche CSS expérimentale a été annulée car elle n'améliorait pas la mesure. Tests ajoutés : aucun dans cette reprise.
+
 ### Reprise 61
 - `ui-cadre.css` compacte l'en-tête et le bandeau du choc (hauteurs, espacements et taille du VS) dans les styles de tranche afin de réduire l'emprise des blocs. `index.html` a reçu le `?v=` incrémenté par `node tools/_bump.js ui-cadre.css`.
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (17 fichiers), `node_modules/.bin/eslint .` passe.
