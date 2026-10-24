@@ -474,6 +474,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-entete-gauche p{font-size:22px;line-height:1.1;max-width:280px}
 .ce3-entete>strong{justify-content:center;gap:14px}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE67_T1_CEREMONIE_ENTETE_PLANCHE_REPRISE] — Monde lot 67 T1 ==== */
+.ce3-entete-gauche{grid-template-columns:max-content max-content;gap:18px}
+.ce3-entete-gauche h1{font-size:56px;line-height:.69}
+.ce3-entete-gauche p{max-width:none;white-space:nowrap}
+.ce3-entete>strong{gap:16px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);flex:none;height:530px}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));height:610px}
