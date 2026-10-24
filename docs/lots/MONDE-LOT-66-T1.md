@@ -132,3 +132,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Relancés séparément : `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLendemainDemo.test.js` (7/7). `node tools/verif-versions.js origin/main` ne détecte aucun écart.
 - La capture n'a pas été relancée lors de cette confirmation ; les dernières mesures consignées restent 19,5 % de gros blocs pour `lendemain` et 18,8 % pour `lendemainSuite`. Aucune inspection directe des PNG n'est revendiquée.
 - Aucun changement fonctionnel ni migration. Compte rendu actualisé uniquement ; les tests et audits ciblés cités ici sont verts.
+
+### Reprise 22 — recapture et correction ciblée — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. Relecture de `LISEZMOI.txt` et recapture des deux écrans après une correction CSS ciblée des détails de moments et du bouton retour redondant dans la suite. `lendemain` : gros blocs 19,4 %, moyen 24,7 % ; `lendemainSuite` : gros blocs 18,4 %, moyen 23,1 %.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Les contrôles automatisés de capture trouvent encore 8 chevauchements et 6 textes sous 22 px sur `lendemain` (dont collisions de la barre des touches avec le contenu et noms tronqués) ; `lendemainSuite` ne signale aucun chevauchement, mais détecte 21 éléments sous 22 px et quelques libellés tronqués. Ces défauts ne sont pas considérés résolus malgré les ratios de gros blocs conformes.
+- Modifié : `ui-cadre.css`, règles ciblées pour améliorer la lisibilité des détails, l'empilement des cartes et supprimer le bouton de retour dupliquant la touche clavier ; version de cache augmentée. Pas de modification de sauvegarde.
+- Écart restant : chevauchements/tailles et troncatures signalés par l'outil, à reprendre ; les images comparatives sont sous `C:/Users/antho/AppData/Local/Temp/shots/` et n'ont pas été ouvertes pour inspection directe. Le compte rendu ne revendique donc pas une conformité visuelle complète.

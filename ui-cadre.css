@@ -1994,6 +1994,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-number strong{font:800 30px/1 var(--mgmt-font-display);color:#E9E6E1}
 .ld66-number span{font:500 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
 .ld66-suite .ld3-suite{height:calc(100vh - 210px);margin:0 auto}
+/* ==== [ANCRE: MONDE66_T1_CAPTURE_FIXES] — Monde lot 66 T1 ==== */
+.ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.ld66-moments .mgmt-ld-link{position:relative;z-index:1;margin-top:auto;padding:8px 0}
+.ld66-lower{position:relative;z-index:0}
+.ld66-screen{padding-bottom:8px}
+.ld66-suite .ld3-suite-back{display:none}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE57_T1_STYLES] — Monde lot 57 T1 ==== */
