@@ -2041,7 +2041,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-actions{margin-top:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:30px;margin-left:26px}.mgmt-ac-actions button{gap:14px}.mgmt-ac-actions button.principale{background:#F0B220}.mgmt-ac-actions button kbd{flex:none}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: POSTE_ECRAN_STYLE] — Monde lot 48 T1 ==== */
-.po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:856px}
+.po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:824px}
 /* ==== [ANCRE: MONDE70_T1_POSTE_SCROLL] — Monde lot 70 T1 ==== */
 .po2-scene{box-sizing:border-box;max-height:calc(100% - 224px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .po2-scene>.po2-grid{min-height:0}
