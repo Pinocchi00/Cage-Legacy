@@ -77,3 +77,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `tests/mgmtLot69T1.test.js` est déjà référencé par `pretest` et `pretest:watch`, donc il s'exécute dans les deux commandes agrégées ; il a aussi des scripts dédiés `test:lot69t1` et `test:watch:lot69t1`. Aucun changement de script n'est requis.
 - Je n'ai pas pu ouvrir le fichier d'instructions de capture externe avec l'outil de lecture autorisé ; aucune capture/cmp n'est revendiquée. Les écarts fonctionnels et visuels précédemment consignés demeurent : choc à trois affiches, contrôle comparatif arrivée/discours/bilan, et parcours contractuel complet avec rechargement identique et lendemain.
 - Vérifications à cette reprise : le test ciblé et l'audit de versions sont relancés avant livraison. Aucun changement de sauvegarde. Cette reprise n'achève pas toutes les cases et ne revendique pas `TOUT_EST_FINI`.
+
+### Reprise 18
+- Lecture des instructions de capture : `LISEZMOI.txt` précise la commande `shoot.js`, les contrôles chevauchement/tailles/débords et les sorties `cmp-*.png`. Le dossier `shoot` n'existe pas dans ce dépôt ; aucune capture n'a donc été produite. Les planches restent la référence de structure.
+- Modification : `tests/mgmtLot69T1.test.js` contrôle aussi la présence des classes de titre, citation et détails du choc, afin de verrouiller ces blocs de la maquette. Les tests `node --test tests/mgmtLot69T1.test.js` passent (2/2).
+- Fichiers modifiés : ce test et la présente fiche. Pas de changement de sauvegarde, de CSS/JS ou de version cache.
+- Limites restantes : la logique métier ne porte qu'un combat dans `m.choc` (aucune donnée fiable n'établit les deux autres affiches ni un booking 2-sur-3) ; le parcours du test n'est pas fin de contrat → bilan → rechargement valide strict → lendemain ; les captures et mesures comparatives des quatre écrans n'ont pas été faites. Le bloc bilan, l'arrivée et le discours n'ont pas été comparés visuellement dans cette reprise.
+- Vérification environnement : la branche est `fid-choc`. Les modifications utilisateur hors tranche sous `.opencode/agents/` et `opencode.json` sont préservées. Aucune migration de sauvegarde.
+- Écart à la fiche : la tranche n'est toujours pas entièrement satisfaite ; cette reprise ajoute seulement une assertion structurelle. Aucun achèvement global revendiqué.
