@@ -318,3 +318,16 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Pas de modification métier, de CSS/JS, de sauvegarde, ni de version cache ; pas de nouvelle capture.
 - Écart inchangé et non masqué : les critères visuels par comparaison/capture, les trois affiches et le parcours strict complet de la fiche restent non établis. Cette reprise ne revendique pas `TOUT_EST_FIN`.
+
+### Reprise 54
+- Branche contrôlée : `fid-choc`. Les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent hors de la tranche.
+- Instructions `shoot` lues ; nouvelle tentative de capture 1920×1080 `choc,discours,bilan`. La capture du choc s'est terminée avant l'expiration : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.1%` (objectif ≤20 % non atteint). La commande a expiré au plafond de 120 s avant de fournir des résultats discours et bilan ; aucune conclusion post-correction pour ces deux écrans.
+- Relecture de `UniChoc` : la planche définit trois affiches séparées, tandis que le modèle métier lot 58 expose une seule paire `a`/`b`. Je n'ai pas inventé les deux autres affiches ni modifié la sémantique du booking sans données/modèle correspondants. Le test existant prouve seulement l'exécution et l'enregistrement du résultat pour cette paire.
+- Vérification ciblée `node --test tests/mgmtLot69T1.test.js` : 4/4. Aucun changement fonctionnel, aucune migration. Cette reprise ne prétend pas que les critères ouverts sont satisfaits.
+
+## Compte rendu (reprise 54)
+- Fichiers modifiés : cette fiche uniquement, pour consigner la nouvelle mesure et les limites observées.
+- Tests ajoutés : aucun ; test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4.
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : choc supérieur au seuil `grosBlocs` (25.1 %), série de captures interrompue après le choc, aucune mesure nouvelle discours/bilan/arrivée, logique de choc mono-affiche, et parcours actuel incomplet concernant fin de contrat/bilan et rechargement strictement identique. Les cases ne sont pas toutes terminées ; pas de revendication `TOUT_EST_FINI`.
+- Questions pour Anthony : aucune nouvelle question ; les limites restantes sont consignées sans inventer de règles métier.
