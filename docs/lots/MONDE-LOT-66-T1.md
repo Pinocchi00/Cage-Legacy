@@ -18,6 +18,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 46 — contrôles d'écran et tests ciblés — 24/10/2026
+
+- Confirmé la branche `fid-lendemain` et l'historique : les changements fonctionnels de la tranche sont déjà commités (`f8d561b2` au sommet) ; aucun fichier de code de tranche n'était en attente. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intactes.
+- Relu le guide de capture et relancé les deux écrans à 1920×1080. `lendemain` : 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %. `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, mais quatre débordements récurrents (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), gros blocs 17 %. Les comparaisons sont régénérées dans le dossier temporaire de l'outil.
+- Tests ciblés relancés et verts : `mgmtEcranLendemain.test.js` (7/7) et `mgmtLendemainDemo.test.js` (7/7). Le défaut restant est uniquement le contrôle de débordement du panneau mouvements de la suite ; les nombreuses règles CSS antérieures ne l'ont pas résolu. Je ne prétends donc pas la case visuelle 4 entièrement satisfaite.
+- Aucun changement de sauvegarde/migration. Tests ajoutés : aucun à cette reprise. Le compte rendu est le seul changement de cette reprise ; aucune question ouverte.
+
 - Modifiés : `mgmt-lendemain-cadre.js` compose l'écran du lendemain en moments, changements, presse et chiffres et relie les touches ; `mgmt-ecran-lendemain.js` présente les moments dans l'ordre Surprise/Finition/Guerre ; `ui-cadre.css` porte le style `ld66-*` sans animation ; `index.html` reçoit les versions de cache ; deux fichiers de tests adaptent leurs assertions obsolètes à la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
 - Captures : mesures précédentes `lendemainSuite` : grosBlocs 18,8 %, moyen 23,3 % ; `lendemain` : grosBlocs 20,8 %, moyen 26,1 %. Ajustement final de la hauteur relative des cartes (flex .82 → .72) pour réduire le ratio des gros blocs. Cette reprise n'a pas pu consulter `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` : l'accès au chemin externe est refusé par l'environnement. Le comparateur n'a donc pas été relancé et le ratio après ajustement reste non mesuré ; l'objectif ≤20 % n'est pas certifié.
 - Tests ciblés verts : `mgmtLot54T1.test.js` (30), `mgmtEcranLendemain.test.js` (7), `mgmtLot48T1.test.js` (9) et `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde ni migration.
