@@ -49,3 +49,12 @@ test('Lot 55 T1 — un prix de combat nul et une finition absente ne sont pas d�
   assert.ok(!ids.includes('soumission'));
   assert.ok(!ids.includes('combat'));
 });
+test('Lot 55 T1 — le retour tient compte du dernier combat avant la fenêtre annuelle',()=>{
+  const c=charger(),m={hist:[
+    {c:10,a:{id:'a'},b:{id:'b'},winner:'A',family:'decision'},
+    {c:200,a:{id:'a',name:'A'},b:{id:'c',name:'C'},winner:'A',family:'decision'}
+  ]};
+  const retour=c.mgmtCeremonieCalculer(m).find(p=>p.id==='retour');
+  assert.ok(retour);
+  assert.equal(retour.laureat,'a');
+});

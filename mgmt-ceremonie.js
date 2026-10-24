@@ -29,8 +29,9 @@ function mgmtCeremonieCalculer(m){
         cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
     } else if(p.id==='revelation'){
        cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||String(a.id).localeCompare(String(b.id)))[0];
-    } else if(p.id==='retour'){
-       cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=h.filter(x=>x.i<i&&(x.t.a.id===side.id||x.t.b.id===side.id)&&x.t.c<t.c).reduce((v,x)=>Math.max(v,x.t.c),-Infinity);return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0};}).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c||b.i-a.i)[0];
+     } else if(p.id==='retour'){
+        /* ==== [ANCRE: P11_T1_RETOUR_HISTORIQUE] — Monde lot 55 T1 ==== */
+        cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity);return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0};}).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c||b.i-a.i)[0];
     }
      if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const index=(String(id||cand.i||'').length+value)%3;out.push({id:p.id,titre:p.titre,laureat:id,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]),relu:false,stat:value});
     }
