@@ -273,6 +273,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
 - Questions pour Anthony : aucune.
 
+### Reprise 6 — tailles verrouillées et captures relancées — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `3820a9bf`. Aucun changement local de code de tranche ; les fichiers agents, `opencode.json` et `sw.js` préexistants sont hors périmètre et laissés intacts.
+- Lu `LISEZMOI.txt`, relu les deux maquettes et lancé les captures séparément à 1920×1080. Après correction, le contrôle de `lendemain` rapporte zéro chevauchement, zéro texte sous 22 px et aucun débordement, mais `grosBlocs=21,5 %` (cible reprise ≤18 % non atteinte). `lendemainSuite` rapporte zéro chevauchement et zéro texte sous 22 px, mais quatre débordements variables dans les mouvements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split ») ; `grosBlocs=17,6 %`.
+- `ui-cadre.css` : ajouté un verrou terminal des noms de cartes à 80 px / 64 px, en capitales et graisse d’affichage, et réaffirmé la grille de mouvements en trois colonnes pour revenir aux valeurs de la planche. `index.html` : version CSS montée par `_bump.js`. La capture n'expose pas les styles calculés JavaScript : les tailles sont celles prescrites par les règles CSS, pas une mesure DOM indépendante.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et ESLint passent. Aucun test ajouté, aucune sauvegarde/migration ni donnée/mécanique modifiée.
+- Avant/après : les écrans existaient déjà sur les compositions Uni et les cartes du lendemain sont maintenant explicitement fixées à l’échelle typographique demandée; le contrôle visuel relancé confirme l’absence de collision sur les deux vues. Écarts non résolus : gros blocs du lendemain au-dessus de la cible de reprise (21,5 %) et quatre débordements variables dans la colonne mouvements de la suite. Ces mesures empêchent d’attester la conformité visuelle totale; aucun jugement d’image direct n’est revendiqué.
+- Fichiers modifiés : `ui-cadre.css` (échelle typographique et grille des mouvements), `index.html` (version de cache), cette fiche (compte rendu). Questions pour Anthony : aucune.
+
 ### Reprise 10 — mesure réelle après capture — 24/10/2026
 
 - État initial : branche `fid-lendemain`, HEAD `82e97268`; le commit précédent contenait uniquement le compte rendu. Aucun fichier de code de tranche n'était non commité. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et intactes.
