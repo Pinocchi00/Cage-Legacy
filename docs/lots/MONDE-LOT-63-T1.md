@@ -14,6 +14,10 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise 8 (24/10/2026) : branche `p8-apres` confirmée. Les commits antérieurs sont déjà présents ; seul complément de tranche : `package.json` inscrit maintenant `mgmtLot63T1.test.js` dans les hooks `pretest` et `pretest:watch`, donc les deux parcours agrégés exécutent les tests ciblés. Le fichier de test passe 5/5.
+- Les critères fonctionnels restant incomplets après cette reprise : le calcul utilise encore le catalogue historique à huit familles ; il ne consomme pas systématiquement les dix entrées du catalogue comme formulaires, et tous les événements réels correspondants ne déclenchent donc pas leur famille dédiée. Aucun test individuel de déclenchement des dix familles ni assertions de validation/réparation de sauvegarde n'a été ajouté ; aucun changement de sauvegarde n'est cependant effectué. Le test lent `mgmtReleveReduit.test.js` n'a pas été lancé.
+- Les vérifications à jour sont `node --test tests/mgmtLot63T1.test.js` (5/5). Les fichiers locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers au périmètre et exclus. La tranche reste non achevée selon ses critères fonctionnels.
+
 - Reprise 7 (24/10/2026) : branche `p8-apres` confirmée ; les commits de tranche précédents sont déjà présents (`48bd68a` en tête). Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues.
 - `tests/mgmtLot63T1.test.js` : ajout des tests « Monde lot 63 T1 — l’après ne répète pas une formulation pour un combattant sur cinquante soirées » et « Monde lot 63 T1 — une ligne de l’après échappe le nom injecté en HTML ». Le test ciblé passe 5/5.
 - Audit `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé ne rapporte aucune erreur (test ignoré par la configuration). Vérification de package : le fichier n’est toujours pas référencé dans les scripts agrégés `test` et `test:watch` (`false`, `false`), bien que les scripts ciblés `test:lot63t1` et `test:watch:lot63t1` existent.
