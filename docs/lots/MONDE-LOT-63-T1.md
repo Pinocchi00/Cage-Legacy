@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 10 — contrôle et livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée ; historique et statut consultés. Les fichiers fonctionnels et les tests de la tranche sont déjà commités dans l'historique ; aucun code fonctionnel n'est resté non commité.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; l'audit confirme `true,true` pour l'inclusion dans `test` et `test:watch`.
+- Fichiers livrés : `mgmt-apres-data.js` (dix familles, formulations `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, Accueil/presse et mouvements d'autres organisations), `tests/mgmtLot63T1.test.js` (neuf tests) et `package.json` (scripts). Aucune nouvelle clé de sauvegarde ni migration.
+- Limite de couverture : les tests préparent isolément les faits familiaux sur le chemin de création réel, sans démontrer que tous les systèmes du jeu génèrent naturellement chacun des dix faits. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les validations antérieures documentent 1 908 745 octets. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères à la tranche et exclues.
+
 ### Reprise 9 — vérification de clôture (24/10/2026)
 
 - État repris sur `p8-apres` : les changements de production et tests de cette tranche sont déjà commités (`9b3a123c`). Les modifications locales d'agents, `opencode.json`, `index.html` et `sw.js` sont étrangères et laissées hors commit.
