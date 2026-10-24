@@ -140,6 +140,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
 - Questions pour Anthony : aucune.
 
+### Reprise 45 — contrôle capture et essai suite — 24/10/2026
+
+- Guide lu et comparateur relancé sur `lendemainSuite` : `chevauchements=0`, `textesSous22px=0`, mais les quatre alertes de débordement restent (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 17 %.
+- Testé une largeur accrue pour la colonne mouvements et ses champs, sans effet sur les alertes; le score moyen monte à 23,1 %. Essai retiré, aucune nouvelle règle CSS/cache conservée. Le critère de débordement de la case 4 reste non satisfait et ne peut pas être certifié. Pas de prétention d'inspection manuelle du PNG.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7) ; `node tools/verif-versions.js origin/main` ne signale aucun écart. Les autres tests ciblés restent ceux des reprises précédentes.
+- Les commits existants livrent déjà le code et les tests des écrans ; cette reprise n'ajoute pas de changement fonctionnel. Fichiers de code de la tranche : aucun changement conservé. Aucun changement de sauvegarde/migration. Modifications de configuration/agents et `sw.js` exclues.
+
 ### Reprise 23 — correction après audit automatisé — 24/10/2026
 
 - Relu le guide et recapturé les deux écrans. Le contrôle a révélé des défauts qui n'étaient pas consignés comme corrigés : sur `lendemain`, 8 chevauchements et 6 textes sous 22 px (avant les ajustements), puis 4/8 chevauchements selon la hauteur testée, avec une ligne de constat coupée. Sur `lendemainSuite`, aucun chevauchement mais 21 éléments sous 22 px et plusieurs libellés coupés. Les gros blocs sont restés proches de la cible (lendemain 19,4–20,6 %, suite 18,1–18,4 %).
