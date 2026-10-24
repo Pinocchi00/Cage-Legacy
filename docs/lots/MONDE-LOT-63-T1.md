@@ -866,3 +866,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - La suite demandée des sept fichiers passe **130/130**, y compris les deux exigences lot 54 concernant la rivalité enregistrée et la non-répétition sur cinquante semaines. `node tools/verif-versions.js origin/main` ne relève aucun écart et ESLint global passe.
 - Le test de plafond `tests/mgmtReleveReduit.test.js` a été relancé, mais a dépassé le délai de 120 secondes de l'outil ; aucun résultat de cette exécution n'est revendiqué. Une reprise précédente consigne sa réussite à 1 908 745 octets.
 - `git merge origin/main` est interdit par la politique de commandes de l'environnement ; la fusion reste à faire par le superviseur. Aucun test existant n'a été modifié. Aucun changement de sauvegarde/migration ni changement fonctionnel de tranche dans cette reprise ; la limite de couverture décrite plus haut demeure.
+### Reprise finale — contrôle prescrit (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà présents ; aucun fichier de production ou test de tranche n'est en attente.
+- Les sept tests ciblés prescrits passent **130/130**, dont les deux régressions lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines). `node tools/verif-versions.js origin/main` ne signale aucun écart et `node_modules/.bin/eslint .` passe. Le test est inscrit dans `test` et `test:watch` (`true,true`).
+- `git merge origin/main` a été refusé par la politique d'exécution interdisant `git merge*` ; aucune fusion n'est revendiquée et l'intégration reste au superviseur. Aucun changement de sauvegarde ni migration. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` étrangères et exclues.
+- Le compte rendu documente toujours la limite de couverture : les faits familiaux sont scénarisés sur une partie créée par le parcours réel, sans prouver que tous les systèmes les produisent naturellement.
