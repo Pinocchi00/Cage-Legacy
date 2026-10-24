@@ -2045,10 +2045,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale>strong{font-size:22px}.gu3-rivale small{font-size:22px;opacity:.76;margin-top:auto}
 .gu3-mouvement{border-top:2px solid rgba(233,230,225,.16);padding-top:12px}
 /* ==== [ANCRE: MONDE57_T1_MAQUETTE_GRILLE] — Monde lot 57 T1 ==== */
-.gu3{grid-template-rows:auto minmax(0,1fr);align-content:stretch}
-.gu3-table{grid-column:1;grid-row:2;min-height:0;overflow:auto}
-.gu3-rivale{grid-column:2;grid-row:2;min-height:0;box-sizing:border-box}
-.gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(180px,1fr) 120px 120px 130px 120px 90px;gap:12px;padding:0 16px}
+.gu3{grid-template-rows:auto auto minmax(0,1fr);align-content:stretch}
+.gu3>.mo67-tabs{grid-column:1/-1;grid-row:2;min-width:0}
+.gu3-table{grid-column:1;grid-row:3;min-height:0;overflow:auto}
+.gu3-rivale{grid-column:2;grid-row:3;min-height:0;box-sizing:border-box}
+.gu3-entete,.gu3-ligne{grid-template-columns:56px minmax(180px,1fr) minmax(72px,90px) minmax(92px,110px) minmax(112px,130px) minmax(92px,110px) minmax(78px,90px);gap:10px;padding:0 12px}
 .gu3-entete{min-height:48px;letter-spacing:.04em}
 .gu3-ligne{min-height:82px}
 .gu3-ligne.gu3-split{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
