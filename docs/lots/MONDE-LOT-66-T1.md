@@ -83,3 +83,9 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtEcranLendemain.test.js` : 7/7 ; `tests/mgmtSoireeShow.test.js` : 18/18. `node tools/verif-versions.js origin/main` et ESLint passent.
 - Tentative du test lent `mgmtReleveReduit.test.js` : 2/6 passent, 4 échouent sur `ENOSPC` lors de l'écriture des sauvegardes temporaires (disque sans espace). Ce test concerne un relevé de la tranche 31, pas les écrans du lendemain ; aucun fichier de code de la tranche ne change ici.
 - Aucun fichier de tranche modifié à l'ouverture ; les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et non commitées. Aucun jugement d'inspection manuelle des PNG n'est ajouté ; seul le seuil mesuré de gros blocs est confirmé.
+
+### Reprise 15 — tests de confirmation — 24/10/2026
+
+- Tests relancés séparément et verts : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot54T1.test.js` (30/30), `mgmtLot48T1.test.js` (9/9) et `mgmtSoireeShow.test.js` (18/18).
+- `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Pas de changement de code ni de CSS/cache à cette reprise : les implémentations sont déjà présentes et les captures antérieures mesurent 19,5 % de gros blocs pour `lendemain`, 18,8 % pour `lendemainSuite`.
+- Le test lent `mgmtReleveReduit.test.js` reste hors de cette tranche ; sa dernière tentative connue a échoué sur `ENOSPC`. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont toujours exclus de la livraison.
