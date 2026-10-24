@@ -136,6 +136,16 @@ test('Monde lot 54 T1 — l’après ne nomme une suspension que si la soirée l
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — l’après tolère un champ de touchés malformé sans inventer de suspension',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const result=w.eval(`(()=>{const m=G.mgmt,f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),side=x=>({id:x.id,name:x.name,last:x.last,first:x.first,div:x.div,W:x.W,L:x.L,D:x.D});m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(g)});m.lastEvent={cycle:m.cycle,fights:[],touched:{days:90},finance:{}};return mgmtLendemainApres(m,m.cycle+1);})()`);
+    assert.ok(result.length<=3);
+    assert.ok(result.every(x=>x.famille!=='suspension'));
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — l’après ne répète pas une formulation pour un combattant sur cinquante semaines',()=>{
   const w=newGameWindow({runMain:true});
   try{

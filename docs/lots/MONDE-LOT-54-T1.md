@@ -97,3 +97,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — la suite conserve ses trois colonnes de planche et tous les combats ». Sur une soirée jouée par le chemin réel, il vérifie que le rendu des résultats comporte une ligne par combat et que les colonnes presse, mouvements et résultats restent explicites. Le test ciblé passe 17/17.
 - État Git au départ : branche `p8-lendemain`, aucun fichier de tranche non commité. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus.
 - Limites toujours présentes : ce test de non-régression ne complète pas la reproduction intégrale du layout et des valeurs des deux planches, ni les événements T3 contextualisés selon tous les faits réels. Le compte rendu précédent décrit les écarts non résolus ; ils ne sont pas déclarés terminés ici. Pas de nouvelle donnée de sauvegarde.
+
+### Reprise — 24/10/2026
+
+- `mgmt-ecran-lendemain.js` : la projection de l'après tolère désormais un `lastEvent.touched` absent ou malformé et ne tente une lecture de suspension que dans un tableau de faits valides. Cache JS monté ; aucun nouvel état de sauvegarde.
+- `tests/mgmtLot54T1.test.js` : test ajouté « Monde lot 54 T1 — l’après tolère un champ de touchés malformé sans inventer de suspension ». Test ciblé : 18/18 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé sans erreur.
+- Les cases 1 et 3 ne sont pas complètes : restent à porter exactement les deux planches dans leur composition et valeurs (dont mouvements/contrat), ainsi qu'à corréler toutes les familles T3 aux faits réels. La tranche n'est pas déclarée terminée par cette correction de robustesse. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de cette tranche et sont exclues.
