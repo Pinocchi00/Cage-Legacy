@@ -1929,6 +1929,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-card h3{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:24px 0 8px}
 .po2-card p,.po2-bilan p{font-size:24px;line-height:1.2;margin:12px 0}
 .po2-offre{border-top:2px solid rgba(233,230,225,.16);padding:8px 0 16px}
+/* ==== [ANCRE: MONDE_LOT69_T1_OFFRE_LAYOUT] — Monde lot 69 T1 ==== */
+.po2-offre{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.po2-offre>p{max-width:100%;overflow-wrap:anywhere}
+.po2-offre>.po2-action{margin:6px 8px 0 0}
+.po2-bilan h1{line-height:.82;white-space:normal;overflow-wrap:anywhere}
+.po2-bilan>p{max-width:100%;overflow-wrap:anywhere}
+/* ==== [FIN ANCRE] ==== */
 .po2-card strong{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .po2-bilan{width:min(900px,90%);margin:20px auto;font-size:24px}
 .po2-bilan h1{font-size:88px;color:#F0B220}

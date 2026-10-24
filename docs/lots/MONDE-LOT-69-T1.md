@@ -134,3 +134,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification de `package.json` : le test `mgmtLot69T1.test.js` figure explicitement dans les scripts agrégés `test` et `test:watch` (ainsi que dans les hooks pré-test). `node --test tests/mgmtLot69T1.test.js` passe 3/3 ; `node tools/verif-versions.js origin/main` passe (16 fichiers comparés) ; `node_modules/.bin/eslint .` passe.
 - Aucun fichier fonctionnel ni donnée de sauvegarde modifié cette reprise. Aucun nouveau test, aucun `?v=` requis. Les limites de fond demeurent : modèle du choc mono-combat et parcours partiel au regard de la séquence contractuelle complète ; visuels non conformes aux seuils ci-dessus. Le commit de tête avait un intitulé de livraison complet, mais ces vérifications n'autorisent pas à déclarer toutes les cases satisfaites.
 - Écart à la fiche : les captures ont été effectuées pour les trois scènes disponibles, mais aucune scène dédiée `arrivée`/offre n'a été construite ; la capture du bilan a exposé un chevauchement qui reste à corriger. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 25
+- Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
+- Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
+- Aucun changement de sauvegarde ou de logique métier.
+- Écarts : captures post-correction non produites ; choc multi-affiches, parcours contractuel strict complet et mesure visuelle ≤20 % restent non démontrés. Les modifications utilisateur préexistantes hors tranche ont été préservées. Pas de `TOUT_EST_FINI` revendiqué.
