@@ -698,6 +698,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts à la fiche : seuil `grosBlocs≤20%` du choc manqué; chevauchement bilan persistant; capture arrivée absente et comparaison visuelle non faite. Aucune fin de contrat complète n'a été reproduite dans cette reprise. Aucun `TOUT_EST_FINI` revendiqué.
 - Questions pour Anthony : aucune nouvelle question.
 
+### Reprise 85 — scène choc relancée
+- Branche `fid-choc`, HEAD initial `b1809bcc`. Aucun fichier de tranche fonctionnel non commité ; les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
+- Capture rejouée avec la scène demandée. La proposition reçue valide s'affiche : 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.1%`, au-dessus du seuil ≤20 %. L'image cmp n'a pas été ouverte visuellement.
+- Le test existant couvre le repli d'écran invalide, les trois paires et leur résolution/majorité, ainsi que le parcours sauvegardé offre → changement → arrivée → soirée → lendemain. Aucun changement fonctionnel ou migration n'a été nécessaire dans cette reprise.
+- Écart restant : seuil visuel du choc non atteint. Aucune scène dédiée d'arrivée/bilan ni comparaison image à image n'a été produite dans cette reprise. Pas de `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 85 — reproduction de la scène choc
 - Branche confirmée `fid-choc`. La seule modification de source détectée au départ (`mgmt-ecran-poste.js`) est une différence de fins de ligne : `git diff --ignore-all-space` est vide et elle reste exclue du commit. Les changements sous `.opencode/agents/` et `opencode.json` restent hors tranche.
 - Commande de capture demandée exécutée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Le contrôle confirme que l'écran est rendu avec une proposition reçue : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.1%`. L'écran n'est donc pas blanc dans cette reproduction ; le seuil de gros blocs ≤20 % reste non atteint.
