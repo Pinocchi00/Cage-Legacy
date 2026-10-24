@@ -15,7 +15,7 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 ## Compte rendu
 
 - `mgmt-corps.js` (déjà livré) appelle le traitement annuel à la clôture de soirée, hors passé généré, dans l'ordre calcul des prix, clôture du classement ; la cérémonie devient visible avant le lien bilan. `mgmt-accueil.js` a reçu une version de cache actualisée.
-- `tests/mgmtLot62T1.test.js` instrumente le chemin de jeu et prouve exactement trois appels de calcul de cérémonie et de clôture annuelle, l'inscription de prix, l'idempotence, la validation et l'état vide du carnet. `package.json` conserve les commandes dédiées `test:lot62t1` et `test:watch:lot62t1`.
+- `tests/mgmtLot62T1.test.js` instrumente le chemin de jeu et prouve exactement trois appels de calcul de cérémonie et de clôture annuelle, l'inscription de prix, l'idempotence, la validation et l'état vide du carnet. `package.json` conserve les commandes dédiées `test:lot62t1` et `test:watch:lot62t1` ; le fichier n'est pas inclus dans les agrégats généraux `test`/`test:watch`.
 - Pas de clé ni migration de sauvegarde nouvelle ; `MGMT_SAVE_VERSION` inchangé. Le validateur et la réparation facultative des prix existaient déjà.
 - Vérifications relancées sur la reprise : `node --test tests/mgmtLot62T1.test.js` (2/2, environ 47 s), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (succès).
 - Au contrôle courant, `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai outil de 120 s et a été interrompu ; le résultat n'est donc pas certifié.
