@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 19
+
+- Branche `fid-organisation` confirmée ; les douze derniers commits et l’état Git ont été consultés. Les modifications précédentes étaient déjà commitées.
+- Test ajouté : « Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; l’en-tête cérémonie réserve sa place au titre, à la presse et à la date ». Le test cible les éléments requis dans l’en-tête et interdit bouton ou retour qui empiète sur celui-ci.
+- Vérification ciblée `node --test tests/mgmtLot55T1.test.js` : 49/49 réussis. Aucune nouvelle capture/cmp ni inspection PNG n’est revendiquée ; les constats antérieurs sur les vues et le rendu rempli restent non certifiés.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (contrat d’en-tête) et cette fiche (compte rendu). Pas de modification JS/CSS, pas de version de cache à monter, pas de migration de sauvegarde. Le test existant figure déjà dans les scripts `test` et `test:watch`.
+- Écarts restant à la fiche : mesures/captures visuelles des six écrans non achevées, capture d’une scène cérémonie avec prix remplis et rivale déterministe non produite dans ce tour. Aucun écart aux données ni question pour Anthony.
+
 ## Compte rendu — reprise 17
 
 - Branche `fid-organisation` confirmée ; `git log --oneline -12` consulté. L'arbre était propre au début de la reprise, les travaux antérieurs étant déjà commités.

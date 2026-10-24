@@ -385,6 +385,18 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une 
   assert.doesNotMatch(rendu.match(/<header[^>]*>[\s\S]*?<\/header>/)?.[0]||'',/RETOUR/);
   for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
 });
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; l’en-tête cérémonie réserve sa place au titre, à la presse et à la date',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[]}};
+  c.mgmtOrgClassement=()=>[];
+  c.mfEcran=contenu=>contenu;
+  const rendu=c.scr_mgmt_ceremonie();
+  const entete=rendu.match(/<header class="ce3-entete">([\s\S]*?)<\/header>/)?.[1]||'';
+  assert.match(entete,/<h1>LES TROPHÉES 2027<\/h1>/);
+  assert.match(entete,/<p>CHOISIS PAR LA PRESSE<\/p>/);
+  assert.match(entete,/<b>31 DÉCEMBRE<\/b><span>CAGE HEBDO<\/span>/);
+  assert.doesNotMatch(entete,/<button|RETOUR|LE BILAN DU PATRON/);
+});
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
