@@ -54,4 +54,11 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Test ciblé relancé : `node --test tests/mgmtEcranLendemain.test.js` (7/7). Les autres vérifications et l'ajustement CSS décrits ci-dessus sont déjà présents dans les commits précédents ; aucun fichier de tranche n'était non commité à la reprise. Les seules modifications locales préexistantes sont des fichiers de configuration/agents et `sw.js`, laissés hors de cette tranche.
 - L'objectif mesuré `grosBlocs ≤ 20 %` est atteint sur les deux écrans ; les images comparatives restent accessibles pour contrôle visuel ultérieur. Aucun changement de code ou de sauvegarde ajouté dans cette reprise.
 
+### Reprise 11 — vérifications de livraison — 24/10/2026
+
+- Rejoué l'outil de capture sur les deux écrans : `lendemain` moyen 24,9 %, `grosBlocs` 19,5 % ; `lendemainSuite` moyen 23,3 %, `grosBlocs` 18,8 %. La première commande groupée a expiré après le rendu du premier écran ; le second a été capturé séparément. Les images sont dans `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Tests relancés et verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30) et `mgmtSoireeShow.test.js` (18). ESLint et `node tools/verif-versions.js origin/main` passent.
+- Pas de fichier de code de tranche en attente : cette reprise ne fait qu'enregistrer ces mesures et résultats dans le compte rendu. Les modifications locales hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) restent intactes et non incluses.
+- Limite visuelle maintenue : les comparaisons chiffrées confirment le seuil `grosBlocs ≤ 20 %`, mais les images comparatives n'ont pas été ouvertes pour inspection visuelle directe ; aucune certification supplémentaire sur chevauchement n'est revendiquée.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
