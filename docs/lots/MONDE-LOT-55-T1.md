@@ -251,3 +251,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (13/13 vert), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). `node tools/verif-versions.js origin/main` signale toujours l'écart préexistant `mgmt-accueil.js`, hors de cette tranche et non modifié.
 - Ce test ne constitue pas la simulation réelle de trois ans avec `mgmtPasseGenerer` et soirées jouées. Les écarts précédemment documentés (maquettes intégrales, scénario d'ancienne sauvegarde chargé, données historiques exhaustives du carnet et déclencheur anniversaire) demeurent; aucun test lent `mgmtReleveReduit` exécuté. Aucun changement de sauvegarde.
 - Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` et cette fiche. Les modifications d'outillage étrangères restent exclues. La tranche n'est pas déclarée terminée.
+
+### Reprise 32
+
+- Ajout du test « Lot 55 T1 — une partie générée valide le champ facultatif des prix à la sauvegarde » : crée une partie via `mgmtPasseGenerer`, vérifie que le champ absent reste absent et que `mgmtRepair` conserve l'entrée valide en éliminant l'entrée mal formée.
+- `node --test tests/mgmtLot55T1.test.js` passe (14/14). `node tools/verif-versions.js origin/main` échoue toujours uniquement sur `mgmt-accueil.js`, écart préexistant hors tranche; aucune modification de ce fichier. L'ESLint global n'a pas été exécuté car la commande enchaînée s'est arrêtée après l'échec du contrôle des versions.
+- Le test emploie une partie réellement générée mais ne simule pas trois années et soirées jouées, et ne charge pas une fixture historique complète. Les écarts majeurs de maquettes et fonctions relevés plus tôt ne sont pas résolus par cette reprise; aucun test lent `mgmtReleveReduit` n'a été lancé.
+- Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (scénario runtime du champ facultatif) et cette fiche. Aucun changement de production ou migration de sauvegarde. Les changements préexistants `.opencode/agents/*` et `opencode.json` restent exclus.

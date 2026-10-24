@@ -3,6 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
+const {newGameWindow}=require('./helpers/loadGame');
 const source=fs.readFileSync(require('node:path').join(__dirname,'..','mgmt-ceremonie.js'),'utf8');
 function charger(){const c={mgmtCalAujourdhui:()=>365,mgmtHistoirePoidsCombat:()=>0};vm.createContext(c);vm.runInContext(source,c);return c;}
 test('Lot 55 T1 — le calcul des prix est pur et déterministe',()=>{
@@ -118,4 +119,27 @@ test('Lot 55 T1 — les formulations de cérémonie ne se répètent pas sur cin
     }
   }
   assert.equal(phrases.size,200);
+});
+test('Lot 55 T1 — une partie générée valide le champ facultatif des prix à la sauvegarde',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      setSeed(5501);
+      const m=mgmtPasseGenerer('split',{soirees:3});
+      const absent=JSON.parse(mgmtSerialiser(m));
+      const sansChamp=mgmtParseAndValidate(JSON.stringify(absent));
+      const f=m.roster.find(x=>x&&x.id);
+      f.prixAnnee=[{prix:'ko',annee:2026,relu:false},{prix:'inconnu',annee:'x'}];
+      mgmtRepair(m);
+      const charge=validateMgmt(m)?m:null;
+      const laureat=charge&&charge.roster.find(x=>x.id===f.id);
+      return {sansChamp:!!sansChamp&&sansChamp.roster.every(x=>!Object.hasOwn(x,'prixAnnee')),
+        garde:!!laureat&&Array.isArray(laureat.prixAnnee)&&laureat.prixAnnee.length===1,
+        prix:laureat&&laureat.prixAnnee[0].prix,annee:laureat&&laureat.prixAnnee[0].annee};
+    })())`));
+    assert.equal(r.sansChamp,true);
+    assert.equal(r.garde,true);
+    assert.equal(r.prix,'ko');
+    assert.equal(r.annee,2026);
+  }finally{w.close();}
 });
