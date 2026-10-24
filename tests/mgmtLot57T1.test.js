@@ -86,7 +86,7 @@ test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels s
      assert.match(result.html,/TA RIVALE DU MOMENT/);
      assert.match(result.html,/Juste devant/);
      // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
-     assert.match(result.html,/Depuis la soirée/);
+      assert.match(result.html,/Rang inchangé/);
      assert.ok(w.eval(`(()=>{const x=mgmtGuerreClassement(G.mgmt).find(y=>y.estSplit); return typeof x.mouvement==='number';})()`));
     assert.equal(result.html,result.screen);
     assert.match(result.html,/&lt;|SPLIT/);
@@ -171,7 +171,8 @@ test('Monde lot 57 T1 — décision : planches Uni* validées par Anthony ; le m
   const w=partie();
   try{
     const texte=w.eval(`(()=>{const m=G.mgmt;const rows=mgmtGuerreClassement(m);m.guerre=m.guerre||{};m.guerre.classementPrecedent=rows.map(x=>x.id).reverse();return scr_mgmt_guerre();})()`);
-     assert.match(texte,/Depuis la soirée : \+[1-7] places?\./);
+     // Décision : planches Uni* validées par Anthony ; le libellé condensé évite le débordement constaté à la capture.
+     assert.match(texte,/Rang : \+[1-7] places?\./);
   }finally{w.close();}
 });
 
@@ -290,7 +291,7 @@ test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette 
     assert.match(result.html,/juste devant\s*:/i);
     assert.match(result.html,/juste derrière\s*:/i);
      // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
-     assert.match(result.html,/Depuis la soirée/);
+      assert.match(result.html,/Rang inchangé/);
   }finally{w.close();}
 });
 
