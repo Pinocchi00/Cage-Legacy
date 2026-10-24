@@ -29,4 +29,12 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (9/9 verts) et `node tools/verif-versions.js origin/main` (aucun écart).
 - Les cases 2 à 6 et la validation des écrans de la case 1 restent à faire ; les écrans non traités restent chacun différents/non vérifiés par rapport à leurs planches. Aucun nouveau commit de fonctionnalités n'a été fait lors de cette reprise.
 
+### Reprise suivante du 24/10/2026
+
+- Ajout dans `tests/mgmtFicheStats.test.js` du test « Monde lot 68 T1 — chaque classe des écrans recruteur a une règle », selon la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (10/10) et `node tools/verif-versions.js origin/main` (aucun écart).
+- La consigne de lire le fichier de l'outil de capture situé dans `%TEMP%` n'a pas été accordée par l'interface de lecture. En conséquence, aucun comparatif n'a été ouvert et aucune correction visuelle n'est prétendue. Cases 1 (hors test existant), 2 à 5 et 7 restent à effectuer. Les écrans fiche, arrivée, recruteur, semaine, relevé, chiffres, menu et classements ne sont pas visuellement vérifiés.
+- Écart : la tranche n'est pas terminée ; seuls le test de couverture CSS des classes recruteur et les tests de fiche déjà présents ont été validés. Pas de migration de sauvegarde.
+- Questions pour Anthony : aucune ; il s'agit de travail visuel restant, pas d'une question de spécification.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
