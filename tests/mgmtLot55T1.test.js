@@ -9,6 +9,11 @@ function charger(){const c={mgmtCalAujourdhui:()=>365,mgmtHistoirePoidsCombat:()
 test('Lot 55 T1 — calcul et lecture du carnet ne tirent aucun hasard',()=>{
   assert.doesNotMatch(source,/\b(?:Math\.random|rnd)\s*\(/);
 });
+test('Lot 55 T1 — une trace sans identifiants de combattants est ignorée sans plantage',()=>{
+  const c=charger();
+  const prix=c.mgmtCeremonieCalculer({hist:[{c:100,a:{name:'A'},b:{name:'B'},winner:'A',family:'ko',round:1}]});
+  assert.deepEqual(JSON.parse(JSON.stringify(prix)),[]);
+});
 test('Lot 55 T1 — le calcul des prix est pur et déterministe',()=>{
   const m={hist:[{c:1,a:{id:'a',name:'A'},b:{id:'b',name:'B'},winner:'A',family:'ko',round:1,slot:'main'},{c:2,a:{id:'a',name:'A'},b:{id:'c',name:'C'},winner:'A',family:'sub',round:2},{c:3,a:{id:'a',name:'A'},b:{id:'d',name:'D'},winner:'A',family:'ko',round:1}],roster:[{id:'a'}]};
   const c=charger(), before=JSON.stringify(m);assert.deepEqual(c.mgmtCeremonieCalculer(m),c.mgmtCeremonieCalculer(m));assert.equal(JSON.stringify(m),before);

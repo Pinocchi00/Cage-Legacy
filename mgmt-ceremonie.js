@@ -12,7 +12,7 @@ const MGMT_CEREMONIE_PRIX=Object.freeze([
 function mgmtCeremonieCalculer(m){
   if(!m||!Array.isArray(m.hist))return [];
   const now=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0, from=now-365;
-  const h=m.hist.map((t,i)=>({t,i})).filter(x=>x.t&&x.t.a&&x.t.b&&Number.isFinite(x.t.c)&&x.t.c>=from&&x.t.c<now);
+  const h=m.hist.map((t,i)=>({t,i})).filter(x=>x.t&&x.t.a&&x.t.a.id&&x.t.b&&x.t.b.id&&Number.isFinite(x.t.c)&&x.t.c>=from&&x.t.c<now);
   const titres=new Set((m.facts||[]).filter(f=>f&&f.k==='title_fight').map(f=>f.fight));
   const byId=new Map();
   const nom=s=>s&&(s.name||s.nom)||'Combattant';

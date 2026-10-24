@@ -563,3 +563,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichier modifié : `tests/mgmtLot55T1.test.js`. Aucun changement de production, sauvegarde ou migration.
 - Les limites déjà consignées restent vraies : test lent `mgmtReleveReduit` non exécuté, pas de fixture complète d'ancienne sauvegarde chargée, pas de preuve de trois saisons intégralement jouées, fidélité intégrale des planches non certifiée, cérémonie liée au terme du contrat plutôt qu'à chaque anniversaire. Elles ne sont pas déclarées satisfaites.
 - Les changements préexistants `.opencode/agents/*` et `opencode.json` sont étrangers et exclus.
+
+### Reprise 73
+
+- Durcissement défensif du calcul : les relevés sans identifiant de combattant sont écartés avant agrégation, afin qu'une trace historique incomplète n'entraîne pas d'exception pendant le calcul des prix.
+- Test ajouté : « Lot 55 T1 — une trace sans identifiants de combattants est ignorée sans plantage ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (35/35); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); test présent dans `test` et `test:watch`; `git diff --check` (vert). `sw.js`, altéré par l'environnement de test, restauré depuis `origin/main`.
+- Fichiers modifiés : `mgmt-ceremonie.js` (filtrage des relevés incomplets), `index.html` (version du script), `tests/mgmtLot55T1.test.js` (régression) et cette fiche. Aucun changement de format de sauvegarde ni migration.
+- Écarts toujours non certifiés : test lent `mgmtReleveReduit` non exécuté; trois saisons complètes et fixture complète d'ancienne sauvegarde non démontrées; validation visuelle intégrale aux planches absente; déclencheur de cérémonie encore lié au terme du contrat plutôt qu'à chaque anniversaire. En conséquence, malgré les vérifications de cette reprise, toutes les cases de la fiche ne sont pas certifiées achevées et `TOUT_EST_FINI` n'est pas revendiqué.
