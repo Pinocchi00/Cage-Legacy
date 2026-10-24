@@ -94,6 +94,9 @@ test('Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux �
   const inlineStyles=[...js.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(match=>match[1]).join('\n');
   for(const block of ['po-flow','po-card','po-title','po-meta','po-objectif','po-note','ma-panel','ma-side','ma-title','ma-lines','ma-leila','ma-counter','ma-intro','ma-cards','ma-card','ma-name','ma-record','ma-stats','ma-status','ma-enter'])
     assert.match(inlineStyles,new RegExp(`\\.${block}(?:[\\s.#:[,{>+~]|\\{)`),`style ${block}`);
+  // La planche UniArriveeContrat donne la priorité au contrat (flex 1.15 contre 1.1).
+  assert.match(inlineStyles,/\.po-card\{left:0;width:55%\}/);
+  assert.match(inlineStyles,/\.po-card\+\.po-card\{left:auto;right:0;width:43%\}/);
 });
 test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
