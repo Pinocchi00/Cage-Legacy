@@ -354,3 +354,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajusté : « Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendemain existant » vérifie désormais le bloc de contexte.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Écarts persistants : la composition complète reste l'écran mf-* historique enrichi et ne reproduit pas toute la planche; le cumul de référence 900–1200 s n'est pas validé (868,38 s précédemment mesurées avec la formule prescrite); la frise ne joue pas de fenêtres temporisées isolées ni de fondu d'image. Le compte rendu reste partiel et ne revendique pas l'achèvement.
+
+### Reprise 53 — vérification de l’état transmis
+
+- État au départ : branche `p7-ecran-soiree`, HEAD `562a889`. Aucun fichier de code de la tranche n'était non commité; les modifications locales `.opencode/agents/*` et `opencode.json` sont étrangères et laissées intactes.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis; `node tools/verif-versions.js origin/main` — aucun écart; `node_modules/.bin/eslint .` — réussi; le test est inclus dans `test` et `test:watch`.
+- Le code existant couvre déjà le sélecteur par ligne, la frise, la carte de résultat passable, les primes, et plusieurs contrôles ciblés. Cette reprise n'a pas modifié de code : l'audit du compte rendu confirme encore des critères majeurs non livrés et aucune modification supplémentaire ne peut être honnêtement présentée comme une case codée/testée.
+- Non achevé : portage intégral aux compositions et valeurs exactes des planches; durée réelle de fenêtres 30–60 s et fondu de l'image d'arène; test d'une soirée de référence entre 900 et 1200 s; tests demandés de fenêtres et d'empreintes historiques. La mesure rapportée de 868,38 s demeure sous la cible; elle n'est pas falsifiée.
+- Aucun test ancien n'a été modifié dans cette reprise; aucun changement moteur, sauvegarde, cache ou ressource joueur. Les vérifications passées ne lèvent pas ces écarts fonctionnels.
