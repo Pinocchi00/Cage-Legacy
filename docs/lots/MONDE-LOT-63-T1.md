@@ -53,6 +53,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 8 — vérification (24/10/2026)
+
+- Branche `p8-apres` confirmée. Le code et les tests de la tranche sont déjà présents dans les commits récents (`ab627d5` en tête) ; aucune modification fonctionnelle de la tranche n'était en attente.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; le test figure dans `test` et `test:watch` (`true,true`).
+- Fichiers déjà livrés : `mgmt-apres-data.js` (catalogue des dix familles), `mgmt-ecran-lendemain.js` (calcul, affichage Accueil/presse et mouvements d'autres organisations), `tests/mgmtLot63T1.test.js` et `package.json` (inscription aux scripts). Aucun changement de sauvegarde ni migration.
+- Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise. Limite de couverture inchangée : les tests exercent chaque déclencheur sur des faits préparés dans une partie créée par le chemin réel, sans établir que chaque système opérationnel génère naturellement chacun des faits. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation locale de `index.html` sont étrangères à cette tranche et exclues du commit.
+
 ### Reprise 10 — validation finale (24/10/2026)
 
 - Sur `p8-apres`, les commits de code/test existants sont déjà dans l'historique ; aucune modification de tranche fonctionnelle n'est en attente. Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` sans écart, `node_modules/.bin/eslint .` passe, et l'inclusion dans `test`/`test:watch` est confirmée (`true,true`).
