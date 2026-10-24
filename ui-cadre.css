@@ -1346,6 +1346,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fb-monde{max-width:230px;text-align:center;margin-top:-6px;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;letter-spacing:.02em;color:var(--mf-blanc);text-transform:uppercase;white-space:normal}
 .mf-fb-cat{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1.1;text-align:center}
 .mf-fi-onglets{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center}
+.mf-fi-onglets>.mf-fiche-onglets{flex:1;min-width:0}
+.mf-fi-onglets>.mf-fiche-suivi{position:static;transform:none;flex:none;margin-left:18px}
+.mf-fi-onglets>.mf-fi-tab{flex:none;margin-left:18px}
 .mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 .mf-fi-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
 /* ==== [ANCRE: MONDE_LOT31_T4_STATS_CSS] — Monde lot 31 T4 ==== */
@@ -1393,9 +1396,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-corps{flex:1;min-height:0;display:flex}
 .mf-fi-ligne{flex:1;display:flex;gap:16px;min-height:0;min-width:0}
 .mf-fi-c1{flex:1;display:flex;min-width:0}
-.mf-fi-apercu>.mf-fi-c1:nth-child(1){flex:none;width:552px}
-.mf-fi-apercu>.mf-fi-c1:nth-child(2){flex:none;width:385px}
-.mf-fi-apercu>.mf-fi-c1:nth-child(3){flex:none;width:595px}
+/* ==== [ANCRE: MONDE_LOT68_T1_COLONNES_FICHE] — Monde lot 68 T1 : colonnes explicites sans compter les autres enfants. ==== */
+.mf-fi-apercu>.mf-fi-c1{flex:none;width:552px}
+.mf-fi-apercu>.mf-fi-c1+.mf-fi-c1{width:385px}
+.mf-fi-apercu>.mf-fi-c1+.mf-fi-c1+.mf-fi-c1{width:595px}
+/* ==== [FIN ANCRE] ==== */
 .mf-fi-col{flex-direction:column;gap:16px}
 .mf-fi-pan{min-width:0}
 .mf-fi-pan.mf-fi-fill{flex:1}
