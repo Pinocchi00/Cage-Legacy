@@ -325,3 +325,12 @@ test('Lot 55 T1 — les prix attribués portent une phrase de presse marquée no
     assert.ok(/\d/.test(p.phrase),`phrase du prix ${p.id} sans chiffre de relevé`);
   }
 });
+test('Lot 55 T1 — à score égal la finition la plus tôt dans l’année est retenue',()=>{
+  const c=charger();
+  const m={hist:[
+    {c:20,a:{id:'premier',name:'Premier'},b:{id:'p',name:'P'},winner:'A',family:'ko',round:1,slot:'main'},
+    {c:200,a:{id:'second',name:'Second'},b:{id:'s',name:'S'},winner:'A',family:'ko',round:1,slot:'main'}
+  ]};
+  const ko=c.mgmtCeremonieCalculer(m).find(p=>p.id==='ko');
+  assert.equal(ko.laureat,'premier');
+});

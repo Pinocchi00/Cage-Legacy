@@ -514,3 +514,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée après bump : `node --test tests/mgmtLot55T1.test.js` (30/30 verts).
 - Aucun changement de sauvegarde ni migration. L'écran reste une adaptation, pas une reproduction certifiée de toute la composition de la planche. Les limites de la reprise 65 (trois saisons complètes, fixture de sauvegarde ancienne, déclenchement anniversaire, test lent) restent non résolues; ne pas les présenter comme satisfaites.
 - Fichiers à commiter : `mgmt-ceremonie.js`, `index.html` et cette fiche. Modifications étrangères `.opencode/agents/*` et `opencode.json` exclues.
+
+### Reprise 67
+
+- Ajout du test « Lot 55 T1 — à score égal la finition la plus tôt dans l’année est retenue » : deux KO de score égal vérifient le départage chronologique demandé.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (31/31 verts).
+- Aucun changement de production, de cache ou de sauvegarde. Les limites déjà consignées (notamment fidélité intégrale aux planches et test lent de plafond) restent inchangées; cette reprise ne déclare pas la tranche entièrement terminée.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de départage), cette fiche (compte rendu). Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
