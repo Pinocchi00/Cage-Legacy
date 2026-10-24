@@ -51,4 +51,11 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Toujours non livré : le portage de l'écran carte `UniSoiree`, le choix de vue bouton V, la frise/fondu de lecture temps forts, la lecture résultat seule, la fin `UniSoireeFin`, l'assertion de durée 15–20 minutes et les exigences restantes d'intégration/test. Le test reste absent des listes complètes `test` et `test:watch`.
 - Aucune modification au moteur de combat. Aucun changement aux tests existants ni à leurs empreintes.
 
+### Reprise 9 — touche de réglage de vue
+
+- Ajout de la touche `V` / `v` dans l'écran agenda : elle fait tourner la vue du combat sélectionné (ou du prochain combat) entre complet, temps forts et résultat, en réutilisant `mgmtVueCombatChoisir`.
+- Le test ciblé passe pour ses 4 tests existants. L'estimation par défaut observée avec la graine 5303 est 868,38 s, donc sous la cible de 900 s ; le calcul demandé (durée exacte des combats complets, 45 s par temps forts, 5 s résultat et 10 s de transition) n'a pas été modifié pour masquer cet écart.
+- Les autres cases restent à faire : portage intégral de la carte et des informations « Le prochain », lecture accélérée avec frise/fondu, carte résultat seul, portage de l'écran de fin et primes exactes, assertions de durée/couverture des classes/empreintes historiques, intégration du test dans `test` et `test:watch`.
+- Fichiers modifiés durant cette reprise : `mgmt-soiree-cadre.js` (touche V) et `index.html` (version cache du JS). Pas de changement de sauvegarde. Aucun écart à la maquette autre que les éléments non encore portés déjà listés.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

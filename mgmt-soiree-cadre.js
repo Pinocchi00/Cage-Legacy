@@ -351,7 +351,7 @@ const MGMT_SO_ANCIENNES_TOUCHES={
   '3'(){ CL.mgmtSoireeToutSimuler(); },
   Enter(){ if(MGMT_SOIREE.index>=G.mgmt.lastEvent.fights.length) CL.mgmtSoireeNext(); },
 };
-/** Les touches de la soirée : Entrée regarde, P passe, F ouvre l'avant-combat, ← → changent de combat. Sans agenda : celles d'origine. */
+/** Les touches de la soirée : Entrée regarde, P passe, F ouvre l'avant-combat, V change la vue, ← → changent de combat. Sans agenda : celles d'origine. */
 function mgmtSoTouche(nom){
   return function(){
     if(!mgmtSoAgenda()){ const f=MGMT_SO_ANCIENNES_TOUCHES[nom]; if(f) f(); return; }
@@ -366,6 +366,7 @@ function mgmtSoTouche(nom){
     }else if(nom==='Escape'){ if(MGMT_SOIREE_UI.focus!==null&&i<n) CL.mgmtSoAutre(0); }
     else if(nom==='p'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoPasser();
     else if(nom==='f'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoAvant();
+    else if(nom==='v'&&!ouverture&&i<n){ const k=MGMT_SOIREE_UI.focus===null?i:MGMT_SOIREE_UI.focus, ordre=['complet','forts','resultat'], vue=mgmtVueDuCombat(m,k); mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(vue)+1)%ordre.length]); }
     else if(nom==='ArrowLeft'){ if(i>=n) CL.mgmtSoRevoirDernier(); else if(!ouverture) CL.mgmtSoAutre(-1); }
     else if(nom==='ArrowRight'&&!ouverture&&i<n) CL.mgmtSoAutre(1);
   };
@@ -377,6 +378,7 @@ keysRegister('mgmt_soiree',{
   Enter:mgmtSoTouche('Enter'),
   p:mgmtSoTouche('p'), P:mgmtSoTouche('p'),
   f:mgmtSoTouche('f'), F:mgmtSoTouche('f'),
+  v:mgmtSoTouche('v'), V:mgmtSoTouche('v'),
   ArrowLeft:mgmtSoTouche('ArrowLeft'), ArrowRight:mgmtSoTouche('ArrowRight'), Escape:mgmtSoTouche('Escape'),
 });
 keysRegister('mgmt_soiree_avant',{
