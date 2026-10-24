@@ -189,6 +189,15 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne signale aucun écart. Pas de changement de code/cache ou sauvegarde dans cette reprise.
 - Écart restant : critère de densité visuelle du choc non satisfait malgré l'affichage réel, affichage visible confirmé par la capture. Les autres écarts consignés ci-dessus (bilan, arrivée, comparaison des images) restent à distinguer de critères validés par test structurel. Aucun achèvement global n'est revendiqué.
 
+### Reprise 61 — densité de l'affiche choc
+- Reproduction de la scène demandée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Le choc valide est bien affiché ; la mesure avant modification était `grosBlocs=26.1%`, chevauchements=0, textes sous 22 px=0, aucun débordement.
+- `ui-cadre.css` réduit la taille des noms des combattants et des médaillons sur les cartes d'affiche (46→32 px, médaillon 54→38 px), sans passer sous le minimum lisible. La version `ui-cadre.css` dans `index.html` a été bumpée.
+- Capture après modification : `grosBlocs=25.5%`, chevauchements=0, textes sous 22 px=0, aucun débordement. L'amélioration est mesurée mais reste insuffisante face à l'objectif ≤20%; ne pas la déclarer conforme.
+- Capture `discours` rejouée : `grosBlocs=18.1%`, chevauchements=0, textes sous 22 px=0, aucun débordement. Les images comparatives n'ont pas été ouvertes dans cette interface ; aucune validation visuelle subjective n'est revendiquée.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe ; `git diff --check` passe. `sw.js`, modifié automatiquement par le bump, a été restauré depuis `origin/main` et n'est pas inclus.
+- Fichiers de cette reprise : `ui-cadre.css` (densité des cartes choc), `index.html` (version cache), cette fiche (mesures). Tests ajoutés : aucun. Migration de sauvegarde : aucune.
+- Écarts toujours ouverts : le choc dépasse le seuil de densité de 5,5 points ; aucune nouvelle capture arrivée ni capture bilan post-correction n'a été faite ici ; parcours complet et majorité sont déjà couverts par les tests présents. Les changements utilisateurs `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
