@@ -995,6 +995,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-total{display:flex;justify-content:space-between;align-items:center;font-size:24px;line-height:1.1}
 .so3-total b{color:#F0B220;font-family:var(--mf-titre);font-size:30px;line-height:1}
 /* ==== [ANCRE: P7_T2_FRISE_CSS] — Monde lot 53 T1 ==== */
+.so3-soiree{min-width:0;min-height:0;width:100%;height:100%;box-sizing:border-box}
 .so3-frise{position:absolute;z-index:5;left:5%;right:5%;bottom:88px;display:flex;gap:8px;pointer-events:none}
 .so3-moment{flex:1;min-width:0;min-height:58px;padding:8px 10px;box-sizing:border-box;display:flex;align-items:center;gap:10px;background:#252121;color:#E9E6E1;opacity:.72;transition:opacity .18s ease,background-color .18s ease}
 .so3-moment b{font-family:var(--mf-titre);font-size:26px}

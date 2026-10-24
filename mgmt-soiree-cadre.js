@@ -178,7 +178,7 @@ function mgmtSoEntreHtml(m,prog,index,focus){
   const haut=`<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}`
     +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index,focus<index,focus):'','choisi','mf-so-c')
     +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
-  return haut+mgmtSoBandeHtml(prog,index,focus);
+  return `<div class="so3-soiree">${haut}${mgmtSoBandeHtml(prog,index,focus)}</div>`;
 }
 /** L'avant-combat : un côté (ce qu'on a vu, ce qu'on ne sait pas, son dernier combat, trois chiffres publics). */
 function mgmtSoCoteHtml(c,couleur){
