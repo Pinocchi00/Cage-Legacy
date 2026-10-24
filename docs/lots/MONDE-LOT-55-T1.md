@@ -598,3 +598,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers de cette reprise : `mgmt-ceremonie.js` (lecture des traces de primes), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche (compte rendu). Aucun changement de format de sauvegarde ni migration.
 - Limites toujours non certifiées : test lent `mgmtReleveReduit` non exécuté; pas de preuve de trois saisons complètes réellement jouées ni de chargement d'une fixture complète ancienne; fidélité visuelle intégrale aux maquettes non certifiée; cérémonie raccordée au terme du contrat et non à chaque anniversaire. Ces limites restent à considérer au bilan, malgré le test ciblé vert.
 - Les modifications étrangères `.opencode/agents/*` et `opencode.json` ne sont pas incluses.
+
+### Reprise 77
+
+- État de reprise : branche `p11-ceremonie-carnet`, HEAD `8a29611` (commit portant le message final demandé). Les modifications non commitées de `.opencode/agents/*` et `opencode.json` restent étrangères et n'ont pas été touchées.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (37/37), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert); confirmation que `mgmtLot55T1` est présent dans `test` et `test:watch`.
+- Aucun défaut de code n'a été révélé; aucun changement métier n'est effectué et aucun commit artificiel n'est créé. Le test lent `mgmtReleveReduit` n'a pas été lancé dans cette reprise; `check:rapide` n'est pas lancé conformément au contrôle rapide du superviseur.
+- Limites déjà documentées et toujours pertinentes : le test de sauvegarde ne charge pas une fixture historique complète, et les vérifications ciblées ne certifient ni trois saisons pleines ni la reproduction intégrale des planches et le déclenchement à chaque anniversaire. Aucune modification de format de sauvegarde ni migration.
+- Les seuls fichiers modifiés restent les fichiers d'outillage étrangers mentionnés ci-dessus; ils sont exclus. Aucun nouveau point ouvert pour Anthony.
