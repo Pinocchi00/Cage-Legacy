@@ -463,3 +463,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (contrôle des options de navigation), cette fiche (compte rendu). Aucun changement de sauvegarde ou migration.
 - Restent non certifiés : intégralité des valeurs et de la composition des maquettes, déclenchement pour chaque anniversaire plutôt qu'au terme du contrat, trois saisons complètes, chargement d'une sauvegarde historique complète, test lent `mgmtReleveReduit`. Cette reprise n'efface pas ces écarts; pas de `TOUT_EST_FINI`.
 - Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
+
+### Reprise 60
+
+- État d'entrée vérifié : branche `p11-ceremonie-carnet`, HEAD `15ebc92`; les commits de tranche figurent déjà dans l'historique. Les seuls fichiers modifiés hors commit sont `.opencode/agents/*` et `opencode.json`, étrangers au périmètre et laissés intacts.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (28/28), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés) et `node_modules/.bin/eslint .` (vert).
+- Contrôle des critères encore non couverts selon les reprises précédentes : le test lent `mgmtReleveReduit`, trois saisons intégralement jouées, une fixture historique complète de sauvegarde et certification visuelle intégrale aux planches restent à vérifier. Aucun changement de sauvegarde ni migration n'est attendu dans cette reprise.
+- Les écarts qui ne sont pas corrigés ne sont pas déclarés satisfaits; les modifications d'outillage étrangères ne sont pas ajoutées.
