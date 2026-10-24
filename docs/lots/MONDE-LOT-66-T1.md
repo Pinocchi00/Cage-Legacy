@@ -63,6 +63,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 44 — recapture suite et essai de cellules — 24/10/2026
+
+- État initial : branche `fid-lendemain`, les commits fonctionnels sont présents ; seules les modifications hors tranche dans les fichiers de configuration/agents et `sw.js` sont laissées intactes.
+- Recaptures après lecture du guide : `lendemain` contrôle 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %. `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, gros blocs 16,8 %, quatre débordements variables dans la colonne des mouvements. Comparaison en seconde capture : libellés concernés variables selon la sauvegarde de démonstration, défaut confirmé sur largeur des cellules, pas sur collisions.
+- Essai CSS dans `ui-cadre.css` : réaffirmer la grille trois colonnes de la planche avec cellules rétrécissables et coupure des mots ; cache CSS monté. L'essai ne supprime pas les alertes du comparateur (nouvelle capture : quatre débordements différents), il est conservé comme règle d'encombrement, pas comme correction complète.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de sauvegarde, données ou mécanique. Les captures ont été régénérées sous le dossier temporaire de l'outil.
+- Écart restant : la suite signale encore des débordements de texte dans la colonne mouvements ; la case visuelle 4 n'est donc pas entièrement certifiée malgré les ratios de gros blocs et l'absence de chevauchement/petits textes. Inspection manuelle d'image non revendiquée. Pas de nouveaux tests.
+
 ### Reprise 33 — mesure de la suite et livraison — 24/10/2026
 
 - Guide de capture relu via Python après refus de l'outil de lecture pour le chemin externe. Captures exécutées séparément à 1920×1080 : `lendemain` contrôle automatique 0 chevauchement, 0 texte sous 22 px, aucun débordement; gros blocs 18,4 %. `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, mais quatre débordements signalés (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), gros blocs 17 %.
