@@ -377,6 +377,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
 - Écart restant : cela affine l'ouverture, sans convertir toute sa composition historique en blocs `so3-*`. Les critères globaux encore ouverts en reprise 53 (portage exact complet, plage totale 900–1200 s mesurée, lecture forts chronométrée/fondue sur l'image) restent non établis; ce changement ne suffit donc pas à déclarer le lot terminé.
 
+### Reprise 56 — vérification à la reprise 3
+
+- Départ : branche `p7-ecran-soiree`, HEAD `cb76287`. Aucun changement de code de la tranche n'était non commité; les modifications locales `.opencode/agents/*` et `opencode.json` sont externes et n'ont pas été touchées.
+- Vérification ciblée : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. La commande confirme le rendu réel, les vues indépendantes, la carte résultat passable, les primes, la frise et les sélecteurs. Les commits récents portent notamment l'en-tête, les libellés accessibles et le contrôle des primes.
+- Le calcul existant reste la formule demandée (durée affichée du combat complet, 45 s forts, 5 s résultat et 10 s de transition). L'estimation antérieure sur la référence reste 868,38 s, sous la borne de 900 s. Je n'ai ni gonflé la durée ni modifié le calcul pour faire passer le seuil; le test de cumul 900–1200 s n'est donc pas satisfait.
+- Non achevé : le portage n'est toujours pas intégralement identique aux trois maquettes; la lecture des temps forts repose sur l'accélération hors fenêtres et non sur une mesure en temps réel de 30–60 s avec fondu de l'image d'arène; l'audit de toutes les classes/tailles et le critère de cumul de référence ne sont pas établis. Le contrôle ciblé vert ne suffit pas à revendiquer la fin.
+- Contrôles versions/lint et test lent non relancés à cette reprise. Aucun changement applicatif, de sauvegarde, du moteur, ni nouveau texte joueur. Les tests historiques ne sont pas modifiés.
+
 ### Reprise 56 — libellé accessible de la frise
 
 - Fait : la région live de la frise annonce maintenant son nombre total de moments forts dans son nom accessible, en complément des états individuels « passé / en cours / à venir ».
