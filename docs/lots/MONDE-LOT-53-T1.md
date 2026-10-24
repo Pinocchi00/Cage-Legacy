@@ -150,3 +150,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Non fait : portage des blocs aux valeurs complètes `UniSoiree`/`UniSoireeFin`, réglage/documentation de la vraie lecture fenêtre par fenêtre/fondu et test de passabilité, assertion du cumul 900–1200 s (le test mesure uniquement une valeur positive), test des empreintes historiques, exhaustivité de classes/échappements, inscription dans les listes agrégées `test` et `test:watch`. La fin conserve sa composition mf-*; `so3-fin` est uniquement un conteneur, pas un portage visuel complet.
 - Écart : cumul antérieur constaté à 868,38 s, inférieur à la cible; je n'ai pas faussé la formule prescrite. La branche comprenait déjà la carte résultat passable et la frise des temps forts, mais pas la lecture segmentée avec fondu annoncée par la maquette.
 - Test lent `mgmtReleveReduit.test.js` non relancé dans cette reprise. Aucun changement de sauvegarde, moteur de combat ou discours.
+
+### Reprise 21 — contrôle de reprise
+
+- Vérifié au démarrage : branche `p7-ecran-soiree`, HEAD `3fa359a`; aucun changement applicatif non commité. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères.
+- Le dernier commit intitulé comme livraison contient encore uniquement un ajout de conteneur/style et une assertion associée. Les cases fonctionnelles non couvertes ci-dessus restent effectivement à faire ; le titre du commit ne constitue pas une preuve d'achèvement.
+- Je ne transforme pas les limites déjà documentées (notamment l'estimation sous 900 s et l'absence de fenêtre temporisée) en assertions vertes artificielles. Pour achever cette reprise, les cas restants doivent être implémentés et validés dans les fichiers applicatifs avant livraison.
