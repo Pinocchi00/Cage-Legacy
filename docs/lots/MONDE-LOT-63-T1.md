@@ -269,6 +269,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - La suite prescrite des sept fichiers (`mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1`, `mgmtLot56T1`) passe **130/130**, y compris les deux régressions lot 54 signalées (rivalité enregistrée et non-répétition sur cinquante semaines).
 - La commande `git merge origin/main` a été tentée, mais l'environnement la bloque explicitement. La fusion et la résolution d'éventuels conflits restent à faire par le superviseur ; les validations sont donc sur l'état local actuel, sans prétendre que la fusion a eu lieu.
 
+### Reprise 5 — vérification finale prescrite (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits de production/tests de la tranche sont déjà présents (`fcaa19e7` en tête) ; aucun fichier fonctionnel non commité. Les modifications locales d'agents `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et exclues.
+- La commande de fusion demandée `git merge origin/main` a été tentée, mais l'environnement interdit `git merge*`. La fusion n'a donc pas eu lieu et reste à effectuer par le superviseur.
+- La suite inter-lots demandée (lots 54, 63, actualités, 55, 57, 48 et 56) passe **130/130**, notamment les deux régressions lot 54 de rivalité enregistrée et d'anti-répétition. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
+- Aucun changement de sauvegarde ni migration. Les seuls fichiers de la tranche restent `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`, déjà commités ; limite de couverture inchangée : les familles sont aussi éprouvées par faits préparés dans un parcours réel, sans prouver que tous les systèmes les produisent naturellement.
+
 ### Reprise 9 — revalidation inter-lots (24/10/2026)
 
 - Branche `p8-apres` confirmée. La suite des sept tests demandés passe **130/130**, dont les deux régressions du lot 54 signalées. `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint global passe et `mgmtLot63T1` figure dans `test` et `test:watch` (`true,true`).
