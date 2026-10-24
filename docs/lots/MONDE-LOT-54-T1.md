@@ -198,3 +198,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 24/24 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé sur `mgmt-ecran-lendemain.js` passe. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
 - Aucun changement de sauvegarde. Les cases 1 et 3 restent incomplètes : malgré la navigation et les contrôles d'ordre/colonnes, l'intégralité des valeurs et dimensions des deux maquettes n'est pas prouvée ; la suite éditoriale T3 n'est pas complètement alimentée par événements réels ni dotée d'une mémoire éditoriale persistée. Les scripts `test` et `test:watch` incluaient déjà le test.
 - Modifications d'environnement `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors tranche.
+
+### Reprise 6 — vérification du 24/10/2026
+
+- Branche `p8-lendemain` confirmée ; aucun fichier de la tranche non commité au départ. Le journal contient déjà les commits de la tranche jusqu'à `a971b15`.
+- Vérification relancée : `node --test tests/mgmtLot54T1.test.js` passe 24/24, y compris le chemin réel de soirée et le cas 13-1 contre le n°1. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` préexistantes restent étrangères à cette tranche et exclues.
+- Limites encore constatées après inspection des deux planches et du code : composition active simplifiée au regard des valeurs exactes, famille T3 non couverte par des faits existants pour toutes les situations demandées, et tests actuels ne démontrant pas une mémoire éditoriale historique persistante. Les exigences non couvertes ne sont pas réputées terminées. Pas de nouvelle donnée sauvegardée ; `MGMT_SAVE_VERSION` inchangé.
+- La branche ne contenait aucune modification de production de la tranche à reprendre. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
