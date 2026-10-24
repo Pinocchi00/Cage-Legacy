@@ -2090,6 +2090,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-ligne strong{overflow:hidden;text-overflow:ellipsis}
 .gu3-ligne>span{text-align:right;white-space:nowrap}
 .gu3-ligne .gu3-evolution{text-align:center}
+.gu3-rivale .gu3-mouvement{max-height:none;overflow:visible;white-space:normal;overflow-wrap:anywhere}
+.ce3-carnet-ecran{top:108px;height:840px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{min-height:calc(100vh - 180px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:72px 110px;gap:24px;background:#0D0B0B;color:#E9E6E1}

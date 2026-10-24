@@ -166,11 +166,11 @@ test('Monde lot 57 T1 — le classement ne produit que les huit organisations co
   }finally{w.close();}
 });
 
-test('Monde lot 57 T1 — le mouvement affiché précise le nombre de places gagnées',()=>{
+test('Monde lot 57 T1 — décision : planches Uni* validées par Anthony ; le mouvement garde un libellé lisible avec le nombre de places',()=>{
   const w=partie();
   try{
     const texte=w.eval(`(()=>{const m=G.mgmt;const rows=mgmtGuerreClassement(m);m.guerre=m.guerre||{};m.guerre.classementPrecedent=rows.map(x=>x.id).reverse();return scr_mgmt_guerre();})()`);
-    assert.match(texte,/Split a gagné [1-7] places? et se rapproche du haut du classement/);
+    assert.match(texte,/Split a gagné [1-7] places?\./);
   }finally{w.close();}
 });
 

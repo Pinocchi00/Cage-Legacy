@@ -360,6 +360,28 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la carte v
   assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,5);
 });
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles',()=>{
+  const c=charger();
+  const combat=(jour,id,nom,opposant,family)=>({c:jour,a:{id,name:nom,W:0,L:0,D:0},b:{id:`${id}-${jour}`,name:opposant},winner:'A',family,round:1,slot:'main'});
+  const m={hist:[
+    {c:10,a:{id:'retour',name:'Retour'},b:{id:'avant',name:'Avant'},winner:'A',family:'decision'},
+    combat(100,'heros','Héros','Adversaire 1','ko'),
+    combat(200,'heros','Héros','Adversaire 2','sub'),
+    combat(250,'retour','Retour','Adversaire 3','ko'),
+    combat(300,'heros','Héros','Adversaire 4','ko')
+  ],roster:[],facts:[]};
+  c.mgmtHistoirePoidsCombat=()=>5;
+  c.G={mgmt:m};
+  c.mgmtOrgNom=()=> 'Split';
+  c.mgmtOrgClassement=()=>[{id:'split',nom:'Split',rang:3,estSplit:true}];
+  c.mgmtPaliersCalculer=()=>({effets:{diffuseur:2,recruteur:1,agents:2,salle:1}});
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,5,'la planche garde ses cinq cartes');
+  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
+  for(const effet of ['Diffuseur : palier 2/3','Budget du recruteur : palier 1/3','Agents libres : palier 2/3','Salles : palier 1/3']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
+});
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
