@@ -23,6 +23,6 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Tests ciblés verts : `mgmtLot54T1.test.js` (30), `mgmtEcranLendemain.test.js` (7), `mgmtLot48T1.test.js` (9) et `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde ni migration.
 - Écart restant : seuil de capture non validé après réduction de la hauteur des cartes ; aucune prétention de réussite visuelle n’est faite. L'affichage branche les contenus existants, sans inventer de mécanique ; les valeurs textuelles de la presse restent issues des données de partie.
 - Compte rendu honnête : tests ciblés, audit des versions et lint sont verts. Le comparateur visuel n’a pas pu être relancé dans cette reprise. Aucun nouveau fichier de test, donc `package.json` n'a pas à changer.
-- Questions pour Anthony : aucune question ouverte ; le seul écart à signaler est le seuil visuel de grosBlocs (20,8 % contre ≤20 % demandé).
+- Questions pour Anthony : aucune question ouverte ; à reprendre lors d’une capture outillée pour mesurer le ratio après ajustement et confirmer (ou corriger) le seuil de 20 %.
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
