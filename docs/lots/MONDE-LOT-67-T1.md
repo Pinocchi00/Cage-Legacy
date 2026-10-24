@@ -7,6 +7,13 @@
 - Vérification : `node --test tests/mgmtLot55T1.test.js` passe (49/49) ; capture cérémonielle passe les contrôles automatisés.
 - Fichiers modifiés : `ui-cadre.css`, `index.html`, cette fiche. Pas de test nouveau ni migration. Écarts non clos : comparatifs et scène remplie non inspectés, mesures/retouches restantes des vues Croissance/Carnet/Bilan/Guerre non effectuées dans cette reprise. Aucun `TOUT_EST_FIN` revendiqué.
 
+## Compte rendu — reprise 22
+
+- Branche `fid-organisation` confirmée. `git log --oneline -12` et `git status` consultés ; la seule modification initiale était le `sw.js` régénéré, restauré depuis `origin/main` sans l'ajouter.
+- Lecture du protocole de capture et capture Cérémonie relancée : chevauchements=0, textes sous 22 px=0, débordements=[], grosBlocs=19,7 %. Le comparatif est régénéré dans `C:/Users/antho/AppData/Local/Temp/shots/cmp-ceremonie.png`, mais ne peut pas être ouvert avec l'outil disponible. La scène ne prouve pas le rendu avec les six prix remplis.
+- `node --test tests/mgmtLot55T1.test.js` passe (49/49) ; `node tools/verif-versions.js origin/main` et ESLint global passent. Aucun changement applicatif n'a été fait dans cette reprise et aucun commit n'est requis pour le contrôle seul.
+- Écarts toujours ouverts d'après les dernières mesures consignées : Croissance (petits textes/débordements), Carnet (chevauchements), Bilan (collision) et Guerre (grosBlocs au-dessus de 20 %), plus la preuve de prix remplis et l'inspection visuelle exigée. La tranche n'est donc pas certifiée terminée ; pas de `TOUT_EST_FIN` revendiqué.
+
 - Branche `fid-organisation` confirmée ; journal et état Git consultés. Aucun changement applicatif non commité n'était présent au départ.
 - Ajustement CSS ciblé de l’en-tête cérémonie d’après `UniCeremonie` : titre à 56 px, presse maintenue sur une seule ligne à côté du titre, cadre date/source conservé à droite. `index.html` versionné via `tools/_bump.js` ; `sw.js` généré a été restauré depuis `origin/main`.
 - `node --test tests/mgmtLot55T1.test.js` passe (49/49). Le protocole/cmp de capture n’a pas été ouvert ni exécuté dans cette reprise ; je ne revendique aucune inspection visuelle, aucune scène à six prix, ni validation des écarts précédemment relevés pour Croissance, Carnet, Bilan ou Guerre. Les captures et le seuil visuel global restent non certifiés.
