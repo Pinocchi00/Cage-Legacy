@@ -60,6 +60,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 10 — contrôle inter-lots demandé (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de production et de tests de la tranche sont déjà présents (`67f9dba7` en tête). Aucun fichier fonctionnel/test de tranche n'était en attente. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et restent exclus.
+- Le contrôle ciblé demandé passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les deux régressions signalées du lot 54 — rivalité enregistrée et non-répétition sur cinquante semaines — passent.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe. Aucune clé de sauvegarde nouvelle ni migration.
+- La fusion demandée `git merge origin/main` a été refusée par la politique de l'environnement, qui interdit toute commande `git merge*`. L'intégration reste à effectuer par le superviseur ; aucun test existant n'a été modifié.
+- Fichiers déjà livrés et rôles : `mgmt-apres-data.js` (dix familles et formulations `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, Accueil/presse et mouvements inter-organisations), `tests/mgmtLot63T1.test.js` (neuf tests) et `package.json` (scripts `test`/`test:watch`). Limite de couverture inchangée : les tests préparent séparément les faits familiaux sur une partie créée par le parcours réel, sans prouver que chaque système de jeu les génère naturellement.
+
 ### Reprise 8 — contrôle inter-lots final (24/10/2026)
 
 - `p8-apres` confirmée ; `git log --oneline -12` et `git status` examinés. Aucun fichier de production/test de la tranche non commité : les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et exclus.
