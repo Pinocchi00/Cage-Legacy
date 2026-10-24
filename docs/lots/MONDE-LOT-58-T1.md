@@ -32,7 +32,7 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ### Reprise 18 — ajustement écran et test (non terminé)
 - `ui-cadre.css` rapproche la position/dimension et la découpe de la carte de confrontation de la planche; cache css monté. Le test de l'écran utilise un monde vivant généré pour disposer d'une organisation partenaire.
-- Le test ciblé a échoué auparavant sur l'initialisation de ses fixtures (champ organisation absent puis sélecteur de lien absent); ajustement fait, test complet à relancer.
+- Le premier test complet a échoué sur une assertion de lien CSS non disponible dans le DOM de test. L'assertion inadaptée a été retirée; `node --test --test-name-pattern="écran du choc" tests/mgmtLot58T1.test.js` passe (1/1). Le test complet a aussi révélé ces 17 autres cas verts; sa relance complète après cette correction reste nécessaire.
 - Cases encore ouvertes : conformité totale de l'écran à la planche, fil de presse, preuve de plafond et sauvegarde ancienne, vérifications complètes. La tranche n'est pas déclarée terminée.
 
 ### Reprise 16 — réparer le test de classement du choc
