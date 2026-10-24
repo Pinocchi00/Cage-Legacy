@@ -466,6 +466,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-prix-combattant:after{right:-64px;bottom:-64px;width:320px;height:320px}
 .ce3-prix-combattant h2{color:#0D0B0B}
 .ce3-prix-combattant strong{font-size:112px;line-height:.8;white-space:normal}
+/* ==== [ANCRE: MONDE67_T1_CEREMONIE_TEXTE_AU_DESSUS_ORNEMENT] — Monde lot 67 T1 ==== */
+.ce3-prix-combattant h2,.ce3-prix-combattant strong,.ce3-prix-combattant p{position:relative;z-index:1}
 .ce3-prix:not(.ce3-prix-combattant){clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
 .ce3-prix:not(.ce3-prix-combattant){gap:18px}
 .ce3-prix:not(.ce3-prix-combattant) strong{font-size:54px;line-height:1.05}
