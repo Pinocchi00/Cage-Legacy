@@ -276,3 +276,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Relu `LISEZMOI.txt`, exécuté le comparateur avant et après ajustement. `lendemainSuite` conserve 0 chevauchement et 0 texte sous 22 px, gros blocs 17 %, mais les mêmes quatre libellés sont signalés en débordement (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`). Le changement finalisé du layout des lignes n'a donc pas résolu le critère et la case visuelle 4 reste ouverte.
 - Modifié `ui-cadre.css` et monté le cache CSS. Test ciblé `mgmtEcranLendemain.test.js` : 7/7. Aucun changement de données/sauvegarde/mécanique.
 - Écart : le comparateur confirme des débordements persistants dans la suite ; ne pas considérer la tranche visuellement terminée. Aucun test nouveau. Questions pour Anthony : aucune.
+
+### Reprise 41 — contrôle du débordement suite — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. Le HEAD précédent contenait déjà les deux écrans et leur navigation ; les seuls changements préexistants hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) restent non touchés.
+- Tenté de rétablir exactement les trois colonnes de mouvements de la planche dans `ui-cadre.css` (nom/division, rang, organisation) au lieu des rétrécissements accumulés. Capture `lendemainSuite` : chevauchements 0, textes sous 22 px 0, mais les quatre débordements persistent (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 17 %. Le changement ne résout pas l'alerte et est donc conservé comme retour à la géométrie source fidèle à la planche, pas comme correction certifiée.
+- Capture `lendemain` : chevauchements 0, textes sous 22 px 0, aucun débordement, moyen 25,9 %, gros blocs 18,4 %. Les deux comparatifs ont été régénérés par `shoot.js` dans le dossier temporaire.
+- `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), audit versions et ESLint passent. Aucune modification de sauvegarde/mécanique ni nouveau test.
+- Écart persistant : case visuelle 4 incomplète pour `lendemainSuite`; malgré la mesure confirmée, le débordement des libellés n'est pas corrigé. Ne pas revendiquer `TOUT_EST_FINI`.
