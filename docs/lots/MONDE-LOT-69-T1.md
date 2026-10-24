@@ -194,3 +194,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications ciblées : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
 - Pas de migration ni de modification JS/CSS. Le test complète la vérification de transition existante, mais ne constitue pas une capture comparative et ne prouve pas le parcours contractuel complet.
 - Écarts inchangés : l’exigence de trois combats choc n’est pas représentée par la logique existante mono-combat ; les seuils visuels post-correction et les scènes arrivée/offre n’ont pas de nouvelles preuves ; le test de parcours ne couvre pas la fin de contrat/bilan ni un rechargement valide strictement identique. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 34
+- Tentative de test bout en bout acceptation → résultat du choc dans `tests/mgmtLot69T1.test.js` : elle a échoué à construire un scénario fiable avec champions adverses de même division pour la graine choisie, comme le test lot 58 conditionnel le signale déjà. Le test expérimental a été retiré ; aucun scénario faux ou sauté n'est présenté comme preuve. Le chemin de soirée est couvert par le test existant de `tests/mgmtLot58T1.test.js`, mais pas ici par un fixture fiable.
+- Vérification ciblée finale et audits avant commit à effectuer. Pas de capture ni migration. La divergence « trois affiches / 2 sur 3 » de la planche demeure, ainsi que les comparaisons/captures, le parcours complet contrat/rechargement strict et les mesures visuelles.
+- Fichier modifié dans cette reprise : cette fiche (compte rendu de la tentative et de sa limite). Aucun écart de version cache.
