@@ -226,3 +226,13 @@ test('Monde lot 57 T1 — un rang final hors des huit est réparé sans toucher 
     assert.equal(resultat.guerreRetiree,true);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — les duels et le mouvement utilisent le relevé de classement précédent',()=>{
+  const w=partie();
+  try{
+    const details=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const avant=mgmtOrgClassement(m);const ids=avant.map(x=>x.id);const split=mgmtPredecesseurOrgId(m);const i=ids.indexOf(split);const precedent=ids.slice();if(i>0)[precedent[i-1],precedent[i]]=[precedent[i],precedent[i-1]];m.guerre={ev:[],rival:null,depuis:0,classementPrecedent:precedent};const apres=mgmtGuerreClassement(m).find(x=>x.estSplit);return JSON.stringify({duelDevant:apres.duelSplit.devant,duelDerriere:apres.duelSplit.derriere,devant:apres.devant,derriere:apres.derriere,mouvement:apres.mouvement,precedentRang:precedent.indexOf(split)+1,rang:apres.rang});})()`));
+    assert.equal(details.duelDevant,details.devant);
+    assert.equal(details.duelDerriere,details.derriere);
+    assert.equal(details.mouvement,details.precedentRang-details.rang);
+  }finally{w.close();}
+});
