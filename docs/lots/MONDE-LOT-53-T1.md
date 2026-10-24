@@ -319,3 +319,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `mgmt-soiree-cadre.js` (structure des lignes), `ui-cadre.css` (grille et règles des deux classes `so3-*`), `index.html` (versions cache générées par `_bump.js`), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Non fait, donc tranche toujours incomplète : le portage intégral des maquettes, la lecture temps forts temporisée/fondue aux fenêtres, la validation de la cible 900–1200 s, et les autres écarts détaillés dans la reprise 42. Le test lent et les vérifications complètes de fin de tranche restent à exécuter. Pas de modification du moteur ni de sauvegarde.
+
+### Reprise 44 — typographie des lignes de la carte
+
+- Fait : les lignes de la carte d'ouverture reprennent les tailles/typos lisibles dans `UniSoiree` (numéro 30 px, informations 22 px, noms 32 px) et différencient les couleurs de ligne sélectionnée comme sur la maquette. Le CSS est toujours préfixé `so3-*` pour les classes nouvelles.
+- Fichiers : `ui-cadre.css` et son cache `index.html`, présente fiche.
+- Test : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
+- Non fait : cette correction typographique n'est pas le portage complet de la maquette. Restent la recomposition complète de l'écran/fin, les fenêtres fortes temporisées/fondues, le cumul de référence dans 900–1200 s (mesure antérieure 868,38 s), et les autres lacunes des reprises antérieures. Le lot n'est pas achevé.
