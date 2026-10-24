@@ -73,4 +73,11 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Critères toujours non atteints : les deux écrans ne reproduisent pas l'intégralité des valeurs/layouts des planches; mouvements et résultats ne sont pas exhaustifs (dont les objectifs de contrat); le catalogue T3 est déterministe, limité à trois propositions et marqué `relu:false`, mais n'a ni mémoire anti-répétition garantie sur 50 soirées ni contextualisation fiable de toutes les familles aux faits (discours, revanche, réseaux et autres organisations). La famille suspension est filtrée si la soirée ne porte pas un fait de blessure connu.
 - Aucune nouvelle clé de sauvegarde ni migration. `test` et `test:watch` référencent le fichier. Le travail existant ne justifie donc pas `TOUT_EST_FINI`; les vérifications lancées ici sont les tests ciblés uniquement.
 
+### Vérification de reprise — 24/10/2026
+
+- Journal consulté (`5fbb2e6` en tête) ; branche `p8-lendemain` confirmée. Aucun fichier de la tranche n'était modifié : les changements `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangers et ne sont pas inclus.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 15/15 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé sur les trois fichiers de production passe ; `package.json` inclut bien le test dans `test` et `test:watch`.
+- Les limites des cases 1 et 3 restent celles décrites plus haut : malgré une seconde vue navigable, l'ensemble des deux planches n'est pas reproduit fidèlement ; mouvements et objectifs contractuels ne sont pas exhaustifs ; les lignes T3 ne disposent ni d'une garantie d'anti-répétition sur 50 soirées, ni d'une contextualisation de toutes les familles par les faits réels. Aucun changement fonctionnel n'a été effectué dans cette reprise de validation.
+- Aucun état de sauvegarde nouveau ni migration. Les tests ciblés et audits réussis ne suffisent pas à marquer la tranche terminée ; aucun `TOUT_EST_FINI` n'est revendiqué.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
