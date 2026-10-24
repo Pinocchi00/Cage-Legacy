@@ -616,3 +616,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Le fichier externe d'instructions de capture n'est pas accessible à l'outil de lecture ; aucun contrôle frais ni ouverture d'image cette reprise. Contrôles antérieurs : fiche, recruteur, retours et semaine à zéro géométrique ; pas de comparaison visuelle ouverte. Arrivée, relevé, chiffres, menu et classements sans contrôle propre documenté dans cette reprise. Accueil, actualités, tonposte et bilan restent hors périmètre.
 - Aucun changement applicatif à effectuer sur la base de nouveaux constats ; aucun fichier JS/CSS/donnée de sauvegarde modifié, aucun bump ni migration. Les vérifications ciblées ne démontrent pas la fidélité aux planches.
 - Écart : les comparatifs ouverts, les scènes manquantes et la validation de fidélité complète restent à faire ; `TOUT_EST_FIN` non atteint.
+
+### Reprise 54 du 24/10/2026 — contrôles ciblés
+
+- Branche `fid-fiches` confirmée. La lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` a été refusée par l'accès externe de l'environnement ; aucun contrôle frais ni comparatif d'image n'est revendiqué.
+- Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (23/23 verts), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Aucun fichier applicatif non committé n'étant présent, aucune correction d'écran ne peut être revendiquée. Les contrôles historiques ne remplacent pas des mesures fraîches : fiche, arrivée, recruteur, retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans validation visuelle complète.
+- Les changements locaux `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés. Pas de migration ni de bump `?v=` requis par les changements de cette reprise. Les critères visuels de la fiche ne sont pas atteints ; `TOUT_EST_FIN` non revendiqué.
