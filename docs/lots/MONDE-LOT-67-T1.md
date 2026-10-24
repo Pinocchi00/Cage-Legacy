@@ -167,6 +167,14 @@ Branche : `fid-organisation` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 6.** Tests : les existants restent verts ; ceux qui décrivaient l'ancienne structure sont **mis à jour en citant la décision** (« planches Uni* validées par Anthony ; l'écran suit la planche ») ; ajoute des tests de présence (onglets, blocs) et « chaque classe a sa règle de style » (la cérémonie avait des classes `ce3-*` sans règle).
 **[ ] 7.** `?v=`, versions, lint ; commit final `Monde lot 67 T1 : la page Organisation et la cérémonie fidèles aux planches` ; compte rendu honnête ; `TOUT_EST_FINI`.
 
+## Compte rendu — reprise 16
+
+- Branche `fid-organisation` confirmée ; historique des douze commits consulté et aucun changement non commité n'était présent au début de cette reprise.
+- Correction CSS limitée de l'en-tête de cérémonie : taille du titre, contrainte de largeur pour la mention presse et espacement du cadre date/source, afin de réduire le risque de collision restant décrit dans la reprise du superviseur. `index.html` porte le nouveau `?v=` ; `sw.js` généré par le bump a été restauré et est exclu.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` passe (47/47), `node tools/verif-versions.js origin/main` ne signale aucun écart, ESLint global passe, `git diff --check` passe. Migration : aucune. Aucun test ajouté.
+- Fichiers : `ui-cadre.css` (espacement/typographie de l'en-tête cérémonie), `index.html` (cache CSS), cette fiche (journal de reprise).
+- Limites : l'accès au protocole et aux comparatifs externes est refusé dans cet environnement ; aucune capture ni ouverture de `cmp-ceremonie.png` n'est revendiquée. La scène avec prix, les captures et défauts connus Croissance/Carnet/Bilan/Guerre ne sont pas clos par cette retouche. Les critères visuels complets restent non certifiés ; `TOUT_EST_FIN` n'est pas revendiqué. Questions de spécification : aucune.
+
 ## Compte rendu
 
 - Reprise après `0a4b25af` : branche `fid-organisation` confirmée et arbre de travail propre. J'ai relu les consignes de `shoot/LISEZMOI.txt` et exécuté les six captures individuellement (un seul Chrome à la fois). Mesures actuelles : Guerre 22,9 % gros blocs, contrôles automatiques sans défaut ; Croissance 17,2 %, trois textes sous 22 px et quatre débordements (libellés de populations/poids) ; Ton poste 19,8 %, aucun défaut ; Carnet 15,7 %, 86 chevauchements et quatre débordements ; Bilan 12,9 %, une collision entre « REMERCIÉ » et son aide ; Cérémonie 20,0 %, contrôles automatiques sans défaut.

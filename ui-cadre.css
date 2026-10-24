@@ -469,6 +469,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-entete-gauche h1{min-width:0}
 .ce3-entete-gauche p{min-width:0;white-space:normal}
 .ce3-entete>strong{min-width:max-content}
+/* ==== [ANCRE: MONDE67_T1_CEREMONIE_ENTETE_RESPIRATION] — Monde lot 67 T1 ==== */
+.ce3-entete-gauche h1{font-size:48px;letter-spacing:0;flex:none}
+.ce3-entete-gauche p{font-size:22px;line-height:1.1;max-width:280px}
+.ce3-entete>strong{justify-content:center;gap:14px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);flex:none;height:530px}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));height:610px}
