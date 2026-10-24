@@ -166,6 +166,16 @@ test('Monde lot 54 T1 — l’après ne fabrique pas de réaction sociale ou int
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — une interpellation enregistrée nomme sa cible dans l’après',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const result=w.eval(`(()=>{const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id),side=f=>({id:f.id,name:f.name,last:f.last,first:f.first,div:f.div,W:f.W,L:f.L,D:f.D}),out=[];for(let semaine=1;semaine<=100;semaine++){const c=m.cycle+semaine;m.hist.push({c,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(a),b:side(b)});m.lastEvent={cycle:c,fights:[],touched:[]};m.facts=m.facts.filter(x=>x.k!=='discours'||x.a!==a.id);m.facts.push({c,k:'discours',a:a.id,target:b.id});out.push(...mgmtLendemainApres(m,c+1).filter(x=>x.famille==='interpellation').map(x=>x.texte));}return {out,a:a.name||a.last,b:b.name||b.last};})()`);
+    assert.ok(result.out.length>0);
+    assert.ok(result.out.every(text=>text.includes(result.a)&&text.includes(result.b)));
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — l’après ne nomme une suspension que si la soirée l’a enregistrée',()=>{
   const w=newGameWindow({runMain:true});
   try{

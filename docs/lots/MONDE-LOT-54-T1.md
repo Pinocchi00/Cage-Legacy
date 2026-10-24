@@ -199,6 +199,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun changement de sauvegarde. Les cases 1 et 3 restent incomplètes : malgré la navigation et les contrôles d'ordre/colonnes, l'intégralité des valeurs et dimensions des deux maquettes n'est pas prouvée ; la suite éditoriale T3 n'est pas complètement alimentée par événements réels ni dotée d'une mémoire éditoriale persistée. Les scripts `test` et `test:watch` incluaient déjà le test.
 - Modifications d'environnement `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors tranche.
 
+### Reprise — test ciblé de l'interpellation (24/10/2026)
+
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — une interpellation enregistrée nomme sa cible dans l’après ». Il crée les faits discours et vérifie que chaque proposition observée nomme l'interpellé et la cible résolue ; test ciblé : 25/25.
+- Aucun changement de production ni de sauvegarde. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de cette tranche.
+- Les limites des cases 1 et 3 ne changent pas : maquettes non intégralement reproduites et contextualisation T3/anti-répétition historique non démontrées. Le nouveau test valide uniquement l'interpellation lorsque son fait est disponible.
+
 ### Reprise 6 — vérification du 24/10/2026
 
 - Branche `p8-lendemain` confirmée ; aucun fichier de la tranche non commité au départ. Le journal contient déjà les commits de la tranche jusqu'à `a971b15`.
