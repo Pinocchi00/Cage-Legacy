@@ -142,3 +142,14 @@ test('Monde lot 57 T1 — une lecture répétée du classement laisse la sauvega
     assert.equal(result.apres,result.avant);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le classement ne produit que les huit organisations connues',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt;return JSON.stringify({ids:MGMT_ORGANISATIONS.map(o=>o.id),rangs:mgmtGuerreClassement(m).map(x=>x.rang),connues:mgmtGuerreClassement(m).every(x=>!!mgmtOrgParId(x.id))});})()`));
+    assert.equal(result.connues,true);
+    assert.equal(result.rangs.length,8);
+    assert.deepEqual(result.rangs,[1,2,3,4,5,6,7,8]);
+    assert.equal(new Set(result.ids).size,8);
+  }finally{w.close();}
+});
