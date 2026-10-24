@@ -86,7 +86,8 @@ function mgmtOffresCreer(m){
   if(!m||m.mondeVivant!==true||!Array.isArray(MGMT_ORGANISATIONS)||!m.poste)return [];
   const ranks=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m),rang=(ranks.find(x=>x.id===active)||{}).rang||4;
   const pool=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(ranks.find(x=>x.id===o.id)||{}).rang||8}));
-  const candidats=pool.filter(x=>rang<=2?x.r<rang:x.r>rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r);
+  const renvoi=mgmtPosteBilan(m).issue==='renvoi';
+  const candidats=pool.filter(x=>renvoi?x.r>rang:x.r<rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r);
   const graine=String(m.graine||m.seed||m.org||'split');
   const cle=`offres:${graine}:${m.poste.saison}:${m.poste.fin}:${active}`;
   const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(cle,'choix-offres',m):null;
