@@ -1876,5 +1876,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-suite-heading{margin:0 0 12px;font:800 30px/1 var(--mgmt-font-display);color:#E23A2B}
 .ld3-suite-empty{margin:0;font:500 22px/1.2 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
 .ld3-suite-results{grid-column:1/-1}
+/* ==== [ANCRE: MONDE54_T1_NAV_SUITE] — Monde lot 54 T1 ==== */
+.ld3-suite-screen{width:100%;max-width:1564px;margin:0 auto;padding-top:12px;color:#E9E6E1}
+.ld3-suite-forward,.ld3-suite-back{min-height:48px;padding:8px 16px;border:2px solid #E9E6E1;background:#0D0B0B;color:#E9E6E1;font:600 22px/1.1 var(--mgmt-font-body);cursor:pointer}
+.ld3-suite-forward{margin-top:12px;border-color:#F0B220;color:#F0B220}
+.ld3-suite-back{grid-column:1/-1;justify-self:start}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

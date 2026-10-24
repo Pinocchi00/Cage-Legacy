@@ -66,7 +66,7 @@ function scr_mgmt_lendemain_cadre(){
    const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
    const recit=`<section class="ld3-recit"><h3 class="ld3-recit-title">LES TROIS MOMENTS</h3>${moments}${mgmtLendemainPrimesHtml(m)}${mgmtLendemainDiscoursHtml(m)}${mgmtLendemainAttentionHtml(m)}${mgmtLendemainPresseHtml(m)}${mgmtLendemainChiffresHtml(m)}</section>`;
    const change=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.changes)}">CE QUI CHANGE</div><div class="mf-ld-change mf-ancien">${recit}${MED}${mgmtLendemainConstatsHtml(m)||'<div class="mf-eff-aucun">Rien à signaler.</div>'}${PAT}</div>`,'normal','mf-fin-p mf-ld-ch');
-   const resultats=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.results)}">TOUS LES RÉSULTATS</div><div class="mf-ld-res mf-ancien mgmt-ld-results">${mgmtLendemainResultatsHtml(m)}<button type="button" class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button></div>`,'normal','mf-fin-p mf-ld-rp');
+    const resultats=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.results)}">TOUS LES RÉSULTATS</div><div class="mf-ld-res mf-ancien mgmt-ld-results">${mgmtLendemainResultatsHtml(m)}<button type="button" class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button><button type="button" class="ld3-suite-forward" onclick="CL.mgmtLendemainSuite()">Lire la suite du lendemain</button></div>`,'normal','mf-fin-p mf-ld-rp');
   const grille=c
     ?`<div class="mf-fin-grille mf-ld-grille">${mgmtLendemainCaseHtml('LA SALLE',c.salle.v,c.salle.l)}${mgmtLendemainCaseHtml('L’ARGENT',c.argent.v,c.argent.l)}${mgmtLendemainCaseHtml('LA POPULARITÉ',c.pop.v,c.pop.l)}${pub}${change}${resultats}</div>`
     :`<div class="mf-fin-grille mf-ld-grille">${pub}${change}${resultats}</div>`;
@@ -75,7 +75,22 @@ function scr_mgmt_lendemain_cadre(){
 }
 SCREENS.mgmt_lendemain=scr_mgmt_lendemain_cadre;
 
+/* ==== [ANCRE: MONDE54_T1_LENDEMAIN_SUITE_ECRAN] — Monde lot 54 T1 ==== */
+/** Seconde vue du lendemain : presse, mouvements puis carte complète. */
+function scr_mgmt_lendemain_suite(){
+  const m=G&&G.mgmt, e=m&&m.lastEvent;
+  if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
+  const nom=mgmtOrgNom(m);
+  const retour=`<button class="ld3-suite-back" type="button" onclick="CL.go('mgmt_lendemain')">Retour aux trois moments</button>`;
+  return mfEcran(`<main class="mf-contenu"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}${retour}</div></main>`,{
+    barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain · la suite',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
+    touches:[{ks:['↑'],t:'Les trois moments',onclick:"CL.go('mgmt_lendemain')"},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
+}
+SCREENS.mgmt_lendemain_suite=scr_mgmt_lendemain_suite;
+/* ==== [FIN ANCRE] ==== */
+
 Object.assign(CL,{
+  mgmtLendemainSuite(){ if(G&&G.mgmt) CL.go('mgmt_lendemain_suite'); },
   /** Referme la soirée et ouvre la liste des résultats. */
   mgmtLendemainResultats(){
     if(!G||!G.mgmt) return;

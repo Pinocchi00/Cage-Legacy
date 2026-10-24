@@ -146,3 +146,17 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     assert.match(html,/TOUS LES RÉSULTATS/);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — la navigation ouvre le second écran puis revient aux moments',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>{CL.go('mgmt_lendemain');const premier=document.getElementById('app').innerHTML;CL.mgmtLendemainSuite();const suite=G.screen;const html=document.getElementById('app').innerHTML;CL.go('mgmt_lendemain');return {premier,suite,html,retour:G.screen};})()`);
+    assert.match(r.premier,/Lire la suite du lendemain/);
+    assert.equal(r.suite,'mgmt_lendemain_suite');
+    assert.match(r.html,/LE LENDEMAIN · LA SUITE/);
+    assert.match(r.html,/LES MOUVEMENTS/);
+    assert.equal(r.retour,'mgmt_lendemain');
+  }finally{w.close();}
+});
