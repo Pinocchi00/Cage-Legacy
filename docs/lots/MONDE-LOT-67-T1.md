@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 55
+
+- Branche `fid-organisation` confirmée. À l'ouverture, `git status` était propre ; les changements CSS en cours sont ceux de cette reprise.
+- Capture `shoot.js` exécutée sur les six vues. Mesures : cérémonie 20,0 % gros blocs (0 chevauchement, 0 texte sous 22 px, aucun débordement) ; guerre 22,9 % (zéro défaut automatique) ; croissance 17,2 % (3 textes sous 22 px et 4 débordements d'éléments de population/poids) ; Ton poste 19,8 % (0 défaut) ; Carnet 15,7 % mais 86 chevauchements automatiques et plusieurs noms tronqués ; Bilan 12,9 % et un chevauchement entre « REMERCIÉ » et son texte d'aide. Les comparatifs ont été régénérés par le protocole, mais je ne revendique pas une inspection visuelle des PNG ni une scène de capture contenant six lauréats/rivale imposée.
+- Retouches CSS dans `ui-cadre.css` : grille de cérémonie rapprochée de la proportion de la planche, noms des cartes secondaires limités à une échelle lisible sans débordement, et contrainte de grille/scroll des cellules Carnet tentée. La nouvelle capture Carnet conserve les 86 chevauchements ; cette correction n'a donc pas résolu le défaut. Les six écrans ne sont pas tous conformes et je ne déclare pas les cases visuelles achevées.
+- Tests : `node --test tests/mgmtLot55T1.test.js` (46/46) et `node --test tests/mgmtLot57T1.test.js` (33/33) passent. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. `ui-cadre.css` versionné dans `index.html` via `_bump.js`. La modification générée de `sw.js` a été restaurée et n'est pas incluse. Aucune migration de sauvegarde.
+- Fichiers modifiés : `ui-cadre.css` (styles cérémonie et contraintes carnet), `index.html` (version du CSS), cette fiche (mesures/limites de la reprise). Tests ajoutés : aucun. Écarts ouverts : gros blocs Guerre (>20 %), défauts croissance/carnet/bilan, scène de cérémonie remplie, inspection visuelle effective de `cmp-ceremonie.png`. Questions pour Anthony : aucune ; le travail restant relève de corrections non terminées, et `TOUT_EST_FINI` n'est pas revendiqué.
+
 ## Compte rendu — reprise 53
 
 - Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. Les changements applicatifs antérieurs sont déjà committés.

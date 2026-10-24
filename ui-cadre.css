@@ -439,6 +439,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-classement{flex:none;max-height:150px;overflow:auto;padding:10px 14px;background:#121010;border:2px solid rgba(233,230,225,.38)}
 .ce3-ecran>button{flex:none;align-self:flex-start;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;border:0;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .ce3-carnet{display:grid;grid-template-columns:1fr 1fr;gap:14px;overflow:auto}
+.ce3-carnet{grid-template-rows:repeat(4,minmax(0,1fr));align-content:stretch;min-height:0}
+.ce3-carnet>article{min-height:0;overflow:auto;overscroll-behavior:contain}
 .ce3-carnet article{padding:18px;background:#121010;border:2px solid rgba(233,230,225,.38);min-width:0}
 .ce3-carnet h2{font:800 30px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0 0 12px;color:#F0B220}
 .ce3-carnet p{font-size:24px;margin:8px 0}
@@ -461,6 +463,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-entete strong span{font-size:24px;letter-spacing:.06em}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);flex:none;height:530px}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));height:610px}
+.ce3-grille{grid-template-columns:minmax(0,1.08fr) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));height:610px;gap:16px}
 .ce3-prix-combattant{position:relative;grid-column:1;grid-row:1 / span 3;background:#F0B220;color:#0D0B0B;border-color:#F0B220;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
 .ce3-prix-combattant:after{content:"";position:absolute;right:-40px;bottom:-40px;width:240px;height:240px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);background:rgba(13,11,11,.12);pointer-events:none}
 .ce3-prix-combattant:after{right:-64px;bottom:-64px;width:320px;height:320px}
@@ -474,6 +477,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-prix:not(.ce3-prix-combattant){clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
 .ce3-prix:not(.ce3-prix-combattant){gap:18px}
 .ce3-prix:not(.ce3-prix-combattant) strong{font-size:54px;line-height:1.05}
+.ce3-prix:not(.ce3-prix-combattant) strong{font-size:48px;line-height:.9;overflow-wrap:anywhere}
 .ce3-bilan{flex:none;height:150px;display:grid;grid-template-columns:1fr 2.2fr;gap:16px}
 .ce3-bilan>div,.ce3-bilan>article{min-width:0;padding:14px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;justify-content:center;gap:8px}
 .ce3-bilan>div{flex-direction:row;align-items:center;gap:22px}
@@ -483,6 +487,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan>div>section>b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
 .ce3-bilan p,.ce3-bilan li{margin:0;font-size:22px}
 .ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
+.ce3-bilan ul{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:28px;list-style:disc}
 /* ==== [ANCRE: MONDE67_T1_MOUVEMENT_TEXTE] — Monde lot 67 T1 ==== */
 .gu3-mouvement{min-width:0;overflow-wrap:anywhere;line-height:1.2}
 /* ==== [ANCRE: MONDE67_T1_GUERRE_TEXTE_RIVALE] — Monde lot 67 T1 ==== */
@@ -2117,6 +2122,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet{flex:1;min-height:0;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);align-content:stretch;overflow:auto}
 .ce3-carnet article{box-sizing:border-box;overflow:hidden;overflow-wrap:anywhere}
 .ce3-carnet article>p{line-height:1.12;overflow-wrap:anywhere}
+.ce3-carnet-ecran .ce3-carnet{grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{min-height:0;overflow:auto;overscroll-behavior:contain}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
