@@ -25,4 +25,12 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Compte rendu honnête : l'audit des versions passe ; le lancement groupé des tests ciblés dépasse la limite de 120 secondes après l'affichage des tests verts jusqu'aux tests lot 54 inclus, donc la commande groupée n'a pas fourni de code de sortie final. Les commits antérieurs indiquent des tests et lint verts. Le comparateur visuel n'a pas pu être relancé dans cette reprise. Aucun nouveau fichier de test, donc `package.json` n'a pas à changer.
 - Questions pour Anthony : aucune question ouverte ; à reprendre lors d’une capture outillée pour mesurer le ratio après ajustement et confirmer (ou corriger) le seuil de 20 %.
 
+### Reprise de livraison — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `97c6f52`; les changements de tranche sont déjà commités. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes, hors tranche.
+- Tests relancés séparément : `mgmtEcranLendemain.test.js` 7/7, `mgmtLot54T1.test.js` 30/30, `mgmtLot48T1.test.js` 9/9. La commande enchaînée a expiré après les messages de démarrage de `mgmtSoireeShow.test.js`, sans fournir son résultat final.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
+- Capture : l'outil `read` a refusé l'accès à `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` (chemin externe bloqué par l'environnement). Sans ses instructions, aucun comparateur ni `cmp-*.png` n'a été lancé. Le ratio après ajustement, l'absence de chevauchement et le seuil `grosBlocs ≤ 20 %` restent donc non vérifiés ; aucun résultat visuel n'est revendiqué.
+- Aucun nouveau changement de code, test, sauvegarde ou migration n'était nécessaire au vu des commits existants. La case de capture/mesure reste à confirmer ; aucun nouveau commit créé dans cette reprise.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
