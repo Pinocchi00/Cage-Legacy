@@ -366,3 +366,16 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Aucun changement JS/CSS, sauvegarde, version de cache ou scène de capture. Les écarts déjà notés restent ouverts : choc trois affiches/2-sur-3, parcours contractuel intégral avec rechargement valide, comparaison des quatre écrans et mesures/captures conformes. Cette assertion de couverture CSS ne prétend pas établir de fidélité visuelle.
 - Fichiers de cette reprise : test ciblé et fiche de tranche. Pas de migration. Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent exclues.
+
+### Reprise 60
+- Instructions `shoot` lues depuis le chemin indiqué et relance effectuée pour `choc,discours,bilan`. La capture du choc finit avec `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=25.1%` (cible ≤20%). La série dépasse le délai de 120 s pendant la capture suivante ; aucune mesure nouvelle discours/bilan n'est disponible.
+- Fichiers de tranche en attente conservés : `tests/mgmtLot69T1.test.js` verrouille l'absence d'animation CSS pour choc et discours, ainsi que la présence des règles de style des classes effectivement rendues. Test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4.
+- Aucun code de sauvegarde ni version de cache modifiés. Pas de migration.
+- Écarts : les trois affiches ne peuvent pas être ajoutées sans faire évoluer le modèle mono-affiche et sa sémantique de résultat ; le parcours contractuel strict et les mesures comparatives de tous les écrans restent non établis. Le rapport capture confirme que le choc dépasse encore le seuil de gros blocs. Aucun achèvement global revendiqué.
+
+## Compte rendu — reprise 60
+- Fichiers modifiés : cette fiche uniquement (résultats et écarts). Les assertions de styles/absence d'animation sont déjà présentes dans le test commité.
+- Tests ajoutés : aucun ; test ciblé exécuté `node --test tests/mgmtLot69T1.test.js` (4/4).
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche : affiches du choc toujours mono-combat côté modèle, parcours complet fin de contrat → bilan → rechargement strict valide non prouvé, capture discours/bilan et scène d'arrivée non obtenues ; le choc mesuré à 25.1% de gros blocs dépasse la cible. Les changements utilisateur préexistants hors tranche restent exclus.
+- Questions pour Anthony : aucune nouvelle question ; aucune règle métier supplémentaire n'a été supposée.
