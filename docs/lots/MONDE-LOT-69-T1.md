@@ -392,3 +392,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers modifiés : test ciblé et cette fiche. Pas de migration, JS/CSS ou nouvelle version cache.
 - Les écarts connus demeurent : choc mono-affiche sans score 2-sur-3, parcours intégral fin de contrat/bilan/rechargement strict non prouvé, comparaisons/captures et seuil visuel post-correction non mesurés, scènes dédiées arrivée/offre absentes. L'assertion structurelle ne vaut pas preuve de rendu ni validation visuelle.
 - Aucun achèvement global revendiqué ; les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent hors tranche.
+
+### Reprise 63
+- `ui-cadre.css` compacte une seconde fois l'en-tête et le bandeau choc (rangées 44/56 px, gap 10 px, titre 32 px, VS 38 px) pour réduire leur emprise. `index.html` reçoit le nouveau `?v=` via `node tools/_bump.js ui-cadre.css`.
+- `tests/mgmtLot69T1.test.js` verrouille cette géométrie compacte. `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Fichiers modifiés : CSS et sa version cache, test de tranche, cette fiche. Pas de changement de sauvegarde ni de migration.
+- Écarts : aucune capture après correction n'a été produite et aucune réduction du taux `grosBlocs` n'est mesurée ; les trois affiches du choc, le parcours contractuel/rechargement strict et les mesures comparatives des écrans restent à valider. Cette retouche ne vaut pas validation visuelle ni achèvement de la tranche.
+- Tests ajoutés : assertion « la seconde compaction réduit encore la hauteur des blocs d’en-tête » dans le test existant des écrans choc/discours.
+- Questions pour Anthony : aucune nouvelle question. Les changements utilisateur hors tranche restent exclus.
