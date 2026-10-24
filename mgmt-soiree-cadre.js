@@ -117,18 +117,28 @@ function mgmtSoBandeHtml(prog,index,focus){
 /* ==== [ANCRE: P7_T1_PRIMES_FIN] — Monde lot 53 T1 ==== */
 /** Affiche les trois attributions de la soirée à partir des seuls relevés. */
 function mgmtSoPrimesFinHtml(m){
-  const hist=Array.isArray(m&&m.hist)?m.hist:[];
-  const cycle=m&&m.lastEvent&&m.lastEvent.cycle;
-  const vus=new Set(), lignes=[];
-  for(const t of hist){
-    if(!t||t.c!==cycle||(t.pr!=='cs'&&t.pr!=='pf')) continue;
-    const type=t.pr;
+  const hist=Array.isArray(m&&m.hist)?m.hist:[], prog=typeof mgmtSoireeProgramme==='function'?mgmtSoireeProgramme(m):[];
+  const lignes=[], annonces=prog.map(p=>({p,t:hist[p.h]})).filter(x=>x.t&&(x.t.pr==='cs'||x.t.pr==='pf'));
+  for(const {p,t} of annonces){
     const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
-    const cle=type+':'+(t.a&&t.a.id)+':'+(t.b&&t.b.id)+':'+(t.c||'');
-    if(vus.has(cle)) continue;
-    vus.add(cle);
-    const award=type==='cs'?`<b>${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}</b>`:`<b>${esc(nom(t.winner==='A'?t.a&&t.a.id:t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id))}</b>`;
-    lignes.push(`<div class="so3-prime"><span>${type==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span>${award}</div>`);
+    let award;
+    if(t.pr==='cs') award=`<b>${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}</b>`;
+    else{
+      const fact=(Array.isArray(m.facts)?m.facts:[]).find(f=>f&&f.k==='prime'&&f.type==='pf'&&f.fight===p.h);
+      const id=fact&&fact.a|| (t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id);
+      award=`<b>${esc(nom(id))}</b>`;
+    }
+    lignes.push(`<div class="so3-prime"><span>${t.pr==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span>${award}</div>`);
+  }
+  /* Anciennes fixtures sans programme complet : les données d'historique restent une porte de repli. */
+  if(!prog.length){
+    const cycle=m&&m.lastEvent&&m.lastEvent.cycle;
+    for(const t of hist){
+      if(!t||t.c!==cycle||(t.pr!=='cs'&&t.pr!=='pf')) continue;
+      const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
+      const id=t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id;
+      lignes.push(`<div class="so3-prime"><span>${t.pr==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span><b>${t.pr==='cs'?`${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}`:esc(nom(id))}</b></div>`);
+    }
   }
   if(!lignes.length) return '';
   const finance=m&&m.lastEvent&&m.lastEvent.finance||{};

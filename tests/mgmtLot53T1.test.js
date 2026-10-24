@@ -83,6 +83,22 @@ test('Monde lot 53 T1 — la fin annonce les primes présentes dans les relevés
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la fin annonce le combat de la soirée et les deux performances du relevé',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const html=w.eval(`(()=>{const m={lastEvent:{cycle:8,finance:{primes:15}},hist:[
+      {c:8,pr:'cs',a:{id:'a',name:'Alpha'},b:{id:'b',name:'Bravo'}},
+      {c:8,pr:'pf',winner:'A',a:{id:'c',name:'Charlie'},b:{id:'d',name:'Delta'}},
+      {c:8,pr:'pf',winner:'A',a:{id:'e',name:'Echo'},b:{id:'f',name:'Foxtrot'}}],
+      facts:[{k:'prime',type:'pf',fight:1,a:'d'},{k:'prime',type:'pf',fight:2,a:'f'}]};
+      mgmtSoireeProgramme=()=>m.hist.map((t,h)=>({h}));return mgmtSoPrimesFinHtml(m);})()`);
+    assert.equal((html.match(/class="so3-prime"/g)||[]).length,3);
+    assert.match(html,/ALPHA · BRAVO/);
+    assert.match(html,/>DELTA</);
+    assert.match(html,/>FOXTROT</);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',()=>{
   const w=newGameWindow({runMain:true});
   try{

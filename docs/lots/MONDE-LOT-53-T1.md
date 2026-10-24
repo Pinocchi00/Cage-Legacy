@@ -263,3 +263,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-soiree-cadre.js`, `ui-cadre.css`, `index.html` (versions), `tests/mgmtLot53T1.test.js` (rendu), présente fiche.
 - Vérification : test ciblé 14/14 réussi.
 - Écart : les proportions et la composition générale ne sont pas encore l'exacte grille de la maquette; la ligne est une adaptation dans le cadre existant.
+
+### Reprise 36 — bénéficiaires des primes
+
+- Fait : l'écran de fin lit désormais les relevés qui composent réellement le programme de la soirée, et pour chaque performance résout le bénéficiaire par le fait de prime associé à l'index du combat. Le combat de la soirée affiche les deux combattants; chaque performance son lauréat. Cela évite d'inférer le lauréat du seul vainqueur. L'argent de soirée est toujours tiré de `lastEvent.finance.primes` et converti par `mgmtEuros`.
+- Test ajouté : « Monde lot 53 T1 — la fin annonce le combat de la soirée et les deux performances du relevé »; vérifie les trois lignes et les deux bénéficiaires sélectionnés.
+- Vérification : test ciblé 15/15 après correction de l'attendu sur les noms normalisés en capitales.
+- Écart : le repli des fixtures incomplètes conserve l'annonce depuis les relevés de cycle; la fin complète et la composition graphique de `UniSoireeFin` restent à achever.
