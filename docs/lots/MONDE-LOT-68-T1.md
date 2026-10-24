@@ -483,3 +483,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Mesures complémentaires, écrans des lots parallèles laissés intacts : accueil `{chevauchements:0,textesSous22px:1,debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{1,3,[]}` (collision « Tout est lu » / « Tout marquer comme lu ») ; tonposte `{6,0,["IL ATTEND DE VOIR","« Je veux voir la suite. »"]}` ; bilan `{1,0,[]}` (collision « REMERCIÉ » / « Il manque 3 combats en carte »).
 - Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records : scènes absentes de l'outil de capture ; aucune mesure ou comparaison n'est inventée. Les cases 1 à 5 restent incomplètes ; aucune retouche à l'aveugle des écrans mesurés sans défaut.
 - Aucun fichier applicatif/test modifié, aucune migration ni hausse de version `?v=`. Aucune image comparative ouverte ; fidélité visuelle globale non établie. Pas de `TOUT_EST_FINI`.
+
+### Reprise 48 du 24/10/2026
+
+- Reprise de l'historique : HEAD initial `2abe6597`, branche `fid-fiches`. Les changements locaux dans `.opencode/agents/*` et `opencode.json` restent hors tranche et ne sont pas inclus.
+- Tests ciblés exécutés : `node --test tests/mgmtFicheStats.test.js` et `node --test tests/mgmtReleve.test.js` ; contrôle versions `node tools/verif-versions.js origin/main`. Résultats consignés après exécution.
+- Contrôles de géométrie disponibles restent ceux de la reprise 47 pour fiche, recruteur, retours et semaine (tous à zéro chevauchement, texte <22 px, et débordement). Je n'ai pas relancé le captureur ni ouvert de comparatif dans cette reprise ; les scènes arrivée, relevé, chiffres, menu et classements restent sans contrôle mesuré.
+- État écran par écran : fiche, recruteur, retours et semaine ont leurs contrôles géométriques historiques favorables, sans validation de fidélité comparative ; arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records n'ont pas de contrôle établi. Accueil, actualités, tonposte et bilan restent les écrans parallèles signalés dans la reprise 47, non modifiés.
+- Aucun changement applicatif, migration ou bump `?v=`. La tranche n'est pas terminée : les mesures fraîches exigées sur tous les écrans et les comparaisons visuelles sont toujours absentes ; aucun `TOUT_EST_FINI`.
