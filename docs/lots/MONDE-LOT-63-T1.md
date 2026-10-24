@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise finale après intégration — 24/10/2026
+
+- Branche `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà dans l'historique (`8bc3ef47` en tête) ; aucun changement de code n'était en attente. Les fichiers locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et laissés intacts.
+- Contrôle inter-lots relancé : les sept fichiers demandés (lots 54, 63, Actualités, 55, 57, 48 et 56) passent **130/130**. Les tests lot 54 de rivalité enregistrée et de non-répétition sur cinquante semaines sont verts.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; le test `mgmtLot63T1` est inscrit à `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- La fusion prescrite de `origin/main` n'a pas été effectuée : la politique de l'environnement interdit `git merge`. Le superviseur devra effectuer l'intégration. La limite de couverture des familles décrite dans les comptes rendus précédents reste inchangée.
+
 ### Reprise 5 — contrôle inter-lots et état du merge (24/10/2026)
 
 - Confirmés branche `p8-apres`, état et historique ; les commits fonctionnels de cette tranche sont déjà présents. Aucun fichier fonctionnel/test non commité n'est à reprendre.
