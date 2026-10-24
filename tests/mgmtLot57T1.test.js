@@ -153,3 +153,11 @@ test('Monde lot 57 T1 — le classement ne produit que les huit organisations co
     assert.equal(new Set(result.ids).size,8);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le mouvement affiché précise le nombre de places gagnées',()=>{
+  const w=partie();
+  try{
+    const texte=w.eval(`(()=>{const m=G.mgmt;const rows=mgmtGuerreClassement(m);m.guerre=m.guerre||{};m.guerre.classementPrecedent=rows.map(x=>x.id).reverse();return scr_mgmt_guerre();})()`);
+    assert.match(texte,/Split a gagné [1-7] places? et se rapproche du haut du classement/);
+  }finally{w.close();}
+});
