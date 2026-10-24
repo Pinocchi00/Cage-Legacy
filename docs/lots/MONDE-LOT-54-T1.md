@@ -316,3 +316,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : le nom du bénéficiaire de prime utilise maintenant le premier nom exploitable (roster puis trace) ou « Combattant » ; la version cache a été montée.
 - `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — une prime sans nom exploitable garde un libellé de repli ». Vérification ciblée : 30/30.
 - Aucun changement de sauvegarde. Les écarts globaux des cases 1 et 3 demeurent : la composition/layout exacts des planches et une mémoire éditoriale persistante T3 sur 50 soirées ne sont pas entièrement réalisés. `tests/mgmtReleveReduit.test.js` et `check:rapide` sont laissés au superviseur.
+
+### Reprise 6 — 24/10/2026
+
+- Branche vérifiée : `p8-lendemain`. Le journal contient déjà les commits de tranche jusqu'à `5b0431a`. Aucun fichier de la tranche n'était modifié à la reprise ; les changements `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et exclus.
+- `node --test tests/mgmtLot54T1.test.js` passe 30/30, dont le chemin réel, le cas de référence 13-1 contre le n°1, D1, navigation, lisibilité et les contrôles de contenu disponibles.
+- Aucun nouveau comportement ni état de sauvegarde n'a été nécessaire. Les écarts restent : composition/layout et valeurs exhaustives des deux planches non atteints, et T3 ne garantit pas une mémoire éditoriale persistante des textes sur 50 soirées. Les lignes disponibles sont filtrées par les faits connus ; les systèmes sociaux manquants ne sont pas simulés.
+- `tests/mgmtReleveReduit.test.js`, `node_modules/.bin/eslint .` et l'audit des versions n'ont pas été relancés dans cette passe. La tranche n'est pas déclarée terminée et aucun commit supplémentaire de code n'est justifié par ce contrôle.
