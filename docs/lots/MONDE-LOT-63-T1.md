@@ -14,6 +14,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise finale — 24/10/2026
+
+- Vérifiés la branche `p8-apres`, l'historique récent et le statut. Le code de tranche est déjà commité dans l'historique ; aucun fichier fonctionnel en attente. Le seul changement de tranche en cours est cette fiche.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6, partie neuve mesurée à 1 908 745 octets (sous 1,9 Mo) ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `test` et `test:watch` contiennent le test (`true,true`).
+- Pas de migration ni de clé sauvegardée nouvelle. Les tests couvrent les dix familles via faits préparés dans une partie créée par le chemin réel, la borne et déterminisme, l'anti-répétition, échappement, sauvegarde ancienne, accueil/presse et mouvements rivaux. Limite : ils ne démontrent pas que chaque système de jeu génère naturellement chacun des dix faits.
+- La variation locale de cache de `index.html`, `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus. Aucun écart nouveau ni question pour Anthony.
+
 - Reprise de livraison (24/10/2026) : branche `p8-apres` et `git log --oneline -12`/`git status` vérifiés. Les fichiers fonctionnels de la tranche sont déjà commités ; seule cette fiche sera ajoutée au commit de reprise.
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` contiennent le test (`true,true`).
 - Aucun changement de production, tests ou sauvegarde n'a été nécessaire ; pas de migration. La vérification ciblée confirme les dix familles, calcul borné/déterministe, affichage/presse, mouvements d'organisation et sauvegarde préservée. La couverture n'établit toujours pas que chaque système opérationnel produit naturellement chacun des dix faits. Le test lent `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
@@ -246,3 +253,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Les scripts `test` et `test:watch` contiennent le test (`true,true`).
 - Aucun changement de sauvegarde ni migration. Écart de couverture conservé : les faits des familles sont préparés séparément dans les tests après création par le parcours réel ; cela ne prouve pas que chaque système de jeu les génère naturellement. Aucun écart nouveau ni question pour Anthony.
 - Seule cette fiche est ajoutée au commit de livraison. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` restent hors tranche et sont exclus.
+
+### Reprise 8 — validation sur l'état courant (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status --short` consultés. Le code, les tests et leurs inscriptions sont déjà committés ; seules des modifications locales étrangères à la tranche sont visibles (`.opencode/agents/*`, `opencode.json`, `sw.js` et cache `index.html`), laissées intactes.
+- Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; l'audit des scripts `test`/`test:watch` confirme `true,true`. Aucun changement de sauvegarde ni migration.
+- Les contrôles fonctionnels restent ceux déjà livrés. Limite de couverture : les tests préparent individuellement les faits familiaux sur le parcours réel, sans démontrer que chaque système opérationnel les produit naturellement. Le test lent de relevé n'a pas été relancé dans cette reprise ; `check:rapide` est laissé au superviseur selon la consigne.
+- Seule cette fiche est modifiée pour consigner la reprise ; aucun nouvel écart ni question pour Anthony.
