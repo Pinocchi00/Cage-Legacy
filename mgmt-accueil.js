@@ -257,7 +257,8 @@ function mgmtAccueilSaison(m,c){
    const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
    const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
-  return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
+   const raccourcis=poste||m.guerre||m.poste?`<nav class="mf-ac-raccourcis" aria-label="Raccourcis de saison">${poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}${m.guerre&&Number.isInteger(m.guerre.rangFinal)?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_guerre')">Le classement des huit</button>`:''}${Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button>`:''}${m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''}</nav>`:'';
+   return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:'')+raccourcis,'normal','mf-ac-p mf-ac-saison');
 }
 /** La première arrivée : l'héritage (organisation, dernière soirée, champions, promesses). */
 function mgmtAccueilHeritage(m,c){
@@ -292,15 +293,13 @@ function scr_mgmt_accueil(){
   }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
   const retourRecruteur=m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0];
   const karim=retourRecruteur?mfPanneau(`<p class="mf-ac-rs">Karim est rentré${retourRecruteur.bredouille?' bredouille':''} · <button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button></p>`,'normal','mf-ac-p'):'';
-   const posteLien=m.poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'';
    const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
    const ceremonieVisible=Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0;
      const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?`<div class="mf-ac-semaine"><b>LA SEMAINE DU COMBAT</b><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button></div>` : '';
     /* ==== [ANCRE: P10_T4_RANG_FINAL_ACCUEIL] — Monde lot 57 T1 ==== */
     const guerre=m.guerre&&Number.isInteger(m.guerre.rangFinal)?mfPanneau(`<h2 class="mf-ac-titre">LE CLASSEMENT DES HUIT</h2><p>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit.</p><button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`,'normal','mf-ac-p'):'';
-    const bilanLien=`${ceremonieVisible?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button>`:''}${bilanVisible?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''}`;
   const espoirsDansAttente=espoirHtml;
-   const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>${guerre}${posteLien}${bilanLien}`;
+    const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

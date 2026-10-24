@@ -1822,6 +1822,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden;max-height:100%}
 .mf-ac .mf-ac-cols>.mf-ac-p{min-height:0;overflow:auto}
 .mf-ac .mf-ac-cols>.mf-ac-saison{overflow:hidden}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_RACCOURCIS] — Monde lot 70 T1 ==== */
+.mf-ac-raccourcis{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;max-height:96px;overflow:auto}
+.mf-ac-raccourcis .po2-lien{font-size:22px;line-height:1;padding:6px 10px}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_COLONNES_BORNEES] — Monde lot 64 T1 ==== */
 .mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2,.mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2>.mf-p3{min-height:0;max-height:100%;box-sizing:border-box}
 .mf-ac .mf-ac-cols>.mf-ac-p{flex-basis:0}

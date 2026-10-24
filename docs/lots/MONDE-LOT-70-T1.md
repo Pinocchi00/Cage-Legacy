@@ -13,4 +13,10 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 ## Cases
 **[ ] 1 à 6** : un commit par écran. **[ ] 7.** Tests : les existants restent verts ; ceux qui décrivaient l'ancienne structure sont **mis à jour en citant la décision** (« planches Uni* validées par Anthony ; l'écran suit la planche ») ; ajoute **un test de non-chevauchement par écran** si tu peux l'exprimer sans mise en page (sinon, test de présence des blocs et « chaque classe a sa règle »). **[ ] 8.** `?v=`, versions, lint ; commit final `Monde lot 70 T1 : polissage` ; compte rendu honnête (**les lignes `CONTRÔLE` avant/après de chaque écran**) ; `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- Accueil partiellement traité : les liens « Ton poste », « Le classement des huit », « La cérémonie de l’année » et « Le bilan du patron » sont regroupés dans la colonne « TA SAISON », avec une rangée scrollable. `mgmt-accueil.js` et `ui-cadre.css` ; versions actualisées. Test existant `T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise : Accueil` et suite ciblée `tests/mgmtAccueil.test.js` : 21/21 verts.
+- Contrôle visuel avant/après : non exécuté, l'outil de capture désigné par la fiche se trouve hors des chemins accessibles dans cette session ; aucune ligne `CONTRÔLE` vérifiable. Les écrans carnet, Ton poste, bilan, croissance et actualités, leurs tests, et le contrôle global restent à faire. Tranche inachevée.
+- Écart : les raccourcis sont dans « TA SAISON » comme demandé ; aucun résultat de capture ne permet de confirmer l'absence de chevauchement. Questions pour Anthony : aucune ; blocage d'accès à l'outil de capture seulement.
+
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`. **Ne touche pas aux écrans de la soirée, de la fin de soirée, du lendemain, du choc, du discours ni de l'arrivée** : d'autres lots y travaillent en ce moment.
