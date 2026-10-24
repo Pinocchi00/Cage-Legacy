@@ -1,6 +1,8 @@
 "use strict";
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
 
@@ -156,6 +158,18 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     assert.match(html,/LES MOUVEMENTS/);
     assert.match(html,/TOUS LES RÉSULTATS/);
     assert.match(html,/class="ld3-suite-results"/);
+  }finally{w.close();}
+});
+
+test('Monde lot 54 T1 — les blocs ld3 de la suite ont chacun une règle de style dédiée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const classes=Array.from(w.eval(`(()=>{const html=mgmtLendemainSuiteHtml(G.mgmt);return [...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\\s+/)))].filter(x=>x.startsWith('ld3-'));})()`));
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    const missing=classes.filter(c=>!new RegExp('\\.'+c+'(?:\\W|$)').test(css));
+    assert.deepEqual(missing,[],'chaque classe de la suite doit être stylée dans le CSS');
   }finally{w.close();}
 });
 
