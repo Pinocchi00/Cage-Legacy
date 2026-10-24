@@ -62,3 +62,11 @@ test('Monde lot 58 T1 — la génération des offres ne consomme pas la graine d
   assert.equal(r.apres,r.avant);
   assert.equal(r.stable,true);
 });
+
+test('Monde lot 58 T1 — le rang améliore l’acceptation du choc sans déplacer la graine',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const seed=SEED;const p=[1,2,4,8].map(mgmtChocProbabiliteAcceptation);const first=mgmtChocTirageAcceptation(m,'split');const second=mgmtChocTirageAcceptation(m,'split');return {p,stable:first===second,seed:SEED===seed}})())`));
+  assert.deepEqual(r.p,[0.9,0.82,0.66,0.34]);
+  assert.equal(r.stable,true);
+  assert.equal(r.seed,true);
+});

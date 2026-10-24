@@ -122,6 +122,23 @@ function mgmtPosteRaisons(m,orgId){
     `Choc des organisations : ${puissance<=4?`${org.nom} est assez bien classée pour recevoir plus souvent une proposition et voir ses propres offres acceptées`:`${org.nom} peut proposer un choc, mais son rang rend l'accord moins fréquent`}.`
   ];
 }
+/* ==== [ANCRE: MONDE_LOT58_T1_CHOC_RANG] — Monde lot 58 T1 ====
+   Le rang 1 est le meilleur. Ce tirage isolé ne consomme pas la graine de
+   simulation et prépare le calcul de réponse aux propositions du choc. ==== */
+const MGMT_CHOC_ACCEPTATION_PAR_RANG=[0.9,0.82,0.74,0.66,0.58,0.5,0.42,0.34];
+function mgmtChocProbabiliteAcceptation(rang){
+  const r=Number.isInteger(rang)?Math.max(1,Math.min(8,rang)):8;
+  return MGMT_CHOC_ACCEPTATION_PAR_RANG[r-1];
+}
+function mgmtChocTirageAcceptation(m,orgId){
+  if(!m||typeof orgId!=='string')return false;
+  const ligne=(mgmtOrgClassement(m)||[]).find(x=>x.id===orgId);
+  if(!ligne)return false;
+  const jour=m.cal&&Number.isSafeInteger(m.cal.jour)?m.cal.jour:(m.eventsPlayed||0)*35;
+  const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():0;
+  const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(`choc:${String(m.graine||m.seed||m.org||'split')}:${orgId}:${annee}`,'acceptation-choc',m):null;
+  return !!stream&&stream()<mgmtChocProbabiliteAcceptation(ligne.rang);
+}
 function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
 function mgmtPosteRenouveler(m,issue){
