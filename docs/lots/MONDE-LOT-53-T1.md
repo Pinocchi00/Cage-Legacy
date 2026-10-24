@@ -389,3 +389,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Ajout de `aria-pressed="true"` au bouton de vue de chaque combat afin d'exposer l'état de sélection courant, en complément du libellé accessible qui indique la vue. La sélection reste pilotée par la porte existante de rotation des vues.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. Cache de `mgmt-soiree-cadre.js` monté avec `_bump.js`.
 - État restant : les écarts de portage visuel, de lecture temps forts et de cumul 900–1200 s documentés plus haut demeurent; cette reprise n'est pas une livraison finale.
+
+### Reprise 58 — contrôle du nombre de primes en fin de soirée
+
+- Renforcement du test de la vraie fin de soirée : en plus de vérifier le bloc primes, il exige désormais que les trois annonces (« combat de la soirée » et deux performances) soient réellement présentes dans le rendu produit par une partie générée.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
+- Les écarts principaux ne sont pas résolus par ce contrôle : portage intégral des trois maquettes, durée de référence 900–1200 s, lecture des temps forts avec fenêtres temporisées et fondu sur l'image, restent à faire. Ce commit n'est pas une livraison finale.

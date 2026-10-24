@@ -121,8 +121,9 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.match(html,/class="so3-fin-contexte"/);
     assert.match(html,/Ce soir/);
     assert.match(html,/class="so3-salle" aria-label="Salle finale/);
-    assert.match(html,/Voir le lendemain/);
-    assert.match(html,/class="so3-primes"/);
+     assert.match(html,/Voir le lendemain/);
+     assert.match(html,/class="so3-primes"/);
+     assert.equal((html.match(/class="so3-prime"/g)||[]).length,3);
   }finally{w.close();}
 });
 
