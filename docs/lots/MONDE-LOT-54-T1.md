@@ -80,6 +80,12 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Les limites des cases 1 et 3 restent celles décrites plus haut : malgré une seconde vue navigable, l'ensemble des deux planches n'est pas reproduit fidèlement ; mouvements et objectifs contractuels ne sont pas exhaustifs ; les lignes T3 ne disposent ni d'une garantie d'anti-répétition sur 50 soirées, ni d'une contextualisation de toutes les familles par les faits réels. Aucun changement fonctionnel n'a été effectué dans cette reprise de validation.
 - Aucun état de sauvegarde nouveau ni migration. Les tests ciblés et audits réussis ne suffisent pas à marquer la tranche terminée ; aucun `TOUT_EST_FINI` n'est revendiqué.
 
+### Reprise — 24/10/2026
+
+- Vérification de reprise : branche `p8-lendemain`; les commits antérieurs contiennent déjà les changements de tranche. Aucun fichier de tranche n'était non commité. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent exclues.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 22/22 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé sur les deux fichiers de production passe.
+- Aucune modification de production n'a été réalisée dans cette passe. Les écarts listés ci-dessus demeurent : fidélité exhaustive aux maquettes et contextualisation T3 complète ne sont pas démontrées. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
+
 ### Reprise de validation — 24/10/2026
 
 - Journal consulté : HEAD `8107084` et les changements de tranche sont déjà commités ; aucun fichier de la tranche en attente. Branche `p8-lendemain` confirmée.
