@@ -446,18 +446,28 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-entete,.gu3-ligne{box-sizing:border-box;min-width:0}
 .gu3-ligne>span{min-width:0;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE67_T1_CEREMONIE_PLANCHE] — Monde lot 67 T1 ==== */
-.ce3-grille{grid-template-columns:1.2fr 1fr 1fr;grid-template-rows:1fr 1fr}
+.ce3-ecran{top:0;height:948px;gap:14px;padding:20px 0 0;overflow:hidden}
+.ce3-entete{height:64px;padding:0 0 0 0;border:0}
+.ce3-entete-gauche{display:flex;align-items:center;gap:18px;min-width:0}
+.ce3-entete h1{border:2px solid rgba(233,230,225,.38);padding:0 18px;height:60px;display:flex;align-items:center;white-space:nowrap}
+.ce3-entete p{font-size:22px;letter-spacing:.06em;white-space:nowrap}
+.ce3-entete strong{height:60px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;white-space:nowrap;border:2px solid rgba(233,230,225,.38)}
+.ce3-entete strong b{font:800 40px/.69 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.ce3-entete strong span{font-size:24px;letter-spacing:.06em}
+.ce3-grille{grid-template-columns:1.2fr 1fr 1fr;grid-template-rows:1fr 1fr;flex:none;height:530px}
 .ce3-prix-combattant{grid-row:span 2;background:#F0B220;color:#0D0B0B;border-color:#F0B220}
 .ce3-prix-combattant h2{color:#0D0B0B}
+.ce3-prix-combattant strong{font-size:112px;line-height:.8;white-space:normal}
+.ce3-prix:not(.ce3-prix-combattant) strong{font-size:48px}
 .ce3-bilan{flex:none;height:150px;display:grid;grid-template-columns:1fr 2.2fr;gap:16px}
 .ce3-bilan>div,.ce3-bilan>article{min-width:0;padding:14px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;justify-content:center;gap:8px}
 .ce3-bilan>div{flex-direction:row;align-items:center;gap:22px}
-.ce3-bilan>div>strong{font:800 88px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.ce3-bilan>div>strong{font:800 110px/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
+.ce3-bilan>div>section{display:flex;flex-direction:column;gap:8px;min-width:0}
 .ce3-bilan h2{margin:0;font-size:24px;line-height:1;color:rgba(233,230,225,.74)}
-.ce3-bilan>div>b{font:800 34px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif}
-.ce3-bilan p{margin:0;font-size:24px}
-.ce3-ecran>.ce3-retour{position:absolute;left:0;top:0;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
-.ce3-ecran>.ce3-bilan-lien{position:absolute;right:0;top:0;min-height:54px;padding:8px 24px;background:#F0B220;color:#0D0B0B;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.ce3-bilan>div>b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
+.ce3-bilan p,.ce3-bilan li{margin:0;font-size:22px}
+.ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
 /* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */
