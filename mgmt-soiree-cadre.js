@@ -295,18 +295,27 @@ Object.assign(CL,{
     if(!mgmtSoAgenda()) return;
     const m=G.mgmt, p=mgmtSoireeProgramme(m)[MGMT_SOIREE.index];
     if(!p||!p.trace) return;
-     const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
-     const vue=mgmtVueDuCombat(m,p.i);
-      if(vue==='resultat'){ MGMT_SOIREE_UI.resultat=MGMT_SOIREE.index; render(); MGMT_SOIREE_UI.resultatTimer=setTimeout(()=>CL.mgmtSoResultatContinuer(),5000); return; }
-     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
-       salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
-   },
-   mgmtSoResultatContinuer(){
-     if(MGMT_SOIREE_UI.resultat===null) return;
-     if(MGMT_SOIREE_UI.resultatTimer) clearTimeout(MGMT_SOIREE_UI.resultatTimer);
-     MGMT_SOIREE_UI.resultatTimer=null; MGMT_SOIREE_UI.resultat=null;
-     MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render();
-   },
+    const sortir=function(){
+      const m=G.mgmt, combat=mgmtSoireeTrace(m,MGMT_SOIREE.index);
+      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render(); };
+      const d=m.discours&&m.discours.c===m.eventsPlayed&&Array.isArray(m.discours.d)
+        ?m.discours.d.find(x=>combat&&x&&[x.a,x.adv].includes(combat.a.id)&&[x.a,x.adv].includes(combat.b.id)):null;
+      if(d&&typeof mgmtDiscoursEcran==='function'&&mgmtDiscoursEcran(m,d,avancer)) return;
+      avancer();
+    };
+    const vue=mgmtVueDuCombat(m,p.i);
+    if(vue==='resultat'){ MGMT_SOIREE_UI.resultat=MGMT_SOIREE.index; MGMT_SOIREE_UI.resultatSuite=sortir; render(); MGMT_SOIREE_UI.resultatTimer=setTimeout(()=>CL.mgmtSoResultatContinuer(),5000); return; }
+    mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
+      salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
+  },
+  mgmtSoResultatContinuer(){
+    if(MGMT_SOIREE_UI.resultat===null) return;
+    if(MGMT_SOIREE_UI.resultatTimer) clearTimeout(MGMT_SOIREE_UI.resultatTimer);
+    const suite=MGMT_SOIREE_UI.resultatSuite;
+    MGMT_SOIREE_UI.resultatTimer=null; MGMT_SOIREE_UI.resultat=null; MGMT_SOIREE_UI.resultatSuite=null;
+    if(typeof suite==='function'){ suite(); return; }
+    MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render();
+  },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){
     if(!mgmtSoAgenda()) return;
