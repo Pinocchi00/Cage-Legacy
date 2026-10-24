@@ -161,3 +161,20 @@ test('Monde lot 57 T1 — le mouvement affiché précise le nombre de places gag
     assert.match(texte,/Split a gagné [1-7] places? et se rapproche du haut du classement/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — les quatre métriques et le rang s’accordent aux données source',()=>{
+  const w=partie();
+  try{
+    const rows=JSON.parse(w.eval(`(()=>{const m=G.mgmt;return JSON.stringify(mgmtGuerreClassement(m).map(x=>({id:x.id,rang:x.rang,niveaux:x.niveaux,rangs:x.rangs})));})()`));
+    const source=JSON.parse(w.eval(`JSON.stringify(mgmtOrgClassement(G.mgmt))`));
+    assert.equal(rows.length,8);
+    for(const row of rows){
+      const original=source.find(x=>x.id===row.id);
+      assert.ok(original);
+      assert.deepEqual(row.niveaux,original.niveaux);
+      assert.deepEqual(row.rangs,original.rangs);
+      assert.equal(row.rang,original.rang);
+      assert.ok(['popularite','stade','notoriete','puissance'].every(k=>Number.isFinite(row.niveaux[k])));
+    }
+  }finally{w.close();}
+});
