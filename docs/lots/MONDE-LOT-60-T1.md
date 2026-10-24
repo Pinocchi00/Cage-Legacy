@@ -29,3 +29,10 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 - Reste incomplet : le test de tranche n'a pas été rendu vert ni étendu à toutes les assertions prescrites (maquette/classes, échappement, sauvegardes et partie ancienne), et le test lent `mgmtReleveReduit.test.js` n'a pas été exécuté. Les changements de cette reprise sont limités au fil d'actualités et à l'inscription des tests ; aucun écart aux comportements prescrits n'a été volontairement décidé. Les autres modifications déjà présentes dans le répertoire (`.opencode/agents/*`, `opencode.json`, `sw.js`, `tests/mgmtLot42T2.test.js`) restent hors tranche.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu — reprise 6
+
+- Tests : `tests/mgmtLot60T1.test.js` contient les scénarios de signature via Contrats, suivi sans doublon, approche déterministe/statistique, délai de grâce et échappement. Le scénario statistique réutilise une partie générée par le chemin réel puis simule 200 profils distincts, plutôt que de reconstruire 200 parties (ce qui dépassait plusieurs minutes).
+- Vérifications : `node --test tests/mgmtLot60T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe ; ESLint ciblé sur le code passe (le test est ignoré par la configuration ESLint).
+- Écart restant : la couverture prescrite concernant les classes sans règle, les clés de sauvegarde facultatives/réparation et la partie ancienne n'est pas incluse dans les tests de cette tranche. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été exécuté. Le check complet est laissé au superviseur conformément au contrôle rapide local.
+- Aucun changement de sauvegarde. Les modifications locales hors tranche (agents OpenCode, `opencode.json`, `sw.js`, `tests/mgmtLot42T2.test.js`) n'ont pas été incluses.
