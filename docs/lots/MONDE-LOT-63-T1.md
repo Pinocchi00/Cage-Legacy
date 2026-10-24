@@ -473,3 +473,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` figure dans `test` et `test:watch` (`true,true`).
 - Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les bilans précédents documentent 1 908 745 octets et sa réussite. Aucun changement de sauvegarde ni migration. Limite honnête inchangée : les tests préparent les faits des familles via le parcours réel, sans démontrer que les systèmes de jeu génèrent naturellement chacun d'eux.
 - Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache de `index.html` hors tranche, exclues. Aucun écart nouveau ni question pour Anthony.
+
+### Reprise 9 — contrôle de livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée ; l'historique des douze commits et le statut consultés. Les changements fonctionnels de la tranche sont déjà committés ; aucune modification de production ou test n'attend. Les différences locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères et exclues.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit des scripts `test` et `test:watch` renvoie `true,true`.
+- Aucun nouveau champ de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé lors de cette reprise ; des résultats précédents documentent la taille de 1 908 745 octets et une réussite. Limite connue : les familles sont exercées sur des faits préparés via une partie issue du chemin réel, sans démontrer que chaque système opérationnel génère naturellement tous ces faits.
+- Cette reprise ne change que le compte rendu. Aucun écart nouveau ni question pour Anthony ; `check:rapide` est réservé au superviseur conformément au contrôle rapide.
