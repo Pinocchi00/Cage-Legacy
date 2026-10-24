@@ -13,10 +13,10 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
-- Modifié : `mgmt-recruteur.js` rend la porte disponible neutre pour les identifiants qui ne sont pas des profils de retour ; `mgmt-recrutement.js` applique cette porte à la liste des combattants libres, afin d'exclure un profil rapporté lorsqu'il figure déjà dans l'effectif ou le marché extérieur. `index.html` versions les deux scripts.
-- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts. Le test prescrit `tests/mgmtLot60T1.test.js` est absent et ne peut pas être exécuté.
-- Cases non terminées : parcours explicite vers l'écran Contrats et signature via ce parcours, suivi vérifié sur le chemin réel, approche rivale déterministe (35 % / 15 %) et actualité, délai de protection des suivis, tests exigés (classes, échappement, sauvegarde, déterminisme, fréquence) et plafond de sauvegarde.
-- Écart / vérifications : tranche inachevée. Lint ciblé et `node tools/verif-versions.js origin/main` passent ; le test ciblé prescrit échoue car le fichier n'existe pas. Aucune migration de sauvegarde.
-- Questions pour Anthony : aucune ; le travail restant est implémenté en partie et n'est pas bloqué par une question de spécification.
+- Modifié : `mgmt-recruteur.js` prépare désormais le profil dans le marché extérieur et ouvre l'écran Contrats existant ; aucune signature n'est faite dans cette porte. `index.html` porte la version du script. `tests/mgmtLot42T1.test.js` adapte le test antérieur de signature directe (décision du brief du 22/10, P5 T4 : Contrats est la porte unique).
+- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts après l'adaptation citée.
+- Cases non terminées : intégrer proprement le bloc d'actions et l'état de caisse du retour (maquette), assurer suivi, implémenter l'approche rivale et sa ligne d'actualité, les délais, les tests prescrits `tests/mgmtLot60T1.test.js` et l'inscription de ce test dans `test`/`test:watch`. La signature finale par l'écran Contrats n'a pas été vérifiée.
+- Écart / vérifications : aucune migration de sauvegarde. Le test prescrit n'existe pas encore ; audit versions, lint et contrôle complet non réalisés. État partiel commité sous `aa059c7`, sans `sw.js`.
+- Questions pour Anthony : aucune question bloquante identifiée ; les cases restantes sont du travail d'implémentation.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
