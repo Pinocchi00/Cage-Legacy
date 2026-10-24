@@ -133,3 +133,14 @@ test('Monde lot 53 T1 — la touche V règle la vue du combat sélectionné',()=
     assert.match(r.html,/COMBAT|PRÉLIM/);
   }finally{w.close();}
 });
+
+test('Monde lot 53 T1 — les repères de temps forts conservent l’ordre et l’échappement dans la frise',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const html=w.eval(`(()=>{MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.tempsFortActif=0;MGMT_COMBAT.tempsForts=[{t:0,raison:'Ouverture <test>'},{t:30,raison:'Fin du combat'}];return mgmtCombatFriseHtml();})()`);
+    assert.ok(html.indexOf('Ouverture &lt;test&gt;')<html.indexOf('Fin du combat'));
+    assert.match(html,/class="so3-moment actif"[^>]*aria-current="step"/);
+    assert.match(html,/class="so3-moment"[^>]*aria-label="Moment 2, à venir/);
+    assert.doesNotMatch(html,/<test>/);
+  }finally{w.close();}
+});
