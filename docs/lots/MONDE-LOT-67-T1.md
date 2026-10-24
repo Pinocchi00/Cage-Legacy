@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 17
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` consulté. L'arbre était propre au début de la reprise, les travaux antérieurs étant déjà commités.
+- Test ajouté : « Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; les onglets Organisation ont une règle de style ». Il vérifie les quatre intitulés communs et l'existence de règle CSS pour chaque classe du composant.
+- Vérification ciblée `node --test tests/mgmtLot55T1.test.js` : 48/48 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis ; `git diff --check` réussi. Aucune modification JS/CSS, aucun bump de cache, aucune migration.
+- Limites : accès au protocole/cmp de capture externe refusé par l'environnement ; pas de capture ni d'ouverture visuelle revendiquée. Ce test ne corrige ni ne valide les écarts consignés sur Croissance, Carnet, Guerre, les captures de cérémonie avec prix, ou les autres vues. La tranche reste visuellement non certifiée ; `TOUT_EST_FINI` n'est pas revendiqué.
+- Fichiers : `tests/mgmtLot55T1.test.js` (test des onglets et styles) et cette fiche (compte rendu). Questions pour Anthony : aucune ; les éléments visuels restent à mesurer/corriger.
+
 ## Compte rendu — reprise 15
 
 - Branche `fid-organisation` confirmée ; `git status` était propre et les douze derniers commits consultés sont déjà commités. Aucun changement applicatif non commité n'était à reprendre.
