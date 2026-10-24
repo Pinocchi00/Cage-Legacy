@@ -356,8 +356,9 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la carte v
   c.mfEcran=contenu=>contenu;
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
-  assert.equal((rendu.match(/Aucun lauréat/g)||[]).length,5);
+  assert.equal((rendu.match(/Aucun lauréat/g)||[]).length,0);
   assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
+  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,5);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();
