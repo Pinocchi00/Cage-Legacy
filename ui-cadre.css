@@ -2171,7 +2171,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article h2{flex:none;margin:0;line-height:1.05;overflow-wrap:anywhere}
 .ce3-carnet-ecran .ce3-carnet>article>p{flex:none;min-width:0;margin:0;padding:8px 0;border-bottom:1px solid rgba(233,230,225,.16);line-height:1.2;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE67_T1_CARNET_LIGNES_ISOLEES] — Monde lot 67 T1 ==== */
-.ce3-carnet-ecran .ce3-carnet>article>p{position:relative;display:block;white-space:normal;word-break:normal;contain:layout}
+.ce3-carnet-ecran .ce3-carnet>article>p{display:block;white-space:normal;word-break:break-word;contain:none;max-width:100%}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
