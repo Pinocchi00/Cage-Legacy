@@ -71,3 +71,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers modifiés : `tests/mgmtLot69T1.test.js` ajoute une assertion que l'écran d'arrivée rend le nom de l'organisation effectivement active après changement.
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (2/2).
 - Pas de migration ni de version de cache modifiée. Les captures restent indisponibles dans cet environnement. Les autres critères visuels et le parcours intégral sont toujours ceux consignés plus haut ; cette assertion ne suffit pas à les valider.
+
+### Reprise 17
+- État de départ : branche `fid-choc`, dernier commit `a38dcac7` ; aucun fichier de la tranche non commité. Les changements préexistants sous `.opencode/agents/` et `opencode.json` sont utilisateur et restent hors de cette tranche.
+- `tests/mgmtLot69T1.test.js` est déjà référencé par `pretest` et `pretest:watch`, donc il s'exécute dans les deux commandes agrégées ; il a aussi des scripts dédiés `test:lot69t1` et `test:watch:lot69t1`. Aucun changement de script n'est requis.
+- Je n'ai pas pu ouvrir le fichier d'instructions de capture externe avec l'outil de lecture autorisé ; aucune capture/cmp n'est revendiquée. Les écarts fonctionnels et visuels précédemment consignés demeurent : choc à trois affiches, contrôle comparatif arrivée/discours/bilan, et parcours contractuel complet avec rechargement identique et lendemain.
+- Vérifications à cette reprise : le test ciblé et l'audit de versions sont relancés avant livraison. Aucun changement de sauvegarde. Cette reprise n'achève pas toutes les cases et ne revendique pas `TOUT_EST_FINI`.
