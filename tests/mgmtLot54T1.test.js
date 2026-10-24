@@ -228,6 +228,14 @@ test('Monde lot 54 T1 — les deux écrans du lendemain gardent un corps de text
   }
 });
 
+test('Monde lot 54 T1 — les moments reprennent la hiérarchie typographique de la planche',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.ld3-moments\s*\{[^}]*grid-template-columns:\s*1\.45fr\s+1fr\s+\.9fr/s);
+  assert.match(css,/\.ld3-moments\s+\.ld3-moment:first-child\s+\.ld3-names\s*\{[^}]*font-size:\s*108px/s);
+  assert.match(css,/\.ld3-moments\s+\.ld3-moment:nth-child\(2\)\s+\.ld3-names[^}]*font-size:\s*64px/s);
+  assert.match(css,/\.ld3-moments\s+\.ld3-moment:nth-child\(3\)\s+\.ld3-names[^}]*font-size:\s*64px/s);
+});
+
 test('Monde lot 54 T1 — la navigation ouvre le second écran puis revient aux moments',()=>{
   const w=newGameWindow({runMain:true});
   try{

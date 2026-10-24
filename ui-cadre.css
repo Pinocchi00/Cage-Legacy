@@ -1890,6 +1890,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-moments .ld3-moment{min-width:0;min-height:260px;margin:0;padding:18px 20px}
 .ld3-moments .ld3-names{font-size:36px;overflow-wrap:anywhere}
 .ld3-moments .ld3-detail{margin-top:auto}
+.ld3-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8}
+.ld3-moments .ld3-moment:first-child .ld3-detail{font-size:36px;line-height:1}
+.ld3-moments .ld3-moment:nth-child(2) .ld3-names,.ld3-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:.8}
+.ld3-moments .ld3-moment:nth-child(2) .ld3-detail,.ld3-moments .ld3-moment:nth-child(3) .ld3-detail{font-size:30px;line-height:1}
 .ld3-suite{height:calc(100vh - 180px);min-height:650px;grid-template-columns:1.05fr 1.1fr 1fr;grid-template-rows:auto minmax(0,1fr);gap:16px;padding:18px;overflow:hidden}
 .ld3-suite-title{font-size:44px}
 .ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:auto;min-height:0;overflow:auto}
