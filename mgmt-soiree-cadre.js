@@ -165,8 +165,8 @@ function mgmtSoOuvertureHtml(m,prog){
   const salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
   const haut=n=>Math.max(44,Math.min(88,Math.floor((560-(n-1)*8)/Math.max(1,n))));
    const ligne=(p,rang,on,h)=>{const vue=mgmtVueDuCombat(m,p.i), labels={complet:'COMPLET',forts:'TEMPS FORTS',resultat:'RÉSULTAT'};
-     return `<div class="mf-so-lg${on?' on':''} so3-carte-combat" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div>`
-       +`<div class="mf-so-ln"><b>${esc(soLast(p.a))}</b><span>contre</span><b>${esc(soLast(p.b))}</b></div></div>`
+      return `<div class="mf-so-lg${on?' on':''} so3-carte-combat" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li so3-carte-infos"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div></div>`
+        +`<div class="mf-so-ln so3-carte-noms"><b>${esc(soLast(p.a))}</b><span>contre</span><b>${esc(soLast(p.b))}</b></div>`
        +`<button type="button" class="so3-vue" aria-label="Vue du combat ${esc(rang)} : ${labels[vue]}" onclick="CL.mgmtSoVueSuivante(${p.i})">${labels[vue]}</button></div>`;
    };
   const hp=haut(pre.length), hm=haut(main.length);

@@ -312,3 +312,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Critères non satisfaits : le portage intégral des compositions et des valeurs exactes des trois planches n'est pas démontré; les temps forts utilisent l'accélération hors moments et la frise, mais pas des fenêtres isolées chronométrées de 30–60 secondes avec fondu de l'image d'arène; le cumul de référence mesuré précédemment est 868,38 s, inférieur aux 900 s minimales prescrites. Le contrôle des classes couvre les nouvelles classes `so3-*`, pas l'ensemble du DOM/classes ni un audit exhaustif des tailles de texte.
 - Le test lent `mgmtReleveReduit.test.js` a été lancé avec une limite de 1,2 seconde par l'outil et a été interrompu avant résultat ; aucun résultat vert n'est revendiqué dans cette reprise. Une exécution antérieure complète (6/6, environ 443 s) est documentée à la reprise 40.
 - Aucun ajustement arbitraire de durée n'a été fait pour maquiller la mesure. Aucun changement applicatif n'a été produit dans cette reprise et aucun commit de livraison finale n'est créé : ce serait inexact de déclarer toutes les cases finies.
+
+### Reprise 43 — séparation des colonnes de la carte
+
+- Fait : les lignes de la carte d'ouverture séparent maintenant l'information de combat (libellé et division) des noms des combattants. La grille CSS reprend les quatre colonnes de la maquette (54 px, 190 px, espace flexible, contrôles), au lieu d'entasser les noms dans la colonne d'information.
+- Fichiers modifiés : `mgmt-soiree-cadre.js` (structure des lignes), `ui-cadre.css` (grille et règles des deux classes `so3-*`), `index.html` (versions cache générées par `_bump.js`), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
+- Non fait, donc tranche toujours incomplète : le portage intégral des maquettes, la lecture temps forts temporisée/fondue aux fenêtres, la validation de la cible 900–1200 s, et les autres écarts détaillés dans la reprise 42. Le test lent et les vérifications complètes de fin de tranche restent à exécuter. Pas de modification du moteur ni de sauvegarde.
