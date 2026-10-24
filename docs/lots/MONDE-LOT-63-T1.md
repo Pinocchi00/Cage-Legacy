@@ -293,3 +293,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Le test lent `node --test tests/mgmtReleveReduit.test.js` passe 6/6 ; relevé neuf mesuré à 1 908 745 octets, sous le plafond de 1,9 Mo. `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint global passe et l'audit des scripts `test`/`test:watch` renvoie `true,true`.
 - Aucun changement de sauvegarde ni migration. Limite de couverture déjà signalée : les faits de familles sont préparés séparément sur une partie issue du parcours réel, sans démontrer que tous les systèmes les génèrent naturellement. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères à la tranche et exclues.
 - Seule cette fiche est modifiée pour ce bilan ; aucun nouvel écart ni question pour Anthony.
+
+### Reprise 9 — validation finale (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les changements de production et tests de la tranche sont déjà committés dans l'historique. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6, partie neuve à 1 908 745 octets, sous le plafond ; `node tools/verif-versions.js origin/main` sans écart ; ESLint global passe ; inclusion dans `test` et `test:watch` confirmée (`true,true`).
+- Aucun nouveau changement fonctionnel ou de sauvegarde dans cette reprise ; aucune migration. La fiche est le seul fichier de tranche à commiter. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la différence de cache locale dans `index.html` sont étrangères et exclues.
+- Limite conservée : les tests préparent chaque fait familial sur une partie issue du parcours réel, sans prouver que chaque système opérationnel produit naturellement ces faits. Aucun nouvel écart ni question pour Anthony.
