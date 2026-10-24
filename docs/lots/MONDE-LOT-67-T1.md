@@ -15,4 +15,12 @@ Branche : `fid-organisation` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 6.** Tests : les existants restent verts ; ceux qui décrivaient l'ancienne structure sont **mis à jour en citant la décision** (« planches Uni* validées par Anthony ; l'écran suit la planche ») ; ajoute des tests de présence (onglets, blocs) et « chaque classe a sa règle de style » (la cérémonie avait des classes `ce3-*` sans règle).
 **[ ] 7.** `?v=`, versions, lint ; commit final `Monde lot 67 T1 : la page Organisation et la cérémonie fidèles aux planches` ; compte rendu honnête ; `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- Modifiés : `mgmt-ecran-organisation.js` ajoute le composant partagé `mgmtOrgOnglets` et l'affiche sur Organisation ; `mgmt-guerre-ecran.js` affiche les onglets sur le classement ; `mgmt-ecran-poste.js` les affiche sur Ton poste ; `mgmt-ceremonie.js` les ajoute à la cérémonie et Carnet ; `ui-cadre.css` ajoute les styles d'onglets, des cartes ce3 et réduit le risque de chevauchement des cellules du classement. Versions `?v=` actualisées par `tools/_bump.js`.
+- Tests : `tests/mgmtLot55T1.test.js` passe (41 tests) et `tests/mgmtLot57T1.test.js` passe (33 tests, 110 s). Vérification `node tools/verif-versions.js origin/main` passée.
+- Pas de changement de sauvegarde.
+- Inachevé : la navigation clavier flèches/Tab, le rendu fidèle des blocs de cérémonie et les contenus de croissance, poste, carnet et bilan restent à aligner ; rivale déterministe et flèches d'évolution non ajoutées ; aucun comparatif d'images n'a pu être fait, le fichier externe `LISEZMOI.txt` est inaccessible par les autorisations de l'environnement. Pas de test neuf ajouté ; le test visuel existant de la cérémonie est vert, mais les critères de capture et d'alignement ne sont pas établis.
+- Questions pour Anthony : aucune ; les choix restant à faire sont consignés comme travaux inachevés, non comme ambiguïtés de spécification.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

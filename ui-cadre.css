@@ -421,6 +421,31 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-dossiers .mf-dos-ligne{position:relative;padding:7px 12px 7px 42px;min-height:42px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-dossiers .mf-dos-ligne:before{content:"";position:absolute;left:14px;top:calc(50% - 8px);width:16px;height:16px;background:var(--mf-jaune);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
+.mo67-tabs{grid-column:1/-1;display:flex;gap:12px;min-width:0;border-bottom:2px solid rgba(233,230,225,.38);padding:0 0 12px}
+.mo67-tab{min-height:54px;padding:8px 20px;background:#121010;color:#E9E6E1;border:2px solid rgba(233,230,225,.38);font:600 24px/1 'Saira Condensed','Arial Narrow',sans-serif;cursor:pointer}
+.mo67-tab[aria-current="page"]{background:#F0B220;color:#0D0B0B;border-color:#F0B220}
+.ce3-ecran{position:absolute;left:300px;top:108px;width:1564px;height:860px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:12px;color:#E9E6E1;background:#0D0B0B;overflow:auto;font:500 24px/1.15 'Saira Condensed','Arial Narrow',sans-serif}
+.ce3-entete{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid rgba(233,230,225,.38)}
+.ce3-entete h1{margin:0;font:800 56px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1}
+.ce3-entete p,.ce3-entete strong{font-size:24px;margin:0}
+.ce3-grille{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px}
+.ce3-prix{min-width:0;box-sizing:border-box;padding:20px 22px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.ce3-prix:first-child{grid-row:span 2;background:#F0B220;color:#0D0B0B;border-color:#F0B220}
+.ce3-prix h2{margin:0;color:#F0B220;font-size:24px;line-height:1.05}
+.ce3-prix:first-child h2{color:#0D0B0B}
+.ce3-prix strong{font:800 52px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;overflow-wrap:anywhere}
+.ce3-prix p{margin:auto 0 0;font-size:24px;line-height:1.15}
+.ce3-classement{flex:none;max-height:150px;overflow:auto;padding:10px 14px;background:#121010;border:2px solid rgba(233,230,225,.38)}
+.ce3-ecran>button{flex:none;align-self:flex-start;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;border:0;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.ce3-carnet{display:grid;grid-template-columns:1fr 1fr;gap:14px;overflow:auto}
+.ce3-carnet article{padding:18px;background:#121010;border:2px solid rgba(233,230,225,.38);min-width:0}
+.ce3-carnet h2{font:800 30px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0 0 12px;color:#F0B220}
+.ce3-carnet p{font-size:24px;margin:8px 0}
+.gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(240px,1fr) 90px 110px 120px 110px 90px;gap:10px}
+.gu3-entete,.gu3-ligne{box-sizing:border-box;min-width:0}
+.gu3-ligne>span{min-width:0;overflow-wrap:anywhere}
+/* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */
 .mf-fiche-cadre{display:flex;gap:20px}
