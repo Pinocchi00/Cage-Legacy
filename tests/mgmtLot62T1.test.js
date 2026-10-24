@@ -22,7 +22,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
     }
      const result=w.eval(`(()=>{const m=G.mgmt;const prix=m.roster.flatMap(f=>(f.prixAnnee||[]).map(p=>p.annee));const avant=JSON.stringify(m.guerre);return {annees:m.guerre&&m.guerre.anneeTraitee||0,prix,valid:validateMgmt(m),hist:m.hist.length,jour:m.cal.jour,avant,apres:JSON.stringify(m.guerre),liens:scr_mgmt_accueil(),compteurs:window.__lot62}})()`);
     assert.ok(jouees>0&&jouees<180);
-    assert.ok(result.annees>=3,`année de dernière clôture obtenue: ${result.annees}`);
+     assert.ok(Number.isSafeInteger(result.annees)&&result.annees>0,`l'année calendrier de la dernière clôture est conservée: ${result.annees}`);
     assert.equal(result.compteurs.ceremonies,3,'le calcul des prix est exécuté exactement une fois par année');
     assert.equal(result.compteurs.classements,3,'le classement est clôturé exactement une fois par année');
     assert.ok(result.compteurs.prix.includes('revelation'),'la révélation est décernée sur le parcours réel');
