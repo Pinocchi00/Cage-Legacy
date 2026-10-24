@@ -6,6 +6,13 @@
 - `node --test tests/mgmtLot55T1.test.js` passe 46/46 ; `node --test tests/mgmtLot57T1.test.js` passe 33/33 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. CSS cache bumpé via `_bump.js`; `sw.js` généré restauré depuis `origin/main` et exclu. Aucun changement de sauvegarde.
 - Fichiers de cette reprise : `ui-cadre.css` (typographie de la carte combattant), `index.html` (version CSS), cette fiche. Captures avec prix réels dans le navigateur non produites ; le test Lot 55 couvre uniquement le rendu des prix synthétiques. Les défauts documentés sur Guerre, Croissance, Carnet et Bilan ne sont pas réinspectés/corrigés ici. La tranche reste inachevée : je ne revendique pas `TOUT_EST_FIN`.
 
+## Compte rendu — reprise 50
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` consulté. Aucun changement applicatif en attente avant cette reprise ; le dernier commit contient déjà les corrections précédentes.
+- Protocole `shoot.js` relu et capture individuelle `ceremonie` exécutée après reprise : chevauchements=0, textesSous22px=0, débordements=[], grosBlocs=19,3 %. Le comparatif est régénéré dans `%TEMP%/shots/cmp-ceremonie.png`. L'accès `Read` à ce PNG a été refusé par la politique de fichiers externes ; je n'affirme donc pas l'avoir inspecté visuellement. Cette capture reste la scène vide du harnais, pas une scène montrant six noms remplis.
+- `node --test tests/mgmtLot55T1.test.js` passe 46/46. Les autres captures ne sont pas relancées dans cette reprise. Les derniers constats disponibles pour Guerre (22,9 % et tronquages), Croissance (textes sous 22 px/tronquages), Carnet (collisions) et Bilan (collision) demeurent des défauts ouverts ; les prix remplis à l'écran et la rivalité forcée MMA KORNER ne sont pas démontrés. Les critères de fidélité globale ne sont donc pas atteints et `TOUT_EST_FIN` n'est pas revendiqué.
+- Migration de sauvegarde : aucune. Fichier modifié : cette fiche (journal de reprise). Questions pour Anthony : aucune ; les critères restants sont des tâches de fidélité/capture, pas des questions de spécification.
+
 ## Compte rendu — reprise 38
 
 - Branche `fid-organisation` confirmée ; les commits antérieurs sont présents et l'arbre de travail était propre. Le protocole de capture est lisible depuis le shell. Capture individuelle cérémonie exécutée : contrôle automatique `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=20,8 %`, score moyen 29,6. Le seuil demandé ≤20 % reste donc manqué.
