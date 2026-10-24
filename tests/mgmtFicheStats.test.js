@@ -63,6 +63,18 @@ test('Monde lot 68 T1 — aperçu et statistiques gardent le suivi hors du palma
     assert.equal(placements.countInBody,false,`${tab}: compteur absent du palmarès`);
   }
 });
+test('Monde lot 68 T1 — la rangée des onglets réserve un espace lisible au suivi',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  const row=css.match(/\.mf-fi-onglets\{([^}]*)\}/)?.[1]||'';
+  const follow=css.match(/\.mf-fi-onglets>\.mf-fiche-suivi\{([^}]*)\}/)?.[1]||'';
+  const counter=css.match(/\.mf-fb-suivi-count\{([^}]*)\}/)?.[1]||'';
+  assert.match(row,/display:flex/);
+  assert.match(row,/justify-content:space-between/);
+  assert.match(follow,/position:static/);
+  assert.match(follow,/margin-left:18px/);
+  assert.match(counter,/font-size:22px/);
+});
 test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',()=>{
   const w=monde();open(w);const shape=JSON.parse(w.eval("JSON.stringify((()=>{const panels=[...document.querySelectorAll('.mf-fs-panel')],frames=[...document.querySelectorAll('.mf-fs-frame')],bars=[...document.querySelectorAll('.mf-fs-part')];return {panels:panels.length,frames:frames.length,layers:frames.map(x=>x.firstElementChild?.firstElementChild?.classList.contains('mf-fs-panel')?3:0),segments:bars.map(x=>x.querySelectorAll('.mf-fs-bar i').length),percent:bars.some(x=>x.querySelector('.mf-fs-bar').textContent.includes('%'))}})())"));
   assert.equal(shape.panels,3);assert.equal(shape.frames,3);assert.deepEqual(shape.layers,[3,3,3]);assert.deepEqual(shape.segments,[3,3]);assert.equal(shape.percent,false);
