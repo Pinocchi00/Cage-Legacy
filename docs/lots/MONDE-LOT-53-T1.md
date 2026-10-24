@@ -58,4 +58,15 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Les autres cases restent à faire : portage intégral de la carte et des informations « Le prochain », lecture accélérée avec frise/fondu, carte résultat seul, portage de l'écran de fin et primes exactes, assertions de durée/couverture des classes/empreintes historiques, intégration du test dans `test` et `test:watch`.
 - Fichiers modifiés durant cette reprise : `mgmt-soiree-cadre.js` (touche V) et `index.html` (version cache du JS). Pas de changement de sauvegarde. Aucun écart à la maquette autre que les éléments non encore portés déjà listés.
 
+### Reprise 10 — primes de fin (travail partiel)
+
+- Fait durant la reprise : la fin existante affiche maintenant le total payé indiqué par `m.lastEvent.finance.primes`, formaté avec `mgmtEuros`, ainsi qu'un titre et un style dédié. La route vers le lendemain n'a pas été modifiée.
+- Commits de reprise : `c76a444` (touche V), `2fad253` (montant de prime) et `70c17de` (styles de prime). Les deux derniers commits exécutent le test ciblé ; il reste vert (4 tests). ESLint complet et `node tools/verif-versions.js origin/main` sont également verts après l'ajout CSS.
+- Restent non faits : portage des valeurs et de tous les blocs `UniSoiree` / `UniSoireeFin`, frise dédiée et fondu de temps forts, garantie/test de durée par fenêtres et passabilité, résultat seul de 5 s, assertion 900–1200 s (l'estimation relevée à la reprise 9 était 868,38 s), couverture des classes/style/échappement et comparaison d'empreintes anciennes. Le test `mgmtLot53T1.test.js` est exécuté via `pretest` et `pretest:watch`, mais n'est toujours pas dans les listes principales `test` / `test:watch`.
+- Écarts de maquette : l'écran carte et le panneau « Le prochain » restent l'ancien rendu `mf-*`; la fin garde sa composition d'origine avec ajouts de primes, et n'est pas un portage de la planche. Les lignes d'annonce ne prouvent pas la sélection fidèle des deux bénéficiaires performance, ni les trois attributions exactes pour toute fixture.
+- Lecture : le code existant accélère les intervalles entre fenêtres en multipliant l'avancement (`MGMT_TF_VITESSE`) et ne crée pas de moteur parallèle. Pas de travail livré dans cette reprise sur frise ou fondu.
+- Fichiers modifiés dans les commits de reprise : `mgmt-soiree-cadre.js` (sélecteur V et bloc de primes/argent), `ui-cadre.css` (styles dédiés), `index.html` (versions cache), cette fiche. Aucune migration de sauvegarde ; aucune modification au moteur.
+- Tests ajoutés à cette reprise : aucun ; les 4 tests ciblés existants passent. La demande détaillée du test de cumul et d'empreintes reste non satisfaite.
+- Questions pour Anthony : aucune question formulée ; plusieurs critères demeurent non implémentés, et cette tranche ne répond pas au critère de fin.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
