@@ -18,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise — reprise de capture et suite — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. `git log --oneline -12` montre que les commits de base de la tranche sont déjà présents ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` préexistantes restent hors périmètre.
+- Capture récente à 1920×1080 : `lendemain` zéro chevauchement, zéro texte sous 22 px et aucun débordement, mais `grosBlocs=22,5 %` (objectif de cette reprise ≤18 % non atteint). `lendemainSuite` zéro chevauchement et texte sous 22 px, `grosBlocs=17,2 %`, avec quatre débordements signalés de mouvements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »).
+- Ajustement ciblé des colonnes des mouvements de la suite (largeurs bornées et retours de ligne renforcés) dans `ui-cadre.css`; version de cache augmentée dans `index.html` par `_bump.js`. La recapture de la suite n'a pas fait varier les quatre alertes. La mise en page du lendemain elle-même n'a pas changé ; son ratio reste au-dessus de la cible mesurée.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Pas de changement de données, mécanique, sauvegarde ou migration. Les objectifs visuels sont partiellement atteints seulement ; la conformité complète n'est pas revendiquée. Images `cmp-lendemain.png` et `cmp-lendemainSuite.png` générées par l'outil dans le dossier temporaire `shots`.
+- Fichiers modifiés : `ui-cadre.css` (colonnes mouvements suite), `index.html` (cache), cette fiche (résultats). Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ### Reprise — vérification de capture — 24/10/2026
 
 - Branche `fid-lendemain` confirmée. Les commits fonctionnels sont déjà présents ; les modifications préexistantes des agents/configuration et `sw.js` sont restées hors de la tranche.
