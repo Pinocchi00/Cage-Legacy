@@ -140,3 +140,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
 - Aucun changement de sauvegarde ou de logique métier.
 - Écarts : captures post-correction non produites ; choc multi-affiches, parcours contractuel strict complet et mesure visuelle ≤20 % restent non démontrés. Les modifications utilisateur préexistantes hors tranche ont été préservées. Pas de `TOUT_EST_FINI` revendiqué.
+
+### Reprise 26
+- Vérification de reprise : branche `fid-choc`, dernier commit `7a6220dd`. Les seules modifications initiales étaient celles de l'utilisateur sous `.opencode/agents/` et `opencode.json`, préservées et non ajoutées.
+- `tests/mgmtLot69T1.test.js` renforce le contrôle du bloc offres : les quatre raisons doivent être distinctes et les principales raisons affichées présentes dans le bilan. `node --test tests/mgmtLot69T1.test.js` passe (3/3). Le test est explicitement inclus dans `test` et `test:watch`.
+- Audit `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe. Aucun fichier JS/CSS et aucune sauvegarde modifiés.
+- Il n'existe pas de dossier `shoot` dans le dépôt de travail. Le guide externe de capture n'a pas pu être ouvert à cause de la restriction d'accès ; aucune nouvelle capture ni mesure n'est revendiquée.
+- Cases encore non démontrées : le choc reste mono-combat dans le modèle, les comparaisons visuelles et seuils après correction ne sont pas établis, et le parcours ne réalise pas le rechargement strictement identique demandé. Le test actuel couvre changement, arrivée, soirée, lendemain et sérialisation intermédiaire, mais pas tout le scénario de fin de contrat.
+- Aucun changement de sauvegarde. Écart à la fiche : tranche toujours incomplète ; aucun `TOUT_EST_FINI` revendiqué.
