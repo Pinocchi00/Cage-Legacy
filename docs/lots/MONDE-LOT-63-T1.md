@@ -316,6 +316,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les reprises précédentes le documentent vert à 1 908 745 octets. Aucun changement de sauvegarde ni migration. La limite de couverture reste que les scénarios préparent les dix faits après création par le chemin réel, sans prouver leur production naturelle par chaque système opérationnel.
 - Seule cette fiche est ajoutée au présent commit ; les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache dans `index.html` sont étrangères et exclues. Aucun nouvel écart ni question pour Anthony.
 
+### Reprise 6 — clôture contrôlée (24/10/2026)
+
+- `p8-apres` confirmée. Aucun code ou test de tranche n'était en attente : les commits fonctionnels sont déjà dans l'historique. Le merge de `origin/main` a été tenté, mais la politique de l'environnement interdit `git merge*` ; aucun test existant n'a été changé.
+- La suite demandée passe **130/130**, dont les deux régressions lot 54 concernant rivalité et répétition. `node --test tests/mgmtLot63T1.test.js` passe également 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; ESLint global passe.
+- Les changements à livrer sont dans les commits antérieurs : `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`. Aucun changement de sauvegarde ni migration. Les tests préparent les faits familiaux sur le parcours réel sans prouver leur production naturelle par chaque système opérationnel.
+- Seule cette fiche est ajoutée au commit de clôture. Les changements de `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche ; pas de question nouvelle pour Anthony.
+
 ### Reprise 7 — contrôle final de livraison (24/10/2026)
 
 - Branche `p8-apres` confirmée. Les commits de production et de tests de la tranche sont déjà présents ; aucune modification fonctionnelle non commitée à reprendre.
