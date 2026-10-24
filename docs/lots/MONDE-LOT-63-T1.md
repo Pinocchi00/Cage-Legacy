@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 8 — clôture validée (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà dans l'historique ; aucun fichier de production ou test de la tranche n'était en attente. Les changements locaux `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` sont hors périmètre et exclus.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Audit des scripts : `mgmtLot63T1` est présent dans `test` et `test:watch` (`true true`).
+- Fichiers livrés dans les commits précédents : `mgmt-apres-data.js` (catalogue des dix familles et textes `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, affichage Accueil/presse et mouvements inter-organisations), `tests/mgmtLot63T1.test.js` (neuf tests) et `package.json` (inscription aux scripts). Aucun nouvel état de sauvegarde ni migration.
+- Limite de couverture : les tests déclenchent séparément les faits familiaux sur une partie issue du chemin réel, sans démontrer que chaque système opérationnel génère naturellement chacun des faits. Aucun nouvel écart ni question pour Anthony.
+
 ### Reprise 15 — contrôle de clôture (24/10/2026)
 
 - Branche `p8-apres` confirmée ; l'historique montre les commits fonctionnels déjà livrés et aucun fichier fonctionnel/test de la tranche n'est non commité. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` ne relève aucun écart, et `node_modules/.bin/eslint .` passe.
