@@ -17,6 +17,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise — état : incomplet, critère final non atteint.** La branche `p9-renvoi-offres` et les douze derniers commits ont été examinés. Aucun changement métier en attente au début de la reprise ; les modifications préexistantes de `.opencode/agents/*` et `opencode.json` sont étrangères et préservées. `sw.js` a été restauré depuis `origin/main` comme demandé.
+  - **Fichiers modifiés dans cette reprise :** `mgmt-screens.js` déclare le symbole global du bilan de poste déjà enregistré comme écran, corrigeant une erreur ESLint introduite par l'ajout antérieur ; version cache montée dans `index.html`. Cette correction ne réalise pas de fonction supplémentaire du choc.
+  - **Vérifications :** les 9 tests actuels de `tests/mgmtLot58T1.test.js` passent ; ESLint complet passe après la correction. `node tools/verif-versions.js origin/main` signale toujours l'écart préexistant `ui-cadre.css` contre `origin/main`. `tests/mgmtReleveReduit.test.js` a dépassé le délai de 300 s de l'outil, sans résultat exploitable.
+  - **Reste impératif :** le combat champion contre champion n'est pas injecté dans la carte et le chemin réel, le bonus de billetterie et la progression de classement ne sont pas branchés ; l'écran `UniChoc` fidèle et préfixé `ch3-` n'existe pas ; le fil de presse est absent. Le test ne figure pas littéralement dans les scripts agrégés `test` et `test:watch`, et le test E2E actuel ne constitue pas une partie générative où le joueur refuse des offres effectivement reçues. La sauvegarde ancienne complète n'est pas vérifiée. Cases 3, 4, 6 et 7 restent incomplètes.
+  - **Décisions/écarts :** aucun combat parallèle inventé. L'étude T5 préexistante est conservée ; aucun code de changement d'organisation n'a été ajouté. Aucune différence maquette supplémentaire revendiquée : l'écran `UniChoc` n'a pas été réalisé.
+  - **Questions pour Anthony :** aucune ; les précisions du superviseur suffisent.
+
   - **Reprise 26 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Les modifications de `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et préservées.
   - **Fichiers modifiés :** `mgmt-poste.js` ajoute le chemin de proposition sortante déterministe et les décisions de rang; `mgmt-ecran-poste.js` expose l'offre entrante ainsi que la proposition de choc; `mgmt-save.js` valide et répare la clé facultative `m.choc`; `index.html` met à jour les versions cache des trois scripts.
   - **Vérifications :** `node --test tests/mgmtLot58T1.test.js` passe (9/9); ESLint ciblé passe. `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `ui-cadre.css`.

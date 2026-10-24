@@ -1,4 +1,5 @@
 "use strict";
+/* global scr_mgmt_poste_bilan */
 /* CAGE LEGACY — mgmt-screens.js (contrôleur et clavier communs)
    ============================================================================
    LOT 1 MODE MANAGEMENT — composants partagés et actions du joueur. Rendu HTML
