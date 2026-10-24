@@ -8,6 +8,13 @@
 - Modifications applicatives/tests/cache/migration : aucune dans cette reprise. Cette fiche seule est mise à jour pour consigner les mesures et l’état réel. Reste à corriger les défauts visuels, établir une scène de cérémonie avec prix, inspecter les six comparatifs et satisfaire la cible `grosBlocs ≤ 20 %` sans chevauchements, texte trop petit ni débordement. Aucun `TOUT_EST_FINI` revendiqué.
 - Questions pour Anthony : aucune question de spécification ; ce sont des travaux de correction et validation encore à exécuter.
 
+## Compte rendu — reprise 26 (24/10/2026)
+
+- Branche `fid-organisation` confirmée ; arbre propre à l'ouverture et historique des douze commits consulté. Le protocole de capture externe et l'ouverture des comparatifs ne sont pas disponibles dans cet environnement : aucune nouvelle capture ni inspection visuelle n'est revendiquée.
+- Retouche ciblée du Carnet : isolation de chaque paragraphe en bloc de mise en page afin d'empêcher les lignes de texte des cartes de se chevaucher. `ui-cadre.css` versionné dans `index.html` par `_bump.js`.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` passe (49/49). Aucun changement de sauvegarde.
+- Fichiers modifiés : `ui-cadre.css` (lignes des cartes Carnet), `index.html` (version cache), cette fiche. Le défaut automatique Carnet et les autres constats visuels de la reprise précédente ne sont pas certifiés résolus ; la scène cérémonie avec tous les prix et l'inspection du comparatif restent à établir. Aucun `TOUT_EST_FINI` revendiqué.
+
 ## Compte rendu — reprise 25 (24/10/2026)
 
 - Branche `fid-organisation` confirmée ; HEAD consulté (`7694789e`), arbre propre au départ. Pas de code applicatif non commité à reprendre.
