@@ -211,3 +211,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 12/12 réussis.
 - Cette reprise ne porte pas les blocs complets aux maquettes et ne prétend pas achever les critères absents, notamment la cible de cumul réelle 900–1200 s, les fenêtres réellement temporisées/fondues, les empreintes historiques, les classes exhaustives et l'intégration directe dans les listes principales `test`/`test:watch`. Aucun changement applicatif, de sauvegarde, du moteur de combat ou du CSS n'est apporté.
 - Écart/documentation : le choix préexistant d'accélérer les portions hors moments conserve l'arène existante; la frise représente l'avancement, mais la fenêtre temporisée et son fondu n'ont pas été livrés. La durée mesurée précédemment sous la cible n'est pas artificiellement modifiée.
+
+### Reprise 29 — vérification du rendu réel
+
+- Branche vérifiée : `p7-ecran-soiree`, HEAD de départ `fb02d7c`; aucun fichier de tranche n'était non commité. Les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et laissées intactes.
+- Ajout du test « Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf combats et ses repères de navigation » ; il vérifie la carte créée par le parcours réel et son rendu initial. Vérification : `node --test tests/mgmtLot53T1.test.js` — 13/13 réussis.
+- État fonctionnel honnête : les choix de vue, l'estimation, la carte résultat passable, les primes partielles et la frise existent dans les commits antérieurs. Les trois maquettes ne sont toujours pas intégralement portées; le lecteur n'a pas de fenêtre par moment avec fondu; aucun cumul 900–1200 s n'est prouvé; le test d'empreintes anciennes, les styles exhaustifs et l'intégration du test dans `test`/`test:watch` manquent. La fin ne garantit pas les trois primes attendues exactement.
+- Vérifications précédentes de cette reprise : `node tools/verif-versions.js origin/main` et ESLint complet réussis avant le test ajouté. Aucun changement applicatif/cache ni de sauvegarde dans cette reprise. Écart : le test ajouté confirme le rendu ancien réellement utilisé, il ne revendique pas le portage `UniSoiree`.
+- Cette reprise n'achève pas les cases fonctionnelles manquantes et ne satisfait donc pas le critère final; aucun `TOUT_EST_FINI` ne peut être annoncé.

@@ -144,3 +144,15 @@ test('Monde lot 53 T1 — les repères de temps forts conservent l’ordre et l�
     assert.doesNotMatch(html,/<test>/);
   }finally{w.close();}
 });
+
+test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf combats et ses repères de navigation',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5310);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const result=w.eval(`(()=>{G.screen='mgmt_soiree';render();return document.getElementById('app').innerHTML;})()`);
+    assert.equal((result.match(/class="mf-so-lg/g)||[]).length,9);
+    assert.match(result,/SOIRÉE/);
+    assert.match(result,/Commencer la soirée/);
+  }finally{w.close();}
+});
