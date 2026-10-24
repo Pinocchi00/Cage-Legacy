@@ -476,3 +476,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Après la soirée et le lendemain, le test exige aussi `validateMgmt(m)`, `mgmtParseAndValidate(mgmtSerialiser(m))` et la conservation de l'organisation d'arrivée. `node --test tests/mgmtLot69T1.test.js` passe 4/4.
 - Fichiers modifiés : `tests/mgmtLot69T1.test.js` (bilan, offre conforme et reprise/rechargement avant et après soirée), cette fiche. Pas de migration ou de version cache.
 - Restent non atteints : capture/mesure d'arrivée et du bloc offres, le chevauchement identifié dans le bilan, et le seuil visuel du choc (`25.6%` contre ≤20%).
+
+### Reprise 72 — proposition réelle du choc
+- `tests/mgmtLot69T1.test.js` exerce maintenant `mgmtChocProposer` avec l'organisation partenaire réelle du fixture, valide sa proposition et vérifie que le rendu `SCREENS.mgmt_choc()` fournit bien une page non vide. Cela couvre directement le chemin de proposition plutôt que de tester uniquement un objet forgé.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (19 fichiers) ; `node_modules/.bin/eslint .` passe.
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (régression du rendu d'une proposition réelle), cette fiche. Pas de changement JS/CSS, migration ou version de cache.
+- Limite : aucun nouveau cmp visuel n'a été généré dans cette reprise. La cible ≤20 % pour le choc et les autres écarts de capture mentionnés à la reprise 71 restent non validés ici.
