@@ -489,3 +489,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot53T1.test.js` — 21/21; `node tools/verif-versions.js origin/main` — aucun écart; `node_modules/.bin/eslint .` — réussi.
 - État restant : cette amélioration ciblée ne comble pas les écarts substantiels consignés aux reprises 63–66 : maquettes pas intégralement portées, lecture des fenêtres pas chronométrée/fondue sur l'image et cumul mesuré antérieurement de 868,383 s (sous la cible demandée). Je ne revendique pas la fin de tranche.
 - Pas de changement de moteur, sauvegarde ou texte joueur.
+
+### Reprise 68 — assertion de vitesse de lecture
+
+- Ajout du test « Monde lot 53 T1 — la lecture accélère hors des fenêtres et garde la vitesse normale dedans », qui vérifie l'état vitesse normale dans la fenêtre active et la position/vitesse de lecture autour de la transition, via `mgmtCombatAvancer` et l'arène existante. Aucun nouveau moteur ni changement applicatif.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 22/22 réussis.
+- Les écarts de fond restent ceux consignés à la reprise 67 : durée de référence à 868,383 s plutôt que 900–1200, portage visuel des maquettes incomplet, et accélération entre fenêtres non équivalente à une preuve chronométrée de 30–60 s avec fondu de l'image. Le nouveau test n'est pas présenté comme preuve de ces critères non atteints.
+- Fichiers : `tests/mgmtLot53T1.test.js` (assertion de lecture) et cette fiche. Aucune migration ni modification moteur.

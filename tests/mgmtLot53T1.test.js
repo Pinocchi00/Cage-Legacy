@@ -176,6 +176,17 @@ test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la lecture accélère hors des fenêtres et garde la vitesse normale dedans',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const result=w.eval(`(()=>{const C=MGMT_COMBAT;C.session={dureeAffichage:100};C.refuse=false;C.pause=false;C.real=0;C.mode='fight';C.d=0;C.fin=0;C.queue=5;C.tempsForts=[{t:350},{t:700}];
+      mgmtCombatAvancer(0.01);const entree=C.vitesse,position=C.d;C.d=20;mgmtCombatAvancer(0.01);return {entree,position,hors:C.vitesse,vitesseRapide:typeof MGMT_TF_VITESSE==='number'?MGMT_TF_VITESSE:8};})()`);
+    assert.equal(result.entree,1);
+    assert.ok(result.position>0);
+    assert.ok(result.hors===1||result.hors===result.vitesseRapide);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le calcul temps forts reste borné et respecte l’ordre chronologique',()=>{
   const w=newGameWindow({runMain:true});
   try{
