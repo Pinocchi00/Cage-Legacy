@@ -17,7 +17,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
-- `mgmt-ecran-poste.js` : début d'alignement de l'écran choc (libellés de la confrontation, citation, partage de recette, condition et actions/indications clavier). La contre-proposition affichée n'est pas reliée : aucune fonction métier existante n'a été trouvée pour la traiter.
-- Aucun test neuf ni capture de comparaison livrés. `node --test tests/mgmtLot58T1.test.js` passe (19 tests) ; son premier lancement a dépassé le délai de 120 s, le second a terminé après 172 s.
-- Arrêt incomplet : les écrans arrivée/discours/bilan, le parcours bout en bout, la fidélité complète aux planches, les captures, l'audit versions/lint et le commit restent à faire. Les styles du choc n'ont pas encore été ajustés aux blocs supplémentaires.
-- Questions pour Anthony : aucune ; l'absence de logique de contre-proposition empêche de rendre le bouton fonctionnel sans inventer une règle métier.
+- `mgmt-ecran-poste.js` : la hiérarchie du bandeau choc et la date ont été rapprochées de la maquette ; champs organisation échappés.
+- Vérification ciblée : `node --test tests/mgmtLot58T1.test.js` passe (19 tests, ~170 s). `node tools/_bump.js mgmt-ecran-poste.js` a mis à jour la version dans `index.html`.
+- Reste non fait : alignement des styles/structure complète (dont les trois affrontements), écran discours, arrivée, bloc offres du bilan, test parcours de bout en bout, captures `shoot`/`cmp`, audit complet versions/lint. Aucun test neuf n'a été créé. Le changement de markup n'a pas de styles dédiés, donc la fidélité visuelle n'est pas démontrée.
+- Écart/décision : les fonctions existantes de contre-proposition et de programmation ne représentent qu'un seul combat (`mgmtChocRepondre`/`mgmtChocValide` dans `mgmt-poste.js`). Ne pas feindre trois affiches en dupliquant les données ; la validation de l'épreuve en trois combats exige une extension métier hors du rendu de cette tranche. Aucune règle nouvelle n'a été inventée.
+- Questions pour Anthony : aucune. Captures non réalisées : lecture du fichier d'instructions externe refusée par les permissions de l'environnement.
