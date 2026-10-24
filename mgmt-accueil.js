@@ -131,6 +131,11 @@ function mgmtAccueilContenu(m){
       ailleurs.push({parts:[mgmtAccueilT(p.nom+' : '+p.texte)],detail:''});
     }
   }
+  /* ==== [ANCRE: MONDE54_T1_APRES_ACCUEIL] — Monde lot 54 T1 ==== */
+  if(typeof mgmtLendemainApres==='function'&&Number.isSafeInteger(m.eventsPlayed)&&m.eventsPlayed>0){
+    const suite=mgmtLendemainApres(m,m.cycle);
+    for(const ligne of suite) passe.push({parts:[mgmtAccueilT(ligne.texte)],detail:ligne.famille.toUpperCase(),menu:'APRÈS'});
+  }
   /* La première fois : l'héritage de l'organisation. */
   let heritage=null;
   if(premiere){
