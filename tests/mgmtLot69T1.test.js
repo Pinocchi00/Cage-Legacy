@@ -91,10 +91,14 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         assert.equal(w.eval(`G.screen`),'mgmt_accueil','une paire qui associe des combattants de divisions différentes revient à l’accueil');
        w.eval(`delete G.mgmt.choc.paires`);
       assert.equal(w.eval(`mgmtChocValide({orgId:'unknown',div:'PAILLE F',jour:0,annee:1,etat:'recu'})`),false);
-       const retourAccueil=w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
-       assert.equal(w.eval(`G.screen`),'mgmt_accueil','un choc invalide renvoie vers l’accueil au lieu de rendre une page vide');
-       assert.ok(retourAccueil.length>0,'le rendu de secours ne retourne pas une page vide pendant la redirection vers l’accueil');
-       w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.screen='mgmt_choc'`);
+        const retourAccueil=w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','un choc invalide renvoie vers l’accueil au lieu de rendre une page vide');
+        assert.ok(retourAccueil.length>0,'le rendu de secours ne retourne pas une page vide pendant la redirection vers l’accueil');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',a:'combattant-absent',b:${JSON.stringify(paires[0].b)}};G.screen='mgmt_choc';`);
+        const referenceAbsente=w.eval(`scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition reçue dont le champion principal manque ne laisse pas l’écran choc blanc');
+        assert.ok(referenceAbsente.length>0,'un choc reçu mal formé retourne le rendu de secours de l’accueil');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.screen='mgmt_choc'`);
      assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');
      const programmation=w.eval(`(()=>{const m=G.mgmt,ok=mgmtChocRepondre(m,true);return {ok,etat:m.choc.etat,jour:m.choc.jour,agenda:m.cal.prochaines.some(s=>s.jour===m.choc.jour)}})()`);
       assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');

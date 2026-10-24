@@ -17,6 +17,15 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 55
+- État de départ : branche `fid-choc`, HEAD `f5d1b875`. `mgmt-ecran-poste.js` apparaissait modifié, mais `git diff --ignore-all-space` est vide (fins de ligne seulement) ; je ne l'ajoute pas. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+- Reproduction demandée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : la page choc est affichée, pas blanche ; contrôle `chevauchements=0`, `textesSous22px=0`, aucun débordement, `grosBlocs=25.2%` (objectif ≤20% non atteint). Le modèle contient déjà `paires`, l'acceptation réserve l'agenda, et `mgmtRunEvent` joue les affiches possibles ; le test couvre trois paires jusqu'à leur résultat et à la majorité.
+- Le test `tests/mgmtLot69T1.test.js` a une assertion supplémentaire de repli vers l'accueil quand une proposition reçue référence un champion principal absent ; ceci protège la scène de capture contre un rendu vide malgré une proposition malformée.
+- Captures également exécutées : `discours` — 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=18.1%` ; `bilan` — un chevauchement entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22), aucun texte trop petit/débordement, `grosBlocs=12.9%`. Le bilan nécessite encore une correction. Aucune scène d'arrivée n'a été produite. Les contrôles ont été lus, les images n'ont pas été ouvertes visuellement.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` et `git diff --check` passent. Pas de migration ni de fichier JS/CSS/cache modifié.
+- Écarts encore à traiter : seuil de gros blocs du choc, chevauchement mesuré du bilan, capture dédiée de l'arrivée, comparaison visuelle image et parcours complet depuis une vraie fin de contrat générée. Ces critères ne sont pas présentés comme achevés.
+- Questions pour Anthony : aucune.
+
 - `mgmt-ecran-poste.js` : la hiérarchie du bandeau choc et la date ont été rapprochées de la maquette ; champs organisation échappés.
 - Vérification ciblée : `node --test tests/mgmtLot58T1.test.js` passe (19 tests, ~170 s). `node tools/_bump.js mgmt-ecran-poste.js` a mis à jour la version dans `index.html`.
 - Avancée de reprise : l'écran discours sépare maintenant prénoms et nom, affiche le nom en très grand et présente les lignes comme une citation ; styles de cartouche, contexte et bouton conservés/précisés. `?v=` incrémentés.
