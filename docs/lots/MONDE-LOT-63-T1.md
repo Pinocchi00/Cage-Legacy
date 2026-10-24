@@ -197,6 +197,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun code fonctionnel ni format de sauvegarde modifié à cette reprise ; aucune migration. Catalogue, calcul, affichages Accueil/presse, mouvements des autres organisations et intitulés des tests sont déjà livrés et commités.
 - Limite de couverture conservée : les familles sont testées par préparation individuelle de leurs faits sur une partie créée par le parcours réel ; cela ne démontre pas que les systèmes opérationnels produisent naturellement tous ces faits. Aucune question nouvelle pour Anthony.
 
+### Reprise 9 — livraison finale (24/10/2026)
+
+- Branche `p8-apres`, historique et statut vérifiés. Les changements fonctionnels de la tranche sont déjà commités ; aucune modification fonctionnelle non committée à reprendre. La seule modification de tranche réalisée ici est cette entrée de compte rendu.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` incluent bien `mgmtLot63T1` (`true,true`).
+- Aucun format de sauvegarde modifié ni migration. Les fichiers de production, catalogue, affichage Accueil/presse, mouvements d'organisation et test de tranche restent ceux des commits antérieurs. Écart de couverture connu : les tests déclenchent isolément les faits des familles sur le parcours réel, sans démontrer que chaque système opérationnel les génère naturellement. Aucun nouveau point à signaler à Anthony.
+- Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation de cache de `index.html` sont étrangères à la tranche et exclues ; aucun autre fichier n'est staged.
+
 ### Reprise finale — validation (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les commits des changements de code sont déjà dans l'historique (HEAD `c12d8a8`). Aucun fichier fonctionnel de la tranche n'était non commité.
