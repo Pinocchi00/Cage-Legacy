@@ -342,3 +342,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : test ciblé 9/9 ; `tests/mgmtReleveReduit.test.js` 6/6, 1 908 745 octets ; `node tools/verif-versions.js origin/main` sans écart ; ESLint global passe ; `test` et `test:watch` contiennent le test (`true,true`).
 - Aucune modification de sauvegarde ni migration. Limite de couverture : les tests préparent chaque fait sur une partie créée via le parcours réel, sans démontrer que chaque système opérationnel les produit naturellement. Aucun écart nouveau ni question pour Anthony.
 - Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et variation de cache `index.html` exclues comme étrangères à la tranche.
+
+### Reprise 5 — validation finale (24/10/2026)
+
+- Branche `p8-apres`, historique récent et statut vérifiés. Les fichiers fonctionnels de la tranche sont déjà commités ; aucun changement de production/test n'est à reprendre.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; présence dans `test` et `test:watch` confirmée (`true,true`).
+- Aucun changement de format de sauvegarde ni migration. Catalogue, calcul, accueil/presse, mouvements rivaux et tests de tranche sont déjà livrés. Limite de couverture : les faits familiaux sont scénarisés individuellement sur le parcours réel, sans démontrer que chaque système opérationnel génère naturellement chacun d'eux.
+- Cette fiche seule sera commitée. Modifications `.opencode/agents/*`, `opencode.json`, `sw.js` et variation de cache de `index.html` restent étrangères et exclues ; aucun nouveau point pour Anthony.
