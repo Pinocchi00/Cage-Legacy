@@ -676,3 +676,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Commande de capture demandée exécutée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Le contrôle confirme que l'écran est rendu avec une proposition reçue : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.1%`. L'écran n'est donc pas blanc dans cette reproduction ; le seuil de gros blocs ≤20 % reste non atteint.
 - Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4, dont proposition réelle + `CL.go`, trois paires et résolution par le chemin normal, ainsi que le parcours offre/changement/rechargement/arrivée/soirée/lendemain.
 - Pas de changement fonctionnel durable, de test ajouté, de migration ni de version cache requise. Écart : la cible de gros blocs reste dépassée ; cette reprise ne produit pas de preuve visuelle ouverte ni de nouvelle scène dédiée arrivée/bilan. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 86 — mesures répétées
+- Guide de capture lu et scènes choc, discours et bilan lancées séparément. Mesures inchangées : choc `grosBlocs=25.1%`, discours `18.1%`, bilan `12.9%`; le bilan conserve le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). Les images cmp n'ont pas été ouvertes, et aucune scène arrivée n'a été bâtie.
+- J'ai testé une correction CSS d'espacement du titre bilan ; le contrôle automatique n'a pas bougé. La tentative et son `?v=` ont été annulés. Aucune retouche fonctionnelle durable.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. `node tools/verif-versions.js origin/main` passe (20 fichiers) et `node_modules/.bin/eslint .` passe.
+- Fichiers modifiés : cette fiche uniquement. Aucun test ajouté, aucune migration. Les changements utilisateur `.opencode/agents/*`, `opencode.json` et `sw.js` demeurent exclus.
+- Écarts persistants : cible de gros blocs du choc manquée, chevauchement bilan non corrigé, arrivée sans capture dédiée ni comparaison visuelle ouverte. Les résultats de tests attestent les fonctionnalités existantes, pas la conformité complète des planches. Aucun `TOUT_EST_FINI` revendiqué.
