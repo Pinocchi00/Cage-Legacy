@@ -24,6 +24,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise — résolution de l’adversaire invité (incomplète)
+- Modifiés : `mgmt-bureau.js` et `index.html`. Le résolveur `mgmtFighterById` sait maintenant retrouver le champion adverse au sein de `m.orgs[choc.orgId].roster`, uniquement pendant un choc programmé, sans copier ce combattant dans le roster Split. La version cache du JS a été montée.
+- Test ajouté : « Monde lot 58 T1 — le résolveur retrouve le champion invité sans l’ajouter au roster de Split ».
+- Vérification : `node --test tests/mgmtLot58T1.test.js` passe (15/15). `node tools/verif-versions.js origin/main` ne signale que l’écart préexistant `ui-cadre.css`.
+- État restant : cette porte de résolution seule ne raccorde pas le combat invité à `mgmtRunEvent`, ne donne pas le bonus +25 % ni la progression de classement, et ne réalise ni le fil de presse ni l’écran `UniChoc` conforme. Les preuves de sauvegarde ancienne/plafond restent à compléter. Tranche non terminée, aucun effet de combat ou d’écran complet revendiqué.
+- Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et exclus du commit.
+
 ### Reprise — renouvellement annuel des propositions entrantes
 - Modifié : `mgmt-ecran-poste.js` ne bloque plus une proposition entrante pour toujours après une réponse (reçue, refusée ou terminée) ; la fonction annuelle existante peut à nouveau examiner l'année suivante. Cache monté avec `node tools/_bump.js`.
 - Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (14/14). ESLint ciblé passe.

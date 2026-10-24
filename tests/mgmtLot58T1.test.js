@@ -78,6 +78,13 @@ test('Monde lot 58 T1 — le choc refuse un partenaire sans champion de la caté
   if(r.hasOther){assert.equal(r.proposed,false);assert.equal(r.received,false);}
 });
 
+test('Monde lot 58 T1 — le résolveur retrouve le champion invité sans l’ajouter au roster de Split',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const local=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!local)return {champion:false};const partenaire=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===local.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!partenaire)return {champion:true,partenaire:false};const adverse=m.orgs[partenaire.id].roster.find(f=>f.div===local.div&&mgmtChampionIds({roster:m.orgs[partenaire.id].roster}).has(f.id));m.choc={orgId:partenaire.id,div:local.div,jour:42,annee:mgmtChocAnnee(m),etat:'programme',a:local.id,b:adverse.id};return {champion:true,partenaire:true,resolu:mgmtFighterById(m,adverse.id)===adverse,split:m.roster.some(f=>f.id===adverse.id)}})())`));
+  assert.equal(r.champion,true);
+  if(r.partenaire){assert.equal(r.resolu,true);assert.equal(r.split,false);}
+});
+
 test('Monde lot 58 T1 — accepter un choc le pose dans l’agenda entre six et dix semaines',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const own=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!own)return {champion:false};const partenaire=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===own.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!partenaire)return {champion:true,partenaire:false};m.choc={orgId:partenaire.id,div:own.div,jour:m.cal.jour,annee:mgmtChocAnnee(m),etat:'recu'};const ok=mgmtChocRepondre(m,true);return {champion:true,partenaire:true,ok,etat:m.choc.etat,delta:m.choc.jour-m.cal.jour,agenda:m.cal.prochaines.some(p=>p.jour===m.choc.jour),valide:validateMgmt(m)}})())`));
