@@ -707,3 +707,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Branche `p8-apres` confirmée ; historique consulté et les fichiers de tranche sont déjà commités. Le contrôle combiné demandé passe 130/130, incluant les régressions du lot 54 sur les rivalités et la non-répétition.
 - Le code et les tests ciblés inter-lots n'ont nécessité aucune modification. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` contiennent bien `mgmtLot63T1` (`true,true`). La fusion `origin/main` reste à réaliser par le superviseur, l'environnement ayant précédemment refusé `git merge`.
 - Aucun changement de sauvegarde ni migration. Les modifications locales des agents, `opencode.json`, `sw.js` et `index.html` restent hors tranche ; limite de couverture précédemment documentée inchangée.
+
+### Reprise finale — revalidation inter-lots (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les fichiers fonctionnels et tests de cette tranche sont déjà commités. Le contrôle demandé `node --test tests/mgmtLot54T1.test.js tests/mgmtLot63T1.test.js tests/mgmtActualitesEcran.test.js tests/mgmtLot55T1.test.js tests/mgmtLot57T1.test.js tests/mgmtLot48T1.test.js tests/mgmtLot56T1.test.js` passe 130/130, dont les deux régressions lot 54.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde ni migration ; le test lent `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
+- `git merge origin/main` a été tenté, mais explicitement refusé par la politique de l'environnement. Aucune fusion n'a donc été effectuée ; le superviseur devra l'intégrer puis relancer les tests. La couverture des faits naturels reste la limite déjà déclarée.
+- Seule cette fiche est modifiée pour consigner le contrôle. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues ; aucun écart nouveau ni question pour Anthony.
