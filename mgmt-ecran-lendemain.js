@@ -188,7 +188,7 @@ function mgmtLendemainMomentsHtml(m){
   add('LA GUERRE',(_s,t)=>t&&Number(t.rounds)>=5&&Number.isFinite(Number(t.rounds)));
   return picks.map(({label,s})=>{const t=hist[s.c];if(!t)return '';const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
     const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
-     return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-meta">${esc(t.slot==='main'?'Combat principal':'Préliminaire')} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+      return `<article class="ld3-moment"><div class="ld66-moment-head"><div class="ld3-label">${esc(label)}</div><button class="ld66-rewatch" aria-label="Revoir ${esc(title)}" onclick="CL.mgmtLendemainRevoir(${s.c})">R</button></div><div class="ld3-meta">${esc(t.slot==='main'?'Combat principal':'Préliminaire')} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div></article>`;
   }).join('');
 }
 /* ==== [FIN ANCRE] ==== */

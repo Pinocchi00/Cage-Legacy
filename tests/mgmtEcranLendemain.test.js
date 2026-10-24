@@ -64,7 +64,7 @@ test('MGMT T4 — planches Uni* validées par Anthony ; l’écran rend les mome
     'aucun jour de la semaine en en-tête');
   /* La planche UniLendemain validée par Anthony est désormais la référence. */
   for(const bloc of ['LA SURPRISE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES']) assert.ok(html.includes(bloc),'bloc de la planche présent : '+bloc);
-  const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(name=>/^ld66-|^ld3-moment$|^ld3-label$|^ld3-meta$|^ld3-names$|^ld3-detail$|^mgmt-ld-link$/.test(name)))];
+   const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(name=>/^ld66-|^ld3-moment$|^ld3-label$|^ld3-meta$|^ld3-names$|^ld3-detail$|^mgmt-ld-link$/.test(name)))];
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.ok(classes.length>0,'les blocs de la planche portent leurs classes de composant');
   assert.deepEqual(classes.filter(name=>!new RegExp('\\.'+name+'(?:\\W|$)').test(css)),[],'chaque classe de l’écran a une règle CSS');
