@@ -17,6 +17,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 24/10 — fidélité des trois affiches choc
+- État initial : branche `fid-choc`, HEAD `be2ec36c`. Aucun fichier de tranche modifié ; les changements utilisateurs sous `.opencode/agents/` et `opencode.json` sont restés hors périmètre.
+- La capture externe demandée pour `choc` a été reproduite avec une proposition valide : l'écran n'est pas blanc. Contrôle : 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, au-dessus de la cible ≤20%.
+- `mgmt-ecran-poste.js` affiche maintenant le bilan V-D-N des deux championnes pour chaque paire, comme le montre le markup UniChoc (`Split · 9-1`, organisation adverse · bilan). `ui-cadre.css` rétablit pour les noms d'affiche la taille exacte de 46 px de la planche ; le test existant est aligné et cite la décision du 24/10 sur la primauté des maquettes validées.
+- Tests : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Les scènes de capture précédentes / le test vérifient les trois affiches, le booking et les résultats de la soirée normale ainsi que discours, arrivée, bilan et parcours d'offre.
+- Fichiers modifiés : `mgmt-ecran-poste.js` (palmarès des combattantes sur les affiches), `ui-cadre.css` (noms à 46 px conformément à UniChoc), `index.html` (`?v=`), `tests/mgmtLot69T1.test.js` (assertion de style alignée avec la décision), cette fiche.
+- Pas de migration de sauvegarde. Écart restant : la capture choc dépasse l'objectif de densité des gros blocs (26.2%); je ne revendique pas le seuil ni une inspection visuelle de l'image comparative. Aucune scène d'arrivée dédiée n'a été construite dans cette reprise.
+
 ### Reprise 55
 - État de départ : branche `fid-choc`, HEAD `f5d1b875`. `mgmt-ecran-poste.js` apparaissait modifié, mais `git diff --ignore-all-space` est vide (fins de ligne seulement) ; je ne l'ajoute pas. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` restent hors périmètre.
 - Reproduction demandée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : la page choc est affichée, pas blanche ; contrôle `chevauchements=0`, `textesSous22px=0`, aucun débordement, `grosBlocs=25.2%` (objectif ≤20% non atteint). Le modèle contient déjà `paires`, l'acceptation réserve l'agenda, et `mgmtRunEvent` joue les affiches possibles ; le test couvre trois paires jusqu'à leur résultat et à la majorité.
