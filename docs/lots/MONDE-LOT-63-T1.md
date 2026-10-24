@@ -65,6 +65,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 **[x] 5. Tests** (`tests/mgmtLot63T1.test.js`, dans `test` ET `test:watch`) : par le chemin réel (`mgmtPasseGenerer('split',{soirees:3})` puis des soirées jouées) ; chaque famille se déclenche sur son fait ; au plus 3 lignes par semaine ; non-répétition sur 50 soirées ; déterminisme ; échappement ; sauvegarde (clés facultatives, validées, réparées ; partie neuve ≤ plafond : `tests/mgmtReleveReduit.test.js` en arrière-plan ; partie ancienne intacte).
 **[x] 6. Fin.** `?v=`, versions, lint, commit final `Monde lot 63 T1 : l'après de la soirée`, compte rendu honnête, `TOUT_EST_FINI`.
 
+### Reprise finale — suite inter-lots (24/10/2026)
+
+- `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Les changements non commités concernent uniquement `.opencode/agents/*`, `opencode.json` et `sw.js` et ne font pas partie de la tranche. Aucun fichier fonctionnel/test de tranche n'est en attente.
+- La suite prescrite passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56. Les régressions de rivalité enregistrée et de non-répétition sur cinquante semaines du lot 54 passent également.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'inclusion du test dans `test` et `test:watch` est confirmée (`true,true`).
+- La fusion `git merge origin/main` a été tentée, mais refusée par la politique d'exécution de l'environnement. Aucun test existant n'a été modifié ; la fusion reste à effectuer par le superviseur. Cette reprise ne change que ce compte rendu ; aucun nouvel état de sauvegarde ni migration.
+
 ## Compte rendu
 
 ### Reprise 10 — contrôle inter-lots demandé (24/10/2026)
