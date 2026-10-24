@@ -1,5 +1,14 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 10
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. Les précédents travaux étaient déjà commités. Lecture du protocole `shoot/LISEZMOI.txt` et captures individuelles exécutées pour les six écrans.
+- Retouche cette reprise : suppression du bouton rouge RETOUR dans l’écran de cérémonie ; le bilan du patron s’ouvre via Entrée selon la barre de touches. Le test de cérémonie avec lauréats a été mis à jour avec la décision « planches Uni* validées par Anthony ; l’écran suit la planche ». La version de `mgmt-ceremonie.js` est bumpée.
+- Résultats des captures : cérémonie 19,7 % de gros blocs avant la correction (0 chevauchement, 0 texte sous 22 px, 0 débordement), puis après correction 19,9 % avec les trois contrôles toujours à zéro ; Croissance 17,2 % mais 3 textes sous 22 px et débordements de libellés/populations ; Ton poste 19,8 %, aucun défaut automatique ; Carnet 15,7 % mais 86 collisions et plusieurs noms tronqués ; Bilan 12,9 % mais 1 collision REMERCIÉ/aide ; Guerre 22,9 %. Les comparatifs sont générés sous `%TEMP%/shots/`, mais n’ont pas pu être ouverts visuellement par l’outil disponible. La scène de capture ne prouve pas les six prix remplis ni la rivale MMA KORNER forcée.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` passe (46/46), `node tools/verif-versions.js origin/main` passe et `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde. `sw.js` généré par le bump a été restauré et est exclu.
+- Fichiers modifiés : `mgmt-ceremonie.js` (suppression du bouton retour superposé), `tests/mgmtLot55T1.test.js` (attente adaptée), `index.html` (cache JS), cette fiche (compte rendu). Tests ajoutés : aucun ; test modifié : « Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles sans bouton retour ».
+- Écart restant majeur : les défauts automatiques relevés sur Croissance, Carnet, Bilan et le seuil Guerre ne sont pas corrigés ; les prix réellement remplis, le forçage déterministe de la rivale en scène et l’ouverture effective des cmp ne sont pas démontrés. La tranche demeure incomplète ; pas de `TOUT_EST_FIN` revendiqué.
+
 ## Compte rendu — reprise 60
 
 - Branche `fid-organisation` confirmée ; historique consulté, aucun fichier applicatif non commité au début de la reprise.

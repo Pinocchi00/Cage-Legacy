@@ -91,7 +91,7 @@ function scr_mgmt_ceremonie(){
          `Salles · −${niveau('salle')} % sur les frais de salle`
        ].map(x=>`<li>${mgmtCeremonieEchapper(x)}</li>`).join('');
         const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${rang===null?'—':mgmtCeremonieEchapper(String(rang))}<small>${rang===null?'':'e'}</small></strong><section><h2>SPLIT FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Cinquième au premier jour</p></section></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul>${listeEffets}</ul></article></section>`;
-      const body=`<main class="ce3-ecran"><header class="ce3-entete"><div class="ce3-entete-gauche"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p></div><strong><b>31 DÉCEMBRE</b><span>CAGE HEBDO</span></strong></header><section class="ce3-grille">${cards}</section><button type="button" class="ce3-retour" onclick="CL.go('mgmt_accueil')">RETOUR</button>${bilanHtml}</main>`;
+       const body=`<main class="ce3-ecran"><header class="ce3-entete"><div class="ce3-entete-gauche"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p></div><strong><b>31 DÉCEMBRE</b><span>CAGE HEBDO</span></strong></header><section class="ce3-grille">${cards}</section>${bilanHtml}</main>`;
    return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['R'],t:'Revoir le combat'},{ks:['F'],t:'Sa fiche'},{ks:['Entrée'],t:'Le bilan du patron'},{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;

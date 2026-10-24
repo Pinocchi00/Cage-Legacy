@@ -360,7 +360,7 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; les cinq c
   assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,5);
 });
-test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles',()=>{
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles sans bouton retour',()=>{
   const c=charger();
   const combat=(jour,id,nom,opposant,family)=>({c:jour,a:{id,name:nom,W:0,L:0,D:0},b:{id:`${id}-${jour}`,name:opposant},winner:'A',family,round:1,slot:'main'});
   const m={hist:[
@@ -380,8 +380,8 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une 
   const rendu=c.scr_mgmt_ceremonie();
   assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,5,'décision : planches Uni* validées par Anthony ; l’écran suit la planche avec cinq cartes de prix');
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
-  for(const texte of ['LES TROPHÉES 2027','CHOISIS PAR LA PRESSE','31 DÉCEMBRE','CAGE HEBDO','COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','COMBAT DE L’ANNÉE','SOUMISSION DE L’ANNÉE','RÉVÉLATION','RETOUR','TROISIÈME DES HUIT','CE QUE ÇA CHANGE EN 2028']) assert.ok(rendu.includes(texte),`bloc cérémonie manquant : ${texte}`);
-  assert.match(rendu,/<button[^>]*class="ce3-retour"[^>]*>RETOUR<\/button>/,'décision : planches Uni* validées par Anthony ; le retour reste dans le contenu, le bilan du patron s’ouvre par Entrée');
+  for(const texte of ['LES TROPHÉES 2027','CHOISIS PAR LA PRESSE','31 DÉCEMBRE','CAGE HEBDO','COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','COMBAT DE L’ANNÉE','SOUMISSION DE L’ANNÉE','RÉVÉLATION','TROISIÈME DES HUIT','CE QUE ÇA CHANGE EN 2028']) assert.ok(rendu.includes(texte),`bloc cérémonie manquant : ${texte}`);
+  assert.doesNotMatch(rendu,/class="ce3-retour"/,'décision : planches Uni* validées par Anthony ; le bilan du patron s’ouvre par Entrée, sans bouton d’en-tête');
   assert.doesNotMatch(rendu.match(/<header[^>]*>[\s\S]*?<\/header>/)?.[0]||'',/RETOUR/);
   for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
 });
