@@ -75,3 +75,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications de cette reprise : `node --test tests/mgmtLot56T1.test.js` (6/6), `node --test tests/mgmtPasse.test.js` (13/13, empreintes inchangées), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
 - Non terminé : cette reprise n'a pas codé le raccordement paliers-diffuseur/recruteur/agents, le franchissement généré par soirées ni l'intégration d'annonces à l'accueil, l'écran reste incomplet vis-à-vis des valeurs de la maquette, et les tests de sauvegarde facultative/réparation et de plafond lent restent à vérifier. Le test de croissance demeure enregistré dans `test` et `test:watch`; le plafond n'est pas revendiqué comme vérifié ici. Pas de migration.
 - Aucune question nouvelle ni `TOUT_EST_FINI` : les critères de fin de la tranche restent à faire.
+
+### Reprise 6 — parcours réel ciblé (24/10/2026)
+
+- Ajout du test « Croissance — une partie créée par le passé généré reste valide après des soirées » : création par `mgmtPasseGenerer('split',{soirees:3})`, une soirée jouée, puis validation et aller-retour de sauvegarde. Le contrôle confirme aussi qu'une partie issue de `mgmtDefault()` n'acquiert pas `croissanceActus` spontanément.
+- `node --test tests/mgmtLot56T1.test.js` passe (7/7).
+- Restent inachevés et non couverts : les effets réels du diffuseur, du budget recruteur et des agents libres ; annonce déclenchée dans le parcours Accueil après un vrai franchissement (la fonction d'annonce est testée isolément) ; détail exact de la maquette (barres/marches) ; test d'empreinte ancienne dédiée et sauvegarde facultative malformée/réparée ; plafond lent non relancé dans cette reprise. Le bonus de salle seul est branché. Aucun nouveau champ requis ni migration.
+- L'écran existant expose l'aperçu mais ne reproduit pas tous les éléments aux valeurs exactes du HTML de la maquette ; écart assumé et non résolu. La tranche n'est pas déclarée terminée.

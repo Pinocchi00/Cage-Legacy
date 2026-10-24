@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 
 test('Croissance — cinq paliers sont dérivés sans mutation et répondent à la popularité et au rang',()=>{
   const win=newGameWindow();
@@ -49,4 +50,14 @@ test('Croissance — aucun bonus de remplissage ne dépasse le plafond historiqu
   const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.pop=100;m.orgs={};const salle={capacite:9000};return JSON.stringify([0,0.5,1].map(q=>mgmtRemplissage(salle,100,'grosse',q,m)));})()`));
   assert.ok(r.every(x=>x.spectateurs<=Math.min(x.capacite,x.plafond)));
   assert.ok(r.every(x=>x.spectateurs>=0));
+});
+
+test('Croissance — une partie créée par le passé généré reste valide après des soirées',()=>{
+  const win=newGameWindow({runMain:true});
+  try{
+    win.eval("setSeed(20261024);G.mgmt=mgmtPasseGenerer('split',{soirees:3});");
+    jouerSoirees(win,1);
+    const r=win.eval(`(()=>{const m=G.mgmt;return {valide:validateMgmt(m),paliers:mgmtPaliersCalculer(m).paliers.map(p=>p.id),ancienneSansCle:!Object.hasOwn(mgmtDefault(),'croissanceActus'),sauvee:!!mgmtParseAndValidate(mgmtSerialiser(m))};})()`);
+    assert.equal(r.valide,true);assert.equal(r.ancienneSansCle,true);assert.equal(r.sauvee,true);assert.ok(Array.isArray(r.paliers));
+  }finally{win.close();}
 });
