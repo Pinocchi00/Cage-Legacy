@@ -1,10 +1,12 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
-### Reprise 13 — livraison vérifiée (24/10/2026)
+### Reprise 14 — livraison vérifiée (24/10/2026)
 
 - `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà dans l'historique (`44af575` en tête) ; aucun fichier de production ou test de la tranche n'est non commité. Les seules modifications locales hors tranche restent `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache dans `index.html` ; elles sont laissées intactes.
 - Validations relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; présence de `mgmtLot63T1.test.js` dans `test` et `test:watch` confirmée. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; ses précédents comptes rendus indiquent 1 908 745 octets et réussite.
 - Le seul fichier modifié par cette reprise est cette fiche. Aucun changement de sauvegarde ni migration. Limite de couverture maintenue honnêtement : les tests déclenchent les familles sur des faits préparés dans une partie réelle, sans démontrer que tous les systèmes opérationnels génèrent naturellement chaque fait. Pas de question nouvelle pour Anthony.
+- Fichiers de tranche produits et déjà commités dans l'historique : `mgmt-apres-data.js` (catalogue `relu:false`), `mgmt-ecran-lendemain.js` (calcul, accueil/presse et mouvements d'autres organisations), `tests/mgmtLot63T1.test.js` et `package.json` (tests intégrés à `test`/`test:watch`). Test ciblé fraîchement passé : 9/9. Aucun changement de sauvegarde ni migration.
+- La variation locale de `index.html` ne concerne que la longueur du paramètre `?v=` du script lendemain ; elle est étrangère à cette reprise et reste non commitée avec les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js`. Le test lent n'a pas été relancé ici ; plafond documenté par les reprises antérieures à 1 908 745 octets. Couverture limitée aux faits préparés sur le chemin réel, sans démonstration de leur production naturelle par chaque système.
 
 ### Reprise finale 12 — clôture vérifiée (24/10/2026)
 
