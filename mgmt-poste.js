@@ -204,6 +204,7 @@ function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isIn
 function mgmtOrgChanger(m,orgId,offre){
   const actif=m&&mgmtPredecesseurOrgId(m),sous=m&&m.orgs&&m.orgs[orgId];
   if(!m||m.mondeVivant!==true||!sous||orgId===actif||!mgmtOrgParId(orgId)||!validateMgmt(sous))return false;
+  const sauvegarde=JSON.stringify(m);
   const joueur=new Set(['poste','offres','memoire','carnet','prix','defis','suivis','espoirs','espoirsPropose','graine','seed','mondeVivant','orgs','guerre','choc','duo']);
   const ancien={};for(const k of Object.keys(m))if(!joueur.has(k))ancien[k]=m[k];
   const promu={};for(const k of Object.keys(sous))if(!joueur.has(k))promu[k]=sous[k];
@@ -219,7 +220,11 @@ function mgmtOrgChanger(m,orgId,offre){
   const ordre=mgmtMondeVivantIds(m), range={};
   ordre.forEach(id=>{if(orgs[id])range[id]=orgs[id];});
   m.orgs=range;
-  return mgmtMondeVivantValide(m);
+  if(mgmtMondeVivantValide(m))return true;
+  const original=JSON.parse(sauvegarde);
+  Object.keys(m).forEach(k=>delete m[k]);
+  Object.assign(m,original);
+  return false;
 }
 function mgmtOffreAccepter(m,index){
   const o=m&&Array.isArray(m.offres)&&m.offres[index], org=o&&mgmtOrgParId(o.orgId);

@@ -14,12 +14,15 @@ Branche : `p9-changer-org` (la branche courante de ce dossier ; commits ICI ; le
 
 ## Compte rendu
 
-- `mgmt-poste.js` : l'échange actif/stocké conserve l'ordre canonique des organisations. Constat : l'étude était exacte sur les sous-parties, mais l'ordre des clés est également une contrainte stricte de `mgmtMondeVivantValide`; sans remise en ordre, le premier échange rendait la sauvegarde invalide.
-- `tests/mgmtLot61T1.test.js` : test ciblé de l'échange depuis le chemin de génération du monde, conservation des identifiants de combattants et validation.
-- Le même fichier ajoute « Monde lot 61 T1 — Split puis retour restaure le roster et le monde valide » ; `package.json` expose le test via `test:lot61t1` et `test:watch:lot61t1`.
+- `mgmt-poste.js` : échange actif/stocké ordonné canoniquement et restauration de l'objet complet si la validation échoue après l'échange.
+- `index.html` : version de `mgmt-poste.js` incrémentée.
+- `tests/mgmtLot61T1.test.js` : conservation des identifiants des combattants, retour Split → organisation → Split, sérialisation/rechargement à l'identique et absence d'appel à `rnd()` dans le changement.
+- `package.json` : ajout du test à `pretest` et `pretest:watch`, et scripts dédiés `test:lot61t1` / `test:watch:lot61t1`.
 - Migration de sauvegarde : aucune ; `MGMT_SAVE_VERSION` inchangé.
-- Vérifications : `node --test tests/mgmtLot61T1.test.js` vert (2/2) ; `node tools/verif-versions.js origin/main` sans écart.
-- Écarts : l'intégration presse/rivalité, l'arrivée recalculée, la validation des suivis/espoirs, les autres tests bout en bout, le lint et le test lent de plafond ne sont pas réalisés. Les tests ciblés prennent environ 90 s et n'ont pas pu couvrir davantage dans ce tour. `test`/`test:watch` agrégés ne listent pas directement ce test ; scripts dédiés ajoutés.
+- Vérifications : `node --test tests/mgmtLot61T1.test.js` vert (3/3, environ 137 s) ; ESLint sur `mgmt-poste.js` sans erreur ; `node tools/verif-versions.js origin/main` sans écart.
+- Migration : aucune, version de sauvegarde inchangée.
+- Écarts non réalisés : les deux lignes de presse, la réaction/rivalité de l'ancienne organisation, l'arrivée recalculée et la confirmation de l'acceptation de l'offre ne sont pas livrées ; les cas soirée complète, clés orphelines exhaustives, ancienne sauvegarde, empreintes inchangées et test lent de plafond ne sont pas couverts. Le premier test ciblé a excédé le délai de 120 s ; relancé avec 300 s, les trois tests sont verts.
+- Décision d'implémentation : la transaction prend un instantané JSON pré-échange pour restaurer `m` si la validation post-échange échoue ; cela n'ajoute aucune clé sauvegardée.
 - Questions pour Anthony : aucune.
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
