@@ -613,3 +613,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (38/38 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert); présence confirmée dans `test` et `test:watch`.
 - Fichier modifié : `tests/mgmtLot55T1.test.js`. Aucun changement de production, de sauvegarde ou migration. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
 - Restent non certifiés, comme précédemment : fidélité intégrale de composition aux planches, cérémonie déclenchée à chaque anniversaire plutôt qu'au terme du contrat, trois saisons complètes jouées, fixture intégrale d'ancienne sauvegarde chargée, test lent `mgmtReleveReduit`. `check:rapide` n'est pas lancé conformément au contrôle superviseur. Ces limites empêchent d'affirmer `TOUT_EST_FINI`.
+
+### Reprise 79
+
+- Test ajouté : « Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix ». La fixture comprend des performances, finitions et combats nombreux mais aucun vainqueur; le calcul doit donc laisser les six prix vacants.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (39/39 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés).
+- Aucun changement de production, de sauvegarde ou de version de cache. Les limites encore documentées en reprise 78 demeurent; le test lent `mgmtReleveReduit` n'a pas été lancé.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (cas de non-attribution sans issue) et cette fiche. Les changements étrangers `.opencode/agents/*` et `opencode.json` restent exclus.

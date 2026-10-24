@@ -392,3 +392,13 @@ test('Lot 55 T1 — le carnet tolère les collections historiques facultatives a
   const carnet=c.mgmtCarnetLire({});
   assert.equal(JSON.stringify(carnet),JSON.stringify({champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]}));
 });
+
+test('Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix',()=>{
+  const c=charger();
+  const hist=[
+    {c:10,a:{id:'a',name:'A'},b:{id:'b',name:'B'},family:'ko',round:1,slot:'main',knockdownsA:4},
+    {c:20,a:{id:'a',name:'A'},b:{id:'c',name:'C'},family:'sub',round:1,slot:'main',knockdownsB:3},
+    {c:30,a:{id:'a',name:'A'},b:{id:'d',name:'D'},family:'decision',slot:'main'}
+  ];
+  assert.deepEqual(JSON.parse(JSON.stringify(c.mgmtCeremonieCalculer({hist}))),[]);
+});
