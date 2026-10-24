@@ -2058,6 +2058,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,104px) minmax(0,94px);column-gap:6px}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
 .ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{text-align:right;justify-self:stretch}
+/* ==== [ANCRE: MONDE66_T1_SUITE_LIBELLES_MOUVEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{width:auto;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{justify-self:end;text-align:right}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

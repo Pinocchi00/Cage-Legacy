@@ -241,3 +241,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tentative CSS de colonnes de mouvements rétrécissables et retours à la ligne forcés (`ui-cadre.css`), cache monté dans `index.html`. Cette tentative n'a pas changé le résultat mesuré ; elle n'est donc pas présentée comme une résolution et la case visuelle 4 reste partielle.
 - `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde/mécanique.
 - Images de comparaison régénérées dans le dossier temporaire de capture. L'état visuel résiduel est explicitement non conforme ; ne pas conclure `TOUT_EST_FINI`.
+
+### Reprise 37 — nouvel essai sur les mouvements — 24/10/2026
+
+- État initial : branche `fid-lendemain`, commits de tranche présents. Modifications locales préexistantes dans `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et exclues.
+- Relu le guide puis recapturé séparément. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, moyen 25,9 %, gros blocs 18,4 %. `lendemainSuite` : chevauchements 0 et textes sous 22 px 0, mais les quatre alertes précédentes persistent (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 17 %.
+- Tentative de réglage fidèle aux trois colonnes de mouvements : largeur des colonnes de rang/organisation augmentée et retrait de la largeur forcée sur leurs enfants (`ui-cadre.css`), version CSS montée via `_bump.js`. La mesure automatique n'a pas changé : ces quatre débordements restent non résolus. Aucune conformité visuelle complète n'est revendiquée.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLot54T1.test.js` (30/30) passent ; `node tools/verif-versions.js origin/main` et ESLint passent. Aucun changement de sauvegarde/mécanique.
+- Fichiers modifiés : `ui-cadre.css` (règles de largeur/retour des mouvements) et `index.html` (cache), cette fiche. Tests ajoutés : aucun ; tests existants inchangés. Migration : aucune. Écart : débordements signalés sur la suite non corrigés malgré l'essai. Questions pour Anthony : aucune.
