@@ -215,13 +215,13 @@ function mgmtLendemainMomentsCompletsHtml(m){
 /* ==== [ANCRE: MONDE54_T1_APRES_CATALOGUE] — Monde lot 54 T1 ==== */
 /* Catalogue T3 : les entrées restent des formulations éditoriales à relire. */
 const MGMT_LD_APRES_FAMILLES=[
-  {famille:'interpellation',texte:'{nom} répond aux questions après sa soirée.',relu:false},
-  {famille:'réseaux',texte:'Les supporters de {nom} commentent encore son dernier combat.',relu:false},
+  {famille:'interpellation',texte:'Les interpellations adressées à {nom} appellent une réponse après sa soirée.',relu:false},
+  {famille:'réseaux',texte:'Sur les réseaux, les supporters de {nom} commentent encore son dernier combat.',relu:false},
   {famille:'suspension',texte:'Le retour de {nom} attend la fin de sa suspension médicale.',relu:false},
   {famille:'revanche',texte:'Le camp de {nom} réclame une revanche.',relu:false},
   {famille:'autre organisation',texte:'Une autre organisation suit désormais {nom}.',relu:false},
-  {famille:'classement',texte:'La division discute de la place de {nom} après le combat.',relu:false},
-  {famille:'rivalité',texte:'Le résultat relance l’opposition entre {nom} et son adversaire.',relu:false},
+  {famille:'classement',texte:'Le classement de la division discute de la place de {nom} après le combat.',relu:false},
+  {famille:'rivalité',texte:'Le résultat relance la rivalité entre {nom} et son adversaire.',relu:false},
   {famille:'espoir',texte:'Ton espoir {nom} entend poursuivre sur cette lancée.',relu:false},
 ];
 /** Jusqu'à la prochaine soirée : au plus trois messages hebdomadaires, issus

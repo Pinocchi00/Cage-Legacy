@@ -104,3 +104,19 @@ test('Monde lot 54 T1 — l’après propose au plus trois lignes déterministes
     assert.ok(r.a.every(x=>x.relu===false));
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — le catalogue de l’après garde une formulation distincte par famille',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=w.eval(`MGMT_LD_APRES_FAMILLES.map(x=>({famille:x.famille,texte:x.texte,relu:x.relu}))`);
+    assert.ok(r.length>=8);
+    assert.equal(new Set(r.map(x=>x.famille)).size,r.length);
+    assert.equal(new Set(r.map(x=>x.texte)).size,r.length);
+    for(const x of r){
+      assert.equal(x.relu,false);
+      assert.ok(x.texte.includes('{nom}'),x.famille);
+      assert.ok(x.texte.toLocaleLowerCase('fr').includes(x.famille.toLocaleLowerCase('fr')),
+        `la formulation doit nommer sa famille : ${x.famille}`);
+    }
+  }finally{w.close();}
+});
