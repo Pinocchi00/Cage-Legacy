@@ -1304,6 +1304,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .cr3-track{display:flex;flex-direction:column;gap:5px;min-height:58px;padding:9px;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1.1 var(--mgmt-font-body)}
 .mf-ancien .cr3-track b{color:#F0B220;font:800 28px/1 var(--mgmt-font-display)}
 .mf-ancien .cr3-track span{color:var(--mgmt-secondary);font:600 22px/1.15 var(--mgmt-font-body)}
+/* ==== [ANCRE: MONDE67_T1_CROISSANCE_TEXTE_LISIBLE] — Monde lot 67 T1 ==== */
+.cr3-title{align-items:flex-start;flex-wrap:wrap;line-height:1.12}
+.cr3-title span{min-width:0;overflow-wrap:anywhere}
+.cr3-step small{font-size:24px;line-height:1.16;white-space:normal;overflow-wrap:anywhere}
+.cr3-track span{font-size:24px;line-height:1.16;white-space:normal;overflow-wrap:anywhere}
+/* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
 .mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}
