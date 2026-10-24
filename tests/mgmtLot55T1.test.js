@@ -92,3 +92,13 @@ test('Lot 55 T1 — chaque prix possède trois formulations distinctes et spéci
   }
   assert.equal(new Set(toutes).size,toutes.length,'formulations partagées entre familles');
 });
+test('Lot 55 T1 — seules les traces des 365 jours précédant la cérémonie comptent',()=>{
+  const c=charger();
+  const combat=(jour,nom)=>({c:jour,a:{id:'a',name:'A',W:0,L:0,D:0},b:{id:nom,name:nom},winner:'A',family:'ko',round:1,slot:'main'});
+  const m={hist:[combat(-1,'avant'),combat(0,'debut'),combat(100,'milieu'),combat(364,'fin'),combat(365,'aujourdhui')]};
+  const result=c.mgmtCeremonieCalculer(m);
+  const combattant=result.find(p=>p.id==='combattant');
+  assert.ok(combattant);
+  assert.equal(combattant.stat,3);
+  assert.equal(result.find(p=>p.id==='ko').stat,1);
+});

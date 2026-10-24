@@ -231,3 +231,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node tools/verif-versions.js origin/main` signale un écart préexistant de version sur `mgmt-accueil.js`, hors tranche et non modifié ici. Aucun fichier étranger ni `sw.js` n'est inclus.
 - État restant non conforme au critère final : aucun parcours de trois années réellement jouées, aucune preuve de non-répétition sur 50 soirées, le test de sauvegarde est statique, le test lent `mgmtReleveReduit` n'a pas été exécuté, et les écarts aux maquettes / historiques incomplets du carnet consignés aux reprises précédentes persistent. Aucune migration de sauvegarde.
 - Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (test des minima) et cette fiche (compte rendu). Livraison toujours incomplète; aucune question de spécification nouvelle.
+
+### Reprise 29
+
+- Ajout du test « Lot 55 T1 — seules les traces des 365 jours précédant la cérémonie comptent » : vérifie les bornes de la fenêtre (date de début incluse, jour de cérémonie exclu) et le minimum du prix du combattant.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (12/12 vert), `git diff --check` (vert). ESLint a été appelé sur le test mais le fichier est ignoré par la configuration (aucune erreur).
+- Les autres cases connues ne sont pas couvertes par ce changement; la tranche reste incomplète. Pas de migration de sauvegarde ni de changement d'écran/code de production durant cette reprise. Fichier de tranche modifié : `tests/mgmtLot55T1.test.js`; les modifications d'outillage listées dans les reprises antérieures sont laissées hors commit.
