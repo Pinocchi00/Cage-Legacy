@@ -383,3 +383,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-combat.js` (libellé accessible), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertion du nombre), présente fiche.
 - Vérification ciblée : 19 tests étaient verts avant ajout de l'assertion ; la vérification finale de cette modification est consignée après relance.
 - Le travail reste partiel : cet ajout ne comble pas les critères majeurs de portage intégral des trois maquettes, de fenêtres temporelles réellement séquencées, ni le cumul de référence 900–1200 s (868,38 s mesurées dans la reprise 40). La tranche n'est donc pas déclarée terminée.
+
+### Reprise 57 — état accessible du sélecteur
+
+- Ajout de `aria-pressed="true"` au bouton de vue de chaque combat afin d'exposer l'état de sélection courant, en complément du libellé accessible qui indique la vue. La sélection reste pilotée par la porte existante de rotation des vues.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. Cache de `mgmt-soiree-cadre.js` monté avec `_bump.js`.
+- État restant : les écarts de portage visuel, de lecture temps forts et de cumul 900–1200 s documentés plus haut demeurent; cette reprise n'est pas une livraison finale.
