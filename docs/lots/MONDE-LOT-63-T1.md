@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 8 — contrôle final (24/10/2026)
+
+- Branche confirmée : `p8-apres`. Les commits fonctionnels sont déjà présents dans l'historique ; aucun fichier de production ou test de la tranche n'est en attente. Le statut montre seulement des changements étrangers dans `.opencode/agents/*`, `opencode.json`, `sw.js` et la longueur du paramètre cache de `index.html` ; ils restent exclus.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'inscription dans `test` et `test:watch` est confirmée (`true,true`).
+- Fichiers livrés : `mgmt-apres-data.js` (dix familles de formulations `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, accueil/presse et mouvements d'autres organisations), `tests/mgmtLot63T1.test.js` (neuf tests) et `package.json` (inscription aux scripts). Aucun nouvel état de sauvegarde ni migration.
+- Limite de couverture : les faits sont exercés séparément sur une partie issue du parcours réel, sans démontrer que chaque système opérationnel les génère naturellement. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les validations antérieures consignent une mesure réussie de 1 908 745 octets. Aucune question nouvelle pour Anthony.
+
 ### Reprise 7 — clôture et validations fraîches (24/10/2026)
 
 - État vérifié sur `p8-apres` : les changements fonctionnels sont déjà commités (`7fb72c81` en tête) ; aucun fichier de production ou test de cette tranche n'est en attente. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangers à la tranche et restent exclus.
