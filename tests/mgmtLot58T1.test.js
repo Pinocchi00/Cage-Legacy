@@ -23,3 +23,9 @@ test('Monde lot 58 T1 — quatre raisons de rejoindre plus fort sont des informa
   assert.ok(n.offers.every(o=>o.relu===false&&o.texte.includes('matchmaker')));
   assert.match(n.html,/LES OFFRES/);
 });
+
+test('Monde lot 58 T1 — le joueur peut attendre après le renvoi sans changer d’organisation',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');m.offres=[];mgmtOffresCreer(m);const org=m.org;const attendu=mgmtOffresAttendre(m);return {attendu,refusees:m.offres.every(o=>o.refuse),orgIdentique:m.org===org,poste:!!m.poste}})())`));
+  assert.deepEqual(r,{attendu:true,refusees:true,orgIdentique:true,poste:true});
+});

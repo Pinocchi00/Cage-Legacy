@@ -90,6 +90,14 @@ function mgmtOffresCreer(m){
   m.offres=candidats.map(({o,r})=>({orgId:o.id,poste:'Matchmaker',salaire:3200+Math.max(0,8-r)*200,texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de matchmaker chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)}));
   return m.offres;
 }
+/* ==== [ANCRE: P9_T4_ATTENDRE_OFFRES] — Monde lot 58 T1 ====
+   Le renvoi n'impose pas de signer une destination : attendre conserve le
+   contrat et les données de l'organisation active, sans créer de clé inutile. ==== */
+function mgmtOffresAttendre(m){
+  if(!m||!m.poste||mgmtPosteBilan(m).issue!=='renvoi') return false;
+  if(Array.isArray(m.offres)) m.offres.forEach(o=>{if(o&&typeof o==='object')o.refuse=true;});
+  return true;
+}
 function mgmtPosteRaisons(m,orgId){
   const ranks=mgmtOrgClassement(m)||[],org=mgmtOrgParId(orgId),profil=org&&org.profil, n=mgmtOrgNiveaux(m,orgId)||{};
   const puissance=(ranks.find(x=>x.id===orgId)||{}).rang||8;
