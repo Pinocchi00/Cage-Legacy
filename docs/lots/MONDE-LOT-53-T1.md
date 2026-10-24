@@ -43,4 +43,12 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Question pour Anthony : quelle durée de lecture réelle imputer à un combat complet ? La durée de trace disponible ne permet pas d'atteindre la cible sur la graine mesurée ; aucune règle n'a été inventée.
 - Conclusion : tranche incomplète ; ne pas déclarer `TOUT_EST_FINI`.
 
+### Reprise 8 — début du calcul de durée
+
+- Ajout de `mgmtSoireeDureeEstimee(m)` : somme, par combat de la carte, des temps par défaut (45 s temps forts, durée de l'arène pour complet, 5 s résultat) et 10 s de transition. Le sélecteur existant fournit chaque vue et la lecture complète est estimée en reconstruisant la session depuis la trace.
+- Test ajouté : « Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitions ». Il vérifie seulement que le calcul donne une valeur finie positive sur une soirée créée par le chemin réel ; l'assertion demandée 900–1200 s n'est pas faite et le critère reste à traiter.
+- Contrôles : test ciblé `mgmtLot53T1.test.js` (4 réussis), version `mgmt-temps-forts.js` montée et référencée dans `index.html`, `node tools/verif-versions.js origin/main` réussi, ESLint ciblé réussi.
+- Toujours non livré : le portage de l'écran carte `UniSoiree`, le choix de vue bouton V, la frise/fondu de lecture temps forts, la lecture résultat seule, la fin `UniSoireeFin`, l'assertion de durée 15–20 minutes et les exigences restantes d'intégration/test. Le test reste absent des listes complètes `test` et `test:watch`.
+- Aucune modification au moteur de combat. Aucun changement aux tests existants ni à leurs empreintes.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

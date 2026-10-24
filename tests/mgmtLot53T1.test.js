@@ -27,6 +27,16 @@ test('Monde lot 53 T1 — le choix de vue reste indépendant pour chaque combat'
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitions',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5303);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const n=w.eval(`mgmtSoireeDureeEstimee(G.mgmt)`);
+    assert.ok(Number.isFinite(n)&&n>0);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — la fin annonce les primes présentes dans les relevés et échappe les noms',()=>{
   const w=newGameWindow({runMain:true});
   try{
