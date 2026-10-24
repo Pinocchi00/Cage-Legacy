@@ -312,3 +312,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Changements : `ui-cadre.css` donne des traitements visuellement distincts aux actions « Contre-proposer » (sombre) et « Refuser » (rouge), en cohérence avec la hiérarchie de décision de l'écran choc ; `index.html` reçoit la version cache CSS via `node tools/_bump.js`. `tests/mgmtLot69T1.test.js` verrouille ces deux traitements.
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Pas de migration. Écarts encore présents : aucune nouvelle capture/mesure n'a été effectuée ; les critères d'achèvement déjà notés (trois combats et score 2-sur-3, parcours contractuel complet avec reprise strictement identique, scènes d'arrivée et validation visuelle des quatre écrans) ne sont pas tous établis. Cette retouche CSS ne les prétend pas satisfaits.
+
+### Reprise 53
+- `tests/mgmtLot69T1.test.js` vérifie en plus que l'en-tête latéral de l'arrivée suit le nom de la nouvelle organisation et que son bandeau/tuiles de contrat restent présents après le changement.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Pas de modification métier, de CSS/JS, de sauvegarde, ni de version cache ; pas de nouvelle capture.
+- Écart inchangé et non masqué : les critères visuels par comparaison/capture, les trois affiches et le parcours strict complet de la fiche restent non établis. Cette reprise ne revendique pas `TOUT_EST_FIN`.
