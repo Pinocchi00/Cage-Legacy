@@ -93,6 +93,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Relevé écran par écran : fiche, recruteur, retours et semaine satisfont le contrôle automatique de géométrie, mais les images comparatives n'ont pas été ouvertes et la fidélité visuelle globale n'est donc pas attestée. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records : aucun contrôle de scène disponible/établi. Accueil, actualités, tonposte et bilan : mesures ci-dessus, erreurs de contrôle documentées, laissées intactes car attribuées aux lots parallèles.
 - Écart majeur : le contrôle universel demandé pour les écrans de tranche et la comparaison visuelle ne sont pas atteints. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été exécuté. Aucune migration de sauvegarde.
 
+### Reprise 37 du 24/10/2026
+
+- Branche `fid-fiches` confirmée ; historique jusqu'à `2842c51c` consulté. Aucun fichier applicatif ou test de cette tranche n'était non committé ; les neuf fichiers `.opencode/agents/*` et `opencode.json` sont hors périmètre et préservés.
+- Tests ciblés relancés : `node --test tests/mgmtFicheStats.test.js` (22/22 verts) et `node --test tests/mgmtReleve.test.js` (5/5 verts). `node tools/verif-versions.js origin/main` : aucun écart. `node_modules/.bin/eslint .` : vert.
+- Le travail de cette reprise documente l'état et ne modifie pas le code applicatif. Les scènes « fiche », « recruteur », « retours » et « semaine » ont des contrôles géométriques rapportés dans la reprise 36 (respectivement `{0,0,[]}`, `{0,0,[]}`, `{0,0,[]}`, `{0,0,[]}` pour chevauchements, textes sous 22 px et débordements). Aucun contrôle nouveau et aucune image comparative ouverte dans cette reprise ; aucun contrôle après-correction n'est donc revendiqué pour les autres scènes.
+- État écran par écran : Fiche Aperçu/Statistiques, Recruteur mission/retours et Semaine ont des mesures géométriques historiques sans comparaison visuelle ouverte ; Arrivée contrat/espoirs, Relevé, Chiffres du combat, Menu, Meilleurs et Records restent sans mesure propre et sans comparaison visuelle. Les scènes accueil, actualités, tonposte et bilan demeurent hors périmètre applicatif et ne sont pas modifiées.
+- Pas de modification JS/CSS, de bump `?v=` ni de migration. `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Écart à la fiche : le protocole capture → ouverture → correction et la validation des cases d'écran ne sont toujours pas achevés ; aucune différence visuelle précise n'est inventée et `TOUT_EST_FINI` n'est pas atteint.
+
 ### Reprise 11 du 24/10/2026
 
 - État initial : branche `fid-fiches`, les commits précédents sont conservés ; modifications `.opencode/agents/*` et `opencode.json` hors tranche laissées intactes.
