@@ -385,3 +385,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (17 fichiers), `node_modules/.bin/eslint .` passe.
 - Pas de capture post-correction : le taux de gros blocs de l'écran choc n'est donc pas mesuré après ce changement et le seuil ≤20 % n'est pas revendiqué. Les autres écarts consignés restent ouverts (affiches du choc, parcours complet strict, comparaisons arrivée/discours/bilan et scènes dédiées).
 - Fichiers de cette reprise : `ui-cadre.css` (compacité du choc), `index.html` (version cache), cette fiche (compte rendu). Pas de migration de sauvegarde. Modifications utilisateur sous `.opencode/agents/` et `opencode.json` laissées intactes.
+
+### Reprise 62
+- `tests/mgmtLot69T1.test.js` ajoute une assertion de régression sur la géométrie compacte du bandeau choc, introduite à la reprise précédente.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Fichiers modifiés : test ciblé et cette fiche. Pas de migration, JS/CSS ou nouvelle version cache.
+- Les écarts connus demeurent : choc mono-affiche sans score 2-sur-3, parcours intégral fin de contrat/bilan/rechargement strict non prouvé, comparaisons/captures et seuil visuel post-correction non mesurés, scènes dédiées arrivée/offre absentes. L'assertion structurelle ne vaut pas preuve de rendu ni validation visuelle.
+- Aucun achèvement global revendiqué ; les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent hors tranche.
