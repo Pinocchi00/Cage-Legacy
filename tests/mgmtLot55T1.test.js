@@ -103,6 +103,14 @@ test('Lot 55 T1 — le retour tient compte du dernier combat avant la fenêtre a
   assert.ok(retour);
   assert.equal(retour.laureat,'a');
 });
+test('Lot 55 T1 — le retour exige au moins 182 jours sans combat',()=>{
+  const c=charger();
+  const combat=(jour,id,adversaire)=>({c:jour,a:{id,name:id},b:{id:adversaire,name:adversaire},winner:'A',family:'decision'});
+  const hist=[combat(10,'court','avant-court'),combat(192,'court','apres-court'),combat(10,'long','avant-long'),combat(193,'long','apres-long')];
+  const retour=c.mgmtCeremonieCalculer({hist}).find(p=>p.id==='retour');
+  assert.ok(retour);
+  assert.equal(retour.laureat,'long');
+});
 test('Lot 55 T1 — le retour départage par poids d’histoire avant la durée d’absence',()=>{
   const c=charger();
   c.mgmtHistoirePoidsCombat=(_m,t)=>t.poids;
