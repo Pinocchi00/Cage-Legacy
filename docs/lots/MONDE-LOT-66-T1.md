@@ -255,3 +255,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Guide de capture relu. Captures séparées: `lendemain` contrôle à 0 chevauchement, 0 texte sous 22 px, aucun débordement; `grosBlocs` 18,4 %, moyen 25,9 %. `lendemainSuite`: 0 chevauchement, 0 texte sous 22 px, mais quatre débordements (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`); `grosBlocs` 17 %, moyen 22,7 %.
 - Tentative temporaire de retour à la ligne plus agressif dans les mouvements de la suite : résultat de capture inchangé, règle annulée pour ne pas conserver un changement sans effet. Les défauts précédemment signalés sur les libellés de mouvement restent ouverts et la case visuelle 4 n'est pas intégralement satisfaite.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de donnée, mécanique ou sauvegarde. Les fichiers de configuration/agents et `sw.js` restent hors tranche et ne sont pas inclus.
+
+### Reprise 39 — reprise des débordements mesurés — 24/10/2026
+
+- Relu le guide du comparateur et relancé les captures après la reprise : `lendemain` reste conforme au contrôle automatique (0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %, moyen 25,9 %). `lendemainSuite` garde 0 chevauchement et 0 texte sous 22 px, mais le comparateur relève encore « Poids léger », « Jonas Bühler », « Poids mi-moyen » et « 6ᵉ → 11ᵉ » en débordement (gros blocs 17 %, moyen 22,7 %).
+- Ajout d'une règle de retour à la ligne/largeur bornée sur les cellules de mouvement (`ui-cadre.css`) et bump de version dans `index.html`. Cette correction n'a pas changé les alertes au comparateur : elle est donc explicitement non suffisante, et la case visuelle 4 reste non satisfaite.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de sauvegarde, de mécanique ou de tests. La capture `lendemainSuite` est régénérée sous le dossier temporaire du comparateur ; l'inspection directe de l'image reste non revendiquée.
+- Écart ouvert : quatre débordements de libellés dans la suite, malgré le respect du seuil des gros blocs. Pas de question pour Anthony.
