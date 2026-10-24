@@ -332,6 +332,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Scène discours également capturée : aucun chevauchement, aucun texte sous 22 px ni débordement ; `grosBlocs=18.1%`. L'image n'a pas pu être ouverte ici. Les tests existants couvrent le rendu via `CL.go`, les trois affiches, l'exécution normale du choc et l'enregistrement des résultats ; le parcours offre/changement/arrivée/rechargement/soirée/lendemain est aussi testé.
 - Aucun changement de code produit par cette reproduction. Le dépassement visuel du choc et les mesures de bilan/arrivée non revalidées restent des écarts ; cette reprise ne prétend pas que toute la fiche est satisfaite.
 
+### Reprise suivante — contrôle du bilan
+- Reproduction réelle de `bilan` avec le shoot indiqué : `chevauchements=1`, toujours entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22) ; textes sous 22 px : 0 ; débordements : 0 ; `grosBlocs=12.9%`.
+- Tentative d'augmenter le `line-height` du titre du bilan (de `.95` à `1.5`) après incrément temporaire du cache : aucun changement de mesure. La tentative CSS et son incrément de cache ont été annulés ; le CSS livré reste inchangé.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe 4/4. La capture `choc` de ce tour montre toujours une page rendue non blanche et 0 anomalie géométrique, mais `grosBlocs=26.1%`.
+- Fichiers modifiés conservés : cette fiche uniquement pour le compte rendu. Aucune migration. Le changement généré de `sw.js` par le shoot a été restauré depuis `origin/main`; les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent hors tranche.
+- Écarts non résolus : seuil des gros blocs choc, chevauchement du bilan, captures/comparaisons dédiées de l'arrivée, ainsi que toute comparaison visuelle manuelle des images. Aucun achèvement global n'est revendiqué.
+
 ### Reprise 44
 - État contrôlé : branche `fid-choc`, HEAD `cfb74364`; les seules modifications initiales étaient les configurations utilisateur sous `.opencode/agents/` et `opencode.json`, laissées intactes.
 - Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe (4/4), notamment le passage du choc par `mgmtRunEvent` et la conservation du résultat, l'arrivée après changement, et l'inclusion dans les commandes agrégées.
