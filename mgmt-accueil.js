@@ -253,7 +253,8 @@ function mgmtAccueilSaison(m,c){
   const dest=retour?mgmtRecruteurDestination(retour.dest):mission?mgmtRecruteurDestination(mission.dest):null;
   const jourRetour=retour?retour.jour:mission&&mission.retourLe;
   const restant=Number.isSafeInteger(jourRetour)?Math.max(0,jourRetour-mgmtRecruteurJour(m)):null;
-  const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${dest?esc(dest.nom):'—'}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}</div></div>`;
+   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
+   const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
   return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
 }
