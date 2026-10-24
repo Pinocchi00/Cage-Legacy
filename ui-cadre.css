@@ -463,6 +463,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);flex:none;height:530px}
 .ce3-prix-combattant{position:relative;grid-row:span 2;background:#F0B220;color:#0D0B0B;border-color:#F0B220;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
 .ce3-prix-combattant:after{content:"";position:absolute;right:-40px;bottom:-40px;width:240px;height:240px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);background:rgba(13,11,11,.12);pointer-events:none}
+.ce3-prix-combattant:after{right:-64px;bottom:-64px;width:320px;height:320px}
 .ce3-prix-combattant h2{color:#0D0B0B}
 .ce3-prix-combattant strong{font-size:112px;line-height:.8;white-space:normal}
 .ce3-prix:not(.ce3-prix-combattant){clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
