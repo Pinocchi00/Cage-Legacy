@@ -56,6 +56,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       w.eval(`G.mgmt.choc.paires=[{div:'PAILLE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'MOUCHE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'COQ F',a:G.mgmt.choc.a,b:G.mgmt.choc.b}]`);
       const triple=w.eval(`scr_mgmt_choc()`);
       assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
+       w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
+       assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
+      w.eval(`G.mgmt.choc.paires=[{div:'PAILLE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'MOUCHE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'COQ F',a:G.mgmt.choc.a,b:G.mgmt.choc.b}]`);
       w.eval(`delete G.mgmt.choc.paires`);
       assert.equal(w.eval(`mgmtChocValide({orgId:'unknown',div:'PAILLE F',jour:0,annee:1,etat:'recu'})`),false);
       w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
