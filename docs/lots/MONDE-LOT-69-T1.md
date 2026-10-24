@@ -460,6 +460,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Tests ajoutés : assertion « la seconde compaction réduit encore la hauteur des blocs d’en-tête » dans le test existant des écrans choc/discours.
 - Questions pour Anthony : aucune nouvelle question. Les changements utilisateur hors tranche restent exclus.
 
+### Reprise 64 — reproduction de la capture choc
+- Reproduction effective de la scène demandée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. La proposition valide s'affiche (pas de page blanche) ; contrôle : 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=25.1%`.
+- Tentative d'optimisation du seul espace d'en-tête par une quatrième compaction : le test `node --test tests/mgmtLot69T1.test.js` passe 4/4, mais la capture de contrôle obtient `grosBlocs=25.6%`, sans résoudre le seuil. La retouche a donc été annulée et le `?v=` non nécessaire remis à sa valeur précédente.
+- Fichiers modifiés conservés : cette fiche uniquement (compte rendu). Pas de migration. `mgmt-ecran-poste.js` reste un changement de fins de ligne uniquement et n'est pas commité ; changements utilisateur `.opencode/agents/*` et `opencode.json` exclus. `sw.js` restauré depuis `origin/main` comme demandé.
+- Restent non satisfaits : seuil de gros blocs du choc, captures/mesures nouvelles de l'arrivée et du bilan, comparaison visuelle des images. Les tests existants confirment le parcours multi-paires/choc et le parcours de changement dans leur périmètre, mais cette reprise ne fournit pas la preuve complète fin de contrat/bilan demandée. Pas de `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 64
 - `ui-cadre.css` ajoute une troisième compaction du bandeau choc (lignes 36/44 px, espacement 8 px, titres conservés au-dessus de 22 px) ; `index.html` est versionné par `_bump.js`.
 - `tests/mgmtLot69T1.test.js` verrouille cette géométrie. `node --test tests/mgmtLot69T1.test.js` passe (4/4).
