@@ -591,3 +591,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Contrôles `CONTRÔLE` avant/après de cette reprise : aucun nouveau contrôle n'a été lancé ici. Les derniers chiffres consignés au-dessus indiquent fiche, recruteur, retours et semaine à zéro ; ils restent des contrôles antérieurs et non une mesure fraîche. Les comparatifs PNG n'ont pas été ouverts.
 - État écran par écran : Fiche — vérification structurelle renforcée pour les deux onglets ; mesure géométrique historique zéro, pas de comparaison visuelle ; Arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records — mesures propres toujours absentes ; Recruteur mission/retours et Semaine — mesures géométriques historiques zéro, sans comparaison ouverte. Accueil, actualités, tonposte et bilan sont hors périmètre de modification ; anomalies historiques documentées plus haut.
 - Pas de changement applicatif/CSS ni de sauvegarde ; aucune migration ni hausse `?v=` requise. Le critère de mesure fraîche de toute la liste et la comparaison image par image restent inachevés. `TOUT_EST_FIN` non revendiqué.
+
+### Reprise 53 du 24/10/2026 — vérifications ciblées
+
+- Branche `fid-fiches` et état git revérifiés. Aucun changement non committé de la tranche ; les modifications `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+- Vérifications relancées : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert).
+- Le fichier externe d'instructions de capture n'est pas accessible à l'outil de lecture ; aucun contrôle frais ni ouverture d'image cette reprise. Contrôles antérieurs : fiche, recruteur, retours et semaine à zéro géométrique ; pas de comparaison visuelle ouverte. Arrivée, relevé, chiffres, menu et classements sans contrôle propre documenté dans cette reprise. Accueil, actualités, tonposte et bilan restent hors périmètre.
+- Aucun changement applicatif à effectuer sur la base de nouveaux constats ; aucun fichier JS/CSS/donnée de sauvegarde modifié, aucun bump ni migration. Les vérifications ciblées ne démontrent pas la fidélité aux planches.
+- Écart : les comparatifs ouverts, les scènes manquantes et la validation de fidélité complète restent à faire ; `TOUT_EST_FIN` non atteint.
