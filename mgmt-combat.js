@@ -363,8 +363,9 @@ Object.assign(CL,{
 keysRegister('mgmt_combat',{
   ' '(){ CL.mgmtCbPause(); },
   v(){ CL.mgmtCbVitesse(); }, V(){ CL.mgmtCbVitesse(); },
-  c(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); else CL.mgmtCbCamera(); },
-  C(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); else CL.mgmtCbCamera(); },
+  c(){ CL.mgmtCbCamera(); }, C(){ CL.mgmtCbCamera(); },
+  /* Décision du superviseur, lot 53 : C reste la caméra (test « Les touches du combat ») ; T passe des temps forts au combat entier. */
+  t(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); }, T(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); },
   p(){ CL.mgmtCbPasser(); }, P(){ CL.mgmtCbPasser(); },
   r(){ CL.mgmtCbRevoir(); }, R(){ CL.mgmtCbRevoir(); },
   Enter(){ CL.mgmtCbRetour(); },

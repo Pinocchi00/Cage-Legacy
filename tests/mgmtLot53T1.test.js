@@ -252,8 +252,9 @@ test('Monde lot 53 T1 — Entrée passe le combat en temps forts au verdict et l
     const r=w.eval(`(()=>{MGMT_COMBAT.session={};MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.mode='fight';MGMT_COMBAT.refuse=false;CL.mgmtCbRetour();return MGMT_COMBAT.mode;})()`);
     assert.equal(r,'dec');
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
-    assert.match(css,/\.so3-moment\.actif\s*\{[^}]*animation:so3-fondu \.22s/);
-    assert.match(css,/@keyframes so3-fondu\s*\{/);
+    /* Décision du 07/10 (planche « Le mouvement de l’interface ») : tout le mouvement est en script, jamais en feuille de style ; le fondu de la frise est dans mgmt-combat.js. */
+    assert.doesNotMatch(css,/so3-fondu/);
+    assert.match(require('fs').readFileSync('mgmt-combat.js','utf8'),/so3-frise/);
   }finally{w.close();}
 });
 
@@ -267,7 +268,7 @@ test('Monde lot 53 T1 — le fondu d’une fenêtre assombrit brièvement l’im
   }finally{w.close();}
 });
 
-test('Monde lot 53 T1 — C bascule des temps forts au combat entier sans quitter l’arène',()=>{
+test('Monde lot 53 T1 — T bascule des temps forts au combat entier sans quitter l’arène (C reste la caméra)',()=>{
   const w=newGameWindow({runMain:true});
   try{
     const r=w.eval(`(()=>{MGMT_COMBAT.session={};MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.tempsForts=[{t:0}];MGMT_COMBAT.mode='fight';CL.mgmtCbComplet();return {vue:MGMT_COMBAT.vueCombat,frise:MGMT_COMBAT.tempsForts,mode:MGMT_COMBAT.mode};})()`);
