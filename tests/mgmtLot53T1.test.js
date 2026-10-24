@@ -87,3 +87,15 @@ test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=
     for(const c of ['so3-frise','so3-moment','so3-moment b','so3-moment span','so3-moment.actif','so3-moment.passe'])assert.match(css,new RegExp(`\\.${c.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}\\s*\\{`));
   }finally{w.close();}
 });
+
+test('Monde lot 53 T1 — le calcul temps forts reste borné et respecte l’ordre chronologique',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5306);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const result=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt)[0], moments=mgmtTempsFortsChoisir(G.mgmt,p);return {moments,duree:mgmtTempsFortsDuree(G.mgmt,p)};})()`);
+    assert.ok(result.moments.length>=4&&result.moments.length<=8);
+    assert.deepEqual(Array.from(result.moments,x=>x.t),Array.from(result.moments,x=>x.t).slice().sort((a,b)=>a-b));
+    assert.ok(result.duree>=30&&result.duree<=60,`durée observée: ${result.duree}s`);
+  }finally{w.close();}
+});

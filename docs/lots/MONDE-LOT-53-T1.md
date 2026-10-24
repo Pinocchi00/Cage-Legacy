@@ -107,3 +107,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` (7 réussis). Le test ne prouve pas la carte résultat dédiée ni son délai de cinq secondes : ce comportement reste absent.
 - Fichier modifié : `tests/mgmtLot53T1.test.js` (test de progression résultat seul), cette fiche (compte rendu). Aucun changement de sauvegarde ou au moteur de combat.
 - Restent non faits : portage fidèle des écrans `UniSoiree` et `UniSoireeFin`, résultat dédié temporisé, fenêtres 30–60 s/fondu/passabilité, assertion du cumul 900–1200 s, couverture exhaustive style/échappement/empreintes et intégration du fichier dans les commandes principales `test` et `test:watch`. Ce travail ne satisfait pas la fin de tranche.
+
+### Reprise 16 — test de durée des temps forts
+
+- Fait : ajout d'un test vérifiant sur une vraie carte que `mgmtTempsFortsChoisir` fournit 4 à 8 moments triés et que `mgmtTempsFortsDuree` reste entre 30 et 60 secondes.
+- Test ciblé : `node --test tests/mgmtLot53T1.test.js` — 8/8 réussis.
+- Aucun code de rendu/lecture n'a été changé dans cette reprise. Les défauts précédemment consignés restent à traiter : les deux écrans ne sont pas portés aux valeurs des planches, la carte résultat dédiée et la commande de lecture des moments ne sont pas implémentées, le cumul 900–1200 s n'est pas démontré, les empreintes/styles exhaustifs restent absents et le test n'est pas dans les listes agrégées `test`/`test:watch`.
+- Écart : l'estimation de durée des temps forts constitue un test de la porte de calcul, pas une preuve de la durée réelle passée dans l'interface ni du caractère passable par fenêtre.
