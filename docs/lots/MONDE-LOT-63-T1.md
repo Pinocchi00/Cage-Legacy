@@ -337,6 +337,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Pas de migration ni de clé sauvegardée nouvelle. Les tests couvrent les dix familles via faits préparés dans une partie créée par le chemin réel, la borne et déterminisme, l'anti-répétition, échappement, sauvegarde ancienne, accueil/presse et mouvements rivaux. Limite : ils ne démontrent pas que chaque système de jeu génère naturellement chacun des dix faits.
 - La variation locale de cache de `index.html`, `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus. Aucun écart nouveau ni question pour Anthony.
 
+### Reprise 4 — vérification inter-lots finale (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits fonctionnels de la tranche sont déjà présents (`04e745ad` en tête). Aucun fichier de production ou test de la tranche n'était en attente ; les modifications locales d'outillage et `sw.js` restent exclues.
+- La suite inter-lots prescrite passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56, y compris les régressions lot 54 de rivalité enregistrée et de non-répétition sur cinquante semaines.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit dans `test` et `test:watch` (`true,true`). Le test lent `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; son dernier résultat documenté est 1 908 745 octets et réussite.
+- Aucun changement de sauvegarde ni migration. Couverture inchangée : tests des familles avec faits préparés sur le parcours réel, sans démontrer que chaque système opérationnel génère naturellement chacun de ces faits. La tentative de merge origin/main, déjà documentée comme refusée par la politique de l'environnement, reste au superviseur. Seul ce compte rendu est à commiter ; aucune question nouvelle pour Anthony.
+
 ### Reprise 9 — contrôle final de la tranche (24/10/2026)
 
 - Branche `p8-apres` et historique vérifiés ; les commits fonctionnels et de tests de la tranche sont déjà présents. Aucune modification fonctionnelle non commité de la tranche à intégrer ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangères et exclues.
