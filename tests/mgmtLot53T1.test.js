@@ -150,6 +150,9 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.match(html,/COMBAT DE LA SOIRÉE/);
     assert.match(html,/PERFORMANCE DE LA SOIRÉE/);
     assert.match(html,/PRIMES PAYÉES/);
+    /* Décision : planches Uni* validées par Anthony ; sous la recette, le libellé est « primes payées », sans répéter le total. */
+    assert.match(html,/<small>PRIMES PAYÉES<\/small>/);
+    assert.doesNotMatch(html,/<small>PRIMES PAYÉES ·/);
     assert.doesNotMatch(html,/SPLIT FIGHT NIGHT TERMINÉE|OÙ EN EST LA SOIRÉE|mf-so-fcw|mf-so-ph/);
   }finally{w.close();}
 });
