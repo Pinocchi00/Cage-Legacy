@@ -1941,6 +1941,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-bilan{width:min(900px,90%);margin:20px auto;font-size:24px}
 .po2-bilan h1{font-size:88px;color:#F0B220}
 .po2-bilan .po2-citation{font-style:italic}
+/* ==== [ANCRE: MONDE_LOT69_T1_BILAN_TITRE_AERE] — Monde lot 69 T1 ====
+   Le verdict garde sa grande taille sans empiéter sur la première ligne du bilan. ==== */
+.po2-bilan h1{line-height:.95;margin:0 0 24px}
 .po2-action{background:#F0B220;color:#0D0B0B;font:800 34px 'Saira Extra Condensed','Arial Narrow',sans-serif}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_STYLE] — Monde lot 58 T1 ==== */
