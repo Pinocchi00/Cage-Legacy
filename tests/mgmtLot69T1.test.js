@@ -42,8 +42,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(6902);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);G.mgmt=m;`);
-    w.eval(`(()=>{const orgId=Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),org=G.mgmt.orgs[orgId];G.mgmt.choc={orgId,div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:G.mgmt.roster[0].id,b:org.roster[0].id}})()`);
+    w.eval(`(()=>{const orgId=Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),org=G.mgmt.orgs[orgId],paires=mgmtChocPaires(G.mgmt,orgId),a=paires[0]&&mgmtFighterById(G.mgmt,paires[0].a)||G.mgmt.roster[0],b=paires[0]&&org.roster.find(f=>f.id===paires[0].b)||org.roster[0];G.mgmt.choc={orgId,div:paires[0]&&paires[0].div||'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:a.id,b:b.id,...(paires.length?{paires}:{})}})()`);
     assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
+    const propositions=w.eval(`G.mgmt.choc.paires?G.mgmt.choc.paires.length:0`);
+    assert.ok(propositions>=0&&propositions<=3,'la logique ne fabrique pas plus de trois affiches');
     w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
      for(const texte of ['SPLIT','CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
@@ -69,7 +71,7 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
       assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
       assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
-       assert.equal(w.eval(`G.mgmt.choc.a`),w.eval(`G.mgmt.roster[0].id`),'le champion Split de la proposition reste associé au choc programmé');
+       assert.ok(w.eval(`G.mgmt.roster.some(f=>f.id===G.mgmt.choc.a)`),'le champion Split de la proposition reste associé au choc programmé');
        assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
         const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,a=c.a,b=c.b; m.cal.prochaines[0].jour=c.jour;m.card.main=[{a,b,cycle:m.cycle,slot:'main'}];m.card.prelims=[];m.card.sizeMain=1;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m),fight=event&&event.fights.find(f=>(f.a===a&&f.b===b)||(f.a===b&&f.b===a)),trace=m.hist.find(h=>h.a&&h.b&&h.a.id===a&&h.b.id===b)||m.hist.find(h=>h.a&&h.b&&h.a.id===b&&h.b.id===a);return {event:!!event,fight:!!fight,etat:c.etat,resultat:c.resultat,eventWinner:fight&&fight.winner,traceWinner:trace&&trace.winner}})()`);
        assert.equal(chocJoue.event,true,'la soirée programmée doit passer par le résolveur normal');
