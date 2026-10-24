@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 54 — remontée d’échelle des cartes — 24/10/2026
+
+- État vérifié : branche `fid-lendemain`, HEAD `8b837aea`; code de la tranche déjà livré, seuls fichiers hors tranche préexistants étaient les agents/configuration et `sw.js`.
+- Reprise du défaut signalé : les règles CSS successives écrasaient les noms des trois moments jusqu’à 32 px et la rangée supérieure était limitée à 210 px. Ajout d’une règle finale dédiée : rangée de cartes à 285 px, noms à 80 px pour la carte principale et 68 px pour les deux autres, et détails à 30 px. Les blocs inférieurs et chiffres reprennent également leur taille de planche.
+- Fichiers modifiés : `ui-cadre.css` (échelle du lendemain) et `index.html` (version de cache), cette fiche (compte rendu). Aucun changement de données, mécanique ou sauvegarde.
+- Tests ciblés : `mgmtEcranLendemain.test.js` (7/7) et `mgmtLendemainDemo.test.js` (7/7). `node tools/verif-versions.js origin/main` et ESLint passent.
+- Capture : tentative de lire le guide demandé refusée par la politique d’accès au chemin externe `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt`; le comparateur n’a donc pas pu être lancé. La mesure de police est fixée par CSS (80/68 px), mais rendu/capture non vérifiés dans cette reprise. La conformité visuelle complète et les débordements précédemment signalés sur la suite ne sont pas revendiqués comme résolus.
+- Questions pour Anthony : aucune.
+
 ### Reprise 53 — contrôle et correction de libellés suite — 24/10/2026
 
 - Branche `fid-lendemain` confirmée. État initial : commits de tranche présents jusqu'à `d93a9cb0`; seuls des fichiers hors tranche étaient aussi modifiés (`.opencode/agents/*`, `opencode.json`, `sw.js`), laissés intacts.
