@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 10 — contrôle inter-lots (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les fichiers fonctionnels et tests de la tranche sont déjà commités ; les modifications locales d'outillage et `sw.js` sont étrangères, laissées intactes.
+- Suite inter-lots prescrite : les sept fichiers passent **130/130**, incluant les deux régressions du lot 54. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- La fusion `git merge origin/main` a été tentée mais la politique de l'environnement bloque cette commande ; l'intégration demeure à faire par le superviseur. Aucun test existant n'a été modifié. Aucune migration ni clé de sauvegarde nouvelle.
+- La couverture reste celle documentée : les faits déclencheurs familiaux sont préparés individuellement sur le parcours réel, sans prouver leur génération naturelle par chaque système de jeu.
+
 ### Reprise 6 — contrôle après reprises successives (24/10/2026)
 
 - `git log --oneline -12` et `git status` contrôlés sur `p8-apres` : le code de tranche est déjà commité ; les changements locaux dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et exclus.
