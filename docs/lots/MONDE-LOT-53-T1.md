@@ -291,3 +291,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajouté : « Monde lot 53 T1 — la carte résultat indique le temps de la finition ou du dernier round ».
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18.
 - Aucun effet sur le moteur de combat ou la sauvegarde.
+
+### Reprise 40 — intégration de la suite et bilan de validation
+
+- `tests/mgmtLot53T1.test.js` est maintenant explicitement ajouté aux commandes `test` et `test:watch` de `package.json`; les scripts ciblés dédiés restent présents.
+- Validations : `node --test tests/mgmtLot53T1.test.js` (18/18), `node --test tests/mgmtPasse.test.js` (13/13, empreinte de partie ancienne inchangée), `node --test tests/mgmtSoiree.test.js` (14/14), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (réussi), `git diff --check` (réussi). Le test lent `node --test tests/mgmtReleveReduit.test.js` a terminé en arrière-plan : 6/6, durée environ 443 s. `tests/mgmtSoireeShow.test.js` n'a pas rendu de bilan avant le délai d'outil de 120 s et n'est pas déclaré vert.
+- Mesure réelle de durée conservée dans `tools/reports/mgmtReleveReduit-lot53.log` (fichier ignoré) : l'estimation d'une carte par défaut avec la graine 5303 est 868,38 s, sous la cible 900 s. La formule n'a pas été artificiellement modifiée; le test exigé 900–1200 s sur cette référence n'est donc pas validé.
+- État restant non terminé : le portage visuel complet aux dimensions et couleurs de `UniSoiree`/`UniSoireeFin` reste incomplet; la carte conserve en partie sa composition antérieure `mf-*`. La lecture forts accélère bien les intervalles hors fenêtres et propose frise, fondu de frise et passage Entrée/Échap, mais la plage 30–60 s n'est pas chronométrée en temps réel et le fondu ne porte pas sur l'image d'arène. L'audit des classes nouvelles `so3-*` est couvert, pas celui de toutes les classes `mf-*` ni un audit de tailles exhaustif.
+- Aucun changement de moteur, de RNG, de sauvegarde ni de discours. Le code est commité par petites étapes; la tranche ne peut honnêtement recevoir le titre de livraison finale ni `TOUT_EST_FINI` tant que les écarts ci-dessus demeurent.
