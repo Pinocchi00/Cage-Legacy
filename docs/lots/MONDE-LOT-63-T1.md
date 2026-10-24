@@ -74,6 +74,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 9 — contrôle final demandé (24/10/2026)
+
+- Branche `p8-apres` confirmée. L'historique contient déjà les livraisons fonctionnelles ; aucun fichier de production ou test de tranche n'était non commité. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
+- La fusion demandée de `origin/main` a été tentée mais interdite par la politique d'exécution (`git merge*`). Elle reste à effectuer par le superviseur.
+- La suite inter-lots demandée passe **130/130**, incluant les régressions lot 54 sur rivalité enregistrée et anti-répétition. Aucun test existant n'a été modifié.
+- Ce contrôle ne révèle aucun correctif code restant. Aucun changement de sauvegarde ni migration ; aucun écart supplémentaire ni question pour Anthony. Les fichiers fonctionnels livrés sont ceux récapitulés dans les comptes rendus ci-dessous.
+
 ### Reprise 8 — suite inter-lots demandée (24/10/2026)
 
 - Branche `p8-apres` confirmée. Les fichiers de production et tests du lot sont déjà commités ; seuls les changements locaux préexistants dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors de cette tranche.
