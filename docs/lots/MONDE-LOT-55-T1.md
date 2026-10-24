@@ -139,3 +139,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications de reprise : `node --test tests/mgmtLot55T1.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé `mgmt-ceremonie.js mgmt-save.js` (vert). Le test lent `mgmtReleveReduit` et la suite complète n'ont pas été lancés.
 - Aucun nouveau fichier métier n'a été modifié durant cette reprise. Le dépôt ne présente donc aucun changement métier à committer avant de compléter les critères restants. Le compte rendu n'est pas un substitut au travail manquant : je ne prétends pas que la tranche est terminée, et ne déclare pas `TOUT_EST_FINI`.
 - Écarts restant à traiter : intégration du test dans les listes générales `test`/`test:watch`, tests parcours multi-années/50 soirées et sauvegarde réelle, contrôle exhaustif des classes CSS et de la planche, ainsi que données carnet plus complètes. Aucune migration de sauvegarde ni question ouverte nouvelle.
+
+### Reprise 17
+
+- Contrôle de reprise : branche `p11-ceremonie-carnet`, HEAD `93c8655`. Les seules modifications non commitées sont les fichiers `.opencode/agents/*` et `opencode.json`, étrangers à cette tranche et non touchés.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), et confirmation par `node -e` que le test est présent dans `test` et `test:watch`.
+- Les fonctionnalités des cases ne sont toujours pas intégralement satisfaites : les tests demandés de simulation multi-années et de non-répétition sur 50 soirées ne sont pas écrits; le test de sauvegarde reste une vérification statique, le test lent `mgmtReleveReduit` n'a pas été exécuté, et la conformité complète aux planches et aux parcours de prix/carnet n'est pas démontrée. Le passage ciblé vert n'est pas une validation de la tranche complète.
+- Aucun fichier métier n'était modifié hors commit à cette reprise. Pas de commit artificiel ni de `TOUT_EST_FINI`. Aucune migration de sauvegarde et aucune question ouverte nouvelle. Les changements `.opencode/agents/*` et `opencode.json` demeurent hors périmètre.
