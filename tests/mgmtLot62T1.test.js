@@ -42,3 +42,18 @@ test('Monde lot 62 T1 — le carnet vide présente honnêtement ses rubriques',(
   }
   finally{w.close();}
 });
+
+test('Monde lot 62 T1 — cinquante soirées réelles ne répètent pas une phrase de prix au même combattant',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval("window.__lot62Phrases=[];window.__lot62Editions=new Set();const calcul=mgmtCeremonieCalculer;mgmtCeremonieCalculer=function(m){const prix=calcul(m);const edition=prix.length&&prix[0].phrase.match(/Édition (\\d+)\\.$/);if(edition&&!window.__lot62Editions.has(edition[1])){window.__lot62Editions.add(edition[1]);for(const p of prix)for(const id of p.laureats||[p.laureat])if(id)window.__lot62Phrases.push({id,prix:p.id,phrase:p.phrase});}return prix};setSeed(20261024);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});");
+    let jouees=0;
+    while(jouees<50){const n=jouer(w,Math.min(50-jouees,5));if(!n)break;jouees+=n;}
+    assert.equal(jouees,50,'cinquante soirées sont jouées par le parcours réel');
+    const phrases=w.eval('window.__lot62Phrases');
+    assert.ok(phrases.some(x=>x.prix==='revelation'),'la révélation est décernée pendant le parcours de cinquante soirées');
+    const parCombattant=new Map();
+    for(const entree of phrases){const liste=parCombattant.get(entree.id)||[];liste.push(entree.phrase);parCombattant.set(entree.id,liste);}
+    for(const [id,liste] of parCombattant)assert.equal(new Set(liste).size,liste.length,`aucune phrase ne se répète pour ${id}`);
+  }finally{w.close();}
+});
