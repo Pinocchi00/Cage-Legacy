@@ -139,6 +139,9 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.doesNotMatch(screen,/mf-prise|rappel de test/);
     /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
     assert.match(html,/class="so3-fin-soiree"/);
+    /* Décision : planches Uni* validées par Anthony ; les données réelles déterminent les cartes, sans les réduire quand deux performances existent. */
+    assert.match(html,/class="so3-fin-cartes"/);
+    assert.equal((html.match(/class="so3-fin-prime performance"/g)||[]).length,2);
     assert.match(html,/LA SALLE/);
     assert.match(html,/LA SOIRÉE/);
     assert.match(html,/L'AMBIANCE À LA FIN/);
