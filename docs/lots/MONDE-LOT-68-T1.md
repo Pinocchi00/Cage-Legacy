@@ -286,6 +286,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Les valeurs de similarité (`moyen`/`grosBlocs`) ne valent pas validation visuelle. Les comparatifs PNG n'ont pas été ouverts. Les scènes arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records ne sont pas disponibles dans les scènes du captureur utilisé et n'ont pas reçu de contrôle automatique dans cette reprise.
 - État honnête : les contrôles géométriques disponibles pour fiche, recruteur, retours et semaine sont sans anomalie, mais le protocole de comparaison visuelle reste incomplet ; les autres écrans cités restent sans contrôle visuel propre. Cases de fidélité et critère final non achevés ; pas de `TOUT_EST_FINI`. Aucun JS/CSS ou test changé, donc aucun bump `?v=` ni migration.
 
+### Reprise 41 du 24/10/2026
+
+- Branche `fid-fiches` confirmée. Les commits fonctionnels précédents sont déjà présents ; les modifications locales de `.opencode/agents/*` et `opencode.json` sont hors tranche, non ajoutées et laissées intactes.
+- Contrôles géométriques disponibles dans le compte rendu (reprise 40) : fiche, recruteur, retours et semaine chacun `{chevauchements:0, textesSous22px:0, debordent:[]}`. Le script externe de capture et ses PNG n'ont pas pu être lus dans cette session, donc pas de nouvelle capture ni de comparaison visuelle revendiquée. Les scènes arrivée, relevé, chiffres, menu et classements restent sans mesure documentée ; accueil, actualités, tonposte et bilan restent hors périmètre applicatif et leurs anomalies consignées en reprise 40 ne sont pas modifiées.
+- Vérifications relancées : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (27/27 verts), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert). Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
+- Aucun défaut géométrique nouveau exploitable n'étant apparu, aucun changement applicatif n'a été fait à l'aveugle. Aucun bump `?v=` ni migration. Fidélité aux maquettes et couverture de toutes les scènes restent incomplètes ; cette reprise ne revendique pas `TOUT_EST_FINI`.
+
 ### Reprise 38 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Historique jusqu'à `6874035f` consulté ; aucun fichier de la tranche en attente de commit. Les modifications `.opencode/agents/*` et `opencode.json` restent hors tranche et intactes.
