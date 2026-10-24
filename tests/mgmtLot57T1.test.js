@@ -188,3 +188,12 @@ test('Monde lot 57 T1 — l’interface garde une issue lisible quand une rivale
     assert.doesNotMatch(html,/undefined|null/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — une organisation hostile reste échappée dans le tableau',()=>{
+  const w=partie();
+  try{
+    const html=w.eval(`(()=>{const original=mgmtOrgParId;try{mgmtOrgParId=id=>({id,nom:'<img src=x onerror=alert(1)>'});return scr_mgmt_guerre();}finally{mgmtOrgParId=original;}})()`);
+    assert.doesNotMatch(html,/<img src=x onerror=alert\(1\)>/);
+    assert.match(html,/&lt;img src=x onerror=alert\(1\)&gt;/);
+  }finally{w.close();}
+});
