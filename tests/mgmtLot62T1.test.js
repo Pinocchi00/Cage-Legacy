@@ -33,8 +33,12 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
   }finally{w.close();}
 });
 
-test('Monde lot 62 T1 — la cérémonie vide présente honnêtement ses rubriques',()=>{
+test('Monde lot 62 T1 — le carnet vide présente honnêtement ses rubriques',()=>{
   const w=newGameWindow({runMain:true});
-  try{const empty=w.eval("(()=>{const m=mgmtPasseGenerer('split',{soirees:3});m.hist=[];m.facts=[];m.roster.forEach(f=>delete f.prixAnnee);G.mgmt=m;return mgmtCarnetLire(m).prix.length})()");assert.equal(empty,0);}
+  try{
+    const empty=w.eval("(()=>{const m=mgmtPasseGenerer('split',{soirees:3});m.hist=[];m.facts=[];m.roster.forEach(f=>delete f.prixAnnee);G.mgmt=m;return {prix:mgmtCarnetLire(m).prix.length,ecran:scr_mgmt_carnet()}})()");
+    assert.equal(empty.prix,0);
+    assert.equal((empty.ecran.match(/Rien encore\./g)||[]).length,7,'chaque rubrique vide du carnet annonce explicitement son absence de contenu');
+  }
   finally{w.close();}
 });

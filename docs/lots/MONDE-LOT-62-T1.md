@@ -38,4 +38,6 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+- Reprise 17 : le test du carnet vide vérifie désormais le rendu de l'écran et confirme que chacune des sept rubriques affiche « Rien encore. » lorsqu'elle est vide (auparavant seul le tableau des prix était contrôlé). `node --test tests/mgmtLot62T1.test.js` passe (2/2). Aucun code de production ni cache n'a changé. Les preuves manquantes des reprises précédentes (50 soirées réelles sans répétition, sauvegarde historique jouée sur une année, prix révélation/retour décernés sur une partie réelle) restent non établies ; elles ne sont pas masquées par ce test ciblé.
+
 - Reprise 16 : `node --test tests/mgmtLot62T1.test.js` passe (2/2, 37 s), `node tools/verif-versions.js origin/main` ne relève aucun écart et ESLint passe. Le parcours prouve trois années clôturées et sauvegardées/rechargées soirée par soirée ; le test lent de poids a déjà passé lors de la reprise 15. Je ne présente toujours pas comme prouvés le parcours historique complet d'un an, les 50 soirées de presse ni l'obtention réelle des prix révélation/retour : le test du lot ne couvre pas ces assertions. Les fichiers locaux de configuration hors tranche restent hors périmètre.
