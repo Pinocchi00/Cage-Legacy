@@ -134,3 +134,11 @@ test('Monde lot 57 T1 — le classement expose les quatre mesures mondiales sans
     }
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — une lecture répétée du classement laisse la sauvegarde inchangée',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const avant=JSON.stringify(m);mgmtGuerreClassement(m);const apres=JSON.stringify(m);return JSON.stringify({avant,apres});})()`));
+    assert.equal(result.apres,result.avant);
+  }finally{w.close();}
+});
