@@ -204,6 +204,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun code fonctionnel ni format de sauvegarde modifié à cette reprise ; aucune migration. Catalogue, calcul, affichages Accueil/presse, mouvements des autres organisations et intitulés des tests sont déjà livrés et commités.
 - Limite de couverture conservée : les familles sont testées par préparation individuelle de leurs faits sur une partie créée par le parcours réel ; cela ne démontre pas que les systèmes opérationnels produisent naturellement tous ces faits. Aucune question nouvelle pour Anthony.
 
+### Reprise 7 — reprise 7 demandée (24/10/2026)
+
+- `git log --oneline -12` et `git status --short` consultés sur `p8-apres`. Tous les changements fonctionnels de tranche figurent déjà dans l'historique. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache dans `index.html` sont étrangers à la tranche ; ils sont exclus.
+- Vérifications relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et confirme 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` contiennent `mgmtLot63T1` (`true,true`).
+- Catalogue, calcul, raccordements Accueil/presse, mouvements d'organisation et test de sauvegarde sans clé nouvelle restent ceux des commits précédents ; aucune migration ni modification de code fonctionnel dans cette reprise. Aucun nouveau test ajouté ; les intitulés exigés sont déjà présents dans le fichier dédié.
+- Limite honnête : les scénarios valident séparément les faits familiaux après création via le parcours réel, sans démontrer que les systèmes opérationnels génèrent naturellement chacun des dix faits. Aucun écart nouveau ni question pour Anthony.
+
 ### Reprise 9 — livraison finale (24/10/2026)
 
 - Branche `p8-apres`, historique et statut vérifiés. Les changements fonctionnels de la tranche sont déjà commités ; aucune modification fonctionnelle non committée à reprendre. La seule modification de tranche réalisée ici est cette entrée de compte rendu.
