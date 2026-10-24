@@ -1861,4 +1861,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-press b{font:800 24px/1 var(--mgmt-font-display);color:#F0B220}
 .ld3-press span{font-size:22px}
 .ld3-speech{padding:12px 14px;border-left:4px solid #F0B220;font-size:22px;line-height:1.2}
+.ld3-figures{margin:14px 0;padding:12px;background:#121010;border:2px solid rgba(233,230,225,.5)}
+.ld3-figures h3{margin:0 0 8px;font:800 26px/1 var(--mgmt-font-display);color:#E23A2B}
+.ld3-figure{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:22px;line-height:1.1}
+.ld3-figure:last-child{border-bottom:0}
+.ld3-figure b{font:600 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+.ld3-figure span{font-size:22px;text-align:right}
 /* ==== [FIN ANCRE] ==== */

@@ -211,19 +211,46 @@ function mgmtLendemainAttentionHtml(m){
   }).join('');
 }
 
-/** Titres presse rattachés à la soirée, classés par le poids de P8 T1. */
-function mgmtLendemainPresseHtml(m){
-  if(typeof mgmtMediasLendemain!=='function') return '';
-  const rows=mgmtMediasLendemain(m)||[], stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
-  const score=row=>{const id=row&&row.id;const s=stories.find(x=>x.a===id||x.b===id);return s?s.poids:0;};
-  return rows.slice().sort((a,b)=>score(b)-score(a)).map((r,i)=>`<div class="ld3-press"><b>${i===0?'À LA UNE':'DANS LA PRESSE'}</b><span>${esc(r.texte||r.titre||'')}</span></div>`).join('');
-}
-
 /** Bloc discursif facultatif : la PR P7 T4 peut arriver après cette branche. */
 function mgmtLendemainDiscoursHtml(m){
   if(typeof mgmtDiscoursLire!=='function'||!Array.isArray(m.discours)) return '';
   const rows=m.discours.filter(d=>d&&d.c===m.lastEvent.cycle);
   return rows.map(d=>`<div class="ld3-speech">${esc(typeof d.texte==='string'?d.texte:'')}</div>`).join('');
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE54_T1_CHIFFRES_PRESSE] — Monde lot 54 T1 ==== */
+/** Les articles existants, ordonnés par le poids P8 T1 de leur combat. */
+function mgmtLendemainPresseHtml(m){
+  if(typeof mgmtMediasLendemain!=='function') return '';
+  const histoires=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
+  const rows=mgmtMediasLendemain(m)||[];
+  const score=row=>{
+    const combat=Number.isSafeInteger(row.f)?m.hist[row.f]:null;
+    const id=row.id;
+    const story=histoires.find(x=>x.c===row.f)||histoires.find(x=>x.a===id||x.b===id);
+    return story?story.poids:combat?0:0;
+  };
+  return rows.slice().sort((a,b)=>score(b)-score(a)).map((row,i)=>
+    `<div class="ld3-press"><b>${i===0?'À LA UNE':'DANS LA PRESSE'}</b><span>${esc(row.texte||row.titre||'')}</span></div>`).join('');
+}
+
+/** Les chiffres effectivement enregistrés à la clôture, sans estimation. */
+function mgmtLendemainChiffresHtml(m){
+  const e=m&&m.lastEvent, f=e&&e.finance||{}, rows=[];
+  const ajouter=(label,value)=>{if(typeof value==='string'||Number.isFinite(value)) rows.push(`<div class="ld3-figure"><b>${esc(label)}</b><span>${esc(typeof value==='number'?value.toLocaleString('fr-FR'):value)}</span></div>`);};
+  ajouter('SALLE',f.spectateurs);
+  ajouter('RECETTES',Number.isFinite(f.recette)?mgmtEuros(f.recette/1000):null);
+  ajouter('CAISSE',Number.isFinite(m.treasury)?mgmtEuros(m.treasury):null);
+  ajouter('POPULARITÉ',Number.isFinite(m.popularity)?m.popularity:null);
+  const poste=m.poste;
+  if(poste&&Array.isArray(poste.objectifs)){
+    for(const objectif of poste.objectifs){
+      if(!objectif||typeof objectif.nom!=='string') continue;
+      rows.push(`<div class="ld3-figure"><b>${esc(objectif.nom)}</b><span>${objectif.ok===true?'ATTEINT':'EN COURS'}</span></div>`);
+    }
+  }
+  return rows.length?`<section class="ld3-figures"><h3>LES CHIFFRES</h3>${rows.join('')}</section>`:'';
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -312,6 +339,8 @@ function scr_mgmt_lendemain(){
       +mgmtLendemainPrimesHtml(m)
       +mgmtLendemainDiscoursHtml(m)
       +mgmtLendemainAttentionHtml(m)
+      +mgmtLendemainPresseHtml(m)
+      +mgmtLendemainChiffresHtml(m)
       +mgmtLendemainResultatsHtml(m)
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
       +`</div>`,'normal','mf-sem-p')+`</section>`
