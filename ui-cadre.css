@@ -1863,4 +1863,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale h2{font-size:26px;color:#E23A2B}.gu3-rivale h3{font-size:52px}.gu3-rivale p,.gu3-rivale li{font-size:24px;line-height:1.15}
 .gu3-rivale ul{margin:0;padding-left:28px;display:flex;flex-direction:column;gap:16px}
 .gu3-rivale>strong{font-size:22px}.gu3-rivale small{font-size:22px;opacity:.76;margin-top:auto}
+.gu3-mouvement{border-top:2px solid rgba(233,230,225,.16);padding-top:12px}
 /* ==== [FIN ANCRE] ==== */

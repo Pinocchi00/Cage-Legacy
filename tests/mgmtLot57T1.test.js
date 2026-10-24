@@ -40,8 +40,10 @@ test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels s
   try{
     const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt; m.guerre={ev:[],rival:null,depuis:0}; const rows=mgmtGuerreClassement(m),id=rows.find(x=>!x.estSplit).id; m.guerre.ev=[{c:m.cycle,o:id,t:'pique',x:null,p:8}]; mgmtRivaleMettreAJour(m); const html=scr_mgmt_guerre(); return JSON.stringify({html,screen:SCREENS.mgmt_guerre()});})()`));
     assert.match(result.html,/LE CLASSEMENT DES HUIT/);
-    assert.match(result.html,/TA RIVALE DU MOMENT/);
-    assert.match(result.html,/Juste devant/);
+     assert.match(result.html,/TA RIVALE DU MOMENT/);
+     assert.match(result.html,/Juste devant/);
+     assert.match(result.html,/Depuis la dernière soirée/);
+     assert.ok(w.eval(`(()=>{const x=mgmtGuerreClassement(G.mgmt).find(y=>y.estSplit); return typeof x.mouvement==='number';})()`));
     assert.equal(result.html,result.screen);
     assert.match(result.html,/&lt;|SPLIT/);
     const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
