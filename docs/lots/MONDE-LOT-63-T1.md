@@ -14,6 +14,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise depuis les commits `e705d1c` et `8c04a2a` : les modifications locales préexistantes de `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et restent non incluses.
+- `mgmt-ecran-lendemain.js` : la suite ajoute les événements `agent`, `pris`, `parti` et `champion` des organisations rivales enregistrés cette semaine dans `m.guerre.ev`, avec organisation et combattant échappés. `index.html` : version cache montée.
+- `tests/mgmtLot63T1.test.js` : nouveau test « Monde lot 63 T1 — la suite du lendemain montre les mouvements des autres organisations ». Les trois tests ciblés passent.
+- **Écarts non résolus à la fiche** : le calcul T3 préexistant de lot 54 reste le moteur appelé, et non un véritable moteur exploitant les dix familles du nouveau catalogue. Son jeu de faits n'alimente pas toutes ces familles et le suffixe semaine n'est pas une mémoire anti-répétition historique. Le test des familles ne déclenche pas chaque famille sur des faits réels; tests d'échappement, sauvegarde/partie ancienne et plafond réduit non ajoutés. Le test nouveau n'est pas encore dans les listes générales `test` et `test:watch` (les commandes dédiées existaient auparavant). Les mouvements rivaux ne montrent que les types consignés connus, et la notion `champion` n'est pas produite par le producteur d'événements actuel.
+- Vérifications exécutées : `node --test tests/mgmtLot63T1.test.js` (3/3), `node tools/verif-versions.js origin/main` sans écart, ESLint ciblé sur le fichier de production. Le test lent `tests/mgmtReleveReduit.test.js` et ESLint global ne sont pas relancés.
+- Aucun changement de format de sauvegarde, aucune migration. Pas de question à Anthony ; les manques sont du travail restant et ne sont pas présentés comme achevés.
+
 - `mgmt-apres-data.js` : début de catalogue de dix familles, trois formulations chacune, marquées `relu:false`.
 - `mgmt-ecran-lendemain.js` : ajout de la porte `mgmtApresCalculer`, pure et déterministe par délégation à la projection préexistante.
 - `mgmt-actualites.js` : ajout d'un libellé et d'une source d'actualité pour les lignes calculées.

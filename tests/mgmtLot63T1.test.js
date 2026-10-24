@@ -24,3 +24,14 @@ test('Monde lot 63 T1 — le calcul reste pur, borné et déterministe sur une v
     for(const x of r.a)assert.equal(x.relu,false);
   }finally{w.close();}
 });
+
+test('Monde lot 63 T1 — la suite du lendemain montre les mouvements des autres organisations',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261024);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const org=mgmtMondeVivantIds(m)[0];m.orgs={[org]:{name:'Organisation Rivale',roster:[]}};m.guerre={ev:[{c:m.cycle,o:org,t:'agent',x:null,p:8}]};return JSON.stringify({org:'Organisation Rivale',html:mgmtLendemainMouvementsHtml(m)});})()`));
+    assert.ok(result.html.includes(result.org));
+    assert.match(result.html,/autre organisation/);
+  }finally{w.close();}
+});

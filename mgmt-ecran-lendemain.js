@@ -212,6 +212,24 @@ function mgmtLendemainMouvementsHtml(m){
     const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,fighter.div);
     lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong><em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
   }
+  /* ==== [ANCRE: P8_T3_MOUVEMENTS_AUTRES_ORGS] — Monde lot 63 T1 ==== */
+  const guerre=m.guerre&&Array.isArray(m.guerre.ev)?m.guerre.ev:[];
+  const orgIds=mgmtMondeVivantIds(m);
+  const splitId=typeof mgmtPredecesseurOrgId==='function'?mgmtPredecesseurOrgId(m):'split';
+  const noms=new Map(orgIds.map(orgId=>[orgId,m.orgs&&m.orgs[orgId]&&m.orgs[orgId].name||orgId]));
+  for(const ev of guerre){
+    if(!ev||!Number.isSafeInteger(ev.c)||ev.c!==m.cycle||ev.o===splitId) continue;
+    const org=noms.get(ev.o);
+    if(!org) continue;
+    const ext=ev.x&&typeof mgmtExteriorCombattant==='function'?mgmtExteriorCombattant(m,ev.x):null;
+    const nom=ext&&(ext.name||ext.last)||'Un agent libre';
+    let detail='';
+    if(ev.t==='agent') detail=`${nom} signé par ${org}`;
+    else if(ev.t==='pris') detail=`${nom} rejoint ${org}`;
+    else if(ev.t==='parti') detail=`${nom} quitte son organisation pour ${org}`;
+    else if(ev.t==='champion') detail=`${org} couronne un nouveau champion${nom!=='Un agent libre'?' : '+nom:''}`;
+    if(detail) lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(org)}</span><strong>${esc(detail)}</strong><em>autre organisation</em></div>`);
+  }
   return lignes.join('');
 }
 /* ==== [FIN ANCRE] ==== */
