@@ -400,3 +400,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (21/21), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Le test cible inclut les simulations déterministes sur les relevés effectivement générés, les 50 fenêtres de formulation et le champ facultatif.
 - Aucun défaut détecté dans les critères couverts par ces contrôles. Les limites fonctionnelles précédemment consignées restent non résolues : fidélité intégrale aux maquettes non démontrée, déclenchement rattaché au terme du contrat plutôt qu'à chaque anniversaire, test de sauvegarde sans fixture historique complète, et pas de preuve de trois saisons pleines. `mgmtReleveReduit` n'a pas été exécuté.
 - Aucun format de sauvegarde modifié ni migration requise. Aucun fichier métier n'était en attente de commit; cette mise à jour du compte rendu est incluse dans le commit de reprise. Aucune question nouvelle pour Anthony. La tranche n'est pas déclarée entièrement conforme et `TOUT_EST_FINI` n'est pas revendiqué.
+
+### Reprise 52
+
+- Ajout du test « Lot 55 T1 — le rendu du carnet échappe les noms provenant des fiches » : il rend le carnet avec un nom hostile réellement issu de la fiche et vérifie que le HTML contient la forme échappée, pas une balise exécutable.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (22/22); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); confirmation que le test est dans `test` et `test:watch`.
+- Aucun changement de production ni de sauvegarde. Limites précédemment documentées inchangées : pas de preuve de trois saisons complètes, de chargement d'une fixture complète d'ancienne sauvegarde, de conformité intégrale aux planches, ni de déclenchement à chaque anniversaire; le test lent `mgmtReleveReduit` n'a pas été lancé.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de rendu hostile) et cette fiche. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues. Aucune migration ni question nouvelle pour Anthony.

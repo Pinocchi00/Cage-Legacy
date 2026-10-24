@@ -229,3 +229,13 @@ test('Lot 55 T1 — trois années de soirées jouées donnent des prix détermin
     }
   }finally{w.close();}
 });
+test('Lot 55 T1 — le rendu du carnet échappe les noms provenant des fiches',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[{id:'x',name:'<img src=x onerror=alert(1)>',prixAnnee:[{prix:'ko',annee:2026}]}],hist:[],facts:[]}};
+  c.mgmtOrgNom=()=> 'Organisation';
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_carnet();
+  assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
+  assert.ok(!rendu.includes('<img src=x'));
+});
