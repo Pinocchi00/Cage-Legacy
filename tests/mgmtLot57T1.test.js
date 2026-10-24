@@ -122,3 +122,15 @@ test('Monde lot 57 T1 — chaque classe gu3 affichée possède une règle CSS',(
     assert.deepEqual(sansRegle,[]);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le classement expose les quatre mesures mondiales sans état parallèle',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const monde=mgmtOrgClassement(m),guerre=mgmtGuerreClassement(m);return JSON.stringify({monde:monde.map(x=>x.id),guerre:guerre.map(x=>({id:x.id,mesures:Object.keys(x.niveaux).sort(),total:x.total}))});})()`));
+    assert.deepEqual(result.guerre.map(x=>x.id),result.monde);
+    for(const row of result.guerre){
+      assert.ok(['notoriete','popularite','puissance','stade'].every(k=>row.mesures.includes(k)));
+      assert.ok(Number.isFinite(row.total));
+    }
+  }finally{w.close();}
+});
