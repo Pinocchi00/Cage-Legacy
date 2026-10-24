@@ -208,6 +208,18 @@ test('Monde lot 53 T1 — V règle aussi le combat sélectionné sur la carte d�
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — le sélecteur expose son état de vue choisi',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5321);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const result=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);mgmtVueCombatChoisir(p[0].i,'forts');return mgmtSoOuvertureHtml(G.mgmt,p);})()`);
+    assert.match(result,/aria-pressed="true" aria-label="Vue du combat 1 : TEMPS FORTS"/);
+    const defaultView=w.eval(`(()=>{mgmtVueCombatChoisir(mgmtSoireeProgramme(G.mgmt)[1].i,'complet');return mgmtSoOuvertureHtml(G.mgmt,mgmtSoireeProgramme(G.mgmt));})()`);
+    assert.match(defaultView,/aria-pressed="false" aria-label="Vue du combat 2 : COMPLET"/);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — les repères de temps forts conservent l’ordre et l’échappement dans la frise',()=>{
   const w=newGameWindow({runMain:true});
   try{

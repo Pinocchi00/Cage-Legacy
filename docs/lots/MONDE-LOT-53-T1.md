@@ -436,3 +436,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Contrôles durant cette session : `node --test tests/mgmtLot53T1.test.js` (20/20), `node --test tests/mgmtPasse.test.js tests/mgmtSoiree.test.js` (27/27), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (succès), test lent `mgmtReleveReduit.test.js` lancé en tâche de fond mais pas encore achevé/lu. Vérification de `package.json`: présence dans `test` et `test:watch` confirmée.
 - Critères restant non validés : portage intégral exact des trois maquettes; lecture par fenêtres de 30–60 s avec fondu réel de l'arène; cumul de référence entre 900 et 1200 s (mesure antérieure 868,38 s); test lent de cette exécution en attente. La frise existante et l'accélération hors moments sont conservées sans moteur secondaire.
 - Pas de changement du moteur, de la sauvegarde ou des textes joueur. Ce compte rendu expose l'état partiel; aucune livraison finale ni `TOUT_EST_FINI` n'est revendiqué.
+
+### Reprise 62 — état vocal du sélecteur
+
+- Fait : l'état accessible `aria-pressed` du sélecteur de vue reflète désormais si le combat est en vue complète (état de base) ou dans une vue choisie (temps forts/résultat), au lieu d'annoncer systématiquement « activé ». La fonction existante de réglage n'a pas changé.
+- Test ajouté : « Monde lot 53 T1 — le sélecteur expose son état de vue choisi ».
+- Vérifications : `node --test tests/mgmtLot53T1.test.js` — 21/21; `node --test tests/mgmtPasse.test.js tests/mgmtSoiree.test.js` — 27/27; `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` réussis. `node --test tests/mgmtReleveReduit.test.js` — 6/6 (435,8 s). Le test établit le plafond de poids, mais ne change pas la mesure d'estimation de soirée antérieure.
+- Vérification `package.json` : `mgmtLot53T1.test.js` est inclus dans `test` et `test:watch`. Version cache de `mgmt-soiree-cadre.js` montée.
+- Restent non validés : portage exhaustif aux valeurs des maquettes; fenêtres de lecture temporisées et fondu de l'image d'arène; durée de référence 900–1200 s (mesures déjà documentées sous 900 s avec les vues par défaut); audit de toutes les tailles/styles et test lent de cette reprise. La durée n'a pas été artificiellement altérée. Aucun moteur de combat ni sauvegarde modifiés.
+- Les modifications `.opencode/agents/*` et `opencode.json` observées au départ sont étrangères et exclues.
