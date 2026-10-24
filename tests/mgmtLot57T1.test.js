@@ -312,3 +312,15 @@ test('Monde lot 57 T1 — la clôture annuelle mémorise le rang et reste idempo
     assert.equal(r.valid,true);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le bilan annuel ne dégrade pas la confiance ni les valeurs économiques existantes',()=>{
+  const w=partie();
+  try{
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;mgmtPosteInit(m);m.poste.conf=2;const avant={conf:m.poste.conf,treasury:m.treasury,pop:m.pop,eventsPlayed:m.eventsPlayed};const resultat=mgmtGuerreFinAnnee(m,1);return JSON.stringify({avant,apres:{conf:m.poste.conf,treasury:m.treasury,pop:m.pop,eventsPlayed:m.eventsPlayed},resultat});})()`));
+    assert.equal(r.resultat.applique,true);
+    assert.ok(r.apres.conf>=r.avant.conf);
+    assert.equal(r.apres.treasury,r.avant.treasury);
+    assert.equal(r.apres.pop,r.avant.pop);
+    assert.equal(r.apres.eventsPlayed,r.avant.eventsPlayed);
+  }finally{w.close();}
+});
