@@ -369,7 +369,6 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État initial : branche `p11-ceremonie-carnet`, HEAD `893a19a`; aucun fichier métier ou test de la tranche non commité. Les changements `.opencode/agents/*` et `opencode.json` visibles dans l'arbre restent étrangers et sont exclus.
 - Vérifications exécutées : `node --test tests/mgmtLot55T1.test.js` (20/20); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert). Le test figure déjà dans les scripts généraux `test` et `test:watch` selon l'état livré antérieurement.
 - Aucun fichier de production n'a nécessité de correction après ces contrôles. Les limites connues ne sont pas masquées : le test ne charge pas une fixture historique complète; `mgmtReleveReduit` n'a pas été lancé; la fidélité intégrale aux maquettes et un déclenchement à chaque anniversaire ne sont pas attestés par ces vérifications (l'enchaînement existant suit la fin du contrat). Pas de changement de format ou migration de sauvegarde.
-- Le commit final est déjà présent dans l'historique; ce relevé de reprise est le seul changement de tranche à committer. Aucun changement étranger n'est ajouté.
 
 ### Reprise 48
 
@@ -620,3 +619,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (39/39 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés).
 - Aucun changement de production, de sauvegarde ou de version de cache. Les limites encore documentées en reprise 78 demeurent; le test lent `mgmtReleveReduit` n'a pas été lancé.
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (cas de non-attribution sans issue) et cette fiche. Les changements étrangers `.opencode/agents/*` et `opencode.json` restent exclus.
+
+### Reprise 80
+
+- Test ajouté : « Lot 55 T1 — un titre relevé sur un autre combat ne décale pas le bonus de titre », couvrant deux finitions concurrentes et l'index absolu du fait `title_fight`.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (40/40); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` et `git diff --check` (verts).
+- Aucun changement de production ou de sauvegarde. Limites toujours non certifiées : fidélité complète aux maquettes, déclencheur à chaque anniversaire, trois saisons pleines jouées, fixture d'ancienne sauvegarde complète et test lent `mgmtReleveReduit`.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` et cette fiche. Les changements étrangers `.opencode/agents/*` et `opencode.json` sont exclus. Ces limites empêchent de déclarer `TOUT_EST_FINI`.

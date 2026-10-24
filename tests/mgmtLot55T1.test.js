@@ -44,6 +44,16 @@ test('Lot 55 T1 — le combat de l’année est inscrit sur les deux fiches',()=
   c.mgmtCeremonieInscrire(m,[{id:'combat',laureats:['a','b']}],2026);
   assert.deepEqual(JSON.parse(JSON.stringify(m.roster.map(f=>f.prixAnnee.map(p=>p.prix)))),[['combat'],['combat']]);
 });
+test('Lot 55 T1 — un titre relevé sur un autre combat ne décale pas le bonus de titre',()=>{
+  const c=charger();
+  const hist=[
+    {c:10,a:{id:'x',name:'X'},b:{id:'y',name:'Y'},winner:'A',family:'ko',round:1},
+    {c:20,a:{id:'u',name:'U'},b:{id:'v',name:'V'},winner:'B',family:'ko',round:2},
+    {c:30,a:{id:'p',name:'P'},b:{id:'q',name:'Q'},winner:'A',family:'decision'}
+  ];
+  const prix=c.mgmtCeremonieCalculer({hist,facts:[{k:'title_fight',fight:1}]});
+  assert.equal(prix.find(p=>p.id==='ko').laureat,'v');
+});
 test('Lot 55 T1 — rendu échappé et toutes les classes ce3 ont une règle',()=>{
   const c=charger();
   const js=source;
