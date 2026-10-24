@@ -54,8 +54,13 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
       assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
       assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
-      assert.equal(w.eval(`G.mgmt.choc.a`),w.eval(`G.mgmt.roster[0].id`),'le champion Split de la proposition reste associé au choc programmé');
-      assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
+       assert.equal(w.eval(`G.mgmt.choc.a`),w.eval(`G.mgmt.roster[0].id`),'le champion Split de la proposition reste associé au choc programmé');
+       assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
+       const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,a=c.a,b=c.b; m.cal.prochaines[0].jour=c.jour;m.card.main=[{a,b,cycle:m.cycle,slot:'main'}];m.card.prelims=[];m.card.sizeMain=1;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m);return {event:!!event,fight:!!(event&&event.fights.some(f=>f.a===a&&f.b===b)),etat:c.etat,resultat:c.resultat}})()`);
+       assert.equal(chocJoue.event,true,'la soirée programmée doit passer par le résolveur normal');
+       assert.equal(chocJoue.fight,true,'le champion adverse doit figurer en combat principal');
+       assert.equal(chocJoue.etat,'termine');
+       assert.ok(['victoire','defaite'].includes(chocJoue.resultat),'le résultat du choc doit être enregistré');
      w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
      const discours=w.eval(`scr_mgmt_discours()`);
      for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);

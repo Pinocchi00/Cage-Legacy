@@ -211,3 +211,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Fichiers modifiés : `tests/mgmtLot69T1.test.js` (fixture cohérent et assertions d'identité des combattants) et cette fiche (compte rendu). Aucune migration ni version de cache requise.
 - Limites : cela vérifie seulement l'association des deux combattants à la proposition mono-combat et l'inscription de la date dans l'agenda ; le parcours de soirée/résultat du choc n'est pas prouvé ici. Les autres écarts demeurent : trois affrontements, parcours complet avec chargement strict, comparaisons/captures et mesures des écrans. Aucune image nouvelle n'est revendiquée.
+
+### Reprise 37
+- `tests/mgmtLot69T1.test.js` poursuit désormais la fixture choc jusqu'à `mgmtRunEvent` : l'affrontement local/adverse est placé en principal, la soirée normale s'exécute et le statut/résultat du choc sont vérifiés.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Limites maintenues : le parcours est le choc mono-affiche du modèle existant, pas les trois combats montrés sur la planche. Les critères restant (parcours contractuel strict, captures/scènes dédiées et conformité visuelle mesurée) ne sont pas déclarés terminés.
