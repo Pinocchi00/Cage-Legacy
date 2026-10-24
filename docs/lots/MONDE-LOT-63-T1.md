@@ -887,3 +887,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Les sept tests ciblés prescrits passent **130/130**, dont les deux régressions lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines). `node tools/verif-versions.js origin/main` ne signale aucun écart et `node_modules/.bin/eslint .` passe. Le test est inscrit dans `test` et `test:watch` (`true,true`).
 - `git merge origin/main` a été refusé par la politique d'exécution interdisant `git merge*` ; aucune fusion n'est revendiquée et l'intégration reste au superviseur. Aucun changement de sauvegarde ni migration. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` étrangères et exclues.
 - Le compte rendu documente toujours la limite de couverture : les faits familiaux sont scénarisés sur une partie créée par le parcours réel, sans prouver que tous les systèmes les produisent naturellement.
+
+### Reprise 24/10/2026 — contrôle demandé après reprise 3
+
+- Branche confirmée : `p8-apres`. Les commits des fichiers fonctionnels et tests de tranche figurent déjà dans l'historique ; aucun fichier de tranche non commité n'a été trouvé. Les modifications locales d'outillage (`.opencode/agents/*`, `opencode.json`, `sw.js`) sont étrangères et laissées intactes.
+- La commande prescrite `git merge origin/main` a été tentée, mais la politique de l'environnement la refuse. Aucun merge n'est prétendu ; l'intégration reste à effectuer par le superviseur.
+- La suite ciblée prescrite passe **130/130** : tests des lots 54, 63, Actualités, 55, 57, 48 et 56, y compris les deux régressions du lot 54.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit aux scripts `test` et `test:watch` (`true,true`). Pas de changement de sauvegarde ni migration. Limite de couverture inchangée : les dix familles sont déclenchées par des faits préparés sur une partie créée par le chemin réel, sans prouver leur production naturelle par tous les systèmes opérationnels.
