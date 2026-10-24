@@ -313,3 +313,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Après capture des deux étapes : `lendemain` conserve 0 chevauchement, 0 texte sous 22 px, aucun débordement (gros blocs 18,4 %). `lendemainSuite` conserve 0 chevauchement et 0 texte sous 22 px (gros blocs 17 %), mais les quatre alertes de débordement — « Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ » — n'ont pas changé. La règle tentée est donc insuffisante ; le critère visuel de la case 4 reste incomplet.
 - `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node tools/verif-versions.js origin/main` et ESLint passent. Aucune migration ni changement de mécanique ; aucun nouveau test.
 - Fichiers de cette reprise : `ui-cadre.css` (cellules bornées), `index.html` (cache), cette fiche. Comparatifs régénérés dans le dossier temporaire défini par le guide ; écart restant honnêtement déclaré, sans inspection manuelle des PNG.
+
+### Reprise 46 — débordement des cellules — 24/10/2026
+
+- État initial : branche `fid-lendemain`, dernier commit fonctionnel déjà présent (`a3e84265`); seules les modifications des fichiers non liés préexistantes restent exclues.
+- CSS : levée du clipping `overflow:hidden` sur la ligne de mouvement et sa première cellule de la suite, sans masquer ni retirer de texte; version de cache montée par `node tools/_bump.js ui-cadre.css`.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7), `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint passe.
+- Capture non exécutée dans cette reprise : le guide temporaire est bloqué par la politique d'accès externe. Les quatre alertes de débordement précédemment relevées restent à confirmer après ce changement; aucune conformité visuelle nouvelle n'est revendiquée. Pas de migration ni de test ajouté.
