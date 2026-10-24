@@ -9,7 +9,7 @@ const jouer=require('./helpers/jouerSoirees');
 test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies et clôtures une seule fois',()=>{
   const w=newGameWindow({runMain:true});
   try{
-    w.eval("window.__lot62={ceremonies:0,classements:0};const calc=mgmtCeremonieCalculer,clot=mgmtGuerreFinAnnee;mgmtCeremonieCalculer=function(m){window.__lot62.ceremonies++;return calc(m)};mgmtGuerreFinAnnee=function(m,a){window.__lot62.classements++;return clot(m,a)};");
+    w.eval("window.__lot62={ceremonies:0,classements:0,prix:[]};const calc=mgmtCeremonieCalculer,clot=mgmtGuerreFinAnnee;mgmtCeremonieCalculer=function(m){window.__lot62.ceremonies++;const prix=calc(m);window.__lot62.prix.push(...prix.map(p=>p.id));return prix};mgmtGuerreFinAnnee=function(m,a){window.__lot62.classements++;return clot(m,a)};");
     w.eval("setSeed(20261024);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});");
     const initial=w.eval('G.mgmt.hist.length');
     let jouees=0;
@@ -24,6 +24,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
     assert.ok(result.annees>=3,`année de dernière clôture obtenue: ${result.annees}`);
     assert.equal(result.compteurs.ceremonies,3,'le calcul des prix est exécuté exactement une fois par année');
     assert.equal(result.compteurs.classements,3,'le classement est clôturé exactement une fois par année');
+    assert.ok(result.compteurs.prix.includes('revelation'),'la révélation est décernée sur le parcours réel');
     assert.ok(result.prix.length>0,'les prix sont consignés sur les fiches');
     assert.equal(result.avant,result.apres,'la vérification passive après sauvegarde/rechargement ne modifie pas les clôtures traitées');
     assert.equal(result.valid,true);
