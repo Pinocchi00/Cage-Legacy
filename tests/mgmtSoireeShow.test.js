@@ -62,6 +62,8 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   assert.ok(maj(win).includes('LE LENDEMAIN')); assert.ok(texte(win).includes('LA SOIRÉE'));
   assert.equal(win.eval(`document.querySelectorAll('.so3-fin-prime').length`),2);
   assert.equal(win.eval(`document.querySelectorAll('.mf-so-bande').length`),0);
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche et ne répète pas son titre dans le contenu. */
+  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-titre').length`),0);
 });
 
 test('Pendant la soirée, aucune section de la barre ne s\'ouvre ; elles se rouvrent à la fin', () => {
