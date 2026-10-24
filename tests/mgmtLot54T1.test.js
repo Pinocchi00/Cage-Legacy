@@ -32,17 +32,18 @@ test('Monde lot 54 T1 — brief du 22/10, P8 : la victoire d’un 13-1 sur le n�
         a:side(f),b:side(other),s:{d:900,c:[]}};
       m.hist.push(fight);m.lastEvent={cycle,fights:[{a:f.id,b:other.id,winner:'A',family:'dec'}],touched:[],finance:{spectateurs:0,recette:0}};
       const stories=mgmtHistoiresSoiree(m,m.eventsPlayed), press=mgmtMediasLendemain(m), moments=mgmtLendemainMomentsHtml(m);
-      return {top:top.id,first:stories[0]&&stories[0].type,winner:stories[0]&&stories[0].a,
-        press:press[0]&&press[0].texte,moments,pressRows:mgmtLendemainPresseHtml(m)};
+       return {top:top.id,first:stories[0]&&stories[0].type,winner:stories[0]&&stories[0].a,
+         winnerName:f.name,press:press[0]&&press[0].texte,moments,pressRows:mgmtLendemainPresseHtml(m)};
     })()`);
     assert.notEqual(r.missing,true,'la partie générée contient deux combattants dans la division');
     assert.equal(r.first,'surprise');
     assert.equal(r.winner,r.top);
     assert.ok(r.press,'la presse du lendemain produit un premier titre');
     assert.match(r.pressRows,/À LA UNE/);
-    assert.match(r.pressRows,/13-1|surprise|favori|n°1|numéro 1/i);
+    assert.match(r.pressRows,new RegExp(r.winnerName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'));
     assert.match(r.moments,/ld3-moment/);
     assert.match(r.moments,/Revoir/);
+    assert.ok(r.moments.indexOf(r.winnerName)<r.moments.indexOf('LA FINITION')||!r.moments.includes('LA FINITION'));
   }finally{w.close();}
 });
 
