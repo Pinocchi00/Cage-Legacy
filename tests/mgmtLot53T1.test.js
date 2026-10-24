@@ -37,6 +37,7 @@ test('Monde lot 53 T1 — la vue résultat affiche sa carte passable puis fait a
     assert.equal(r.screen,'mgmt_soiree');
     assert.equal(r.delai,5000);
     assert.match(w.eval(`document.getElementById('app').innerHTML`),/so3-resultat/);
+    assert.match(w.eval(`document.getElementById('app').innerHTML`),/role="status" aria-live="polite"/);
     w.eval(`CL.mgmtSoResultatContinuer()`);
     assert.equal(w.eval(`MGMT_SOIREE.index`),r.avant+1);
   }finally{w.close();}

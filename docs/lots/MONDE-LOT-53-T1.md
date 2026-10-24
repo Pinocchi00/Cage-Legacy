@@ -422,6 +422,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. Cache de `mgmt-soiree-cadre.js` monté avec `_bump.js`.
 - État restant : les écarts de portage visuel, de lecture temps forts et de cumul 900–1200 s documentés plus haut demeurent; cette reprise n'est pas une livraison finale.
 
+### Reprise 61 — annonce accessible du résultat seul
+
+- La carte de résultat seul porte maintenant `role="status"` et `aria-live="polite"`, afin que l'annonce du verdict soit exposée aux lecteurs d'écran lorsqu'elle remplace l'écran de soirée.
+- Test ajouté : l'assertion correspondante dans « Monde lot 53 T1 — la vue résultat affiche sa carte passable puis fait avancer la soirée ».
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 22/22 ; `node tools/verif-versions.js origin/main` — aucun écart ; `node_modules/.bin/eslint .` et `git diff --check` passent.
+- Cette reprise est une amélioration ciblée, pas l'achèvement du lot. Les écarts fonctionnels encore listés à la reprise 56 (portage exact complet, cumul mesuré 900–1200 s et chronométrage réel des fenêtres) ne sont pas résolus par cette modification.
+
 ### Reprise 58 — contrôle du nombre de primes en fin de soirée
 
 - Renforcement du test de la vraie fin de soirée : en plus de vérifier le bloc primes, il exige désormais que les trois annonces (« combat de la soirée » et deux performances) soient réellement présentes dans le rendu produit par une partie générée.
