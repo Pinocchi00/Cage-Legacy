@@ -215,6 +215,10 @@ function mgmtOrgChanger(m,orgId,offre){
   if(m.poste)m.poste.conf=2;
   if(Array.isArray(m.espoirsPropose))m.espoirsPropose=[];
   if(typeof mgmtEspoirsFixer==='function')mgmtEspoirsFixer(m);
+  /* L'ordre canonique des sous-parties fait partie du contrat de sauvegarde. */
+  const ordre=mgmtMondeVivantIds(m), range={};
+  ordre.forEach(id=>{if(orgs[id])range[id]=orgs[id];});
+  m.orgs=range;
   return mgmtMondeVivantValide(m);
 }
 function mgmtOffreAccepter(m,index){
