@@ -237,3 +237,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : les réactions de suspension, réseaux et autre organisation reprennent désormais le fait de la soirée sélectionné ; la suspension donne le nombre de jours connu, et une organisation est nommée seulement si le fait fournit son nom. Aucun fait absent n'est simulé.
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé des fichiers de production passe. Le cache de `mgmt-ecran-lendemain.js` est monté.
 - Aucun nouvel état de sauvegarde. Les écrans et la projection T3 restent soumis aux limites déjà consignées : composition non exhaustive vis-à-vis des planches, et absence de systèmes de données pour toutes les réactions et de mémoire éditoriale persistante. Ce complément ne déclare pas la tranche intégralement achevée.
+
+### Reprise — mouvements sur le premier écran (24/10/2026)
+
+- `mgmt-lendemain-cadre.js` affiche désormais les changements de rang des participants dans « Ce qui change », en complément des entrées/sorties et faits de clôture. Le rendu réutilise `mgmtLendemainMouvementsHtml`, sans créer de nouvelle règle de classement.
+- `ui-cadre.css` ajoute la règle dédiée `.ld3-change-movements`; caches CSS et JS montés dans `index.html`. Aucun état de sauvegarde nouveau.
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint du fichier JS passe.
+- Limites inchangées : fidélité exhaustive de la composition aux deux planches et contextualisation/anti-répétition éditoriale T3 ne sont pas entièrement garanties. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangères à la tranche et exclues.
