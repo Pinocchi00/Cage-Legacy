@@ -1681,7 +1681,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
    MondeAccueilArrivee.dc.html. Aucun texte sous 22 px, aucune animation, rien par-dessus. ==== */
 /* ==== [ANCRE: ACCUEIL_PLANCHE_COLONNES] — Monde lot 12 T2 ==== */
 /* ==== [ANCRE: ACCUEIL_PROPORTIONS_REPRISE] — Monde lot 12 T2 ==== */
-.mf-ac{display:flex;flex-direction:column;gap:16px;overflow:visible}
+.mf-ac{display:flex;flex-direction:column;gap:16px;overflow:hidden;min-height:0}
 .mf-ac-cols>.mf-ac-p{flex:5 1 0;min-width:0}
 .mf-ac-cols>.mf-ac-c3{flex:3 1 0}
 .mf-ac .mf-ac-hd{flex-wrap:wrap;gap:12px}
@@ -1701,6 +1701,20 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-tl{font-weight:600}
 .mf-ac-tv{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap}
 .mf-ac-cols{display:flex;align-items:stretch;gap:18px;min-height:700px;flex:1 0 auto}
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_SEMAINE_SANS_CHEVAUCHEMENT] — Monde lot 64 T1 ==== */
+.mf-ac-cols~.mf-ac-p{flex:none;max-height:calc(100vh - 250px);overflow:auto}
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_ZONE_VISIBLE] — Monde lot 64 T1 ==== */
+.mf-contenu.mf-ac{height:calc(100vh - 224px);min-height:0;box-sizing:border-box;overflow:hidden}
+.mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden;max-height:100%}
+.mf-ac .mf-ac-cols>.mf-ac-p{min-height:0;overflow:auto}
+.mf-ac .mf-ac-cols>.mf-ac-saison{overflow:hidden}
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_COLONNES_BORNEES] — Monde lot 64 T1 ==== */
+.mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2,.mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2>.mf-p3{min-height:0;max-height:100%;box-sizing:border-box}
+.mf-ac .mf-ac-cols>.mf-ac-p{flex-basis:0}
+/* ==== [ANCRE: MONDE64_T1_SEMAINE_COMPACTE] — Monde lot 64 T1 ==== */
+.mf-ac-semaine{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:2px solid var(--mf-sep);font-size:22px;line-height:1.1;flex:none}
+.mf-ac-semaine b{font-family:var(--mf-titre);font-size:24px;line-height:1;}
+.mf-ac-semaine button{font-size:22px;line-height:1.1}
 .mf-ac-colonne{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
 .mf-ac-c3{flex:none;min-height:0}
 .mf-ac-c4{flex:4;min-width:0}
@@ -1710,6 +1724,21 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-souple{flex:1;min-height:0}
 .mf-ac-p>.mf-p2>.mf-p3{padding:15px;gap:12px;overflow:visible}
 .mf-ac-haut>.mf-p2>.mf-p3{overflow:visible}
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_SAISON_CSS] — Monde lot 64 T1 ==== */
+.mf-ac-saison{flex:3 1 0;min-width:0;min-height:0}
+.mf-ac-titre{font-family:var(--mf-titre);font-size:34px;line-height:.8;font-weight:800;margin:0}
+.mf-ac-saison>.mf-p2>.mf-p3{overflow:hidden}
+.mf-ac-objectif{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-bottom:2px solid var(--mf-sep);font-size:22px;line-height:1.05}
+.mf-ac-objectif>div:first-child{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.mf-ac-objectif b{font-family:var(--mf-titre);font-size:28px;line-height:1;white-space:nowrap}
+.mf-ac-barre{height:8px;background:#252121;flex:none}
+.mf-ac-barre i{display:block;height:8px;background:var(--mf-jaune)}
+.mf-ac-patron,.mf-ac-recruteur{display:flex;flex-direction:column;gap:10px;flex:none;margin-top:4px}
+.mf-ac-patron>.mf-ac-rs,.mf-ac-recruteur>div:last-child{font-size:22px;line-height:1.1;color:var(--mf-texte2)}
+.mf-ac-recruteur{margin-top:auto}
+.mf-ac-recruteur b{font-family:var(--mf-titre);font-size:34px;line-height:.8;color:var(--mf-jaune);white-space:nowrap}
+.mf-ac-ailleurs-saison{min-height:0;overflow:auto}
+.mf-ac-ailleurs-saison .mf-ac-p{width:100%;max-height:none}
 .mf-ac-hd{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
 .mf-ac-h{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.75;white-space:nowrap}
 .mf-ac-trait{width:56px;height:8px;margin-top:12px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
@@ -1738,7 +1767,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-ligne.sel{outline:2px solid var(--mf-jaune)}
 .mf-ac-rt{display:flex;flex-direction:column;gap:6px;min-width:0}
 .mf-ac-rp{font-size:24px;line-height:1.05}
-.mf-ac-act,.mf-ac-lien{background:none;border:0;padding:0;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune)}
+.mf-ac-act,.mf-ac-lien,.mf-ac-demande{background:none;border:0;padding:0;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune)}
 .mf-ac-retrait,.mf-ac-retrait *{font-size:22px;line-height:1.15}
 .mf-ac-retrait .mgmt-retrait{margin:0;padding:8px 12px}
 .mf-ac-retrait .mgmt-retrait-sortie{padding:6px 10px;font-size:22px}
@@ -1852,6 +1881,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-re-avant{font-size:22px}.mf-re>p{font-size:26px;color:rgba(233,230,225,.74)}
 /* ==== [ANCRE: P3_T2B_ACTUALITES_STYLE] — Monde lot 33 T2b ==== */
 .mf-actu{position:absolute;left:300px;top:128px;width:1564px;height:856px;min-height:0;box-sizing:border-box;color:#E9E6E1;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:500}
+/* ==== [ANCRE: MONDE64_T1_ACTUALITES_PANNEAUX] — Monde lot 64 T1 ==== */
+.mf-actu .mgmt-ac-cols{grid-template-columns:380px 1.45fr 1fr;gap:16px}
 .mgmt-ac-cols{position:absolute;inset:0;display:grid;grid-template-columns:380px 1.45fr 1fr;gap:16px;min-height:0}
 .mgmt-ac-pane{min-width:0;min-height:0;overflow:hidden;display:flex}
 .mgmt-ac-pane>.mf-panneau{flex:1;min-width:0;min-height:0}
@@ -1879,7 +1910,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-item{align-items:flex-start;gap:16px;padding:14px 16px;background:#1B1818}.mgmt-ac-item.choisi{background:#E9E6E1;color:#0D0B0B}.mgmt-ac-type{width:132px;flex:none;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}.mgmt-ac-item.choisi .mgmt-ac-type{color:#B32A1E}.mgmt-ac-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.mgmt-ac-copy b{font-size:26px;line-height:1.05;font-weight:600}.mgmt-ac-copy small{line-height:1.1}.mgmt-ac-detail{gap:18px}.mgmt-ac-detail h2{font-size:48px;line-height:.9}.mgmt-ac-detail p{font-size:24px;line-height:1.2}.mgmt-ac-stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px;color:rgba(233,230,225,.74)}.mgmt-ac-stat b{font:800 30px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1;text-align:right}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_PLANCHE] — Monde lot 33 T2b ==== */
 .mgmt-ac-follow-panel .mf-p3{gap:0}.mgmt-ac-follow-panel .mgmt-ac-filters{justify-content:flex-start;gap:8px;margin-top:32px}.mgmt-ac-follow-group{margin:72px 0 0 12px;font:600 22px/1 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74);text-transform:uppercase}.mgmt-ac-follow-group+.mgmt-ac-follow{margin-top:16px}.mgmt-ac-follow{padding-left:28px}.mgmt-ac-follow>span:first-child{margin-left:0}.mgmt-ac-follow .mgmt-ac-unread-count{margin-left:auto;width:30px;height:30px;padding:0;background:#F0B220;color:#0D0B0B;font:800 22px/30px 'Saira Extra Condensed',sans-serif;text-align:center}
-.mgmt-ac-feedhead{position:relative}.mgmt-ac-feedhead>span{position:absolute;right:0;top:0;font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}.mgmt-ac-feedhead>button{margin-left:auto;font:500 18px 'Saira Condensed',sans-serif}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:0}.mgmt-ac-group{font-weight:600}.mgmt-ac-item{gap:16px}.mgmt-ac-copy{gap:11px}.mgmt-ac-stat{min-height:52px;padding:0 0 8px;box-sizing:border-box}
+.mgmt-ac-feedhead{position:relative}.mgmt-ac-feedhead>span{position:absolute;right:0;top:0;font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}.mgmt-ac-feedhead>button{margin-left:auto;font:500 22px 'Saira Condensed',sans-serif}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:0}.mgmt-ac-group{font-weight:600}.mgmt-ac-item{gap:16px}.mgmt-ac-copy{gap:11px}.mgmt-ac-stat{min-height:52px;padding:0 0 8px;box-sizing:border-box}
+/* ==== [ANCRE: MONDE64_T1_ACTUALITES_ETAT_VIDE] — Monde lot 64 T1 ==== */
+.mgmt-ac-empty{font-size:24px;line-height:1.2;color:rgba(233,230,225,.74);margin:12px 0}
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-detail>.mgmt-ac-actions{margin-top:auto;display:flex;flex-direction:column;gap:30px}.mgmt-ac-actions button{height:38px;display:flex;align-items:center;gap:14px;border:0;background:transparent;color:#E9E6E1;text-align:left;font:800 28px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}.mgmt-ac-actions button kbd{width:32px;height:38px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border:2px solid rgba(233,230,225,.6);font:400 24px 'Saira Condensed',sans-serif;text-transform:none}.mgmt-ac-actions button.principale{color:#0D0B0B}.mgmt-ac-actions button.principale kbd{background:#F0B220;border-color:#F0B220}.mgmt-ac-stat+.mgmt-ac-stat{margin-top:0}.mgmt-ac-follow-panel .mf-p3>.mgmt-ac-filters{margin-bottom:0}.mgmt-ac-feed-panel .mf-p3{gap:0}.mgmt-ac-feedhead{min-height:32px}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:32px}.mgmt-ac-item{min-height:94px;padding:14px 16px}.mgmt-ac-type{width:132px}.mgmt-ac-copy{max-width:427px}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_PANNEAU_1] — Monde lot 33 T2b ==== */
 .mgmt-ac-follow-panel .mgmt-ac-filters{margin-top:30px}.mgmt-ac-follow-group{margin-top:16px}.mgmt-ac-follow-group+.mgmt-ac-follow{margin-top:16px}.mgmt-ac-follow{padding-left:40px}.mgmt-ac-follow-group+.mgmt-ac-follow b{line-height:1}.mgmt-ac-follow b{line-height:1}

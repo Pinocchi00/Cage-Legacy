@@ -1,6 +1,8 @@
 "use strict";
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 function game(){const w=newGameWindow();w.eval(`setSeed(3312);mgmtEntrerAvantH4();const m=G.mgmt;m.suivis=m.roster.slice(0,3).map(f=>f.id);CL.go('mgmt_actualites');`);return w;}
 test('Actualités — la barre compte 13 sections et Actualités est en deuxième position, éclairée',()=>{const w=game();assert.ok(w.document.querySelector('.mf-ecran .mf-actu'));assert.equal(w.eval('MF_SECTIONS.length'),13);assert.equal(w.eval('MF_SECTIONS[1].id'),'actualites');assert.equal(w.eval("mfSectionCourante('mgmt_actualites')"),'actualites');});
@@ -11,3 +13,5 @@ test('Actualités — sans suivi et sans nouvelle, messages sobres et aucune exc
 test('Actualités — un nom joueur hostile est échappé',()=>{const w=game();const html=w.eval(`(function(){const m=G.mgmt,id=m.roster[0].id;m.roster[0].name='<img onerror=alert(1)>';m.suivis=[id];return mgmtActualitesHtml()})()`);assert.ok(!html.includes('<img onerror'));});
 test('Actualités — blocs de contrat et rang sont conditionnés aux données',()=>{const w=game();assert.ok(!w.document.querySelector('.mgmt-ac-stat'));});
 test('Actualités — le rendu reste inférieur à 200 ms sur une partie de six soirées',()=>{const w=game();const t=Date.now();w.eval('SCREENS.mgmt_actualites()');assert.ok(Date.now()-t<200);});
+/* Les planches Uni* sont validées par Anthony (brief du 22/10) ; l'écran suit la planche. */
+test('Actualités — chaque classe du balisage de la planche possède une règle de style',()=>{const w=game(),html=w.document.querySelector('.mf-actu').innerHTML,css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(c=>c.startsWith('mgmt-ac-')))];for(const nom of classes)assert.ok(css.includes(`.${nom}`),`classe ${nom} stylée`);});

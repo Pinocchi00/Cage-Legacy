@@ -82,6 +82,8 @@ function mfAttentes(m){
   if(m.card&&Number.isSafeInteger(m.card.sizeMain)&&Array.isArray(m.card.main)&&m.card.main.length<m.card.sizeMain) out.add('carte');
   if(typeof mgmtOpenCount==='function'&&mgmtOpenCount(m)>0) out.add('preliminaires');
   if(typeof mgmtActuNonLues==='function'&&mgmtActuNonLues(m)>0) out.add('actualites');
+  /* ==== [ANCRE: MONDE64_T1_ATTENTE_CONTRAT] — Monde lot 64 T1 ==== */
+  if(typeof mgmtContratRestants==='function'&&(m.roster||[]).some(f=>f&&f.ct&&mgmtContratRestants(f)<=1)) out.add('contrats');
   return out;
 }
 
