@@ -154,6 +154,18 @@ test('Monde lot 54 T1 — l’après ne formule une revanche qu’après une dem
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — l’après ne fabrique pas de réaction sociale ou interorganisation sans fait',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const r=w.eval(`(()=>{const m=G.mgmt,cycle=m.cycle;const f=m.roster.find(x=>x&&x.id);m.lastEvent={cycle,fights:[],touched:[]};m.hist.push({c:cycle,a:{id:f.id,name:f.name},b:{id:'other',name:'Autre'}});m.facts=m.facts.filter(x=>!['reseaux','interet-organisation','rivalite','discours'].includes(x.k));return mgmtLendemainApres(m,cycle+1).map(x=>x.famille);})()`);
+    assert.ok(!r.includes('réseaux'));
+    assert.ok(!r.includes('autre organisation'));
+    assert.ok(!r.includes('rivalité'));
+    assert.ok(!r.includes('interpellation'));
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — l’après ne nomme une suspension que si la soirée l’a enregistrée',()=>{
   const w=newGameWindow({runMain:true});
   try{

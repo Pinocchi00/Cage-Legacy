@@ -282,11 +282,20 @@ function mgmtLendemainApres(m,semaine){
     let item=null, depart=Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length);
     for(let pas=0;pas<MGMT_LD_APRES_FAMILLES.length;pas++){
       const candidat=MGMT_LD_APRES_FAMILLES[(depart+pas+i)%MGMT_LD_APRES_FAMILLES.length];
-      if(!famillesUtilisees.has(candidat.famille)){item=candidat;break;}
+      if(famillesUtilisees.has(candidat.famille)) continue;
+      /* Une réaction d'après n'est publiée que si la soirée en porte le fait.
+         Les familles sans événement actuellement enregistré restent au
+         catalogue, mais ne fabriquent pas de nouvelles « nouvelles ». */
+      if(candidat.famille==='interpellation'&&!faits.some(x=>x.k==='discours'&&x.a===f.id&&typeof x.target==='string')) continue;
+      if(candidat.famille==='revanche'&&!faits.some(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche')) continue;
+      if(candidat.famille==='suspension'&&!touches.some(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
+      if(candidat.famille==='réseaux'&&!faits.some(x=>x.k==='reseaux'&&x.a===f.id)) continue;
+      if(candidat.famille==='autre organisation'&&!faits.some(x=>x.k==='interet-organisation'&&x.a===f.id)) continue;
+      if(candidat.famille==='rivalité'&&!faits.some(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id))) continue;
+      item=candidat;break;
     }
     if(!item) break;
     famillesUtilisees.add(item.famille);
-    if(item.famille==='suspension'&&!touches.some(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
     /* La semaine fait partie du fait temporel : elle distingue une reprise
        ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */
     let texte=item.texte.replaceAll('{nom}',nom);

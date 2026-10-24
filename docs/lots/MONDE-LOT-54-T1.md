@@ -190,3 +190,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : le message de la famille « revanche » n'est plus proposé par défaut. Il n'apparaît que si les faits de la soirée contiennent une demande `want:'revanche'` du combattant ; le rendu nomme le rival lorsque l'identifiant cible est résolu. Les demandes ne déclenchent donc plus une réaction inventée.
 - `tests/mgmtLot54T1.test.js` : test ajouté « Monde lot 54 T1 — l’après ne formule une revanche qu’après une demande enregistrée » ; test ciblé complet : 23/23. Cache JS monté par `node tools/_bump.js`.
 - Aucun nouvel état de sauvegarde. Les autres manques demeurent : toutes les valeurs/layouts des planches ne sont pas démontrées, et T3 ne contextualise pas encore intégralement les interpellations, réseaux et réactions des autres organisations. Le test lent `mgmtReleveReduit.test.js` n'a pas été lancé.
+
+### Reprise demandée — 24/10/2026 (suite)
+
+- `mgmt-ecran-lendemain.js` : les familles de réaction « réseaux », « autre organisation » et « rivalité » (ainsi que l'interpellation) ne produisent plus de ligne sans fait correspondant ; le catalogue reste présent, mais les familles encore non alimentées par les systèmes existants n'inventent pas d'événement. Ce choix privilégie l'exactitude factuelle sans simuler les systèmes absents.
+- `tests/mgmtLot54T1.test.js` : ajout de « Monde lot 54 T1 — l’après ne fabrique pas de réaction sociale ou interorganisation sans fait ».
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 24/24 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé sur `mgmt-ecran-lendemain.js` passe. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
+- Aucun changement de sauvegarde. Les cases 1 et 3 restent incomplètes : malgré la navigation et les contrôles d'ordre/colonnes, l'intégralité des valeurs et dimensions des deux maquettes n'est pas prouvée ; la suite éditoriale T3 n'est pas complètement alimentée par événements réels ni dotée d'une mémoire éditoriale persistée. Les scripts `test` et `test:watch` incluaient déjà le test.
+- Modifications d'environnement `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors tranche.
