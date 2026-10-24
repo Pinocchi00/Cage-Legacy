@@ -26,6 +26,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 10 — validation finale (24/10/2026)
+
+- Sur `p8-apres`, les commits de code/test existants sont déjà dans l'historique ; aucune modification de tranche fonctionnelle n'est en attente. Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` sans écart, `node_modules/.bin/eslint .` passe, et l'inclusion dans `test`/`test:watch` est confirmée (`true,true`).
+- Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les reprises précédentes le documentent vert à 1 908 745 octets. Aucun changement de sauvegarde ni migration. La limite de couverture reste que les scénarios préparent les dix faits après création par le chemin réel, sans prouver leur production naturelle par chaque système opérationnel.
+- Seule cette fiche est ajoutée au présent commit ; les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache dans `index.html` sont étrangères et exclues. Aucun nouvel écart ni question pour Anthony.
+
 ### Reprise 7 — contrôle final de livraison (24/10/2026)
 
 - Branche `p8-apres` confirmée. Les commits de production et de tests de la tranche sont déjà présents ; aucune modification fonctionnelle non commitée à reprendre.
