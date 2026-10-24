@@ -47,7 +47,8 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   assert.equal(win.eval(`document.querySelectorAll('.mf-so-lg').length`),9,'les neuf combats de la carte');
   touche(win,'Enter');
   assert.ok(maj(win).includes('REGARDER LE COMBAT')); assert.ok(maj(win).includes('PASSER')); assert.ok(maj(win).includes('AVANT-COMBAT'));
-  assert.equal(win.eval(`document.querySelectorAll('.mf-so-tag').length`),9,'les neuf pastilles');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.equal(win.eval(`document.querySelectorAll('.so3-ligne').length`),9,'les neuf lignes de la carte en cours');
   /* ==== [ANCRE: TEST_MGMT_PRESENTATION_SOIREE_RUBRIQUES] — Monde lot 3 T5 ==== */
   touche(win,'f'); assert.equal(win.eval(`G.screen`),'mgmt_soiree_avant'); assert.ok(maj(win).includes('CE QUI LE REND UNIQUE'));
   assert.ok(maj(win).includes('CE QUE CHACUN IMPOSE')); assert.ok(maj(win).includes('LEUR HISTOIRE')); assert.ok(maj(win).includes('LES PRONOSTICS'));
