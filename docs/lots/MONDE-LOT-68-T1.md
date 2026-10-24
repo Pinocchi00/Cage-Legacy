@@ -435,6 +435,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Les contrôles disponibles ne signalant pas d'anomalie géométrique, aucune retouche applicative à l'aveugle n'a été faite. Les scènes `accueil`, `actualites`, `tonposte` et `bilan` n'ont pas été reprises dans ce contrôle (écrans des lots parallèles, explicitement hors périmètre).
 - Tests : `node --test tests/mgmtFicheStats.test.js` — 22/22 verts. Aucun nouveau test ni changement JS/CSS, donc aucun bump `?v=` ni migration de sauvegarde.
 
+### Reprise 48 du 24/10/2026 — correction VS recruteur
+
+- Contrôle frais avant : fiche `{chevauchements:0,textesSous22px:0,debordent:[]}` ; recruteur `{chevauchements:1,exemples:["VS [mf-vs] x VS [mf-vs trait] (204x230)"],textesSous22px:0,debordent:[]}` ; retours/semaine `{chevauchements:0,textesSous22px:0,debordent:[]}`.
+- `mgmt-cadre.js` : suppression du second VS superposé ; contour blanc appliqué au même libellé avec `-webkit-text-stroke`. `index.html` : version `?v=` montée.
+- Contrôle recruteur après correction : `{chevauchements:0,exemples:[],textesSous22px:0,debordent:[]}`. `node --test tests/mgmtFicheStats.test.js` : 22/22 verts. Pas de migration.
+- Les comparatifs n'ont pas été ouverts ; les scènes arrivée, relevé, chiffres, menu et classements ne sont pas supportées par le captureur. Fidélité visuelle complète non revendiquée.
+
 ### Reprise 47 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Historique jusqu'à `9ad72a62` et `git status` consultés. Aucun fichier applicatif ou test de la tranche en attente ; les changements préexistants `.opencode/agents/*` et `opencode.json` restent hors périmètre.
