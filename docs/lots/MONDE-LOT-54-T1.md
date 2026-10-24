@@ -238,6 +238,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé des fichiers de production passe. Le cache de `mgmt-ecran-lendemain.js` est monté.
 - Aucun nouvel état de sauvegarde. Les écrans et la projection T3 restent soumis aux limites déjà consignées : composition non exhaustive vis-à-vis des planches, et absence de systèmes de données pour toutes les réactions et de mémoire éditoriale persistante. Ce complément ne déclare pas la tranche intégralement achevée.
 
+### Reprise — contrôle du récit actif (24/10/2026)
+
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — le premier écran montre les blocs de suite et les objectifs présents ». Il vérifie dans l'écran actif les moments, primes, bloc de changement, presse, chiffres, rangs, résultats et objectif de contrat, ainsi que leur ordre narratif. Les tests ciblés passent 28/28.
+- `node tools/verif-versions.js origin/main` : aucun écart de cache. Aucun fichier de production, aucun état de sauvegarde ni migration modifié.
+- Limites résiduelles inchangées : les écrans n'établissent pas une reproduction exhaustive au pixel et sur chaque valeur des planches ; certains mouvements/valeurs sont uniquement ceux effectivement disponibles ; T3 ne dispose pas d'une mémoire anti-répétition éditoriale persistante, même si les textes observés sur cinquante semaines sont distincts grâce au suffixe temporel. Ces critères ne sont pas revendiqués comme intégralement satisfaits.
+- Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangers à la tranche et ne sont pas inclus.
+
 ### Reprise — mouvements sur le premier écran (24/10/2026)
 
 - `mgmt-lendemain-cadre.js` affiche désormais les changements de rang des participants dans « Ce qui change », en complément des entrées/sorties et faits de clôture. Le rendu réutilise `mgmtLendemainMouvementsHtml`, sans créer de nouvelle règle de classement.

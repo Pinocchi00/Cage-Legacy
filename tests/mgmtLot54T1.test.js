@@ -334,6 +334,22 @@ test('Monde lot 54 T1 — le premier écran respecte l’ordre narratif P8 T2',(
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — le premier écran montre les blocs de suite et les objectifs présents',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`(()=>{const m=G.mgmt;mgmtPosteInit(m);m.poste.obj=[{t:'popularite',cible:40,e:'tenu',v:42}];return scr_mgmt_lendemain_cadre();})()`);
+    for(const text of ['LES TROIS MOMENTS','PERFORMANCE DE LA SOIRÉE','CE QUI CHANGE','À LA UNE','LES CHIFFRES','MOUVEMENTS DE CLASSEMENT','TOUS LES RÉSULTATS','Popularité','ATTEINT · 42 / 40']){
+      assert.ok(html.includes(text),`le premier écran du lendemain expose ${text}`);
+    }
+    assert.ok(html.indexOf('CE QUI CHANGE')<html.indexOf('À LA UNE'));
+    assert.ok(html.indexOf('À LA UNE')<html.indexOf('LES CHIFFRES'));
+    assert.ok(html.indexOf('LES CHIFFRES')<html.indexOf('MOUVEMENTS DE CLASSEMENT'));
+    assert.ok(html.indexOf('MOUVEMENTS DE CLASSEMENT')<html.indexOf('TOUS LES RÉSULTATS'));
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — les mouvements de classement exposent les rangs avant et après',()=>{
   const w=newGameWindow({runMain:true});
   try{
