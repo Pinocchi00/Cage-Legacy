@@ -67,3 +67,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : test de tranche 6/6, `mgmtPasse.test.js` 13/13 avec empreintes, audit `node tools/verif-versions.js origin/main` sans écart et `node_modules/.bin/eslint .` sans erreur.
 - Toujours inachevé : pas d'intégration réelle des paliers diffuseur/recruteur/attrait agents; le franchissement via `mgmtPasseGenerer` et soirées n'est pas couvert; aucune preuve que les annonces sont déclenchées par le parcours Accueil; maquette partielle; validation/réparation facultative et plafond de sauvegarde neuve non revérifiés. Le test lent `mgmtReleveReduit.test.js` n'a pas été lancé cette reprise. Aucun résultat ci-dessus ne permet d'affirmer que toutes les cases sont finies.
 - Lint global vert. Les changements personnels préexistants hors tranche ne sont pas ajoutés.
+
+### Reprise 5 — vérification ciblée (24/10/2026)
+
+- Historique et état Git vérifiés : branche `p11-croissance`, HEAD `86f9f1a`; les modifications `.opencode/agents/*` et `opencode.json` étaient préexistantes, hors de cette tranche, et restent non ajoutées.
+- Correction du test « Croissance — chaque palier documente un effet borné et une annonce distincte » : l'unicité porte désormais sur le texte, pas sur la référence d'objet, et l'assertion vérifie que chaque annonce est une phrase marquée `relu:false`.
+- Vérifications de cette reprise : `node --test tests/mgmtLot56T1.test.js` (6/6), `node --test tests/mgmtPasse.test.js` (13/13, empreintes inchangées), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Non terminé : cette reprise n'a pas codé le raccordement paliers-diffuseur/recruteur/agents, le franchissement généré par soirées ni l'intégration d'annonces à l'accueil, l'écran reste incomplet vis-à-vis des valeurs de la maquette, et les tests de sauvegarde facultative/réparation et de plafond lent restent à vérifier. Le test de croissance demeure enregistré dans `test` et `test:watch`; le plafond n'est pas revendiqué comme vérifié ici. Pas de migration.
+- Aucune question nouvelle ni `TOUT_EST_FINI` : les critères de fin de la tranche restent à faire.
