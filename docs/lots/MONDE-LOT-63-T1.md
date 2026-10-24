@@ -74,6 +74,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 10 — contrôle final après demande de reprise (24/10/2026)
+
+- Vérifiés `git log --oneline -12`, `git status` et la branche `p8-apres`. Les fichiers de code et tests de la tranche sont déjà commités ; les modifications présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et laissées hors commit.
+- La suite demandée passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. En particulier, les deux régressions du lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines) sont vertes.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; le test est référencé dans `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- `git merge origin/main` a été tenté mais la politique d'exécution le refuse explicitement. La fusion demandée reste au superviseur. Aucune modification fonctionnelle ni de test n'a été nécessaire dans cette reprise ; aucun changement de comportement ni question nouvelle pour Anthony.
+
 ### Reprise finale 7 — contrôle de régression (24/10/2026)
 
 - Branche `p8-apres` confirmée. Les fichiers de code et tests de la tranche sont déjà commités ; les changements locaux dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et exclus.
