@@ -1,7 +1,7 @@
 ﻿---
 description: Ã‰crit la fiche d'une tranche du brief Â« Un monde qui a vÃ©cu Â» (docs/lots/MONDE-LOT-N-TK.md) aprÃ¨s avoir lu la section du brief et le code concernÃ©. Ne modifie jamais le code.
 mode: all
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 permission:
   edit:
     "*": deny

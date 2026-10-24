@@ -85,7 +85,8 @@ test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels s
     assert.match(result.html,/LE CLASSEMENT DES HUIT/);
      assert.match(result.html,/TA RIVALE DU MOMENT/);
      assert.match(result.html,/Juste devant/);
-     assert.match(result.html,/Depuis la dernière soirée/);
+     // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
+      assert.match(result.html,/Rang inchangé/);
      assert.ok(w.eval(`(()=>{const x=mgmtGuerreClassement(G.mgmt).find(y=>y.estSplit); return typeof x.mouvement==='number';})()`));
     assert.equal(result.html,result.screen);
     assert.match(result.html,/&lt;|SPLIT/);
@@ -166,11 +167,12 @@ test('Monde lot 57 T1 — le classement ne produit que les huit organisations co
   }finally{w.close();}
 });
 
-test('Monde lot 57 T1 — le mouvement affiché précise le nombre de places gagnées',()=>{
+test('Monde lot 57 T1 — décision : planches Uni* validées par Anthony ; le mouvement garde un libellé court avec le nombre de places',()=>{
   const w=partie();
   try{
     const texte=w.eval(`(()=>{const m=G.mgmt;const rows=mgmtGuerreClassement(m);m.guerre=m.guerre||{};m.guerre.classementPrecedent=rows.map(x=>x.id).reverse();return scr_mgmt_guerre();})()`);
-    assert.match(texte,/Split a gagné [1-7] places? et se rapproche du haut du classement/);
+     // Décision : planches Uni* validées par Anthony ; le libellé condensé évite le débordement constaté à la capture.
+     assert.match(texte,/Rang : \+[1-7] places?\./);
   }finally{w.close();}
 });
 
@@ -288,7 +290,8 @@ test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette 
     for(const titre of ['RANG','ORGANISATION','POP.','SALLE','NOTORIÉTÉ','PUISSANCE','ÉVOLUTION']) assert.ok(result.html.includes(titre),`colonne absente: ${titre}`);
     assert.match(result.html,/juste devant\s*:/i);
     assert.match(result.html,/juste derrière\s*:/i);
-    assert.match(result.html,/Depuis la dernière soirée/);
+     // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
+      assert.match(result.html,/Rang inchangé/);
   }finally{w.close();}
 });
 
