@@ -23,6 +23,37 @@ test('Monde lot 63 T1 — le catalogue conserve les faits déclencheurs propres 
   }finally{w.close();}
 });
 
+test('Monde lot 63 T1 — le fait réel de chaque famille produit sa ligne dédiée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261024);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=JSON.parse(w.eval(`(()=>{
+      const base=G.mgmt, cycle=base.lastEvent.cycle, fight=base.hist.find(t=>t&&t.c===cycle&&t.a&&t.b);
+      if(!fight)return JSON.stringify({});
+      const cases=[
+        ['interpellation',m=>m.facts.push({k:'discours',c:cycle,a:fight.a.id,interpelle:fight.b.id})],
+        ['réseaux',m=>m.facts.push({k:'trait_gagne',c:cycle,a:fight.a.id})],
+        ['suspension',m=>m.lastEvent.touched=[{id:fight.a.id,days:21}]],
+        ['revanche',m=>m.facts.push({k:'demande',c:cycle,a:fight.a.id,want:'revanche',target:fight.b.id})],
+        ['autre organisation',m=>m.facts.push({k:'interet-organisation',c:cycle,a:fight.a.id,org:'Rivale'})],
+        ['espoir',m=>m.espoirs=[fight.a.id]],
+        ['titre',m=>{const t=m.hist.find(x=>x&&x.c===cycle&&x.a&&x.b);t.title=true;}],
+        ['salle',m=>m.lastEvent.finance={spectateurs:1}],
+        ['prime',m=>m.facts.push({k:'prime',c:cycle,a:fight.a.id})],
+        ['retraite',m=>m.facts.push({k:'retraite_annoncee',c:cycle,a:fight.a.id})]
+      ];
+      return JSON.stringify(cases.map(([family,setup])=>{
+        const m=JSON.parse(JSON.stringify(base));m.facts=Array.isArray(m.facts)?m.facts.filter(f=>f.c!==cycle):[];
+        m.lastEvent=JSON.parse(JSON.stringify(base.lastEvent));m.hist=JSON.parse(JSON.stringify(base.hist));
+        setup(m);return {family,lines:Array.from({length:100},(_,i)=>mgmtLendemainApres(m,cycle+i+1).map(x=>x.famille)).flat()};
+      }));
+    })()`));
+    assert.equal(r.length,10);
+    for(const row of r)assert.ok(row.lines.includes(row.family),`${row.family}: ${row.lines.join(', ')}`);
+  }finally{w.close();}
+});
+
 test('Monde lot 63 T1 — les dix familles réclament chacune le fait réel correspondant',()=>{
   const w=newGameWindow({runMain:true});
   try{
