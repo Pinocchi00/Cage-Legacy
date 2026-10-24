@@ -288,6 +288,9 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 
 ### Reprise 46 du 24/10/2026
 
+- Contrôles géométriques relancés indépendamment pour éviter l'arrêt du processus groupé : `fiche` (UniFicheStats), `recruteur` (UniRecruteurMission), `retours` (UniRecruteurRetour) et `semaine` (UniSemaine) renvoient tous `chevauchements:0`, `textesSous22px:0`, `debordent:[]`. Scores respectifs : fiche `{moyen:31.2,grosBlocs:23.2}`, recruteur `{moyen:26,grosBlocs:19.7}`, retours `{moyen:27.1,grosBlocs:18.4}`, semaine `{moyen:27.6,grosBlocs:22.1}`. Le lot n'a pas été lancé en parallèle ; seul le processus groupé fiche/recruteur/retours/semaine a dépassé le délai après la fiche, puis les trois autres scènes ont été mesurées séparément.
+- Ces contrôles confirment l'absence de collisions, de texte trop petit et de débordement sur ces quatre scènes seulement ; ils ne valident pas la fidélité visuelle et les comparatifs n'ont pas été ouverts. Les autres écrans et scènes restent à mesurer. Aucun changement applicatif n'était requis par ces contrôles, donc aucun bump de version ni migration. Tests ciblés : `mgmtFicheStats.test.js` (23/23) et `mgmtReleve.test.js` (5/5) verts ; `node tools/verif-versions.js origin/main` sans écart.
+
 - Historique consulté : `78172147` en tête, branche `fid-fiches`. Aucun changement non committé de la tranche ; les modifications `.opencode/agents/*` et `opencode.json` restent hors périmètre et n'ont pas été ajoutées.
 - Vérifications ciblées fraîches : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts). `node tools/verif-versions.js origin/main` : aucun écart.
 - La correction demandée du suivi est présente dans le code actuel : `.mf-fiche-suivi` est rendue dans `.mf-fi-onglets`; la règle dédiée la place statiquement dans cette rangée, et le compteur est associé au bouton. Les tests concernés sont verts.
