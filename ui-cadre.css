@@ -438,6 +438,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-prix-vide{padding-top:18px}
 .ce3-classement{flex:none;max-height:150px;overflow:auto;padding:10px 14px;background:#121010;border:2px solid rgba(233,230,225,.38)}
 .ce3-ecran>button{flex:none;align-self:flex-start;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;border:0;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+/* ==== [ANCRE: LOT67_T1_RETOUR_CEREMONIE] — Monde lot 67 T1 ==== */
+.ce3-retour{flex:none;align-self:flex-start;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;border:0;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif;cursor:pointer}
 .ce3-carnet{display:grid;grid-template-columns:1fr 1fr;gap:14px;overflow:auto}
 .ce3-carnet{grid-template-rows:repeat(4,minmax(0,1fr));align-content:stretch;min-height:0}
 .ce3-carnet>article{min-height:0;overflow:auto;overscroll-behavior:contain}

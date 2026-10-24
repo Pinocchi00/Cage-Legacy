@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 60
+
+- Branche `fid-organisation` confirmée ; historique consulté, aucun fichier applicatif non commité au début de la reprise.
+- Ajustement de la cérémonie d’après `UniCeremonie` : cinq cartes de trophées visibles (combattant, KO, combat, soumission, révélation), le prix « retour » reste calculable mais n’est pas affiché comme sixième carte car la planche prévoit le bouton RETOUR à cet emplacement. Le bouton de retour est maintenant présent dans le contenu, pas dans l’en-tête ; les tests ont été adaptés en citant la décision « planches Uni* validées par Anthony ; l’écran suit la planche ». Classe `.ce3-retour` stylée et cache monté.
+- Tests ciblés : `node --test tests/mgmtLot55T1.test.js` passe (46/46). Capture cérémonie générée : aucun chevauchement, aucun texte sous 22 px, aucun débordement, `grosBlocs=19,7 %`. Guerre 22,9 % sans défaut détecté ; Croissance 17,2 % avec 3 textes sous 22 px et 4 débordements ; Ton poste 19,8 % sans défaut ; Carnet 15,7 % avec 86 chevauchements et 4 débordements ; Bilan 12,9 % avec une collision « REMERCIÉ »/aide. Les comparatifs ont été régénérés par `shoot.js`, mais l’image `cmp-ceremonie.png` n’a pas été ouverte visuellement dans cette session. Capture cérémonie à cinq lauréats non produite.
+- `node tools/verif-versions.js origin/main` passe. ESLint ciblé sur le JS applicatif ne signale rien ; le fichier de test est ignoré par ESLint. Aucun changement de sauvegarde.
+- Fichiers : `mgmt-ceremonie.js` (composition cérémonie), `ui-cadre.css` (bouton retour cérémonie), `index.html` (cache), `tests/mgmtLot55T1.test.js` (attentes alignées avec la planche), cette fiche. Restent non terminés : scène de prix remplie, rivalité de capture forcée, écarts mesurés dans Croissance/Carnet/Bilan, seuil Guerre, ouverture visuelle des cmp et alignement des vues restante. Aucun `TOUT_EST_FINI` revendiqué.
+
 ## Compte rendu — reprise 59
 
 - Branche `fid-organisation` confirmée. À la reprise, le seul fichier de tranche non commité était `mgmt-ceremonie.js` ; son diff ne changeait que l'indentation et réaffirmait l'ordre des six cartes, sans changer le rendu. Je l'ai conservé et commité après validation ciblée.
