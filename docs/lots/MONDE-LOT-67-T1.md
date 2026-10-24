@@ -8,6 +8,15 @@
 - Fichiers modifiés : `ui-cadre.css` (gabarit de l’en-tête cérémonie) et `index.html` (version cache CSS). Aucune migration de sauvegarde ni nouveau test. Tests existants restent verts.
 - À compléter avant livraison : audit versions/lint, captures comparatives et correction/validation des vues dont les écarts persistent. Aucun `TOUT_EST_FIN` revendiqué.
 
+## Compte rendu — reprise 21
+
+- Branche `fid-organisation` confirmée (`fid-organisation`), `git log --oneline -12` consulté ; `git status` était propre : aucun fichier applicatif non commité à reprendre.
+- Lecture du protocole de capture externe et captures individuelles : Cérémonie `grosBlocs=20,7 %`, contrôles automatiques zéro ; Croissance `17,2 %`, trois textes sous 22 px et quatre débordements ; Carnet `15,1 %`, 84 chevauchements et quatre débordements ; Ton poste `19,8 %`, contrôles zéro ; Bilan `12,9 %`, un chevauchement (« REMERCIÉ » / aide) ; Guerre `22,9 %`, contrôles zéro. Les captures ont été produites dans le dossier temporaire prescrit. L’outil `Read` interdit l’ouverture des comparatifs externes ; je ne prétends donc pas les avoir inspectés visuellement.
+- Vérifications locales : `node --test tests/mgmtLot55T1.test.js` passe (49/49), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Les tentatives de capture groupée (croissance → autres vues) dépassent le délai de l’outil ; les captures restantes ont été faites individuellement.
+- Aucun correctif applicatif n’a été apporté : les mesures exposent toujours des défauts vérifiables (Croissance, Carnet, Bilan, seuil Guerre et cérémonie au-dessus de 20 %), et la scène avec prix remplis/rivale imposée n’a pas été constituée. Les tests ciblés ne valident pas ces critères visuels. Pas de migration ni de changement de version cache.
+- Fichiers modifiés : cette fiche uniquement (compte rendu de mesure). Aucun test ajouté. Écarts à la fiche : cases visuelles et scène de capture toujours ouvertes ; `TOUT_EST_FIN` n’est pas revendiqué.
+- Questions pour Anthony : aucune ; les travaux restants sont des corrections/validations à exécuter, pas une ambiguïté de spécification.
+
 ## Compte rendu — reprise 19
 
 - Branche `fid-organisation` confirmée ; les douze derniers commits et l’état Git ont été consultés. Les modifications précédentes étaient déjà commitées.
