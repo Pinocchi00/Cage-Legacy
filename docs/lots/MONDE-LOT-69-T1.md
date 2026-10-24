@@ -250,3 +250,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une première exécution a dépassé le délai de 120 s avant la relance réussie.
 - Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
 - Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
+
+### Reprise 43
+- `tests/mgmtLot69T1.test.js` vérifie maintenant qu'après `mgmtRunEvent`, le gagnant du combat choc apparaît aussi dans la carte résolue et que son résultat est conservé dans `m.hist`.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Écart : le test couvre uniquement la proposition mono-combat prise en charge par le modèle lot 58 ; il ne crée ni les deux autres affrontements ni un score 2-sur-3. Le parcours fin de contrat/bilan avec rechargement strict, les scènes dédiées et les comparaisons visuelles restent non réalisés. Aucune donnée de combat supplémentaire n'a été inventée.
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (assertion de persistance du résultat), cette fiche (compte rendu). Pas de migration ni de version de cache.
+- Modifications utilisateur sous `.opencode/agents/` et `opencode.json` préservées et exclues.
