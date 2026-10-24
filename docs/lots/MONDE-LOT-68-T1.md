@@ -380,6 +380,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun défaut frais signalé par le contrôle sur les scènes de tranche disponibles ; pas de modification applicative à l'aveugle. Tests ciblés précédemment verts : `tests/mgmtFicheStats.test.js` et `tests/mgmtReleve.test.js` ; versions/lint précédemment verts. Pas de changement JS/CSS/sauvegarde, donc ni bump ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
 - État honnête écran par écran : fiche Statistiques, mission recruteur, retours et semaine — contrôle géométrique sans anomalie, sans comparaison visuelle ouverte ; fiche Aperçu — pas de capture distincte ; arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records — pas de capture ni de mesure ; écrans accueil/actualités/tonposte/bilan — contrôles ci-dessus, anomalies hors périmètre non corrigées. Les cases de comparaison/correction visuelle complète restent inachevées ; aucun `TOUT_EST_FIN`.
 
+### Reprise 45 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. `git log --oneline -12` et `git status` consultés ; aucun fichier de la tranche n'était en attente. Les modifications locales dans `.opencode/agents/*` et `opencode.json` sont hors périmètre et préservées.
+- Vérification ciblée relancée : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` — 27/27 tests verts.
+- État écran par écran : les derniers contrôles géométriques documentés en reprise 44 restent fiche Statistiques, recruteur, retours et semaine `{chevauchements:0,textesSous22px:0,debordent:[]}`. La fiche Aperçu n'a pas de scène dédiée. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records n'ont pas de mesures de scène établies. Les comparatifs d'images n'ont pas été ouverts ; aucun score ni état historique ne vaut validation visuelle.
+- Pas de changement applicatif ou de test dans cette reprise, aucune migration ni bump `?v=`. Écart à la fiche : les corrections/mesures des scènes restantes et la comparaison visuelle exigée ne sont pas achevées ; `TOUT_EST_FINI` non atteint.
+
 ### Reprise du 24/10/2026 — rangée de la fiche
 
 - `mgmt-fiche-cadre.js` : dans la rangée des onglets, le repère clavier « Tab · Onglet suivant » précède maintenant le groupe compteur/bouton de suivi. Le suivi est le dernier bloc à droite, conformément à la position demandée dans les planches. `?v=` monté.
