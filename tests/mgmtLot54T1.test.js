@@ -133,3 +133,16 @@ test('Monde lot 54 T1 — le cadre du lendemain intègre les trois moments et le
     assert.match(html,/TOUS LES RÉSULTATS/);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et carte complète',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`mgmtLendemainSuiteHtml(G.mgmt)`);
+    assert.match(html,/LE LENDEMAIN · LA SUITE/);
+    assert.match(html,/CAGE HEBDO/);
+    assert.match(html,/LES MOUVEMENTS/);
+    assert.match(html,/TOUS LES RÉSULTATS/);
+  }finally{w.close();}
+});

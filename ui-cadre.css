@@ -1870,5 +1870,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE54_T1_RECIT_CADRE] — Monde lot 54 T1 ==== */
 .ld3-recit{display:flex;flex-direction:column;gap:10px;padding:12px;background:#0D0B0B;border:2px solid rgba(233,230,225,.38)}
 .ld3-recit-title{margin:0;font:800 30px/1 var(--mgmt-font-display);color:#E23A2B}
+.ld3-suite{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px;background:#0D0B0B;color:#E9E6E1;border:2px solid rgba(233,230,225,.38)}
+.ld3-suite-title{grid-column:1/-1;margin:0;font:800 44px/.9 var(--mgmt-font-display);color:#E9E6E1}
+.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{min-width:0;padding:16px;background:#121010;border:2px solid rgba(233,230,225,.5)}
+.ld3-suite-heading{margin:0 0 12px;font:800 30px/1 var(--mgmt-font-display);color:#E23A2B}
+.ld3-suite-empty{margin:0;font:500 22px/1.2 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+.ld3-suite-results{grid-column:1/-1}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

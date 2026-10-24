@@ -213,6 +213,20 @@ function mgmtLendemainMomentsCompletsHtml(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MONDE54_T1_SUITE_LENDEMAIN] — Monde lot 54 T1 ==== */
+/** Suite de la page du lendemain : presse ordonnée, mouvements et carte
+ * complète. Exposée séparément afin de ne pas masquer l'écran historique. */
+function mgmtLendemainSuiteHtml(m){
+  const presse=mgmtLendemainPresseHtml(m);
+  const resultats=mgmtLendemainResultatsHtml(m);
+  const mouvements=mgmtLendemainConstatsHtml(m);
+  return `<section class="ld3-suite"><h2 class="ld3-suite-title">LE LENDEMAIN · LA SUITE</h2>`
+    +`<div class="ld3-suite-press"><h3 class="ld3-suite-heading">CAGE HEBDO</h3>${presse}</div>`
+    +`<div class="ld3-suite-moves"><h3 class="ld3-suite-heading">LES MOUVEMENTS</h3>${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div>`
+    +`<div class="ld3-suite-results"><h3 class="ld3-suite-heading">TOUS LES RÉSULTATS</h3>${resultats}</div></section>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MONDE54_T1_APRES_CATALOGUE] — Monde lot 54 T1 ==== */
 /* Catalogue T3 : les entrées restent des formulations éditoriales à relire. */
 const MGMT_LD_APRES_FAMILLES=[
