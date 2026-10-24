@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 58
+
+- Branche `fid-organisation` et historique contrôlés ; tous les changements déjà présents étaient committés. Protocole `shoot/LISEZMOI.txt` lu et captures individuelles relancées pour Guerre, Croissance, Ton poste, Carnet, Bilan et Cérémonie.
+- Mesures actuelles : Guerre grosBlocs 22,9 % (contrôle automatique sans défaut) ; Croissance 17,2 % (3 textes sous 22 px et 4 débordements) ; Ton poste 19,8 % (sans défaut) ; Carnet 15,7 % (86 chevauchements et 4 débordements) ; Bilan 12,9 % (un chevauchement « REMERCIÉ »/aide) ; Cérémonie 20 % (contrôle automatique sans défaut). Les comparatifs ont été générés ; leur ouverture visuelle directe et la capture cérémonie à six lauréats n'ont pas été réalisées.
+- Retouche ciblée : `ui-cadre.css` contraint désormais la ligne de titre du bilan du patron et ajoute un espacement avant son contenu, pour traiter la collision détectée. La capture bilan après modification conserve cependant le même chevauchement automatique : correction non confirmée/résolue.
+- `node --test tests/mgmtLot55T1.test.js` passe (46/46), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Cache CSS monté avec `_bump.js`; `sw.js` généré par l'outil a été restauré et exclu. Aucune migration de sauvegarde.
+- Fichiers : `ui-cadre.css` (typographie/espacement du bilan du patron), `index.html` (version de cache) et cette fiche. Tests ajoutés : aucun. Écarts encore ouverts : seuil Guerre, défauts Croissance/Carnet/Bilan, cérémonie remplie et inspection effective des cmp ; la tranche ne satisfait donc pas tous ses critères et `TOUT_EST_FINI` n'est pas revendiqué.
+
 ## Compte rendu — reprise 57
 
 - Branche `fid-organisation` confirmée. L'historique des douze commits et l'état Git ont été consultés ; les changements précédents étaient déjà committés.
