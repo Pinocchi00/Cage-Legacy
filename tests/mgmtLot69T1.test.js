@@ -16,6 +16,9 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
     assert.equal(w.eval(`G.screen`),'mgmt_arrivee');
     const org=w.eval(`mgmtPredecesseurOrgId(G.mgmt)`);
     assert.equal(org,'garden-of-blood');
+    const arrivee=w.eval(`(()=>{const m=G.mgmt;return {org:mgmtOrgNom(m),html:scr_mgmt_arrivee()}})()`);
+    assert.ok(arrivee.org);
+    assert.ok(arrivee.html.includes(arrivee.org),'l’écran d’arrivée doit afficher la nouvelle organisation');
     const saved=serialized.slice(3);
     assert.equal(w.eval(`mgmtSerialiser(G.mgmt)`),saved);
     w.eval(`G.screen='mgmt_accueil';`);

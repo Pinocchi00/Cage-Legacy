@@ -66,3 +66,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Reprise 15 : le test structurel du choc vérifie désormais explicitement les raccourcis Échap, P et Entrée rendus dans la barre inférieure, ainsi que la présence du marqueur VS octogonal. `node --test tests/mgmtLot69T1.test.js` passe (2/2). `node tools/verif-versions.js origin/main` passe ; ESLint ciblé ignore les tests selon la configuration.
 - Fichiers modifiés : `tests/mgmtLot69T1.test.js` (assertions de rendu/raccourcis du choc). Aucun changement de sauvegarde ni de version JS/CSS. Pas de capture comparative : les instructions externes restent inaccessibles.
 - Écart : ajout de vérification structurelle uniquement ; cela ne valide pas la capture/mesure visuelle et ne complète pas le chemin métier du choc à trois affiches ni les cases d'arrivée, bilan et parcours intégral déjà consignées ci-dessus. Je ne revendique pas l'achèvement de la tranche.
+
+### Reprise 16
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` ajoute une assertion que l'écran d'arrivée rend le nom de l'organisation effectivement active après changement.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (2/2).
+- Pas de migration ni de version de cache modifiée. Les captures restent indisponibles dans cet environnement. Les autres critères visuels et le parcours intégral sont toujours ceux consignés plus haut ; cette assertion ne suffit pas à les valider.
