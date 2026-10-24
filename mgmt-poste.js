@@ -165,7 +165,7 @@ function mgmtChocPaires(m,orgId){
 }
 function mgmtChocValide(choc){
   const paires=choc&&choc.paires;
-  const pairesValides=!Object.hasOwn(choc||{},'paires')||Array.isArray(paires)&&paires.length>0&&paires.length<=3&&new Set(paires.map(p=>p&&p.div)).size===paires.length&&new Set(paires.flatMap(p=>p?[p.a,p.b]:[])).size===paires.length*2&&paires.every(p=>p&&typeof p.div==='string'&&typeof p.a==='string'&&typeof p.b==='string'&&p.a!==p.b);
+  const pairesValides=!Object.hasOwn(choc||{},'paires')||Array.isArray(paires)&&paires.length>0&&paires.length<=3&&new Set(paires.map(p=>p&&p.div)).size===paires.length&&new Set(paires.flatMap(p=>p?[p.a,p.b]:[])).size===paires.length*2&&paires.every(p=>p&&typeof p.div==='string'&&typeof p.a==='string'&&typeof p.b==='string'&&p.a!==p.b)&&paires[0].a===choc.a&&paires[0].b===choc.b&&paires[0].div===choc.div;
   return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee)&&(!Object.hasOwn(choc,'resultat')||['victoire','defaite'].includes(choc.resultat))&&(!Object.hasOwn(choc,'victoires')||Number.isSafeInteger(choc.victoires)&&choc.victoires>=0)&&(!Object.hasOwn(choc,'pairesJouees')||Number.isSafeInteger(choc.pairesJouees)&&choc.pairesJouees>=1&&choc.pairesJouees<=3)&&(!Object.hasOwn(choc,'a')||typeof choc.a==='string')&&(!Object.hasOwn(choc,'b')||typeof choc.b==='string')&&pairesValides;
 }
 function mgmtChocProposition(m){
