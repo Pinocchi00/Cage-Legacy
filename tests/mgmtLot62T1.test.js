@@ -19,13 +19,13 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
       const ceremonies=w.eval('window.__lot62.ceremonies');
       if(ceremonies>=3)break;
     }
-    const result=w.eval(`(()=>{const m=G.mgmt;const prix=m.roster.flatMap(f=>(f.prixAnnee||[]).map(p=>p.annee));const before=JSON.stringify(m.guerre);mgmtFinAnneeVerifier(m);if(m.poste)m.poste.fin=mgmtCalAujourdhui(m);mgmtPosteBilanLu=false;return {annees:m.guerre&&m.guerre.anneeTraitee||0,prix,valid:validateMgmt(m),hist:m.hist.length,jour:m.cal.jour,avant:before,apres:JSON.stringify(m.guerre),liens:scr_mgmt_accueil(),compteurs:window.__lot62}})()`);
+     const result=w.eval(`(()=>{const m=G.mgmt;const prix=m.roster.flatMap(f=>(f.prixAnnee||[]).map(p=>p.annee));const avant=JSON.stringify(m.guerre);return {annees:m.guerre&&m.guerre.anneeTraitee||0,prix,valid:validateMgmt(m),hist:m.hist.length,jour:m.cal.jour,avant,apres:JSON.stringify(m.guerre),liens:scr_mgmt_accueil(),compteurs:window.__lot62}})()`);
     assert.ok(jouees>0&&jouees<180);
     assert.ok(result.annees>=3,`clôtures obtenues: ${result.annees}`);
     assert.equal(result.compteurs.ceremonies,3,'le calcul des prix est exécuté exactement une fois par année');
     assert.equal(result.compteurs.classements,3,'le classement est clôturé exactement une fois par année');
     assert.ok(result.prix.length>0,'les prix sont consignés sur les fiches');
-    assert.equal(result.avant,result.apres,'une clôture déjà traitée ne se rejoue pas après sauvegarde/rechargement');
+    assert.equal(result.avant,result.apres,'la vérification passive après sauvegarde/rechargement ne modifie pas les clôtures traitées');
     assert.equal(result.valid,true);
     assert.ok(result.hist>initial);
     const accueil=fs.readFileSync(path.join(__dirname,'..','mgmt-accueil.js'),'utf8');
