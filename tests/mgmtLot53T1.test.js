@@ -162,12 +162,16 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     /* Décision : planches Uni* validées par Anthony ; sous la recette, le libellé est « primes payées », sans répéter le total. */
     assert.match(html,/<small>PRIMES PAYÉES<\/small>/);
     assert.doesNotMatch(html,/<small>PRIMES PAYÉES ·/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, avec les actions visibles au-dessus de la barre de touches. */
+    assert.match(html,/class="so3-fin-actions"[^>]*>[\s\S]*Tous les résultats[\s\S]*Le lendemain/);
     /* Décision : planches Uni* validées par Anthony ; noms, salle et pastilles reprennent leurs tailles et formes de la planche. */
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     assert.match(css,/\.so3-fin-prime\.combat strong\{font-size:104px;line-height:\.8\}/);
     assert.match(css,/\.so3-fin-prime\.performance strong\{font-size:92px;line-height:\.8\}/);
     assert.match(css,/\.so3-fin-salle b,\.so3-fin-recette b\{font-family:var\(--mf-titre\);font-size:64px;line-height:\.8\}/);
     assert.match(css,/\.so3-fin-ambiance i\{width:34px;height:34px;flex:none/);
+    assert.match(css,/\.so3-fin-recomposee\{[^}]*grid-template-rows:470px 280px 64px/);
+    assert.match(css,/\.so3-fin-actions\{[^}]*justify-content:flex-end/);
     assert.doesNotMatch(html,/SPLIT FIGHT NIGHT TERMINÉE|OÙ EN EST LA SOIRÉE|mf-so-fcw|mf-so-ph/);
   }finally{w.close();}
 });
