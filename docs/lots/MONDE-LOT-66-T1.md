@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 4 — contrôle visuel et dernière correction — 24/10/2026
+
+- État initial vérifié : branche `fid-lendemain`, HEAD `962decfb`; code déjà livré et seul le CSS de la tranche retouché ici. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et restent intacts.
+- Le comparateur demandé a été lancé depuis le vrai dossier de travail, écrans séparés. `lendemain` : chevauchements 0, texte sous 22 px 0, débordements 0, gros blocs 20 %. Le CSS mesuré porte les noms à 80 px sur la carte surprise et 68 px sur les deux autres, cartes hautes de 285 px.
+- Pour `lendemainSuite`, j'ai redonné de la largeur à l'identité des mouvements en réduisant les deux colonnes de rang/organisation. Capture après correction : aucun chevauchement ni texte sous 22 px, gros blocs 17,1 %, mais le détecteur relève encore quatre débordements variables (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »). La conformité complète de cette colonne n'est donc pas revendiquée.
+- Fichiers modifiés dans cette reprise : `ui-cadre.css` (répartition de la grille des mouvements) et `index.html` (version CSS montée par `_bump.js`), plus cette fiche. Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30) et `mgmtSoireeShow.test.js` (18). Audit `node tools/verif-versions.js origin/main` et ESLint passent. Aucun changement de données, navigation, sauvegarde ou migration. `mgmtReleveReduit.test.js` est hors de cette tranche et n'a pas été lancé.
+- Écarts à la fiche : la suite a toujours des libellés de mouvement en débordement malgré l'essai de grille ; comparateur mesure `grosBlocs=17,1%`. Les images comparatives sont produites sous le dossier temporaire `shots`; le contrôle textuel est détaillé ci-dessus.
+- Questions pour Anthony : aucune.
+
 ### Reprise 24 — échelle du lendemain — 24/10/2026
 
 - Branche `fid-lendemain` confirmée. Le code de tranche était déjà commité ; les seuls changements préexistants hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) restent intacts.
