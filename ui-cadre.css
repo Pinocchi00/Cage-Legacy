@@ -1055,23 +1055,23 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-prime.combat{background:#E9E6E1;color:#0D0B0B}
 .so3-fin-prime.performance{background:#252121;color:#E9E6E1}
 .so3-fin-prime b{color:#F0B220;font-family:var(--mf-titre);font-size:30px}
-.so3-fin-prime.combat strong{font-size:76px;line-height:.82}
-.so3-fin-prime.performance strong{font-size:52px;line-height:.88}
+.so3-fin-prime.combat strong{font-size:104px;line-height:.8}
+.so3-fin-prime.performance strong{font-size:92px;line-height:.8}
 .so3-fin-label{font-size:24px;font-weight:600;letter-spacing:.04em}
 .so3-fin-prime strong{font-family:var(--mf-titre);font-size:42px;line-height:.95}
 .so3-fin-prime.combat strong span{display:block;font:inherit;line-height:.82}
 .so3-fin-prime span{font-size:24px;line-height:1.1}
-.so3-fin-prime>b{font-family:var(--mf-titre);font-size:32px}
+.so3-fin-prime>b{font-family:var(--mf-titre);font-size:40px;line-height:.8}
 .so3-fin-soiree{padding:18px 22px;border:2px solid rgba(233,230,225,.38);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 22px;align-content:center}
 .so3-fin-soiree h2{grid-column:1/-1;margin:0;font-family:var(--mf-titre);font-size:34px}
 .so3-fin-soiree>div{display:flex;flex-direction:column;gap:8px;font-size:22px}
 .so3-fin-soiree>div span{color:rgba(233,230,225,.74)}
 .so3-fin-soiree>div b{font-family:var(--mf-titre);font-size:30px}
 .so3-fin-salle,.so3-fin-ambiance,.so3-fin-recette{display:flex;flex-direction:column;gap:8px;font-size:22px}
-.so3-fin-salle b,.so3-fin-recette b{font-family:var(--mf-titre);font-size:42px}
+.so3-fin-salle b,.so3-fin-recette b{font-family:var(--mf-titre);font-size:64px;line-height:.8}
 .so3-fin-salle small,.so3-fin-ambiance small,.so3-fin-recette small{font-size:22px;color:rgba(233,230,225,.74)}
 .so3-fin-ambiance b{display:flex;gap:8px}
-.so3-fin-ambiance i{width:22px;height:22px;border-radius:50%;background:#B32A1E}
+.so3-fin-ambiance i{width:34px;height:34px;flex:none;background:#B32A1E;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .so3-fin-ambiance i.on{background:#F0B220}
 .so3-fin-recette{grid-column:3/5}
 /* ==== [ANCRE: MGMT_LOT65_T1_TABLEAU_CSS] — Monde lot 65 T1 : carte de soirée fidèle à UniSoiree. ==== */
