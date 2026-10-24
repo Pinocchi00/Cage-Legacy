@@ -279,6 +279,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun comparatif `cmp-*.png` n'a été ouvert dans cette reprise ; je n'affirme pas les écarts visuels précis. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Aucun changement hors fiche à commiter.
 - Écart à la fiche : le protocole de capture/ouverture/correction écran par écran demeure non achevé et les cases visuelles 1 à 5 ne sont donc pas validées. Aucun fichier applicatif n'est commité dans cette reprise ; ce compte rendu consigne l'état sans revendiquer `TOUT_EST_FINI`.
 
+### Reprise 38 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. Historique jusqu'à `6874035f` consulté ; aucun fichier de la tranche en attente de commit. Les modifications `.opencode/agents/*` et `opencode.json` restent hors tranche et intactes.
+- Instructions du captureur relues. Contrôles exécutés avec ses scènes disponibles : fiche `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}` ; recruteur `{0,[],0,[]}` ; retours `{0,[],0,[]}`. Les comparatifs des fichiers `cmp-*.png` n'ont pas été ouverts : les valeurs `moyen`/`grosBlocs` ne sont pas prises pour preuve de fidélité visuelle.
+- Aucun défaut signalé par le contrôle dans ces trois scènes ; aucune modification de balisage/styles n'est justifiée à l'aveugle. Les mesures ne sont pas une validation visuelle des planches et ne couvrent pas les autres scènes requises. Semaine, accueil, actualités, tonposte, bilan et les scènes ajoutées (arrivée, relevé, chiffres, menu, classements) restent à contrôler ; accueil/actualités/tonposte/bilan restent hors périmètre applicatif de cette tranche.
+- Aucune modification de JS/CSS ou test lors de cette reprise ; aucun bump `?v=` ni migration de sauvegarde. Les cases d'écran et la livraison globale ne sont donc pas achevées ; `TOUT_EST_FIN` n'est pas revendiqué.
+
 ### Reprise 34 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Les changements préexistants `.opencode/agents/*` et `opencode.json` restent hors tranche ; `sw.js` a été rétabli depuis `origin/main` conformément à la consigne.
