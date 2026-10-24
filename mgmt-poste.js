@@ -233,7 +233,9 @@ function mgmtOffreAccepter(m,index){
   if(!confirm(`Tu quittes ${ancien} pour ${org.nom}. Ton équipe, ton carnet et ta réputation te suivent ; tes combattants restent chez ${ancien}.`))return false;
   if(!mgmtOrgChanger(m,o.orgId,o))return false;
   if(typeof saveMgmt==='function')saveMgmt();
-  if(typeof mgmtEspArriveeOuvrir==='function')mgmtEspArriveeOuvrir(1);
+   if(typeof mgmtEspoirsFixer==='function')mgmtEspoirsFixer(m);
+   if(typeof MGMT_ARRIVEE_CHANGEMENT!=='undefined')MGMT_ARRIVEE_CHANGEMENT=true;
+   if(typeof CL!=='undefined'&&CL.go)CL.go('mgmt_arrivee');
   return true;
 }
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
