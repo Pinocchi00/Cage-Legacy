@@ -14,6 +14,11 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise de livraison (24/10/2026) : branche `p8-apres` et `git log --oneline -12`/`git status` vérifiés. Les fichiers fonctionnels de la tranche sont déjà commités ; seule cette fiche sera ajoutée au commit de reprise.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` contiennent le test (`true,true`).
+- Aucun changement de production, tests ou sauvegarde n'a été nécessaire ; pas de migration. La vérification ciblée confirme les dix familles, calcul borné/déterministe, affichage/presse, mouvements d'organisation et sauvegarde préservée. La couverture n'établit toujours pas que chaque système opérationnel produit naturellement chacun des dix faits. Le test lent `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
+- Les différences locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation de cache dans `index.html` sont étrangères à la tranche et exclues. Aucun écart nouveau ni question pour Anthony.
+
 - Reprise 6 — validation finale (24/10/2026) : branche `p8-apres` confirmée ; les commits fonctionnels sont déjà dans l'historique, aucun fichier de tranche hors fiche n'est en attente. `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo. `node tools/verif-versions.js origin/main` ne signale aucun écart, ESLint global passe, et l'audit confirme la présence du test dans `test` et `test:watch` (`true,true`).
 - Aucun changement de production, test ou sauvegarde nécessaire ; aucune migration. Limite de couverture explicitée : les faits familiaux sont préparés séparément après création via le chemin réel, sans établir que chaque système opérationnel génère naturellement chacun d'eux. Les modifications `.opencode/agents/*`, `opencode.json`, `sw.js` et le changement local de cache dans `index.html` sont étrangers et exclus.
 
