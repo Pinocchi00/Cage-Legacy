@@ -1,5 +1,11 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 38
+
+- Branche `fid-organisation` confirmée ; les commits antérieurs sont présents et l'arbre de travail était propre. Le protocole de capture est lisible depuis le shell. Capture individuelle cérémonie exécutée : contrôle automatique `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=20,8 %`, score moyen 29,6. Le seuil demandé ≤20 % reste donc manqué.
+- Le fichier `cmp-ceremonie.png` a été régénéré sous `C:/Users/antho/AppData/Local/Temp/shots/`, mais l'outil de lecture interdit son ouverture effective. Je ne prétends pas avoir vu le comparatif. Le code de scène du harnais n'a pas été modifié : cette capture ne garantit pas six prix remplis. Les comparatifs Guerre/Croissance/Ton poste/Carnet/Bilan et les défauts constatés lors des reprises précédentes ne sont pas vérifiés dans cette reprise.
+- Aucun changement applicatif, test, migration ou version de cache dans cette reprise ; aucun commit requis pour cette seule mesure. Aucun `TOUT_EST_FINI` revendiqué : scène six prix, validation visuelle, captures restantes et écarts sous le seuil demeurent à traiter.
+
 ## Compte rendu — reprise 25
 
 - Branche `fid-organisation`, dernier commit initial `869e943`, arbre applicatif propre avant cette reprise.
