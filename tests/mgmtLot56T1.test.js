@@ -37,3 +37,9 @@ test('Croissance — chaque palier documente un effet borné et une annonce dist
     assert.ok(r.some((p,i)=>i&&p[effet]>r[i-1][effet]),effet+' doit ouvrir quelque chose de progressif');
   }
 });
+
+test('Croissance — bonus de remplissage additif, plafonné et nul pour une partie ancienne',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.pop=100;m.orgs={};const salle={capacite:9000};const ancien=mgmtRemplissage(salle,100,'grosse',0.8).spectateurs;const nouveau=mgmtRemplissage(salle,100,'grosse',0.8,m).spectateurs;return JSON.stringify({ancien,nouveau,bonus:mgmtCroissanceRemplissageBonus(m)});})()`));
+  assert.equal(r.bonus,0.03); assert.ok(r.nouveau>=r.ancien); assert.ok(r.nouveau<=9000);
+});

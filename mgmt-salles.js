@@ -112,6 +112,14 @@ function mgmtSalleDefaut(m){
   return best;
 }
 
+/* ==== [ANCRE: CROISSANCE_SALLES] — Monde lot 56 T1 ====
+   Chaque marche ajoute au plus 1 % au remplissage, sans réduire le plafond
+   historique et sans modifier les parties qui n'atteignent aucun palier. */
+function mgmtCroissanceRemplissageBonus(m){
+  if(!m||m.mondeVivant!==true||typeof mgmtPaliersCalculer!=='function') return 0;
+  return Math.max(0,Math.min(0.03,mgmtPaliersCalculer(m).effets.salle*0.01));
+}
+
 /** La qualité d'une carte, de 0 à 1 : son attrait rapporté à celui d'une carte moyenne de même taille. Pur. */
 function mgmtCarteQualite(m,slotted){
   const sm=slotted.filter(x=>x.slot==='main').length, sp=slotted.length-sm;
@@ -125,11 +133,12 @@ function mgmtCarteQualite(m,slotted){
 
 /** Le remplissage : salle, popularité (plafond), qualité de la carte, taille de la soirée. Pur.
  *  @returns {{capacite:number,plafond:number,spectateurs:number,taux:number}} */
-function mgmtRemplissage(salle,pop,taille,qualite){
+function mgmtRemplissage(salle,pop,taille,qualite,m){
   const cap=salle?salle.capacite:0, plafond=mgmtPopPlafond(pop);
   const base=Math.min(cap,plafond);
   const part=MGMT_REMPLI_PART_MIN+(1-MGMT_REMPLI_PART_MIN)*Math.max(0,Math.min(1,qualite));
-  const spectateurs=Math.round(base*part*(MGMT_REMPLI_TAILLE[taille]||MGMT_REMPLI_TAILLE.petite));
+  const bonus=typeof mgmtCroissanceRemplissageBonus==='function'?mgmtCroissanceRemplissageBonus(m):0;
+  const spectateurs=Math.round(base*Math.min(1,part+bonus)*(MGMT_REMPLI_TAILLE[taille]||MGMT_REMPLI_TAILLE.petite));
   return {capacite:cap,plafond,spectateurs,taux:cap>0?spectateurs/cap:0};
 }
 
@@ -208,7 +217,7 @@ function mgmtSallesApplique(m,finance,fights,avant){
   mgmtSallesInit(m);
   const soir=m.cal.prochaines[0]||{taille:'petite'};
   const salle=mgmtSalleParId(m,soir.salle)||mgmtSalleDefaut(m);
-  const r=mgmtRemplissage(salle,m.pop,soir.taille,avant.qualite);
+  const r=mgmtRemplissage(salle,m.pop,soir.taille,avant.qualite,m);
   const sat=mgmtSatisfaction(m,{reclames:avant.reclames,fights,noms:avant.noms});
   finance.ticketing=mgmtBilletterie(r.spectateurs,salle);
   finance.location=mgmtLocation(salle);

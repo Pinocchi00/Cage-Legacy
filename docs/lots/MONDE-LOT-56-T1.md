@@ -37,6 +37,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
 
+### Reprise du 24/10/2026 — effet incrémental salle
+
+- Modifié `mgmt-salles.js` : ajout du bonus additif au remplissage par palier de salle (1 % par niveau, plafond 3 %), activé uniquement pour monde vivant et transmis explicitement au calcul réel de la soirée. Anciennes parties/appels sans contexte inchangés.
+- Modifié `tests/mgmtLot56T1.test.js` : test « Croissance — bonus de remplissage additif, plafonné et nul pour une partie ancienne ».
+- Vérifications : test de tranche 5/5 vert ; `mgmtPasse.test.js` est inclus dans le lancement combiné et ses empreintes ont passé (13/13). `mgmtSalles.test.js` a dépassé le délai de 120 s, sans conclusion sur son dernier test. `node tools/verif-versions.js origin/main` vert ; ESLint ciblé sans erreur (test ignoré par configuration).
+- État non terminé : diffuseur, recruteur et attrait agents restent sans raccordement, il manque le scénario de progression `mgmtPasseGenerer` + soirées, la couverture sauvegarde/réparation, le test de plafond lent, le détail exact de la maquette et l’inscription explicite du nouveau test dans `test` et `test:watch`. Pas de migration. Ces limites n’autorisent pas à déclarer la tranche finie.
+
 ### Reprise 4 — contrôle avant poursuite (24/10/2026)
 
 - Branche vérifiée : `p11-croissance`. `git log --oneline -12` montre les trois commits antérieurs inachevés; aucun changement de fichier de tranche n'était non commité au début. Les changements présents dans `.opencode/agents/*` et `opencode.json` n'appartiennent pas à cette tranche et restent intacts.
