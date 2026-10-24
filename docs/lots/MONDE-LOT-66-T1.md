@@ -269,3 +269,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Essai supplémentaire dans `ui-cadre.css` : autoriser la coupure de mots dans les cellules de mouvements. Cache CSS monté. La capture post-changement produit exactement les mêmes alertes ; cette tentative n'a donc pas corrigé le débordement et ne constitue pas une résolution de la case 4.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de données, de mécanique ou de sauvegarde. Modifications préexistantes d'agents/configuration et `sw.js` restent hors tranche.
 - Écart toujours ouvert : quatre débordements du comparateur dans la suite ; le seuil gros blocs est conforme mais la tranche ne peut être certifiée visuellement complète. Aucune question pour Anthony.
+
+### Reprise 40 — nouvelle tentative mouvements — 24/10/2026
+
+- Branche `fid-lendemain` confirmée ; HEAD initial `5b72fdcd`. Les seuls fichiers locaux préexistants hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) sont laissés intacts.
+- Relu `LISEZMOI.txt`, exécuté le comparateur avant et après ajustement. `lendemainSuite` conserve 0 chevauchement et 0 texte sous 22 px, gros blocs 17 %, mais les mêmes quatre libellés sont signalés en débordement (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`). Le changement finalisé du layout des lignes n'a donc pas résolu le critère et la case visuelle 4 reste ouverte.
+- Modifié `ui-cadre.css` et monté le cache CSS. Test ciblé `mgmtEcranLendemain.test.js` : 7/7. Aucun changement de données/sauvegarde/mécanique.
+- Écart : le comparateur confirme des débordements persistants dans la suite ; ne pas considérer la tranche visuellement terminée. Aucun test nouveau. Questions pour Anthony : aucune.
