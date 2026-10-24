@@ -2,6 +2,11 @@
 
 ## Compte rendu — reprise 20
 
+- Reprise : branche `fid-organisation`, HEAD initial `40367f66`, arbre propre. La procédure externe a été consultée via terminal. Capture Cérémonie après ajustement CSS : chevauchements=0, textes sous 22 px=0, débordements=[], `grosBlocs=19,7 %` (avant : 20,7 %). Le cmp a été généré mais non ouvert visuellement ; la scène capturée n'est pas démontrée avec prix remplis.
+- Correction : hauteur de la grille cérémonie réduite de 760 à 738 px pour rapprocher le bilan bas et rester sous le seuil des gros blocs. Version CSS bumpée dans `index.html`.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` passe (49/49) ; capture cérémonielle passe les contrôles automatisés.
+- Fichiers modifiés : `ui-cadre.css`, `index.html`, cette fiche. Pas de test nouveau ni migration. Écarts non clos : comparatifs et scène remplie non inspectés, mesures/retouches restantes des vues Croissance/Carnet/Bilan/Guerre non effectuées dans cette reprise. Aucun `TOUT_EST_FIN` revendiqué.
+
 - Branche `fid-organisation` confirmée ; journal et état Git consultés. Aucun changement applicatif non commité n'était présent au départ.
 - Ajustement CSS ciblé de l’en-tête cérémonie d’après `UniCeremonie` : titre à 56 px, presse maintenue sur une seule ligne à côté du titre, cadre date/source conservé à droite. `index.html` versionné via `tools/_bump.js` ; `sw.js` généré a été restauré depuis `origin/main`.
 - `node --test tests/mgmtLot55T1.test.js` passe (49/49). Le protocole/cmp de capture n’a pas été ouvert ni exécuté dans cette reprise ; je ne revendique aucune inspection visuelle, aucune scène à six prix, ni validation des écarts précédemment relevés pour Croissance, Carnet, Bilan ou Guerre. Les captures et le seuil visuel global restent non certifiés.

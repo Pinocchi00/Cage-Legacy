@@ -513,6 +513,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-ecran{left:300px;top:20px;width:1564px;height:1040px;padding:0;gap:16px;overflow:hidden}
 .ce3-entete{height:64px;flex:none}
 .ce3-grille{height:760px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
+.ce3-grille{height:738px;gap:16px}
 .ce3-prix-combattant{grid-row:1 / span 2}
 .ce3-bilan{height:150px}
 /* ==== [FIN ANCRE] ==== */
