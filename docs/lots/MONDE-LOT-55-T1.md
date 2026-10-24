@@ -521,3 +521,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (31/31 verts).
 - Aucun changement de production, de cache ou de sauvegarde. Les limites déjà consignées (notamment fidélité intégrale aux planches et test lent de plafond) restent inchangées; cette reprise ne déclare pas la tranche entièrement terminée.
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de départage), cette fiche (compte rendu). Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
+
+### Reprise 68
+
+- État contrôlé : branche `p11-ceremonie-carnet`; le commit final de tranche existe déjà dans l'historique. Les seules modifications étrangères restent `.opencode/agents/*` et `opencode.json`, exclues.
+- Ajout du test « Lot 55 T1 — une trace sans vainqueur ne produit aucun prix de finition ou de retour » pour empêcher une ligne incomplète de devenir candidate à une finition ou à un retour.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert).
+- Aucun changement métier, écran, sauvegarde ou migration. Cette assertion ciblée n'efface pas les limites consignées dans les reprises antérieures : conformité visuelle intégrale et déclenchement anniversaire non certifiés; le test lent `mgmtReleveReduit` n'a pas été relancé dans cette reprise.
+- Fichier de tranche modifié : `tests/mgmtLot55T1.test.js`; aucune question nouvelle pour Anthony.

@@ -334,3 +334,11 @@ test('Lot 55 T1 — à score égal la finition la plus tôt dans l’année est 
   const ko=c.mgmtCeremonieCalculer(m).find(p=>p.id==='ko');
   assert.equal(ko.laureat,'premier');
 });
+test('Lot 55 T1 — une trace sans vainqueur ne produit aucun prix de finition ou de retour',()=>{
+  const c=charger();
+  const prix=c.mgmtCeremonieCalculer({hist:[
+    {c:20,a:{id:'a',name:'A'},b:{id:'b',name:'B'},winner:null,family:'ko',round:1,slot:'main'},
+    {c:200,a:{id:'c',name:'C'},b:{id:'d',name:'D'},winner:'A',family:'decision',round:3,slot:'main'}
+  ]});
+  assert.ok(!prix.some(p=>p.id==='ko'||p.id==='soumission'||p.id==='retour'));
+});
