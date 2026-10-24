@@ -40,7 +40,7 @@ function mgmtRecruteurRetour(m){
   const r=mgmtRecruteurFlux(m,n,d.id,'retour');
   const profils=[];
   if(r()<d.bredouille){
-    e.retours.unshift({n,dest:d.id,profils:[],lus:0,bredouille:MGMT_RECRUTEUR.retour.bredouille[Math.floor(r()*3)]});
+    e.retours.unshift({n,dest:d.id,jour:mgmtRecruteurJour(m),profils:[],lus:0,bredouille:MGMT_RECRUTEUR.retour.bredouille[Math.floor(r()*3)]});
   }else{
     const nombre=3+Math.floor(r()*3),pool=Array.isArray(MGMT_NOMS_AJOUTS[d.ck]?.first)?MGMT_NOMS_AJOUTS[d.ck].first:COUNTRIES[d.ck].first;
     const noms=Array.isArray(pool)&&pool.length?pool:COUNTRIES.FR.first;
@@ -56,28 +56,72 @@ function mgmtRecruteurRetour(m){
         chiffres:{documentes:Math.max(3,Math.min(vic+def,Math.floor(profilRng()*8)+3)),significatifs:Math.floor(profilRng()*40)+10,amenes:Math.floor(profilRng()*8),finitions:pepite?vic:Math.floor(profilRng()*Math.max(1,vic))},
         trait:trait?(trait.id||trait):null,phrase:(pepite?MGMT_RECRUTEUR.retour.pepite:formule)[Math.floor(profilRng()*3)],contrat:{combats:3+Math.floor(profilRng()*3),primeCombat:1000+Math.floor(profilRng()*4000),primeSignature:1000+Math.floor(profilRng()*9000)}});
     }
-    e.retours.unshift({n,dest:d.id,profils,lus:0});
+    e.retours.unshift({n,dest:d.id,jour:mgmtRecruteurJour(m),profils,lus:0});
   }
   e.mission=null;e.retours=e.retours.slice(0,3);
+  if(typeof mgmtRecruteurApprocher==='function')mgmtRecruteurApprocher(m);
   return e.retours[0];
 }
 function mgmtRecruteurSigner(m,idProfil){
   const e=m?.recruteur,profil=e?.retours?.flatMap(x=>x.profils||[]).find(p=>p.id===idProfil);
-  if(!profil||m.roster?.some(f=>f.id===profil.id)||typeof mgmtContratSigner!=='function')return null;
-  /* La porte mgmtRecruter signe une ligne du marché et exige une trace. Les profils de mission sont une offre déjà observée : les insérer temporairement dans la même porte, puis retirer la ligne d'offre. */
-  if(!Array.isArray(m.exterieur)||typeof mgmtExteriorTrace!=='function')return null;
+  if(!profil||m.roster?.some(f=>f.id===profil.id))return null;
+  /* ==== [ANCRE: P5_T4_SIGNATURE_PORTE_CONTRATS] — Monde lot 60 T1 ==== */
+  if(!Array.isArray(m.exterieur)||typeof mgmtExteriorTrace!=='function'||typeof CL?.go!=='function')return null;
   const div=typeof divById==='function'?divById(profil.cat):null;
   if(!div)return null;
-  const ligne={id:profil.id,name:profil.name,first:profil.first,last:profil.last,ck:profil.ck,div:div.id,generation:0,W:profil.W,L:profil.L,D:profil.D||0,age:profil.age,level:1,libre:true,career:[{age:profil.age,W:profil.W,L:profil.L,D:profil.D||0}]};
-  m.exterieur.push(ligne);
-  const signé=mgmtRecruter(m,profil.id,true);
-  m.exterieur=m.exterieur.filter(x=>x.id!==profil.id);
-  if(!signé)return null;
-  signé.cat=profil.cat;signé.style=profil.style;signé.ck=profil.ck;signé.recruteurId=profil.id;
-  return signé;
+  if(!m.exterieur.some(x=>x.id===profil.id))m.exterieur.push({id:profil.id,name:profil.name,first:profil.first,last:profil.last,ck:profil.ck,div:div.id,generation:0,W:profil.W,L:profil.L,D:profil.D||0,age:profil.age,level:1,libre:true,career:[{age:profil.age,W:profil.W,L:profil.L,D:profil.D||0}]});
+  if(typeof MGMT_CONTRATS==='object'){
+    MGMT_CONTRATS.mode='recrutement';MGMT_CONTRATS.sexe=div.gender;MGMT_CONTRATS.div=div.id;MGMT_CONTRATS.curseur=mgmtContratsLignes(m).findIndex(x=>x.id===profil.id);MGMT_CONTRATS.n=profil.contrat?.combats||3;MGMT_CONTRATS.b=null;MGMT_CONTRATS.msg='';
+  }
+  CL.go('mgmt_contrats');
+  return true;
 }
 function mgmtRecruteurSuivre(m,idProfil){
   const profil=m?.recruteur?.retours?.flatMap(x=>x.profils||[]).find(p=>p.id===idProfil);
   if(!profil||typeof mgmtSuivre!=='function')return false;
+  if(Array.isArray(m.suivis)&&m.suivis.includes(idProfil))return true;
   return mgmtSuivre(m,idProfil);
+}
+/* ==== [ANCRE: P5_T4_PROFIL_DISPONIBLE] — Monde lot 60 T1 ==== */
+function mgmtRecruteurProfilDisponible(m,idProfil){
+  if(!m||typeof idProfil!=='string')return false;
+  const profil=m.recruteur?.retours?.flatMap(r=>r.profils||[]).find(p=>p.id===idProfil);
+  if(!profil)return true;
+  return !!profil&&!m.roster?.some(f=>f.id===idProfil)&&!m.exterieur?.some(f=>f.id===idProfil);
+}
+/* ==== [ANCRE: P5_T4_ETAT_PROFIL_RECRUTEUR] — Monde lot 60 T1 ==== */
+function mgmtRecruteurProfilSuivi(m,idProfil){
+  return !!(m&&typeof idProfil==='string'&&Array.isArray(m.suivis)&&m.suivis.includes(idProfil));
+}
+/* ==== [ANCRE: P5_T4_APPROCHE_RIVALE] — Monde lot 60 T1 ==== */
+const MGMT_RECRUTEUR_PROBA_RIVALE=0.35;
+const MGMT_RECRUTEUR_PROBA_PROXIMITE=0.15;
+function mgmtRecruteurApprocher(m){
+  if(!m?.recruteur?.retours?.length||!Array.isArray(m.exterieur))return [];
+  const jour=mgmtRecruteurJour(m),prises=[];
+  for(const retour of m.recruteur.retours){
+    const age=jour-(Number.isSafeInteger(retour.jour)?retour.jour:jour);
+    if(age<0)continue;
+    for(const p of retour.profils||[]){
+      const suivi=mgmtRecruteurProfilSuivi(m,p.id);
+      if(!mgmtRecruteurProfilDisponible(m,p.id)||age>(suivi?28:14)||suivi&&age<28)continue;
+      const rng=mgmtIdentiteStream(p.id,'recruteur-approche-'+retour.n,m);
+      const rivale=typeof mgmtRivaleDuMoment==='function'?mgmtRivaleDuMoment(m):null;
+      let orgId=rivale,proba=rivale?MGMT_RECRUTEUR_PROBA_RIVALE:MGMT_RECRUTEUR_PROBA_PROXIMITE;
+      if(!orgId){
+        const ids=mgmtMondeVivantIds(m).filter(id=>id!==mgmtPredecesseurOrgId(m)&&m.orgs?.[id]?.roster);
+        orgId=ids.find(id=>typeof globalThis.mgmtOrganisationManqueCategorie==='function'&&globalThis.mgmtOrganisationManqueCategorie(id,p.cat,m))||null;
+      }
+      if(!orgId||rng()>=proba)continue;
+      const org=MGMT_ORGANISATIONS.find(x=>x.id===orgId);
+      if(!org)continue;
+      const orgState=m.orgs?.[orgId];
+      if(m.mondeVivant===true&&(!orgState||!Array.isArray(orgState.roster)))continue;
+      if(!m.mondeVivant&&typeof globalThis.mgmtOrganisationManqueCategorie==='function'&&!globalThis.mgmtOrganisationManqueCategorie(orgId,p.cat,m))continue;
+      m.exterieur.push({id:p.id,name:p.name,first:p.first,last:p.last,ck:p.ck,div:p.cat,generation:0,W:p.W,L:p.L,D:p.D||0,age:p.age,level:1,libre:false,orgId,career:[{age:p.age,W:p.W,L:p.L,D:p.D||0}]});
+      if(typeof mgmtAddFact==='function')mgmtAddFact(m,{c:m.cycle,k:'recruteur_profil_signe',a:orgId,b:p.name});
+      prises.push(p.id);
+    }
+  }
+  return prises;
 }

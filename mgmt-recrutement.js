@@ -31,6 +31,8 @@ function mgmtRecrutables(m,divId){
   const out=[];
   ranking.forEach((o,i)=>{
     if(chezSplit.has(o.id)) return;
+    /* ==== [ANCRE: P5_T4_PROFIL_RECRUTEUR_DISPONIBLE] — Monde lot 60 T1 ==== */
+    if(typeof mgmtRecruteurProfilDisponible==='function'&&!mgmtRecruteurProfilDisponible(m,o.id)) return;
     const line=(m.exterieur||[]).find(e=>e.id===o.id);
     if(!line) return;
     const trace=mgmtExteriorTrace(line,m.cycle);
