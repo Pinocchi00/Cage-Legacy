@@ -22,13 +22,13 @@ function mgmtCeremonieCalculer(m){
   for(const p of MGMT_CEREMONIE_PRIX){let cand=null;
     if(p.id==='combattant'){
       for(const {t,i} of h)if(t.winner==='A'||t.winner==='B'){const s=t.winner==='A'?t.a:t.b,x=entrant(s.id,s);x.score+=(titres.has(i)?3:(t.slot==='main'||t.slot==='co-main'?2:1))+(['ko','sub','stop'].includes(t.family)?1:0);if(t.winner==='A')entrant(t.b.id,t.b).defaites++;else entrant(t.a.id,t.a).defaites++;}
-      cand=[...byId.values()].filter(x=>x.combats>=3&&x.score>=3).sort((a,b)=>b.score-a.score||a.defaites-b.defaites||String(a.id).localeCompare(String(b.id)))[0];
+       cand=[...byId.values()].filter(x=>x.combats>=3&&x.score>=3).sort((a,b)=>b.score-a.score||a.defaites-b.defaites||(String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0))[0];
     } else if(p.id==='ko'||p.id==='soumission'){
        cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').filter(({t})=>p.id==='ko'?t.family==='ko':t.family==='sub').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b;const publicOdds=Number(t.publicOddsWinner??t.pronosticPublic?.[t.winner]??t.pronostic?.[t.winner]);return {t,i,side,score:(titres.has(i)?3:0)+(Number.isFinite(publicOdds)&&publicOdds<35?2:0)+(t.round===1?2:0)+(t.slot==='main'||t.slot==='co-main'?1:0)};}).sort((a,b)=>b.score-a.score||a.t.c-b.t.c||a.i-b.i)[0];
     } else if(p.id==='combat'){
         cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
     } else if(p.id==='revelation'){
-       cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||String(a.id).localeCompare(String(b.id)))[0];
+        cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||(String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0))[0];
      } else if(p.id==='retour'){
         /* ==== [ANCRE: P11_T1_RETOUR_HISTORIQUE] — Monde lot 55 T1 ==== */
         cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity);return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0};}).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c||b.i-a.i)[0];

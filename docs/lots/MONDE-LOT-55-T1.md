@@ -295,3 +295,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (17/17); `node_modules/.bin/eslint .` (vert); `git diff --check` (vert).
 - Limites non résolues : pas de conformité intégrale certifiée aux planches ni de chargement d'une fixture historique complète. Le test lent `mgmtReleveReduit` non exécuté. Les critères fonctionnels déjà présents mais incomplets, notamment le déclencheur anniversaire et l'étendue des traces historiques du carnet, restent des écarts. Aucun changement de sauvegarde ou migration.
 - Fichier modifié : `tests/mgmtLot55T1.test.js`; aucune question nouvelle pour Anthony. Modifications étrangères `.opencode/agents/*` et `opencode.json` exclues du commit.
+
+### Reprise 38
+
+- Durcissement du départage des prix combattant et révélation : les identifiants sont maintenant comparés lexicalement de façon explicite, sans dépendre des règles locales de `localeCompare`, afin de garder un ordre stable.
+- Vérification ciblée après bump : `node --test tests/mgmtLot55T1.test.js` (17/17 verts; environ 40 secondes).
+- Cette correction ne comble pas les écarts précédemment listés : fidélité intégrale aux planches, vrais parcours de trois années complètes jouées, chargement d'une fixture ancienne, et historique exhaustif du carnet restent non certifiés. Aucun changement de format de sauvegarde.
+- Fichiers de cette reprise : `mgmt-ceremonie.js` (départage déterministe), `index.html` (version du script) et cette fiche. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et exclues.
