@@ -288,6 +288,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Capture post-correction de `lendemainSuite` : chevauchements 0, textes sous 22px 0, mais quatre débordements demeurent (`14ᵉ → 24ᵉ`, `chez Split`, nom et division). Gros blocs 16,1 %. La tentative n'a donc pas atteint le critère visuel complet; la disposition plus verticale est un écart de maquette et doit être reprise, non tenue pour une solution finale.
 - Aucun changement sauvegarde/mécanique. Fichiers de configuration locaux et `sw.js` exclus du commit.
 
+### Reprise 59 — taille du nom principal et recapture — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `cb0eae69`; le code antérieur de la tranche est déjà commité. Les modifications hors tranche dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent intactes.
+- `ui-cadre.css` : rétabli explicitement le nom de la première carte à 80 px (les deux autres restent à 68 px), annulant une surcharge terminale à 72 px. Version du cache montée par `node tools/_bump.js ui-cadre.css`.
+- Tests : `mgmtEcranLendemain.test.js` (7/7) et `mgmtLendemainDemo.test.js` (7/7) passent. `node tools/verif-versions.js origin/main` et ESLint passent.
+- Captures depuis le guide `LISEZMOI.txt` : `lendemain` gros blocs 19,5 %, zéro texte sous 22 px, aucun débordement, mais trois chevauchements du titre « Salomé Aït, 18 ans, suspendu » avec les touches ↓/Tab. `lendemainSuite` gros blocs 16,9 %, aucun chevauchement ni texte sous 22 px, mais quatre débordements de mouvements (« Poids plume féminin », « 26ᵉ → 27ᵉ », « chez Split », « Elijah Sanders »). Images comparatives régénérées dans `C:/Users/antho/AppData/Local/Temp/shots/` ; pas d'inspection manuelle revendiquée.
+- Avant/après : correction ciblée du nom principal selon l'échelle demandée, sans changement de données, navigation ou sauvegarde. Les défauts de capture ci-dessus restent ouverts ; la conformité visuelle complète n'est pas déclarée. Questions pour Anthony : aucune.
+
 ### Reprise 31 — tentative de correction des mouvements — 24/10/2026
 
 - Guide de capture relu et outil relancé sur les deux écrans. `lendemain` : aucun chevauchement, aucun texte sous 22 px, aucun débordement ; moyen 25,9 %, gros blocs 18,4 %. `lendemainSuite` : aucun chevauchement ni texte sous 22 px, mais le contrôle continue de signaler quatre débordements (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 16,9 %.
