@@ -58,8 +58,10 @@ function mgmtCeremonieEchapper(v){return typeof esc==='function'?esc(String(v??'
 function scr_mgmt_ceremonie(){
   const m=G&&G.mgmt;if(!m)return '';
   const prix=mgmtCeremonieCalculer(m), cards=MGMT_CEREMONIE_PRIX.map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
+  const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
+  const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
   const lien=`<button type="button" onclick="CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;
-  const body=`<main class="ce3-ecran"><h1>LES TROPHÉES DE FIN D’ANNÉE</h1><p>CHOISIS PAR LA PRESSE</p><section class="ce3-grille">${cards}</section>${lien}</main>`;
+  const body=`<main class="ce3-ecran"><h1>LES TROPHÉES DE FIN D’ANNÉE</h1><p>CHOISIS PAR LA PRESSE</p><section class="ce3-grille">${cards}</section><section class="ce3-classement"><h2>CLASSEMENT FINAL DES HUIT</h2><ol>${rangs}</ol></section>${lien}</main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'LES TROPHÉES',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
@@ -68,7 +70,7 @@ if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
 function scr_mgmt_carnet(){
   const m=G&&G.mgmt;if(!m)return '';const c=mgmtCarnetLire(m);
   const liste=(xs,fn)=>xs.length?xs.map(fn).join(''):'<p>Rien encore.</p>';
-  const body=`<main class="ce3-ecran"><h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.fait.nom||x.fait.fighter||'Champion')}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}</p>`)}</article></section></main>`;
+  const body=`<main class="ce3-ecran"><h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.fait.nom||x.fait.fighter||'Champion')}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}</p>`)}</article></section><button type="button" onclick="CL.go('mgmt_accueil')">Accueil</button></main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'TON CARNET',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_carnet=scr_mgmt_carnet;

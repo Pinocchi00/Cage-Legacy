@@ -91,3 +91,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Après inspection de l'état courant, les écrans existants restent des versions partielles : pas de classement final des huit organisations dans la cérémonie ni de raccordement à l'accueil avant bilan patron, et le carnet n'est pas raccordé à la navigation secondaire. Le calcul/inscription des prix ne constitue pas encore l'implémentation complète des critères d'année et l'écran n'est pas conforme aux planches.
 - Aucun travail métier incomplet n'était présent dans l'arbre à commiter. Je n'ai donc pas créé de commit artificiel ni déclaré la tranche terminée : la demande de reprise ne peut pas être satisfaite honnêtement sans réaliser les cases manquantes. Aucune modification n'a été faite durant cette reprise.
 - Vérifications effectuées : `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint mgmt-ceremonie.js mgmt-save.js` (vert), `git diff --check` (vert). Test lent `mgmtReleveReduit` non lancé. La seule modification de cette reprise est ce compte rendu ; aucun code métier n'a été modifié.
+
+### Reprise 11
+
+- Complété l'écran cérémonie avec un bloc de classement final des organisations disponibles; le carnet a un retour vers l'accueil. Styles `ce3-classement` et `ce3-rang` ajoutés, chacun avec une règle CSS; version du script montée.
+- Vérifications : tests ciblés `mgmtLot55T1` (3/3), versions sans écart, ESLint ciblé vert.
+- Reste non réalisé : raccordement automatique à la fin d'année, tests de trois années et 50 soirées, conformité complète aux planches, inscription annuelle automatique, accès du carnet dans la navigation secondaire, tests sauvegarde/échappement/classes, ajout aux listes générales `test` et `test:watch`, test lent. Tranche inachevée.
+- Écart à la planche : classement compact plutôt qu'en tuiles; pas de déclencheur cérémonie. Fichiers : `mgmt-ceremonie.js`, `index.html`, cette fiche. Aucune migration ni question pour Anthony.
