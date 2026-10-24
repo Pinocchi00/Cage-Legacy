@@ -149,7 +149,7 @@ function mgmtChocAnnee(m){
   return typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():0;
 }
 function mgmtChocValide(choc){
-  return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee);
+  return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee)&&(!Object.hasOwn(choc,'resultat')||['victoire','defaite'].includes(choc.resultat))&&(!Object.hasOwn(choc,'a')||typeof choc.a==='string')&&(!Object.hasOwn(choc,'b')||typeof choc.b==='string');
 }
 function mgmtChocProposition(m){
   if(!m||!m.mondeVivant||m.choc&&mgmtChocValide(m.choc)&&m.choc.annee===mgmtChocAnnee(m))return null;
