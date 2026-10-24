@@ -2303,3 +2303,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-screen .ld66-lower{min-height:0}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_FINALE_CARTE] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
