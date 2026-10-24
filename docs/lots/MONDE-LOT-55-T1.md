@@ -363,3 +363,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` et `git diff --check` (verts).
 - Le test `mgmtReleveReduit` n'a pas été relancé. Les limites consignées restent : conformité complète aux planches non certifiée, déclencheur lié à la fin du contrat plutôt qu'à chaque anniversaire, et aucune fixture complète d'ancienne sauvegarde chargée. Aucun format de sauvegarde modifié ni migration requise.
 - Aucun changement de fonctionnalité nécessaire à la reprise. Le seul ajout est ce relevé de vérification; il est à committer sur la branche avec le commit final existant. Les changements hors tranche ne sont pas inclus.
+
+### Reprise 47
+
+- État initial : branche `p11-ceremonie-carnet`, HEAD `893a19a`; aucun fichier métier ou test de la tranche non commité. Les changements `.opencode/agents/*` et `opencode.json` visibles dans l'arbre restent étrangers et sont exclus.
+- Vérifications exécutées : `node --test tests/mgmtLot55T1.test.js` (20/20); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert). Le test figure déjà dans les scripts généraux `test` et `test:watch` selon l'état livré antérieurement.
+- Aucun fichier de production n'a nécessité de correction après ces contrôles. Les limites connues ne sont pas masquées : le test ne charge pas une fixture historique complète; `mgmtReleveReduit` n'a pas été lancé; la fidélité intégrale aux maquettes et un déclenchement à chaque anniversaire ne sont pas attestés par ces vérifications (l'enchaînement existant suit la fin du contrat). Pas de changement de format ou migration de sauvegarde.
+- Le commit final est déjà présent dans l'historique; ce relevé de reprise est le seul changement de tranche à committer. Aucun changement étranger n'est ajouté.
