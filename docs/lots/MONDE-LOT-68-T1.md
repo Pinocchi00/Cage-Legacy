@@ -193,3 +193,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Test ajouté : « Monde lot 68 T1 — chaque classe rendue par l’arrivée a une règle dans sa feuille intégrée », avec la décision « planches Uni* validées par Anthony ; l'écran suit la planche ». Test ciblé `node --test tests/mgmtFicheStats.test.js` : 20/20 verts.
 - État écran par écran : fiche et semaine/recruteur/retours tentés par capture, mais comparatifs non ouverts et corrections visuelles non validées ; arrivée, relevé, chiffres, menu et classements non capturés. Les tests assurent une partie de la structure et des règles CSS, pas la fidélité de l'écran rendu. Écarts visuels précis : non déterminés faute d'ouverture des comparatifs.
 - Aucun code applicatif, migration ou bump de version dans cette reprise. Restent à faire les corrections visuelles, les captures ouvrables écran par écran, le test lent `tests/mgmtReleveReduit.test.js` et la validation finale/livraison. `TOUT_EST_FINI` n'est pas atteint.
+
+### Reprise 24 du 24/10/2026
+
+- Branche vérifiée : `fid-fiches`. Dernier commit observé `20461ef`; les modifications hors tranche (`.opencode/agents/*`, `opencode.json`) ont été préservées.
+- Test ajouté dans `tests/mgmtFicheStats.test.js` : « Monde lot 68 T1 — chaque classe des vues meilleurs et records a une règle ». Il vérifie les classes `mf-me-*` et `mf-re-*` de `mgmt-su-leaders.js` contre `ui-cadre.css`, avec la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- `node --test tests/mgmtFicheStats.test.js` : 21/21 verts.
+- Capture/comparaison non réalisées : aucune correction d'apparence ni fidélité visuelle n'est revendiquée. Fiche, arrivée, recruteur, semaine, relevé, chiffres, menu et classements restent sans comparaison visuelle exploitable ; corrections visuelles restantes.
+- Aucun fichier applicatif JS/CSS ni donnée de sauvegarde modifié ; pas de migration ni de bump `?v=`. Tests lents non relancés. `TOUT_EST_FINI` non atteint.

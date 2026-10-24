@@ -139,6 +139,17 @@ test('Monde lot 68 T1 — chaque classe de la planche menu a une règle',()=>{
   const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
 });
+test('Monde lot 68 T1 — chaque classe des vues meilleurs et records a une règle',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-su-leaders.js'),'utf8');
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  const classes=[...new Set([...js.matchAll(/class="([^"]+)"/g)]
+    .flatMap(match=>match[1].split(/\s+/))
+    .filter(name=>/^mf-(?:me|re)-[\w-]+$/.test(name)))];
+  assert.ok(classes.length>0,'classes des écrans meilleurs/records trouvées');
+  for(const name of classes)
+    assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+});
 test('Monde lot 68 T1 — les chiffres de combat gardent les métriques comparées et le relevé par round',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
   const js=fs.readFileSync(require.resolve('../mgmt-combat-chiffres.js'),'utf8');
