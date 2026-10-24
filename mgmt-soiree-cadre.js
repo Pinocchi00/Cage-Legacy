@@ -260,7 +260,7 @@ function mgmtSoFinHtml(m,prog){
   const cartes=primes.map(({p,t})=>{
     const detail=mgmtResultatDetail(m,p.h);
     const noms=t.pr==='cs'?`${p.a.last} · ${p.b.last}`:(detail&&detail.gagnant?(detail.gagnant.last||detail.gagnant.name):p.a.last);
-    return `<article class="so3-fin-prime"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span><b>${esc(mgmtEuros(Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0))}</b></article>`;
+     return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span><b>${esc(mgmtEuros(Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0))}</b></article>`;
   });
   const finance=m.lastEvent.finance||{};
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
