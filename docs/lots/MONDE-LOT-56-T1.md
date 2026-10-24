@@ -170,3 +170,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe (24/24, empreintes comprises) ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe ; présence dans `test` et `test:watch` vérifiée (`true true`).
 - Ces résultats ne ferment pas les écarts recensés ci-dessus : le test dit parcours réel valide après une soirée, sans démontrer de palier nouvellement franchi ; le bonus diffuseur est couvert seulement par borne arithmétique ; aucun attrait agents libres effectif n'est raccordé ; l'empreinte spécifique et la vérification lente du plafond n'ont pas été rejouées ; l'écran n'est pas vérifié comme reproduction exacte de toute la planche.
 - Pas de changement de code ou de sauvegarde dans cette reprise, donc pas de commit de tranche créé. Aucune migration. État : **inachevé** ; aucun `TOUT_EST_FINI`.
+
+### Reprise 6 — vérifications (24/10/2026)
+
+- Branche confirmée `p11-croissance`; HEAD au début `4e4fe4a`. Aucun fichier de la tranche non commité. Les changements `.opencode/agents/*` et `opencode.json` préexistants sont hors tranche et laissés intacts.
+- `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe (24/24, empreintes historiques incluses). `node tools/verif-versions.js origin/main` ne signale aucun écart; `node_modules/.bin/eslint .` passe.
+- Le test `node --test tests/mgmtReleveReduit.test.js` a été tenté jusqu'à la limite de 300 secondes de l'outil puis interrompu : plafond non confirmé.
+- Aucun nouveau changement de code dans cette reprise. Critères toujours ouverts : attrait des agents libres non raccordé à une mécanique réelle; aucun test ne prouve que les soirées générées font franchir un palier et déclenchent son annonce; l'écran reste partiel par rapport à la planche (notamment les quatre pistes visuelles et la prochaine marche aux valeurs exactes); le diffuseur n'a qu'une vérification arithmétique, sans test d'effet sur une soirée. Les réparations facultatives et le plafond lent ne sont pas complètement démontrés.
+- Pas de migration. La fiche n'autorise pas à appeler cette tranche terminée : aucun commit final ni `TOUT_EST_FINI` n'est revendiqué.
