@@ -2233,6 +2233,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article>p{flex:none;min-width:0;margin:0;padding:8px 0;border-bottom:1px solid rgba(233,230,225,.16);line-height:1.2;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE67_T1_CARNET_LIGNES_ISOLEES] — Monde lot 67 T1 ==== */
 .ce3-carnet-ecran .ce3-carnet>article>p{display:block;white-space:normal;word-break:break-word;contain:none;max-width:100%}
+/* ==== [ANCRE: MONDE70_T1_CARNET_SCROLL_INTERNE] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet{width:100%;min-width:0;min-height:0;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{min-width:0;max-width:100%;min-height:0;overflow-x:hidden;overflow-y:auto;contain:layout paint}
+.ce3-carnet-ecran .ce3-carnet>article h2,.ce3-carnet-ecran .ce3-carnet>article>p{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
