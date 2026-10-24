@@ -93,7 +93,7 @@ function mgmtOrgMoneyHtml(m){
 /* ==== [ANCRE: MONDE67_T1_ONGLETS_ORG] — Monde lot 67 T1 ==== */
 function mgmtOrgOnglets(m,courant){
   const onglets=[['mgmt_guerre','LE CLASSEMENT DES HUIT'],['mgmt_organisation','LA CROISSANCE'],['mgmt_poste','TON POSTE'],['mgmt_carnet','TON CARNET']];
-  return `<nav class="mo67-tabs" aria-label="Organisation">${onglets.map(([id,titre])=>`<button type="button" class="mo67-tab" aria-current="${id===courant?'page':'false'}" onclick="CL.go('${id}')" onkeydown="if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();const a=[...this.parentElement.querySelectorAll('button')],i=a.indexOf(this),d=event.key==='ArrowDown'?1:-1;a[(i+d+a.length)%a.length].focus()}else if(event.key==='Escape'){CL.go('mgmt_accueil')}">${esc(titre)}</button>`).join('')}</nav>`;
+  return `<nav class="mo67-tabs" aria-label="Organisation">${onglets.map(([id,titre])=>`<button type="button" class="mo67-tab" aria-current="${id===courant?'page':'false'}" onclick="CL.go('${id}')" onkeydown="if(event.key==='ArrowDown'||event.key==='ArrowUp'||event.key==='Tab'){event.preventDefault();const a=[...this.parentElement.querySelectorAll('button')],i=a.indexOf(this),d=event.key==='ArrowUp'||event.shiftKey?-1:1;a[(i+d+a.length)%a.length].focus()}else if(event.key==='Escape'){CL.go('mgmt_accueil')}">${esc(titre)}</button>`).join('')}</nav>`;
 }
 function mgmtPaliersHtml(m){
   const c=mgmtPaliersCalculer(m), avance=c.paliers.map(p=>`<span class="cr3-step cr3-done"><b>${esc(p.nom)}</b><small>${esc(p.texte)}</small></span>`).join('');
