@@ -459,3 +459,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîchement relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'inscription dans `test` et `test:watch` est confirmée (`true,true`).
 - Pas de nouvelle clé de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé ici ; les reprises antérieures consignent une mesure de 1 908 745 octets et un résultat vert. Limite de couverture inchangée : les familles sont exercées sur des faits préparés via le parcours réel, sans preuve que chaque système opérationnel génère naturellement tous les faits.
 - Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation de cache de `index.html` sont étrangères à la tranche et exclues du commit. Aucun autre écart ni question pour Anthony ; `check:rapide` reste réservé au superviseur.
+
+### Reprise 7 — clôture (24/10/2026)
+
+- Branche `p8-apres` et historique/statut consultés ; les changements fonctionnels sont déjà commités, aucun fichier de production/test de tranche n'est en attente. Seule cette fiche est ajoutée au commit de reprise.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` figure dans `test` et `test:watch` (`true,true`).
+- Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les bilans précédents documentent 1 908 745 octets et sa réussite. Aucun changement de sauvegarde ni migration. Limite honnête inchangée : les tests préparent les faits des familles via le parcours réel, sans démontrer que les systèmes de jeu génèrent naturellement chacun d'eux.
+- Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache de `index.html` hors tranche, exclues. Aucun écart nouveau ni question pour Anthony.
