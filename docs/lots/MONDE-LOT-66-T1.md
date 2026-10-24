@@ -133,6 +133,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tests verts après les modifications : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9) et `mgmtLot54T1.test.js` (30/30). `node tools/verif-versions.js origin/main` sans écart ; ESLint passe.
 - Écart restant vérifié : le comparateur signale encore des chevauchements/troncatures sur `lendemain` et des textes de moins de 22 px/troncatures sur `lendemainSuite`. Cette tranche ne peut donc pas revendiquer le critère visuel de la case 4 comme satisfait. Les captures sont sous `C:/Users/antho/AppData/Local/Temp/shots/`; aucun examen manuel de PNG n'est revendiqué. Aucun changement des fichiers non liés préexistants (`.opencode/agents/*`, `opencode.json`, `sw.js`).
 
+### Reprise 24 — ajustements de cadre et tests de non-régression — 24/10/2026
+
+- Modifié `ui-cadre.css` : les deux vues bornent désormais leurs zones internes, les colonnes de la suite autorisent les retours à la ligne des mouvements, et le lendemain répartit plus de place aux blocs inférieurs. Version de cache montée dans `index.html` via `node tools/_bump.js ui-cadre.css`.
+- Après capture, mesures: `lendemain` gros blocs 19,4 %, moyen 25 %; le contrôle automatique trouve encore 11 chevauchements et aucun texte sous 22 px (débordement vide). `lendemainSuite` gros blocs 17,8 %, moyen 23,2 %; aucun chevauchement, mais 21 éléments sous 22 px et des débordements. Les captures sont dans `C:/Users/antho/AppData/Local/Temp/shots/`; pas d'inspection manuelle revendiquée. **Case visuelle 4 non satisfaite** malgré le ratio de gros blocs conforme.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` sans écart. ESLint non relancé dans cette reprise.
+- Écart/limite : ajustements CSS ne résolvent pas les problèmes de chevauchement et petits textes détectés automatiquement; ils sont documentés pour une reprise visuelle supplémentaire. Aucun changement de sauvegarde/migration ni des fichiers de moteur.
+
 ### Reprise 21 — tests ciblés de confirmation — 24/10/2026
 
 - À la reprise, les commits fonctionnels restent présents (HEAD `d57deab`) ; aucun fichier de code ou test de la tranche n'était en attente. Les changements locaux d'agents/configuration et `sw.js` sont restés intacts et exclus.
