@@ -27,6 +27,17 @@ test('Monde lot 53 T1 — le choix de vue reste indépendant pour chaque combat'
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la vue résultat seule termine le combat et fait avancer la soirée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5305);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>{const i=MGMT_SOIREE.index;mgmtVueCombatChoisir(i,'resultat');CL.mgmtSoRegarder();return {avant:i,apres:MGMT_SOIREE.index,screen:G.screen};})()`);
+    assert.equal(r.apres,r.avant+1);
+    assert.notEqual(r.screen,'mgmt_combat');
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitions',()=>{
   const w=newGameWindow({runMain:true});
   try{

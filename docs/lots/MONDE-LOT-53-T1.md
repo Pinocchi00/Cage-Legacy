@@ -100,3 +100,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Contrôle ciblé : `node --test tests/mgmtLot53T1.test.js` (6 réussis), dont un test du nombre de repères, de l'état actif et de l'échappement. Versions de `mgmt-combat.js` et `ui-cadre.css` montées.
 - Travail restant conséquent : portage des écrans soirée et fin aux valeurs des planches, fenêtres réellement testées 30–60 s avec commandes/fondu conforme, résultat seul, assertion 900–1200 s, test des empreintes historiques, intégration directe aux listes `test`/`test:watch` et test exhaustif des classes. Le cumul mesuré antérieurement (868,38 s) reste hors cible. Ce commit ne termine donc pas la tranche.
 - Écart de lecture : la frise illustre la sélection des moments et leur progression, mais ne transforme pas l'arène en lecture fenêtrée interactive ; l'implémentation reste l'accélération existante, sans fondu dédié ni passage au verdict spécialement géré. Aucun changement de sauvegarde.
+
+### Reprise 15 — contrôle de la vue résultat
+
+- Ajout du test « Monde lot 53 T1 — la vue résultat seule termine le combat et fait avancer la soirée ». Il confirme sur le chemin réel que cette vue ne bloque pas la progression et n'ouvre pas l'arène.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` (7 réussis). Le test ne prouve pas la carte résultat dédiée ni son délai de cinq secondes : ce comportement reste absent.
+- Fichier modifié : `tests/mgmtLot53T1.test.js` (test de progression résultat seul), cette fiche (compte rendu). Aucun changement de sauvegarde ou au moteur de combat.
+- Restent non faits : portage fidèle des écrans `UniSoiree` et `UniSoireeFin`, résultat dédié temporisé, fenêtres 30–60 s/fondu/passabilité, assertion du cumul 900–1200 s, couverture exhaustive style/échappement/empreintes et intégration du fichier dans les commandes principales `test` et `test:watch`. Ce travail ne satisfait pas la fin de tranche.
