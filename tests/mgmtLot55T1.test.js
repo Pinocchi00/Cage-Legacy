@@ -69,3 +69,17 @@ test('Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les sai
   assert.equal(carnet.soirees.length,1);
   assert.equal(JSON.stringify(c.mgmtCarnetLire({})),JSON.stringify({champions:[],espoirs:[],prix:[],defis:[],primes:[],soirees:[]}));
 });
+test('Lot 55 T1 — chaque prix possède trois formulations distinctes et spécifiques',()=>{
+  const blocs=[...source.matchAll(/\{id:'(combattant|ko|soumission|combat|revelation|retour)'[^\n]*phrases:\[([^\]]+)\]/g)];
+  assert.equal(blocs.length,6);
+  const toutes=[];
+  for(const [,id,contenu] of blocs){
+    const phrases=[...contenu.matchAll(/'([^']+)'/g)].map(x=>x[1]);
+    assert.equal(phrases.length,3,id);
+    assert.equal(new Set(phrases).size,3,id);
+    const mot=id==='ko'?'KO':id==='soumission'?'soumission':id==='combattant'?'combattant':id==='combat'?'combat':id==='revelation'?'révélation':'retour';
+    assert.ok(phrases.every(p=>p.toLocaleLowerCase('fr').includes(mot.toLocaleLowerCase('fr'))),id);
+    toutes.push(...phrases);
+  }
+  assert.equal(new Set(toutes).size,toutes.length,'formulations partagées entre familles');
+});

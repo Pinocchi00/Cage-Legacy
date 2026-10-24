@@ -5,9 +5,9 @@ const MGMT_CEREMONIE_PRIX=Object.freeze([
   {id:'combattant',titre:'COMBATTANT DE L’ANNÉE',min:3,phrases:['La saison de {nom} se lit dans {n} combats : la presse le couronne combattant de l’année.','Avec {n} combats disputés, {nom} s’impose comme combattant de l’année.','La régularité de {nom}, mesurée sur {n} combats, lui vaut le trophée de combattant de l’année.']},
   {id:'ko',titre:'KO DE L’ANNÉE',phrases:['{nom} signe le KO de l’année après {n} round(s).','La presse retient le KO de {nom}, conclu au {n}e round.','Le KO de l’année revient à {nom} : {n} round(s) ont suffi.']},
   {id:'soumission',titre:'SOUMISSION DE L’ANNÉE',phrases:['{nom} place la soumission marquante de l’année au {n}e round.','La presse distingue la soumission de {nom}, achevée en {n} round(s).','Au terme de {n} round(s), {nom} signe la soumission de l’année.']},
-  {id:'combat',titre:'COMBAT DE L’ANNÉE',phrases:['Le combat de {a} et {b} a pesé {n} points d’histoire.','Avec {n} points d’histoire, {a} contre {b} est le combat de l’année.','La presse choisit {a}–{b} : {n} points d’histoire ont marqué la saison.']},
+  {id:'combat',titre:'COMBAT DE L’ANNÉE',phrases:['Le combat de {a} et {b} a pesé {n} points d’histoire.','Avec {n} points d’histoire, {a} contre {b} est le combat de l’année.','La presse choisit {a}–{b} comme combat de l’année : {n} points d’histoire ont marqué la saison.']},
   {id:'revelation',titre:'RÉVÉLATION DE L’ANNÉE',phrases:['{nom} signe {n} victoires dans son année de révélation.','{n} victoires font de {nom} la révélation de l’année.','La révélation {nom} a remporté {n} combats cette année.']},
-  {id:'retour',titre:'RETOUR DE L’ANNÉE',phrases:['Après {n} jours loin de la compétition, {nom} revient par une victoire.','{nom} a gagné après {n} jours sans combattre : la presse salue son retour.','Le retour gagnant de {nom}, après {n} jours d’absence, est distingué.']}
+  {id:'retour',titre:'RETOUR DE L’ANNÉE',phrases:['Après {n} jours loin de la compétition, le retour de {nom} se conclut par une victoire.','{nom} a gagné après {n} jours sans combattre : la presse salue son retour.','Le retour gagnant de {nom}, après {n} jours d’absence, est distingué.']}
 ]);
 function mgmtCeremonieCalculer(m){
   if(!m||!Array.isArray(m.hist))return [];
