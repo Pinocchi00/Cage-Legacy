@@ -74,6 +74,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise — tests inter-lots et clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée. Aucun fichier fonctionnel ou test de tranche en attente ; les modifications préexistantes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues.
+- La fusion demandée `git merge origin/main` a été refusée par la politique de l'environnement. Contrôle prescrit exécuté ensuite : les sept suites inter-lots passent **130/130**, dont les deux régressions lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines).
+- Validations : `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1.test.js` est référencé par `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- Les fichiers déjà commités remplissent les rôles suivants : `mgmt-apres-data.js` (catalogue des dix familles, textes `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, raccord Accueil/presse et mouvements inter-organisations), `tests/mgmtLot63T1.test.js` et `package.json` (tests et scripts). La seule modification de cette reprise est le présent compte rendu.
+- Limite de couverture inchangée : les tests préparent séparément les faits familiaux sur une partie créée par le chemin réel, sans prouver que chaque système opérationnel génère naturellement tous ces faits. Pas de question nouvelle pour Anthony.
+
 ### Reprise 10 — contrôle inter-lots demandé (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les commits de production et de tests de la tranche sont déjà présents (`67f9dba7` en tête). Aucun fichier fonctionnel/test de tranche n'était en attente. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et restent exclus.
