@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 24 (24/10/2026)
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` consulté et arbre propre. Il n’y avait donc aucun fichier applicatif non commité à reprendre/commiter.
+- Protocole externe `shoot/LISEZMOI.txt` relu et captures Guerre/Croissance/Ton poste/Carnet/Bilan/Cérémonie prescrites individuellement. Dans cette reprise, j’ai effectivement recapturé Croissance et Carnet : Croissance 17,2 % de gros blocs, aucun chevauchement, 3 textes sous 22 px et 4 débordements (« 27 combattants… », « 29 combattants… », « Poids coq féminin », « 21 combattants… ») ; Carnet 15,1 %, 84 chevauchements et quatre débordements de noms. Aucun PNG comparatif n’a pu être ouvert avec l’outil disponible, et la scène à lauréats n’a pas été fabriquée. Ces critères ne sont pas certifiés.
+- Validation relancée : `node --test tests/mgmtLot55T1.test.js` (49/49), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussissent. Ces tests ne corrigent pas les défauts visuels détectés ; je n’invente pas une correction non vérifiée.
+- Modifications applicatives/tests/cache/migration : aucune dans cette reprise. Cette fiche seule est mise à jour pour consigner les mesures et l’état réel. Reste à corriger les défauts visuels, établir une scène de cérémonie avec prix, inspecter les six comparatifs et satisfaire la cible `grosBlocs ≤ 20 %` sans chevauchements, texte trop petit ni débordement. Aucun `TOUT_EST_FINI` revendiqué.
+- Questions pour Anthony : aucune question de spécification ; ce sont des travaux de correction et validation encore à exécuter.
+
 ## Compte rendu — reprise 20
 
 - Reprise : branche `fid-organisation`, HEAD initial `40367f66`, arbre propre. La procédure externe a été consultée via terminal. Capture Cérémonie après ajustement CSS : chevauchements=0, textes sous 22 px=0, débordements=[], `grosBlocs=19,7 %` (avant : 20,7 %). Le cmp a été généré mais non ouvert visuellement ; la scène capturée n'est pas démontrée avec prix remplis.
