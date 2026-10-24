@@ -17,7 +17,7 @@ function mgmtCeremonieCalculer(m){
   const byId=new Map();
   const nom=s=>s&&(s.name||s.nom)||'Combattant';
   const entrant=(id,s)=>{if(!id)return null;if(!byId.has(id))byId.set(id,{id,nom:nom(s),combats:0,victoires:0,defaites:0,finitions:0,score:0,proAvant:Infinity});return byId.get(id);};
-  for(const {t} of h){for(const s of [t.a,t.b]){const x=entrant(s.id,s);x.combats++;const avant=Number(s.W||0)+Number(s.L||0)+Number(s.D||0);if(Number.isFinite(avant))x.proAvant=Math.min(x.proAvant,avant);}if(t.winner==='A'||t.winner==='B'){const side=t.winner==='A'?t.a:t.b, x=entrant(side.id,side);x.victoires++;if(['ko','sub','stop'].includes(t.family))x.finitions++;}}
+   for(const {t} of h.slice().sort((a,b)=>a.t.c-b.t.c||a.i-b.i)){for(const s of [t.a,t.b]){const x=entrant(s.id,s);x.combats++;const avant=Number(s.W||0)+Number(s.L||0)+Number(s.D||0);if(Number.isFinite(avant)&&x.proAvant===Infinity)x.proAvant=avant;}if(t.winner==='A'||t.winner==='B'){const side=t.winner==='A'?t.a:t.b, x=entrant(side.id,side);x.victoires++;if(['ko','sub','stop'].includes(t.family))x.finitions++;}}
   const out=[];
   for(const p of MGMT_CEREMONIE_PRIX){let cand=null;
     if(p.id==='combattant'){

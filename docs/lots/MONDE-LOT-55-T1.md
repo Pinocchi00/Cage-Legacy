@@ -348,3 +348,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Pas de changement de code cette reprise : le dernier état métier est déjà commité et les vérifications ne révèlent pas de défaut à corriger. Le test lent `mgmtReleveReduit` n'a pas été exécuté (délai outil de 120 s); il ne peut être déclaré vert.
 - Limites résiduelles documentées : ces tests n'établissent pas une reproduction intégrale des deux maquettes ni un déclenchement à chaque anniversaire (le parcours actuel passe par le terme du contrat); le test de sauvegarde vérifie le champ facultatif et sa réparation, mais ne charge pas une fixture historique complète. Aucune migration de sauvegarde.
 - Aucun fichier de tranche n'est à committer; aucun commit artificiel n'est créé. Ces limites empêchent de certifier toutes les cases de la fiche et de déclarer `TOUT_EST_FINI`.
+
+### Reprise 45
+
+- Correction fonctionnelle du palmarès d'entrée de la révélation : le calcul prend maintenant le W/L/D observé au premier combat chronologique de l'année, même si `m.hist` est rangé dans un ordre différent. L'ancienne réduction au plus petit total pouvait requalifier un combattant ayant déjà plus de cinq combats professionnels au début de l'année.
+- Test ajouté : « Lot 55 T1 — la révélation utilise le palmarès au premier combat chronologique ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert), présence confirmée dans les scripts `test` et `test:watch`, `git diff --check` (vert). `sw.js` a été restauré depuis `origin/main` après modification par l'environnement de test.
+- Aucune modification de sauvegarde ou migration. Les limites relevées précédemment restent : pas de preuve de reproduction intégrale des planches, déclencheur à la fin du contrat plutôt qu'à chaque anniversaire, et absence de chargement d'une fixture complète de sauvegarde ancienne. Le test lent `mgmtReleveReduit` n'a pas été relancé.
+- Fichiers modifiés : `mgmt-ceremonie.js` (palmarès chronologique), `index.html` (bump de cache), `tests/mgmtLot55T1.test.js` (cas de régression), cette fiche (compte rendu). Les modifications étrangères `.opencode/agents/*` et `opencode.json` sont exclues.

@@ -22,6 +22,12 @@ test('Lot 55 T1 — les prix combattant et révélation respectent leurs minima'
   assert.ok(trois.some(p=>p.id==='combattant'&&p.laureat==='a'));
   assert.ok(trois.some(p=>p.id==='revelation'&&p.laureat==='a'));
 });
+test('Lot 55 T1 — la révélation utilise le palmarès au premier combat chronologique',()=>{
+  const c=charger();
+  const combat=(jour,w,l,family='decision')=>({c:jour,a:{id:'rookie',name:'Rookie',W:w,L:l,D:0},b:{id:`opp${jour}`,name:`Opp${jour}`},winner:'A',family});
+  const m={hist:[combat(200,0,2,'ko'),combat(100,0,6,'ko'),combat(300,1,2)]};
+  assert.ok(!c.mgmtCeremonieCalculer(m).some(p=>p.id==='revelation'));
+});
 test('Lot 55 T1 — les prix lauréats se consignent sans doublon',()=>{
   const c=charger(),m={roster:[{id:'a'}]},prix=[{id:'ko',laureat:'a'}];c.mgmtCeremonieInscrire(m,prix,2026);c.mgmtCeremonieInscrire(m,prix,2026);assert.equal(m.roster[0].prixAnnee.length,1);
 });
