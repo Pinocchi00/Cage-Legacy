@@ -1033,6 +1033,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-entete{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;color:#E9E6E1}
 .so3-fin-entete strong{font-family:var(--mf-titre);font-size:56px;font-weight:800;line-height:.69}
 .so3-fin-entete span{font-family:var(--mf-titre);font-size:44px;font-weight:800;line-height:.69}
+.so3-fin-titre{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.so3-fin-contexte{display:flex;align-items:center;gap:16px;font-size:24px;line-height:1;white-space:nowrap}
+.so3-fin-contexte span{color:rgba(233,230,225,.74);font-size:24px;font-family:inherit;font-weight:500;line-height:1}
+.so3-fin-contexte b{height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;display:flex;align-items:center;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:.9}
 .so3-fin .mf-so-haut{flex:1;min-height:0}
 .so3-fin .mf-so-bande{flex:none}
 /* ==== [FIN ANCRE] ==== */

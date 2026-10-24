@@ -347,3 +347,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `mgmt-combat.js` (markup aide), `ui-cadre.css` (styles), `index.html` (versions cache), `tests/mgmtLot53T1.test.js` (assertions aide et règles), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 ; `node tools/verif-versions.js origin/main` — aucun écart ; `node_modules/.bin/eslint .` et `git diff --check` passent.
 - Limites persistantes : ce rappel n'ajoute pas de navigation réelle entre les fenêtres. Le portage complet des maquettes, la lecture fenêtre par fenêtre/fondu d'image, le cumul de référence dans 900–1200 s et le test lent ne sont pas établis par cette étape. Aucun changement moteur ou sauvegarde.
+
+### Reprise 48 — contexte de fin aligné sur la maquette
+
+- Fait : enrichissement du bandeau de fin avec le contexte visible sur `UniSoireeFin` (mention « Ce soir », date/lieu et nom d'organisation), en conservant les libellés issus des données existantes et la route vers le lendemain. Les classes nouvelles ont chacune une règle `so3-*`, les valeurs dynamiques restent échappées.
+- Test ajusté : « Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendemain existant » vérifie désormais le bloc de contexte.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
+- Écarts persistants : la composition complète reste l'écran mf-* historique enrichi et ne reproduit pas toute la planche; le cumul de référence 900–1200 s n'est pas validé (868,38 s précédemment mesurées avec la formule prescrite); la frise ne joue pas de fenêtres temporisées isolées ni de fondu d'image. Le compte rendu reste partiel et ne revendique pas l'achèvement.

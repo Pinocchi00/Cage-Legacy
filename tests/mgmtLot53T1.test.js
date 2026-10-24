@@ -118,6 +118,8 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     jouerSoirees(w,1);
     const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoFinHtml(m,p);})()`);
     assert.match(html,/FIN DE SOIRÉE/);
+    assert.match(html,/class="so3-fin-contexte"/);
+    assert.match(html,/Ce soir/);
     assert.match(html,/class="so3-salle" aria-label="Salle finale/);
     assert.match(html,/Voir le lendemain/);
     assert.match(html,/class="so3-primes"/);
