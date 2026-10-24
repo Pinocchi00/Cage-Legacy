@@ -208,3 +208,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tentative dans `ui-cadre.css` : retour à une présentation horizontale des mouvements, plus proche des trois colonnes de la planche, avec colonnes rétrécissables et retours à la ligne. Cache CSS monté. Cette tentative ne résout pas les quatre débordements sur la suite ; critère visuel 4 encore non satisfait.
 - Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7. `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Aucun changement de données ou de sauvegarde.
 - Questions pour Anthony : aucune. Écart de rendu restant honnêtement déclaré : quatre débordements détectés dans la colonne des mouvements de `lendemainSuite`, malgré zéro chevauchement et zéro texte sous 22 px. Captures régénérées par l'outil.
+
+### Reprise 32 — largeur des colonnes et recapture — 24/10/2026
+
+- Guide relu et comparateur relancé sur `lendemainSuite` : contrôle toujours à 0 chevauchement, 0 texte sous 22 px, mais 4 débordements (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 17 %.
+- Élargissement des deux colonnes de rang/organisation de 96 à 112 px et cache CSS augmenté. Ce réglage n'a pas supprimé les quatre débordements selon la capture ; ce défaut demeure ouvert, sans prétention que la case visuelle 4 soit entièrement satisfaite.
+- `node --test tests/mgmtEcranLendemain.test.js` : 7/7. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde.
+- La branche fonctionnelle des deux écrans et la navigation restent déjà livrées dans les commits précédents. Les modifications locales d'agents, `opencode.json` et `sw.js` sont hors tranche et laissées intactes.
