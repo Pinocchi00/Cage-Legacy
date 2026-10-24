@@ -8,6 +8,13 @@
 - Aucun changement de sauvegarde. La modification `ui-cadre.css` est versionnée ; modification de `sw.js` de l’outil restaurée et exclue.
 - À finir : corriger ces écarts à partir d’une inspection visuelle des cmp, produire les scènes de prix et rivalité, valider les vues au seuil. Cette tranche reste non terminée ; aucun `TOUT_EST_FINI` n’est revendiqué.
 
+## Compte rendu — reprise 26
+
+- Branche `fid-organisation` vérifiée ; l’historique contenait déjà des commits de la tranche et l’arbre était propre avant cette reprise. Aucun changement applicatif non commité n’était à reprendre.
+- Ajustement conservateur de l’en-tête cérémonie : titre ramené à 48 px pour préserver une marge dans le rang titre/mention/date et éviter les collisions signalées. `ui-cadre.css` versionné dans `index.html` avec `_bump.js` ; `sw.js` généré par l’outil restauré et exclu.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (43/43), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` réussis.
+- Aucun accès outil valide aux captures comparatives n’a été disponible dans cette reprise, donc aucun PNG n’a été ouvert ni aucun score recalculé. Les mesures antérieures restent la référence, et restent au-dessus de 20 % pour Guerre et Cérémonie ; Ton poste est à 20,4 %. Scène de capture avec prix/rivale, ouverture effective des cmp et cible de gros blocs non validées. La tranche reste visuellement incomplète et aucun `TOUT_EST_FINI` n’est revendiqué. Pas de migration de sauvegarde.
+
 Branche : `fid-organisation` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). **Les maquettes (`docs/planches-uniques/Uni*.dc.html`) sont validées par Anthony : l'écran du jeu doit leur ressembler.** Lis d'abord `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` : un outil capture ton écran à 1920×1080 et le compare à la maquette (`cmp-<écran>.png` : jeu à gauche, maquette à droite). **Utilise-le après chaque étape.**
 
 Écrans de ta tranche : `guerre` (`UniGuerre`), `croissance` (`UniCroissance`), `tonposte` (`UniTonPoste`), `carnet` (`UniCarnet`), `bilan` (`UniBilanPatron`) et `ceremonie` (`UniCeremonie`). Fichiers : `mgmt-guerre-ecran.js`, `mgmt-ecran-organisation.js`, `mgmt-ecran-poste.js`, `mgmt-ceremonie.js`, `mgmt-croissance*.js` (cherche `mgmtPaliersHtml`), `ui-cadre.css`.

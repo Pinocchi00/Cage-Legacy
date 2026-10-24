@@ -427,7 +427,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mo67-tab[aria-current="page"]{background:#F0B220;color:#0D0B0B;border-color:#F0B220}
 .ce3-ecran{position:absolute;left:300px;top:108px;width:1564px;height:860px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:12px;color:#E9E6E1;background:#0D0B0B;overflow:auto;font:500 24px/1.15 'Saira Condensed','Arial Narrow',sans-serif}
 .ce3-entete{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid rgba(233,230,225,.38)}
-.ce3-entete h1{margin:0;font:800 56px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1}
+.ce3-entete h1{margin:0;font:800 48px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1}
 .ce3-entete p,.ce3-entete strong{font-size:24px;margin:0}
 .ce3-grille{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px}
 .ce3-prix{min-width:0;box-sizing:border-box;padding:20px 22px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;gap:12px;overflow:hidden}
