@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 34 — clôture contrôlée (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de code/test sont déjà présents dans l'historique. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` sans écart, `node_modules/.bin/eslint .` passe et l'inclusion dans `test`/`test:watch` est confirmée (`true,true`).
+- Aucun fichier fonctionnel non commité de la tranche. Le plafond de partie neuve demeure documenté comme vérifié dans les validations précédentes (1 908 745 octets). Aucun nouvel état de sauvegarde ni migration.
+- Fichiers et rôles livrés dans les commits antérieurs : `mgmt-apres-data.js` (dix familles `relu:false`), `mgmt-ecran-lendemain.js` (calcul, Accueil/presse et mouvements inter-organisations), `tests/mgmtLot63T1.test.js` et `package.json` (tests et scripts agrégés). Limite honnête : les familles sont testées avec leurs faits préparés sur le chemin réel, sans démontrer que chaque système opérationnel les génère naturellement.
+- Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation de cache de `index.html` sont étrangères à la tranche et exclues. Aucun écart nouveau ni question pour Anthony.
+
 ### Reprise 8 — vérification finale (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les fichiers de production et de tests de la tranche sont déjà commités dans l'historique (`1c3685b6`). Les seules modifications de travail visibles concernent `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` ; elles sont étrangères à la tranche et laissées hors commit.
