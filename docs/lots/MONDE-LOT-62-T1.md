@@ -17,9 +17,9 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 - `mgmt-corps.js` (déjà livré) appelle le traitement annuel à la clôture de soirée, hors passé généré, dans l'ordre calcul des prix, clôture du classement ; la cérémonie devient visible avant le lien bilan. `mgmt-accueil.js` a reçu une version de cache actualisée.
 - `tests/mgmtLot62T1.test.js` instrumente le chemin de jeu et prouve exactement trois appels de calcul de cérémonie et de clôture annuelle, l'inscription de prix, l'idempotence, la validation et l'état vide du carnet. `package.json` conserve les commandes dédiées `test:lot62t1` et `test:watch:lot62t1`.
 - Pas de clé ni migration de sauvegarde nouvelle ; `MGMT_SAVE_VERSION` inchangé. Le validateur et la réparation facultative des prix existaient déjà.
-- Vérifications réussies : `node --test tests/mgmtLot62T1.test.js` (2/2) ; `node tools/verif-versions.js origin/main` (aucun écart après actualisation de `?v=`) ; lint ciblé (aucune erreur ; fichier de test ignoré par ESLint).
+- Vérifications relancées sur la reprise : `node --test tests/mgmtLot62T1.test.js` (2/2, environ 47 s), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (succès).
 - Non démontré dans cette tranche : absence de répétition de phrase sur 50 soirées effectivement jouées, chargement et jeu d'une année depuis une sauvegarde historique, et exécution de `tests/mgmtReleveReduit.test.js`. La preuve existante du lot 55 teste des formulations sur cinquante éditions, ce qui n'est pas un substitut au parcours demandé.
-- Les commandes générales `test` et `test:watch` ne listent pas directement ce fichier ; les scripts dédiés le lancent chacun. Aucun changement d'écran ni écart de maquette dans cette reprise.
+- Les commandes générales `test` et `test:watch` ne listent pas directement ce fichier ; les scripts dédiés le lancent chacun. Aucun changement d'écran ni écart de maquette dans cette reprise. Le test multi-années établit les trois clôtures sur le parcours joué mais ne simule pas la sauvegarde/reprise après chaque clôture.
 - Hors tranche, laissés intacts : modifications locales des fichiers `.opencode/agents/*`, `opencode.json` et `sw.js`.
 - Questions pour Anthony : aucune.
 
