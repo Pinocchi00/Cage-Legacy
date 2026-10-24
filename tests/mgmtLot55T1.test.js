@@ -29,3 +29,23 @@ test('Lot 55 T1 — champ prix facultatif et réparé sans création sur ancien 
   assert.match(save,/prixAnnee/);
   assert.match(save,/delete f\.prixAnnee/);
 });
+test('Lot 55 T1 — les relevés sont filtrés sur la fenêtre annuelle et les prix changent avec les combats',()=>{
+  const c=charger();
+  const combat=(jour,adversaire,family='ko')=>({c:jour,a:{id:'a',name:'A',W:3,L:0,D:0},b:{id:adversaire,name:adversaire},winner:'A',family,round:1,slot:'main'});
+  const m={hist:[combat(1,'ancien'),combat(40,'b'),combat(100,'c'),combat(200,'d'),combat(366,'hors-fenetre')],roster:[]};
+  const result=c.mgmtCeremonieCalculer(m);
+  assert.ok(result.some(p=>p.id==='combattant'&&p.laureat==='a'));
+  assert.ok(result.every(p=>p.relu===false));
+  const avant=JSON.stringify(result);m.hist.push(combat(250,'e','sub'));
+  assert.notEqual(JSON.stringify(c.mgmtCeremonieCalculer(m)),avant);
+});
+test('Lot 55 T1 — un prix de combat nul et une finition absente ne sont pas décernés',()=>{
+  const c=charger(),m={hist:[
+    {c:1,a:{id:'a',name:'A'},b:{id:'b',name:'B'},winner:'A',family:'decision'},
+    {c:2,a:{id:'c',name:'C'},b:{id:'d',name:'D'},winner:'B',family:'decision'}
+  ]};
+  const ids=c.mgmtCeremonieCalculer(m).map(p=>p.id);
+  assert.ok(!ids.includes('ko'));
+  assert.ok(!ids.includes('soumission'));
+  assert.ok(!ids.includes('combat'));
+});

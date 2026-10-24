@@ -175,3 +175,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Relancé `node --test tests/mgmtLot55T1.test.js` : 5/5 passent. `node tools/verif-versions.js origin/main` : aucun écart de version. ESLint ciblé sur `mgmt-ceremonie.js` et `mgmt-save.js` : aucune erreur.
 - Le code n'a pas été modifié : ces contrôles ne couvrent pas le parcours multi-années réellement joué, l'absence de répétition des formulations sur 50 soirées, le chargement effectif d'une sauvegarde ancienne ni la conformité intégrale des deux maquettes. Le test `mgmtReleveReduit` et ESLint global n'ont pas été exécutés. `check:rapide` n'est pas lancé conformément au contrôle rapide du superviseur.
 - Il reste des critères d'implémentation/tests non satisfaits; le commit final demandé et `TOUT_EST_FINI` ne sont donc pas revendiqués. Aucune migration de sauvegarde et aucune question ouverte nouvelle.
+
+### Reprise 22
+
+- Ajout de deux tests ciblés au fichier existant : vérification de la fenêtre de relevés annuelle avec un changement de trace, et absence de prix de finition/combat lorsqu'aucun candidat ne remplit les minima. Les 7 tests ciblés passent.
+- Audits exécutés : `node tools/verif-versions.js origin/main` (aucun écart de version); ESLint ciblé n'a rapporté aucune erreur (le test est ignoré par la configuration). Confirmation que le test figure déjà dans les scripts généraux `test` et `test:watch`.
+- Non démontré et toujours incomplet : le parcours `mgmtPasseGenerer` avec soirées réellement jouées sur trois années, non-répétition des phrases sur 50 soirées, chargement réel d'une sauvegarde ancienne, le test lent `mgmtReleveReduit`, l'ESLint global et conformité exacte des deux maquettes. Les limites fonctionnelles et écarts aux maquettes consignés plus haut restent vrais; aucune prétention de complétude.
+- Aucune migration de sauvegarde. Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (deux tests de fenêtre/minimums) et cette fiche. Aucun texte joueur ou changement métier/UI ajouté. Aucun point de spécification ouvert.
