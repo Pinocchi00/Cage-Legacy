@@ -41,4 +41,11 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Capture : la lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusée par la politique de chemin externe de l'environnement ; aucun outil de capture ni `cmp-*.png` n'a donc pu être lancé. Les ratios, chevauchements et comparaison visuelle après ajustement restent non certifiés.
 - Pas de modification de moteur, de sauvegarde ou de migration. Pas d'autre écart fonctionnel identifié ; mesure visuelle toujours à confirmer.
 
+### Mesure visuelle et livraison — 24/10/2026
+
+- Après accès au guide via l'environnement shell, capture du lendemain relancée : `grosBlocs` 20,4 % avec flex `.72`, puis 19,5 % après réduction à `.70` ; `moyen` 24,9 %. La suite : `grosBlocs` 18,8 %, `moyen` 23,3 %. Les captures `cmp-lendemain.png` et `cmp-lendemainSuite.png` ont été générées par l'outil. Aucune preuve de lecture visuelle des PNG n'est revendiquée ici.
+- `ui-cadre.css` : réglage ciblé de la hauteur relative des moments à `.70` pour atteindre le seuil mesuré de `grosBlocs ≤ 20 %`; version de cache augmentée par `node tools/_bump.js ui-cadre.css`.
+- Tests après cet ajustement : `mgmtEcranLendemain.test.js` 7/7 et `mgmtLendemainDemo.test.js` 7/7 ; audit `node tools/verif-versions.js origin/main` et ESLint passent.
+- À vérifier au bilan : aucune capture image n'a été ouverte pour jugement visuel des chevauchements. Les indicateurs mesurés sont conformes aux seuils gros blocs ; aucun autre écart identifié.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

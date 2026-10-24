@@ -1973,7 +1973,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 @media(max-width:1100px){.ld3-moments{grid-template-columns:1fr}.ld3-suite{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:auto}.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:1}}
 /* ==== [ANCRE: MONDE66_T1_LENDEMAIN_PLANCHES] — Monde lot 66 T1 ==== */
 .ld66-screen{height:calc(100vh - 180px);max-width:1564px;margin:0 auto;display:flex;flex-direction:column;gap:16px;padding-top:12px;box-sizing:border-box;color:#E9E6E1}
-.ld66-moments{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;min-height:300px;flex:.72}
+.ld66-moments{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;min-height:300px;flex:.70}
 .ld66-moments .ld3-moment{margin:0;min-height:0;padding:24px 26px;gap:14px}
 .ld66-moments .ld3-label{font-size:26px}
 .ld66-moments .ld3-meta{font-size:26px}
