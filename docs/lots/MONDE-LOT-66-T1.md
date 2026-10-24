@@ -273,6 +273,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
 - Questions pour Anthony : aucune.
 
+### Reprise 10 — mesure réelle après capture — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `82e97268`; le commit précédent contenait uniquement le compte rendu. Aucun fichier de code de tranche n'était non commité. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et intactes.
+- Guide de capture relu, puis les deux écrans capturés séparément à 1920×1080. `lendemain` : aucun chevauchement, texte sous 22 px ni débordement, mais gros blocs mesurés à 20,9 % (moyen 27,7 %). `lendemainSuite` : zéro chevauchement et texte sous 22 px, gros blocs 17,6 %, mais quatre débordements de mouvements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »). Les PNG `cmp-lendemain.png` et `cmp-lendemainSuite.png` sont générés sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Les règles existantes fixent les noms des cartes à 80 px (surprise) et 64 px (les deux autres), et les cartes à 285 px. Le ratio du lendemain est donc au-dessus du seuil de la reprise (18 %) malgré la structure fidèle; réduire les cartes pour abaisser le ratio entrerait en conflit avec la taille de carte/noms demandée. Aucune modification CSS à l'aveugle n'a été faite. Les quatre débordements de la suite restent également non résolus.
+- Tests ciblés réussis : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30) et `mgmtSoireeShow.test.js` (18). Vérification d'inscription dans `test` et `test:watch` : vraie pour `mgmtEcranLendemain`. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de données, sauvegarde ou migration.
+- Avant/après : aucune retouche de code sur cette reprise, les écrans et la typographie ≥64 px étaient déjà livrés. Captures actuelles révèlent que les résultats visuels chiffrés antérieurs ne sont pas reproductibles ici; les critères ≤18 % sur le lendemain et aucun débordement en suite ne sont pas satisfaits. Le contrôle visuel complet n'est donc pas certifié.
+- Fichiers modifiés : cette fiche uniquement (mesures et écarts). Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ### Reprise 45 — contrôle capture et essai suite — 24/10/2026
 
 - Guide lu et comparateur relancé sur `lendemainSuite` : `chevauchements=0`, `textesSous22px=0`, mais les quatre alertes de débordement restent (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 17 %.
