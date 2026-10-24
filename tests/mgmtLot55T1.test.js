@@ -59,6 +59,20 @@ test('Lot 55 T1 — un prix de combat nul et une finition absente ne sont pas d�
   assert.ok(!ids.includes('soumission'));
   assert.ok(!ids.includes('combat'));
 });
+test('Lot 55 T1 — les prix de finition privilégient titre, surprise, premier round et affiche principale',()=>{
+  const c=charger();
+  const m={
+    hist:[
+      {c:100,a:{id:'x',name:'X'},b:{id:'y',name:'Y'},winner:'A',family:'ko',round:3,slot:'prelim',publicOddsWinner:70},
+      {c:200,a:{id:'z',name:'Z'},b:{id:'w',name:'W'},winner:'A',family:'ko',round:1,slot:'main',publicOddsWinner:30}
+    ],
+    facts:[{k:'title_fight',fight:1}]
+  };
+  const ko=c.mgmtCeremonieCalculer(m).find(p=>p.id==='ko');
+  assert.ok(ko);
+  assert.equal(ko.laureat,'z');
+  assert.equal(ko.stat,1);
+});
 test('Lot 55 T1 — le retour tient compte du dernier combat avant la fenêtre annuelle',()=>{
   const c=charger(),m={hist:[
     {c:10,a:{id:'a'},b:{id:'b'},winner:'A',family:'decision'},
