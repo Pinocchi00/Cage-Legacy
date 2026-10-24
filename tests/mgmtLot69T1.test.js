@@ -23,3 +23,18 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
     assert.ok(lendemain.played>0);
   }finally{w.close();}
 });
+
+test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs validés par les planches Uni*',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6902);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);G.mgmt=m;`);
+    w.eval(`G.mgmt.choc={orgId:Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:G.mgmt.roster[0].id,b:Object.values(G.mgmt.orgs).flatMap(o=>o.roster||[])[0].id};`);
+    assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
+    w.eval(`G.screen='mgmt_choc';`);
+    const choc=w.eval(`scr_mgmt_choc()`);
+    for(const texte of ['SPLIT','CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+    w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
+    const discours=w.eval(`scr_mgmt_discours()`);
+    for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
+  }finally{w.close();}
+});
