@@ -318,3 +318,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets (sous le plafond de 1,9 Mo) ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; ESLint global passe. Les scripts `test` et `test:watch` incluent le test.
 - Pas de clé nouvelle ni de migration. Les dix faits sont exercés dans des scénarios ciblés créés via le parcours réel, sans preuve que chaque système opérationnel génère naturellement chacun d'eux. Aucun autre écart ni question pour Anthony.
 - Cette fiche seule est incluse au commit de reprise ; les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation de cache de `index.html` restent étrangers et exclus.
+
+### Reprise 11 — validation finale (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les fichiers de code, tests et package de la tranche sont déjà committés. Vérifications exécutées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `test` et `test:watch` incluent le test (`true,true`).
+- Aucun changement de sauvegarde ni migration. Les dix familles, leur calcul déterministe/borné, l'accueil/presse et les mouvements d'organisation sont présents. Limite : les tests préparent les faits familiaux sur le parcours réel sans prouver que chaque système les produit naturellement.
+- Cette fiche est le seul fichier de tranche à inclure au commit. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la différence de cache de `index.html` sont étrangères et exclues. Pas de nouvel écart ni question pour Anthony.
