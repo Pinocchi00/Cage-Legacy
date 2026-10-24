@@ -33,6 +33,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
 
+### Reprise 4 — contrôle avant poursuite (24/10/2026)
+
+- Branche vérifiée : `p11-croissance`. `git log --oneline -12` montre les trois commits antérieurs inachevés; aucun changement de fichier de tranche n'était non commité au début. Les changements présents dans `.opencode/agents/*` et `opencode.json` n'appartiennent pas à cette tranche et restent intacts.
+- Fiche, passage P9 demandé et maquette `UniCroissance.dc.html` consultés. Les trois tests actuels de `tests/mgmtLot56T1.test.js` passent, ainsi que les 13 tests de `tests/mgmtPasse.test.js` (empreintes comprises).
+- Cette reprise n'a pas terminé les écarts déjà listés ci-dessus : effets non raccordés, déclenchement accueil non raccordé, progression réelle et tests de compatibilité/validation/réparation/plafond manquants; le fichier de test reste seulement en scripts dédiés et n'est pas explicitement dans les listes `test` et `test:watch`. La maquette de croissance est également seulement partiellement reprise dans l'écran. Aucune revendication de fin n'est faite.
+- Vérifications restantes avant livraison : implémenter les intégrations et tests manquants, lancer ESLint et `node tools/verif-versions.js origin/main`, puis exécuter le test lent de plafond en arrière-plan. Pas de migration de sauvegarde connue; `croissanceActus` et `paliersAnnonces` restent facultatives.
+
 ### Reprise du 24/10/2026 — test de franchissement et annonce initiale
 
 - Historique à la reprise : HEAD `4e195b6` (inachevé). Branche confirmée `p11-croissance`. Les seules modifications déjà présentes hors tranche (`.opencode/agents/*`, `opencode.json`) ont été laissées intactes.
