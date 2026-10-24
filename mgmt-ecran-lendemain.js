@@ -180,8 +180,8 @@ function mgmtLendemainMomentsHtml(m){
   const used=new Set(), picks=[];
   const add=(label,find)=>{const s=stories.find(x=>!used.has(x.c)&&find(x,hist[x.c]));if(s){used.add(s.c);picks.push({label,s});}};
   add('LA SURPRISE',s=>s.type==='surprise');
-  add('LA FINITION',(_s,t)=>t&&['ko','sub','stop'].includes(t.family));
-  add('LA GUERRE',(_s,t)=>t&&t.rounds>=5);
+  add('LA FINITION',(_s,t)=>t&&(['ko','sub','stop'].includes(t.family)||/ko|soumission|arrêt/i.test(mgmtLendemainMethode(t))));
+  add('LA GUERRE',(_s,t)=>t&&Number(t.rounds)>=5&&Number.isFinite(Number(t.rounds)));
   return picks.map(({label,s})=>{const t=hist[s.c];if(!t)return '';const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
     const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
     return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
