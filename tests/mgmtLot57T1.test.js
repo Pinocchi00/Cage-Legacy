@@ -348,3 +348,12 @@ test('Monde lot 57 T1 — une place finale moins bonne ne retire aucun acquis de
     assert.ok(resultat.apres.eventsPlayed>=resultat.avant.eventsPlayed);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le rang final mémorisé est annoncé sur l’Accueil',()=>{
+  const w=partie();
+  try{
+    const html=w.eval(`(()=>{const m=G.mgmt;m.guerre=m.guerre||{ev:[],rival:null,depuis:0};m.guerre.rangFinal=3;return scr_mgmt_accueil();})()`);
+    assert.match(html,/À la fin de l’année, Split a terminé 3e sur huit/);
+    assert.match(html,/Revoir le classement/);
+  }finally{w.close();}
+});
