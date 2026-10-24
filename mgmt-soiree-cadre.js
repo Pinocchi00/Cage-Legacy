@@ -267,8 +267,11 @@ function mgmtSoFinHtml(m,prog){
   const cartes=primes.slice().sort((a,b)=>(a.t.pr==='cs'?-1:1)-(b.t.pr==='cs'?-1:1)).map(({p,t})=>{
     const detail=mgmtResultatDetail(m,p.h);
     const noms=t.pr==='cs'?`${p.a.last} · ${p.b.last}`:(detail&&detail.gagnant?(detail.gagnant.last||detail.gagnant.name):p.a.last);
-      const prime=Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0;
-      return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><b>${esc(mgmtEuros(prime))} CHACUN</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
+    const id=t.pr==='cs'?t.a&&t.a.id:(detail&&detail.gagnant&&detail.gagnant.id)||t.a&&t.a.id;
+    const fait=(m.facts||[]).find(f=>f&&f.k==='prime'&&f.fight===p.h&&f.a===id);
+    const total=Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0;
+    const prime=Number.isFinite(fait&&fait.m)?fait.m:Math.floor(total/4);
+    return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><b>${esc(mgmtEuros(prime))}${t.pr==='cs'?' CHACUN':''}</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
   });
   const finance=m.lastEvent.finance||{};
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
