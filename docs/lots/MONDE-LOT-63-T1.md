@@ -147,3 +147,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Tests ciblés relancés : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond. Le test est directement référencé par `test` et `test:watch` (`true,true`).
 - `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Pas de changement fonctionnel ni de format de sauvegarde, aucune migration. Les dix familles, le calcul, l'accueil/presse et les mouvements sont déjà livrés par les commits antérieurs.
 - Écart de couverture conservé : les tests de familles préparent les faits séparément sur une partie issue du chemin réel ; ils n'établissent pas que chaque système opérationnel génère naturellement chacun des dix faits. Aucun nouveau fichier de tranche modifié ; cette seule entrée de compte rendu est commitée.
+
+### Reprise 29 — validation et livraison (24/10/2026)
+
+- Validation fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 avec 1 908 745 octets, sous le plafond ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe.
+- Aucun changement de sauvegarde ni migration. La limite de couverture demeure : les dix faits sont préparés séparément dans les tests après création par le parcours réel, sans prouver que tous sont naturellement produits par les systèmes de jeu. Pas de question nouvelle.
+- Seule cette fiche est modifiée pour ce compte rendu ; changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et cache local `index.html` hors tranche, exclus.
