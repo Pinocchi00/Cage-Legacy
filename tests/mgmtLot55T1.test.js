@@ -168,3 +168,32 @@ test('Lot 55 T1 — trois soirées du passé produisent une lecture de prix dét
     assert.equal(result.valide,true);
   }finally{w.close();}
 });
+test('Lot 55 T1 — trois années de soirées jouées donnent des prix déterministes par fenêtre',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const result=JSON.parse(w.eval(`JSON.stringify((()=>{
+      setSeed(551055);
+      const m=mgmtPasseGenerer('split',{soirees:9,reculAns:3});
+      const jouees=[];
+      for(let k=0;k<9;k++)jouees.push(mgmtPasseSoiree(m,k).jouee);
+      const dates=m.hist.filter(t=>t&&Number.isFinite(t.c)).map(t=>t.c);
+      const debut=Math.min(...dates),fin=Math.max(...dates);
+      const lectures=[];
+      for(let annee=0;annee<3;annee++){
+        const jour=debut+(annee+1)*365;
+        const fenetre=m.hist.filter(t=>t&&t.c>=jour-365&&t.c<jour);
+        const copie={...m,hist:fenetre};
+        const a=mgmtCeremonieCalculer(copie),b=mgmtCeremonieCalculer(copie);
+        lectures.push({jour,combats:fenetre.length,identique:JSON.stringify(a)===JSON.stringify(b),prix:a.length,fin});
+      }
+      return {jouees,hist:m.hist.length,lectures};
+    })())`));
+    assert.equal(result.jouees.filter(Boolean).length,9);
+    assert.ok(result.hist>=9);
+    assert.equal(result.lectures.length,3);
+    assert.ok(result.lectures.some(x=>x.combats>0));
+    for(const lecture of result.lectures){
+      assert.equal(lecture.identique,true);
+    }
+  }finally{w.close();}
+});

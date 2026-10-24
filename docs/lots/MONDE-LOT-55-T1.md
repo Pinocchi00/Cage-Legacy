@@ -288,3 +288,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (16/16 verts).
 - Les critères plus larges restent à traiter : simulation véritable de trois années de soirées jouées, rendu intégral conforme aux deux maquettes, et test de chargement d'une sauvegarde historique. Ce test ciblé ne prouve pas ces critères. Aucun changement de production ou de format de sauvegarde, donc aucune migration.
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de lecture des records) et cette fiche. Pas de question de spécification nouvelle.
+
+### Reprise 37
+
+- Ajout du test « Lot 55 T1 — trois années de soirées jouées donnent des prix déterministes par fenêtre » : partie produite avec `mgmtPasseGenerer`, neuf soirées du passé jouées, puis vérification répétée des lectures déterministes sur des fenêtres annuelles issues des dates effectivement présentes. Le premier essai a révélé que les dates générées ne correspondaient pas aux jours calendaires 365/730 supposés; le test utilise désormais les bornes réellement observées, sans prétendre que chaque fenêtre contient des relevés.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (17/17); `node_modules/.bin/eslint .` (vert); `git diff --check` (vert).
+- Limites non résolues : pas de conformité intégrale certifiée aux planches ni de chargement d'une fixture historique complète. Le test lent `mgmtReleveReduit` non exécuté. Les critères fonctionnels déjà présents mais incomplets, notamment le déclencheur anniversaire et l'étendue des traces historiques du carnet, restent des écarts. Aucun changement de sauvegarde ou migration.
+- Fichier modifié : `tests/mgmtLot55T1.test.js`; aucune question nouvelle pour Anthony. Modifications étrangères `.opencode/agents/*` et `opencode.json` exclues du commit.
