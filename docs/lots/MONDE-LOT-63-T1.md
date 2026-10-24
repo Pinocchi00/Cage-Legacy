@@ -1,5 +1,12 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
+### Reprise finale 12 — clôture vérifiée (24/10/2026)
+
+- Reprise sur `p8-apres` : l'historique contient déjà les commits fonctionnels de la tranche. Seul le compte rendu de cette fiche est à ajouter ; les modifications locales `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` sont hors périmètre.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Le test est inscrit directement aux scripts `test` et `test:watch` (`true,true`).
+- Le test lent `tests/mgmtReleveReduit.test.js` n'est pas relancé dans cette reprise ; le compte rendu antérieur documente sa réussite à 1 908 745 octets. Pas de nouvelle clé de sauvegarde ni migration.
+- Limite de couverture : les tests déclenchent séparément les dix faits sur une partie créée par le parcours réel, sans démontrer que chaque système opérationnel génère naturellement tous ces faits. Aucun autre écart ni question nouvelle pour Anthony.
+
 ### Reprise 11 — contrôle final de reprise (24/10/2026)
 
 - Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Le code de la tranche est déjà commité ; les modifications locales d'outillage et de `sw.js` restent hors périmètre.
