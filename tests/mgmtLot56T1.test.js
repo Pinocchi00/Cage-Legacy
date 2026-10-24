@@ -25,3 +25,15 @@ test('Croissance — les classes cr3 de l’écran ont des règles dédiées et 
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.ok(r.classes.length>0); for(const c of new Set(r.classes)) assert.ok(css.includes('.'+c),c+' doit avoir une règle');
 });
+
+test('Croissance — chaque palier documente un effet borné et une annonce distincte',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`JSON.stringify(MGMT_PALIERS.map(p=>({id:p.id,annonce:p.annonce,relu:p.relu,salle:p.salle,diffuseur:p.diffuseur,recruteur:p.recruteur,agents:p.agents})))`));
+  assert.ok(r.length>=5);
+  assert.equal(new Set(r.map(p=>p.annonce)).size,r.length);
+  assert.ok(r.every(p=>p.annonce&&p.relu===false));
+  for(const effet of ['salle','diffuseur','recruteur','agents']){
+    assert.ok(r.every(p=>Number.isFinite(p[effet])&&p[effet]>=0&&p[effet]<=3),effet+' doit rester borné et additif');
+    assert.ok(r.some((p,i)=>i&&p[effet]>r[i-1][effet]),effet+' doit ouvrir quelque chose de progressif');
+  }
+});

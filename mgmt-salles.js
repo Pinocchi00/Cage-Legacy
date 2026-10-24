@@ -33,11 +33,11 @@ const MGMT_TETE_AFFICHE_POIDS=0.5;
    Les rangs sont ceux du classement vivant des huit. Les bonus restent
    additifs et plafonnés : ils ne retirent jamais une possibilité existante. */
 const MGMT_PALIERS=[
-  {id:'regional',nom:'Régional',popularite:0,rang:8,salle:0,diffuseur:0,recruteur:0,agents:0,texte:'Split s’installe dans sa région.',annonce:'Dans sa région, Split commence à remplir les petites salles.'},
-  {id:'national',nom:'National',popularite:30,rang:6,salle:1,diffuseur:1,recruteur:1,agents:1,texte:'Split attire désormais l’attention du pays.',annonce:'La popularité de Split attire désormais le regard des diffuseurs nationaux.'},
-  {id:'europeen',nom:'Européen',popularite:50,rang:4,salle:2,diffuseur:2,recruteur:1,agents:2,texte:'Split commence à compter au-delà des frontières.',annonce:'Le rang européen de Split ouvre une salle plus vaste au public.'},
-  {id:'mondial',nom:'Mondial',popularite:70,rang:2,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split rejoint les organisations qui comptent dans le monde.',annonce:'Dans le classement mondial, Split attire désormais des agents libres plus ambitieux.'},
-  {id:'sommet',nom:'Le sommet',popularite:90,rang:1,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split prend la première place parmi les huit.',annonce:'Première des huit, Split entre dans une nouvelle dimension de recrutement.'}
+  {id:'regional',nom:'Régional',popularite:0,rang:8,salle:0,diffuseur:0,recruteur:0,agents:0,texte:'Split s’installe dans sa région.',annonce:{texte:'Dans sa région, Split commence à remplir les petites salles.',relu:false}},
+  {id:'national',nom:'National',popularite:30,rang:6,salle:1,diffuseur:1,recruteur:1,agents:1,texte:'Split attire désormais l’attention du pays.',annonce:{texte:'La popularité de Split attire désormais le regard des diffuseurs nationaux.',relu:false}},
+  {id:'europeen',nom:'Européen',popularite:50,rang:4,salle:2,diffuseur:2,recruteur:1,agents:2,texte:'Split commence à compter au-delà des frontières.',annonce:{texte:'Le rang européen de Split ouvre une salle plus vaste au public.',relu:false}},
+  {id:'mondial',nom:'Mondial',popularite:70,rang:2,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split rejoint les organisations qui comptent dans le monde.',annonce:{texte:'Dans le classement mondial, Split attire désormais des agents libres plus ambitieux.',relu:false}},
+  {id:'sommet',nom:'Le sommet',popularite:90,rang:1,salle:3,diffuseur:3,recruteur:2,agents:3,texte:'Split prend la première place parmi les huit.',annonce:{texte:'Première des huit, Split entre dans une nouvelle dimension de recrutement.',relu:false}}
 ];
 function mgmtPaliersCalculer(m){
   const pop=Number.isFinite(m&&m.pop)?m.pop:0;
@@ -60,7 +60,7 @@ function mgmtPaliersAnnoncer(m){
     if(p.id==='regional') continue;
     if(m.paliersAnnonces.includes(p.id)) continue;
     m.paliersAnnonces.push(p.id);
-    const f={k:'croissance',palier:p.id,texte:p.annonce,relu:false,c:Number.isSafeInteger(m.cycle)?m.cycle:0};
+    const f={k:'croissance',palier:p.id,texte:p.annonce.texte,relu:p.annonce.relu,c:Number.isSafeInteger(m.cycle)?m.cycle:0};
     if(!Array.isArray(m.croissanceActus)) m.croissanceActus=[];
     m.croissanceActus.push(f);
     nouveaux.push(f);
