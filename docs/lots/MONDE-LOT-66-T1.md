@@ -178,3 +178,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Poursuite de la correction visuelle : chaque carte moment porte désormais son bouton `R` à côté de l'étiquette, conforme à la planche et sans bouton « Revoir » en pied ; styles compactés. Mesure suivante `lendemain` : 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %. Sur `lendemainSuite`, taille plancher 22 px appliquée aux libellés concernés, mais restent 4 débordements sur les lignes de mouvements (noms/rangs/division/organisation) malgré zéro chevauchement et zéro texte sous 22 px ; objectif 4 toujours non satisfait.
 - Tests relancés : `mgmtEcranLendemain.test.js` 7/7 et `mgmtLendemainDemo.test.js` 7/7 ; `node tools/verif-versions.js origin/main` et ESLint passent. Aucun test concernant la transition de soirée n'a été touché.
 - Dernière capture après réorganisation des rangs : `lendemainSuite` toujours 0 chevauchement et 0 texte sous 22 px, gros blocs 17 %, mais 4 débordements de texte des mouvements subsistent. Cas visuel non clos en dépit des essais de grille et réduction de taille ; pas d'affirmation de conformité globale.
+
+### Reprise 28 — réglage des colonnes et recapture — 24/10/2026
+
+- Ajustement additionnel de `ui-cadre.css` pour autoriser le retour à la ligne dans les colonnes de mouvements (grille à minima zéro et limites de largeur), puis cache CSS augmenté.
+- Tests: `node --test tests/mgmtEcranLendemain.test.js` passe (7/7).
+- Capture relancée après le changement sur les deux écrans. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, moyen 25,9 %, gros blocs 18,4 %. `lendemainSuite` : chevauchements 0, textes sous 22 px 0, mais débordements persistants (« Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen »), moyen 22,7 %, gros blocs 16,9 %.
+- Case visuelle 4 encore non satisfaite : le contenu des mouvements de la suite continue de déborder après cette correction. Pas de changement de mécanique/sauvegarde. Images régénérées sous `C:/Users/antho/AppData/Local/Temp/shots/`; pas d'inspection manuelle revendiquée.
+- Questions pour Anthony : aucune; poursuivre l'ajustement de la suite à la prochaine reprise, sans masquer ni tronquer ces lignes.
