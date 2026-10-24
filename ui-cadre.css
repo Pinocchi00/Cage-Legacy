@@ -986,6 +986,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cb-p{box-sizing:border-box;height:44px;padding:0 12px;border:2px solid var(--mf-bord);background:transparent;color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:40px;white-space:nowrap}
 .mf-cb-p.lg{font-size:26px}
 .mf-cb-p.on{background:var(--mf-blanc);color:var(--mf-noir)}
+/* ==== [ANCRE: MONDE_LOT53_T1_PRIMES_FIN_STYLE] — Monde lot 53 T1 ==== */
+.so3-primes{display:flex;flex-direction:column;gap:12px;margin:18px 0;padding:18px 24px;background:#121010;border:2px solid rgba(233,230,225,.38);color:#E9E6E1}
+.so3-primes h2{margin:0;color:#F0B220;font-family:var(--mf-titre);font-size:30px;line-height:1;text-transform:uppercase}
+.so3-prime{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:48px;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px;line-height:1.1}
+.so3-prime span{color:rgba(233,230,225,.74);font-weight:600}
+.so3-prime b{font-family:var(--mf-titre);font-size:30px;line-height:1}
+.so3-total{display:flex;justify-content:space-between;align-items:center;font-size:24px;line-height:1.1}
+.so3-total b{color:#F0B220;font-family:var(--mf-titre);font-size:30px;line-height:1}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche
