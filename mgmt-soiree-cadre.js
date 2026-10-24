@@ -404,7 +404,8 @@ function mgmtSoTouche(nom){
     }else if(nom==='Escape'){ if(MGMT_SOIREE_UI.focus!==null&&i<n) CL.mgmtSoAutre(0); }
     else if(nom==='p'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoPasser();
     else if(nom==='f'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoAvant();
-    else if(nom==='v'&&!ouverture&&i<n){ const k=MGMT_SOIREE_UI.focus===null?i:MGMT_SOIREE_UI.focus, ordre=['complet','forts','resultat'], vue=mgmtVueDuCombat(m,k); mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(vue)+1)%ordre.length]); }
+    /* ==== [ANCRE: P7_T1_V_OUVERTURE] — Monde lot 53 T1 ==== */
+    else if(nom==='v'&&i<n){ const k=MGMT_SOIREE_UI.focus===null?i:MGMT_SOIREE_UI.focus, ordre=['complet','forts','resultat'], vue=mgmtVueDuCombat(m,k); mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(vue)+1)%ordre.length]); }
     else if(nom==='ArrowLeft'){ if(i>=n) CL.mgmtSoRevoirDernier(); else if(!ouverture) CL.mgmtSoAutre(-1); }
     else if(nom==='ArrowRight'&&!ouverture&&i<n) CL.mgmtSoAutre(1);
   };

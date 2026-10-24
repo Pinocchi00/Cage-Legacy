@@ -362,3 +362,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Le code existant couvre déjà le sélecteur par ligne, la frise, la carte de résultat passable, les primes, et plusieurs contrôles ciblés. Cette reprise n'a pas modifié de code : l'audit du compte rendu confirme encore des critères majeurs non livrés et aucune modification supplémentaire ne peut être honnêtement présentée comme une case codée/testée.
 - Non achevé : portage intégral aux compositions et valeurs exactes des planches; durée réelle de fenêtres 30–60 s et fondu de l'image d'arène; test d'une soirée de référence entre 900 et 1200 s; tests demandés de fenêtres et d'empreintes historiques. La mesure rapportée de 868,38 s demeure sous la cible; elle n'est pas falsifiée.
 - Aucun test ancien n'a été modifié dans cette reprise; aucun changement moteur, sauvegarde, cache ou ressource joueur. Les vérifications passées ne lèvent pas ces écarts fonctionnels.
+
+### Reprise 54 — raccourci V dès l’ouverture
+
+- Fait : le raccourci V fonctionne désormais dès l'écran d'ouverture, lorsqu'un combat de la carte est sélectionné, et réutilise la porte `mgmtVueCombatChoisir`. Avant, la garde `!ouverture` bloquait le raccourci alors que la maquette demande ce réglage sur la carte; les boutons restaient utilisables.
+- Test ajouté : « Monde lot 53 T1 — V règle aussi le combat sélectionné sur la carte d’ouverture ».
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. Le cache de `mgmt-soiree-cadre.js` a été monté.
+- Ce correctif ne résout pas les écarts substantiels restant dans la reprise 53 : composition intégrale des planches, mesure 900–1200 s et lecture des moments temporisée. Aucun changement du moteur ou de la sauvegarde.
