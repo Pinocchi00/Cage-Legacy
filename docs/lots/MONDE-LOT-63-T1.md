@@ -263,6 +263,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Le test lent `tests/mgmtReleveReduit.test.js` et ESLint global ne sont pas relancés dans cette reprise ; les précédents comptes rendus documentent leurs résultats. Limite de couverture inchangée : les tests déclenchent les faits familiaux préparés sur une partie créée par le parcours réel, sans prouver que chaque système opérationnel génère naturellement chacun des faits.
 - Reprise 21 (24/10/2026) : branche `p8-apres` confirmée. Les commits précédents contiennent déjà les changements fonctionnels de la tranche et le test ciblé. Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; contrôle `node -e "const p=require('./package.json');console.log(p.scripts.test.includes('mgmtLot63T1'),p.scripts['test:watch'].includes('mgmtLot63T1'))"` renvoie `true true` ; `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
 
+### Reprise 9 — clôture finale (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de production et de test sont déjà présents. Les changements locaux `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` sont hors tranche et exclus.
+- Validations fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets (sous le plafond de 1,9 Mo) ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; présence du test dans `test` et `test:watch` confirmée (`true,true`).
+- Fichiers déjà livrés et rôles : `mgmt-apres-data.js` (catalogue et textes `relu:false`), `mgmt-ecran-lendemain.js` (calcul, Accueil/presse, mouvements inter-organisations), `tests/mgmtLot63T1.test.js` (neuf tests), `package.json` (scripts). Aucun changement de sauvegarde ni migration. Limite honnête : les tests scénarisent les faits sur une partie créée par le chemin réel, sans prouver que tous les systèmes opérationnels produisent naturellement chacun de ces faits. Aucun écart ni question nouvelle pour Anthony.
+
 ### Reprise 9 — contrôle de livraison (24/10/2026)
 
 - Branche `p8-apres` et état repris : `git log --oneline -12` confirme que la livraison fonctionnelle est déjà commitée (`69149ffc` en tête). Aucun fichier de production ou test de la tranche n'était en attente ; les modifications locales `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` restent hors périmètre.
