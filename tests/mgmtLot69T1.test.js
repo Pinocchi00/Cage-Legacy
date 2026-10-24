@@ -78,8 +78,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
        assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
        assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');
        assert.match(css,/\.ch3-button\.ch3-refuse\{[^}]*background:#E23A2B/s,'refuser est identifié par le rouge de la charte');
-     assert.match(css,/\.di3-nom[^\{]*\{[^}]*font:800 clamp\(88px,12vw,230px\)/s,'le nom du discours reste traité en très grand');
-     assert.doesNotMatch(css,/\.ch3-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'aucune animation CSS ne doit être ajoutée au choc');
+      assert.match(css,/\.di3-nom[^\{]*\{[^}]*font:800 clamp\(88px,12vw,230px\)/s,'le nom du discours reste traité en très grand');
+      assert.doesNotMatch(css,/\.ch3-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'aucune animation CSS ne doit être ajoutée au choc');
+      assert.doesNotMatch(css,/\.(?:ch3|di3)-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'les écrans choc et discours restent sans animation CSS conformément à la décision du 07/10');
   }finally{w.close();}
 });
 

@@ -353,3 +353,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Aucun changement utilisateur hors tranche n'a été inclus.
 - Écarts inchangés : modèle du choc une seule affiche, conformité/captures comparatives non validées dans cette reprise, et parcours fin de contrat/bilan avec reprise sauvegardée identique non démontré. Le changement améliore la hiérarchie du bloc d’offres mais ne constitue pas une validation de capture. Aucune scène `shoot`/`cmp` ni mesure nouvelle produite.
 - Questions pour Anthony : aucune nouvelle question. Les critères de la tranche restent incomplets; aucun `TOUT_EST_FINI` n'est revendiqué.
+
+### Reprise 58 — audit après demande de reprise
+- Branche `fid-choc`, HEAD initial `d62dd794`; aucun fichier de tranche en attente. Les changements préexistants sous `.opencode/agents/` et `opencode.json` sont utilisateur et restent exclus.
+- Modification de cette reprise : `tests/mgmtLot69T1.test.js` étend l'assertion sans animation CSS au discours en plus du choc, conformément à la décision du 07/10.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
+- Pas de migration ni de version cache modifiée. Aucun nouveau résultat visuel/capture : les mesures antérieures demeurent le dernier état documenté. Le test couvre encore le parcours partiel existant, non la fin de contrat complète avec rechargement identique valide.
+- Écarts non résolus : le modèle choc reste mono-affiche, les captures et mesures comparatives post-correction ne sont pas établies, et le parcours complet demandé n'est pas démontré. Aucun `TOUT_EST_FINI` revendiqué.
