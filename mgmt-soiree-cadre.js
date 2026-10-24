@@ -285,7 +285,9 @@ function scr_mgmt_soiree_cadre(){
     touches=[{ks:['←','→'],t:'Autre combat'},...(focus<index?[{ks:['Échap'],t:'Prochain combat',onclick:'CL.mgmtSoAutre(0)'}]:[{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'}]),
       {ks:['Entrée'],t:focus===index?'Regarder le combat':(focus<index?'Revoir le combat':'Revenir au prochain combat'),jaune:true,onclick:focus===index?'CL.mgmtSoRegarder()':(focus<index?`CL.mgmtSoRevoir(${focus})`:'CL.mgmtSoAutre(0)')}];
   }
-  return mfEcran(mgmtSoEntete(m,prog,index)+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches});
+  /* ==== [ANCRE: MGMT_SOIREE_FIN_SANS_DOUBLE_ENTETE] — Monde lot 65 T1 ==== */
+  const entete=moment==='fin'?'':mgmtSoEntete(m,prog,index);
+  return mfEcran(entete+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches});
 }
 /* L'écran d'origine reste celui des parties d'avant l'agenda. */
 const MGMT_SO_ANCIEN=SCREENS.mgmt_soiree;
