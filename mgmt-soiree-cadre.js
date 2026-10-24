@@ -10,7 +10,7 @@
    Avec l'agenda seulement : une partie d'avant garde l'ancien écran de soirée (SCREENS.mgmt_soiree d'origine). ==== */
 
 /** Trace de navigation de la soirée (jamais écrite dans la partie) : `commence` porte le cycle de la soirée dont le joueur a pris la main. */
-let MGMT_SOIREE_UI={focus:null,commence:null};
+let MGMT_SOIREE_UI={focus:null,commence:null,resultat:null,resultatTimer:null};
 const mgmtSoCommence=()=>!!(G&&G.mgmt&&G.mgmt.lastEvent&&MGMT_SOIREE_UI.commence===G.mgmt.lastEvent.cycle);
 const mgmtSoAgenda=()=>!!(G&&G.mgmt&&G.mgmt.lastEvent&&mgmtAgendaActif(G.mgmt));
 
@@ -95,7 +95,7 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
      :libre
       ?`<div class="mf-so-actes"><div class="mf-so-s">TU LE REGARDES EN</div>${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{jaune:mgmtVueDuCombat(m,k)===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}<div class="mf-so-s">${mgmtVueDuCombat(m,k)==='forts'?'Les moments clés, environ 45 secondes':mgmtVueDuCombat(m,k)==='resultat'?'Le résultat seul':'Le combat en entier'}</div></div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
-  return mgmtSoBanniereHtml(av)
+   return `<div class="so3-prochain">LE PROCHAIN · ${esc(av.etiquette)} · ${esc(av.divLabel)}</div>`+mgmtSoBanniereHtml(av)
     +`<div class="mf-so-cp"><div class="mf-so-rs">`
     +soLigne(`<span class="mf-so-v">${a.rang===null?'—':esc(a.rang)}</span>`,'Classement',`<span class="mf-so-v">${b.rang===null?'—':esc(b.rang)}</span>`)
     +soLigne(`<span class="mf-so-v">${esc(a.palmares)}</span>`,'Palmarès',`<span class="mf-so-v">${esc(b.palmares)}</span>`)
@@ -110,8 +110,40 @@ function mgmtSoBandeHtml(prog,index,focus){
     const fait=k<index, cur=k===focus;
     const vue=mgmtVueDuCombat(G.mgmt,k);
     return `<div class="mf-so-card${cur?' cur':''}${fait?' fait':''}"><button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`
-      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">`+[['complet','COMPLET'],['forts','TEMPS FORTS'],['resultat','RÉSULTAT']].map(([v,l])=>mfBouton(l,{jaune:vue===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')+`</div></div>`;
+      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">${mfBouton(vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT',{jaune:true,onclick:`CL.mgmtSoVueSuivante(${k})`})}</div></div>`;
   }).join('')+`</div>`;
+}
+
+/* ==== [ANCRE: P7_T1_PRIMES_FIN] — Monde lot 53 T1 ==== */
+/** Affiche les trois attributions de la soirée à partir des seuls relevés. */
+function mgmtSoPrimesFinHtml(m){
+  const hist=Array.isArray(m&&m.hist)?m.hist:[], prog=typeof mgmtSoireeProgramme==='function'?mgmtSoireeProgramme(m):[];
+  const lignes=[], annonces=prog.map(p=>({p,t:hist[p.h]})).filter(x=>x.t&&(x.t.pr==='cs'||x.t.pr==='pf'));
+  for(const {p,t} of annonces){
+    const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
+    let award;
+    if(t.pr==='cs') award=`<b>${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}</b>`;
+    else{
+      const fact=(Array.isArray(m.facts)?m.facts:[]).find(f=>f&&f.k==='prime'&&f.type==='pf'&&f.fight===p.h);
+      const id=fact&&fact.a|| (t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id);
+      award=`<b>${esc(nom(id))}</b>`;
+    }
+    lignes.push(`<div class="so3-prime"><span>${t.pr==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span>${award}</div>`);
+  }
+  /* Anciennes fixtures sans programme complet : les données d'historique restent une porte de repli. */
+  if(!prog.length){
+    const cycle=m&&m.lastEvent&&m.lastEvent.cycle;
+    for(const t of hist){
+      if(!t||t.c!==cycle||(t.pr!=='cs'&&t.pr!=='pf')) continue;
+      const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
+      const id=t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id;
+      lignes.push(`<div class="so3-prime"><span>${t.pr==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span><b>${t.pr==='cs'?`${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}`:esc(nom(id))}</b></div>`);
+    }
+  }
+  if(!lignes.length) return '';
+  const finance=m&&m.lastEvent&&m.lastEvent.finance||{};
+  const milliers=Number.isFinite(finance.primes)?finance.primes:0;
+  return `<section class="so3-primes" aria-label="Primes annoncées"><h2>LES PRIMES DE LA SOIRÉE</h2>${lignes.join('')}<div class="so3-total"><span>ARGENT VERSÉ</span><b>${esc(mgmtEuros(milliers))}</b></div></section>`;
 }
 
 /** Ce que dit Leïla à l'ouverture : combien de préliminaires, et qui attend. */
@@ -132,8 +164,11 @@ function mgmtSoOuvertureHtml(m,prog){
   const pre=prog.filter(p=>p.slot==='prelim'), main=prog.filter(p=>p.slot==='main');
   const salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
   const haut=n=>Math.max(44,Math.min(88,Math.floor((560-(n-1)*8)/Math.max(1,n))));
-  const ligne=(p,rang,on,h)=>`<div class="mf-so-lg${on?' on':''}" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div>`
-    +`<div class="mf-so-ln"><b>${esc(soLast(p.a))}</b><span>contre</span><b>${esc(soLast(p.b))}</b></div></div></div>`;
+   const ligne=(p,rang,on,h)=>{const vue=mgmtVueDuCombat(m,p.i), labels={complet:'COMPLET',forts:'TEMPS FORTS',resultat:'RÉSULTAT'};
+      return `<div class="mf-so-lg${on?' on':''} so3-carte-combat" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li so3-carte-infos"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div></div>`
+        +`<div class="mf-so-ln so3-carte-noms"><b>${esc(soLast(p.a))}</b><span>contre</span><b>${esc(soLast(p.b))}</b></div>`
+            +`<button type="button" class="so3-vue" aria-label="Vue du combat ${esc(rang)} : ${labels[vue]}" aria-valuetext="${labels[vue]}" title="Changer la vue avec V" onclick="CL.mgmtSoVueSuivante(${p.i})">${labels[vue]}</button></div>`;
+   };
   const hp=haut(pre.length), hm=haut(main.length);
   const gauche=`<div class="mf-so-col"><div class="mf-so-ct"><div><div class="mf-so-ti">PRÉLIMINAIRES</div><i class="mf-so-bar"></i></div><span>La carte de Leïla</span></div>`
     +`<div class="mf-so-ls">${pre.map((p,k)=>ligne(p,k+1,k===0,hp)).join('')}</div>`
@@ -141,14 +176,15 @@ function mgmtSoOuvertureHtml(m,prog){
   const droite=`<div class="mf-so-col"><div class="mf-so-ct"><div><div class="mf-so-ti">CARTE PRINCIPALE</div><i class="mf-so-bar"></i></div><span>Ta carte</span></div>`
     +`<div class="mf-so-ls">${main.map((p,k)=>ligne(p,main.length-k,false,hm)).join('')}</div>`
     +`<div class="mf-so-pied">${mfBouton('Commencer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoCommencer()'})}</div></div>`;
-  const corps=`<div class="mf-so-ban2"><div><div class="mf-so-s2">CE SOIR${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
-    +`<div class="mf-so-n"><b>${esc(num)}</b><span>${esc(prog.length)} COMBATS</span></div></div>`
+   const corps=`<div class="mf-so-ban2 so3-entete"><div><div class="mf-so-s2">CE SOIR${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
+     +`<div class="mf-so-n"><b>${esc(num)}</b><span>${esc(Math.min(MGMT_SOIREE.index,prog.length))} / ${esc(prog.length)} · COMBATS</span></div></div>`
     +`<div class="mf-so-cr">${gauche}${droite}</div>`;
-  return mfPanneau(corps,'choisi','mf-so-ouv');
+  return `<section class="so3-ouverture" aria-label="La carte de ce soir">${mfPanneau(corps,'choisi','mf-so-ouv')}</section>`;
 }
 /** L'entre-deux et l'attente du principal : un seul écran, celui du combat qui vient. */
 function mgmtSoEntreHtml(m,prog,index,focus){
   const av=mgmtAvantCombat(m,focus);
+  const salle=mgmtSoireeSalle(m,focus), taux=Math.round(salle.part*100);
   const prec=prog[focus-1];
   const gauche=prec?mgmtSoResultatHtml(m,prec,'TERMINÉ')
     :`<div class="mf-so-ph"><div class="mf-so-s">CE SOIR · ${esc(prog.length)} COMBATS</div><div class="mf-so-h">OUVERTURE</div></div>`
@@ -156,7 +192,14 @@ function mgmtSoEntreHtml(m,prog,index,focus){
   const haut=`<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}`
     +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index,focus<index,focus):'','choisi','mf-so-c')
     +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
-  return haut+mgmtSoBandeHtml(prog,index,focus);
+  return `<div class="so3-soiree">${haut}<div class="so3-salle" aria-label="Salle à ${esc(taux)} pour cent"><span>LA SALLE MONTE</span><div class="so3-salle-piste"><i style="width:${esc(taux)}%"></i></div><b>${esc(taux)}%</b></div>${mgmtSoBandeHtml(prog,index,focus)}</div>`;
+}
+/* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
+function mgmtSoResultatSeulHtml(m,p){
+  const d=mgmtResultatDetail(m,p.h), gagnant=d&&d.gagnant, perdant=d&&d.perdant;
+  const resultat=d?(d.nul?'Match nul':`${mfNet(gagnant.last||gagnant.name)} bat ${mfNet(perdant.last||perdant.name)}`):'Résultat enregistré';
+  const methode=d?d.methode:'Combat terminé', round=d?mgmtRoundTexte(d):'', temps=d&&d.temps?d.temps:'';
+  return mfEcran(`<main class="mf-contenu"><section class="so3-resultat" role="status" aria-live="polite"><div class="so3-resultat-titre">RÉSULTAT</div><h1>${esc(resultat)}</h1><div class="so3-resultat-meta">${esc(methode)}${round?' · '+esc(round):''}${temps?' · '+esc(temps):''}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'})}</section></main>`,{barre:'jeu',grise:true,m,touches:[{ks:['Échap','Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'}]});
 }
 /** L'avant-combat : un côté (ce qu'on a vu, ce qu'on ne sait pas, son dernier combat, trois chiffres publics). */
 function mgmtSoCoteHtml(c,couleur){
@@ -196,16 +239,19 @@ function mgmtSoFinHtml(m,prog){
   const lieu=mgmtCalendrierLieu(m,num+1);
   const gauche=dernier?mgmtSoResultatHtml(m,dernier,'TERMINÉ'):'';
   const centre=`<div class="mf-so-ban2 fin"><div><div class="mf-so-s2">${esc(date)}${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div><div class="mf-so-n"><b>${esc(num)}</b><span>${F.terminee}</span></div></div>`
+    +mgmtSoPrimesFinHtml(m)
     +`<div class="mf-so-fcw"><div class="mf-so-fc"><div class="mf-so-fcl"><div class="mf-so-fb"><div class="mf-so-s">${F.lieu}</div><div class="mf-so-big">${esc(mfNet(salle||'—')).replace(' ','<br>')}</div></div>`
     +`<div class="mf-so-fb"><div class="mf-so-s">${F.maintenant}</div><div class="mf-so-big">${F.resultats[0]}<br>${F.resultats[1]}</div></div></div>`
     +`<div class="mf-so-fcr"><div class="mf-so-s">${F.etat}</div>${ligne(F.prelims,nPre+' / '+nPre)}${ligne(F.main,nMain+' / '+nMain)}${ligne(F.principal,F.joue)}</div></div>`
-    +`<div class="mf-so-fp"><span class="mf-puce">${F.rouvertes}</span>${mfBouton('Voir les résultats',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</div></div>`;
+     +`<div class="mf-so-fp"><span class="mf-puce">${F.rouvertes}</span>${mfBouton('Voir le lendemain',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</div></div>`;
   const droite=sd
     ?`<div class="mf-so-ph"><div class="mf-so-s">${esc(sd.jour)} ${esc(sd.mois)}</div><div class="mf-so-h">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>DANS<br>${esc(dans)} JOURS</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${esc(lieu==='LIEU À CHOISIR'?F.aChoisir:lieu)}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`
     :`<div class="mf-so-ph"><div class="mf-so-s">LA SUITE</div><div class="mf-so-h">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>${F.aposer}</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${F.aChoisir}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`;
-  return `<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>`+mgmtSoBandeHtml(prog,prog.length,-1);
+  const rempli=Math.round(mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part*100);
+  const org=mgmtOrgNom(m), finLieu=mgmtSoireeSalle(m,0).nom;
+  return `<div class="so3-fin"><header class="so3-fin-entete"><div class="so3-fin-titre"><strong>FIN DE SOIRÉE</strong><span>${esc(prog.length)} / ${esc(prog.length)}</span></div><div class="so3-fin-contexte"><span>Ce soir</span><b>${esc(date||'SOIRÉE')} · ${esc(mfNet(finLieu||'—'))}</b><b>${esc(mfNet(org))} FIGHT NIGHT</b></div></header><div class="so3-salle" aria-label="Salle finale à ${esc(rempli)} pour cent"><span>SALLE FINALE</span><div class="so3-salle-piste"><i style="width:${esc(rempli)}%"></i></div><b>${esc(rempli)}%</b></div><div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>${mgmtSoBandeHtml(prog,prog.length,-1)}</div>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
@@ -216,6 +262,7 @@ function mgmtSoireeFallback(){
 function scr_mgmt_soiree_cadre(){
   const m=G.mgmt, prog=mgmtSoireeProgramme(m), n=prog.length, index=MGMT_SOIREE.index;
   if(!n||prog.some(p=>!p.trace)) return mgmtSoireeFallback();
+  if(MGMT_SOIREE_UI.resultat!==null){ const p=prog[MGMT_SOIREE_UI.resultat]; return p?mgmtSoResultatSeulHtml(m,p):mgmtSoireeFallback(); }
   const moment=(index<=0&&!mgmtSoCommence())?'ouverture':mgmtSoireeMoment(m,Math.max(1,index));
   const focus=MGMT_SOIREE_UI.focus===null?Math.min(index,n-1):Math.max(0,Math.min(n-1,MGMT_SOIREE_UI.focus));
   let corps, touches, grise=true, courant=null;
@@ -224,7 +271,7 @@ function scr_mgmt_soiree_cadre(){
     touches=[{ks:['Entrée'],t:'Commencer la soirée',jaune:true,onclick:'CL.mgmtSoCommencer()'}];
   }else if(moment==='fin'){
     corps=mgmtSoFinHtml(m,prog); grise=false; courant='resultats';
-    touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir les résultats',jaune:true,onclick:'CL.mgmtSoFin()'}];
+     touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir le lendemain',jaune:true,onclick:'CL.mgmtSoFin()'}];
   }else{
     corps=mgmtSoEntreHtml(m,prog,index,focus);
     touches=[{ks:['←','→'],t:'Autre combat'},...(focus<index?[{ks:['Échap'],t:'Prochain combat',onclick:'CL.mgmtSoAutre(0)'}]:[{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'}]),
@@ -257,9 +304,17 @@ Object.assign(CL,{
       avancer();
     };
     const vue=mgmtVueDuCombat(m,p.i);
-    if(vue==='resultat'){ sortir(); return; }
+    if(vue==='resultat'){ MGMT_SOIREE_UI.resultat=MGMT_SOIREE.index; MGMT_SOIREE_UI.resultatSuite=sortir; render(); MGMT_SOIREE_UI.resultatTimer=setTimeout(()=>CL.mgmtSoResultatContinuer(),5000); return; }
     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
       salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
+  },
+  mgmtSoResultatContinuer(){
+    if(MGMT_SOIREE_UI.resultat===null) return;
+    if(MGMT_SOIREE_UI.resultatTimer) clearTimeout(MGMT_SOIREE_UI.resultatTimer);
+    const suite=MGMT_SOIREE_UI.resultatSuite;
+    MGMT_SOIREE_UI.resultatTimer=null; MGMT_SOIREE_UI.resultat=null; MGMT_SOIREE_UI.resultatSuite=null;
+    if(typeof suite==='function'){ suite(); return; }
+    MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render();
   },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){
@@ -293,6 +348,11 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index>=n){ CL.mgmtSoRevoir(k); return; }   /* la soirée finie : une pastille rouvre le combat */
     if(!Number.isSafeInteger(k)||k<0||k>=n) return;
     MGMT_SOIREE_UI.focus=k===MGMT_SOIREE.index?null:k; render();
+  },
+  mgmtSoVueSuivante(k){
+    if(!mgmtSoAgenda()) return;
+    const ordre=['complet','forts','resultat'], actuelle=mgmtVueDuCombat(G.mgmt,k);
+    mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(actuelle)+1)%ordre.length]);
   },
   /** Revoir un combat déjà passé de la soirée : l'arène, sans rien changer au déroulé. */
   mgmtSoRevoir(k){
@@ -337,9 +397,10 @@ const MGMT_SO_ANCIENNES_TOUCHES={
   '3'(){ CL.mgmtSoireeToutSimuler(); },
   Enter(){ if(MGMT_SOIREE.index>=G.mgmt.lastEvent.fights.length) CL.mgmtSoireeNext(); },
 };
-/** Les touches de la soirée : Entrée regarde, P passe, F ouvre l'avant-combat, ← → changent de combat. Sans agenda : celles d'origine. */
+/** Les touches de la soirée : Entrée regarde, P passe, F ouvre l'avant-combat, V change la vue, ← → changent de combat. Sans agenda : celles d'origine. */
 function mgmtSoTouche(nom){
   return function(){
+    if(MGMT_SOIREE_UI.resultat!==null&&(nom==='Enter'||nom==='Escape')){ CL.mgmtSoResultatContinuer(); return; }
     if(!mgmtSoAgenda()){ const f=MGMT_SO_ANCIENNES_TOUCHES[nom]; if(f) f(); return; }
     const m=G.mgmt, n=m.lastEvent.fights.length, i=MGMT_SOIREE.index;
     const ouverture=i<=0&&!mgmtSoCommence();
@@ -352,6 +413,8 @@ function mgmtSoTouche(nom){
     }else if(nom==='Escape'){ if(MGMT_SOIREE_UI.focus!==null&&i<n) CL.mgmtSoAutre(0); }
     else if(nom==='p'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoPasser();
     else if(nom==='f'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoAvant();
+    /* ==== [ANCRE: P7_T1_V_OUVERTURE] — Monde lot 53 T1 ==== */
+    else if(nom==='v'&&i<n){ const k=MGMT_SOIREE_UI.focus===null?i:MGMT_SOIREE_UI.focus, ordre=['complet','forts','resultat'], vue=mgmtVueDuCombat(m,k); mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(vue)+1)%ordre.length]); }
     else if(nom==='ArrowLeft'){ if(i>=n) CL.mgmtSoRevoirDernier(); else if(!ouverture) CL.mgmtSoAutre(-1); }
     else if(nom==='ArrowRight'&&!ouverture&&i<n) CL.mgmtSoAutre(1);
   };
@@ -363,6 +426,7 @@ keysRegister('mgmt_soiree',{
   Enter:mgmtSoTouche('Enter'),
   p:mgmtSoTouche('p'), P:mgmtSoTouche('p'),
   f:mgmtSoTouche('f'), F:mgmtSoTouche('f'),
+  v:mgmtSoTouche('v'), V:mgmtSoTouche('v'),
   ArrowLeft:mgmtSoTouche('ArrowLeft'), ArrowRight:mgmtSoTouche('ArrowRight'), Escape:mgmtSoTouche('Escape'),
 });
 keysRegister('mgmt_soiree_avant',{
