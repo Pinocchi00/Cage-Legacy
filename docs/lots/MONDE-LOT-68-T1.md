@@ -82,3 +82,11 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Migration de sauvegarde : aucune. Les cases de fidélité visuelle et le critère final ne sont pas atteints ; pas de `TOUT_EST_FINI`.
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+### Reprise 10 du 24/10/2026
+
+- Historique consulté : `dafc87c` en tête, branche `fid-fiches`. Au départ, aucun fichier de tranche non committé ; les neuf changements `.opencode/agents/*` et `opencode.json` sont hors tranche et restent intacts.
+- Test ajouté dans `tests/mgmtFicheStats.test.js` : « Monde lot 68 T1 — menu principal conserve ses blocs et styles de planche ». Il rend l'écran titre et vérifie les blocs de menu ainsi que les règles CSS des classes de cadre. La décision « planches Uni* validées par Anthony ; l'écran suit la planche » est citée.
+- Vérification ciblée : `node --test tests/mgmtFicheStats.test.js`, 15/15 verts. Une première assertion a révélé que le titre ne porte pas de classe `title-logo` ; le test a été ajusté aux vrais blocs du markup (`mf-accueil-*`). Aucun JS/CSS applicatif modifié, aucun bump de version ou migration.
+- Captures/écarts visuels : pas de capture comparative ouverte, instructions sous `%TEMP%` inaccessibles dans le contexte et scène capture dédiée non établie. Ainsi aucune fidélité visuelle n'est revendiquée. Fiche aperçu/statistiques : changements antérieurs, visuel non validé ; Arrivée contrat/espoirs : non corrigée/validée ; Recruteur mission/retours : structure/styles partiellement testés, visuel non validé ; Semaine : couverture CSS seulement ; Relevé, chiffres du combat, menu, Meilleurs et Records : pas de comparaison visuelle (menu désormais couvert structurellement par test, non par capture).
+- Limites : cases de corrections écran par écran et validation visuelle restent inachevées. Les différences visuelles précises ne sont pas affirmées sans accès au comparatif. Migration de sauvegarde : aucune. Tests lents : `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.

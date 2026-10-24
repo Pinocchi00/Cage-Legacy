@@ -92,6 +92,15 @@ test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le
   for(const screen of ['mgmt_fiche','mgmt_arrivee','mgmt_espoirs_arrivee','mgmt_recruteur_mission','mgmt_recruteur_retours','mgmt_semaine','mgmt_resultats','mgmt_classements','title'])
     assert.ok(screens.includes(screen),`écran ${screen} enregistré`);
 });
+test('Monde lot 68 T1 — menu principal conserve ses blocs et styles de planche',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const w=newGameWindow({runMain:true});
+  w.eval("G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};render()");
+  const html=w.eval('document.querySelector("#app").innerHTML');
+  for(const block of ['title-screen','mf-stage','mf-fond','mf-accueil-gauche','mf-accueil-titre','mf-menu','mf-menu-bas','mf-accueil-touches','title-management']) assert.ok(html.includes(block),`bloc ${block}`);
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  for(const name of ['mf-stage','mf-fond','mf-accueil-gauche','mf-accueil-titre','mf-menu','mf-menu-bas','mf-accueil-touches']) assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);
