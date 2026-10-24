@@ -263,3 +263,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` ne signale aucun écart. `package.json` référence le test dans `test` et `test:watch`.
 - Les changements locaux `.opencode/agents/*` et `opencode.json` ne sont pas liés à la tranche et restent exclus. Aucun nouvel état de sauvegarde.
 - Cette reprise ne ferme pas les écarts déjà signalés : la réalisation active n'est pas attestée conforme à toutes les dimensions/valeurs des deux planches, et la sélection éditoriale T3 n'a pas de mémoire persistante sur 50 soirées, même si les formulations observées sont distinctes dans le test temporel. Ces points restent non terminés ; aucun nouveau commit de production n'est justifié par cette validation.
+
+### Reprise — identification de chaque préliminaire (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : sur la suite, chaque combat préliminaire porte maintenant son numéro de passage (« Préliminaires 1 », « Préliminaires 2 », …) au lieu de réserver le libellé aux seuls premiers combats et de laisser les suivants sans contexte.
+- `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et carte complète » vérifie chaque numéro présent dans la carte réelle. Test ciblé : 27/27.
+- Cache JS remonté ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé de production sans erreur. Aucun changement de sauvegarde.
+- Écarts restants : la fidélité intégrale des valeurs et dimensions des planches n'est pas établie et T3 ne possède toujours pas de mémoire éditoriale persistante sur 50 soirées (le test distinctif repose sur le suffixe temporel). Les familles dépendantes de systèmes non présents ne simulent pas de faits. Cette amélioration n'achève donc pas les cases 1 et 3.

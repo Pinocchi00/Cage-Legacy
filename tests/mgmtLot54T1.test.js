@@ -239,8 +239,10 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     assert.match(html,/aria-label="Le lendemain, la suite"/);
     assert.match(html,/CAGE HEBDO/);
     assert.match(html,/LES MOUVEMENTS/);
-    assert.match(html,/TOUS LES RÉSULTATS/);
-    assert.match(html,/class="ld3-suite-results"/);
+     assert.match(html,/TOUS LES RÉSULTATS/);
+     assert.match(html,/class="ld3-suite-results"/);
+     const prelims=w.eval(`G.mgmt.lastEvent.fights.filter((f,i)=>{const t=mgmtSoireeTrace(G.mgmt,i);return t&&t.slot!=='main';}).length`);
+     for(let i=1;i<=prelims;i++) assert.match(html,new RegExp(`Préliminaires ${i}`),`le résultat préliminaire ${i} conserve son rang dans la carte`);
   }finally{w.close();}
 });
 
