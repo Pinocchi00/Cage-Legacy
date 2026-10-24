@@ -500,3 +500,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (30/30 verts). `node tools/verif-versions.js origin/main` (aucun écart; 17 fichiers examinés).
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (garde-fou déterminisme), cette fiche (compte rendu). Aucun changement de production/sauvegarde ni migration.
 - Limites précédemment consignées inchangées : test lent `mgmtReleveReduit` non validé, pas de preuve de trois saisons complètes ou de fixture complète d'ancienne sauvegarde, fidélité intégrale aux planches non certifiée, déclencheur au terme du contrat plutôt qu'à chaque anniversaire. La tranche n'est pas déclarée entièrement achevée.
+
+### Reprise 65
+
+- Contrôle d'entrée : branche `p11-ceremonie-carnet`, HEAD `ef31360`; aucun fichier de la tranche n'est en attente. Les changements de `.opencode/agents/*` et `opencode.json` sont étrangers et restent exclus.
+- Vérifications exécutées : `node --test tests/mgmtLot55T1.test.js` (30/30 verts, dont le parcours de relevés issus de trois années et le test de cinquante années); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert).
+- Le test de plafond `mgmtReleveReduit` n'a pas été exécuté cette reprise. Les contrôles ciblés ne prouvent pas trois saisons complètes réellement simulées ni le chargement d'une fixture complète d'ancienne sauvegarde; la fidélité intégrale aux valeurs des maquettes n'a pas fait l'objet d'une validation visuelle. Le raccordement de l'écran reste celui du terme du contrat décrit précédemment, et non chaque anniversaire calendaire.
+- Aucun changement de sauvegarde ou migration. Les modifications préexistantes `.opencode/agents/*` et `opencode.json` restent non incluses. Les critères résiduels ci-dessus ne sont pas déclarés satisfaits.
