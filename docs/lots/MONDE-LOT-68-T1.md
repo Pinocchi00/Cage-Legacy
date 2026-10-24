@@ -18,9 +18,15 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - `tests/mgmtFicheStats.test.js` : test « Monde lot 68 T1 — colonnes de l’aperçu explicites, sans position nth-of-type ».
 - Test ciblé `node --test tests/mgmtFicheStats.test.js` : vert (9 tests). `node tools/verif-versions.js origin/main` : aucun écart.
 - Écrans : aucun écran de cette tranche n'a été validé par capture visuelle au cours de ce travail. Fiche Aperçu/Statistiques : seule la règle de placement des colonnes a été modifiée, fidélité à la planche non vérifiée. Arrivée contrat/espoirs, Recruteur mission/retours, Semaine, Relevé, chiffres du combat, Menu, Meilleurs et Records : non traités.
-- Écart / limite : la lecture demandée de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` a été refusée par les permissions du workspace ; impossible de réaliser les captures et d'ouvrir les comparatifs prescrits. La tranche reste incomplète ; ne pas déclarer `TOUT_EST_FINI`.
+- Écart / limite : à la reprise, la lecture demandée de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` a de nouveau été refusée par les permissions du workspace ; impossible de réaliser les captures et d'ouvrir les comparatifs prescrits. J'ai pu lire les planches HTML du dépôt et relancer les tests de fiche, mais je n'ai pas prétendu que cela remplaçait la validation visuelle.
 - Tests ajoutés : aucun nouveau fichier ; test ajouté au fichier existant ci-dessus (déjà inclus dans les scripts de test du dépôt).
 - Migration de sauvegarde : aucune.
 - Questions pour Anthony : aucune ; les vérifications visuelles restantes sont des travaux à effectuer, pas des questions de spécification.
+
+### Reprise du 24/10/2026
+
+- Historique examiné : `be1535a` (colonnes explicites de la fiche) et `afc4bb8` (fiche) sont déjà committés. Aucun changement non committé de cette tranche n'était présent ; les modifications visibles dans `.opencode/agents/*` et `opencode.json` sont hors tranche et n'ont pas été ajoutées.
+- Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (9/9 verts) et `node tools/verif-versions.js origin/main` (aucun écart).
+- Les cases 2 à 6 et la validation des écrans de la case 1 restent à faire ; les écrans non traités restent chacun différents/non vérifiés par rapport à leurs planches. Aucun nouveau commit de fonctionnalités n'a été fait lors de cette reprise.
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
