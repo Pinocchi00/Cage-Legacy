@@ -325,6 +325,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Bilan écran par écran : fiche, recruteur, retours, semaine ont un dernier contrôle sans chevauchement documenté, mais fidélité visuelle exacte non validée ; arrivée, relevé, chiffres, menu et classements restent sans contrôle de capture établi. Pas de nouveau changement applicatif, test ou migration ; aucun bump `?v=` nécessaire.
 - Écart à la fiche : le critère de contrôle `chevauchements:0` n'est pas établi pour tous les écrans demandés et la comparaison visuelle reste incomplète ; tranche non terminée. `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
 
+### Reprise 42 du 24/10/2026
+
+- Vérifications de départ : branche `fid-fiches`, tête `041a20d3`. Aucun fichier de la tranche n'était non committé ; les modifications `.opencode/agents/*` et `opencode.json` sont préexistantes et hors périmètre.
+- Outil de capture relancé conformément aux instructions. Scène `fiche` (UniFicheStats) : `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}`, similarité `{moyen:31.2,grosBlocs:23.2}`. Capture groupée interrompue au timeout de 120 s après la fiche ; scène `recruteur` exécutée séparément : `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}`, similarité `{moyen:26,grosBlocs:19.7}`. Les scores ne remplacent pas l'ouverture du comparatif ; les PNG n'ont pas été ouverts.
+- Tests ciblés relancés : `node --test tests/mgmtFicheStats.test.js` (22/22), `node --test tests/mgmtReleve.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Contrôle écran par écran : fiche (contrôle géométrique zéro, confirmé dans cette reprise) ; recruteur (zéro, confirmé dans cette reprise) ; retours et semaine (dernier résultat zéro documenté en reprise 40, pas de mesure nouvelle) ; arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records (aucune scène de capture dans l'outil, aucun résultat géométrique établi). Les scènes accueil, actualités, tonposte et bilan sont hors périmètre, leurs anciennes anomalies de reprise 40 restent inchangées.
+- Aucun défaut géométrique signalé sur les deux scènes mesurées ; aucune retouche à l'aveugle. Les cases visuelles et la validation comparative restent incomplètes. Aucun changement applicatif, aucune migration et aucun bump `?v=` ; seuls ce compte rendu et les vérifications décrites sont nouveaux. `tests/mgmtReleveReduit.test.js` non relancé.
+
 ### Reprise 35 du 24/10/2026
 
 - Historique et état vérifiés : branche `fid-fiches`, tête `6d484b53`. Aucun fichier de la tranche n'était non committé ; les changements `.opencode/agents/*` et `opencode.json` restent hors périmètre. Les commits antérieurs sont conservés.
