@@ -624,3 +624,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Tests ciblés : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; le test vérifie les trois paires et le score majoritaire par le résolveur normal, ainsi que le parcours offre/changement/rechargement identique/arrivée/soirée/lendemain. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
 - Fichiers modifiés : cette fiche uniquement (compte rendu des mesures). Tests ajoutés : aucun. Pas de migration ni de version cache à monter. Les changements utilisateur et les modifications seulement EOL ne sont pas inclus.
 - Écarts : gros blocs choc à 25.1 % (>20 %), aucun nouveau `cmp` pour arrivée/bilan, comparaison visuelle image à image non faite. La tranche n'est pas entièrement conforme ; aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 9 — recontrôle des écrans
+- Branche `fid-choc`, HEAD `d04e84d0`. Les modifications utilisateurs `.opencode/agents/` et `opencode.json` ne sont pas incluses. Les changements source préexistants en statut (mgmt-ecran-poste.js/ui-cadre.css) n'ont pas de diff fonctionnel hors de cette retouche CSS, laquelle a été annulée faute d'effet.
+- Captures prescrites : choc : proposition affichée, 0 chevauchements, 0 textes sous 22 px, aucun débordement, `grosBlocs=25.1%`; discours : 0 anomalies, `grosBlocs=18.1%`; bilan : 1 chevauchement (« REMERCIÉ » / « Il manque 3 combats en carte », 265×22), `grosBlocs=12.9%`. Les objectifs ne sont donc pas atteints pour choc et bilan.
+- Deux tentatives d'espacement/hauteur de ligne du titre bilan n'ont changé aucune mesure et ont été annulées. Pas de scène arrivée dédiée, et les images de comparaison n'ont pas été ouvertes visuellement.
+- Test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4 passe, incluant le chemin existant des trois paires choc et l'E2E d'offre/changement/arrivée/soirée/lendemain. Aucun nouveau test. Pas de migration de sauvegarde.
+- Fichier modifié : cette fiche, compte rendu des mesures et des tentatives annulées. Aucun changement de version cache conservé. Vérifications `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` à effectuer avant livraison.
+- Écarts à la fiche : seuil `grosBlocs≤20%` du choc manqué; chevauchement bilan persistant; capture arrivée absente et comparaison visuelle non faite. Aucune fin de contrat complète n'a été reproduite dans cette reprise. Aucun `TOUT_EST_FINI` revendiqué.
+- Questions pour Anthony : aucune nouvelle question.
