@@ -699,3 +699,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État consulté sur `p8-apres` : les commits fonctionnels de la tranche sont déjà présents ; aucun fichier de production/test de tranche n'est en attente. Le contrôle combiné des sept tests prescrits passe 130/130, notamment les deux régressions lot 54.
 - `git merge origin/main` a été tenté mais bloqué par la politique de l'environnement interdisant cette commande. Aucune fusion ni résolution de conflits n'a donc été effectuée ; le superviseur devra intégrer `origin/main` et relancer les tests après fusion.
 - Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues. Pas de modification de sauvegarde ni migration. Les comptes rendus précédents décrivent les fichiers fonctionnels, tests, limites et couverture ; aucun autre écart nouveau.
+
+### Reprise 9 — contrôle inter-lots renouvelé (24/10/2026)
+
+- Branche `p8-apres` confirmée ; historique consulté et les fichiers de tranche sont déjà commités. Le contrôle combiné demandé passe 130/130, incluant les régressions du lot 54 sur les rivalités et la non-répétition.
+- Le code et les tests ciblés inter-lots n'ont nécessité aucune modification. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` contiennent bien `mgmtLot63T1` (`true,true`). La fusion `origin/main` reste à réaliser par le superviseur, l'environnement ayant précédemment refusé `git merge`.
+- Aucun changement de sauvegarde ni migration. Les modifications locales des agents, `opencode.json`, `sw.js` et `index.html` restent hors tranche ; limite de couverture précédemment documentée inchangée.
