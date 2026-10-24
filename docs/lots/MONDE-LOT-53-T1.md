@@ -327,6 +327,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajusté : « Monde lot 53 T1 — le panneau de combat rend les trois vues réglables » vérifie aussi l'aide clavier sur la carte d'ouverture. Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Non fait, donc tranche toujours incomplète : le portage intégral des maquettes, la lecture temps forts temporisée/fondue aux fenêtres, la validation de la cible 900–1200 s, et les autres écarts détaillés dans la reprise 42. Le test lent et les vérifications complètes de fin de tranche restent à exécuter. Pas de modification du moteur ni de sauvegarde.
 
+### Reprise 45 — valeur de vue accessible
+
+- Le bouton cyclique de vue sur chaque ligne annonce maintenant la valeur choisie via `aria-valuetext`, plutôt que d'exposer un état booléen `aria-pressed` qui regroupait à tort les deux vues non-completes.
+- Tests : `node --test tests/mgmtLot53T1.test.js` — 22/22 réussis ; `node --test tests/mgmtPasse.test.js` — 13/13, empreintes historiques intactes. `node tools/verif-versions.js origin/main`, ESLint complet et `git diff --check` passent. Le test figure dans les listes `test` et `test:watch`.
+- Fichiers de cette modification : `mgmt-soiree-cadre.js` (sémantique accessible du bouton), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertions), présente fiche.
+- Non achevé : compositions exactes des maquettes non toutes portées ; durée estimée de référence consignée à 868,38 s (sous 900 s) ; lecture accélérée hors des moments forts non chronométrée en navigateur à 30–60 s ; fondu sur la frise, pas sur l'image d'arène. Aucun achèvement global n'est revendiqué.
+- Pas de changement du moteur, de sauvegarde ni de données de combat. Les modifications locales `.opencode/agents/*` et `opencode.json` sont étrangères et exclues ; `sw.js` a été restauré depuis `origin/main`.
+
 ### Reprise 44 — typographie des lignes de la carte
 
 - Fait : les lignes de la carte d'ouverture reprennent les tailles/typos lisibles dans `UniSoiree` (numéro 30 px, informations 22 px, noms 32 px) et différencient les couleurs de ligne sélectionnée comme sur la maquette. Le CSS est toujours préfixé `so3-*` pour les classes nouvelles.
