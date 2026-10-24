@@ -163,6 +163,24 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
   }finally{w.close();}
 });
 
+/* ==== [ANCRE: MONDE65T1_TEST_CARTE_NEUF_COMBATS] — Monde lot 65 T1 ==== */
+test('Monde lot 65 T1 — la soirée en cours expose ses neuf lignes, bandeau et vues par combat',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6501);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoEntreHtml(m,p,0,0);})()`);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.equal((html.match(/class="so3-ligne/g)||[]).length,9);
+    assert.equal((html.match(/class="so3-vue(?: choisi)?"/g)||[]).length,27);
+    for(const bloc of ['so3-bandeau','so3-carte','so3-prochain-panneau','LA SALLE',"L'AMBIANCE",'LA RECETTE','LA CARTE','LE PROCHAIN','TU LE REGARDES EN']) assert.ok(html.includes(bloc),bloc);
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    for(const classe of ['so3-tableau','so3-bandeau','so3-corps','so3-carte','so3-ligne','so3-rang','so3-categorie','so3-noms','so3-carte-vues','so3-prochain-panneau','so3-prochain-noms','so3-prochain-vue']){
+      assert.match(css,new RegExp(`\\.${classe}[^{}]*\\{`),`règle absente pour .${classe}`);
+    }
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=>{
   const w=newGameWindow({runMain:true});
   try{
