@@ -57,6 +57,7 @@ function mgmtPaliersAnnoncer(m){
   if(!Array.isArray(m.paliersAnnonces)) m.paliersAnnonces=[];
   const c=mgmtPaliersCalculer(m),nouveaux=[];
   for(const p of c.paliers){
+    if(p.id==='regional') continue;
     if(m.paliersAnnonces.includes(p.id)) continue;
     m.paliersAnnonces.push(p.id);
     const f={k:'croissance',palier:p.id,texte:p.annonce,relu:false,c:Number.isSafeInteger(m.cycle)?m.cycle:0};

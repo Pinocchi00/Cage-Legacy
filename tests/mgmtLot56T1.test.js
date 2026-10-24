@@ -7,8 +7,16 @@ const {newGameWindow}=require('./helpers/loadGame');
 
 test('Croissance — cinq paliers sont dérivés sans mutation et répondent à la popularité et au rang',()=>{
   const win=newGameWindow();
-  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault(); const avant=JSON.stringify(m); m.mondeVivant=true; m.orgs={}; m.pop=100; const p=mgmtPaliersCalculer(m); return JSON.stringify({n:MGMT_PALIERS.length,pop:p.popularite,rang:p.rang,paliers:p.paliers.map(x=>x.id),avant:JSON.stringify(m)===avant});})()`));
-  assert.equal(r.n,5); assert.equal(r.pop,100); assert.ok(r.paliers.length>=1); assert.equal(r.avant,false);
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault(); m.mondeVivant=true; m.orgs={}; m.pop=100; const avant=JSON.stringify(m); const p=mgmtPaliersCalculer(m); return JSON.stringify({n:MGMT_PALIERS.length,pop:p.popularite,rang:p.rang,paliers:p.paliers.map(x=>x.id),avant:JSON.stringify(m)===avant});})()`));
+  assert.equal(r.n,5); assert.equal(r.pop,100); assert.ok(r.paliers.length>=1); assert.equal(r.avant,true);
+});
+
+test('Croissance — les franchissements sont publiés une seule fois et restent sans effet sur les anciennes parties',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.orgs={};m.pop=100;m.facts=[];const a=mgmtPaliersAnnoncer(m),b=mgmtPaliersAnnoncer(m);return JSON.stringify({a:a.length,b:b.length,annonces:m.croissanceActus.map(x=>({palier:x.palier,relu:x.relu})),ancienne:mgmtPaliersAnnoncer(Object.assign(mgmtDefault(),{facts:[]})).length});})()`));
+  assert.equal(r.a,4); assert.equal(r.b,0); assert.equal(r.ancienne,0);
+  assert.deepEqual(r.annonces.map(x=>x.palier),['national','europeen','mondial','sommet']);
+  assert.ok(r.annonces.every(x=>x.relu===false));
 });
 
 test('Croissance — les classes cr3 de l’écran ont des règles dédiées et aucun petit texte',()=>{

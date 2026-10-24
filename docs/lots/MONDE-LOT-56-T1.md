@@ -32,3 +32,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Écarts : aucun effet de palier n’est encore raccordé à la disponibilité des salles, au diffuseur, au recruteur ou aux agents libres. L’annonce n’est pas encore déclenchée dans le parcours d’Accueil, le classement des huit est purement présenté, et le balisage n’atteint pas les valeurs exactes de la maquette. Le test n’est toujours pas inscrit dans les listes agrégées `test` et `test:watch` (scripts dédiés uniquement). L’écran reste un premier affichage, sans détail des quatre marches attendu.
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
+
+### Reprise du 24/10/2026 — test de franchissement et annonce initiale
+
+- Historique à la reprise : HEAD `4e195b6` (inachevé). Branche confirmée `p11-croissance`. Les seules modifications déjà présentes hors tranche (`.opencode/agents/*`, `opencode.json`) ont été laissées intactes.
+- Changements : `mgmt-salles.js` n'annonce plus le palier régional de départ comme un franchissement ; `tests/mgmtLot56T1.test.js` corrige l'assertion de pureté et ajoute un test d'annonces uniques/compatibilité ancienne. `index.html` a été actualisé par `_bump.js` pour le JS modifié. Aucun changement de sauvegarde ni de version.
+- Tests verts : `node --test tests/mgmtLot56T1.test.js` (3/3) et `node --test tests/mgmtPasse.test.js` (13/13, empreintes incluses). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- `node --test tests/mgmtReleveReduit.test.js` a dépassé la limite de 120 s de l'outil et a été interrompu ; plafond de nouvelle partie donc non revérifié cette reprise.
+- État toujours **inachevé** : `mgmtPasseGenerer` et les soirées ne sont pas couverts pour les franchissements ; les effets des paliers ne sont pas raccordés aux systèmes existants ; pas d'annonce déclenchée au parcours Accueil ; maquette toujours seulement partiellement suivie. Il reste aussi à inscrire le test directement dans les listes `test` et `test:watch` : les hooks `pretest`/`pretest:watch` l'exécutent, mais le contrôle explicite des listes renvoie `false false`.
+- Écarts/question : aucune nouvelle question. Les effets restent à implémenter ; aucune conclusion de fin de tranche n'est justifiée.
