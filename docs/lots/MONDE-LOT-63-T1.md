@@ -60,6 +60,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 15 — contrôle de clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée ; l'historique montre les commits fonctionnels déjà livrés et aucun fichier fonctionnel/test de la tranche n'est non commité. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` ne relève aucun écart, et `node_modules/.bin/eslint .` passe.
+- Aucun changement de code, de test ou de sauvegarde requis ; aucune migration. Les dix familles, le calcul déterministe et borné, les raccordements accueil/presse et les mouvements inter-organisations sont présents dans les commits antérieurs.
+- Limite de couverture maintenue : les faits familiaux sont scénarisés individuellement sur une partie créée par le parcours réel, sans prouver que chaque système opérationnel les produit naturellement. Les changements locaux `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` sont étrangers à la tranche et exclus. Aucun écart nouveau ni question pour Anthony.
+
 ### Reprise 8 — validation et clôture (24/10/2026)
 
 - État repris : branche `p8-apres`, commits de code/test déjà présents (`b9caf2d6` en tête). Aucun fichier fonctionnel de tranche non commité. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangers à cette reprise et exclus.
