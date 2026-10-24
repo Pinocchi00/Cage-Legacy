@@ -17,6 +17,31 @@ test('Monde lot 54 T1 — la partie réelle classe la surprise majeure avant les
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — brief du 22/10, P8 : la victoire d’un 13-1 sur le n°1 ouvre le lendemain',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const r=w.eval(`(()=>{
+      const m=G.mgmt, div=m.roster.find(f=>f&&f.div).div;
+      const top=mgmtDivisionRanking(m,div,'world')[0];
+      const f=m.roster.find(x=>x&&x.id===top.id), other=m.roster.find(x=>x&&x.id!==f.id&&x.div===div);
+      if(!other) return {missing:true};
+      f.W=13;f.L=1;f.D=0;other.W=20;other.L=1;other.D=0;
+      const side=x=>({id:x.id,name:x.name,first:x.first,last:x.last,div:x.div,age:x.age,W:x.W,L:x.L,D:x.D});
+      const cycle=m.cycle, fight={c:cycle,slot:'main',rounds:3,seed:0,round:3,winner:'A',family:'dec',
+        a:side(f),b:side(other),s:{d:900,c:[]}};
+      m.hist.push(fight);m.lastEvent={cycle,fights:[{a:f.id,b:other.id,winner:'A',family:'dec'}],touched:[],finance:{spectateurs:0,recette:0}};
+      const stories=mgmtHistoiresSoiree(m,m.eventsPlayed), press=mgmtMediasLendemain(m);
+      return {top:top.id,first:stories[0]&&stories[0].type,winner:stories[0]&&stories[0].a,
+        press:press[0]&&press[0].texte};
+    })()`);
+    assert.notEqual(r.missing,true,'la partie générée contient deux combattants dans la division');
+    assert.equal(r.first,'surprise');
+    assert.equal(r.winner,r.top);
+    assert.ok(r.press,'la presse du lendemain produit un premier titre');
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — D1 : une défaite réduit le score de classement (correction déjà présente, audit du 16/10)',()=>{
   const w=newGameWindow({runMain:true});
   try{

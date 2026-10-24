@@ -6,19 +6,19 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 
 ## Cases
 **[ ] 1.** Non implémenté : l'écran existant n'a pas été recomposé selon les deux planches.
-**[ ] 2.** Non implémenté : le test de partie réelle vérifie le tri ordinaire des histoires, pas le scénario de référence 13-1 contre n°1.
+**[x] 2.** Un test génère une partie par `mgmtPasseGenerer('split',{soirees:3})`, choisit le n°1 mondial et construit dans `m.hist` le 13-1 gagnant ; il vérifie que l'histoire de surprise est en tête et que la presse produit un premier titre. Limite : les données de finitions, discours et autres composantes de T2 restent non branchées.
 **[ ] 3.** Non implémenté : aucun catalogue de réactions de semaines suivantes.
 **[x] 4.** D1 est déjà appliqué dans `mgmt-carte.js` (commentaire de décision au bloc `mgmtRangScores`, correction résultat par résultat). Le test ciblé vérifie maintenant qu'une défaite réduit bien le score par rapport au vainqueur, sans toucher au moteur de combat. L'audit cité par le brief ne contient pas lui-même le constat D1 ; la décision porte cette mention dans le code.
-**[ ] 5.** Le test est référencé par `test` et `test:watch`; aucun nouvel état de sauvegarde. Les critères fonctionnels principaux restent incomplets.
+**[x] 5.** Le test est référencé par `test` et `test:watch`; aucun nouvel état de sauvegarde. Les critères fonctionnels principaux restent incomplets.
 **[ ] 6.** Compte rendu actualisé ; critère de tranche non atteint.
 
 ## Compte rendu
 
-- `tests/mgmtLot54T1.test.js` : un test de fumée sur une partie réelle construite par `mgmtPasseGenerer('split',{soirees:3})`, et un test ciblé du score du perdant pour D1. Le premier ne couvre pas la soirée de référence 13-1.
+- `tests/mgmtLot54T1.test.js` : test de fumée sur une partie réelle, test du scénario de référence (partie issue du chemin réel, classement 13-1 contre le n°1 injecté dans la trace, histoire classée en tête et production d'un titre de presse), et test ciblé du score du perdant pour D1.
 - `package.json` : le fichier est déjà référencé par les scripts agrégés `test` et `test:watch` et par les scripts ciblés.
-- Aucun code d'écran, catalogue T3 ou changement du classement ; aucune migration de sauvegarde.
-- Vérification : `node --test tests/mgmtLot54T1.test.js` passe (2 tests). D1 est déjà corrigé dans le classement depuis une tranche antérieure ; le résultat de `mgmtRangScores` est maintenant vérifié ici. La tranche reste incomplète sur T2, T3 et le scénario de référence.
-- Écarts à la fiche et aux maquettes : les deux écrans à `ld3-`, les trois moments, les blocs de presse/mouvements et l'après n'ont pas été codés. Aucun écart ne doit être interprété comme une validation de ces écrans.
-- Questions pour Anthony : le scénario de référence doit-il être fourni comme partie de fixture existante ou faut-il construire ses combattants/son combat via un autre chemin réel ? Sans réponse, aucun nom ou résultat du jeu n'a été inventé.
+- Aucun code d'écran ni catalogue T3 ; aucune migration de sauvegarde. D1 était déjà corrigé dans le classement depuis une tranche antérieure ; le test vérifie cette correction sans moteur de combat.
+- Vérification : `node --test tests/mgmtLot54T1.test.js` passe (3 tests).
+- Écarts à la fiche et aux maquettes : les deux écrans à `ld3-`, les trois moments, primes/discours, chiffres/contrat et résultats aux valeurs des planches, ainsi que l'après (catalogue de huit familles, limitation hebdomadaire et garantie d'absence de répétition sur 50 soirées) restent à faire. Le scénario de test suit la précision du superviseur : données de combat injectées à la main après génération du monde.
+- Questions pour Anthony : aucune question bloquante identifiée ; ces écarts sont des travaux restants, pas une validation des écrans.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
