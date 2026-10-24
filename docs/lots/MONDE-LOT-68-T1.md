@@ -377,6 +377,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écart à la fiche : corrections et contrôles actuels de toutes les scènes, puis fidélité visuelle par comparaison, restent incomplets. Tests lents `tests/mgmtReleveReduit.test.js` non relancé. Aucune migration. `TOUT_EST_FINI` non revendiqué.
 - Écart à la fiche : le critère de livraison globale n'est pas atteint ; contrairement à l'exigence de cette reprise, les comparatifs n'ont pu être ouverts et les scènes manquantes ne sont pas capturées. `TOUT_EST_FINI` n'est pas atteint.
 
+### Reprise 45 du 24/10/2026
+
+- Branche vérifiée : `fid-fiches`. Historique relu jusqu'à `8b1af6e7`. Les seuls changements locaux restent `.opencode/agents/*` et `opencode.json`, hors tranche ; aucun fichier de la tranche n'est en attente de commit.
+- Vérifications ciblées fraîches : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert).
+- Le contrôle de capture/lecture des `cmp-*.png` n'a pas pu être exécuté dans cette session : son répertoire est hors des chemins accessibles via les outils présents. Je ne rapporte donc aucun résultat géométrique frais, ni aucune validation visuelle. Les mesures à zéro documentées pour fiche, recruteur, retours et semaine restent historiques, pas un contrôle après-correction.
+- État écran par écran : fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records : les changements/tests structurels décrits plus haut sont présents, mais aucune comparaison visuelle vérifiable n'est faite ici. Aucune différence d'image n'est inventée. Accueil, actualités, tonposte et bilan restent hors périmètre applicatif.
+- Aucune modification JS/CSS/sauvegarde ; aucun bump `?v=` ni migration. `tests/mgmtReleveReduit.test.js` non lancé. Les corrections visuelles et contrôles complets demandés restent à accomplir ; cette reprise ne revendique pas `TOUT_EST_FINI`.
+
 ### Reprise 41 du 24/10/2026
 
 - État repris : branche `fid-fiches`, HEAD `38811937`. L'historique `git log --oneline -12` et `git status` ont été examinés. Aucun fichier applicatif ou test de la tranche n'est non committé ; les changements `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés.
