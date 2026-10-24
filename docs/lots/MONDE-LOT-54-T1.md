@@ -256,3 +256,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État vérifié : branche `p8-lendemain`; les commits de tranche sont déjà présents dans `git log`. Aucun fichier de la tranche n'était en attente. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères à la tranche et ne sont pas incluses.
 - Bilan inchangé et explicite : les cases 2, 4 et 5 sont couvertes selon les tests et limites décrits plus haut. Les cases 1 et 3 restent partielles : malgré les deux vues navigables, l'intégralité du contenu et des valeurs des maquettes n'est pas garantie ; les familles T3 non soutenues par un fait ne sont pas inventées et aucune mémoire éditoriale persistante n'est stockée. Pas de nouvelle donnée de sauvegarde ni migration.
 - Vérifications effectuées : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé passe ; les scripts `test` et `test:watch` référencent le test. `tests/mgmtReleveReduit.test.js` (lent), le lint global et `check:rapide` ne sont pas lancés dans cette passe.
+
+### Reprise demandée — 24/10/2026
+
+- Branche confirmée : `p8-lendemain`. Journal consulté : la tête est `6f9eccd Monde lot 54 T1 : le lendemain recomposé`; les modifications de la tranche sont déjà commités. Aucun fichier de la tranche n'était modifié au départ.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` ne signale aucun écart. `package.json` référence le test dans `test` et `test:watch`.
+- Les changements locaux `.opencode/agents/*` et `opencode.json` ne sont pas liés à la tranche et restent exclus. Aucun nouvel état de sauvegarde.
+- Cette reprise ne ferme pas les écarts déjà signalés : la réalisation active n'est pas attestée conforme à toutes les dimensions/valeurs des deux planches, et la sélection éditoriale T3 n'a pas de mémoire persistante sur 50 soirées, même si les formulations observées sont distinctes dans le test temporel. Ces points restent non terminés ; aucun nouveau commit de production n'est justifié par cette validation.
