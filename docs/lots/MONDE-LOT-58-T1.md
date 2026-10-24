@@ -11,7 +11,7 @@ Branche : `p9-renvoi-offres` (la branche courante de ce dossier ; commits ICI ; 
 **[x] 4. Rester est une vraie voie** : « Monde lot 58 T1 — le refus des offres laisse poursuivre puis renouveler le contrat » refuse les offres réellement produites quand il y en a et poursuit/renouvelle sans changer d'organisation.
 **[x] 5. L'étude de T5 (document, pas de code)** : `docs/lots/ETUDE-CHANGER-D-ORGANISATION.md` inventorie la forme connue de `m.orgs[id]`, les éléments à échanger, les risques de sauvegarde et un plan en tranches. Elle précise les points qui restent à inventorier avant le code. **Aucun code de T5.**
 **[~] 6. Tests** (`tests/mgmtLot58T1.test.js`, dans `test` ET `test:watch`) ; sauvegarde facultative, validée, réparée ; partie neuve ≤ plafond (`tests/mgmtReleveReduit.test.js` en arrière-plan) ; partie ancienne intacte. Scripts vérifiés; le test ciblé passe (19/19, plus ciblé après l'ajout historique); le plafond reste sans résultat exploitable après dépassement de délai.
-**[~] 7. Fin.** Tests ciblés et lint/audit verts; le test lent plafond n'a pas encore rendu de résultat. Le commit final sera créé après les vérifications restantes.
+**[~] 7. Fin.** Le commit `9469b88` porte les changements de reprise; le test lent plafond et la fidélité complète de l'écran à la maquette empêchent encore de déclarer toutes les cases terminées.
 
 ### Compte rendu — reprise 12
 - Modifié : `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — accepter un choc le pose dans l’agenda entre six et dix semaines » ; le scénario vérifie la réponse, la fenêtre de date, la soirée agenda et la validité de la sauvegarde.
@@ -263,4 +263,5 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification plafond : `node --test tests/mgmtReleveReduit.test.js` a été lancé deux fois (une fois en arrière-plan); les exécutions ont dépassé le délai maximal de l'outil (300 s) sans résultat final exploitable. Le plafond n'est donc pas attesté dans ce compte rendu.
 - Écarts : l'écran respecte le cadre et les classes `ch3-`, mais n'affiche qu'un combat (décision superviseur), et son bloc d'offre n'intègre pas encore l'ensemble lieu/citation vus sur la planche. Le fil de presse d'une proposition est visible avec le champion suivi (comme les autres entrées du système actualités). Aucun code T5 ni texte de patron inédit ajouté.
 - État Git au départ : modifications locales de `.opencode/agents/*`, `opencode.json` et `sw.js` préexistantes, exclues; aucun fichier de ces groupes n'est inclus dans le commit. Le contrôle rapide `npm run check:rapide` n'est pas lancé conformément à la consigne superviseur.
+- Commit de reprise : `9469b88 Monde lot 58 T1 : le renvoi, les offres et le choc`; il contient cette fiche, `mgmt-actualites.js`, `index.html` et `tests/mgmtLot58T1.test.js`. Il ne vaut pas déclaration de fin, puisque les limites ci-dessus demeurent.
 - Questions pour Anthony : aucune.
