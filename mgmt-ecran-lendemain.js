@@ -189,6 +189,44 @@ function mgmtLendemainMomentsHtml(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MONDE54_T1_LENDEMAIN_RECOMPOSE] — Monde lot 54 T1 ==== */
+/** Les primes attribuées pour cette soirée, dans l'ordre établi par P7 T3. */
+function mgmtLendemainPrimesHtml(m){
+  const facts=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='prime'&&f.c===m.lastEvent.cycle);
+  const vus=new Set();
+  return facts.filter(f=>{const key=f.fight+'|'+f.type;if(vus.has(key))return false;vus.add(key);return true;})
+    .map(f=>{const t=m.hist&&m.hist[f.fight],fighter=mgmtFighterById(m,f.a),name=fighter?fighter.name:(t&&t.a&&t.a.id===f.a?t.a.name:t&&t.b&&t.b.name)||'Combattant';
+      const label=f.type==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE';
+      return `<div class="ld3-prime"><b>${esc(label)}</b><span>${esc(name)}</span><span>${esc(mgmtEuros((f.m||0)/1000))}</span></div>`;}).join('');
+}
+
+/** Faits sur la soirée qui ont modifié le suivi ou l'espoir du joueur. */
+function mgmtLendemainAttentionHtml(m){
+  const stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
+  return stories.filter(s=>s.type==='suivi'||s.type==='espoir').map(s=>{
+    const f=mgmtFighterById(m,s.a),nom=f?f.name:s.a||'Combattant';
+    const statut=s.type==='espoir'?'Ton espoir':'Ton suivi';
+    const issue=s.raison&&s.raison.victoire?'gagne':'a combattu';
+    return `<div class="ld3-attention"><b>${esc(nom)}</b><span>${esc(statut)} · ${esc(issue)}</span></div>`;
+  }).join('');
+}
+
+/** Titres presse rattachés à la soirée, classés par le poids de P8 T1. */
+function mgmtLendemainPresseHtml(m){
+  if(typeof mgmtMediasLendemain!=='function') return '';
+  const rows=mgmtMediasLendemain(m)||[], stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
+  const score=row=>{const id=row&&row.id;const s=stories.find(x=>x.a===id||x.b===id);return s?s.poids:0;};
+  return rows.slice().sort((a,b)=>score(b)-score(a)).map((r,i)=>`<div class="ld3-press"><b>${i===0?'À LA UNE':'DANS LA PRESSE'}</b><span>${esc(r.texte||r.titre||'')}</span></div>`).join('');
+}
+
+/** Bloc discursif facultatif : la PR P7 T4 peut arriver après cette branche. */
+function mgmtLendemainDiscoursHtml(m){
+  if(typeof mgmtDiscoursLire!=='function'||!Array.isArray(m.discours)) return '';
+  const rows=m.discours.filter(d=>d&&d.c===m.lastEvent.cycle);
+  return rows.map(d=>`<div class="ld3-speech">${esc(typeof d.texte==='string'?d.texte:'')}</div>`).join('');
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Les constats factuels de la soirée (§1) : entrées et sorties du top 15
  *  mondial — la seule loi de classement (mgmtDivisionRanking, ancre
  *  MGMT_LOT2_CLASSEMENT, recalcul au cycle explicite T6-1), limitée aux
@@ -271,6 +309,9 @@ function scr_mgmt_lendemain(){
     +`<section class="mgmt-ld-pane mgmt-ld-results">`+mfPanneau(`<div class="mf-sem-in">`
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.results)}</h3>`
       +mgmtLendemainMomentsHtml(m)
+      +mgmtLendemainPrimesHtml(m)
+      +mgmtLendemainDiscoursHtml(m)
+      +mgmtLendemainAttentionHtml(m)
       +mgmtLendemainResultatsHtml(m)
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
       +`</div>`,'normal','mf-sem-p')+`</section>`

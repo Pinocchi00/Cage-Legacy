@@ -1850,3 +1850,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-label{font:800 26px/1 var(--mgmt-font-display);color:var(--mf-jaune)}
 .ld3-names{font:800 32px/1.05 var(--mgmt-font-display);color:#E9E6E1}
 .ld3-detail{font:600 22px/1.2 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+/* ==== [ANCRE: MONDE54_T1_LENDEMAIN_CSS] — Monde lot 54 T1 ==== */
+.ld3-prime{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border:2px solid rgba(240,178,32,.65);font-size:22px;line-height:1.1;color:#E9E6E1}
+.ld3-prime b{font:800 24px/1 var(--mgmt-font-display);color:#F0B220}
+.ld3-prime span{font-size:22px}
+.ld3-attention{display:flex;flex-direction:column;gap:4px;padding:10px 14px;border-bottom:2px solid rgba(233,230,225,.16);font-size:22px;line-height:1.15}
+.ld3-attention b{font:800 26px/1 var(--mgmt-font-display)}
+.ld3-attention span{font-size:22px;color:rgba(233,230,225,.74)}
+.ld3-press{display:flex;flex-direction:column;gap:5px;padding:12px 14px;background:#121010;border-left:4px solid #E23A2B;font-size:22px;line-height:1.15}
+.ld3-press b{font:800 24px/1 var(--mgmt-font-display);color:#F0B220}
+.ld3-press span{font-size:22px}
+.ld3-speech{padding:12px 14px;border-left:4px solid #F0B220;font-size:22px;line-height:1.2}
+/* ==== [FIN ANCRE] ==== */

@@ -57,3 +57,15 @@ test('Monde lot 54 T1 — D1 : une défaite réduit le score de classement (corr
     assert.ok(r.loser<r.other,JSON.stringify(r));
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — le lendemain assemble primes, discours facultatif et suivis/espoirs',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const r=w.eval(`(()=>{const m=G.mgmt,f=m.roster[0],i=m.hist.length,side=x=>({id:x.id,name:x.name,first:x.first,last:x.last,div:x.div,W:x.W,L:x.L,D:x.D});m.suivis=[f.id];m.espoirs=[f.id];m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(m.roster.find(x=>x.id!==f.id))});const t=m.hist[i];m.lastEvent={cycle:m.cycle,fights:[{a:t.a.id,b:t.b.id,winner:'A',family:'dec'}],finance:{spectateurs:0,recette:0}};m.facts.push({c:m.cycle,k:'prime',a:f.id,fight:i,type:'pf',m:1200});return {prime:mgmtLendemainPrimesHtml(m),attention:mgmtLendemainAttentionHtml(m),discours:mgmtLendemainDiscoursHtml(m)};})()`);
+    assert.match(r.prime,/PERFORMANCE DE LA SOIRÉE/);
+    assert.match(r.prime,/1\s*200/);
+    assert.match(r.attention,/Ton espoir/);
+    assert.equal(r.discours,'');
+  }finally{w.close();}
+});
