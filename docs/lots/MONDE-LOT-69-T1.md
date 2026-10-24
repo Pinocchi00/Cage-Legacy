@@ -183,6 +183,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4. Les changements source de la tranche déjà présents sont commités dans l'historique ; je n'ai pas ajouté de modification CSS non prouvée pour masquer les écarts de mesure.
 - Écarts à la fiche toujours constatés : seuil `grosBlocs≤20%` du choc non atteint, chevauchement bilan, pas de capture arrivée ni comparaison visuelle ouverte. Pas de migration. Les modifications utilisateur hors tranche sont préservées et non ajoutées.
 
+### Reprise 60 — contrôle après le dernier commit
+- État initial : branche `fid-choc`, HEAD `9f19a505`. Les seuls changements de travail préexistants sont `.opencode/agents/*` et `opencode.json`; ils restent hors tranche. Aucun fichier fonctionnel T1 n'était non commité.
+- Rejoué `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` avec la scène demandée : le contrôle a affiché `chevauchements=0`, `textesSous22px=0`, aucun débordement, mais `grosBlocs=25.1%`, au-dessus du seuil de 20%. La capture ne peut donc pas être déclarée conforme. L'image comparative n'a pas été ouverte dans cette interface.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne signale aucun écart. Pas de changement de code/cache ou sauvegarde dans cette reprise.
+- Écart restant : critère de densité visuelle du choc non satisfait malgré l'affichage réel, affichage visible confirmé par la capture. Les autres écarts consignés ci-dessus (bilan, arrivée, comparaison des images) restent à distinguer de critères validés par test structurel. Aucun achèvement global n'est revendiqué.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
