@@ -1682,6 +1682,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-cols{display:flex;align-items:stretch;gap:18px;min-height:700px;flex:1 0 auto}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_SEMAINE_SANS_CHEVAUCHEMENT] — Monde lot 64 T1 ==== */
 .mf-ac-cols~.mf-ac-p{flex:none;max-height:calc(100vh - 250px);overflow:auto}
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_ZONE_VISIBLE] — Monde lot 64 T1 ==== */
+.mf-contenu.mf-ac{height:calc(100vh - 224px);min-height:0;box-sizing:border-box;overflow:hidden}
+.mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden}
+.mf-ac .mf-ac-cols>.mf-ac-p{min-height:0;overflow:auto}
+.mf-ac .mf-ac-cols>.mf-ac-saison{overflow:hidden}
 /* ==== [ANCRE: MONDE64_T1_SEMAINE_COMPACTE] — Monde lot 64 T1 ==== */
 .mf-ac-semaine{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:2px solid var(--mf-sep);font-size:22px;line-height:1.1;flex:none}
 .mf-ac-semaine b{font-family:var(--mf-titre);font-size:24px;line-height:1;}
