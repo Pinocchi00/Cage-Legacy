@@ -282,9 +282,11 @@ function mgmtValidFightTrace(x){
     if(!d||typeof d!=='object'||Array.isArray(d)||Object.keys(d).sort().join(',')!=='b,ca,cb') return false;
     if(!MGMT_ORGANISATIONS.some(o=>o.id===d.b)||!Number.isSafeInteger(d.ca)||d.ca<0||!Number.isSafeInteger(d.cb)||d.cb<0) return false;
   }
+  /* Monde lot 50 T1 : `position` (rang du combat dans la carte principale, 0 = principal ; null en préliminaires) est facultative. */
+  if(x.position!==undefined&&x.position!==null&&!(Number.isSafeInteger(x.position)&&x.position>=0&&x.position<=20)) return false;
   /* Monde lot 44 T1 : pr marque le prix reçu (combat de la soirée, performance). */
   if(x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') return false;
-  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr').sort().join(',');
+  const clefs=Object.keys(x).filter(k=>k!=='p'&&k!=='duo'&&k!=='s'&&k!=='pr'&&k!=='position').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -344,11 +346,17 @@ function mgmtDuoValide(d,raw){
  *  Lot 3b T1 : l'argent s'ajoute — trésorerie entière (le découvert est
  *  permis, c'est T sous zéro), les deux dernières recettes, l'audience
  *  d'historique et le nombre de soirées jouées. */
+/* ==== [ANCRE: P7_T4_DISCOURS_VALIDATION] — Monde lot 50 T1 ==== */
+function mgmtDiscoursValide(x){
+  return !!x&&typeof x==='object'&&!Array.isArray(x)&&Number.isSafeInteger(x.c)&&x.c>=0&&Array.isArray(x.d)&&x.d.length<=4&&x.d.every(d=>d&&typeof d==='object'&&typeof d.a==='string'&&d.a.length<=80&&typeof d.adv==='string'&&d.adv.length<=80&&typeof d.motif==='string'&&d.motif.length<=40&&typeof d.ton==='string'&&d.ton.length<=40&&Array.isArray(d.lignes)&&d.lignes.length<=5&&d.lignes.every(l=>typeof l==='string'&&l.length<=200)&&(d.interpelle===null||d.interpelle===undefined||typeof d.interpelle==='string'&&d.interpelle.length<=80));
+}
+
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(raw.vues!==undefined&&(!raw.vues||typeof raw.vues!=='object'||Array.isArray(raw.vues)||Object.keys(raw.vues).length>12||Object.entries(raw.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) return false;
   if(raw.surnomsGagnes!==undefined&&typeof raw.surnomsGagnes!=='boolean') return false;
+  if(raw.discours!==undefined&&!mgmtDiscoursValide(raw.discours)) return false;
   if(raw.surnoms!==undefined&&!mgmtSurnomsGagnesValide(raw.surnoms)) return false;
   if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
@@ -380,6 +388,8 @@ function validateMgmt(raw){
   /* Facultatif : une partie d'avant le lot n'en porte pas. Quand il est là,
      seuls des identifiants connus, soixante entrées au plus. */
   if(raw.defis!==undefined&&!mgmtDefisValide(raw.defis)) return false;
+  /* ==== [ANCRE: P11_T1_PRIX_VALIDATION] — Monde lot 55 T1 ==== */
+  if(Array.isArray(raw.roster)&&raw.roster.some(f=>f&&f.prixAnnee!==undefined&&(!Array.isArray(f.prixAnnee)||f.prixAnnee.length>30||f.prixAnnee.some(p=>!p||!['combattant','ko','soumission','combat','revelation','retour'].includes(p.prix)||!Number.isSafeInteger(p.annee)||typeof p.relu!=='boolean')))) return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -487,6 +497,7 @@ function validateMgmt(raw){
   if(raw.guerre!==undefined){
     if(!raw.guerre||typeof raw.guerre!=='object'||Array.isArray(raw.guerre)) return false;
     if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal','anneeTraitee'].includes(k))) return false;
+    if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))) return false;
     if(raw.guerre.rival!==null&&(typeof raw.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===raw.guerre.rival))) return false;
     if(!Number.isSafeInteger(raw.guerre.depuis)||raw.guerre.depuis<0) return false;
     if(!Array.isArray(raw.guerre.ev)) return false;
@@ -708,6 +719,7 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(Object.prototype.hasOwnProperty.call(m,'discours')&&!mgmtDiscoursValide(m.discours)) delete m.discours;
   if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
@@ -718,6 +730,12 @@ function mgmtRepair(m){
     const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
     if(surnoms===undefined) delete m.surnoms;
     else m.surnoms=surnoms;
+  }
+  /* ==== [ANCRE: P11_T1_PRIX_REPARATION] — Monde lot 55 T1 ==== */
+  if(Array.isArray(m.roster)) for(const f of m.roster){
+    if(!f||!Object.prototype.hasOwnProperty.call(f,'prixAnnee')) continue;
+    if(!Array.isArray(f.prixAnnee)){delete f.prixAnnee;continue;}
+    f.prixAnnee=f.prixAnnee.filter(p=>p&&['combattant','ko','soumission','combat','revelation','retour'].includes(p.prix)&&Number.isSafeInteger(p.annee)&&typeof p.relu==='boolean').slice(-30);
   }
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
@@ -843,6 +861,10 @@ function mgmtRepair(m){
        ||m.guerre.classementPrecedent!==undefined&&(!Array.isArray(m.guerre.classementPrecedent)||m.guerre.classementPrecedent.length!==MGMT_ORGANISATIONS.length||m.guerre.classementPrecedent.some(id=>typeof id!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===id))||new Set(m.guerre.classementPrecedent).size!==MGMT_ORGANISATIONS.length)
         ||m.guerre.rangFinal!==undefined&&(!Number.isSafeInteger(m.guerre.rangFinal)||m.guerre.rangFinal<1||m.guerre.rangFinal>MGMT_ORGANISATIONS.length)
        ||m.guerre.anneeTraitee!==undefined&&(!Number.isSafeInteger(m.guerre.anneeTraitee)||m.guerre.anneeTraitee<1)
+      ||Object.keys(m.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))
+      ||m.guerre.rival!==null&&(typeof m.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===m.guerre.rival))
+      ||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<0
+      ||!Array.isArray(m.guerre.ev)
       ||m.guerre.ev.some(ev=>!ev||typeof ev!=='object'||Array.isArray(ev)
         ||typeof ev.o!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===ev.o)
         ||typeof ev.t!=='string'||!['pris','agent','meme-soir','parti','voisin','pique'].includes(ev.t)
