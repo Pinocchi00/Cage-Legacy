@@ -342,10 +342,15 @@ function mgmtLendemainChiffresHtml(m){
   ajouter('CAISSE',Number.isFinite(m.treasury)?mgmtEuros(m.treasury):null);
   ajouter('POPULARITÉ',Number.isFinite(m.popularity)?m.popularity:null);
   const poste=m.poste;
-  if(poste&&Array.isArray(poste.objectifs)){
-    for(const objectif of poste.objectifs){
-      if(!objectif||typeof objectif.nom!=='string') continue;
-      rows.push(`<div class="ld3-figure"><b>${esc(objectif.nom)}</b><span>${objectif.ok===true?'ATTEINT':'EN COURS'}</span></div>`);
+  if(poste&&Array.isArray(poste.obj)){
+    const noms={'manque':'Objectif de recrutement','lourd-top15':'Poids lourds dans le top 15','rang-orgs':'Rang de l’organisation','champion-top5':'Champion dans le top 5','caisse':'Trésorerie','popularite':'Popularité','salle':'Affluence'};
+    for(const objectif of poste.obj){
+      if(!objectif||typeof objectif.t!=='string') continue;
+      const titre=noms[objectif.t]||'Objectif du contrat';
+      const statut=objectif.e==='tenu'||objectif.e==='fait'?'ATTEINT':'EN COURS';
+      const valeur=Number.isFinite(objectif.v)?` · ${objectif.v}`:'';
+      const cible=Number.isFinite(objectif.cible)?` / ${objectif.cible}`:'';
+      rows.push(`<div class="ld3-figure"><b>${esc(titre)}</b><span>${esc(statut+valeur+cible)}</span></div>`);
     }
   }
   return rows.length?`<section class="ld3-figures"><h3>LES CHIFFRES</h3>${rows.join('')}</section>`:'';

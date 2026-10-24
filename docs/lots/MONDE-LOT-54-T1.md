@@ -98,6 +98,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État Git au départ : branche `p8-lendemain`, aucun fichier de tranche non commité. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus.
 - Limites toujours présentes : ce test de non-régression ne complète pas la reproduction intégrale du layout et des valeurs des deux planches, ni les événements T3 contextualisés selon tous les faits réels. Le compte rendu précédent décrit les écarts non résolus ; ils ne sont pas déclarés terminés ici. Pas de nouvelle donnée de sauvegarde.
 
+### Reprise — objectifs du contrat (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : les chiffres du contrat lisent désormais la structure réelle `m.poste.obj` (type, cible, état et valeur), avec intitulés lisibles et échappement HTML, au lieu d'attendre une propriété inexistante `objectifs`.
+- `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres utilisent les données de clôture » contrôle un objectif réel avec statut, valeur et cible. `node --test tests/mgmtLot54T1.test.js` passe 20/20. Cache de script monté.
+- Pas de changement de sauvegarde. Les limites restantes demeurent : rendu non intégralement fidèle aux deux planches, catalogue T3 non déclenché par l'ensemble des faits réels, et pas de garantie stricte d'anti-répétition éditoriale au-delà du suffixe temporel.
+
 ### Reprise — 24/10/2026
 
 - `mgmt-ecran-lendemain.js` : la projection de l'après tolère désormais un `lastEvent.touched` absent ou malformé et ne tente une lecture de suspension que dans un tableau de faits valides. Cache JS monté ; aucun nouvel état de sauvegarde.

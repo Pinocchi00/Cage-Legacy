@@ -90,10 +90,12 @@ test('Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres 
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
-    const r=w.eval(`(()=>{const m=G.mgmt, f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),side=x=>({id:x.id,name:x.name,last:x.last,first:x.first,div:x.div,W:x.W,L:x.L,D:x.D});m.treasury=230;m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(g)});m.lastEvent={cycle:m.cycle,fights:[{a:f.id,b:g.id,winner:'A',family:'dec'}],finance:{spectateurs:1234,recette:250000}};return {press:mgmtLendemainPresseHtml(m),figures:mgmtLendemainChiffresHtml(m)};})()`);
+     const r=w.eval(`(()=>{const m=G.mgmt, f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),side=x=>({id:x.id,name:x.name,last:x.last,first:x.first,div:x.div,W:x.W,L:x.L,D:x.D});mgmtPosteInit(m);m.treasury=230;m.poste.obj=[{t:'popularite',cible:40,e:'tenu',v:42}];m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(g)});m.lastEvent={cycle:m.cycle,fights:[{a:f.id,b:g.id,winner:'A',family:'dec'}],finance:{spectateurs:1234,recette:250000}};return {press:mgmtLendemainPresseHtml(m),figures:mgmtLendemainChiffresHtml(m)};})()`);
     assert.match(r.press,/ld3-press/);
     assert.match(r.figures,/SALLE/);
-    assert.match(r.figures,/CAISSE/);
+     assert.match(r.figures,/CAISSE/);
+     assert.match(r.figures,/Popularité/);
+     assert.match(r.figures,/ATTEINT · 42 \/ 40/);
   }finally{w.close();}
 });
 
