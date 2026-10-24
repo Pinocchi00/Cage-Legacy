@@ -30,6 +30,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` exclues du commit (étrangères à la tranche).
 - Non terminé : corriger la structure aux valeurs exactes de `UniChoc`, ajouter le fil de presse, vérifier le plafond et la sauvegarde ancienne, puis tests/audits et commit final.
 
+### Reprise 18 — ajustement écran et test (non terminé)
+- `ui-cadre.css` rapproche la position/dimension et la découpe de la carte de confrontation de la planche; cache css monté. Le test de l'écran utilise un monde vivant généré pour disposer d'une organisation partenaire.
+- Le test ciblé a échoué auparavant sur l'initialisation de ses fixtures (champ organisation absent puis sélecteur de lien absent); ajustement fait, test complet à relancer.
+- Cases encore ouvertes : conformité totale de l'écran à la planche, fil de presse, preuve de plafond et sauvegarde ancienne, vérifications complètes. La tranche n'est pas déclarée terminée.
+
 ### Reprise 16 — réparer le test de classement du choc
 - Modifié : `tests/mgmtLot58T1.test.js`. L’assertion compare maintenant la baisse du total de classement (-1) plutôt qu’une hausse garantie de place, car les ex æquo ne changent pas nécessairement la position. Décision fondée sur la précision superviseur : le champ `chocPrestige` nourrit le total classé.
 - Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (17/17).

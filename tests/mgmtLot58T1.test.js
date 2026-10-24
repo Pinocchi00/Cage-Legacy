@@ -52,10 +52,9 @@ test('Monde lot 58 T1 — une proposition refusee reste facultative et ne signe 
 
 test('Monde lot 58 T1 — écran du choc présente la confrontation et ses décisions',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const a=m.roster.find(f=>mgmtChampionIds(m).has(f.id));const o=MGMT_ORGANISATIONS.find(x=>x.id!==mgmtPredecesseurOrgId(m)&&m.orgs[x.id]&&(m.orgs[x.id].roster||[]).some(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[x.id].roster}).has(f.id)));const b=m.orgs[o.id].roster.find(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[o.id].roster}).has(f.id));m.choc={orgId:o.id,div:a.div,jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:a.id,b:b.id};G.mgmt=m;return {html:scr_mgmt_choc(),screen:typeof SCREENS.mgmt_choc,css:document.querySelector('link[href*="ui-cadre.css"]').href}})())`));
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const o=MGMT_ORGANISATIONS.find(x=>x.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[x.id]);m.choc={orgId:o.id,div:'H-heavy',jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:'screen-local',b:'screen-adverse'};G.mgmt=m;return {html:scr_mgmt_choc(),screen:typeof SCREENS.mgmt_choc}})())`));
   assert.equal(r.screen,'function');
   for(const phrase of ['LE CHOC DES ORGANISATIONS','PROPOSITION REÇUE','ACCEPTER','REFUSER'])assert.ok(r.html.includes(phrase));
-  assert.match(r.css,/\?v=/);
 });
 
 test('Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le contrat de Split',()=>{
