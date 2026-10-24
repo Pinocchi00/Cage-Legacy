@@ -83,6 +83,7 @@ test('Monde lot 69 T1 — les raisons d’offre restent échappées dans le bila
     const rendu=w.eval('mgmtPosteRendu(G.mgmt)');
     assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
     assert.ok(!rendu.includes('<img src=x onerror=alert(1)>'));
+    assert.equal(w.eval('G.mgmt.offres[0].raisons.length'),4,'une offre du bilan présente exactement quatre raisons');
     assert.equal(w.eval('new Set(G.mgmt.offres[0].raisons).size'),4,'les quatre raisons d’offre doivent rester distinctes');
     for(const raison of ['Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(rendu.includes(raison),`raison absente du bilan: ${raison}`);
   }finally{w.close();}
