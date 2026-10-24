@@ -20,8 +20,9 @@ function mgmtRecruteurEnvoyer(m,choix){
   const etat=mgmtRecruteurEtat(m);
   if(etat.mission||!d.categories.includes(choix.cat)||!['lutteur','frappeur','grappler','complet'].includes(choix.style)||![2,3,4].includes(choix.sem)) return false;
   const cout=d.cout;
-  if(!Number.isFinite(m.treasury)||m.treasury<cout) return false;
-  m.treasury-=cout;
+  const coutCaisse=cout/1000;
+  if(!Number.isFinite(m.treasury)||m.treasury<coutCaisse) return false;
+  m.treasury-=coutCaisse;
   const partiLe=mgmtRecruteurJour(m),sem=choix.sem;
   etat.mission={dest:d.id,cat:choix.cat,style:choix.style,sem,partiLe,retourLe:partiLe+sem*7,cout};
   etat.seq=(etat.seq||0)+1;
