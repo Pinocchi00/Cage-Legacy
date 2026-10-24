@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 59
+
+- Branche `fid-organisation` confirmée. À la reprise, le seul fichier de tranche non commité était `mgmt-ceremonie.js` ; son diff ne changeait que l'indentation et réaffirmait l'ordre des six cartes, sans changer le rendu. Je l'ai conservé et commité après validation ciblée.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` passe (46/46). Aucun test ajouté ni mise à jour de cache nécessaire (aucune modification fonctionnelle ou CSS/HTML). Migration de sauvegarde : aucune.
+- Limites honnêtes : les reprises précédentes documentent des mesures encore hors seuil sur Guerre et des écarts/défauts sur plusieurs vues ; cette session n'a pas généré ni ouvert les comparatifs visuels et n'a pas établi une scène de cérémonie à six lauréats. Je ne revendique donc pas l'achèvement des critères visuels ni `TOUT_EST_FINI`.
+- Fichiers concernés : `mgmt-ceremonie.js` (ordre/formatage des cartes), cette fiche (compte rendu). Écart à la fiche : les captures, inspections et corrections visuelles restant requises ne sont pas accomplies.
+- Questions pour Anthony : aucune.
+
 ## Compte rendu — reprise 58
 
 - Branche `fid-organisation` et historique contrôlés ; tous les changements déjà présents étaient committés. Protocole `shoot/LISEZMOI.txt` lu et captures individuelles relancées pour Guerre, Croissance, Ton poste, Carnet, Bilan et Cérémonie.

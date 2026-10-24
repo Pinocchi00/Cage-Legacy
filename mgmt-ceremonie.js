@@ -70,10 +70,10 @@ function mgmtCarnetLire(m){
 function mgmtCeremonieEchapper(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function scr_mgmt_ceremonie(){
   const m=G&&G.mgmt;if(!m)return '';
-   const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
-   const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
-   mgmtCeremonieInscrire(m,prix,annee);
-    const ordreCartes=['combattant','ko','combat','soumission','revelation','retour'];
+    const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
+    const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
+    mgmtCeremonieInscrire(m,prix,annee);
+     const ordreCartes=['combattant','ko','combat','soumission','revelation','retour'];
     const cartesParId=new Map(MGMT_CEREMONIE_PRIX.map(p=>[p.id,p]));
     const cards=ordreCartes.map(id=>cartesParId.get(id)).filter(Boolean).map(p=>{const v=prix.find(x=>x.id===p.id),classe=p.id==='combattant'?'ce3-prix-combattant':'ce3-prix';return `<article class="${classe}"><h2>${mgmtCeremonieEchapper(p.titre)}</h2>${v?`<strong>${mgmtCeremonieEchapper(v.nom)}</strong><p>${mgmtCeremonieEchapper(v.phrase)}</p>`:`<p class="ce3-prix-vide">Aucun candidat cette année.</p>`}</article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
