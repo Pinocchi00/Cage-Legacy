@@ -131,7 +131,7 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtLot54T1.test.js` passe 25/25. Le test inclut le chemin réel de génération et la victoire du 13-1 contre le n°1, D1, la navigation et l'ordre narratif des deux vues.
 - Les éléments livrés de T2 comprennent la navigation vers une page distincte pour presse/mouvements/résultats et les blocs de récit existants. T3 utilise les faits connus et n'invente pas les événements sociaux absents; son offre reste déterministe, à trois lignes maximum, et ses textes incluent la semaine pour prévenir la répétition littérale dans le test sur 50 semaines.
 - Écarts qui empêchent de déclarer la tranche terminée : la composition n'est pas une reproduction exhaustive des dimensions et valeurs des maquettes; les mouvements ne couvrent pas les changements d'organisation hors participants aux combats et ne constituent pas le relevé illustré complet; certaines familles T3 ne peuvent être alimentées faute de systèmes/faits correspondants, et la non-répétition repose sur le marqueur temporel plutôt que sur une mémoire éditoriale persistante. Aucun nouvel état de sauvegarde ni migration.
-- `tests/mgmtReleveReduit.test.js` (lent), ESLint global et le check complet ne sont pas lancés dans cette reprise. `node tools/verif-versions.js origin/main` et ESLint de production restent à exécuter avant livraison.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart; ESLint ciblé des trois fichiers de production ne signale aucune erreur. `tests/mgmtReleveReduit.test.js` (lent), ESLint global et le check complet ne sont pas lancés dans cette reprise.
 
 ### Reprise — objectifs du contrat (24/10/2026)
 
