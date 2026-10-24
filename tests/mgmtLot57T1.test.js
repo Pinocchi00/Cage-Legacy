@@ -100,3 +100,13 @@ test('Monde lot 57 T1 — le rapport de classement reste facultatif sur une part
     assert.equal(result,0);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — les raisons hostiles de rivalité sont échappées dans le HTML',()=>{
+  const w=partie();
+  try{
+    const hostile='<img src=x onerror=alert(1)>';
+    const html=w.eval(`(()=>{const m=G.mgmt;const id=mgmtGuerreClassement(m).find(x=>!x.estSplit).id;m.guerre={ev:[{c:m.cycle,o:id,t:'pique',x:null,p:8}],rival:id,depuis:m.cycle};const raisons=mgmtRivaleRaisons,rivale=mgmtRivaleDuMoment;mgmtRivaleRaisons=()=>[{raison:${JSON.stringify(hostile)},soiree:1}];mgmtRivaleDuMoment=()=>id;try{return scr_mgmt_guerre();}finally{mgmtRivaleRaisons=raisons;mgmtRivaleDuMoment=rivale;}})()`);
+    assert.ok(!html.includes(hostile));
+    assert.ok(html.includes('&lt;img'));
+  }finally{w.close();}
+});
