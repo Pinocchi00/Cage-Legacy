@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouer=require('./helpers/jouerSoirees');
+const fixtureHistorique=fs.readFileSync(path.join(__dirname,'fixtures','mgmt-sauvegarde-14.json'),'utf8');
 
 test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies et clôtures une seule fois',()=>{
   const w=newGameWindow({runMain:true});
@@ -43,6 +44,19 @@ test('Monde lot 62 T1 — le carnet vide présente honnêtement ses rubriques',(
     assert.equal((empty.ecran.match(/Rien encore\./g)||[]).length,7,'chaque rubrique vide du carnet annonce explicitement son absence de contenu');
   }
   finally{w.close();}
+});
+
+test('Monde lot 62 T1 — une sauvegarde historique v14 chargée joue une soirée sans erreur',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`window.__lot62Historique=${JSON.stringify(fixtureHistorique)};`);
+    const charge=w.eval('mgmtParseAndValidate(window.__lot62Historique)');
+    assert.ok(charge,'la fixture historique est acceptée par la porte de chargement');
+    w.eval('G.mgmt=mgmtMigrate(JSON.parse(window.__lot62Historique));');
+    assert.equal(w.eval('validateMgmt(G.mgmt)'),true,'la sauvegarde migrée est valide');
+    const jouees=jouer(w,1);
+    assert.ok(jouees>=1,'une soirée est jouée depuis la sauvegarde historique migrée');
+  }finally{w.close();}
 });
 
 test('Monde lot 62 T1 — cinquante soirées réelles ne répètent pas une phrase de prix au même combattant',()=>{
