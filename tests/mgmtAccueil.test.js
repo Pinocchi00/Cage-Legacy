@@ -102,6 +102,7 @@ test('Lot 7 — aucun texte sous 22 px dans les règles de l’Accueil, aucune a
 });
 
 /* ==== [ANCRE: ACCUEIL_PLANCHE_TEST] — Monde lot 12 T2 ==== */
+/* Les planches Uni* sont validées par Anthony (brief du 22/10) ; l'écran suit la planche. */
 test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochaine soirée et une action par affaire', () => {
   const w=ouverte();
   const r=res(w,`const m=G.mgmt;
@@ -123,8 +124,10 @@ test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochai
       jaune:document.querySelector('.mf-ac-jaune').textContent,
       vides:mgmtAccueilPasse(m,{passe:[]})+mgmtAccueilAilleurs(m,{ailleurs:[]})};`);
   assert.equal(r.colonnes,3);
-  assert.deepEqual(r.titres,['CE QUI S’EST PASSÉ','CE QUI T’ATTEND','ET AILLEURS']);
-  assert.match(r.bandeau,/Prochaine soirée.*Le lieu.*La carte/);
+   assert.deepEqual(r.titres,['CE QUI S’EST PASSÉ','CE QUI T’ATTEND','TA SAISON']);
+   assert.match(r.bandeau,/Prochaine soirée.*Le lieu.*La carte.*LES PRÉVENTES/);
+   assert.match(w.document.querySelector('.mf-ac-cols').textContent,/LE PATRON/);
+   assert.match(w.document.querySelector('.mf-ac-cols').textContent,/TON RECRUTEUR/);
   assert.doesNotMatch(r.bandeau,/prédécesseur|adjointe|première soirée/);
   assert.ok(r.date.includes(r.mois));
   assert.equal(r.lignes,Math.min(4,r.attend));
@@ -137,6 +140,18 @@ test('Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochai
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.match(css,/\.mf-ac-cols>\.mf-ac-p\{flex:5 1 0;min-width:0\}/);
   assert.doesNotMatch(css,/\.mf-ac-haut[^{}]*\{[^}]*overflow-y:auto/);
+});
+
+test('Monde lot 64 T1 — accueil planche : quatre cases, saison, patron, recruteur et styles des classes',()=>{
+  const w=ouverte(),html=w.document.querySelector('.mf-ac').innerHTML,css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const texte of ['LES PRÉVENTES','TA SAISON','LE PATRON','TON RECRUTEUR']) assert.ok(w.document.querySelector('.mf-ac').textContent.includes(texte),`bloc ${texte}`);
+  const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(c=>c.startsWith('mf-ac-')))];
+  for(const nom of classes) assert.match(css,new RegExp(`\\.${nom}(?:[\\s.:,{>#]|$)`),`classe ${nom} stylée`);
+});
+
+test('Monde lot 64 T1 — un contrat presque échu allume sa section sans ajouter de donnée',()=>{
+  const w=ouverte(),r=res(w,`const m=G.mgmt,f=m.roster.find(x=>!mgmtIsRetired(x));f.ct={n:2,f:1,b:0};render();const item=document.querySelector('.mf-barre-item[data-section="contrats"]');return {attente:mfAttentes(m).has('contrats'),marque:!!item.querySelector('.mf-oct')};`);
+  assert.deepEqual(r,{attente:true,marque:true});
 });
 
 /* ==== [ANCRE: ACCUEIL_REPRISE_2_TESTS] — Monde lot 12 T2 ==== */
