@@ -125,6 +125,11 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.match(html,/LA SALLE/);
     assert.match(html,/LA SOIRÉE/);
     assert.equal((html.match(/class="so3-fin-prime"/g)||[]).length,3);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(html,/COMBAT DE LA SOIRÉE/);
+    assert.match(html,/PERFORMANCE DE LA SOIRÉE/);
+    assert.match(html,/PRIMES PAYÉES/);
+    assert.doesNotMatch(html,/SPLIT FIGHT NIGHT TERMINÉE|OÙ EN EST LA SOIRÉE|mf-so-fcw|mf-so-ph/);
   }finally{w.close();}
 });
 
