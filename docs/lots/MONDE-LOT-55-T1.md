@@ -356,3 +356,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert), présence confirmée dans les scripts `test` et `test:watch`, `git diff --check` (vert). `sw.js` a été restauré depuis `origin/main` après modification par l'environnement de test.
 - Aucune modification de sauvegarde ou migration. Les limites relevées précédemment restent : pas de preuve de reproduction intégrale des planches, déclencheur à la fin du contrat plutôt qu'à chaque anniversaire, et absence de chargement d'une fixture complète de sauvegarde ancienne. Le test lent `mgmtReleveReduit` n'a pas été relancé.
 - Fichiers modifiés : `mgmt-ceremonie.js` (palmarès chronologique), `index.html` (bump de cache), `tests/mgmtLot55T1.test.js` (cas de régression), cette fiche (compte rendu). Les modifications étrangères `.opencode/agents/*` et `opencode.json` sont exclues.
+
+### Reprise 46
+
+- État de reprise : branche `p11-ceremonie-carnet`, HEAD `75b369a`, commit portant déjà le message final requis. Aucun fichier métier de la tranche n'était en attente; les changements `.opencode/agents/*` et `opencode.json` sont étrangers et restent exclus.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` et `git diff --check` (verts).
+- Le test `mgmtReleveReduit` n'a pas été relancé. Les limites consignées restent : conformité complète aux planches non certifiée, déclencheur lié à la fin du contrat plutôt qu'à chaque anniversaire, et aucune fixture complète d'ancienne sauvegarde chargée. Aucun format de sauvegarde modifié ni migration requise.
+- Aucun changement de fonctionnalité nécessaire à la reprise. Le seul ajout est ce relevé de vérification; il est à committer sur la branche avec le commit final existant. Les changements hors tranche ne sont pas inclus.
