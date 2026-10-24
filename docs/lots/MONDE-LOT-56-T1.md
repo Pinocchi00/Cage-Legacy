@@ -185,3 +185,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications rejouées : `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe (24/24, empreintes incluses), `node tools/verif-versions.js origin/main` ne trouve aucun écart et `node_modules/.bin/eslint .` passe.
 - Le code présent couvre la validation des annonces facultatives et les bonus salle, recruteur et soirée diffuseur. Les critères que le code/tests ne prouvent pas restent ouverts : franchissement causé par le chemin `mgmtPasseGenerer` et les soirées, effet réel d'attrait des agents libres, test dédié de l'effet diffuseur en soirée, reproduction complète de la maquette, empreinte historique dans le test de tranche et test lent du plafond. Le test de parcours actuel vérifie une partie après soirée, pas le franchissement causal.
 - Aucun nouveau code de production n'a été ajouté dans cette reprise. Aucun changement de sauvegarde ni migration. Ces écarts empêchent le commit final nommé et `TOUT_EST_FINI`; ils ne sont pas présentés comme terminés.
+
+### Reprise 8 — contrôles ciblés (24/10/2026)
+
+- Branche confirmée `p11-croissance`; les changements préexistants dans `.opencode/agents/*` et `opencode.json` restent étrangers à la tranche et n'ont pas été modifiés.
+- `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe : 24/24, empreintes historiques comprises. Le test de tranche est inscrit dans les deux scripts d'agrégation selon les commits existants.
+- `node --test tests/mgmtReleveReduit.test.js` a été lancé avec un délai de 300 secondes et interrompu par la limite de l'outil. Le plafond de taille ne peut donc pas être revendiqué comme vérifié dans cette reprise.
+- État du code existant : salle, recruteur et droits du diffuseur disposent de raccordements; le contrôle du diffuseur reste une borne arithmétique, pas une assertion d'effet au cours d'une soirée. L'attrait des agents libres n'est pas branché. Le parcours testé crée et joue une soirée mais ne démontre pas de franchissement causé par celle-ci. La reproduction exacte de la maquette et l'empreinte dédiée de compatibilité ancienne restent à compléter.
+- Aucun changement de production n'a été fait dans cette reprise. Pas de migration. La tranche reste inachevée; aucun commit final ni `TOUT_EST_FINI` n'est revendiqué.
