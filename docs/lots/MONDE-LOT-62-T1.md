@@ -25,5 +25,6 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 - Questions pour Anthony : aucune.
 
 - Reprise supplémentaire : `node --test tests/mgmtLot62T1.test.js` passe (2/2, environ 45 s) ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Les contrôles de poids et les deux preuves restantes ci-dessus demeurent non certifiés.
+- Reprise 10 : tests ciblés du lot passent encore (2/2, environ 39 s), l'audit des versions et ESLint passent. `tests/mgmtReleveReduit.test.js` a été relancé avec un délai de 300 s mais a dépassé ce délai ; aucun résultat de poids ne peut être affirmé. Le test ciblé instrumente le calcul et les clôtures sur trois années de jeu, mais son contrôle de reprise appelle directement le vérificateur et ne constitue pas une vraie sauvegarde/reprise. Les preuves demandées de 50 soirées sur les phrases de presse et de chargement historique suivi d'une année restent absentes ; la tranche n'est donc pas entièrement certifiée.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
