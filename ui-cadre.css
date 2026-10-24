@@ -461,7 +461,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-entete strong b{font:800 40px/.69 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .ce3-entete strong span{font-size:24px;letter-spacing:.06em}
 .ce3-grille{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);flex:none;height:530px}
-.ce3-prix-combattant{position:relative;grid-row:span 2;background:#F0B220;color:#0D0B0B;border-color:#F0B220;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.ce3-grille{grid-template-columns:minmax(0,1.2fr) repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));height:610px}
+.ce3-prix-combattant{position:relative;grid-row:span 3;background:#F0B220;color:#0D0B0B;border-color:#F0B220;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
 .ce3-prix-combattant:after{content:"";position:absolute;right:-40px;bottom:-40px;width:240px;height:240px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);background:rgba(13,11,11,.12);pointer-events:none}
 .ce3-prix-combattant:after{right:-64px;bottom:-64px;width:320px;height:320px}
 .ce3-prix-combattant h2{color:#0D0B0B}
@@ -2065,7 +2066,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-ligne>div{display:flex;flex-direction:column;gap:4px;min-width:0}
 .gu3-ligne strong{font-size:27px;white-space:nowrap}.gu3-ligne small{font-size:22px;opacity:.74}
 .gu3-ligne i{font-size:22px;font-style:normal;color:#E23A2B}.gu3-ligne.gu3-split{background:#E9E6E1;color:#0D0B0B}
-.gu3-rivale{display:flex;flex-direction:column;gap:18px;padding:24px;background:#121010;border:2px solid rgba(233,230,225,.5);min-width:0}
+.gu3-rivale{display:flex;flex-direction:column;gap:12px;padding:24px;background:#121010;border:2px solid rgba(233,230,225,.5);min-width:0}
 .gu3-rivale h2{font-size:26px;color:#E23A2B}.gu3-rivale h3{font-size:52px}.gu3-rivale p,.gu3-rivale li{font-size:24px;line-height:1.15}
 .gu3-rivale ul{margin:0;padding-left:28px;display:flex;flex-direction:column;gap:16px}
 .gu3-rivale>strong{font-size:22px}.gu3-rivale small{font-size:22px;opacity:.76;margin-top:auto}

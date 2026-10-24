@@ -348,7 +348,7 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la cérém
     assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
   }
 });
-test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la carte vide reste lisible sans lauréat',()=>{
+test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; les six cartes vides restent lisibles sans lauréat',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
   c.mgmtOrgNom=()=> 'Organisation';
@@ -357,8 +357,8 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la carte v
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
   assert.equal((rendu.match(/Aucun lauréat/g)||[]).length,0);
-  assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
-  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,5);
+  assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,6);
+  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,6);
 });
 test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles',()=>{
   const c=charger();
@@ -378,7 +378,7 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une 
   c.mfEcran=contenu=>contenu;
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
-  assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,5,'la planche garde ses cinq cartes');
+  assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,6,'décision : planches Uni* validées par Anthony ; les six prix calculés doivent rester visibles');
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
   for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
 });
