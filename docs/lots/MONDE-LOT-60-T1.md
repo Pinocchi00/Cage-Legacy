@@ -13,11 +13,10 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
-- Modifié dans ce tour : `mgmt-recruteur.js` ajoute `mgmtRecruteurProfilDisponible`, porte commune permettant de rejeter un profil déjà dans l'effectif ou le marché extérieur ; signature, suivi idempotent et présentation des états existaient déjà dans les commits précédents.
-- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts. `tests/mgmtLot60T1.test.js` n'existe pas encore ; les exigences de bout en bout ne sont donc pas validées.
-- Cases non terminées : ouverture explicite de l'écran Contrats, retrait des profils signés du marché via la porte d'admission, approche rivale déterministe et presse, tests requis (dont sauvegarde/classement/échappement), vérification de partie neuve.
-- Écart : aucun écran supplémentaire ni migration de sauvegarde ajoutés. Cette tranche demeure inachevée ; `mgmtRecruteurProfilDisponible` n'est pas encore consommée par les écrans Contrats.
-- Vérifications : test ciblé historique P5 T1 vert ; aucun lint global ni audit versions exécuté dans ce tour.
-- Questions pour Anthony : aucune ; le travail restant est identifié et doit être implémenté, non soumis à arbitrage.
+- Modifié : `mgmt-recruteur.js` rend la porte disponible neutre pour les identifiants qui ne sont pas des profils de retour ; `mgmt-recrutement.js` applique cette porte à la liste des combattants libres, afin d'exclure un profil rapporté lorsqu'il figure déjà dans l'effectif ou le marché extérieur. `index.html` versions les deux scripts.
+- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts. Le test prescrit `tests/mgmtLot60T1.test.js` est absent et ne peut pas être exécuté.
+- Cases non terminées : parcours explicite vers l'écran Contrats et signature via ce parcours, suivi vérifié sur le chemin réel, approche rivale déterministe (35 % / 15 %) et actualité, délai de protection des suivis, tests exigés (classes, échappement, sauvegarde, déterminisme, fréquence) et plafond de sauvegarde.
+- Écart / vérifications : tranche inachevée. Lint ciblé et `node tools/verif-versions.js origin/main` passent ; le test ciblé prescrit échoue car le fichier n'existe pas. Aucune migration de sauvegarde.
+- Questions pour Anthony : aucune ; le travail restant est implémenté en partie et n'est pas bloqué par une question de spécification.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

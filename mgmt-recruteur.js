@@ -97,5 +97,6 @@ function mgmtRecruteurSuivre(m,idProfil){
 function mgmtRecruteurProfilDisponible(m,idProfil){
   if(!m||typeof idProfil!=='string')return false;
   const profil=m.recruteur?.retours?.flatMap(r=>r.profils||[]).find(p=>p.id===idProfil);
+  if(!profil)return true;
   return !!profil&&!m.roster?.some(f=>f.id===idProfil)&&!m.exterieur?.some(f=>f.id===idProfil);
 }
