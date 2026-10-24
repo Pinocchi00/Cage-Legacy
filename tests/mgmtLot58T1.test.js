@@ -29,3 +29,9 @@ test('Monde lot 58 T1 — le joueur peut attendre après le renvoi sans changer 
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');m.offres=[];mgmtOffresCreer(m);const org=m.org;const attendu=mgmtOffresAttendre(m);return {attendu,refusees:m.offres.every(o=>o.refuse),orgIdentique:m.org===org,poste:!!m.poste}})())`));
   assert.deepEqual(r,{attendu:true,refusees:true,orgIdentique:true,poste:true});
 });
+
+test('Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le contrat de Split',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);const org=m.org;m.poste.conf=0;m.poste.obj.forEach(o=>{o.e='cours';});m.offres=[];mgmtOffresAttendre(m);const refusees=m.offres.every(o=>o.refuse);m.poste.conf=4;m.poste.obj.forEach(o=>{o.e='tenu';});const bilan=mgmtPosteBilan(m),renouvele=mgmtPosteRenouveler(m,bilan.issue);return {refusees,org:m.org===org,issue:bilan.issue,renouvele:!!renouvele,saison:m.poste.saison}})())`));
+  assert.deepEqual(r,{refusees:true,org:true,issue:'prolonge-augmente',renouvele:true,saison:2});
+});
