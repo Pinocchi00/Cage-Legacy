@@ -201,3 +201,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications : `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node --test tests/mgmtLot54T1.test.js` (30/30), `node tools/verif-versions.js origin/main` et ESLint passent.
 - Capture post-correction de `lendemainSuite` : chevauchements 0, textes sous 22px 0, mais quatre débordements demeurent (`14ᵉ → 24ᵉ`, `chez Split`, nom et division). Gros blocs 16,1 %. La tentative n'a donc pas atteint le critère visuel complet; la disposition plus verticale est un écart de maquette et doit être reprise, non tenue pour une solution finale.
 - Aucun changement sauvegarde/mécanique. Fichiers de configuration locaux et `sw.js` exclus du commit.
+
+### Reprise 31 — tentative de correction des mouvements — 24/10/2026
+
+- Guide de capture relu et outil relancé sur les deux écrans. `lendemain` : aucun chevauchement, aucun texte sous 22 px, aucun débordement ; moyen 25,9 %, gros blocs 18,4 %. `lendemainSuite` : aucun chevauchement ni texte sous 22 px, mais le contrôle continue de signaler quatre débordements (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), moyen 22,7 %, gros blocs 16,9 %.
+- Tentative dans `ui-cadre.css` : retour à une présentation horizontale des mouvements, plus proche des trois colonnes de la planche, avec colonnes rétrécissables et retours à la ligne. Cache CSS monté. Cette tentative ne résout pas les quatre débordements sur la suite ; critère visuel 4 encore non satisfait.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7. `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Aucun changement de données ou de sauvegarde.
+- Questions pour Anthony : aucune. Écart de rendu restant honnêtement déclaré : quatre débordements détectés dans la colonne des mouvements de `lendemainSuite`, malgré zéro chevauchement et zéro texte sous 22 px. Captures régénérées par l'outil.
