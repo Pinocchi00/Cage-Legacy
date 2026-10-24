@@ -13,9 +13,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
-- Travail repris : `mgmt-organisations.js` expose `mgmtGuerreClassement(m)` comme une porte sur `mgmtOrgClassement(m)` (les quatre rangs existants), avec les organisations et leurs identités, les voisins de Split et un champ de mouvement calculé à partir de `m.guerre.classementPrecedent`.
-- Test ajouté : `tests/mgmtLot57T1.test.js`, intitulés « Monde lot 57 T1 — le classement de guerre relie les huit rangs existants » et « Monde lot 57 T1 — le classement est déterministe ». Vérification ciblée : 2/2 réussis.
-- `package.json` a des alias dédiés `test:lot57t1` et `test:watch:lot57t1`, mais le fichier n'est pas ajouté aux listes principales `test` et `test:watch` (contrôle littéral encore faux).
-- Non réalisés : écran `UniGuerre`, mouvements de classement persistés / phrase `relu:false`, effets de fin d'année et annonces, essais sur trois années, cas de sauvegarde/empreintes/styles/échappement et test de plafond.
-- Vérifications lors de la reprise : `node --test tests/mgmtLot57T1.test.js` passe (2/2). L'audit `node tools/verif-versions.js origin/main` signale quatre écarts préexistants de la base lot 45 : `mgmt-bureau.js`, `mgmt-matchmakers-data.js`, `mgmt-orgs-agissent.js`, `mgmt-rivalite-orgs.js`. Ils ne sont pas inclus ici.
-- Questions pour Anthony : aucune nouvelle question de spécification identifiée ; cette reprise est incomplète et ne satisfait donc pas le critère de fin.
+- `mgmt-organisations.js` repris de l'état antérieur : `mgmtGuerreClassement(m)` expose la porte vers `mgmtOrgClassement(m)`, les huit identités et les voisins de Split.
+- `mgmt-guerre-ecran.js` ajouté : vue de classement, rivalité préexistante du lot 45 et indications sur les duels. `ui-cadre.css` porte les styles `gu3-`; accès depuis Organisation et Accueil. Écart à la maquette : écran simplifié, pas toutes les valeurs typographiques/positions du dessin et l'évolution reste le nombre (aucune phrase circonstanciée `relu:false`).
+- `tests/mgmtLot57T1.test.js` porte trois tests intitulés « Monde lot 57 T1 — le classement de guerre relie les huit rangs existants », « Monde lot 57 T1 — le classement est déterministe » et « Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels sans injection ». Ils passent (3/3).
+- Les effets de fin d'année (palier, budget, attrait agents libres, confiance et presse), les annonces Accueil/presse, les simulations sur trois années, les empreintes d'ancienne partie, la sauvegarde facultative/réparée et le test de plafond ne sont pas implémentés. Pas de modification du format sauvegarde.
+- `package.json` conserve ses alias dédiés mais le test n'est pas intégré aux scripts principaux `test` et `test:watch` (contrôle littéral faux). Test lent `mgmtReleveReduit.test.js` non lancé.
+- Vérifications : `node --test tests/mgmtLot57T1.test.js` passe. `node tools/verif-versions.js origin/main` ne relève que quatre écarts de base lot 45 (`mgmt-bureau.js`, `mgmt-matchmakers-data.js`, `mgmt-orgs-agissent.js`, `mgmt-rivalite-orgs.js`), laissés hors périmètre. ESLint ciblé passe pour les fichiers JS de l'écran et ses points d'accès.
+- La reprise est partielle et ne satisfait pas le critère de fin.

@@ -2,6 +2,8 @@
 /* ==== [ANCRE: TEST_MONDE_LOT57_T1_CLASSEMENT] — Monde lot 57 T1 ==== */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 
 function partie(){
@@ -31,4 +33,19 @@ test('Monde lot 57 T1 — le classement est déterministe',()=>{
     const code=`JSON.stringify(mgmtGuerreClassement(G.mgmt))`;
     assert.equal(a.eval(code),b.eval(code));
   }finally{a.close();b.close();}
+});
+
+test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels sans injection',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt; m.guerre={ev:[],rival:null,depuis:0}; const rows=mgmtGuerreClassement(m),id=rows.find(x=>!x.estSplit).id; m.guerre.ev=[{c:m.cycle,o:id,t:'pique',x:null,p:8}]; mgmtRivaleMettreAJour(m); const html=scr_mgmt_guerre(); return JSON.stringify({html,screen:SCREENS.mgmt_guerre()});})()`));
+    assert.match(result.html,/LE CLASSEMENT DES HUIT/);
+    assert.match(result.html,/TA RIVALE DU MOMENT/);
+    assert.match(result.html,/Juste devant/);
+    assert.equal(result.html,result.screen);
+    assert.match(result.html,/&lt;|SPLIT/);
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    const classes=[...new Set([...result.html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('gu3')))];
+    for(const c of classes) assert.match(css,new RegExp('\\.'+c+'(?:[ .:{,#]|\\s*\\{)'));
+  }finally{w.close();}
 });
