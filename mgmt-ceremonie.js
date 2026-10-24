@@ -81,8 +81,15 @@ function scr_mgmt_ceremonie(){
     const rang=bilan&&Number.isFinite(Number(bilan.rang))?Number(bilan.rang):null;
     const nomsClassement=Array.isArray(classement)?classement.map(o=>mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')).join(', '):'';
       const ordinal=['','PREMIÈRE','DEUXIÈME','TROISIÈME','QUATRIÈME','CINQUIÈME','SIXIÈME','SEPTIÈME','HUITIÈME'][rang]||'—';
-     const palier=typeof mgmtPaliersCalculer==='function'?mgmtPaliersCalculer(m):null,effets=palier&&palier.effets||{};
-      const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${rang===null?'—':mgmtCeremonieEchapper(rang+'e')}</strong><section><h2>SPLIT FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Cinquième au premier jour</p></section></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul><li>Diffuseur : palier ${mgmtCeremonieEchapper(effets.diffuseur??0)}/3.</li><li>Budget du recruteur : palier ${mgmtCeremonieEchapper(effets.recruteur??0)}/3.</li><li>Agents libres : palier ${mgmtCeremonieEchapper(effets.agents??0)}/3.</li><li>Salles : palier ${mgmtCeremonieEchapper(effets.salle??0)}/3.</li></ul></article></section>`;
+       const palier=typeof mgmtPaliersCalculer==='function'?mgmtPaliersCalculer(m):null,effets=palier&&palier.effets||{};
+       const niveau=cle=>Math.max(0,Math.min(3,Number.isFinite(Number(effets[cle]))?Number(effets[cle]):0));
+       const listeEffets=[
+         `Diffuseur · ${niveau('diffuseur')} % de bonus aux droits`,
+         `Recruteur · −${niveau('recruteur')} % sur le coût des missions`,
+         `Agents libres · attrait de classement, palier ${niveau('agents')}/3`,
+         `Salles · −${niveau('salle')} % sur les frais de salle`
+       ].map(x=>`<li>${mgmtCeremonieEchapper(x)}</li>`).join('');
+       const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${rang===null?'—':mgmtCeremonieEchapper(rang+'e')}</strong><section><h2>SPLIT FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Cinquième au premier jour</p></section></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul>${listeEffets}</ul></article></section>`;
       const body=`<main class="ce3-ecran"><header class="ce3-entete"><div class="ce3-entete-gauche"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p></div><strong><b>31 DÉCEMBRE</b><span>CAGE HEBDO</span></strong></header><section class="ce3-grille">${cards}</section>${bilanHtml}</main>`;
    return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['R'],t:'Revoir le combat'},{ks:['F'],t:'Sa fiche'},{ks:['Entrée'],t:'Le bilan du patron'},{ks:['Échap'],t:'Accueil'}]});
 }

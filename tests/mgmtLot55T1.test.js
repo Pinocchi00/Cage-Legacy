@@ -380,7 +380,7 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une 
   const rendu=c.scr_mgmt_ceremonie();
   assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,5,'la planche garde ses cinq cartes');
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
-  for(const effet of ['Diffuseur : palier 2/3','Budget du recruteur : palier 1/3','Agents libres : palier 2/3','Salles : palier 1/3']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
+  for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();
