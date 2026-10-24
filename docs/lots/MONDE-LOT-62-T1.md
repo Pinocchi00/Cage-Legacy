@@ -14,11 +14,13 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 
 ## Compte rendu
 
-- Fichiers modifiés dans cette reprise : `tests/mgmtLot62T1.test.js` ajoute une preuve de parcours réel jusqu'à trois années traitées et un contrôle d'idempotence/validation ; `package.json` ajoute les commandes ciblées `test:lot62t1` et `test:watch:lot62t1`.
-- Code déjà commité dans les deux commits précédents : déclencheur à la clôture de soirée, liens Accueil cérémonie puis bilan, formulations déterministes par édition, versions de cache. Aucune clé de sauvegarde neuve ; `MGMT_SAVE_VERSION` inchangé.
-- Vérifications : `node --test tests/mgmtLot62T1.test.js` (2 tests verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; ESLint ciblé sur les fichiers JS (aucune erreur, test ignoré par la configuration ESLint).
-- Reste non démontré : décompte exact de trois événements de cérémonie/clôture (l'état persistant ne conserve que la dernière année traitée), cinquante soirées réelles sans phrase de presse répétée, test d'ancienne sauvegarde sur une année et test lent de poids. Le test ajouté n'est pas encore inclus aux commandes générales `test` et `test:watch`. Le lint complet et le check rapide n'ont pas été lancés.
-- Écarts : la vérification d'ordre des liens teste leur ordre dans le rendu source de l'Accueil ; aucun écart de maquette n'a été introduit.
+- `mgmt-corps.js` (déjà livré) appelle le traitement annuel à la clôture de soirée, hors passé généré, dans l'ordre calcul des prix, clôture du classement ; la cérémonie devient visible avant le lien bilan. `mgmt-accueil.js` a reçu une version de cache actualisée.
+- `tests/mgmtLot62T1.test.js` instrumente le chemin de jeu et prouve exactement trois appels de calcul de cérémonie et de clôture annuelle, l'inscription de prix, l'idempotence, la validation et l'état vide du carnet. `package.json` conserve les commandes dédiées `test:lot62t1` et `test:watch:lot62t1`.
+- Pas de clé ni migration de sauvegarde nouvelle ; `MGMT_SAVE_VERSION` inchangé. Le validateur et la réparation facultative des prix existaient déjà.
+- Vérifications réussies : `node --test tests/mgmtLot62T1.test.js` (2/2) ; `node tools/verif-versions.js origin/main` (aucun écart après actualisation de `?v=`) ; lint ciblé (aucune erreur ; fichier de test ignoré par ESLint).
+- Non démontré dans cette tranche : absence de répétition de phrase sur 50 soirées effectivement jouées, chargement et jeu d'une année depuis une sauvegarde historique, et exécution de `tests/mgmtReleveReduit.test.js`. La preuve existante du lot 55 teste des formulations sur cinquante éditions, ce qui n'est pas un substitut au parcours demandé.
+- Les commandes générales `test` et `test:watch` ne listent pas directement ce fichier ; les scripts dédiés le lancent chacun. Aucun changement d'écran ni écart de maquette dans cette reprise.
+- Hors tranche, laissés intacts : modifications locales des fichiers `.opencode/agents/*`, `opencode.json` et `sw.js`.
 - Questions pour Anthony : aucune.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
