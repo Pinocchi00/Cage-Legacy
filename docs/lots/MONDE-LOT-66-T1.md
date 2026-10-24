@@ -18,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 21 — capture et vérifications — 24/10/2026
+
+- État à la reprise : branche `fid-lendemain`, HEAD `e3b29d57`; l'implémentation et les tests de la tranche sont déjà commités. Modifications `.opencode/agents/*`, `opencode.json` et `sw.js` déjà présentes : laissées intactes et hors tranche.
+- Lu le guide capture via Python (le chemin externe n'est pas accessible au lecteur de fichiers) et lancé `shoot.js` séparément à 1920×1080. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, `grosBlocs=22,5 %`, `moyen=28,5 %`. `lendemainSuite` : chevauchements 0, textes sous 22 px 0, `grosBlocs=17,2 %`, `moyen=22,6 %`, quatre débordements de mouvements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »). Images comparatives générées sous `C:/Users/antho/AppData/Local/Temp/shots/`; non inspectées directement.
+- `node --test tests/mgmtEcranLendemain.test.js` passe 7/7. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Captures et mesures des polices calculées directement par JavaScript non réalisées dans cette reprise.
+- Pas de changement de mécanique, données ou sauvegarde. Les trois noms ont dans le CSS terminal les tailles 80/68 px, cartes 285 px; toutefois le comparateur montre que le seuil visuel `grosBlocs≤18 %` du contrôle de reprise n'est pas satisfait pour `lendemain`, et les libellés de mouvements de la suite débordent encore. Ces écarts ne sont pas déclarés résolus; code fonctionnel livré antérieurement reste inchangé.
+- Fichiers modifiés dans cette reprise : cette fiche uniquement (résultats honnêtes de capture et tests). Pas de nouveau test ni migration. Questions pour Anthony : aucune.
+
 ### Reprise 6 — remontée d’échelle et captures — 24/10/2026
 
 - État initial : branche `fid-lendemain`, HEAD `72fd45be`; aucun changement local de fichier de tranche. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` demeurent hors périmètre et n’ont pas été ajoutées.
