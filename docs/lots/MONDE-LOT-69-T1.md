@@ -300,6 +300,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test ciblé et audits : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe.
 - Aucun code fonctionnel nouveau ni migration. Critères encore ouverts : écart visuel du choc, captures/mesures du reste des écrans, choc mono-affiche au lieu des trois affrontements de la planche, et parcours contrat-bilan avec rechargement strict. Pas de `TOUT_EST_FINI` revendiqué.
 
+### Reprise 24/10 — libellé visible des affiches choc
+- `mgmt-ecran-poste.js` rend maintenant « CHAMPIONNE CONTRE CHAMPIONNE » comme titre visible et associé à la section des affiches (auparavant, le texte n'existait qu'en `aria-label`, invisible à l'écran).
+- `ui-cadre.css` ajoute le style dédié du titre et réserve sa rangée au-dessus des trois affiches ; `index.html` porte les versions cache incrémentées via `node tools/_bump.js`.
+- `tests/mgmtLot69T1.test.js` vérifie la présence de ce titre visible. Test ciblé : 4/4 réussi. `node tools/verif-versions.js origin/main` et ESLint complet passent.
+- Capture choc refaite à 1920×1080 : écran affiché, aucun chevauchement, aucun texte sous 22 px, aucun débordement ; `grosBlocs=25.3%`, donc toujours au-dessus de la cible ≤20%. Capture image non ouverte ici.
+- Pas de migration. Les autres écarts demeurent : comparaisons visuelles ouvertes, capture dédiée arrivée, chevauchement bilan déjà rapporté et parcours contractuel complet tel qu'exigé non démontré. Ces critères ne sont pas déclarés terminés.
+
 ### Reprise 39
 - État de départ : branche `fid-choc`, HEAD `7b50b1fe`. Les seuls changements en attente sous `.opencode/agents/` et `opencode.json` sont des changements utilisateur et restent exclus.
 - Tests ciblés relancés : `node --test tests/mgmtLot69T1.test.js` passe (4/4). `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).

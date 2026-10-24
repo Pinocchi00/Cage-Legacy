@@ -2013,6 +2013,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-fight>.ch3-paire{padding-inline:14px}
 .ch3-paire .ch3-side b{font-size:26px}
 .ch3-paire .ch3-side{gap:4px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_AFFICHE_TITRE] — Monde lot 69 T1 ====
+   Le libellé de la section d'affiches est visible, pas seulement annoncé aux lecteurs d'écran. ==== */
+.ch3-fight{grid-template-rows:28px repeat(3,minmax(0,1fr))}
+.ch3-fight-heading{grid-column:1/-1;margin:0;padding:4px 14px;background:#121010;color:#E9E6E1;font:800 22px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
 /* ==== [ANCRE: MONDE_LOT69_T1_CHOC_FIDELITE_AFFICHE] — Monde lot 69 T1 ====
    Les noms et médaillons reprennent les tailles explicites de la planche UniChoc. ==== */
 .ch3-screen{grid-template-rows:64px minmax(0,1fr)}
