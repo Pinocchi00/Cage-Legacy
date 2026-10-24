@@ -25,6 +25,28 @@ test('Monde lot 63 T1 — le calcul reste pur, borné et déterministe sur une v
   }finally{w.close();}
 });
 
+test('Monde lot 63 T1 — l’après ne répète pas une formulation pour un combattant sur cinquante soirées',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261024);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;return JSON.stringify(Array.from({length:50},(_,i)=>mgmtLendemainApres(m,m.lastEvent.cycle+i+1)).flat().map(x=>x.texte))})()`));
+    assert.ok(r.length>0);
+    assert.equal(new Set(r).size,r.length);
+  }finally{w.close();}
+});
+
+test('Monde lot 63 T1 — une ligne de l’après échappe le nom injecté en HTML',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261024);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt,f=m.hist.find(t=>t&&t.c===m.lastEvent.cycle);if(!f)return JSON.stringify({});f.a.name='<img src=x>';m.facts.push({k:'discours',c:m.lastEvent.cycle,a:f.a.id,target:f.b.id});return JSON.stringify({line:mgmtLendemainApres(m,m.lastEvent.cycle+1).map(x=>x.texte).join(' '),safe:esc('<img src=x>')})})()`));
+    if(r.line.includes('img')) assert.ok(!r.line.includes('<img'));
+    assert.equal(r.safe,'&lt;img src=x&gt;');
+  }finally{w.close();}
+});
+
 test('Monde lot 63 T1 — la suite du lendemain montre les mouvements des autres organisations',()=>{
   const w=newGameWindow({runMain:true});
   try{
