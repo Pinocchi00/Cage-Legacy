@@ -35,6 +35,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
     w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
     for(const texte of ['SPLIT','CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+    assert.match(choc,/<span class="mf-k">Échap<\/span><span>Répondre plus tard<\/span>/);
+    assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
+    assert.match(choc,/<span class="mf-k or">Entrée<\/span><span>Accepter<\/span>/);
+    assert.match(choc,/ch3-vs/);
     w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
     const discours=w.eval(`scr_mgmt_discours()`);
     for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
