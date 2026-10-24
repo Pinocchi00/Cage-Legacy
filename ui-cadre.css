@@ -1995,6 +1995,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-paire .ch3-side b{font-size:32px}
 .ch3-paire .ch3-category{display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px}
 .ch3-paire .ch3-category .ch3-vs{display:flex;width:34px;height:34px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:22px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ENTETE_UNIQUE] — Monde lot 69 T1 ====
+   mfEcran porte déjà le titre et l'échéance de la planche. Le contenu commence
+   dessous : pas de second bandeau superposé aux pièces communes. ==== */
+.ch3-screen{top:128px;height:856px;grid-template-rows:56px minmax(0,1fr);gap:14px}
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}

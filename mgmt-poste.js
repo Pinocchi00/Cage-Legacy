@@ -152,7 +152,7 @@ function mgmtChocAnnee(m){
    Les affiches restent limitées aux catégories où les deux organisations ont
    un champion réel ; leur ordre suit le roster local, de façon déterministe. */
 function mgmtChocPaires(m,orgId){
-  const org=m&&m.orgs&&m.orgs[orgId],ids=mgmtChampionIds(m||{}),adverses=mgmtChampionIds({roster:org&&org.roster||[]});
+  const org=m&&m.orgs&&m.orgs[orgId],ids=mgmtChampionIds(m||{}),adverses=mgmtChampionIds(org||{});
   const prises=new Set(),paires=[];
   for(const a of m&&m.roster||[]){
     if(!a||!ids.has(a.id)||prises.has(a.div))continue;
@@ -172,7 +172,7 @@ function mgmtChocProposition(m){
   const meilleure=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,rank:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.rank>=0).sort((a,b)=>a.rank-b.rank)[0];
   if(!meilleure)return null;
   const partenaires=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(rangs.find(x=>x.id===o.id)||{}).rang||8})).filter(x=>{
-    const c=(m.orgs[x.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[x.o.id].roster||[]}).has(f.id));
+    const c=(m.orgs[x.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds(m.orgs[x.o.id]).has(f.id));
     return !!c;
   }).sort((a,b)=>a.r-b.r);
   if(!partenaires.length)return null;
@@ -181,7 +181,7 @@ function mgmtChocProposition(m){
   if(!stream)return null;
   const candidat=partenaires.find(({r})=>stream()<MGMT_CHOC_PROPOSITION_PAR_RANG[Math.max(0,Math.min(7,r-1))]);
   if(!candidat)return null;
-   const adverse=(m.orgs[candidat.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[candidat.o.id].roster||[]}).has(f.id));
+   const adverse=(m.orgs[candidat.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds(m.orgs[candidat.o.id]).has(f.id));
    if(!adverse)return null;
    const paires=mgmtChocPaires(m,candidat.o.id);
    const premiere=paires[0];
@@ -204,7 +204,7 @@ function mgmtChocProposer(m,orgId){
   const champion=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,r:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.r>=0).sort((a,b)=>a.r-b.r)[0];
   const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId&&o.id!==active&&m.orgs&&m.orgs[o.id]);
   if(!champion||!org)return false;
-  const adversaire=(m.orgs[org.id].roster||[]).find(f=>f&&f.div===champion.f.div&&mgmtChampionIds({roster:m.orgs[org.id].roster||[]}).has(f.id));
+  const adversaire=(m.orgs[org.id].roster||[]).find(f=>f&&f.div===champion.f.div&&mgmtChampionIds(m.orgs[org.id]).has(f.id));
   if(!adversaire)return false;
   const annee=mgmtChocAnnee(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
    const paires=mgmtChocPaires(m,org.id);
