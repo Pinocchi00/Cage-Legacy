@@ -1144,6 +1144,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .cr3-step.cr3-next{border:2px solid #F0B220}
 .mf-ancien .cr3-effects{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .mf-ancien .cr3-label{padding:7px;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1 var(--mgmt-font-body)}
+.mf-ancien .cr3-track{display:flex;flex-direction:column;gap:5px;min-height:58px;padding:9px;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1.1 var(--mgmt-font-body)}
+.mf-ancien .cr3-track b{color:#F0B220;font:800 28px/1 var(--mgmt-font-display)}
+.mf-ancien .cr3-track span{color:var(--mgmt-secondary);font:600 22px/1.15 var(--mgmt-font-body)}
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
 .mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}

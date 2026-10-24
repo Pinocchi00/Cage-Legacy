@@ -22,9 +22,11 @@ test('Croissance — les franchissements sont publiés une seule fois et restent
 
 test('Croissance — les classes cr3 de l’écran ont des règles dédiées et aucun petit texte',()=>{
   const win=newGameWindow({runMain:true});
-  const r=win.eval(`(()=>{setSeed(7);CL.mgmtEnter(1);CL.go('mgmt_organisation'); const html=document.getElementById('app').innerHTML; const classes=[...html.matchAll(/class="([^"]*cr3-[^"]*)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('cr3-'));return {classes,screen:G.screen};})()`);
+  const r=win.eval(`(()=>{setSeed(7);CL.mgmtEnter(1);CL.go('mgmt_organisation'); const html=document.getElementById('app').innerHTML; const classes=[...html.matchAll(/class="([^"]*cr3-[^"]*)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('cr3-'));return {classes,html,screen:G.screen};})()`);
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   assert.ok(r.classes.length>0); for(const c of new Set(r.classes)) assert.ok(css.includes('.'+c),c+' doit avoir une règle');
+  for(const libelle of ['LES SALLES','LE DIFFUSEUR','LE RECRUTEUR','LES AGENTS LIBRES']) assert.ok(r.html.includes(libelle),`piste absente : ${libelle}`);
+  assert.match(r.html,/Popularité\s+[0-9]+\s+et rang\s+[0-9]+ ou mieux|Le sommet atteint/);
 });
 
 test('Croissance — chaque palier documente un effet borné et une annonce distincte',()=>{
