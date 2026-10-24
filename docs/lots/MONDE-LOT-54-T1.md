@@ -219,3 +219,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification relancée : `node --test tests/mgmtLot54T1.test.js` passe 24/24, y compris le chemin réel de soirée et le cas 13-1 contre le n°1. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` préexistantes restent étrangères à cette tranche et exclues.
 - Limites encore constatées après inspection des deux planches et du code : composition active simplifiée au regard des valeurs exactes, famille T3 non couverte par des faits existants pour toutes les situations demandées, et tests actuels ne démontrant pas une mémoire éditoriale historique persistante. Les exigences non couvertes ne sont pas réputées terminées. Pas de nouvelle donnée sauvegardée ; `MGMT_SAVE_VERSION` inchangé.
 - La branche ne contenait aucune modification de production de la tranche à reprendre. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
+
+### Reprise — réaction de rivalité contextualisée (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : lorsqu'un fait `rivalite` de la soirée existe, le message T3 nomme désormais les deux combattants du fait, et aucun message de rivalité n'est rendu si le rival ne peut pas être résolu dans le roster. Le cache JS a été monté.
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — une rivalité enregistrée nomme bien les deux combattants ». Le test ciblé passe 26/26 ; `test` et `test:watch` référencent déjà le fichier.
+- Cette reprise améliore le lien aux faits, sans prétendre régler les limites restantes : fidélité dimensionnelle exhaustive des deux maquettes, toutes les familles sociales/interorganisationnelles alimentées par leurs systèmes réels, et mémoire anti-répétition persistante au-delà du suffixe temporel. Aucune nouvelle clé de sauvegarde. Les autres changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangers à la tranche et exclus.

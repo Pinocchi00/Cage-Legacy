@@ -309,6 +309,13 @@ function mgmtLendemainApres(m,semaine){
       if(!demande) continue;
       const cible=mgmtFighterById(m,demande.target);
       texte=`Après sa demande, ${nom} veut une revanche${cible?' contre '+cible.name:''}.`;
+    } else if(item.famille==='rivalité'){
+      const rivalite=faits.find(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id));
+      if(!rivalite) continue;
+      const rivalId=rivalite.a===f.id?rivalite.b:rivalite.a;
+      const rival=mgmtFighterById(m,rivalId);
+      if(!rival) continue;
+      texte=`La rivalité entre ${nom} et ${rival.name} se poursuit après leur combat.`;
     }
     result.push({famille:item.famille,texte:`${texte} (semaine ${semaine})`,relu:false});
   }
