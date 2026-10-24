@@ -230,7 +230,7 @@ function mgmtLendemainMomentsCompletsHtml(m){
   const rest=picks.map(s=>{const t=hist[s.c],a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
     const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
     const label=s.type==='surprise'?'LA SURPRISE':(['ko','sub','stop'].includes(t.family)||/ko|soumission|arrêt/i.test(mgmtLendemainMethode(t))?'LA FINITION':Number.isFinite(Number(t.rounds))&&Number(t.rounds)>=5?'LA GUERRE':'LE COMBAT');
-    return `<article class="ld3-moment"><div class="ld3-label">${label}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+    return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
   }).join('');
   return html+rest;
 }

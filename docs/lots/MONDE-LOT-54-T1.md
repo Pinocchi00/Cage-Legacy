@@ -177,3 +177,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Relecture des sections P7/P8 et des deux planches. `node --test tests/mgmtLot54T1.test.js` passe 22/22 ; les tests couvrent déjà le chemin de génération réelle, le cas 13-1 contre le n°1, les trois colonnes de la suite, les styles dédiés, la lisibilité, D1 et le test des 50 semaines.
 - Les écarts de complétude subsistent : les deux compositions actives ne reproduisent pas encore toutes les valeurs et contenus des maquettes ; la logique de l'après ne fournit pas encore toutes les réactions conditionnées aux faits (notamment discours/interpellations et autres organisations). La présence d'un catalogue générique ne suffit pas à prouver ces critères. Les audits versions/lint ne sont pas relancés dans cette passe.
 - Aucun changement de production effectué dans cette passe de validation. Pas de nouvelle clé de sauvegarde ni de migration. La tranche ne peut pas être déclarée terminée tant que les cases 1 et 3 restent incomplètes.
+
+### Reprise suivante — 24/10/2026
+
+- `mgmt-ecran-lendemain.js` : le libellé de catégorie des cartes de moment de complément est désormais échappé avec `esc()` comme les autres données rendues.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 22/22 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé sur le fichier de production passe. Le cache du script est monté.
+- Aucun nouvel état de sauvegarde. Les limites des cases 1 et 3 restent les suivantes : reproduction complète de toutes les valeurs/layouts de planche, contextualisation de toutes les familles T3 aux faits et mémoire éditoriale stricte anti-répétition sur 50 soirées. Ces critères ne sont pas déclarés achevés.
+- Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` étrangères à la tranche, exclues.
