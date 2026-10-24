@@ -170,6 +170,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 - Après accès au guide via l'environnement shell, capture du lendemain relancée : `grosBlocs` 20,4 % avec flex `.72`, puis 19,5 % après réduction à `.70` ; `moyen` 24,9 %. La suite : `grosBlocs` 18,8 %, `moyen` 23,3 %. Les captures `cmp-lendemain.png` et `cmp-lendemainSuite.png` ont été générées par l'outil. Aucune preuve de lecture visuelle des PNG n'est revendiquée ici.
 - `ui-cadre.css` : réglage ciblé de la hauteur relative des moments à `.70` pour atteindre le seuil mesuré de `grosBlocs ≤ 20 %`; version de cache augmentée par `node tools/_bump.js ui-cadre.css`.
+
+### Reprise 8 — contrôle outillé — 24/10/2026
+
+- Confirmé `fid-lendemain`; les commits de la tranche sont en place (HEAD initial `88ba32f2`). Les changements non liés dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont laissés intacts.
+- Guide de capture lu. Captures à 1920×1080 régénérées séparément : `lendemain` chevauchements 0, textes sous 22 px 0, débordements 0, mais `grosBlocs=22,6 %`; `lendemainSuite` chevauchements 0, textes sous 22 px 0, `grosBlocs=17,6 %`, quatre débordements (« Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ », « chez Split »). Les noms de moments restent définis à 80/68 px et les cartes à 285 px; la taille calculée en JavaScript de la scène n'a pas pu être mesurée par cette capture.
+- Une tentative CSS de découpe plus agressive des libellés de mouvements n'a pas changé les alertes de capture et a été retirée pour ne pas dégrader la fidélité à la planche. `_bump.js` a été exécuté pendant cette tentative; le cache CSS reste augmenté.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de données, navigation, moteur ou sauvegarde. Le seuil de gros blocs ≤18 % demandé par cette reprise et les débordements de la suite ne sont pas atteints; conformité visuelle finale non revendiquée.
+- Fichiers concernés à cette reprise : `ui-cadre.css` (aucun changement final conservé), `index.html` (version de cache montée), cette fiche (résultats et écarts). Pas de migration ni de nouveau test. Questions pour Anthony : aucune.
 - Tests après cet ajustement : `mgmtEcranLendemain.test.js` 7/7 et `mgmtLendemainDemo.test.js` 7/7 ; audit `node tools/verif-versions.js origin/main` et ESLint passent.
 - À vérifier au bilan : aucune capture image n'a été ouverte pour jugement visuel des chevauchements. Les indicateurs mesurés sont conformes aux seuils gros blocs ; aucun autre écart identifié.
 
