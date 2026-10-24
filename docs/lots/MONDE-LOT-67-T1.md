@@ -1,5 +1,12 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 51
+
+- Branche `fid-organisation` confirmée. `git status` était propre au départ ; les commits précédents, dont `db27705e`, sont déjà dans l'historique.
+- Revalidation : `node --test tests/mgmtLot55T1.test.js` passe (46/46). Le rapport du dernier passage de capture et les critères qui restent ouverts sont consignés dans les reprises précédentes ; cette reprise n'a pas produit de nouvelle capture ni ouvert visuellement `cmp-ceremonie.png`. Je ne revendique donc pas une vérification visuelle des six prix, de la composition basse ou des autres vues.
+- Aucun fichier applicatif nouveau n'a été modifié : le code testé est déjà commité et aucun changement ciblé dont la fidélité serait démontrée n'est justifié sans le comparatif demandé. Le protocole de capture externe est bloqué par la permission de lecture. Aucun changement de sauvegarde.
+- État honnête : la cérémonie, la scène réelle à lauréats visibles, les seuils de gros blocs et la revue comparative des six écrans ne sont toujours pas validés. Aucune retouche ni capture fictive n'est présentée comme réalisée ; `TOUT_EST_FINI` n'est pas revendiqué.
+
 ## Compte rendu — reprise 49
 
 - Branche `fid-organisation` confirmée ; `git log --oneline -12` montre les livraisons précédentes et l'arbre était propre avant cette reprise. Le protocole `shoot.js` a été lu et lancé pour Cérémonie après une retouche ciblée : le texte de la carte principale passe à 28 px et sa largeur max à 440 px, comme la maquette. `cmp-ceremonie.png` régénéré hors dépôt ; le contrôle rapporte 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=19,3 %` (score moyen 26,7). Le PNG n'a pas été ouvert visuellement par l'outil disponible.
