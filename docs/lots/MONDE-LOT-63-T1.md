@@ -74,6 +74,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise suite à la demande de contrôle inter-lots — 24/10/2026
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Les commits fonctionnels de la tranche sont déjà présents. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et restent hors du commit.
+- Contrôle inter-lots exact demandé : `node --test tests/mgmtLot54T1.test.js tests/mgmtLot63T1.test.js tests/mgmtActualitesEcran.test.js tests/mgmtLot55T1.test.js tests/mgmtLot57T1.test.js tests/mgmtLot48T1.test.js tests/mgmtLot56T1.test.js` passe **130/130**, dont les deux régressions du lot 54 signalées (rivalité enregistrée et non-répétition sur cinquante semaines).
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. La validation de partie neuve et le test de tranche demeurent tels que consignés dans les validations précédentes ; aucun état de sauvegarde ni migration n'a changé.
+- La commande `git merge origin/main` a été tentée mais interdite par la politique d'exécution (`git merge*`). L'intégration de `origin/main` reste au superviseur. Aucun test existant n'a été modifié. Aucun changement fonctionnel n'était nécessaire lors de ce contrôle ; cette entrée consigne les validations demandées.
+- Fichiers de production livrés antérieurement : `mgmt-apres-data.js` (catalogue de dix familles, formulations `relu:false`) et `mgmt-ecran-lendemain.js` (calcul, accueil/presse et mouvements inter-organisations). Test livré : `tests/mgmtLot63T1.test.js`, inscrit aux deux scripts dans `package.json`. Pas de question nouvelle pour Anthony.
+
 ### Reprise 9 — contrôle après intégration demandée (24/10/2026)
 
 - Branche confirmée : `p8-apres`. Historique contrôlé ; tous les fichiers fonctionnels et tests de la tranche sont déjà commités. `git status` ne montre que les modifications préexistantes des agents locaux, `opencode.json` et `sw.js`, étrangères à cette tranche.
