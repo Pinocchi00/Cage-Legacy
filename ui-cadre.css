@@ -2344,3 +2344,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.72fr) minmax(0,.72fr);column-gap:8px}
 .ld66-suite .ld3-move>.ld66-move-identity,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_FIDELITE_ECHELLE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{min-width:0;min-height:0;overflow:hidden}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:.82}
+.mf-contenu.ld66-screen .ld66-lower{min-height:0;grid-template-columns:1.25fr 1fr .9fr}
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [FIN ANCRE] ==== */
