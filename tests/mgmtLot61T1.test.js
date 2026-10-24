@@ -3,6 +3,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 
 test('Monde lot 61 T1 — changer d’organisation échange les parties et conserve chaque combattant',()=>{
   const w=newGameWindow({runMain:true});
@@ -32,4 +33,15 @@ test('Monde lot 61 T1 — accepter une offre confirme le départ et montre l’a
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(61);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],salaire:4321}];window.confirm=()=>true;G.mgmt=m;const ok=mgmtOffreAccepter(m,0);return {ok,org:mgmtPredecesseurOrgId(m),screen:G.screen,arrival:document.getElementById('app').textContent.includes('Ton arrivée'),salaire:m.poste.salaire,espoirs:Array.isArray(m.espoirsPropose)}})())`));
   assert.deepEqual(r,{ok:true,org:'garden-of-blood',screen:'mgmt_arrivee',arrival:true,salaire:4321,espoirs:true});
+});
+
+test('Monde lot 61 T1 — une soirée complète se joue après le changement d’organisation',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6101);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOrgChanger(m,Object.keys(m.orgs)[0],{salaire:1234});G.mgmt=m;`);
+    const jouees=jouerSoirees(w,1);
+    const etat=w.eval(`(()=>({valid:validateMgmt(G.mgmt),org:mgmtPredecesseurOrgId(G.mgmt),loaded:!!mgmtParseAndValidate(mgmtSerialiser(G.mgmt))}))()`);
+    assert.equal(jouees,1);
+    assert.deepEqual({...etat},{valid:true,org:'garden-of-blood',loaded:true});
+  }finally{w.close();}
 });
