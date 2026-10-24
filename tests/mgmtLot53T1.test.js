@@ -112,6 +112,18 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — toutes les classes so3 des écrans ont une règle de style',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5312);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const classes=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m),html=[mgmtSoOuvertureHtml(m,p),mgmtSoEntreHtml(m,p,0,0),mgmtSoFinHtml(m,p),mgmtSoResultatSeulHtml(m,p[0])].join(' '),out=new Set();for(const x of html.matchAll(/class="([^"]+)"/g))for(const c of x[1].split(/\\s+/))if(c.startsWith('so3-'))out.add(c);return Array.from(out);})()`);
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    const absentes=Array.from(classes).filter(c=>!new RegExp(`\\.${c.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}[^{}]*\\{`).test(css));
+    assert.deepEqual(absentes,[]);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',()=>{
   const w=newGameWindow({runMain:true});
   try{

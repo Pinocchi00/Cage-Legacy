@@ -277,3 +277,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-soiree-cadre.js`, `ui-cadre.css`, `index.html` (versions), `tests/mgmtLot53T1.test.js` (fin générée par voie réelle), cette fiche.
 - Test ciblé : 16/16 réussis.
 - Écart : la composition centrale de fin reste bâtie sur les panneaux existants plutôt que portée intégralement à la grille `UniSoireeFin`.
+
+### Reprise 38 — audit des classes so3
+
+- Ajout du test « Monde lot 53 T1 — toutes les classes so3 des écrans ont une règle de style ». Il collecte les classes `so3-*` rendues par l'ouverture, l'entre-deux, la fin et le résultat, puis exige un sélecteur CSS pour chacune.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 17/17 réussis.
+- L'audit de classes ne couvre pas les classes préexistantes `mf-*`; elles restent les règles existantes du cadre.
