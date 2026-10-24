@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 59 — correction du lendemain et contrôle des captures — 24/10/2026
+
+- État de départ : branche `fid-lendemain`, HEAD `a1285179`; aucun changement local de code de tranche. Les modifications déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
+- `ui-cadre.css` : resserrement vertical de la liste « Ce que ça change pour toi » pour supprimer son empiètement sur les touches; maintien des noms de moments à 64 px minimum et des cartes à 285 px. Le cache de la feuille de style a été bumpé dans `index.html`.
+- Captures 1920×1080 : `lendemain` après correction, contrôle automatique `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=19,7 %` (`moyen=25,9 %`). `lendemainSuite` : `chevauchements=0`, `textesSous22px=0`, `grosBlocs=16,9 %`, mais quatre débordements subsistent dans les mouvements (« Poids plume féminin », rang, « chez Split », identité). Essai de grille à deux colonnes abandonné car ces alertes persistaient et la disposition s'éloignait des trois valeurs horizontales de la planche; retour au principe à trois colonnes, sans prétendre le débordement résolu. Captures produites par `shoot.js` dans le dossier temporaire `shots`.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). Audit `node tools/verif-versions.js origin/main` et ESLint passent. Aucun test ajouté ou modifié; aucune sauvegarde/migration, mécanique de combat ni donnée touchée.
+- Avant/après : les cartes restent sur la planche et le comparateur confirme un lendemain sans chevauchement après réduction de l'espacement des constats. La suite reste composée en trois colonnes mais conserve quatre alertes de débordement mesurées; conformité visuelle complète non certifiée. `mgmtReleveReduit.test.js` (hors tranche) n'a pas été relancé. Pas d'inspection directe des images revendiquée.
+- Questions pour Anthony : aucune.
+
 ### Reprise 58 — échelle des cartes et nouvelle capture — 24/10/2026
 
 - État de départ : branche `fid-lendemain`, `git status` sans fichier de tranche en attente; les commits fonctionnels sont déjà présents. Seuls agents/configuration et `sw.js` étaient modifiés hors périmètre et laissés intacts.
