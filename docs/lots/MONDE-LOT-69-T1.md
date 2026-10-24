@@ -533,3 +533,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test existant exerce déjà la proposition réelle, navigation `CL.go`, trois paires réelles, programmation, résolveur normal, résultat et bonus majoritaire ; le test du parcours contrat/offre couvre rechargement identique, arrivée, soirée et lendemain.
 - Aucune modification fonctionnelle de tranche n'était en attente en début de reprise. Pas de migration ni de fichier JS/CSS touché. Les modifications utilisateur de configuration restent hors du commit.
 - Écarts persistants honnêtement : cible de gros blocs du choc non atteinte ; aucune mesure comparative nouvelle du bilan/arrivée ni capture dédiée de ces écrans. Pas de `TOUT_EST_FINI` revendiqué.
+
+### Reprise 79 — reproduction de capture et vérifications
+- Reproduction réelle de l'écran choc avec `node "C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js" "C:/Users/antho/Documents/cage-legacy-p69" choc` : la proposition valide s'affiche ; `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.2%` (seuil ≤20 % toujours dépassé).
+- Même outil sur `discours` : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=18.1%`. Pas de nouvelle capture bilan/arrivée dans cette reprise.
+- Vérification ciblée `node --test tests/mgmtLot69T1.test.js` : 4/4 ; `node tools/verif-versions.js origin/main` : aucun écart ; `node_modules/.bin/eslint .` : succès.
+- Les essais temporaires visant à injecter des bilans W-L dans le choc n'ont pas été conservés : les combattants du fixture ne portent pas ces champs de données de façon exploitable et les assertions échouaient. Aucune donnée sportive n'a été supposée. Aucun fichier fonctionnel durablement modifié, aucune migration.
+- Écart restant : seuil de gros blocs choc toujours non atteint et pas de comparaison récente du bilan/arrivée. Les autres résultats métier sont couverts par les tests existants, sans nouvelle capture comparative. Les changements utilisateur hors tranche (`.opencode/agents/`, `opencode.json`) restent exclus. Aucun `TOUT_EST_FINI` revendiqué.
