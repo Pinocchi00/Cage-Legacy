@@ -25,6 +25,10 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Vérifications exécutées : `node --test tests/mgmtLot63T1.test.js` (3/3), `node tools/verif-versions.js origin/main` sans écart, ESLint ciblé sur le fichier de production. Le test lent `tests/mgmtReleveReduit.test.js` et ESLint global ne sont pas relancés.
 - Aucun changement de format de sauvegarde, aucune migration. Pas de question à Anthony ; les manques sont du travail restant et ne sont pas présentés comme achevés.
 
+- Reprise 5 : état Git vérifié (`p8-apres`), commits `e705d1c`, `36448de` et `bb81090` déjà présents. Une vérification d'échappement a été ajoutée au test des mouvements d'organisation, avec un nom d'organisation contenant du markup hostile.
+- Vérifications : `node --test tests/mgmtLot63T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; ESLint ciblé n'a aucun problème de code (seulement avertissement indiquant que le fichier de test est ignoré par configuration).
+- Toujours non conforme au critère de fin : le moteur d'après ne sélectionne pas encore les dix familles sur leurs faits réels, l'anti-répétition sur 50 soirées, les déclencheurs familiaux, les assertions de sauvegarde et le test lent ne sont pas couverts ici. `mgmtLot63T1` reste absent des agrégats `test` et `test:watch` (commandes dédiées présentes). Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et ne sont pas incluses.
+
 - `mgmt-apres-data.js` : début de catalogue de dix familles, trois formulations chacune, marquées `relu:false`.
 - `mgmt-ecran-lendemain.js` : ajout de la porte `mgmtApresCalculer`, pure et déterministe par délégation à la projection préexistante.
 - `mgmt-actualites.js` : ajout d'un libellé et d'une source d'actualité pour les lignes calculées.
