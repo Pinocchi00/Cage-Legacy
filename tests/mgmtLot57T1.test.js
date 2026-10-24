@@ -258,3 +258,12 @@ test('Monde lot 57 T1 — le score global est bien la somme des quatre rangs exi
     for(let i=1;i<result.length;i++) assert.ok(result[i-1].somme<=result[i].somme);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — la ligne de classement sépare les combattants du top 15 et la puissance',()=>{
+  const w=partie();
+  try{
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const html=scr_mgmt_guerre();const split=mgmtGuerreClassement(m).find(x=>x.estSplit);const top=mgmtGuerrePuissanceTop15(m)[split.id]||0;return JSON.stringify({html,top,p:split.niveaux.puissance});})()`));
+    assert.match(r.html,new RegExp(`${r.top} du top 15`));
+    assert.match(r.html,new RegExp(`<span>${r.p}</span>`));
+  }finally{w.close();}
+});

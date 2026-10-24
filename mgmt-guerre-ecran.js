@@ -24,7 +24,7 @@ function scr_mgmt_guerre(){
   if(!m) return scr_mgmt_bureau();
   const rows=mgmtGuerreClassement(m), split=rows.find(x=>x.estSplit), rival=mgmtRivaleDuMoment(m);
   const puissanceTop15=mgmtGuerrePuissanceTop15(m);
-  const lignes=rows.map(x=>`<div class="gu3-ligne${x.estSplit?' gu3-split':''}"><b>${esc(x.rang)}</b><div><strong>${esc(x.nom.toUpperCase())}${x.id===rival?'<i>TA RIVALE</i>':''}</strong><small>${esc(x.ville)} · DEPUIS ${esc(x.annee)}</small></div><span>${esc(x.niveaux.popularite)}</span><span>${esc(x.niveaux.stade.toLocaleString('fr-FR'))}</span><span>${esc(x.niveaux.notoriete)}</span><span>${esc(puissanceTop15[x.id]||0)} du top 15</span><b>${esc(x.mouvement>0?'+'+x.mouvement:x.mouvement<0?String(x.mouvement):'＝')}</b></div>`).join('');
+  const lignes=rows.map(x=>`<div class="gu3-ligne${x.estSplit?' gu3-split':''}"><b>${esc(x.rang)}</b><div><strong>${esc(x.nom.toUpperCase())}${x.id===rival?'<i>TA RIVALE</i>':''}</strong><small>${esc(x.ville)} · DEPUIS ${esc(x.annee)}</small></div><span>${esc(x.niveaux.popularite)}</span><span>${esc(x.niveaux.stade.toLocaleString('fr-FR'))}</span><span>${esc(puissanceTop15[x.id]||0)} du top 15</span><span>${esc(x.niveaux.puissance)}</span><b>${esc(x.mouvement>0?'+'+x.mouvement:x.mouvement<0?String(x.mouvement):'＝')}</b></div>`).join('');
   const raisons=rival?mgmtRivaleRaisons(m,rival).slice(0,3).map(r=>`<li>${esc(r.raison)} · soirée ${esc(r.soiree)}</li>`).join(''):'<li>Aucune rivale ne s’est encore imposée.</li>';
   const maker=rival&&MGMT_MATCHMAKERS[rival];
    const devant=split&&split.duelSplit.devant?mgmtOrgParId(split.duelSplit.devant).nom:'Personne';
