@@ -261,6 +261,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun comparatif `cmp-*.png` n'a été ouvert dans cette reprise ; je n'affirme pas les écarts visuels précis. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Aucun changement hors fiche à commiter.
 - Écart à la fiche : le protocole de capture/ouverture/correction écran par écran demeure non achevé et les cases visuelles 1 à 5 ne sont donc pas validées. Aucun fichier applicatif n'est commité dans cette reprise ; ce compte rendu consigne l'état sans revendiquer `TOUT_EST_FINI`.
 
+### Reprise 34 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. Les changements préexistants `.opencode/agents/*` et `opencode.json` restent hors tranche ; `sw.js` a été rétabli depuis `origin/main` conformément à la consigne.
+- Contrôles disponibles dans l'historique de capture (reprise 32), avant/après : fiche `chevauchements 2 → 0`, `textesSous22px 0`, `debordent []`; recruteur `0,0,[]`; retours `0,0,[]`; semaine `0,0,[]`. Les écrans secondaires demandés par la reprise (accueil, actualités, tonposte, bilan), et arrivée, relevé, chiffres, menu, meilleurs et records n'ont pas de mesure établie. Aucun contrôle/capture n'a été exécuté à nouveau ici ; les nombres historiques ne sont pas assimilés à une validation visuelle.
+- Tests ciblés : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (26/26 verts). `node tools/verif-versions.js origin/main` : aucun écart.
+- État écran par écran : fiche, recruteur, retours, semaine ont les résultats géométriques historiques ci-dessus ; arrivée contrat/espoirs, relevé, chiffres du combat, menu et classements ne disposent pas de contrôle mesuré dans ce rapport. Accueil/Actualités/Ton poste/Bilan : aucun résultat récent. Ouverture des comparatifs et fidélité aux planches non établies.
+- Aucune modification applicative ou migration de sauvegarde dans cette reprise. Écart majeur : la demande de mesure complète des scènes restantes et la validation visuelle écran par écran ne sont pas satisfaites ; pas de `TOUT_EST_FINI`.
+
 ### Reprise 33 du 24/10/2026
 
 - Vérifiés à la reprise : branche `fid-fiches`, tête `e0e438ad`. Aucun fichier de la tranche n'était non committé ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et laissées intactes.
