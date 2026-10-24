@@ -298,6 +298,21 @@ test('Lot 55 T1 — les règles ce3 n’abaissent pas la typographie sous 22 px'
     }
   }
 });
+test('Lot 55 T1 — toute classe réellement rendue par les écrans ce3 possède une règle',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[],defis:[]}};
+  c.mgmtOrgNom=()=> 'Organisation';
+  c.mgmtOrgClassement=()=>[];
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const html=c.scr_mgmt_ceremonie()+c.scr_mgmt_carnet();
+  const classes=new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)));
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  for(const classe of classes){
+    const selecteur=new RegExp(`\\.${classe}(?![\\w-])`);
+    assert.ok([...css.matchAll(/([^{}]+)\{/g)].some(x=>selecteur.test(x[1])),`aucune règle pour .${classe}`);
+  }
+});
 test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};

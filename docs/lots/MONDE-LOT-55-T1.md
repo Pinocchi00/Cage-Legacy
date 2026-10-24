@@ -606,3 +606,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun défaut de code n'a été révélé; aucun changement métier n'est effectué et aucun commit artificiel n'est créé. Le test lent `mgmtReleveReduit` n'a pas été lancé dans cette reprise; `check:rapide` n'est pas lancé conformément au contrôle rapide du superviseur.
 - Limites déjà documentées et toujours pertinentes : le test de sauvegarde ne charge pas une fixture historique complète, et les vérifications ciblées ne certifient ni trois saisons pleines ni la reproduction intégrale des planches et le déclenchement à chaque anniversaire. Aucune modification de format de sauvegarde ni migration.
 - Les seuls fichiers modifiés restent les fichiers d'outillage étrangers mentionnés ci-dessus; ils sont exclus. Aucun nouveau point ouvert pour Anthony.
+
+### Reprise 78
+
+- Ajout du test « Lot 55 T1 — toute classe réellement rendue par les écrans ce3 possède une règle ». Il rend les deux écrans avec leurs options réelles, extrait les classes générées et contrôle qu'un sélecteur CSS les couvre (y compris les règles groupées avec plusieurs sélecteurs).
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (38/38 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert); présence confirmée dans `test` et `test:watch`.
+- Fichier modifié : `tests/mgmtLot55T1.test.js`. Aucun changement de production, de sauvegarde ou migration. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
+- Restent non certifiés, comme précédemment : fidélité intégrale de composition aux planches, cérémonie déclenchée à chaque anniversaire plutôt qu'au terme du contrat, trois saisons complètes jouées, fixture intégrale d'ancienne sauvegarde chargée, test lent `mgmtReleveReduit`. `check:rapide` n'est pas lancé conformément au contrôle superviseur. Ces limites empêchent d'affirmer `TOUT_EST_FINI`.
