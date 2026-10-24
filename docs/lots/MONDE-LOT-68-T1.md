@@ -261,6 +261,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun comparatif `cmp-*.png` n'a été ouvert dans cette reprise ; je n'affirme pas les écarts visuels précis. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Aucun changement hors fiche à commiter.
 - Écart à la fiche : le protocole de capture/ouverture/correction écran par écran demeure non achevé et les cases visuelles 1 à 5 ne sont donc pas validées. Aucun fichier applicatif n'est commité dans cette reprise ; ce compte rendu consigne l'état sans revendiquer `TOUT_EST_FINI`.
 
+### Reprise 33 du 24/10/2026
+
+- Vérifiés à la reprise : branche `fid-fiches`, tête `e0e438ad`. Aucun fichier de la tranche n'était non committé ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et laissées intactes.
+- Tests relancés : `node --test tests/mgmtFicheStats.test.js` (21/21 verts) et `node tools/verif-versions.js origin/main` (aucun écart).
+- Derniers contrôles de scène consignés (reprise 32) : fiche `{chevauchements:0,textesSous22px:0,debordent:[]}`, recruteur `{0,0,[]}`, retours `{0,0,[]}`, semaine `{0,0,[]}`. Avant la correction de la fiche : `{chevauchements:2,textesSous22px:0,debordent:[]}` ; le suivi a été déplacé à droite des onglets. Ces mesures attestent les contrôles géométriques rapportés, pas une comparaison visuelle aux planches.
+- L'outil de capture décrit dans la fiche n'est pas disponible via les outils de cette reprise ; aucun nouveau contrôle n'a été exécuté ni image ouverte. Les scènes accueil, actualites, tonposte et bilan demandées par le contrôle de reprise n'ont donc pas de résultat nouveau. Arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records n'ont pas de contrôle d'écran nouveau non plus.
+- Bilan écran par écran : fiche, recruteur, retours, semaine ont un dernier contrôle sans chevauchement documenté, mais fidélité visuelle exacte non validée ; arrivée, relevé, chiffres, menu et classements restent sans contrôle de capture établi. Pas de nouveau changement applicatif, test ou migration ; aucun bump `?v=` nécessaire.
+- Écart à la fiche : le critère de contrôle `chevauchements:0` n'est pas établi pour tous les écrans demandés et la comparaison visuelle reste incomplète ; tranche non terminée. `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
+
 ### Reprise 32 du 24/10/2026
 
 - Contrôles automatiques de capture avant correction : fiche `{chevauchements:2, textesSous22px:0, debordent:[]}` (palmarès/compteur et poids/bouton SUIVRE). La fiche a été déplacée du bloc bannière à la rangée des onglets ; le premier essai a montré trois recouvrements avec le nom de style, corrigés en contraignant l'onglet, le bouton de suivi et l'aide Tab dans la rangée. Contrôle après correction fiche : `{chevauchements:0, textesSous22px:0, debordent:[]}`.
