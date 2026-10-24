@@ -524,6 +524,8 @@ function validateMgmt(raw){
     }
   }
   if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
+  if(raw.offres!==undefined&&!mgmtOffresValide(raw.offres)) return false;
+  if(raw.choc!==undefined&&!mgmtChocValide(raw.choc)) return false;
   return true;
 }
 
@@ -723,6 +725,8 @@ function mgmtRepair(m){
   if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'offres')&&!mgmtOffresValide(m.offres)) delete m.offres;
+  if(Object.prototype.hasOwnProperty.call(m,'choc')&&!mgmtChocValide(m.choc)) delete m.choc;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
   if(Object.prototype.hasOwnProperty.call(m,'paliersAnnonces')&&(!Array.isArray(m.paliersAnnonces)||m.paliersAnnonces.length>5||new Set(m.paliersAnnonces).size!==m.paliersAnnonces.length||m.paliersAnnonces.some(id=>!MGMT_PALIERS.some(p=>p.id===id)))) m.paliersAnnonces=[];

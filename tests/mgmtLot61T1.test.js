@@ -1,0 +1,53 @@
+"use strict";
+/* ==== [ANCRE: TEST_MONDE_LOT61_T1] — Monde lot 61 T1 ==== */
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
+
+test('Monde lot 61 T1 — changer d’organisation échange les parties et conserve chaque combattant',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);const ids=()=>[...m.roster,...Object.values(m.orgs).flatMap(o=>o.roster)].map(f=>f.id),avant=ids(),avantUniques=new Set(avant),cible=Object.keys(m.orgs)[0],ok=mgmtOrgChanger(m,cible,{salaire:1234}),apres=ids();return {ok,org:mgmtPredecesseurOrgId(m),valid:mgmtMondeVivantValide(m),same:JSON.stringify(avant.slice().sort())===JSON.stringify(apres.slice().sort()),unique:avant.length===avantUniques.size&&apres.length===new Set(apres).size,split:!!m.orgs.split,conf:m.poste.conf}})())`));
+  assert.deepEqual(r,{ok:true,org:'garden-of-blood',valid:true,same:true,unique:true,split:true,conf:2});
+});
+
+test('Monde lot 61 T1 — Split puis retour restaure le roster et le monde valide',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);const roster=m.roster.map(f=>f.id).sort(), cible=Object.keys(m.orgs)[0];const aller=mgmtOrgChanger(m,cible,{salaire:1234}),retour=mgmtOrgChanger(m,'split',{salaire:1234});return {aller,retour,split:mgmtPredecesseurOrgId(m)==='split',roster:JSON.stringify(roster)===JSON.stringify(m.roster.map(f=>f.id).sort()),valid:mgmtMondeVivantValide(m)}})())`));
+  assert.deepEqual(r,{aller:true,retour:true,split:true,roster:true,valid:true});
+});
+
+test('Monde lot 61 T1 — le changement sauvegardé se recharge à l’identique sans tirage RNG',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);const cible=Object.keys(m.orgs)[0];mgmtOrgChanger(m,cible,{salaire:1234});const avant=mgmtSerialiser(m),copie=JSON.parse(avant);return {identique:mgmtSerialiser(copie)===avant,org:mgmtPredecesseurOrgId(copie),rng:!String(mgmtOrgChanger).includes('rnd('),sansOrphelins:mgmtMondeVivantValide(copie)}})())`));
+  assert.deepEqual(r,{identique:true,org:'garden-of-blood',rng:true,sansOrphelins:true});
+});
+
+test('Monde lot 61 T1 — le calendrier de chaque organisation reste en place pendant l’échange',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);const cible=Object.keys(m.orgs)[0],jour=m.cal.jour,agenda=JSON.stringify(m.agenda),calendrier=JSON.stringify(m.orgs[cible].cal);const ok=mgmtOrgChanger(m,cible,{salaire:1234});return {ok,jourInchange:m.cal.jour===jour,agendaPromu:JSON.stringify(m.agenda)===JSON.stringify(m.orgs.split.agenda),calendrierPromu:JSON.stringify(m.cal)===calendrier}})())`));
+  assert.deepEqual(r,{ok:true,jourInchange:true,agendaPromu:true,calendrierPromu:true});
+});
+
+test('Monde lot 61 T1 — accepter une offre confirme le départ et montre l’arrivée de la nouvelle organisation',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(61);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],salaire:4321}];window.confirm=()=>true;G.mgmt=m;const ok=mgmtOffreAccepter(m,0);return {ok,org:mgmtPredecesseurOrgId(m),screen:G.screen,arrival:document.getElementById('app').textContent.includes('Ton arrivée'),salaire:m.poste.salaire,espoirs:Array.isArray(m.espoirsPropose)}})())`));
+  assert.deepEqual(r,{ok:true,org:'garden-of-blood',screen:'mgmt_arrivee',arrival:true,salaire:4321,espoirs:true});
+});
+
+test('Monde lot 61 T1 — une soirée complète se joue après le changement d’organisation',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6101);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOrgChanger(m,Object.keys(m.orgs)[0],{salaire:1234});G.mgmt=m;`);
+    const jouees=jouerSoirees(w,1);
+    const etat=w.eval(`(()=>({valid:validateMgmt(G.mgmt),org:mgmtPredecesseurOrgId(G.mgmt),loaded:!!mgmtParseAndValidate(mgmtSerialiser(G.mgmt))}))()`);
+    assert.equal(jouees,1);
+    assert.deepEqual({...etat},{valid:true,org:'garden-of-blood',loaded:true});
+  }finally{w.close();}
+});
+
+test('Monde lot 61 T1 — une partie sans monde vivant refuse le changement sans altération',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const avant=mgmtSerialiser(m),ok=mgmtOrgChanger(m,'garden-of-blood');return {ok,identique:mgmtSerialiser(m)===avant}})())`));
+  assert.deepEqual(r,{ok:false,identique:true});
+});

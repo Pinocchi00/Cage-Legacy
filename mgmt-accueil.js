@@ -66,12 +66,15 @@ function mgmtAccueilContenu(m){
   const rest=(m.cal&&m.cal.prochaines&&m.cal.prochaines[0])?Math.max(0,m.cal.prochaines[0].jour-(m.cal.jour||0)):null;
   const salle=(infos.lieu&&m.cal&&m.cal.prochaines[0]&&typeof mgmtSalleParId==='function')?mgmtSalleParId(m,m.cal.prochaines[0].salle):null;
   const ou={
-    org, ville:ident?ident.ville:'', annee:ident?ident.annee:null, date:mgmtAccueilDate(m),
+    org, ville:ident?ident.ville:'', annee:ident?ident.annee:null, rang:typeof mgmtPosteRang==='function'?mgmtPosteRang(m):null,date:mgmtAccueilDate(m),
     semaine:Number.isSafeInteger(m.cycle)?m.cycle:1,
     soiree:{nom:org+' Fight Night '+((m.eventsPlayed||0)+1),dans:rest===null?'—':(rest===0?'CE SOIR':'DANS '+rest+' J')},
     /* ==== [ANCRE: ACCUEIL_LIEU_REPRISE] — Monde lot 12 T2 ==== */
     lieu:{nom:(salle?salle.nom:(infos.lieu||'—')).toUpperCase(),sous:[salle&&salle.ville?salle.ville:'',(infos.date||'').toLowerCase()].filter(Boolean).join(', ')},
-    carte:{valeur:carte.main+' / '+carte.sm,sous:carte.sm-carte.main>0?(carte.sm-carte.main===1?'Une place à finir':(carte.sm-carte.main)+' places à finir'):'Carte complète'},
+     carte:{valeur:carte.main+' / '+carte.sm,sous:carte.sm-carte.main>0?(carte.sm-carte.main===1?'Une place à finir':(carte.sm-carte.main)+' places à finir'):'Carte complète'},
+      /* L'audience projetée de la carte est la seule estimation déjà définie
+         par le modèle financier ; on la borne à la capacité de la salle. */
+      preventes:{vendus:null,capacite:salle&&Number.isFinite(salle.capacite)?salle.capacite:null},
   };
   /* Que s'est-il passé ? Les marques allumées du lot 8, une phrase chacune. */
   const passe=[];
@@ -180,9 +183,17 @@ function mgmtAccueilTuile(lib,val,sous){
 }
 function mgmtAccueilBandeau(c,m){
   /* ==== [ANCRE: ACCUEIL_BANDEAU_SOIREE] — Monde lot 12 T2 ==== */
-  const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous);
+  const pres=c.ou.preventes;
+  let vendus=pres.vendus;
+  if(vendus===null&&pres.capacite!==null&&typeof mgmtCardAttraction==='function'&&typeof mgmtEventRecette==='function'){
+    const combats=[...(m.card&&m.card.main||[]).map(f=>({...f,slot:'main'})),...(m.card&&m.card.prelims||[]).map(f=>({...f,slot:'prelim'}))];
+    const attraction=mgmtCardAttraction(m,combats),audience=mgmtEventRecette(attraction,0,0,combats.length,0).audience;
+    vendus=Math.min(pres.capacite,Math.max(0,audience));
+  }
+  const ventes=pres.capacite===null?'—':`${vendus===null?'—':mfNet(vendus)} sur ${mfNet(pres.capacite)} places`;
+  const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous)+mgmtAccueilTuile('LES PRÉVENTES',ventes,'');
   return `<div class="mf-ac-band"><div class="mf-ac-id"><div class="mf-ac-org" style="font-size:${mfCorps(c.ou.org,520,120,60)}px">${esc(mfNet(c.ou.org))}</div>`
-    +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
+    +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')+(Number.isSafeInteger(c.ou.rang)?' · '+c.ou.rang+'e DES HUIT':'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
     +`<div class="mf-ac-tuiles">${tuiles}</div></div>`;
 }
 function mgmtAccueilAttend(m,c,extra=''){
@@ -229,6 +240,25 @@ function mgmtAccueilAilleurs(m,c){
   const rows=c.ailleurs.map(r=>`<div class="mf-ac-al"><div class="mf-ac-ap">${mgmtAccueilParts(m,r.parts)}</div>${r.detail?`<div class="mf-ac-rs">${esc(r.detail)}</div>`:''}</div>`).join('');
   return mfPanneau(mgmtAccueilTitre('ET AILLEURS')+(rows||`<div class="mf-ac-rs">Rien à signaler hors de ${esc(c.ou.org)}.</div>`),'normal','mf-ac-p mf-ac-c3');
 }
+/* ==== [ANCRE: MONDE64_T1_ACCUEIL_SAISON] — Monde lot 64 T1 ==== */
+function mgmtAccueilSaison(m,c){
+  const poste=m.poste;
+  const objectifs=poste&&Array.isArray(poste.obj)?poste.obj.slice(0,3).map(o=>{
+    const valeur=mgmtPosteValeur(m,o),fait=o.e==='tenu'||o.e==='fait';
+    const ratio=o.t==='rang-orgs'?Math.max(0,Math.min(1,(9-valeur)/Math.max(1,9-o.cible))):o.t==='caisse'? (valeur>=o.cible?1:0):o.t==='popularite'?Math.max(0,Math.min(1,valeur/Math.max(1,o.cible))):(fait?1:Math.max(0,Math.min(1,valeur/Math.max(1,o.cible))));
+    const statut=o.t==='rang-orgs'?`${valeur}e → ${o.cible}e`:fait?'FAIT':'EN COURS';
+    return `<div class="mf-ac-objectif"><div><span>${esc(mgmtPosteObjectifTexte(o))}</span><b>${esc(statut)}</b></div><div class="mf-ac-barre"><i style="width:${Math.round(ratio*100)}%"></i></div></div>`;
+  }).join(''):'';
+  const patron=poste?`<div class="mf-ac-patron"><div class="mf-ac-lib">LE PATRON : ${esc(mgmtPosteNiveau(poste.conf).niveau.toUpperCase())}</div><div class="mf-ac-rs">${esc(mgmtPosteNiveau(poste.conf).banque[0].texte)}</div></div>`:'';
+  const retour=m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0], mission=m.recruteur&&m.recruteur.mission;
+  const dest=retour?mgmtRecruteurDestination(retour.dest):mission?mgmtRecruteurDestination(mission.dest):null;
+  const jourRetour=retour?retour.jour:mission&&mission.retourLe;
+  const restant=Number.isSafeInteger(jourRetour)?Math.max(0,jourRetour-mgmtRecruteurJour(m)):null;
+   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
+   const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
+  const ailleurs=mgmtAccueilAilleurs(m,c);
+  return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
+}
 /** La première arrivée : l'héritage (organisation, dernière soirée, champions, promesses). */
 function mgmtAccueilHeritage(m,c){
   const h=c.heritage;
@@ -264,11 +294,13 @@ function scr_mgmt_accueil(){
   const karim=retourRecruteur?mfPanneau(`<p class="mf-ac-rs">Karim est rentré${retourRecruteur.bredouille?' bredouille':''} · <button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button></p>`,'normal','mf-ac-p'):'';
    const posteLien=m.poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'';
    const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
-    const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?mfPanneau(`<h2 class="mf-ac-titre">LA SEMAINE DU COMBAT</h2><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button>`,'normal','mf-ac-p') : '';
+   const ceremonieVisible=Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0;
+     const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?`<div class="mf-ac-semaine"><b>LA SEMAINE DU COMBAT</b><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button></div>` : '';
     /* ==== [ANCRE: P10_T4_RANG_FINAL_ACCUEIL] — Monde lot 57 T1 ==== */
     const guerre=m.guerre&&Number.isInteger(m.guerre.rangFinal)?mfPanneau(`<h2 class="mf-ac-titre">LE CLASSEMENT DES HUIT</h2><p>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit.</p><button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`,'normal','mf-ac-p'):'';
-    const bilanLien=bilanVisible?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button><button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:'';
-  const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div>${espoirHtml}${semaine}${guerre}<button class="po2-lien" type="button" onclick="CL.go('mgmt_guerre')">Le classement des huit</button>${posteLien}${bilanLien}`;
+    const bilanLien=`${ceremonieVisible?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button>`:''}${bilanVisible?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''}`;
+  const espoirsDansAttente=espoirHtml;
+   const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>${guerre}${posteLien}${bilanLien}`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

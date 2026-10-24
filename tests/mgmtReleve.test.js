@@ -42,6 +42,19 @@ test('Monde lot 31 T1 — le relevé ne consomme pas la RNG',()=>{
   assert.deepEqual(x.a,x.b);assert.equal(x.seedA,x.seedB);
 });
 
+test('Monde lot 68 T1 — le relevé conserve les blocs round et total de la planche',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const w=newGameWindow({runMain:true});
+  const result=evalJSON(w,`const res={round:2,finishTime:75,roundStats:[{sigA:3,totalA:5,headA:2,bodyA:1,legA:0,tdA:1,ctrlSecA:12},{sigB:4,totalB:7,headB:1,bodyB:2,legB:1,tdB:2,ctrlSecB:19}],stats:{A:{headAtt:3,bodyAtt:2,legAtt:1,distStrikes:4},B:{headAtt:2,bodyAtt:4,legAtt:2,distStrikes:5}}};const s=mgmtReleveDeResultat(res,3);return {s,compact:mgmtReleveReduit(s)};`);
+  assert.equal(result.s.r.length,2);
+  assert.equal(result.s.r[0][0],3);
+  assert.equal(result.s.r[1][14],4);
+  assert.equal(result.s.e[0][0],3);
+  assert.equal(result.s.e[1][1],4);
+  assert.equal(result.compact.c.length,2);
+  assert.equal(result.compact.d,result.s.d);
+});
+
 test('Monde lot 31 T1/T2 — soirée, rejeu, sauvegarde et anciennes parties',()=>{
   const w=newGameWindow({runMain:true});
   const x=evalJSON(w,`setSeed(20261008);const m=mgmtPasseGenerer('split',{soirees:2});G={theme:'dark',mgmt:m};const before=m.hist.length;mgmtRunEvent(m);const fresh=m.hist.slice(before).filter(t=>t.s);const copy=JSON.parse(JSON.stringify(m));const bad=copy.hist.find(t=>t.s);if(bad){if(bad.s.r)bad.s.r[0].pop();else bad.s.c[0].pop();}const repaired=mgmtParseAndValidate(JSON.stringify(copy));const serial=mgmtParseAndValidate(mgmtSerialiser(m));const old=JSON.parse(JSON.stringify(m));old.hist.forEach(t=>delete t.s);const loaded=mgmtParseAndValidate(JSON.stringify(old));setSeed(20261008);const past=mgmtPasseGenerer('split',{soirees:6});return {fresh:fresh.length,valid:fresh.every(t=>mgmtReleveValide(t.s)),rounds:fresh.map(t=>t.s.r.length),serial:!!serial&&fresh.every(t=>JSON.stringify(t.s)===JSON.stringify(serial.hist.find(q=>q.seed===t.seed&&q.a===t.a&&q.b===t.b)?.s)),badRemoved:!!repaired&&repaired.hist.filter(t=>t.a===bad?.a&&t.b===bad?.b).every(t=>!t.s),oldLoaded:!!loaded,pastHas:past.hist.some(t=>Object.hasOwn(t,'s')&&mgmtReleveValide(t.s)&&!!t.s.c)};`);
