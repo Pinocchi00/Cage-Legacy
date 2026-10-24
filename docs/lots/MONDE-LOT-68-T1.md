@@ -412,6 +412,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun défaut géométrique neuf dans les quatre écrans de tranche mesurables ; aucune correction applicative à l'aveugle. Tests et audit à relancer. Migration et bump `?v=` : aucun changement applicatif.
 - État honnête : fiche, recruteur mission/retours et semaine sont à zéro sur les contrôles disponibles. Les autres écrans de la tranche gardent les limites documentées ci-dessus ; le contrôle des écrans hors périmètre révèle les anomalies ci-dessus sans autoriser de les modifier. Fidélité comparative complète et cases de capture non achevées ; `TOUT_EST_FIN` non revendiqué.
 
+### Reprise 50 du 24/10/2026 — contrôle automatique à jour
+
+- Branche `fid-fiches`, historique et statut vérifiés ; aucun fichier non committé de la tranche au départ. Le guide du captureur a été lu et les scènes ont été lancées individuellement pour respecter la limite d'un Chrome à la fois.
+- Contrôles frais à 1920×1080 : fiche Statistiques `{chevauchements:0,exemples:[],textesSous22px:0,debordent:[]}` (`moyen:31.2,grosBlocs:23.2`) ; recruteur mission `{0,[],0,[]}` (`26,19.7`) ; retours `{0,[],0,[]}` (`27.1,18.4`) ; semaine `{0,[],0,[]}` (`27.6,22.1`). Le lancement groupé a dépassé 120 s après la fiche ; les trois scènes restantes ont été relancées séparément. Cela confirme uniquement la géométrie des scènes mesurables, pas leur fidélité visuelle.
+- Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records ne font pas partie de la liste de scènes offerte par le captureur. Aucune mesure ou comparaison n'est inventée. Les PNG comparatifs n'ont pas été ouverts avec un outil disponible.
+- État écran par écran : fiche Statistiques, recruteur mission, retours et semaine ont le contrôle géométrique à zéro ; fiche Aperçu n'a pas de scène distincte. Arrivée contrat/espoirs, relevé, chiffres, menu et classements restent sans mesure. Aucune correction supplémentaire n'a été apportée à l'aveugle. Les écrans accueil/actualités/tonposte/bilan ont des mesures historiques détaillées dans les reprises antérieures et demeurent hors périmètre de modification.
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (24/24), `node --test tests/mgmtReleve.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Pas de migration de sauvegarde. Le contrôle et ses scores ne remplacent pas la comparaison structurelle aux planches. Écart : les cases de fidélité visuelle complète et les scènes non prises en charge restent à faire ; aucun `TOUT_EST_FINI`.
+
 ### Reprise 43 du 24/10/2026
 
 - Branche contrôlée : `fid-fiches`. `git log --oneline -12` et `git status` consultés ; les changements `.opencode/agents/*` et `opencode.json` restent hors tranche. Aucun changement applicatif non committé à reprendre.
