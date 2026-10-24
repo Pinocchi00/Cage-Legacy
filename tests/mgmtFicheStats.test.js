@@ -30,10 +30,10 @@ test('Monde lot 31 T4 — façon de gagner selon les méthodes et échappement',
  open(w);w.eval("G.mgmt.roster[0].name='<b>test</b>'");const html=w.eval("mgmtFicheStatsHtml(G.mgmt,G.mgmt.roster[0])");assert.doesNotMatch(html,/<b>test<\/b>/);
 });
 test('Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S',()=>{
-  // Adapté selon la décision superviseur « REPRISE VISUELLE » : le contrôle suit la bannière, non la rangée d’onglets.
-  const w=monde();open(w,'apercu');let html=w.eval("document.querySelector('.mf-fb-wrap').innerHTML");
+   // Décision : planches Uni* validées par Anthony ; le bouton de suivi est à droite des onglets.
+   const w=monde();open(w,'apercu');let html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");
   assert.match(html,/SUIVRE/);assert.match(html,/aria-pressed="false"/);assert.match(html,/CL\.mgmtSuivre/);
-  w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fb-wrap').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
+   w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
   assert.match(fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8'),/\.mf-fb-suivi\.on\{[^}]*background:#F0B220/);
   const n=w.eval('mgmtSuivis(G.mgmt).length');w.eval("keysHandle({key:'s',preventDefault(){}})");assert.equal(w.eval('mgmtSuivis(G.mgmt).length'),n-1);
 });
