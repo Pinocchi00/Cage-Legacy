@@ -155,6 +155,7 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     assert.match(html,/CAGE HEBDO/);
     assert.match(html,/LES MOUVEMENTS/);
     assert.match(html,/TOUS LES RÉSULTATS/);
+    assert.match(html,/class="ld3-suite-results"/);
   }finally{w.close();}
 });
 

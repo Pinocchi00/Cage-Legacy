@@ -1881,6 +1881,20 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-suite-forward,.ld3-suite-back{min-height:48px;padding:8px 16px;border:2px solid #E9E6E1;background:#0D0B0B;color:#E9E6E1;font:600 22px/1.1 var(--mgmt-font-body);cursor:pointer}
 .ld3-suite-forward{margin-top:12px;border-color:#F0B220;color:#F0B220}
 .ld3-suite-back{grid-column:1/-1;justify-self:start}
+/* ==== [ANCRE: MONDE54_T1_PLANCHES_LENDEMAIN] — Monde lot 54 T1 ==== */
+.ld3-moments{display:grid;grid-template-columns:1.45fr 1fr .9fr;gap:16px;min-width:0}
+.ld3-moments .ld3-moment{min-width:0;min-height:260px;margin:0;padding:18px 20px}
+.ld3-moments .ld3-names{font-size:36px;overflow-wrap:anywhere}
+.ld3-moments .ld3-detail{margin-top:auto}
+.ld3-suite{height:calc(100vh - 180px);min-height:650px;grid-template-columns:1.05fr 1.1fr 1fr;grid-template-rows:auto minmax(0,1fr);gap:16px;padding:18px;overflow:hidden}
+.ld3-suite-title{font-size:44px}
+.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:auto;min-height:0;overflow:auto}
+.ld3-suite-press .ld3-press{padding:12px 10px}
+.ld3-suite-results .mgmt-ld-item{padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.ld3-suite-results .mgmt-ld-title{font-size:26px;line-height:1.1}
+.ld3-suite-results .mgmt-ld-sub,.ld3-suite-results .mgmt-ld-rangs{font-size:22px;line-height:1.15}
+.ld3-suite-back{margin-top:10px}
+@media(max-width:1100px){.ld3-moments{grid-template-columns:1fr}.ld3-suite{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:auto}.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:1}}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
