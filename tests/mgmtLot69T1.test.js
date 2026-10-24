@@ -45,8 +45,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
     const choc=w.eval(`scr_mgmt_choc()`);
      for(const texte of ['SPLIT','CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
     assert.match(choc,/<span class="mf-k">Échap<\/span><span>Répondre plus tard<\/span>/);
-    assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
-    assert.match(choc,/<span class="mf-k or">Entrée<\/span><span>Accepter<\/span>/);
+     assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
+     assert.match(choc,/<span class="mf-k">R<\/span><span>Refuser<\/span>/,'le raccourci de refus doit être visible dans la barre de commandes');
+     assert.match(choc,/<span class="mf-k or">Entrée<\/span><span>Accepter<\/span>/);
      assert.match(choc,/ch3-vs/);
      assert.match(choc,/Fiche/);
      assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');

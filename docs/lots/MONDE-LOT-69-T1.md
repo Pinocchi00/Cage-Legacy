@@ -243,3 +243,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - J'ai relu la planche `UniBilanPatron` : elle comporte le verdict, une offre distincte et quatre raisons. Les assertions existantes inspectent les raisons et l'échappement, mais aucune scène/capture post-correction ne démontre la fidélité géométrique. Les captures précédentes signalaient choc/discours au-dessus du seuil des 20 % et un chevauchement dans le bilan ; aucun résultat après correction n'est disponible.
 - Pas de guide de capture accessible avec l'outil autorisé dans cette reprise, aucune capture nouvelle ni mesure. La logique du choc reste mono-affiche et n'implémente pas le 2-sur-3 de la planche.
 - Pas de changement de sauvegarde ni de version de cache. Écart à la fiche : les critères d'affiches triples, de parcours complet, de scène d'arrivée et de conformité visuelle mesurée ne sont pas établis ; aucune case n'est faussement déclarée terminée.
+
+### Reprise 42
+- `mgmt-ecran-poste.js` branche maintenant le raccourci R de la barre du choc sur le refus existant (`mgmtChocRepondre(..., false)`), avec sauvegarde et rafraîchissement comme les autres décisions. `index.html` versionné avec `node tools/_bump.js mgmt-ecran-poste.js`.
+- `tests/mgmtLot69T1.test.js` vérifie que la commande « R Refuser » est effectivement exposée dans l'écran choc.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une première exécution a dépassé le délai de 120 s avant la relance réussie.
+- Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
+- Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
