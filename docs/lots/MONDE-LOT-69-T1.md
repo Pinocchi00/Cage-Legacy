@@ -169,6 +169,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Les reprises précédentes et les tests couvrent les trois paires, le booking/soirée normale du choc, l'offre/changement/arrivée/soirée/lendemain, ainsi que l'inscription du test aux scripts `test` et `test:watch`. Cette vérification ne transforme pas les cases visuelles restantes en succès : seuil de gros blocs du choc manqué, chevauchement du bilan persistant, arrivée non capturée.
 - Écart à la fiche : les objectifs visuels complets et la capture d'arrivée ne sont toujours pas atteints. Aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise — vérification des captures
+- État de départ : branche `fid-choc`, HEAD `d015ab54`. `git status` montre les mêmes changements hors tranche sous `.opencode/agents/` et `opencode.json`, ainsi que `mgmt-ecran-poste.js` dont `git diff --ignore-all-space` est vide ; aucun fichier de tranche fonctionnel en attente.
+- Lecture du guide externe réussie. Captures relancées séparément à 1920×1080 : choc `grosBlocs=25.1`, contrôles géométriques à zéro ; discours `grosBlocs=18.1`, contrôles à zéro ; bilan `grosBlocs=12.9`, mais un chevauchement persiste entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22). La commande choc-discours-bilan en une fois a dépassé le délai de l'outil après avoir produit le contrôle choc, les deux autres ont ensuite été capturées individuellement.
+- Images `cmp-*.png` créées dans le répertoire externe `/C:/Users/antho/AppData/Local/Temp/shots/` par l'outil ; elles ne sont pas dans le dépôt et n'ont pas été ouvertes dans cette interface. Aucune scène arrivée dédiée n'a été construite/capturée.
+- Test ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4. Les changements source de la tranche déjà présents sont commités dans l'historique ; je n'ai pas ajouté de modification CSS non prouvée pour masquer les écarts de mesure.
+- Écarts à la fiche toujours constatés : seuil `grosBlocs≤20%` du choc non atteint, chevauchement bilan, pas de capture arrivée ni comparaison visuelle ouverte. Pas de migration. Les modifications utilisateur hors tranche sont préservées et non ajoutées.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
