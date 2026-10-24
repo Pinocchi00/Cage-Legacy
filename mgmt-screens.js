@@ -207,7 +207,7 @@ function mgmtWithNav(screen){
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
    Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
    comme eux (mgmtWithNav). Lot 4 T6 : les classements, de même. ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_recrutement:mgmtWithNav(scr_mgmt_recrutement),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements),mgmt_poste:scr_mgmt_poste,mgmt_poste_bilan:scr_mgmt_poste_bilan});
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_recrutement:mgmtWithNav(scr_mgmt_recrutement),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements),mgmt_poste:scr_mgmt_poste,mgmt_poste_bilan:scr_mgmt_poste_bilan,mgmt_choc:scr_mgmt_choc});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse

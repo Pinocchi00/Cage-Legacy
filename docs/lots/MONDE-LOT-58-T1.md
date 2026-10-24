@@ -24,6 +24,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise 17 — écran de choc commencé (non terminé)
+- Modifiés : `mgmt-ecran-poste.js` ajoute un écran accessible pour les propositions, `mgmt-screens.js` l'enregistre, `ui-cadre.css` ajoute ses classes `ch3-`, `index.html` monte les versions cache, et `tests/mgmtLot58T1.test.js` vérifie l'enregistrement et les actions affichées.
+- Test ciblé : à lancer après intégration. Le nouvel écran ne reproduit pas encore fidèlement la maquette et le fil de presse reste absent.
+- Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` exclues du commit (étrangères à la tranche).
+- Non terminé : corriger la structure aux valeurs exactes de `UniChoc`, ajouter le fil de presse, vérifier le plafond et la sauvegarde ancienne, puis tests/audits et commit final.
+
 ### Reprise 16 — réparer le test de classement du choc
 - Modifié : `tests/mgmtLot58T1.test.js`. L’assertion compare maintenant la baisse du total de classement (-1) plutôt qu’une hausse garantie de place, car les ex æquo ne changent pas nécessairement la position. Décision fondée sur la précision superviseur : le champ `chocPrestige` nourrit le total classé.
 - Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (17/17).
