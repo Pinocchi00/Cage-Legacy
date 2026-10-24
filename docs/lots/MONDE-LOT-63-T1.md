@@ -984,3 +984,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - La suite exacte inter-lots passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56, dont les deux régressions lot 54 signalées. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
 - La tentative requise `git merge origin/main` a été refusée par la politique d'exécution (`git merge*` bloqué). Aucun merge n'est revendiqué ; l'intégration reste à faire par le superviseur. Aucun changement de sauvegarde ni migration.
 - Cette reprise met à jour uniquement le présent compte rendu. Limite inchangée : les tests préparent les faits déclencheurs sur le parcours réel sans prouver que chaque système opérationnel génère naturellement chacun des faits.
+
+### Reprise 7 — contrôle inter-lots relancé (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de code et de tests sont déjà présents dans l'historique. Aucun fichier fonctionnel non commité de la tranche. La suite prescrite passe **130/130**, dont les deux tests de régression du lot 54 (rivalité enregistrée et non-répétition sur cinquante soirées).
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit dans `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- Le merge `origin/main` demandé reste bloqué par la politique d'exécution qui interdit `git merge*` ; il n'a pas été exécuté et demeure à faire par le superviseur. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les comptes rendus précédents consignent une réussite à 1 908 745 octets. Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` étrangères, laissées hors de ce commit.
+- La seule modification de tranche de cette reprise est ce compte rendu ; aucune question nouvelle. Limite inchangée : les tests préparent les faits des familles dans une partie issue du parcours réel, sans prouver leur génération naturelle par chaque système opérationnel.
