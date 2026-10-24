@@ -181,3 +181,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Pas de migration de sauvegarde, aucun JS/CSS modifié. La vérification porte sur la programmation, pas sur les trois affrontements ni sur l’exécution/résultat du combat. Les écarts de maquette et de parcours des reprises précédentes demeurent ; pas de nouvelle capture comparative produite.
 - Changements utilisateur sous `.opencode/agents/` et `opencode.json` laissés hors du commit.
+
+### Reprise 32
+- Reprise de l'historique et de l'état : branche `fid-choc`, dernier commit `aa8f9c01`; les modifications présentes sous `.opencode/agents/` et `opencode.json` sont hors tranche et restent intactes.
+- Vérifications relancées : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (16 fichiers examinés), `node_modules/.bin/eslint .` passe.
+- Aucune modification fonctionnelle supplémentaire ni capture produite. L'accès au guide externe de capture est refusé dans cet environnement, donc aucune scène ni mesure nouvelle n'est revendiquée.
+- Les écarts non résolus restent : validation visuelle comparative des écrans, trois combats pour le choc, et scénario fin de contrat/bilan puis rechargement strictement identique. Le test existant couvre une partie de la transition d'offre et confirme soirée/lendemain ainsi que programmation de l'agenda, mais ne satisfait pas ces critères intégraux. Aucun changement de sauvegarde ni migration.
+- Cette reprise ne déclare pas la tranche achevée et ne revendique pas `TOUT_EST_FINI`.
