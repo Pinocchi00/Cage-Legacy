@@ -69,3 +69,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Relecture du guide de capture puis comparateur relancé séparément : `lendemain` moyen 24,9 %, `grosBlocs` 19,5 % ; `lendemainSuite` moyen 23,3 %, `grosBlocs` 18,8 %. Le comparateur a régénéré `cmp-lendemain.png` et `cmp-lendemainSuite.png` sous le dossier temporaire des captures. Le seuil `grosBlocs ≤ 20 %` est confirmé ; aucune inspection visuelle manuelle des images n'est revendiquée.
 - Vérifications ciblées relancées : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7) ; audit `node tools/verif-versions.js origin/main` sans écart. Pas de changement fonctionnel, test, sauvegarde ou migration nécessaire.
 - Les captures restent les seules nouvelles mesures de cette reprise ; aucun autre écart à la fiche n'a été constaté. Les contrôles complets et lint ont été réalisés aux reprises précédentes, sans modification de code depuis.
+
+### Reprise 13 — contrôle ciblé final — 24/10/2026
+
+- Branche `fid-lendemain` confirmée ; les modifications locales de configuration/agents et `sw.js` restent hors tranche. Aucun fichier de code de la tranche n'était en attente.
+- Guide de capture relu par shell et comparateur rejoué séparément : `lendemain` moyen 24,9 %, gros blocs 19,5 % ; `lendemainSuite` moyen 23,3 %, gros blocs 18,8 %. Les captures `cmp-lendemain.png` et `cmp-lendemainSuite.png` ont été régénérées. Aucun jugement visuel direct des images n'est revendiqué.
+- Tests ciblés réussis : `mgmtEcranLendemain.test.js` 7/7, `mgmtLendemainDemo.test.js` 7/7, `mgmtLot54T1.test.js` 30/30, `mgmtLot48T1.test.js` 9/9 et `mgmtSoireeShow.test.js` 18/18 (ce dernier nécessite un délai de 300 s). `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe.
+- Aucun nouveau changement fonctionnel, test ou état de sauvegarde. Les changements de code prévus sont déjà présents dans les commits précédents ; seule cette actualisation du compte rendu est commise dans cette reprise. La conformité des ratios est mesurée ; l'inspection visuelle manuelle et le test lent `mgmtReleveReduit.test.js` restent non effectués ici.
