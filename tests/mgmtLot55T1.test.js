@@ -31,6 +31,11 @@ test('Lot 55 T1 — la révélation utilise le palmarès au premier combat chron
 test('Lot 55 T1 — les prix lauréats se consignent sans doublon',()=>{
   const c=charger(),m={roster:[{id:'a'}]},prix=[{id:'ko',laureat:'a'}];c.mgmtCeremonieInscrire(m,prix,2026);c.mgmtCeremonieInscrire(m,prix,2026);assert.equal(m.roster[0].prixAnnee.length,1);
 });
+test('Lot 55 T1 — le combat de l’année est inscrit sur les deux fiches',()=>{
+  const c=charger(),m={roster:[{id:'a'},{id:'b'}]};
+  c.mgmtCeremonieInscrire(m,[{id:'combat',laureats:['a','b']}],2026);
+  assert.deepEqual(JSON.parse(JSON.stringify(m.roster.map(f=>f.prixAnnee.map(p=>p.prix)))),[['combat'],['combat']]);
+});
 test('Lot 55 T1 — rendu échappé et toutes les classes ce3 ont une règle',()=>{
   const c=charger();
   const js=source;

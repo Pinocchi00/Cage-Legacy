@@ -33,14 +33,14 @@ function mgmtCeremonieCalculer(m){
         /* ==== [ANCRE: P11_T1_RETOUR_HISTORIQUE] — Monde lot 55 T1 ==== */
         cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity);return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0};}).filter(x=>x.gap>=182).sort((a,b)=>b.gap-a.gap||b.t.c-a.t.c||b.i-a.i)[0];
     }
-      if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const index=(String(id||cand.i||'').length+value)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${Math.floor(now/365)+1}.`,relu:false,stat:value});
+       if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const laureats=p.id==='combat'?[bout.a.id,bout.b.id].filter(Boolean):id?[id]:[];const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const index=(String(id||cand.i||'').length+value)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,laureats,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${Math.floor(now/365)+1}.`,relu:false,stat:value});
     }
   }
   return out;
 }
 function mgmtCeremonieInscrire(m,prix,annee){
   if(!m||!Array.isArray(m.roster)||!Array.isArray(prix)||!Number.isSafeInteger(annee))return;
-  for(const p of prix){const f=p&&m.roster.find(x=>x&&x.id===p.laureat);if(!f)continue;if(!Array.isArray(f.prixAnnee))f.prixAnnee=[];if(!f.prixAnnee.some(x=>x&&x.prix===p.id&&x.annee===annee))f.prixAnnee.push({prix:p.id,annee,relu:false});}
+  for(const p of prix){if(!p)continue;const laureats=Array.isArray(p.laureats)&&p.laureats.length?p.laureats:(p.laureat?[p.laureat]:[]);for(const id of laureats){const f=m.roster.find(x=>x&&x.id===id);if(!f)continue;if(!Array.isArray(f.prixAnnee))f.prixAnnee=[];if(!f.prixAnnee.some(x=>x&&x.prix===p.id&&x.annee===annee))f.prixAnnee.push({prix:p.id,annee,relu:false});}}
 }
 
 /* ==== [ANCRE: P11_T3_CARNET_LECTURE] — Monde lot 55 T1 ==== */

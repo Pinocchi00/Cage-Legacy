@@ -385,3 +385,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
 - Aucun changement de code supplémentaire n'a été justifié par ces vérifications. La fiche continue d'indiquer les limites non certifiées plutôt que de prétendre une conformité totale : le parcours n'exécute pas trois saisons pleines, ne charge pas une fixture historique complète, le test lent `mgmtReleveReduit` n'a pas été exécuté et le rendu intégral des planches ainsi qu'un déclencheur à chaque anniversaire ne sont pas attestés (l'enchaînement existant suit le terme du contrat).
 - Pas de changement de sauvegarde ni migration. Aucun fichier de tranche nouveau à committer; aucun commit artificiel. Les vérifications ne justifient pas `TOUT_EST_FINI` puisque les critères ci-dessus restent non satisfaits.
+
+### Reprise 50
+
+- Correction livrée : le prix « Combat de l’année », attribué à deux combattants, est maintenant consigné sur les deux fiches de roster, sans doublon. Les autres catégories conservent leur inscription individuelle.
+- Test ajouté : « Lot 55 T1 — le combat de l’année est inscrit sur les deux fiches ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (21/21), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). Aucun changement de sauvegarde ni migration.
+- Fichiers modifiés : `mgmt-ceremonie.js` (inscription des deux lauréats), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche (compte rendu). Le test existant est déjà intégré aux suites `test` et `test:watch`.
+- Écarts toujours connus : conformité intégrale des planches non certifiée, déclencheur associé à la fin du contrat plutôt qu’à chaque anniversaire, absence de chargement d’une fixture historique complète et test lent `mgmtReleveReduit` non exécuté. Le parcours joue des soirées issues de trois années, mais ne prouve pas trois saisons pleines. Aucun `TOUT_EST_FINI` revendiqué.
