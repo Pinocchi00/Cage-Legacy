@@ -258,6 +258,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Le guide de capture externe n'a pas pu être lu avec `read` (accès refusé) ; je n'ai produit aucune capture. Aucune modification de code conservée ni migration de sauvegarde.
 - Les autres critères non atteints restent : trois affiches et score 2-sur-3 du choc, parcours complet fin de contrat/bilan avec rechargement strict, mesure visuelle post-correction et scènes d'arrivée/offre. Aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise 45
+- Recontrôle demandé : branche `fid-choc`, dernier commit `a0020a00`. Les seuls fichiers en attente au départ étaient les modifications utilisateur sous `.opencode/agents/`, `opencode.json` et une indentation dans le test ; aucune modification fonctionnelle de la tranche n'était en attente.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4), couvrant les assertions déjà établies du changement d'organisation, du choc mono-combat et des écrans. L'essai d'ajouter une assertion stricte de chargement après soirée échoue : `mgmtParseAndValidate(mgmtSerialiser(m))` renvoie faux dans ce parcours généré. L'assertion d'essai a été retirée, sans faire passer le comportement pour valide.
+- Pas de nouveau fichier de code retenu, pas de migration ni de version cache. Les changements utilisateur hors tranche sont préservés. La modification d'indentation préexistante était seulement du whitespace (aucun diff utile après normalisation) ; elle n'a pas été committée.
+- Les lacunes demeurent : trois affiches/score 2-sur-3, parcours contractuel intégral et rechargement identique valide, et captures/mesures post-correction des écrans. La tentative de chargement strict confirme le défaut au lieu de le résoudre. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 43
 - `tests/mgmtLot69T1.test.js` vérifie maintenant qu'après `mgmtRunEvent`, le gagnant du combat choc apparaît aussi dans la carte résolue et que son résultat est conservé dans `m.hist`.
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
