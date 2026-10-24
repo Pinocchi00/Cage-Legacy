@@ -161,3 +161,17 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtReleveReduit.test.js` a été lancé, mais a dépassé le délai maximal de 120 secondes de l'environnement; aucune conclusion de réussite n'en est tirée.
 - L'audit des éléments déjà présents confirme que les cases majeures ne sont pas démontrées par les tests commis : parcours d'au moins trois années réellement simulées, non-répétition sur 50 soirées, scénario de sauvegarde ancien chargé, maquettes intégrales et conformité complète du calcul/carnet. Les changements du HEAD précédent apportent certaines portions, mais ne suffisent pas à certifier ces critères.
 - Aucun nouveau fichier métier n'a été modifié; pas de commit artificiel. La tranche demeure non terminée et aucun `TOUT_EST_FINI` n'est déclaré. Aucune migration de sauvegarde ni question de spécification nouvelle.
+
+### Reprise 20
+
+- Contrôle initial : branche `p11-ceremonie-carnet`, HEAD `764c779`. Aucun fichier métier de la tranche n'était modifié hors commit. Les changements `.opencode/agents/*` et `opencode.json` restent étrangers et intacts.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (5/5 vert), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint mgmt-ceremonie.js mgmt-save.js` (vert). Confirmation : `mgmtLot55T1.test.js` figure déjà dans les scripts généraux `test` et `test:watch`.
+- La vérification ciblée ne valide pas les cases encore manquantes décrites précédemment : parcours d'au moins trois années jouées, non-répétition testée sur 50 soirées, scénario complet de chargement d'une ancienne sauvegarde, et conformité intégrale aux maquettes. Le carnet et le calcul ne sont pas certifiés complets par les cinq assertions présentes. `mgmtReleveReduit` n'a pas été lancé dans cette reprise.
+- Aucun fichier métier n'a été modifié et aucun commit artificiel n'a été créé. Pas de migration de sauvegarde ni de question nouvelle pour Anthony. Le compte rendu consigne les contrôles, mais ne déclare pas la tranche terminée.
+
+### Reprise 21
+
+- Contrôles de reprise : branche conforme (`p11-ceremonie-carnet`), HEAD `764c779`; changements préexistants `.opencode/agents/*` et `opencode.json` restent hors périmètre. Le seul diff de tranche à l'ouverture était ce compte rendu.
+- Relancé `node --test tests/mgmtLot55T1.test.js` : 5/5 passent. `node tools/verif-versions.js origin/main` : aucun écart de version. ESLint ciblé sur `mgmt-ceremonie.js` et `mgmt-save.js` : aucune erreur.
+- Le code n'a pas été modifié : ces contrôles ne couvrent pas le parcours multi-années réellement joué, l'absence de répétition des formulations sur 50 soirées, le chargement effectif d'une sauvegarde ancienne ni la conformité intégrale des deux maquettes. Le test `mgmtReleveReduit` et ESLint global n'ont pas été exécutés. `check:rapide` n'est pas lancé conformément au contrôle rapide du superviseur.
+- Il reste des critères d'implémentation/tests non satisfaits; le commit final demandé et `TOUT_EST_FINI` ne sont donc pas revendiqués. Aucune migration de sauvegarde et aucune question ouverte nouvelle.
