@@ -196,6 +196,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets (sous 1,9 Mo) ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; inclusion du test dans `test` et `test:watch` confirmée (`true true`).
 - Aucun code fonctionnel ni format de sauvegarde modifié à cette reprise ; aucune migration. Catalogue, calcul, affichages Accueil/presse, mouvements des autres organisations et intitulés des tests sont déjà livrés et commités.
 - Limite de couverture conservée : les familles sont testées par préparation individuelle de leurs faits sur une partie créée par le parcours réel ; cela ne démontre pas que les systèmes opérationnels produisent naturellement tous ces faits. Aucune question nouvelle pour Anthony.
+
+### Reprise finale — validation (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits des changements de code sont déjà dans l'historique (HEAD `c12d8a8`). Aucun fichier fonctionnel de la tranche n'était non commité.
+- Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets (sous le plafond de 1,9 Mo) ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'inclusion dans `test` et `test:watch` est confirmée (`true true`).
+- Les dix familles, le calcul déterministe et borné, Accueil/presse, mouvements rivaux et les tests sont déjà livrés. Aucune clé nouvelle ni migration de sauvegarde. Les tests de familles préparent les faits séparément après création par le parcours réel ; ils ne prouvent pas que chaque système de jeu les génère naturellement.
+- Modifications de `.opencode/agents/*`, `opencode.json`, `sw.js` et le changement local de cache dans `index.html` sont étrangers à la tranche et exclus. Seule cette fiche est modifiée dans cette reprise ; aucun nouvel écart ni question pour Anthony.
 - Cette fiche est le seul fichier de la tranche à modifier/commiter pour ce bilan. Changements locaux d'agents et d'outillage ainsi que la variation de cache `index.html` restent étrangers et exclus.
 
 ### Reprise 10 — livraison revérifiée (24/10/2026)
