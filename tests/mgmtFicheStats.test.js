@@ -118,6 +118,15 @@ test('Monde lot 68 T1 — l’écran des classements conserve ses blocs de donn�
   assert.match(js,/top15:'Le top 15'/);
   assert.match(js,/title:'Classements'/);
 });
+test('Monde lot 68 T1 — chaque classe de la planche menu a une règle',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const w=newGameWindow({runMain:true});
+  w.eval("G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};render()");
+  const html=w.eval('document.querySelector("#app").innerHTML');
+  const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/).filter(name=>/^mf-/.test(name))))];
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);

@@ -137,3 +137,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications : `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert). Aucun JS/CSS applicatif modifié, aucun bump `?v=`, aucune migration.
 - Captures visuelles : toujours non effectuées ; l’accès à `%TEMP%/p1/shoot/LISEZMOI.txt` est refusé par l’environnement. Aucune comparaison visuelle ni correction d’apparence n’est revendiquée. Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans validation visuelle ; la majeure partie des corrections de fidélité demandées reste à faire.
 - Écart à la fiche : malgré la couverture structurelle croissante, les cases visuelles 1 à 5 ne sont pas achevées. Test lent `tests/mgmtReleveReduit.test.js` non relancé. Pas de `TOUT_EST_FINI`.
+
+### Reprise 17 du 24/10/2026
+
+- État repris : branche `fid-fiches`, les commits antérieurs restent en place. Les changements `.opencode/agents/*` et `opencode.json` sont hors tranche et ne sont pas ajoutés.
+- Test ajouté dans `tests/mgmtFicheStats.test.js` : « Monde lot 68 T1 — chaque classe de la planche menu a une règle ». Il contrôle les classes `mf-*` réellement rendues par l'écran titre contre `ui-cadre.css`. Décision appliquée : « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : 18/18 verts.
+- Comparaison visuelle : non effectuée ; l'accès au fichier d'instructions et aux images externes ne fait pas partie des chemins autorisés dans ce contexte. Il n'y a donc ni diagnostic visuel ni correction d'apparence revendiqués.
+- État écran par écran : fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans validation comparative visuelle. La couverture est structurelle/tests uniquement ; les corrections visuelles écran par écran demandées restent à faire.
+- Migration : aucune. Aucun fichier applicatif JS/CSS modifié ; pas de bump `?v=`. Tests lents non relancés lors de cette reprise.
+- Écart à la fiche : critère de fidélité visuelle et cases 1 à 5 non achevés ; `TOUT_EST_FINI` non atteint.
