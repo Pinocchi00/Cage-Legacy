@@ -226,3 +226,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (21/21 verts) et `node tools/verif-versions.js origin/main` (aucun écart). Aucune modification applicative ou test n'a été faite dans cette reprise ; ce commit ne concerne que ce compte rendu.
 - État écran par écran : fiche Aperçu/Statistiques : corrections structurelles et tests antérieurs, aucune comparaison exploitable ; arrivée contrat/espoirs : modifications textuelles/géométriques et tests, aucune comparaison ; recruteur mission/retours et semaine : capture interrompue avant comparaison visuelle ; Relevé, chiffres du combat, Menu, Meilleurs et Records : pas de capture comparative. Les différences précises à l'image ne sont pas déterminées, aucun écart visuel n'est inventé.
 - Tests lents : `tests/mgmtReleveReduit.test.js` non relancé. Migration de sauvegarde : aucune. Écart majeur : les cases de correction et validation visuelles écran par écran ne sont pas achevées ; `TOUT_EST_FINI` n'est pas atteint.
+
+### Reprise 28 du 24/10/2026
+
+- Historique et statut consultés : branche `fid-fiches`, tête `72ef0b9`. Aucun fichier applicatif de la tranche n'était non committé ; seules les modifications préexistantes `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+- Ajout dans `tests/mgmtReleve.test.js` du test « Monde lot 68 T1 — le relevé conserve les blocs round et total de la planche », couvrant les mesures par round et totaux via la conversion complète/réduite. Décision citée : « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- `node --test tests/mgmtReleve.test.js` : 5/5 verts. Ce test de données ne vaut pas capture ni validation visuelle du relevé.
+- État écran par écran inchangé : fiche, arrivée, recruteur, semaine, relevé, chiffres, menu, meilleurs et records restent sans comparaison visuelle exploitable ; les différences précises demeurent inconnues. Aucune capture ou correction visuelle n'est revendiquée.
+- Pas de modification JS/CSS applicative, donc pas de bump `?v=` ; aucune migration. Cases de fidélité visuelle et critère final encore non atteints.
