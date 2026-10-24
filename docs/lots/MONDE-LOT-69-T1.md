@@ -527,3 +527,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers de tranche : `mgmt-poste.js` (validation de cohérence), `index.html` (version cache incrémentée via `_bump.js`), `tests/mgmtLot69T1.test.js` (régression), cette fiche. Aucune migration.
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4; `node tools/verif-versions.js origin/main` passe; ESLint ciblé ne rapporte aucune erreur (test ignoré par configuration).
 - Écarts : objectif de gros blocs du choc toujours hors seuil; aucune nouvelle capture dédiée arrivée/offre ni mesure post-correction du bilan. Les autres critères couverts par des tests ne sont pas remplacés par cette vérification visuelle. Aucun achèvement global revendiqué.
+
+### Reprise 78 — reproduction demandée et tests ciblés
+- Reproduction de la scène `choc` avec l'outil externe : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. La page s'affiche avec une proposition valide ; contrôle `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.2%`. Le seuil de 20 % reste manqué.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test existant exerce déjà la proposition réelle, navigation `CL.go`, trois paires réelles, programmation, résolveur normal, résultat et bonus majoritaire ; le test du parcours contrat/offre couvre rechargement identique, arrivée, soirée et lendemain.
+- Aucune modification fonctionnelle de tranche n'était en attente en début de reprise. Pas de migration ni de fichier JS/CSS touché. Les modifications utilisateur de configuration restent hors du commit.
+- Écarts persistants honnêtement : cible de gros blocs du choc non atteinte ; aucune mesure comparative nouvelle du bilan/arrivée ni capture dédiée de ces écrans. Pas de `TOUT_EST_FINI` revendiqué.
