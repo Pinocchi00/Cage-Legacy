@@ -326,6 +326,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
 - Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
 
+### Reprise 69 — reproduction demandée
+- État Git : branche `fid-choc`, HEAD vérifié via `git log`; aucun fichier de la tranche n'était modifié au départ. Les changements utilisateurs sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
+- Lancement de la scène demandée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. La capture affiche l'écran choc issu d'une proposition valide (pas de page blanche) ; contrôle `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=26.1%` (seuil ≤20% non atteint).
+- Scène discours également capturée : aucun chevauchement, aucun texte sous 22 px ni débordement ; `grosBlocs=18.1%`. L'image n'a pas pu être ouverte ici. Les tests existants couvrent le rendu via `CL.go`, les trois affiches, l'exécution normale du choc et l'enregistrement des résultats ; le parcours offre/changement/arrivée/rechargement/soirée/lendemain est aussi testé.
+- Aucun changement de code produit par cette reproduction. Le dépassement visuel du choc et les mesures de bilan/arrivée non revalidées restent des écarts ; cette reprise ne prétend pas que toute la fiche est satisfaite.
+
 ### Reprise 44
 - État contrôlé : branche `fid-choc`, HEAD `cfb74364`; les seules modifications initiales étaient les configurations utilisateur sous `.opencode/agents/` et `opencode.json`, laissées intactes.
 - Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe (4/4), notamment le passage du choc par `mgmtRunEvent` et la conservation du résultat, l'arrivée après changement, et l'inclusion dans les commandes agrégées.
