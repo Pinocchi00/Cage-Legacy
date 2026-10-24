@@ -54,6 +54,12 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Écarts restant avant la fin : les pages ne reproduisent pas encore toutes les dimensions/valeurs des maquettes et les lignes d'après n'ont toujours pas de mémoire anti-répétition sur 50 soirées ni de réactions complètes conditionnées aux faits (interpellations/discours, revanche, réactions des autres organisations). Le test de référence existant confirme l'histoire 13-1 dans les moments et presse, D1 reste préexistant au classement et aucun changement de sauvegarde n'a été introduit.
 - Reprise du 24/10/2026 : ajout du test « Monde lot 54 T1 — les blocs ld3 de la suite ont chacun une règle de style dédiée », qui extrait les classes `ld3-*` produites par la suite et vérifie leur présence dans `ui-cadre.css`. Le test ciblé passe 13/13. Ceci protège la couverture CSS mais ne prétend pas achever la fidélité dimensionnelle des maquettes ni T3.
 
+### Reprise de validation — 24/10/2026
+
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — les blocs ld3 du premier écran ont chacun une règle de style dédiée », couvrant les composants réels des moments, primes, suivis/espoirs, presse et chiffres. `node --test tests/mgmtLot54T1.test.js` passe 15/15.
+- Aucun changement de production, d'index, de CSS ou de sauvegarde. Le statut demeure honnête : maquette intégrale (valeurs et composition), mouvements/résultats exhaustifs et T3 avec contextualisation fiable et anti-répétition sur 50 soirées restent à achever. Le test ajouté valide seulement qu'une classe effectivement émise du premier écran possède son style.
+- Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et exclues.
+
 ### Reprise supplémentaire — 24/10/2026
 
 - `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — les deux écrans du lendemain gardent un corps de texte lisible », qui vérifie que les tailles `font-size` exprimées en pixels dans les règles `.ld3-*` restent au moins à 22 px.

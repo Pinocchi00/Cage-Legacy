@@ -173,6 +173,18 @@ test('Monde lot 54 T1 — les blocs ld3 de la suite ont chacun une règle de sty
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — les blocs ld3 du premier écran ont chacun une règle de style dédiée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const classes=Array.from(w.eval(`(()=>{const m=G.mgmt,html=mgmtLendemainMomentsCompletsHtml(m)+mgmtLendemainPrimesHtml(m)+mgmtLendemainDiscoursHtml(m)+mgmtLendemainAttentionHtml(m)+mgmtLendemainPresseHtml(m)+mgmtLendemainChiffresHtml(m);return [...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\\s+/)))].filter(x=>x.startsWith('ld3-'));})()`));
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    const missing=classes.filter(c=>!new RegExp('\\.'+c+'(?:\\W|$)').test(css));
+    assert.deepEqual(missing,[],'chaque classe ld3 du premier écran doit avoir une règle CSS');
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — les deux écrans du lendemain gardent un corps de texte lisible',()=>{
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
   const styles=css.match(/\.ld3-[^{]+\{[^}]*\}/g)||[];
