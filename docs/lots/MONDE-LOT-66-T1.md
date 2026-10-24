@@ -284,3 +284,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Capture `lendemain` : chevauchements 0, textes sous 22 px 0, aucun débordement, moyen 25,9 %, gros blocs 18,4 %. Les deux comparatifs ont été régénérés par `shoot.js` dans le dossier temporaire.
 - `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), audit versions et ESLint passent. Aucune modification de sauvegarde/mécanique ni nouveau test.
 - Écart persistant : case visuelle 4 incomplète pour `lendemainSuite`; malgré la mesure confirmée, le débordement des libellés n'est pas corrigé. Ne pas revendiquer `TOUT_EST_FINI`.
+
+### Reprise 42 — dernier essai de largeur — 24/10/2026
+
+- État initial : branche `fid-lendemain`, les commits fonctionnels sont déjà présents et seuls les fichiers de configuration/agents et `sw.js` sont modifiés hors tranche.
+- Après recapture de `lendemainSuite`, les alertes restent `Poids léger`, `Jonas Bühler`, `Poids mi-moyen` et `6ᵉ → 11ᵉ` (0 chevauchement, 0 texte sous 22 px, gros blocs 17 %). Ajout d'un réglage ciblé de coupure des libellés dans les trois colonnes, CSS cache bumpé, puis nouveau test et capture : résultat strictement inchangé.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucune correction de sauvegarde ou mécanique.
+- Fichiers modifiés : `ui-cadre.css` (nouvelle règle de coupure sans effet mesuré), `index.html` (cache) et cette fiche. Écart à la maquette toujours ouvert : quatre débordements de texte dans la suite. Aucun jugement manuel des PNG revendiqué. Pas de migration.
