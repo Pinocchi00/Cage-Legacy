@@ -110,3 +110,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification des versions par `node tools/verif-versions.js origin/main` : aucun écart. Les scripts `test` et `test:watch` contiennent déjà le fichier de test.
 - Le test ne prouve pas la complétude de toutes les valeurs des planches : les mouvements/contrat ne sont pas encore démontrés dans cet ordre par le rendu du premier écran. Les réactions T3 demeurent partiellement génériques ; la validation de suspension repose seulement sur un fait `touched` connu, sans couverture exhaustive des réponses, réseaux, revanche et organisations. Aucune donnée nouvelle de sauvegarde.
 - Modifications Git étrangères à la tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) laissées intactes et exclues.
+
+### Reprise supplémentaire — 24/10/2026
+
+- `mgmt-ecran-lendemain.js` : la page de suite rend maintenant une ligne de mouvement pour chaque participant dont le rang organisationnel a changé, avec rang avant/après (au-delà des seuls entrants/sortants du top 15). Styles dédiés `.ld3-move*` ajoutés dans `ui-cadre.css`, versions cache montées.
+- Test ajouté : « Monde lot 54 T1 — les mouvements de classement exposent les rangs avant et après ».
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 20/20 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé de `mgmt-ecran-lendemain.js` passe.
+- Limites honnêtes : le rendu des mouvements reflète désormais les variations organisationnelles des participants, mais la composition/valeurs complètes des deux planches ne sont pas démontrées, les chiffres de contrat restent partiels et l'après n'a pas de contextualisation complète aux faits réels (discours, réseaux, revanche et organisations) ni de mémoire persistante anti-répétition sur 50 soirées. Les cases 1 et 3 ne sont donc toujours pas entièrement satisfaites. Aucun état de sauvegarde ajouté.
+- Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus du commit.

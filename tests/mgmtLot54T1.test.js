@@ -260,3 +260,16 @@ test('Monde lot 54 T1 — le premier écran respecte l’ordre narratif P8 T2',(
     assert.deepEqual(positions,[...positions].sort((a,b)=>a-b),`ordre réel: ${positions}`);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — les mouvements de classement exposent les rangs avant et après',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`mgmtLendemainMouvementsHtml(G.mgmt)`);
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    assert.match(html,/class="ld3-move"/);
+    assert.match(html,/→/);
+    assert.match(css,/\.ld3-move\s*\{/);
+  }finally{w.close();}
+});

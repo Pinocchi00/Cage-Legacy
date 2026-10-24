@@ -189,6 +189,29 @@ function mgmtLendemainMomentsHtml(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MONDE54_T1_MOUVEMENTS_ORGANISATION] — Monde lot 54 T1 ==== */
+/** Mouvements de classement des participants, y compris ceux qui restent dans
+ *  le top 15 : la comparaison utilise le rang organisationnel avant/après. */
+function mgmtLendemainMouvementsHtml(m){
+  const e=m&&m.lastEvent;
+  if(!e||!Array.isArray(e.fights)) return '';
+  const ids=[];
+  for(const fight of e.fights) for(const id of [fight&&fight.a,fight&&fight.b])
+    if(typeof id==='string'&&!ids.includes(id)) ids.push(id);
+  const lignes=[];
+  for(const id of ids){
+    const fighter=mgmtFighterById(m,id);
+    if(!fighter||!fighter.div) continue;
+    const rangs=mgmtLendemainRangs(m,id);
+    if(!rangs||rangs.avant===rangs.apres) continue;
+    const nom=fighter.name||fighter.last||'Combattant';
+    const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,fighter.div);
+    lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong></div>`);
+  }
+  return lignes.join('');
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MONDE54_T1_MOMENTS_COMPLETES] — Monde lot 54 T1 ==== */
 /** Complète les trois catégories sans dupliquer de combat lorsque la soirée
  *  n'en contient pas un de chaque type. */
@@ -219,7 +242,7 @@ function mgmtLendemainMomentsCompletsHtml(m){
 function mgmtLendemainSuiteHtml(m){
   const presse=mgmtLendemainPresseHtml(m);
   const resultats=mgmtLendemainResultatsHtml(m);
-  const mouvements=mgmtLendemainConstatsHtml(m);
+  const mouvements=mgmtLendemainMouvementsHtml(m)+mgmtLendemainConstatsHtml(m);
   return `<section class="ld3-suite"><h2 class="ld3-suite-title">LE LENDEMAIN · LA SUITE</h2>`
     +`<div class="ld3-suite-press"><h3 class="ld3-suite-heading">CAGE HEBDO</h3>${presse}</div>`
     +`<div class="ld3-suite-moves"><h3 class="ld3-suite-heading">LES MOUVEMENTS</h3>${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div>`
