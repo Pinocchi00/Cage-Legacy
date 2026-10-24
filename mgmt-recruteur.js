@@ -110,14 +110,14 @@ function mgmtRecruteurApprocher(m){
       let orgId=rivale,proba=rivale?MGMT_RECRUTEUR_PROBA_RIVALE:MGMT_RECRUTEUR_PROBA_PROXIMITE;
       if(!orgId){
         const ids=mgmtMondeVivantIds(m).filter(id=>id!==mgmtPredecesseurOrgId(m)&&m.orgs?.[id]?.roster);
-        orgId=ids.find(id=>mgmtOrganisationManqueCategorie?.(id,p.cat,m))||null;
+        orgId=ids.find(id=>typeof globalThis.mgmtOrganisationManqueCategorie==='function'&&globalThis.mgmtOrganisationManqueCategorie(id,p.cat,m))||null;
       }
       if(!orgId||rng()>=proba)continue;
       const org=MGMT_ORGANISATIONS.find(x=>x.id===orgId);
       if(!org)continue;
       const orgState=m.orgs?.[orgId];
       if(m.mondeVivant===true&&(!orgState||!Array.isArray(orgState.roster)))continue;
-      if(!m.mondeVivant&&typeof mgmtOrganisationManqueCategorie==='function'&&!mgmtOrganisationManqueCategorie(orgId,p.cat,m))continue;
+      if(!m.mondeVivant&&typeof globalThis.mgmtOrganisationManqueCategorie==='function'&&!globalThis.mgmtOrganisationManqueCategorie(orgId,p.cat,m))continue;
       m.exterieur.push({id:p.id,name:p.name,first:p.first,last:p.last,ck:p.ck,div:p.cat,generation:0,W:p.W,L:p.L,D:p.D||0,age:p.age,level:1,libre:false,orgId,career:[{age:p.age,W:p.W,L:p.L,D:p.D||0}]});
       if(typeof mgmtAddFact==='function')mgmtAddFact(m,{c:m.cycle,k:'recruteur_profil_signe',a:orgId,b:p.name});
       prises.push(p.id);
