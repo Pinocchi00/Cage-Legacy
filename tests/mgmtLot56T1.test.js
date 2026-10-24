@@ -43,3 +43,10 @@ test('Croissance — bonus de remplissage additif, plafonné et nul pour une par
   const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.pop=100;m.orgs={};const salle={capacite:9000};const ancien=mgmtRemplissage(salle,100,'grosse',0.8).spectateurs;const nouveau=mgmtRemplissage(salle,100,'grosse',0.8,m).spectateurs;return JSON.stringify({ancien,nouveau,bonus:mgmtCroissanceRemplissageBonus(m)});})()`));
   assert.equal(r.bonus,0.03); assert.ok(r.nouveau>=r.ancien); assert.ok(r.nouveau<=9000);
 });
+
+test('Croissance — aucun bonus de remplissage ne dépasse le plafond historique de la salle',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.pop=100;m.orgs={};const salle={capacite:9000};return JSON.stringify([0,0.5,1].map(q=>mgmtRemplissage(salle,100,'grosse',q,m)));})()`));
+  assert.ok(r.every(x=>x.spectateurs<=Math.min(x.capacite,x.plafond)));
+  assert.ok(r.every(x=>x.spectateurs>=0));
+});
