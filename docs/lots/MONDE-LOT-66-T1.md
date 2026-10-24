@@ -291,3 +291,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Après recapture de `lendemainSuite`, les alertes restent `Poids léger`, `Jonas Bühler`, `Poids mi-moyen` et `6ᵉ → 11ᵉ` (0 chevauchement, 0 texte sous 22 px, gros blocs 17 %). Ajout d'un réglage ciblé de coupure des libellés dans les trois colonnes, CSS cache bumpé, puis nouveau test et capture : résultat strictement inchangé.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucune correction de sauvegarde ou mécanique.
 - Fichiers modifiés : `ui-cadre.css` (nouvelle règle de coupure sans effet mesuré), `index.html` (cache) et cette fiche. Écart à la maquette toujours ouvert : quatre débordements de texte dans la suite. Aucun jugement manuel des PNG revendiqué. Pas de migration.
+
+### Reprise 43 — recapture et essai compact — 24/10/2026
+
+- Branche `fid-lendemain` ; HEAD initial `331f6c5f`, changements locaux initiaux uniquement hors tranche (agents OpenCode, `opencode.json`, `sw.js`). Le guide a été relu depuis le chemin temporaire.
+- Recapture de `lendemainSuite` : chevauchements 0, textes sous 22 px 0, débordements toujours présents pour « Poids léger », « Jonas Bühler », « Poids mi-moyen » et « 6ᵉ → 11ᵉ » ; moyen 22,7 %, gros blocs 17 %.
+- Tentative de réduction des colonnes des rangs et organisations dans `ui-cadre.css` n'a pas modifié le contrôle automatique ; règle expérimentale retirée, pour ne pas enregistrer une modification sans effet. Aucun code de capture ne modifie les données.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Les autres tests demandés et contrôles versions/lint figurent dans les reprises précédentes ; pas de modification de sauvegarde/migration.
+- Écart restant : quatre débordements détectés sur `lendemainSuite`. Cases structurelles et navigation déjà livrées, mais case visuelle 4 non certifiée complète. `cmp-lendemainSuite.png` a été régénérée sous le dossier temporaire de capture ; pas d'inspection visuelle directe revendiquée.
