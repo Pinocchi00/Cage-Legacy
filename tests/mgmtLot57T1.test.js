@@ -357,3 +357,16 @@ test('Monde lot 57 T1 — le rang final mémorisé est annoncé sur l’Accueil'
     assert.match(html,/Revoir le classement/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — trois années de clôture conservent un rang valide après des soirées jouées',()=>{
+  const w=partie();
+  try{
+    assert.equal(jouerSoirees(w,3),3);
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt,out=[];for(let annee=1;annee<=3;annee++){out.push(mgmtGuerreFinAnnee(m,annee));}return JSON.stringify({out,final:m.guerre.rangFinal,annee:m.guerre.anneeTraitee,valid:validateMgmt(m)});})()`));
+    assert.equal(result.out.length,3);
+    assert.ok(result.out.every(x=>x&&x.applique&&x.rang>=1&&x.rang<=8));
+    assert.equal(result.final,result.out[2].rang);
+    assert.equal(result.annee,3);
+    assert.equal(result.valid,true);
+  }finally{w.close();}
+});
