@@ -234,3 +234,12 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtReleve.test.js` : 5/5 verts. Ce test de données ne vaut pas capture ni validation visuelle du relevé.
 - État écran par écran inchangé : fiche, arrivée, recruteur, semaine, relevé, chiffres, menu, meilleurs et records restent sans comparaison visuelle exploitable ; les différences précises demeurent inconnues. Aucune capture ou correction visuelle n'est revendiquée.
 - Pas de modification JS/CSS applicative, donc pas de bump `?v=` ; aucune migration. Cases de fidélité visuelle et critère final encore non atteints.
+
+### Reprise 29 du 24/10/2026
+
+- État vérifié : branche `fid-fiches`, dernier commit `8d756f0`. Aucun fichier applicatif ou test de la tranche non committé ; les modifications `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (21/21 verts), `node --test tests/mgmtReleve.test.js` (5/5 verts), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Tentative du test lent `node --test tests/mgmtReleveReduit.test.js` : dépasse le délai outil de 120 s après les sorties de démarrage, résultat non confirmé.
+- Captures : l'accès à `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est bloqué par les permissions ; aucun comparatif n'a pu être ouvert. Pas de correction ni de validation visuelle revendiquée.
+- État écran par écran : fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, Meilleurs et Records restent visuellement non comparés ; certains changements et tests structurels sont décrits dans les reprises antérieures, mais les cases de fidélité par captures et corrections ne sont pas achevées. Écarts visuels précis non établis.
+- Aucun changement applicatif, test ou migration dans cette reprise ; aucun bump `?v=` requis. Écart principal : fidélité visuelle et protocole capture→ouverture→correction incomplets, donc la livraison finale et `TOUT_EST_FINI` ne sont pas atteints.
