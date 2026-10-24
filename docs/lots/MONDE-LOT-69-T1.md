@@ -148,3 +148,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Il n'existe pas de dossier `shoot` dans le dépôt de travail. Le guide externe de capture n'a pas pu être ouvert à cause de la restriction d'accès ; aucune nouvelle capture ni mesure n'est revendiquée.
 - Cases encore non démontrées : le choc reste mono-combat dans le modèle, les comparaisons visuelles et seuils après correction ne sont pas établis, et le parcours ne réalise pas le rechargement strictement identique demandé. Le test actuel couvre changement, arrivée, soirée, lendemain et sérialisation intermédiaire, mais pas tout le scénario de fin de contrat.
 - Aucun changement de sauvegarde. Écart à la fiche : tranche toujours incomplète ; aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 27
+- Fichiers modifiés : `mgmt-ecran-poste.js` distingue les moitiés Split et organisation adverse dans le bandeau choc ; `ui-cadre.css` dessine le bandeau bicolore et son VS octogonal jaune conformément à la planche ; `index.html` versions cache incrémentées par `_bump.js`. `tests/mgmtLot69T1.test.js` vérifie ces deux côtés de structure.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
+- Pas de migration de sauvegarde. Le guide de capture externe n'est pas accessible dans cet environnement ; les captures et mesures de comparaison post-correction n'ont donc pas été produites.
+- Cases restantes : les trois combats ne sont toujours pas portés par le modèle d'événement mono-combat et n'ont pas été inventés ; arrivée/bilan/discours non vérifiés par comparaison d'image ; parcours fin de contrat → rechargement strictement identique → lendemain non couvert intégralement. Les mesures antérieures (choc 25,1 %, discours 23,4 %, bilan avec chevauchement) ne prouvent pas la conformité actuelle.
+- Écart documenté : le bandeau est un rapprochement structurel/couleur ; il ne constitue pas une capture validée et n'achève pas la tranche. Aucun `TOUT_EST_FINI` revendiqué.
