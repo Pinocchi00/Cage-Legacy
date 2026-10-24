@@ -142,3 +142,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Correction Guerre : phrase d’évolution raccourcie pour réduire le débordement. Recapture après correction : le contrôle automatique détecte encore un tronquage de l’évolution (« Split garde sa place dep… ») et celui de l’indication de rivale ; la correction n’est donc pas suffisante. `cmp-ceremonie.png` est bien régénéré sous `%TEMP%/shots/`, mais non ouvert visuellement dans cet environnement. La scène cérémonie demeure sans prix attribués et la scène Guerre ne force pas MMA KORNER.
 - `node --test tests/mgmtLot55T1.test.js` passe (44/44), `node tools/verif-versions.js origin/main` et ESLint ciblé passent. Fichiers modifiés : `mgmt-guerre-ecran.js` (texte d’évolution), `index.html` (version cache), cette fiche. Pas de migration ni nouveau test.
 - Restent non validés : objectif grosBlocs Guerre/Cérémonie, captures avec prix et rivalité imposés, corrections des autres vues, ouverture effective des comparatifs et mesures visuelles complètes. Pas de `TOUT_EST_FINI` revendiqué.
+
+## Compte rendu — reprise 40
+
+- Branche `fid-organisation` confirmée et arbre de travail propre au départ ; les commits applicatifs de la tranche sont déjà présents, dont le dernier ajustement du texte d'évolution Guerre.
+- Revalidation : `node --test tests/mgmtLot55T1.test.js` passe (44/44) ; `node tools/verif-versions.js origin/main` ne signale aucun écart. Pas de fichier applicatif non commité et aucun changement de sauvegarde.
+- Je n'ai pas pu produire une nouvelle capture ni ouvrir le comparatif `cmp-ceremonie.png` dans cet environnement ; les résultats documentés auparavant restent donc les seuls indicateurs disponibles. Les défauts précédemment relevés (prix non injectés dans la scène de capture, rivalité non forcée, seuils de gros blocs Guerre/Ton poste/Cérémonie et comparatifs non inspectés) ne sont pas corrigés ni validés par cette revalidation. Aucun `TOUT_EST_FINI` revendiqué.
+- Fichier modifié : cette fiche, pour consigner l'état vérifié ; pas de tests ajoutés, pas de migration. Questions pour Anthony : aucune.
