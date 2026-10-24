@@ -106,6 +106,13 @@ test('Monde lot 58 T1 — un choc terminé conserve son résultat facultatif et 
   if(r.org){assert.equal(r.valid,true);assert.equal(r.repaired,true);}
 });
 
+test('Monde lot 58 T1 — le choc champion invité passe par la soirée normale et son bonus de billetterie',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const a=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!a)return {champion:false};const partenaire=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!partenaire)return {champion:true,partenaire:false};const b=m.orgs[partenaire.id].roster.find(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[partenaire.id].roster}).has(f.id));const jour=m.cal.prochaines[0].jour;m.card.main=[{a:a.id,b:'placeholder',cycle:m.cycle,slot:'main'}];m.card.prelims=[];m.card.sizeMain=1;m.card.sizePrelims=0;m.card.sizeEarly=0;m.choc={orgId:partenaire.id,div:a.div,jour,annee:mgmtChocAnnee(m),etat:'programme',a:a.id,b:b.id};G.mgmt=m;const caisse=m.treasury,event=mgmtRunEvent(m);return {champion:true,partenaire:true,event:!!event,fight:!!(event&&event.fights.some(f=>f.a===a.id&&f.b===b.id)),etat:m.choc.etat,resultat:m.choc.resultat,bonus:event&&event.finance.recette===m.treasury-caisse,valid:validateMgmt(m)}})())`));
+  assert.equal(r.champion,true);
+  if(r.partenaire){assert.equal(r.event,true);assert.equal(r.fight,true);assert.equal(r.etat,'termine');assert.ok(['victoire','defaite'].includes(r.resultat));assert.equal(r.bonus,true);assert.equal(r.valid,true);}
+});
+
 test('Monde lot 58 T1 — le refus des offres laisse poursuivre puis renouveler le contrat',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);const id=mgmtPredecesseurOrgId(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');const offres=mgmtOffresCreer(m);offres.forEach((_,i)=>mgmtOffreRefuser(m,i));mgmtOffresAttendre(m);const refus=offres.every(o=>o.refuse);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const bilan=mgmtPosteBilan(m);const poste=mgmtPosteRenouveler(m,bilan.issue);return {id,actif:mgmtPredecesseurOrgId(m),refus,issue:bilan.issue,poste:!!poste,valid:validateMgmt(m)}})())`));
