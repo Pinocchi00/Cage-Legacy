@@ -139,6 +139,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; le test `mgmtLot63T1` est inscrit à `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
 - La fusion prescrite de `origin/main` n'a pas été effectuée : la politique de l'environnement interdit `git merge`. Le superviseur devra effectuer l'intégration. La limite de couverture des familles décrite dans les comptes rendus précédents reste inchangée.
 
+### Reprise de clôture — suite de non-régression (24/10/2026)
+
+- Sur `p8-apres`, les changements de production et tests de la tranche étaient déjà commités ; aucune modification fonctionnelle en attente. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et laissés hors commit.
+- La commande inter-lots prescrite passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56. Les deux régressions du lot 54 signalées sont vertes : rivalité enregistrée et absence de répétition sur cinquante semaines.
+- Vérifications fraîches : `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; le test de tranche est inscrit dans `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- La fusion de `origin/main` reste à effectuer par le superviseur ; les contrôles précédents documentent que la politique d'exécution de cet environnement refuse `git merge`. La limite de couverture demeure : les tests scénarisent les faits familiaux sur le chemin réel, sans prouver que tous les systèmes opérationnels les produisent naturellement.
+
 ### Reprise 5 — contrôle inter-lots et état du merge (24/10/2026)
 
 - Confirmés branche `p8-apres`, état et historique ; les commits fonctionnels de cette tranche sont déjà présents. Aucun fichier fonctionnel/test non commité n'est à reprendre.
