@@ -175,9 +175,17 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tenté dans `ui-cadre.css` une hauteur plus basse des cartes moments (310 → 230 px) et une taille de noms réduite à 42 px ; version de cache CSS montée. `node --test tests/mgmtEcranLendemain.test.js` passe (7/7).
 - Capture après essai : `lendemain` gros blocs 19,4 %, textes sous 22 px 0, débordements 0, mais 2 chevauchements subsistent (« Revoir » avec « CAGE HEBDO · LA UNE » et « LES CHIFFRES »). `lendemainSuite` : aucun chevauchement, mais 21 textes sous 22 px et débordements encore constatés lors de la capture précédente. Les objectifs visuels de la case 4 ne sont donc pas satisfaits ; il faut continuer les corrections avant de clôturer la tranche.
 - Aucun changement de sauvegarde ou mécanique. Les captures sont produites par l'outil sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+
 - Poursuite de la correction visuelle : chaque carte moment porte désormais son bouton `R` à côté de l'étiquette, conforme à la planche et sans bouton « Revoir » en pied ; styles compactés. Mesure suivante `lendemain` : 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %. Sur `lendemainSuite`, taille plancher 22 px appliquée aux libellés concernés, mais restent 4 débordements sur les lignes de mouvements (noms/rangs/division/organisation) malgré zéro chevauchement et zéro texte sous 22 px ; objectif 4 toujours non satisfait.
 - Tests relancés : `mgmtEcranLendemain.test.js` 7/7 et `mgmtLendemainDemo.test.js` 7/7 ; `node tools/verif-versions.js origin/main` et ESLint passent. Aucun test concernant la transition de soirée n'a été touché.
 - Dernière capture après réorganisation des rangs : `lendemainSuite` toujours 0 chevauchement et 0 texte sous 22 px, gros blocs 17 %, mais 4 débordements de texte des mouvements subsistent. Cas visuel non clos en dépit des essais de grille et réduction de taille ; pas d'affirmation de conformité globale.
+
+### Reprise 30 — reprise des défauts visuels suite — 24/10/2026
+
+- État initial : branche `fid-lendemain`, tête `cad5a809`, aucun fichier de tranche modifié. Les dix changements locaux d'agents/configuration et `sw.js` sont hors tranche et sont laissés intacts.
+- La dernière mesure précédemment consignée (reprise 29) signalait encore quatre débordements dans `lendemainSuite`. Le CSS existant a depuis accumulé plusieurs surcharges successives pour ces mêmes lignes, dont une disposition verticale des mouvements ; sans accès au guide/outillage de capture et sans nouvel état de reproduction, remplacer encore ces règles au jugé risquerait de dégrader la conformité et n'est pas présenté comme une correction.
+- L'accès au guide externe `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusé par les outils disponibles dans cet environnement (lecture locale et shell). Capture, mesures actualisées et inspection de `cmp-*.png` non réalisables dans cette reprise.
+- Les fichiers fonctionnels de la tranche sont déjà commités. Aucun changement de code, test ou sauvegarde ajouté. Écart toujours ouvert : les débordements de `lendemainSuite` signalés en reprise 29 n'ont pas été vérifiés comme résolus ; la case visuelle 4 ne peut être déclarée satisfaite sur la foi des seules mesures antérieures.
 
 ### Reprise 28 — réglage des colonnes et recapture — 24/10/2026
 
