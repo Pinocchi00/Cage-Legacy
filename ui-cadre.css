@@ -1393,9 +1393,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-corps{flex:1;min-height:0;display:flex}
 .mf-fi-ligne{flex:1;display:flex;gap:16px;min-height:0;min-width:0}
 .mf-fi-c1{flex:1;display:flex;min-width:0}
-.mf-fi-apercu>.mf-fi-c1:nth-child(1){flex:none;width:552px}
-.mf-fi-apercu>.mf-fi-c1:nth-child(2){flex:none;width:385px}
-.mf-fi-apercu>.mf-fi-c1:nth-child(3){flex:none;width:595px}
+/* ==== [ANCRE: MONDE_LOT68_T1_COLONNES_FICHE] — Monde lot 68 T1 : colonnes explicites sans compter les autres enfants. ==== */
+.mf-fi-apercu>.mf-fi-c1{flex:none;width:552px}
+.mf-fi-apercu>.mf-fi-c1+.mf-fi-c1{width:385px}
+.mf-fi-apercu>.mf-fi-c1+.mf-fi-c1+.mf-fi-c1{width:595px}
+/* ==== [FIN ANCRE] ==== */
 .mf-fi-col{flex-direction:column;gap:16px}
 .mf-fi-pan{min-width:0}
 .mf-fi-pan.mf-fi-fill{flex:1}

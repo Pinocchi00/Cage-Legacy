@@ -43,6 +43,13 @@ test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',
   const fills=JSON.parse(w.eval(`(()=>{const old=[mgmtStatsCarriere,mgmtStatsDocumentes,mgmtStatsCategorie];mgmtStatsCarriere=()=>({docs:3,sigParMin:3.12,precision:.58,sigEncaisseParMin:0,defense:0,ameneesPar15:.3,defenseAmenee:0,soumissionsPar15:0,controlePar15:0,dureeMoyenne:0,repartition:{cibles:{head:1,body:0,leg:0},positions:{dist:1,clinch:0,ground:0}},vParMethode:{}});mgmtStatsDocumentes=()=>({docs:3});mgmtStatsCategorie=()=>({n:3,moyennes:{},rangs:new Map()});const html=mgmtFicheStatsHtml(G.mgmt,mgmtFighterById(G.mgmt,MGMT_FICHE.id));[mgmtStatsCarriere,mgmtStatsDocumentes,mgmtStatsCategorie]=old;return JSON.stringify(html.split('width:').slice(1).map(x=>Number(x.split('%')[0])).filter(Number.isFinite))})()`));
   assert.ok(fills.includes(58));assert.ok(fills.includes(52));assert.ok(fills.includes(6));
 });
+test('Monde lot 68 T1 — colonnes de l’aperçu explicites, sans position nth-of-type',()=>{
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-fi-apercu>\.mf-fi-c1\{[^}]*width:552px/);
+  assert.match(css,/\.mf-fi-apercu>\.mf-fi-c1\+\.mf-fi-c1\{[^}]*width:385px/);
+  assert.match(css,/\.mf-fi-apercu>\.mf-fi-c1\+\.mf-fi-c1\+\.mf-fi-c1\{[^}]*width:595px/);
+  assert.doesNotMatch(css,/\.mf-fi-apercu[^{}]*:nth-of-type\(/);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);

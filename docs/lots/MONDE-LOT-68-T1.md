@@ -12,4 +12,15 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 **[ ] 6.** Tests : les existants restent verts ; ceux qui décrivaient l'ancienne structure sont **mis à jour en citant la décision** (« planches Uni* validées par Anthony ; l'écran suit la planche ») ; ajoute des tests de présence des blocs et « chaque classe a sa règle ».
 **[ ] 7.** `?v=`, versions, lint ; commit final `Monde lot 68 T1 : les fiches et l'arrivée fidèles aux planches` ; compte rendu honnête (**liste, écran par écran, ce qui reste différent**) ; `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- `ui-cadre.css` : remplacement des sélecteurs `:nth-child` de colonnes de l'aperçu de la fiche par des sélecteurs adjacents explicites ; version `?v=` montée.
+- `tests/mgmtFicheStats.test.js` : test « Monde lot 68 T1 — colonnes de l’aperçu explicites, sans position nth-of-type ».
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : vert (9 tests). `node tools/verif-versions.js origin/main` : aucun écart.
+- Écrans : aucun écran de cette tranche n'a été validé par capture visuelle au cours de ce travail. Fiche Aperçu/Statistiques : seule la règle de placement des colonnes a été modifiée, fidélité à la planche non vérifiée. Arrivée contrat/espoirs, Recruteur mission/retours, Semaine, Relevé, chiffres du combat, Menu, Meilleurs et Records : non traités.
+- Écart / limite : la lecture demandée de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` a été refusée par les permissions du workspace ; impossible de réaliser les captures et d'ouvrir les comparatifs prescrits. La tranche reste incomplète ; ne pas déclarer `TOUT_EST_FINI`.
+- Tests ajoutés : aucun nouveau fichier ; test ajouté au fichier existant ci-dessus (déjà inclus dans les scripts de test du dépôt).
+- Migration de sauvegarde : aucune.
+- Questions pour Anthony : aucune ; les vérifications visuelles restantes sont des travaux à effectuer, pas des questions de spécification.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
