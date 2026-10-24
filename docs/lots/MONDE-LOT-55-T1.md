@@ -273,3 +273,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node tools/verif-versions.js origin/main` retrouve seulement l’écart préexistant de `mgmt-accueil.js`, non modifié et hors tranche. Les fichiers d’outillage `.opencode/agents/*` et `opencode.json` sont exclus; `sw.js`, altéré par le test, a été restauré depuis `origin/main`.
 - Les cases majeures restant à réaliser ne changent pas par cette reprise : simulation réellement jouée sur trois années, carnet exhaustif des records historiques, conformité intégrale aux planches et vérification de sauvegarde historique. Le test lent `mgmtReleveReduit` n’a pas été lancé. Aucun changement de version de sauvegarde ni migration.
 - Fichiers métier de cette reprise : `mgmt-ceremonie.js` (titre annuel) et `index.html` (version du script); cette fiche (compte rendu). Aucun écart nouveau ni question pour Anthony.
+
+### Reprise 35
+
+- Ajout d'une lecture des records existants (`mgmtRecords(m)`) au carnet et d'une section « Records de tes soirées » ; aucune nouvelle trace n'est générée ni persistée. Le test « Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les saisons absentes » a été adapté pour inclure la collection vide facultative.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (15/15), `node_modules/.bin/eslint mgmt-ceremonie.js` (vert), `git diff --check` (vert). Audit de versions toujours signalé uniquement sur `mgmt-accueil.js`, préexistant et hors tranche. `sw.js` restauré, non inclus.
+- Limites restantes : parcours trois années complètes réellement jouées, conformité exacte aux maquettes, historique exhaustif des records/primes/champions et déclencheur anniversaire ne sont toujours pas démontrés. Le test lent de plafond n'a pas été lancé.
+- Fichiers de cette reprise : `mgmt-ceremonie.js` (lecture et rendu des records), `index.html` (bump de version), `tests/mgmtLot55T1.test.js` (attendu de lecture vide) et cette fiche. Aucune migration de sauvegarde. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et exclues.

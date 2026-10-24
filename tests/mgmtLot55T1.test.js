@@ -77,7 +77,7 @@ test('Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les sai
   assert.equal(carnet.primes[0].titre,'Prime observée');
   assert.equal(carnet.defis.length,1);
   assert.equal(carnet.soirees.length,1);
-  assert.equal(JSON.stringify(c.mgmtCarnetLire({})),JSON.stringify({champions:[],espoirs:[],prix:[],defis:[],primes:[],soirees:[]}));
+  assert.equal(JSON.stringify(c.mgmtCarnetLire({})),JSON.stringify({champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]}));
 });
 test('Lot 55 T1 — chaque prix possède trois formulations distinctes et spécifiques',()=>{
   const blocs=[...source.matchAll(/\{id:'(combattant|ko|soumission|combat|revelation|retour)'[^\n]*phrases:\[([^\]]+)\]/g)];
