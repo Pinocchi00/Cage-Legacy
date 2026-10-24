@@ -340,3 +340,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (19/19, dont la simulation multi-fenêtres jouées); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); `git diff --check` (vert). Le test lent `mgmtReleveReduit` n'a pas été relancé.
 - `sw.js` a été restauré depuis `origin/main` après altération par l'exécution des tests; il n'est pas inclus. Les changements `.opencode/agents/*` et `opencode.json` demeurent étrangers et exclus.
 - Aucun changement de format de sauvegarde ou migration. Les limites précédemment consignées persistent (notamment fidélité intégrale des maquettes et déclencheur au terme du contrat); ce commit corrige uniquement la version de cache requise pour l'accueil. Aucun ajout de test ni changement de textes joueur.
+
+### Reprise 44
+
+- État d'entrée : branche `p11-ceremonie-carnet`, HEAD `f4845f3`; le commit précédent porte déjà le message final demandé. Les seuls changements non committés sont `.opencode/agents/*` et `opencode.json`, étrangers à la tranche et laissés intacts.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (19/19, incluant les fenêtres de trois années jouées, les 50 formulations, rendu/échappement, carnet et champ facultatif de sauvegarde); `node_modules/.bin/eslint .` (vert); `node tools/verif-versions.js origin/main` (aucun écart); `git diff --check` (vert). Confirmation que le test figure dans `test` et `test:watch`.
+- Pas de changement de code cette reprise : le dernier état métier est déjà commité et les vérifications ne révèlent pas de défaut à corriger. Le test lent `mgmtReleveReduit` n'a pas été exécuté (délai outil de 120 s); il ne peut être déclaré vert.
+- Limites résiduelles documentées : ces tests n'établissent pas une reproduction intégrale des deux maquettes ni un déclenchement à chaque anniversaire (le parcours actuel passe par le terme du contrat); le test de sauvegarde vérifie le champ facultatif et sa réparation, mais ne charge pas une fixture historique complète. Aucune migration de sauvegarde.
+- Aucun fichier de tranche n'est à committer; aucun commit artificiel n'est créé. Ces limites empêchent de certifier toutes les cases de la fiche et de déclarer `TOUT_EST_FINI`.
