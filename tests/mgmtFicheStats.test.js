@@ -50,6 +50,19 @@ test('Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des o
   assert.match(css,/\.mf-fi-onglets>\.mf-fiche-suivi\{position:static;transform:none;flex:none;margin-left:18px\}/);
   assert.match(css,/\.mf-fb-suivi-count\{font-size:22px/);
   });
+test('Monde lot 68 T1 — aperçu et statistiques gardent le suivi hors du palmarès',()=>{
+  // Décision : planches Uni* validées par Anthony ; le bouton suit la rangée des onglets.
+  const w=monde();
+  for(const tab of ['apercu','stats']){
+    open(w,tab);
+    const placements=JSON.parse(w.eval("JSON.stringify((()=>{const row=document.querySelector('.mf-fi-onglets'),body=document.querySelector('.mf-fi-corps');return {tab:MGMT_FICHE.onglet,follow:!!row?.querySelector('.mf-fb-suivi'),count:!!row?.querySelector('.mf-fb-suivi-count'),followInBody:!!body?.querySelector('.mf-fb-suivi'),countInBody:!!body?.querySelector('.mf-fb-suivi-count')}})())"));
+    assert.equal(placements.tab,tab);
+    assert.equal(placements.follow,true,`${tab}: bouton dans les onglets`);
+    assert.equal(placements.count,true,`${tab}: compteur dans les onglets`);
+    assert.equal(placements.followInBody,false,`${tab}: bouton absent du palmarès`);
+    assert.equal(placements.countInBody,false,`${tab}: compteur absent du palmarès`);
+  }
+});
 test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',()=>{
   const w=monde();open(w);const shape=JSON.parse(w.eval("JSON.stringify((()=>{const panels=[...document.querySelectorAll('.mf-fs-panel')],frames=[...document.querySelectorAll('.mf-fs-frame')],bars=[...document.querySelectorAll('.mf-fs-part')];return {panels:panels.length,frames:frames.length,layers:frames.map(x=>x.firstElementChild?.firstElementChild?.classList.contains('mf-fs-panel')?3:0),segments:bars.map(x=>x.querySelectorAll('.mf-fs-bar i').length),percent:bars.some(x=>x.querySelector('.mf-fs-bar').textContent.includes('%'))}})())"));
   assert.equal(shape.panels,3);assert.equal(shape.frames,3);assert.deepEqual(shape.layers,[3,3,3]);assert.deepEqual(shape.segments,[3,3]);assert.equal(shape.percent,false);
