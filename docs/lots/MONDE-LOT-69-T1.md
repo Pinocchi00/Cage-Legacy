@@ -331,3 +331,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Migration de sauvegarde : aucune.
 - Écarts à la fiche : choc supérieur au seuil `grosBlocs` (25.1 %), série de captures interrompue après le choc, aucune mesure nouvelle discours/bilan/arrivée, logique de choc mono-affiche, et parcours actuel incomplet concernant fin de contrat/bilan et rechargement strictement identique. Les cases ne sont pas toutes terminées ; pas de revendication `TOUT_EST_FINI`.
 - Questions pour Anthony : aucune nouvelle question ; les limites restantes sont consignées sans inventer de règles métier.
+
+### Reprise 55
+- État contrôlé : branche `fid-choc`, HEAD `6e56a95e`. Le statut initial ne contenait aucun fichier de tranche en attente ; les modifications utilisateur sous `.opencode/agents/` et `opencode.json` sont conservées hors tranche.
+- Vérifications rejouées : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (16 fichiers) et `node_modules/.bin/eslint .` passe.
+- Aucun code ni test modifié durant cette reprise. Les instructions de capture externe n'ont pas pu être lues par l'outil autorisé et aucun dossier/scène `shoot` n'a été trouvé dans le dépôt ; aucune nouvelle image ou mesure n'est revendiquée.
+- Les cases ouvertes restent : affiches triples/score du choc, seuil visuel post-correction, captures arrivée/offre, parcours complet fin de contrat-bilan-rechargement strict. Aucun changement de sauvegarde.
+- Compte rendu honnête : travail déjà commité consulté et testé, mais la tranche n'atteint pas encore tous ses critères ; pas de `TOUT_EST_FINI`. Aucun autre écart ou question nouvelle.
