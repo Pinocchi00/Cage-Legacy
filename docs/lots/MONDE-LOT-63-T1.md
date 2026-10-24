@@ -74,6 +74,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 6 — contrôle inter-lots et livraison (24/10/2026)
+
+- État initial contrôlé sur `p8-apres` : les commits de production et de tests de la tranche figurent déjà dans `git log --oneline -12`; aucun fichier fonctionnel de tranche n'était non commité. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues.
+- La commande inter-lots demandée passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56. Les deux régressions lot 54 — rivalité enregistrée et non-répétition sur cinquante semaines — sont vertes.
+- La fusion `git merge origin/main` a été tentée mais l'environnement l'interdit explicitement. Elle reste à effectuer par le superviseur ; aucun test existant n'a été modifié.
+- Pas de changement de code ni de sauvegarde/migration nécessaire ; seul ce compte rendu est ajouté. Limite de couverture inchangée : les dix faits sont préparés dans les tests sur une partie issue du chemin réel, sans démontrer que tous les systèmes opérationnels les produisent naturellement. `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
+
 ### Reprise 10 — contrôle final après demande de reprise (24/10/2026)
 
 - Vérifiés `git log --oneline -12`, `git status` et la branche `p8-apres`. Les fichiers de code et tests de la tranche sont déjà commités ; les modifications présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et laissées hors commit.
