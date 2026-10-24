@@ -12,6 +12,15 @@ test('Lot 55 T1 — le calcul des prix est pur et déterministe',()=>{
 test('Lot 55 T1 — aucun prix sans candidat minimum',()=>{
   const c=charger();assert.equal(JSON.stringify(c.mgmtCeremonieCalculer({hist:[]})),'[]');
 });
+test('Lot 55 T1 — les prix combattant et révélation respectent leurs minima',()=>{
+  const c=charger();
+  const combat=(id,opp,jour)=>({c:jour,a:{id,name:id,W:0,L:0,D:0},b:{id:opp,name:opp},winner:'A',family:'ko',round:1});
+  const unSeul=c.mgmtCeremonieCalculer({hist:[combat('a','b',10)]});
+  assert.ok(!unSeul.some(p=>p.id==='combattant'||p.id==='revelation'));
+  const trois=c.mgmtCeremonieCalculer({hist:[combat('a','b',10),combat('a','c',20),combat('a','d',30)]});
+  assert.ok(trois.some(p=>p.id==='combattant'&&p.laureat==='a'));
+  assert.ok(trois.some(p=>p.id==='revelation'&&p.laureat==='a'));
+});
 test('Lot 55 T1 — les prix lauréats se consignent sans doublon',()=>{
   const c=charger(),m={roster:[{id:'a'}]},prix=[{id:'ko',laureat:'a'}];c.mgmtCeremonieInscrire(m,prix,2026);c.mgmtCeremonieInscrire(m,prix,2026);assert.equal(m.roster[0].prixAnnee.length,1);
 });
