@@ -2052,6 +2052,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-entete{min-height:48px;letter-spacing:.04em}
 .gu3-ligne{min-height:82px}
 .gu3-ligne.gu3-split{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+/* ==== [ANCRE: MONDE67_T1_EVOLUTION_CLASSEMENT] — Monde lot 67 T1 ==== */
+.gu3-ligne .gu3-evolution{font-size:26px;text-align:right;white-space:nowrap}
+.gu3-evolution.gu3-hausse{color:#F0B220}
+.gu3-evolution.gu3-baisse{color:#E23A2B}
+.gu3-evolution.gu3-stable{color:rgba(233,230,225,.74)}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{min-height:calc(100vh - 180px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:72px 110px;gap:24px;background:#0D0B0B;color:#E9E6E1}
