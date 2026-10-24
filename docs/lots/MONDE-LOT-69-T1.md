@@ -289,3 +289,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Cette assertion a échoué : `validateMgmt(m)` renvoie `false` après la soirée dans le montage actuel. Je l'ai retirée plutôt que d'affirmer que l'état est valide ; le test restant couvre seulement les assertions déjà établies du lendemain et l'identité de l'organisation.
 - Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent exclues de la tranche.
 - Écart : cette assertion ne résout pas le fait que le rechargement strict via `mgmtParseAndValidate` échoue dans le scénario existant ; elle ne prouve pas le parcours complet depuis la fin de contrat. Les écarts de choc multi-affiches, captures dédiées, mesure visuelle post-correction et comparaisons visuelles demeurent comme à la reprise 47.
+
+### Reprise 49
+- `ui-cadre.css` réorganise l'écran choc en deux colonnes (zone d'affiche et panneau de proposition) sous un bandeau/en-tête pleine largeur, conformément à la composition de `UniChoc`; le panneau d'offre est contenu dans sa colonne. `index.html` a été versionné par `node tools/_bump.js ui-cadre.css`.
+- `tests/mgmtLot69T1.test.js` vérifie la structure CSS en grille et l'en-tête traversant les colonnes. Test ciblé : 4/4 passe. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Pas de migration. Aucun test existant modifié pour modifier son comportement.
+- Écart : le modèle reste mono-affiche, les deux autres affrontements ne sont pas créés par ce changement de présentation; aucune mesure/capture post-correction n'a été produite. Les autres limites de parcours strict arrivée/contrat et preuve visuelle restent ouvertes. La grille s'approche du placement latéral de la planche mais n'est pas revendiquée comme comparaison d'image validée.
+- Modifications utilisateur sous `.opencode/agents/` et `opencode.json` préservées et hors commit.

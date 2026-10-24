@@ -68,7 +68,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      const discours=w.eval(`scr_mgmt_discours()`);
      for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
      const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
-     for(const selecteur of ['.ch3-title','.ch3-split','.ch3-adverse','.ch3-vs','.ch3-fight','.ch3-quote','.ch3-detail','.ch3-condition','.ch3-actions','.di3-scene','.di3-nom','.di3-lignes','.di3-suite']) assert.ok(css.includes(selecteur),`style de maquette absent: ${selecteur}`);
+      for(const selecteur of ['.ch3-title','.ch3-split','.ch3-adverse','.ch3-vs','.ch3-fight','.ch3-quote','.ch3-detail','.ch3-condition','.ch3-actions','.di3-scene','.di3-nom','.di3-lignes','.di3-suite']) assert.ok(css.includes(selecteur),`style de maquette absent: ${selecteur}`);
+      assert.match(css,/\.ch3-screen\{[^}]*display:grid;grid-template-columns:minmax\(0,1\.15fr\) minmax\(0,\.85fr\)/,'le choc dispose une colonne d’affiches et un panneau d’offre côte à côte');
+      assert.match(css,/\.ch3-head,\.ch3-title\{grid-column:1\/-1\}/,'en-tête et bandeau traversent les deux colonnes de la maquette');
      assert.match(css,/\.ch3-title[^\{]*\{[^}]*linear-gradient\(90deg,#E9E6E1[^}]*#E23A2B/s,'le bandeau choc conserve les deux couleurs de la planche');
      assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
      assert.match(css,/\.di3-nom[^\{]*\{[^}]*font:800 clamp\(88px,12vw,230px\)/s,'le nom du discours reste traité en très grand');
