@@ -82,3 +82,21 @@ test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels s
     for(const c of classes) assert.match(css,new RegExp('\\.'+c+'(?:[ .:{,#]|\\s*\\{)'));
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — classement et mouvement ne consomment aucun tirage',()=>{
+  const w=partie();
+  try{
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const avant=mgmtGuerreClassement(m);const seed=m.graine;const rng=m.rng;mgmtGuerreClassement(m);return JSON.stringify({seed,rng,seedApres:m.graine,rngApres:m.rng,avant:avant.map(x=>x.id),apres:mgmtGuerreClassement(m).map(x=>x.id)});})()`));
+    assert.deepEqual(r.apres,r.avant);
+    assert.equal(r.seedApres,r.seed);
+    assert.equal(r.rngApres,r.rng);
+  }finally{w.close();}
+});
+
+test('Monde lot 57 T1 — le rapport de classement reste facultatif sur une partie sans monde vivant',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const result=w.eval(`(()=>{const m=mgmtDefault('Split');return mgmtGuerreClassement(m).length;})()`);
+    assert.equal(result,0);
+  }finally{w.close();}
+});
