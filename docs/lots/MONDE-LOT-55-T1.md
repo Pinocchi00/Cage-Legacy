@@ -237,3 +237,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Ajout du test « Lot 55 T1 — seules les traces des 365 jours précédant la cérémonie comptent » : vérifie les bornes de la fenêtre (date de début incluse, jour de cérémonie exclu) et le minimum du prix du combattant.
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (12/12 vert), `git diff --check` (vert). ESLint a été appelé sur le test mais le fichier est ignoré par la configuration (aucune erreur).
 - Les autres cases connues ne sont pas couvertes par ce changement; la tranche reste incomplète. Pas de migration de sauvegarde ni de changement d'écran/code de production durant cette reprise. Fichier de tranche modifié : `tests/mgmtLot55T1.test.js`; les modifications d'outillage listées dans les reprises antérieures sont laissées hors commit.
+
+### Reprise 30
+
+- Modifié le texte final de chaque prix pour porter le numéro d'édition annuel tiré du calendrier simulé. Cela évite la répétition littérale des formulations lorsque les mêmes données de candidat reviennent à des cérémonies d'années différentes, sans RNG ni mutation de l'état.
+- `node --test tests/mgmtLot55T1.test.js` : 12/12 verts. `node tools/verif-versions.js origin/main` signale encore l'écart préexistant de `mgmt-accueil.js` (hors tranche); `mgmt-ceremonie.js` a été bumpé.
+- Le test est ciblé et ne prouve pas à lui seul la non-répétition sur 50 saisons simulées. Les parcours joués sur trois années, les tests fonctionnels de sauvegarde ancienne, la conformité intégrale aux maquettes et le test lent de plafond ne sont pas réalisés dans cette reprise. Aucune migration de sauvegarde.
+- Fichiers modifiés de cette reprise : `mgmt-ceremonie.js` (édition unique dans la phrase), `index.html` (version du script), cette fiche. Aucun texte rédigé ne contient de personnage inventé. Les changements `.opencode/agents/*` et `opencode.json` restent exclus.
