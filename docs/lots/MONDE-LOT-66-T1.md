@@ -234,3 +234,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtEcranLendemain.test.js` passe 7/7 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde ou de mécanique.
 - Capture non relancée : le guide externe `LISEZMOI.txt` reste inaccessible à l'outil de lecture de cette session ; le résultat visuel de cet ajustement et les quatre débordements antérieurement signalés restent à confirmer. Aucun nouveau résultat chiffré n'est revendiqué.
 - Fichiers de cette reprise : `ui-cadre.css` (colonnes mouvements), `index.html` (cache), cette fiche (compte rendu). Tests ajoutés : aucun ; tests existants conservés. Écarts : mesure/capture non disponible. Questions pour Anthony : aucune.
+
+### Reprise 36 — recapture et tentative de débordement — 24/10/2026
+
+- Guide relu et captures régénérées séparément : `lendemain` contrôle automatique 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 % ; `lendemainSuite` 0 chevauchement, 0 texte sous 22 px, gros blocs 17 %, mais les débordements « Poids léger », « Jonas Bühler », « Poids mi-moyen » et « 6ᵉ → 11ᵉ » persistent.
+- Tentative CSS de colonnes de mouvements rétrécissables et retours à la ligne forcés (`ui-cadre.css`), cache monté dans `index.html`. Cette tentative n'a pas changé le résultat mesuré ; elle n'est donc pas présentée comme une résolution et la case visuelle 4 reste partielle.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde/mécanique.
+- Images de comparaison régénérées dans le dossier temporaire de capture. L'état visuel résiduel est explicitement non conforme ; ne pas conclure `TOUT_EST_FINI`.
