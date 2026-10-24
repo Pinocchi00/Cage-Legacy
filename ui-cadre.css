@@ -2133,6 +2133,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_DEUX_CELLULES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);column-gap:12px;row-gap:6px}
+.ld66-suite .ld3-move>.ld66-move-identity{grid-column:1;grid-row:1 / span 2}
+.ld66-suite .ld3-move>strong{grid-column:2;grid-row:1}
+.ld66-suite .ld3-move>em{grid-column:2;grid-row:2}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE57_T1_STYLES] — Monde lot 57 T1 ==== */

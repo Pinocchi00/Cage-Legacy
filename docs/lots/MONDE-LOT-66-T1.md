@@ -28,6 +28,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Fichiers de cette reprise : `ui-cadre.css` (taille du nom de la carte surprise), `index.html` (version de cache), cette fiche (mesure et écarts). Tests ajoutés : aucun.
 - Questions pour Anthony : aucune.
 
+### Reprise 11 — tentative complémentaire sur les mouvements — 24/10/2026
+
+- Après le commit précédent, j’ai essayé une disposition interne à deux cellules (identité d’un côté, rang et organisation de l’autre) dans la colonne « Les mouvements », pour libérer de la largeur aux libellés. `index.html` a de nouveau été bumpé.
+- Capture `lendemainSuite` après l’essai : chevauchements 0, textes sous 22 px 0, `grosBlocs` 17 %, moyen 22,6 %, mais quatre débordements persistent (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). Les éléments signalés varient avec le jeu de données; le défaut de contenance n’est pas résolu par cette tentative. Aucun objectif visuel complet n’est revendiqué.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node tools/verif-versions.js origin/main` passent. Aucune donnée, navigation ou sauvegarde touchée.
+- Fichiers de cette reprise : `ui-cadre.css` (tentative de répartition des champs des mouvements), `index.html` (cache), cette fiche (résultat). Tests ajoutés : aucun.
+
 ### Reprise 59 — correction du lendemain et contrôle des captures — 24/10/2026
 
 - État de départ : branche `fid-lendemain`, HEAD `a1285179`; aucun changement local de code de tranche. Les modifications déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
