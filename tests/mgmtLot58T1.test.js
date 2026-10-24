@@ -55,3 +55,10 @@ test('Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le 
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);const org=m.org;m.poste.conf=0;m.poste.obj.forEach(o=>{o.e='cours';});const offers=mgmtOffresCreer(m);offers.forEach((_,i)=>mgmtOffreRefuser(m,i));const refusees=offers.every(o=>o.refuse);m.poste.conf=4;m.poste.obj.forEach(o=>{o.e='tenu';});const bilan=mgmtPosteBilan(m),renouvele=mgmtPosteRenouveler(m,bilan.issue);return {refusees,org:m.org===org,issue:bilan.issue,renouvele:!!renouvele,saison:m.poste.saison}})())`));
   assert.deepEqual(r,{refusees:true,org:true,issue:'prolonge-augmente',renouvele:true,saison:2});
 });
+
+test('Monde lot 58 T1 — la génération des offres ne consomme pas la graine de simulation',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');const avant=SEED;const une=JSON.stringify(mgmtOffresCreer(m));const apres=SEED;const deux=JSON.stringify(mgmtOffresCreer(m));return {avant,apres,stable:une===deux}})())`));
+  assert.equal(r.apres,r.avant);
+  assert.equal(r.stable,true);
+});

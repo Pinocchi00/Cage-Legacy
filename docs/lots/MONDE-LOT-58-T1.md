@@ -17,6 +17,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise 23 — état : inachevé, critère final non atteint.** Branche `p9-renvoi-offres` confirmée. Les modifications locales `.opencode/agents/*`, `opencode.json` et l'écart préexistant `ui-cadre.css` sont étrangers à la tranche, laissés intacts.
+  - **Fichier modifié :** `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — la génération des offres ne consomme pas la graine de simulation » : vérifie que la création déterministe des offres ne déplace pas `SEED` et qu'elle retourne le même contenu à répétition.
+  - **Tests/contrôles :** `node --test tests/mgmtLot58T1.test.js` passe (8/8). ESLint ciblé sur les fichiers de production ne relève pas d'erreur ; le fichier de test est ignoré. `git diff --check` passe. `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `ui-cadre.css`.
+  - **Travail restant, sans prétention de complétude :** le choc des organisations (propositions, agenda, combat extérieur, bonus, classement et écran `ch3-`), l'inclusion littérale du fichier de test dans les commandes `test` et `test:watch`, la validation E2E réellement générative et le contrôle du plafond restent non codés/vérifiés. L'étude T5 est déjà présente. Aucun écart visuel au choc n'est revendiqué car l'écran n'a pas été créé.
+  - **Sauvegarde :** aucune clé nouvelle dans cette reprise ; version inchangée. Aucun changement T5.
+  - **Questions pour Anthony :** aucune ; précisions du superviseur appliquées, les éléments non réalisés sont du travail restant et non des questions.
+
   - **Reprise 22 — état : incomplet, le critère final n'est pas atteint.** Branche `p9-renvoi-offres` confirmée. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et l'écart `ui-cadre.css` sont hors tranche et préservés.
   - **Modifications :** `mgmt-ecran-poste.js` crée les approches destinées aux organisations mieux classées au clic RESTER après un bilan positif ; version de cache montée dans `index.html`. `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — un bilan positif ouvre la voie aux approches avant le renouvellement ».
   - **Vérifications :** `node --test tests/mgmtLot58T1.test.js` vert (7/7). ESLint ciblé : aucune erreur (le test est ignoré par configuration). `git diff --check` passe. `node tools/verif-versions.js origin/main` rapporte seulement l'écart préexistant `ui-cadre.css`. Vérification package : le nom `mgmtLot58T1.test.js` n'est toujours pas littéralement inclus dans `test`/`test:watch` (il est couvert dans les pré-hooks et scripts ciblés).
