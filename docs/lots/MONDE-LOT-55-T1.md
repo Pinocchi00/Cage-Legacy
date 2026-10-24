@@ -447,3 +447,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichier de tranche modifié : `tests/mgmtLot55T1.test.js` (test de rendu sans candidats). Pas de modification de production, sauvegarde ou migration.
 - Les points non certifiés restent : fidélité intégrale aux planches, déclencheur à chaque anniversaire (l'enchaînement suit la fin du contrat), trois saisons complètes réellement jouées, fixture complète de sauvegarde ancienne et test lent `mgmtReleveReduit`. Aucun changement de code ne les rendrait honnêtement satisfaits dans cette seule vérification ciblée.
 - Les changements préexistants de `.opencode/agents/*` et `opencode.json` sont étrangers et exclus du commit.
+
+### Reprise 58
+
+- Vérification d'entrée : branche `p11-ceremonie-carnet`, HEAD `2cea26d`; aucun changement de production non commité. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères à la tranche.
+- Ajout du test « Lot 55 T1 — les prix attribués portent une phrase de presse marquée non relue » : exercice du calcul sur des relevés qui remplissent les critères de combattant, finition, combat et révélation, puis vérification du marqueur `relu:false`, de la présence du lauréat et d'un chiffre tiré de la période/trace.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (27/27 verts).
+- Limites non résolues : les écarts des reprises antérieures restent vrais, dont absence de preuve de trois saisons pleines, test de sauvegarde historique complète non effectué, fidélité intégrale aux maquettes non attestée, déclenchement à chaque anniversaire non réalisé (flux lié au terme du contrat). Le test lent `mgmtReleveReduit` n'a pas été exécuté.
+- Aucun changement de sauvegarde ou migration. Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (assertions sur la phrase presse), cette fiche (compte rendu). Aucune question nouvelle pour Anthony; la tranche n'est pas déclarée complète.

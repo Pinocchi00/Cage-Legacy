@@ -280,3 +280,19 @@ test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',
   assert.equal((rendu.match(/Pas de /g)||[]).length,6);
   assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
 });
+test('Lot 55 T1 — les prix attribués portent une phrase de presse marquée non relue',()=>{
+  const c=charger();
+  const hist=[
+    {c:10,a:{id:'a',name:'A',W:0,L:0,D:0},b:{id:'b',name:'B'},winner:'A',family:'ko',round:1,slot:'main',knockdownsA:2,knockdownsB:1},
+    {c:20,a:{id:'a',name:'A',W:1,L:0,D:0},b:{id:'c',name:'C'},winner:'A',family:'sub',round:2,slot:'main'},
+    {c:30,a:{id:'a',name:'A',W:2,L:0,D:0},b:{id:'d',name:'D'},winner:'A',family:'ko',round:1,slot:'main'}
+  ];
+  const prix=c.mgmtCeremonieCalculer({hist});
+  assert.ok(prix.length>0);
+  for(const p of prix){
+    assert.equal(p.relu,false,p.id);
+    assert.equal(typeof p.phrase,'string');
+    assert.ok(p.phrase.includes(p.nom),`phrase du prix ${p.id} sans lauréat`);
+    assert.ok(/\d/.test(p.phrase),`phrase du prix ${p.id} sans chiffre de relevé`);
+  }
+});
