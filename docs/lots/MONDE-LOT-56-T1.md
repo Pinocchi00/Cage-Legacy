@@ -131,3 +131,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtReleveReduit.test.js` a été lancé, mais dépassé par la limite de 120 secondes de l'outil et interrompu ; le contrôle du plafond n'est donc pas confirmé.
 - Aucun nouveau code n'a été ajouté lors de cet audit. La tranche reste inachevée : les intégrations diffuseur et attrait agents libres ne sont pas réalisées, aucun test ne prouve un franchissement causé par plusieurs soirées après `mgmtPasseGenerer`, la maquette exacte n'est pas entièrement reproduite et le test de tranche ne comporte toujours pas les couvertures de progression réelle/empreinte ancienne spécifiquement exigées. Les vérifications vertes ne suffisent pas à satisfaire ces critères.
 - Migration : aucune. Aucune question de spécification nouvelle. Aucun commit final ni `TOUT_EST_FINI` revendiqué.
+
+### Reprise 6 — nouvel état des vérifications (24/10/2026)
+
+- État consulté : branche `p11-croissance`, HEAD `7e74cb1`. Le seul changement préexistant était la présente fiche ; les modifications `.opencode/agents/*` et `opencode.json` sont restées hors tranche.
+- Tests ciblés relancés : `node --test tests/mgmtLot56T1.test.js` passe (10/10). `node --test tests/mgmtReleveReduit.test.js` a été tenté deux fois et a dépassé la limite outil de 120 s puis 300 s ; le plafond de partie neuve n'est pas confirmé.
+- Cette reprise n'a pas modifié le code : le parcours réel ne prouve toujours pas un franchissement induit par les soirées, et les branches d'effet diffuseur et d'attrait des agents libres ne sont pas raccordées. Le test de tranche ne couvre pas les empreintes historiques de façon dédiée. La reproduction complète des valeurs de la planche demeure à comparer/corriger. Ces critères restent ouverts, ainsi que lint/audit final après les modifications manquantes.
+- Aucun changement de sauvegarde ni migration. Pas de commit final ni `TOUT_EST_FINI` : les critères de fin de la tranche ne sont pas atteints.
