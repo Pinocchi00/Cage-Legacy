@@ -1832,6 +1832,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-side{display:flex;flex-direction:column;gap:12px;align-items:flex-end}.ch3-side b{font:800 46px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif}.ch3-side span{font-size:22px;color:rgba(233,230,225,.74)}
 .ch3-opponent{align-items:flex-start}.ch3-category{text-align:center;font-size:22px;font-weight:600;line-height:1.25;color:#F0B220}
 .ch3-terms{background:#121010;border:2px solid rgba(233,230,225,.5);padding:24px;display:flex;flex-direction:column;gap:10px}.ch3-terms h2{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0}.ch3-terms p,.ch3-status{font-size:24px;line-height:1.2;margin:6px 0}
+.ch3-detail{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:8px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px}.ch3-detail span{color:rgba(233,230,225,.74)}.ch3-detail b{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;text-align:right}
 .ch3-actions{display:flex;gap:12px}.ch3-button,.ch3-back{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;padding:12px 22px;background:#F0B220;color:#0D0B0B;border:0;cursor:pointer}.ch3-back{align-self:flex-start;background:#252121;color:#E9E6E1;font-size:24px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
