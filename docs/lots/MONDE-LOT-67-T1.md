@@ -7,6 +7,13 @@
 - Vérification : `node --test tests/mgmtLot55T1.test.js` passe (49/49) ; capture cérémonielle passe les contrôles automatisés.
 - Fichiers modifiés : `ui-cadre.css`, `index.html`, cette fiche. Pas de test nouveau ni migration. Écarts non clos : comparatifs et scène remplie non inspectés, mesures/retouches restantes des vues Croissance/Carnet/Bilan/Guerre non effectuées dans cette reprise. Aucun `TOUT_EST_FIN` revendiqué.
 
+## Compte rendu — reprise 23 (24/10/2026)
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` consulté. L'arbre était propre et les commits de tranche antérieurs étaient déjà présents.
+- Protocole de capture lu depuis le chemin externe et capture Cérémonie lancée à 1920×1080 : contrôle `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=19,7 %`. Le fichier comparatif a été généré par l'outil dans le répertoire temporaire, mais l'outil `Read` ne peut pas ouvrir le chemin externe : je ne revendique pas d'inspection visuelle directe ni de rendu démontré avec les cinq prix remplis.
+- Le test ciblé `node --test tests/mgmtLot55T1.test.js` passe (49/49). Aucun code applicatif n'a été changé dans cette reprise ; la capture répétée n'apporte pas de correction aux défauts restant consignés pour Croissance, Carnet, Bilan et Guerre, et ne prouve pas que tous les prix sont affichés. Aucune migration de sauvegarde.
+- Fichier modifié : cette fiche (résultat de capture et limites de preuve). Aucun test ajouté, aucune version de cache à monter. Écarts à la fiche toujours ouverts : correction/mesure des autres vues et capture cérémonie avec prix remplis/rivale déterministe ; aucun `TOUT_EST_FIN` revendiqué.
+
 ## Compte rendu — reprise 22
 
 - Branche `fid-organisation` confirmée. `git log --oneline -12` et `git status` consultés ; la seule modification initiale était le `sw.js` régénéré, restauré depuis `origin/main` sans l'ajouter.
