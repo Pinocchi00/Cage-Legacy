@@ -83,3 +83,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun test `mgmtReleveReduit` n'a été lancé (test lent). `check:rapide` n'a pas été lancé conformément au contrôle rapide superviseur. Aucune migration de sauvegarde.
 - Le diff local de `package.json` ajoute des scripts `test:lot55t1-suite` et `test:watch:lot55t1-suite` redondants aux deux scripts spécifiques déjà présents dans HEAD; il n'a pas été intégré à cette tranche. Aucun écran supplémentaire ou maquette n'a été livré lors de cette reprise.
 - Livraison toujours inachevée, sans question ouverte de spécification identifiée. Les fichiers métier déjà commis dans les reprises précédentes restent à terminer avant la livraison finale.
+
+### Reprise 10
+
+- Vérification initiale : branche `p11-ceremonie-carnet`, HEAD `97a6442`; aucun fichier métier de la tranche n'était modifié hors commit. Les changements `.opencode/agents/*` et `opencode.json` restent étrangers.
+- Relance du test disponible : `node --test tests/mgmtLot55T1.test.js` (3/3 vert). Le dépôt ne comporte toujours pas les parcours exigés (trois années simulées, 50 soirées, classes CSS sans règle, échappement et sauvegarde intégrés) ; un résultat vert de ces trois tests unitaires ne démontre donc pas la conformité.
+- Après inspection de l'état courant, les écrans existants restent des versions partielles : pas de classement final des huit organisations dans la cérémonie ni de raccordement à l'accueil avant bilan patron, et le carnet n'est pas raccordé à la navigation secondaire. Le calcul/inscription des prix ne constitue pas encore l'implémentation complète des critères d'année et l'écran n'est pas conforme aux planches.
+- Aucun travail métier incomplet n'était présent dans l'arbre à commiter. Je n'ai donc pas créé de commit artificiel ni déclaré la tranche terminée : la demande de reprise ne peut pas être satisfaite honnêtement sans réaliser les cases manquantes. Aucune modification n'a été faite durant cette reprise.
+- Vérifications effectuées : `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint mgmt-ceremonie.js mgmt-save.js` (vert), `git diff --check` (vert). Test lent `mgmtReleveReduit` non lancé. La seule modification de cette reprise est ce compte rendu ; aucun code métier n'a été modifié.
