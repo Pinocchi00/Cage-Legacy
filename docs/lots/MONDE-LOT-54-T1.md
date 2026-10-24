@@ -220,6 +220,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Limites encore constatées après inspection des deux planches et du code : composition active simplifiée au regard des valeurs exactes, famille T3 non couverte par des faits existants pour toutes les situations demandées, et tests actuels ne démontrant pas une mémoire éditoriale historique persistante. Les exigences non couvertes ne sont pas réputées terminées. Pas de nouvelle donnée sauvegardée ; `MGMT_SAVE_VERSION` inchangé.
 - La branche ne contenait aucune modification de production de la tranche à reprendre. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
 
+### Reprise — contexte des moments (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : chaque carte de moment affiche le contexte disponible du combat (principal/préliminaire et catégorie), échappé avec `esc()` ; `ui-cadre.css` fournit `.ld3-meta` à 26 px. Versions cache montées.
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — chaque moment indique le cadre du combat ».
+- Les détails co-principal/préliminaire numérotés et l’alignement complet des deux planches restent à achever ; T3 n’invente toujours pas les réactions dépourvues de faits sources. Aucun changement de sauvegarde.
+
 ### Reprise — réaction de rivalité contextualisée (24/10/2026)
 
 - `mgmt-ecran-lendemain.js` : lorsqu'un fait `rivalite` de la soirée existe, le message T3 nomme désormais les deux combattants du fait, et aucun message de rivalité n'est rendu si le rival ne peut pas être résolu dans le roster. Le cache JS a été monté.

@@ -343,3 +343,17 @@ test('Monde lot 54 T1 — les mouvements de classement exposent les rangs avant 
     assert.match(css,/\.ld3-move\s*\{/);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — chaque moment indique le cadre du combat',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`mgmtLendemainMomentsCompletsHtml(G.mgmt)`);
+    assert.equal((html.match(/class="ld3-meta"/g)||[]).length,3);
+    assert.match(html,/Combat principal|Préliminaire/);
+    assert.match(html,/ld3-meta[^<]*|class="ld3-meta"/);
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    assert.match(css,/\.ld3-meta\s*\{[^}]*font:\s*600\s+26px/s);
+  }finally{w.close();}
+});
