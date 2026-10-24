@@ -107,6 +107,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - État écran par écran : Aperçu/Statistiques (colonnes et structure couvertes par tests, fidélité visuelle non validée) ; Arrivée contrat/espoirs, Recruteur mission/retours, Semaine, Relevé, Chiffres, Menu, Meilleurs et Records (non validés visuellement ; certaines structures/classes testées, corrections et comparaisons restent à faire). Différences visuelles précises non établies.
 - Aucune migration de sauvegarde, modification JS/CSS, ni bump `?v=`. Le critère visuel complet et la livraison ne sont pas atteints ; pas de déclaration `TOUT_EST_FINI`.
 
+### Reprise 14 du 24/10/2026
+
+- Vérifiés à la reprise : branche `fid-fiches`, historique jusqu'à `7615840`, aucun fichier de tranche non committé. Changements `.opencode/agents/*` et `opencode.json` hors périmètre préservés.
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : 16/16 verts. Une tentative de test « chaque classe fiche a une règle » a été supprimée : classes de présentation (notamment SVG) mêlées aux classes de layout, et le test naïf confondait règle CSS exacte et styles hérités. Aucun test invalide gardé.
+- Comparaison visuelle requise : toujours impossible à produire/ouvrir dans l'environnement ; le rapport ne prétend donc pas avoir validé les planches. Écrans : fiche, arrivée, recruteur, semaine, relevé, chiffres, menu, meilleurs et records restent sans vérification comparative complète. Les seules différences précises observées via tests sont structurelles ; pas de diagnostic visuel inventé.
+- Aucun changement applicatif ni migration. Le critère de fidélité visuelle n'est pas atteint ; ne pas déclarer `TOUT_EST_FINI`.
+
 ### Reprise 13 du 24/10/2026
 
 - Ajout de « Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux étapes » dans `tests/mgmtFicheStats.test.js`. Le test vérifie la présence des blocs contrat/espoirs et de règles CSS correspondantes dans les styles définis par l'écran d'arrivée, conformément à la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
