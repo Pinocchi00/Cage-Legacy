@@ -39,7 +39,7 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(6902);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);G.mgmt=m;`);
-    w.eval(`G.mgmt.choc={orgId:Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:G.mgmt.roster[0].id,b:Object.values(G.mgmt.orgs).flatMap(o=>o.roster||[])[0].id};`);
+    w.eval(`(()=>{const orgId=Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),org=G.mgmt.orgs[orgId];G.mgmt.choc={orgId,div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:G.mgmt.roster[0].id,b:org.roster[0].id}})()`);
     assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
     w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
@@ -51,9 +51,11 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      assert.match(choc,/Fiche/);
      assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');
      const programmation=w.eval(`(()=>{const m=G.mgmt,ok=mgmtChocRepondre(m,true);return {ok,etat:m.choc.etat,jour:m.choc.jour,agenda:m.cal.prochaines.some(s=>s.jour===m.choc.jour)}})()`);
-     assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
-     assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
-     assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
+      assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
+      assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
+      assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
+      assert.equal(w.eval(`G.mgmt.choc.a`),w.eval(`G.mgmt.roster[0].id`),'le champion Split de la proposition reste associé au choc programmé');
+      assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
      w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
      const discours=w.eval(`scr_mgmt_discours()`);
      for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);

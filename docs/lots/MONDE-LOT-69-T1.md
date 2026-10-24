@@ -205,3 +205,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications exécutées : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
 - Aucun changement fonctionnel ajouté : le travail de reprise précédent est déjà commité et le test ciblé confirme son périmètre actuel. Pas de migration de sauvegarde.
 - Les critères restant à prouver restent ceux des reprises précédentes : choc 3 contre 3 avec résultat par le parcours normal, mesures post-correction et scènes dédiées/captures, et le parcours complet depuis la fin du contrat avec rechargement strict. Rien dans cette reprise ne permet de les déclarer accomplis. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 36
+- `tests/mgmtLot69T1.test.js` corrige le fixture du choc : le combattant adverse est désormais pris dans l'effectif de l'organisation explicitement associée à la proposition. Le test vérifie également que les deux identifiants de champions restent rattachés au choc après acceptation et programmation.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (fixture cohérent et assertions d'identité des combattants) et cette fiche (compte rendu). Aucune migration ni version de cache requise.
+- Limites : cela vérifie seulement l'association des deux combattants à la proposition mono-combat et l'inscription de la date dans l'agenda ; le parcours de soirée/résultat du choc n'est pas prouvé ici. Les autres écarts demeurent : trois affrontements, parcours complet avec chargement strict, comparaisons/captures et mesures des écrans. Aucune image nouvelle n'est revendiquée.
