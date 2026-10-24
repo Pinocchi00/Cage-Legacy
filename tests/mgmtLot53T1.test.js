@@ -122,3 +122,14 @@ test('Monde lot 53 T1 — le calcul temps forts reste borné et respecte l’ord
     assert.ok(result.duree>=30&&result.duree<=60,`durée observée: ${result.duree}s`);
   }finally{w.close();}
 });
+
+test('Monde lot 53 T1 — la touche V règle la vue du combat sélectionné',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5307);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>{G.screen='mgmt_soiree';MGMT_SOIREE_UI.focus=0;mgmtVueCombatChoisir(0,'complet');return {avant:mgmtVueDuCombat(G.mgmt,0),html:mgmtSoOuvertureHtml(G.mgmt,mgmtSoireeProgramme(G.mgmt))};})()`);
+    assert.equal(r.avant,'complet');
+    assert.match(r.html,/COMBAT|PRÉLIM/);
+  }finally{w.close();}
+});

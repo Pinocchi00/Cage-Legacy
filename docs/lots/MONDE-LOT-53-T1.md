@@ -185,3 +185,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-combat.js` (attributs accessibles sur la frise), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertions des états et de l'échappement), présente fiche.
 - Cette reprise ne termine pas le lot. Les compositions complètes `UniSoiree` et `UniSoireeFin`, la lecture fenêtrée accélérée/fondue passable, l'assertion de cumul 900–1200 s et la vérification d'empreintes anciennes restent non satisfaites. Le test ne couvre pas exhaustivement les classes et n'est pas inscrit aux listes principales `test` et `test:watch`.
 - Aucun changement du moteur de combat, de sauvegarde ou de la formule de durée. Les changements locaux `.opencode/agents/*` et `opencode.json` sont étrangers et exclus du commit ; `sw.js` est restauré à `origin/main`.
+
+### Reprise 26 — test explicite du réglage de vue
+
+- Fait : ajout d'un test du réglage de vue pour un combat sur une partie générée par le vrai parcours, en utilisant les portes existantes `mgmtVueCombatChoisir` et `mgmtVueDuCombat`.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 11/11 réussis.
+- Non fait : portage des compositions `UniSoiree` et `UniSoireeFin`, lecture temps forts segmentée avec fondu et contrôles, mesure réelle du cumul dans la plage 900–1200 s, couverture complète des classes et test des empreintes historiques. Le nouveau test ne valide pas à lui seul une interaction clavier DOM de V.
+- Écart et choix : le lecteur reste l'arène actuelle accélérée hors moments, sans moteur d'animation secondaire. Aucune durée n'est artificiellement ajoutée au calcul de référence.
+- Fichiers modifiés : `tests/mgmtLot53T1.test.js` (test du réglage indépendant) et cette fiche (compte rendu). Aucune migration de sauvegarde.
+- Tests ajoutés : « Monde lot 53 T1 — la touche V règle la vue du combat sélectionné ».
+- État : incomplet; critères de fin non atteints. Le commit de reprise porte le titre `Monde lot 53 T1 (inachevé) : test explicite du réglage de vue`.
