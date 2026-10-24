@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 6 — clôture vérifiée (24/10/2026)
+
+- Sur `p8-apres`, le code et les tests fonctionnels de cette tranche étaient déjà commités (`1a580491` en tête) ; aucun changement de production n'a été nécessaire. Le présent compte rendu consigne cette reprise.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Le test de tranche est inscrit dans `test` et `test:watch` (`true,true`).
+- Fichiers livrés dans les commits précédents : `mgmt-apres-data.js` (dix familles `relu:false`), `mgmt-ecran-lendemain.js` (calcul, Accueil/presse et mouvements d'autres organisations), `tests/mgmtLot63T1.test.js` et `package.json` (tests et scripts). Aucun changement de sauvegarde ni migration.
+- Limite de couverture : les tests établissent chaque déclenchement sur des faits préparés dans une partie issue du parcours réel, sans prouver que les systèmes de jeu produisent naturellement tous ces faits. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation locale de cache `index.html` sont hors tranche et exclues.
+
 ### Reprise 5 — contrôle et livraison (24/10/2026)
 
 - Branche `p8-apres` confirmée. `git log --oneline -12` montre les commits fonctionnels antérieurs ; aucun fichier de production/test de cette tranche n'est non commité. Seule cette fiche est modifiée pour ce bilan.
