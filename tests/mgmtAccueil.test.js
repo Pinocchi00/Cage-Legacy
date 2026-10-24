@@ -225,7 +225,8 @@ test('Monde lot 12 T2 — reprise 2 — listes limitées et Voir tout sans nom c
   assert.equal(r.liens.length,3); assert.equal(r.cur,0);
   assert.ok(r.noms.length>=9); assert.ok(r.noms.every(n=>n===r.nomLong),'les noms complets restent dans chaque bouton');
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
-  assert.match(css,/\.mf-ac\{[^}]*overflow:visible/);
+  /* Décision : les planches Uni* sont validées par Anthony (brief du 22/10) ; l'écran suit la planche. */
+  assert.match(css,/\.mf-ac\{[^}]*overflow:hidden/);
   assert.match(css,/\.mf-ac-p>\.mf-p2>\.mf-p3\{[^}]*overflow:visible/);
   assert.match(css,/\.mf-ac \.mf-ac-nom\{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%\}/);
 });

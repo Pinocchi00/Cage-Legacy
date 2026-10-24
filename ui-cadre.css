@@ -1660,7 +1660,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
    MondeAccueilArrivee.dc.html. Aucun texte sous 22 px, aucune animation, rien par-dessus. ==== */
 /* ==== [ANCRE: ACCUEIL_PLANCHE_COLONNES] — Monde lot 12 T2 ==== */
 /* ==== [ANCRE: ACCUEIL_PROPORTIONS_REPRISE] — Monde lot 12 T2 ==== */
-.mf-ac{display:flex;flex-direction:column;gap:16px;overflow:visible}
+.mf-ac{display:flex;flex-direction:column;gap:16px;overflow:hidden;min-height:0}
 .mf-ac-cols>.mf-ac-p{flex:5 1 0;min-width:0}
 .mf-ac-cols>.mf-ac-c3{flex:3 1 0}
 .mf-ac .mf-ac-hd{flex-wrap:wrap;gap:12px}
@@ -1684,7 +1684,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-cols~.mf-ac-p{flex:none;max-height:calc(100vh - 250px);overflow:auto}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_ZONE_VISIBLE] — Monde lot 64 T1 ==== */
 .mf-contenu.mf-ac{height:calc(100vh - 224px);min-height:0;box-sizing:border-box;overflow:hidden}
-.mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden}
+.mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden;max-height:100%}
 .mf-ac .mf-ac-cols>.mf-ac-p{min-height:0;overflow:auto}
 .mf-ac .mf-ac-cols>.mf-ac-saison{overflow:hidden}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_COLONNES_BORNEES] — Monde lot 64 T1 ==== */
