@@ -415,3 +415,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun changement de production ou de sauvegarde dans cette reprise; aucune migration. Les modifications d'outillage `.opencode/agents/*` et `opencode.json` restent étrangères et non incluses.
 - Limites toujours réelles : fidélité intégrale au markup des maquettes et déclenchement à chaque anniversaire non démontrés (l'enchaînement actuel suit le terme du contrat); le parcours n'exécute pas trois saisons complètes, et le test lent `mgmtReleveReduit` ainsi que le chargement d'une sauvegarde historique complète ne sont pas validés. Ces critères empêchent de certifier la fiche entièrement achevée.
 - Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (test d'échappement/rubriques) et cette fiche (compte rendu). Aucun écart nouveau ni question pour Anthony.
+
+### Reprise 54
+
+- Corrigé le départage à égalité des prix KO/soumission et combat : il repose maintenant sur les identifiants des candidats plutôt que sur l'index courant de `m.hist`, donc réordonner des relevés à score et date égaux ne change plus le lauréat.
+- Test ajouté : « Lot 55 T1 — les égalités de prix sont stables malgré l’ordre des traces ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (24/24), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé `mgmt-ceremonie.js` (vert), `git diff --check` (vert). `mgmt-ceremonie.js` bumpé. Le test demeure déjà inscrit dans les scripts généraux `test` et `test:watch`.
+- Écarts précédemment consignés inchangés : pas de preuve d'exécution de trois saisons complètes ni du chargement d'une fixture complète historique; le test lent `mgmtReleveReduit` n'a pas été exécuté; le déclencheur suit le terme du contrat et la reproduction intégrale des planches n'est pas certifiée. Aucune migration de sauvegarde.
+- Fichiers de cette reprise : `mgmt-ceremonie.js` (départages déterministes), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
