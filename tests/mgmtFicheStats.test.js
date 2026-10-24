@@ -110,6 +110,14 @@ test('Monde lot 68 T1 — menu principal conserve ses blocs et styles de planche
   const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
   for(const name of ['mf-stage','mf-fond','mf-accueil-gauche','mf-accueil-titre','mf-menu','mf-menu-bas','mf-accueil-touches']) assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
 });
+test('Monde lot 68 T1 — l’écran des classements conserve ses blocs de données',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-ecran-classements.js'),'utf8');
+  for(const fn of ['mgmtClassementsTabsHtml','mgmtClassementsScopeBtnsHtml','mgmtClassementsChampionsHtml','mgmtClassementsStepsHtml'])
+    assert.match(js,new RegExp(`function\\s+${fn}\\s*\\(`),fn);
+  assert.match(js,/top15:'Le top 15'/);
+  assert.match(js,/title:'Classements'/);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);
