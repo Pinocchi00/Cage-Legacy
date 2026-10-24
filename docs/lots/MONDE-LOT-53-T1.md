@@ -369,3 +369,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajouté : « Monde lot 53 T1 — V règle aussi le combat sélectionné sur la carte d’ouverture ».
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis. Le cache de `mgmt-soiree-cadre.js` a été monté.
 - Ce correctif ne résout pas les écarts substantiels restant dans la reprise 53 : composition intégrale des planches, mesure 900–1200 s et lecture des moments temporisée. Aucun changement du moteur ou de la sauvegarde.
+
+### Reprise 55 — en-tête de la carte
+
+- Fait : l'en-tête de l'ouverture a une classe de portée `so3-entete` et reprend la hiérarchie de la planche (séparation de 64 px, libellé secondaire de 22 px, organisation en titre condensé de 56 px, compteur de combats lisible). Les données restent celles de l'événement courant; aucune donnée ni texte de personnage nouveau.
+- Fichiers modifiés : `mgmt-soiree-cadre.js` (classe de l'en-tête), `ui-cadre.css` (règles dédiées), `index.html` (versions cache), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
+- Écart restant : cela affine l'ouverture, sans convertir toute sa composition historique en blocs `so3-*`. Les critères globaux encore ouverts en reprise 53 (portage exact complet, plage totale 900–1200 s mesurée, lecture forts chronométrée/fondue sur l'image) restent non établis; ce changement ne suffit donc pas à déclarer le lot terminé.
