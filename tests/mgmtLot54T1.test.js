@@ -340,7 +340,9 @@ test('Monde lot 54 T1 — les mouvements de classement exposent les rangs avant 
     const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
     assert.match(html,/class="ld3-move"/);
     assert.match(html,/→/);
+    assert.match(html,/chez /);
     assert.match(css,/\.ld3-move\s*\{/);
+    assert.match(css,/\.ld3-move\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\)\s+120px\s+130px/s);
   }finally{w.close();}
 });
 

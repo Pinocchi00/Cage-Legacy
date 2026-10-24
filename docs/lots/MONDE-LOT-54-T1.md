@@ -244,3 +244,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `ui-cadre.css` ajoute la règle dédiée `.ld3-change-movements`; caches CSS et JS montés dans `index.html`. Aucun état de sauvegarde nouveau.
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint du fichier JS passe.
 - Limites inchangées : fidélité exhaustive de la composition aux deux planches et contextualisation/anti-répétition éditoriale T3 ne sont pas entièrement garanties. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangères à la tranche et exclues.
+
+### Reprise — ligne de mouvement conforme à la planche (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : les mouvements indiquent aussi l’organisation (« chez … »), échappée avec `esc()`. `ui-cadre.css` dispose ces données selon les trois colonnes de la planche (combattant/catégorie, évolution, organisation).
+- Test renforcé : « Monde lot 54 T1 — les mouvements de classement exposent les rangs avant et après » vérifie aussi l’organisation et les dimensions de grille. `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; versions sans écart ; ESLint ciblé passe. Les scripts `test` et `test:watch` contiennent le test.
+- Aucun changement de sauvegarde. Les écarts essentiels persistent : reproduction complète des valeurs/layouts des deux maquettes non démontrée ; les familles T3 n'ont pas de données-source pour toutes les réactions demandées et l'anti-répétition sur 50 semaines reste assurée par un suffixe temporel, pas par mémoire éditoriale persistante. `tests/mgmtReleveReduit.test.js` n'a pas été lancé.

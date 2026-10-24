@@ -206,7 +206,7 @@ function mgmtLendemainMouvementsHtml(m){
     if(!rangs||rangs.avant===rangs.apres) continue;
     const nom=fighter.name||fighter.last||'Combattant';
     const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,fighter.div);
-    lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong></div>`);
+    lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong><em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
   }
   return lignes.join('');
 }
