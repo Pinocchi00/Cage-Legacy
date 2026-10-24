@@ -378,3 +378,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun fichier métier n'a été changé durant cette reprise : l'état courant est déjà commité et les contrôles ne révèlent pas de régression à corriger. Aucun commit artificiel n'est créé.
 - Limites honnêtement conservées : les tests ne démontrent pas trois saisons complètes, le test lent `mgmtReleveReduit` n'a pas été exécuté ici, le chargement d'une fixture complète de sauvegarde ancienne n'est pas couvert, et les reprises précédentes signalent des écarts résiduels à la reproduction intégrale des planches et au déclenchement anniversaire (le raccordement suit le terme du contrat). Aucune migration de sauvegarde.
 - Aucune question nouvelle pour Anthony; les limites ci-dessus sont des critères encore non certifiés, pas des questions de spécification.
+
+### Reprise 49
+
+- État contrôlé : branche `p11-ceremonie-carnet`, HEAD `cbc50a5` (le commit final au nom demandé existe déjà). Aucun fichier métier/test de la tranche n'est modifié hors commit; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et restent exclues.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (20/20), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Aucun changement de code supplémentaire n'a été justifié par ces vérifications. La fiche continue d'indiquer les limites non certifiées plutôt que de prétendre une conformité totale : le parcours n'exécute pas trois saisons pleines, ne charge pas une fixture historique complète, le test lent `mgmtReleveReduit` n'a pas été exécuté et le rendu intégral des planches ainsi qu'un déclencheur à chaque anniversaire ne sont pas attestés (l'enchaînement existant suit le terme du contrat).
+- Pas de changement de sauvegarde ni migration. Aucun fichier de tranche nouveau à committer; aucun commit artificiel. Les vérifications ne justifient pas `TOUT_EST_FINI` puisque les critères ci-dessus restent non satisfaits.
