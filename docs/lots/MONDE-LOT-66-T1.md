@@ -126,6 +126,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
 - Questions pour Anthony : aucune.
 
+### Reprise 23 — correction après audit automatisé — 24/10/2026
+
+- Relu le guide et recapturé les deux écrans. Le contrôle a révélé des défauts qui n'étaient pas consignés comme corrigés : sur `lendemain`, 8 chevauchements et 6 textes sous 22 px (avant les ajustements), puis 4/8 chevauchements selon la hauteur testée, avec une ligne de constat coupée. Sur `lendemainSuite`, aucun chevauchement mais 21 éléments sous 22 px et plusieurs libellés coupés. Les gros blocs sont restés proches de la cible (lendemain 19,4–20,6 %, suite 18,1–18,4 %).
+- Modifié `ui-cadre.css` et augmenté son `?v=` : règles de taille plancher pour détails et lignes de résultats, ajustement de la répartition des cartes et retours à la ligne dans les colonnes. Aucune mécanique ni sauvegarde changée.
+- Tests verts après les modifications : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9) et `mgmtLot54T1.test.js` (30/30). `node tools/verif-versions.js origin/main` sans écart ; ESLint passe.
+- Écart restant vérifié : le comparateur signale encore des chevauchements/troncatures sur `lendemain` et des textes de moins de 22 px/troncatures sur `lendemainSuite`. Cette tranche ne peut donc pas revendiquer le critère visuel de la case 4 comme satisfait. Les captures sont sous `C:/Users/antho/AppData/Local/Temp/shots/`; aucun examen manuel de PNG n'est revendiqué. Aucun changement des fichiers non liés préexistants (`.opencode/agents/*`, `opencode.json`, `sw.js`).
+
 ### Reprise 21 — tests ciblés de confirmation — 24/10/2026
 
 - À la reprise, les commits fonctionnels restent présents (HEAD `d57deab`) ; aucun fichier de code ou test de la tranche n'était en attente. Les changements locaux d'agents/configuration et `sw.js` sont restés intacts et exclus.

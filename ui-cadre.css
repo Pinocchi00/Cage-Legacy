@@ -2000,6 +2000,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-lower{position:relative;z-index:0}
 .ld66-screen{padding-bottom:8px}
 .ld66-suite .ld3-suite-back{display:none}
+/* Contrôle de capture lot 66 : taille minimale de lecture, détails contenus dans leurs colonnes. */
+.ld66-screen .mgmt-ld-detail,.ld66-screen .mgmt-ld-sub,.ld66-screen .mgmt-ld-rangs{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.ld66-screen .mgmt-ld-link{font:600 22px/1.1 var(--mgmt-font-body);min-height:44px;padding:8px 0}
+.ld66-suite .mgmt-ld-title{font-size:28px;line-height:1.05}
+.ld66-suite .mgmt-ld-sub,.ld66-suite .mgmt-ld-rangs,.ld66-suite .ld3-move span{font-size:22px;line-height:1.15}
+.ld66-suite .ld3-suite-press,.ld66-suite .ld3-suite-moves,.ld66-suite .ld3-suite-results{overflow-wrap:anywhere}
+.ld66-screen{height:calc(100vh - 210px);gap:12px}
+.ld66-moments{min-height:260px;flex:.62}
+.ld66-lower{flex:1.12}
+.ld66-lower .mgmt-ld-item{min-width:0}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
