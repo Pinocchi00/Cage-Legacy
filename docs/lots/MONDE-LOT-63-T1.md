@@ -287,6 +287,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 ### Reprise 5 — vérification finale prescrite (24/10/2026)
 
 - Branche `p8-apres` confirmée. Les commits de production/tests de la tranche sont déjà présents (`fcaa19e7` en tête) ; aucun fichier fonctionnel non commité. Les modifications locales d'agents `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et exclues.
+
+### Reprise — suite inter-lots prescrite (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les changements de production/tests sont déjà commités (`83788c9a` en tête). Aucun fichier fonctionnel ou test de tranche en attente. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et restent exclues.
+- La commande prescrite `git merge origin/main` a été refusée par la politique d'exécution interdisant `git merge*` ; l'intégration reste à effectuer par le superviseur.
+- Les sept suites ciblées demandées passent **130/130**, y compris les deux régressions du lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines). `node tools/verif-versions.js origin/main` ne signale aucun écart, ESLint global passe et les scripts `test`/`test:watch` référencent `mgmtLot63T1` (`true,true`).
+- Aucun changement de sauvegarde ni migration. Les familles de l'après, le calcul, les raccordements Accueil/presse, les mouvements inter-organisations et les neuf tests sont livrés dans les commits antérieurs. Limite de couverture inchangée : les tests préparent les faits familiaux sur une partie réelle sans démontrer que chaque système de jeu les génère naturellement. Aucun écart supplémentaire ni question pour Anthony.
 - La commande de fusion demandée `git merge origin/main` a été tentée, mais l'environnement interdit `git merge*`. La fusion n'a donc pas eu lieu et reste à effectuer par le superviseur.
 - La suite inter-lots demandée (lots 54, 63, actualités, 55, 57, 48 et 56) passe **130/130**, notamment les deux régressions lot 54 de rivalité enregistrée et d'anti-répétition. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
 - Aucun changement de sauvegarde ni migration. Les seuls fichiers de la tranche restent `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`, déjà commités ; limite de couverture inchangée : les familles sont aussi éprouvées par faits préparés dans un parcours réel, sans prouver que tous les systèmes les produisent naturellement.
