@@ -393,3 +393,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (21/21), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). Aucun changement de sauvegarde ni migration.
 - Fichiers modifiés : `mgmt-ceremonie.js` (inscription des deux lauréats), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche (compte rendu). Le test existant est déjà intégré aux suites `test` et `test:watch`.
 - Écarts toujours connus : conformité intégrale des planches non certifiée, déclencheur associé à la fin du contrat plutôt qu’à chaque anniversaire, absence de chargement d’une fixture historique complète et test lent `mgmtReleveReduit` non exécuté. Le parcours joue des soirées issues de trois années, mais ne prouve pas trois saisons pleines. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 51
+
+- Contrôle de reprise : branche `p11-ceremonie-carnet`, HEAD `2fb6af4`; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et restent hors de la tranche.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (21/21), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Le test cible inclut les simulations déterministes sur les relevés effectivement générés, les 50 fenêtres de formulation et le champ facultatif.
+- Aucun défaut détecté dans les critères couverts par ces contrôles. Les limites fonctionnelles précédemment consignées restent non résolues : fidélité intégrale aux maquettes non démontrée, déclenchement rattaché au terme du contrat plutôt qu'à chaque anniversaire, test de sauvegarde sans fixture historique complète, et pas de preuve de trois saisons pleines. `mgmtReleveReduit` n'a pas été exécuté.
+- Aucun format de sauvegarde modifié ni migration requise. Aucun fichier métier n'était en attente de commit; cette mise à jour du compte rendu est incluse dans le commit de reprise. Aucune question nouvelle pour Anthony. La tranche n'est pas déclarée entièrement conforme et `TOUT_EST_FINI` n'est pas revendiqué.
