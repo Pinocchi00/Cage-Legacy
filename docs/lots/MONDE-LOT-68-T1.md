@@ -325,6 +325,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications relancées : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (27/27 verts), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert). Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
 - Aucun défaut géométrique nouveau exploitable n'étant apparu, aucun changement applicatif n'a été fait à l'aveugle. Aucun bump `?v=` ni migration. Fidélité aux maquettes et couverture de toutes les scènes restent incomplètes ; cette reprise ne revendique pas `TOUT_EST_FINI`.
 
+### Reprise 47 du 24/10/2026 — contrôles demandés
+
+- État de reprise : branche `fid-fiches`, HEAD initial `c9f556aa`. Aucun fichier applicatif/test de la tranche non committé ; modifications préexistantes `.opencode/agents/*` et `opencode.json` préservées.
+- Guide de capture lu puis scènes lancées une par une. Résultats frais à 1920×1080 : fiche `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}` ; recruteur `{0,[],0,[]}` ; retours `{0,[],0,[]}` ; semaine `{0,[],0,[]}`. Le contrôle de la fiche confirme l'absence des deux chevauchements signalés au départ. Aucune correction supplémentaire de ces écrans n'est justifiée par ces mesures.
+- Scènes supplémentaires demandées, hors périmètre de modification parallèle : accueil `{chevauchements:0,textesSous22px:1,debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{chevauchements:1,exemples:["« Tout est lu » x « Tout marquer comme lu »"],textesSous22px:3,debordent:[]}` ; tonposte `{chevauchements:6,textesSous22px:0,debordent:["IL ATTEND DE VOIR","« Je veux voir la suite."]}` ; bilan `{chevauchements:1,exemples:["REMERCIÉ x Il manque 3 combats en carte"],textesSous22px:0,debordent:[]}`. Ces écrans appartiennent aux lots 64/67 ; conformément à l'interdiction de toucher les écrans parallèles, aucun fichier correspondant n'a été modifié.
+- Tests ciblés : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts). Ces tests couvrent les blocs/styles et les données, pas les scènes non présentes dans le captureur.
+- Arrivée contrat/espoirs, relevé, chiffres de combat, menu et classements ne figurent toujours pas dans la liste de scènes de l'outil ; aucun contrôle géométrique propre n'est revendiqué. Les comparatifs PNG n'ont pas été ouverts : les scores `moyen`/`grosBlocs` ne sont pas traités comme validation visuelle.
+- Aucun changement applicatif, aucune migration ni bump `?v=` : les contrôles frais des écrans de tranche disponibles n'ont révélé aucune anomalie à corriger, et les défauts des écrans hors périmètre ne peuvent être corrigés ici sans empiéter sur les lots parallèles. Écart à la fiche : comparaison visuelle et contrôle des scènes non accessibles restent inachevés ; pas de `TOUT_EST_FINI`.
+
 ### Reprise 38 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Historique jusqu'à `6874035f` consulté ; aucun fichier de la tranche en attente de commit. Les modifications `.opencode/agents/*` et `opencode.json` restent hors tranche et intactes.
