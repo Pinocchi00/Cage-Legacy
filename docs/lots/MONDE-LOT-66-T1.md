@@ -62,3 +62,10 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Limite visuelle maintenue : les comparaisons chiffrées confirment le seuil `grosBlocs ≤ 20 %`, mais les images comparatives n'ont pas été ouvertes pour inspection visuelle directe ; aucune certification supplémentaire sur chevauchement n'est revendiquée.
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+### Reprise 12 — recapture de confirmation — 24/10/2026
+
+- L'état initial montre les commits de tranche déjà présents jusqu'à `9193524`; seuls des fichiers de configuration d'agents et `sw.js` sont modifiés localement, tous hors tranche et laissés intacts.
+- Relecture du guide de capture puis comparateur relancé séparément : `lendemain` moyen 24,9 %, `grosBlocs` 19,5 % ; `lendemainSuite` moyen 23,3 %, `grosBlocs` 18,8 %. Le comparateur a régénéré `cmp-lendemain.png` et `cmp-lendemainSuite.png` sous le dossier temporaire des captures. Le seuil `grosBlocs ≤ 20 %` est confirmé ; aucune inspection visuelle manuelle des images n'est revendiquée.
+- Vérifications ciblées relancées : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7) ; audit `node tools/verif-versions.js origin/main` sans écart. Pas de changement fonctionnel, test, sauvegarde ou migration nécessaire.
+- Les captures restent les seules nouvelles mesures de cette reprise ; aucun autre écart à la fiche n'a été constaté. Les contrôles complets et lint ont été réalisés aux reprises précédentes, sans modification de code depuis.
