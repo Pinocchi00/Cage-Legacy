@@ -1021,6 +1021,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-moment span{font-size:22px;line-height:1.05}
 .so3-moment.actif{background:#F0B220;color:#0D0B0B;opacity:1;animation:so3-fondu .22s ease both}
 .so3-moment.passe{opacity:.4}
+.so3-frise-aide{position:absolute;top:calc(100% + 8px);left:0;right:0;display:flex;justify-content:center;gap:28px;color:#E9E6E1;font-size:24px;line-height:1;white-space:nowrap}
+.so3-frise-aide span{display:flex;align-items:center;gap:10px}
+.so3-frise-aide kbd{border:2px solid rgba(233,230,225,.7);padding:5px 9px;color:#E9E6E1;font:inherit}
 @keyframes so3-fondu{from{opacity:.35}to{opacity:1}}
 .so3-resultat{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;background:#121010;border:2px solid rgba(233,230,225,.38);color:#E9E6E1}
 .so3-resultat-titre{font-family:var(--mf-titre);font-size:36px;line-height:1;color:#F0B220}

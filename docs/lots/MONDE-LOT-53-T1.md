@@ -340,3 +340,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `ui-cadre.css` (règle du bouton `so3-vue`) et `index.html` (version de cache CSS), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` (18/18), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent.
 - Écart : ce petit ajustement rapproche le sélecteur de la maquette mais ne porte pas l'ensemble des blocs/compositions visuels des trois planches. Les lacunes substantielles et l'estimation mesurée antérieure sous 900 s demeurent; aucun achèvement global n'est revendiqué.
+
+### Reprise 47 — aide de commandes dans la frise
+
+- Fait : ajouté sous la frise un rappel des commandes réellement utilisables en lecture temps forts : Entrée (continuer au verdict), Échap (passer à la suite) et P (passer le combat). Le rappel ne prétend plus proposer le déplacement fenêtre par fenêtre des flèches, qui n'est pas implémenté. Chaque nouvelle classe `so3-frise-aide*` possède une règle CSS; tailles de texte 24 px.
+- Fichiers modifiés : `mgmt-combat.js` (markup aide), `ui-cadre.css` (styles), `index.html` (versions cache), `tests/mgmtLot53T1.test.js` (assertions aide et règles), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 ; `node tools/verif-versions.js origin/main` — aucun écart ; `node_modules/.bin/eslint .` et `git diff --check` passent.
+- Limites persistantes : ce rappel n'ajoute pas de navigation réelle entre les fenêtres. Le portage complet des maquettes, la lecture fenêtre par fenêtre/fondu d'image, le cumul de référence dans 900–1200 s et le test lent ne sont pas établis par cette étape. Aucun changement moteur ou sauvegarde.
