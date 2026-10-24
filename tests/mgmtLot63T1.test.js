@@ -23,6 +23,23 @@ test('Monde lot 63 T1 — le catalogue conserve les faits déclencheurs propres 
   }finally{w.close();}
 });
 
+test('Monde lot 63 T1 — les dix familles réclament chacune le fait réel correspondant',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=w.eval(`(()=>{const fn=mgmtLendemainApres.toString();return {
+      interpellation:/discours/.test(fn)&&/interpelle|target/.test(fn),
+      reseaux:/trait_gagne/.test(fn)&&/surnom/.test(fn),
+      suspension:/days/.test(fn)&&/touches/.test(fn),
+      revanche:/demande/.test(fn)&&/revanche/.test(fn),
+      organisation:/interet-organisation/.test(fn)&&/guerre/.test(fn),
+      espoir:/espoirs/.test(fn)&&/suivis/.test(fn),
+      titre:/title/.test(fn)||/ceinture/.test(fn),
+      salle:/spectateurs/.test(fn),prime:/prime/.test(fn),retraite:/retraite_annoncee/.test(fn)
+    }})()`);
+    assert.deepEqual(Object.values(r),Array(10).fill(true));
+  }finally{w.close();}
+});
+
 test('Monde lot 63 T1 — le calcul reste pur, borné et déterministe sur une vraie soirée',()=>{
   const w=newGameWindow({runMain:true});
   try{
