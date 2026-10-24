@@ -82,7 +82,7 @@ function scr_mgmt_ceremonie(){
     const nomsClassement=Array.isArray(classement)?classement.map(o=>mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')).join(', '):'';
     const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${mgmtCeremonieEchapper(rang)}e</strong><h2>SPLIT FINIT L’ANNÉE</h2><b>${mgmtCeremonieEchapper(rang)}e DES HUIT</b></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><p>Le rang de fin d’année détermine le diffuseur, le budget et l’accès aux agents libres.</p></article></section>`;
     const lien=`<button type="button" class="ce3-retour" onclick="CL.go('mgmt_accueil')">RETOUR</button><button type="button" class="ce3-bilan-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">LE BILAN DU PATRON</button>`;
-    const body=`<main class="ce3-ecran"><header class="ce3-entete"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p><strong>31 DÉCEMBRE · CAGE HEBDO</strong></header>${typeof mgmtOrgOnglets==='function'?mgmtOrgOnglets(m,'mgmt_organisation'):''}<section class="ce3-grille">${cards}</section>${bilanHtml}${lien}</main>`;
+     const body=`<main class="ce3-ecran"><header class="ce3-entete"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p><strong>31 DÉCEMBRE · CAGE HEBDO</strong></header><section class="ce3-grille">${cards}</section>${bilanHtml}${lien}</main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'LES TROPHÉES',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
