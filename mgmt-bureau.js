@@ -462,6 +462,9 @@ function mgmtNewPile(m){
   /* Monde lot 8 T4a : une demande périmée sans réponse, une vacance de ceinture et un cap de règne naissent à l'ouverture du cycle — jamais une fenêtre. */
   mgmtMondeOuvreCycle(m);
   if(typeof mgmtMondeVivantSemaine==='function') mgmtMondeVivantSemaine(m);
+  /* Monde lot 45 T1 : les organisations rivales agissent, puis la rivalité se met à jour. */
+  if(typeof mgmtOrgsAgir==='function') mgmtOrgsAgir(m);
+  if(typeof mgmtRivaleMettreAJour==='function') mgmtRivaleMettreAJour(m);
   /* Lot 10 : les nouvelles du cycle (défis, public, combattants qui attendent) entrent au fil. */
   if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
   m.pile=[];

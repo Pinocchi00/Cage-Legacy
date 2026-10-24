@@ -1,7 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P3_T2_ACTUALITES] — Monde lot 33 T2 ==== */
 const MGMT_ACTU_SOURCES=[];
-const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',choc:'CHOC DES ORGANISATIONS'};
+const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE',choc:'CHOC DES ORGANISATIONS'};
 function mgmtActuSourceAjouter(src){
   if(!src||typeof src.type!=='string'||typeof src.lire!=='function'||MGMT_ACTU_SOURCES.some(x=>x.type===src.type)) return false;
   MGMT_ACTU_SOURCES.push(src); return true;
@@ -21,6 +21,8 @@ function mgmtActuVariante(cle,type,sous,banque){
 }
 function mgmtActuNom(m,id){const f=mgmtFighterById(m,id)||mgmtExteriorCombattant(m,id); if(f)return {n:f.name,p:f.first||f.name,org:f.org||null,div:f.div||null}; for(const t of m.hist||[]){for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id,org:null,div:x.div||null};}for(const o of Object.values(m.orgs||{})){for(const t of o.hist||[])for(const x of [t&&t.a,t&&t.b])if(x&&x.id===id)return {n:x.name||id,p:x.first||x.name||id,org:null,div:x.div||null};}return null;}
 mgmtActuSourceAjouter({type:'resultat',lire(m,ids,depuis){const out=[];const historiques=[...(m.hist||[]).map((t,i)=>({t,i})),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>(o.hist||[]).map((t,i)=>({t,i}))):[])];const vus=new Set();for(const {t,i} of historiques){if(!t||!Number.isSafeInteger(t.c)||t.c<depuis||!t.a||!t.b)continue;for(const id of ids){const moi=t.a.id===id?t.a:t.b.id===id?t.b:null;if(moi){const uniq=t.c+'|'+i+'|'+id;if(vus.has(uniq))continue;vus.add(uniq);out.push({type:'resultat',c:t.c,id,adv:(moi===t.a?t.b:t.a).id,donnees:{combat:t,index:i}});}}}return out;} });
+/* ==== [ANCRE: P7_T4_DISCOURS_ACTUALITES] — Monde lot 50 T1 ==== */
+mgmtActuSourceAjouter({type:'discours',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='discours'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis&&x.interpelle).map(x=>({type:'discours',c:x.c,id:x.a,adv:x.interpelle,donnees:x}));}});
 mgmtActuSourceAjouter({type:'blessure',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='injury'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'blessure',c:x.c,id:x.a,donnees:x}));}});
 mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&['fin_contrat','libere','contrat'].includes(x.k)&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'contrat',c:x.c,id:x.a,donnees:x,sous:x.k}));}});
 /* ==== [ANCRE: P2_T5_SURNOMS_GAGNES_ACTUALITES] — Monde lot 40 T1 ==== */
@@ -29,6 +31,11 @@ mgmtActuSourceAjouter({type:'surnom',lire(m,ids,depuis){return (m.facts||[]).fil
    Une proposition est une actualité du monde même si aucun combattant n'est
    suivi; elle réutilise l'identité du champion, sans créer de fait sauvegardé. ==== */
 mgmtActuSourceAjouter({type:'choc',lire(m,ids,depuis){const c=m&&m.choc;if(!c||!mgmtChocValide(c)||!['recu','propose','programme','termine'].includes(c.etat)||!ids.includes(c.a))return [];return [{type:'choc',c:Number.isSafeInteger(m.cycle)?Math.max(depuis,m.cycle):depuis,id:c.a,donnees:c}];}});
+/* ==== [ANCRE: P10_T1_ACTUALITE_RIVALE] — Monde lot 45 T1 ==== */
+mgmtActuSourceAjouter({type:'rivale',lire(m,ids,depuis){
+  if(!m||!m.guerre||!m.guerre.rival||!ids.length||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<depuis) return [];
+  return [{type:'rivale',c:m.guerre.depuis,id:ids[0],donnees:{org:m.guerre.rival}}];
+}});
 function mgmtActualites(m,opts){
   if(!m||!Array.isArray(m.suivis)||!m.suivis.length)return [];
   opts=opts||{}; const ids=mgmtSuivis(m), cycles=Number.isSafeInteger(opts.cycles)&&opts.cycles>=0?opts.cycles:8, depuis=Math.max(0,(Number.isSafeInteger(m.cycle)?m.cycle:0)-cycles+1), brut=[];
@@ -38,13 +45,15 @@ function mgmtActualites(m,opts){
    for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const moi=mgmtActuNom(m,x.id);if(!moi)continue;const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, adversaire=mgmtActuNom(m,x.adv||''),a=adversaire?adversaire.n:(x.adv||''),d=x.donnees||{};let banque,vars,detail='';
       if(x.type==='choc'){const org=mgmtOrgParId(d.orgId);banque=['Une proposition de choc des organisations est en discussion'];vars={};detail=d.propose?'Split propose une soirée commune à '+(org?org.nom:d.orgId)+', champion contre champion.':(org?org.nom:d.orgId)+' propose une soirée commune contre Split, champion contre champion.';}
       else if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
+      else if(x.type==='discours'){banque=['{n} s’adresse à {cible} après sa victoire'];vars={n:moi.n,cible:a};detail='Après sa victoire, il remercie son équipe et parle de la suite.';}
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}
       else if(x.type==='surnom'){const type=d.t,info=MGMT_SURNOMS_GAGNES[type];if(!info)continue;const medias=Array.isArray(MGMT_MEDIAS)?MGMT_MEDIAS:[],media=medias.length?medias[Math.floor(mgmtIdentiteStream(x.id,'presse-surnom',m)()*medias.length)]:null;banque=info.voix;vars={n:moi.n,surnom:d.nom,raison:info.raison};detail='Donné par '+(media?media.nom:'la presse')+' après '+info.raison+'.';}
       else if(x.type==='espoir'){banque=[''];vars={};detail='';}
+      else if(x.type==='rivale'){const rival=MGMT_ORGANISATIONS.find(o=>o.id===d.org);if(!rival)continue;banque=[''];vars={org:rival.nom};detail='La rivalité se joue soirée après soirée.';}
      else {if(d.k==='contrat')continue;banque=MGMT_ACTU_CONTRATS[d.k];if(!banque)continue;vars={n:moi.n,p:moi.p};detail=d.k==='libere'?'Il peut signer ailleurs.':'C’est le moment de lui parler.';}
     const groupe=x.type+'|'+x.id,phraseBrute=mgmtActuVariante(cle,x.type,'prev:'+String(dernier.get(groupe)||''),banque),phrase=phraseBrute.replace(/\{(\w+)\}/g,(_,key)=>vars[key]===undefined?'':String(vars[key]));dernier.set(groupe,phraseBrute);
      if(x.type==='espoir'){banque=null;}
-      rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:x.type==='surnom'?'La presse l’appelle désormais « '+d.nom+' »':phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
+      rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:x.type==='surnom'?'La presse l’appelle désormais « '+d.nom+' »':x.type==='rivale'?vars.org+' devient ta rivale du moment':phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
   }
   rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
 }

@@ -631,6 +631,7 @@ function mgmtRunEvent(m){
   /* Lot 2 T1 : chaque combat porte son emplacement (slot:'main'|'prelim')
      et la soirée joue la carte principale d'abord, puis les préliminaires. */
   const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
+    position:f.slot==='main'?Math.max(0,m.card.main.length-1-m.card.main.findIndex(x=>x===f)):null,
     title:f.title===true,rounds:mgmtBoutRounds(m,f),source:f}));
   /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_COMBAT] — Monde lot 58 T1 ====
      Le champion invité prend le dernier emplacement principal de la soirée
@@ -679,7 +680,7 @@ function mgmtRunEvent(m){
     const roundF=Number.isSafeInteger(res.round)?res.round:cf.rounds;
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
-    m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
+    m.hist.push({c:m.cycle,slot:cf.slot,...(mgmtHorsPasse(m)&&cf.position!==null&&cf.position!==undefined?{position:cf.position}:{}),seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
     /* ==== [ANCRE: P7_T1_SALLE_PRIMES_SOIREE] — Monde lot 44 T1 ====
        L'ambiance se met à jour ENTRE deux combats, une fois le relevé écrit ;
@@ -727,6 +728,18 @@ function mgmtRunEvent(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
+  /* ==== [ANCRE: P7_T4_DISCOURS_ENREGISTREMENT] — Monde lot 50 T1 ==== */
+  /* Poids de la sauvegarde (1,9 Mo, sacré) : les six ans de passé de chaque organisation ne reçoivent ni position ni discours, comme pour les primes. */
+  if(typeof mgmtDiscoursEligibilite==='function'&&mgmtHorsPasse(m)){
+    const discours=[];
+    for(const t of m.hist.slice(premier)){
+      const elig=mgmtDiscoursEligibilite(m,t); if(!elig||discours.length>=4)continue;
+      const d=mgmtDiscoursComposer(m,t); if(!d)continue;
+      discours.push({a:d.auteur,adv:d.adversaire,motif:elig.motif,ton:d.ton,lignes:d.lignes,interpelle:d.interpelle});
+      mgmtAddFact(m,{c:m.cycle,k:'discours',a:d.auteur,adv:d.adversaire,interpelle:d.interpelle||null,motif:elig.motif});
+    }
+    m.discours={c:m.eventsPlayed,d:discours};
+  }
   if(m.poste) mgmtPosteSoiree(m);
   delete m.semaine;
   /* Lot 5 H7 : les décisions contraires de la soirée deviennent des faits. */
@@ -766,3 +779,7 @@ function mgmtRunEvent(m){
 }
 
 /* ==== [FIN ANCRE] ==== */
+/** Vrai hors du passé généré d'avance (prédécesseur ou création de partie) : ce qui est nouveau n'écrit rien dans le passé. */
+function mgmtHorsPasse(m){
+  return !(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m&&m.passe&&m.passe.enCours===true);
+}
