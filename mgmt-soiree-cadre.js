@@ -271,7 +271,8 @@ function mgmtSoFinHtml(m,prog){
     const fait=(m.facts||[]).find(f=>f&&f.k==='prime'&&f.fight===p.h&&f.a===id);
     const total=Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0;
     const prime=Number.isFinite(fait&&fait.m)?fait.m:Math.floor(total/4);
-    return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><b>${esc(mgmtEuros(prime))}${t.pr==='cs'?' CHACUN':''}</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
+    const affichageNoms=t.pr==='cs'?noms.split(' · ').map(n=>`<span>${esc(mfNet(n))}</span>`).join(''):esc(mfNet(noms));
+    return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${affichageNoms}</strong><b>${esc(mgmtEuros(prime))}${t.pr==='cs'?' CHACUN':''}</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
   });
   const finance=m.lastEvent.finance||{};
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;

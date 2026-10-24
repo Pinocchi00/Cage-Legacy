@@ -1058,6 +1058,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-prime.performance strong{font-size:52px;line-height:.88}
 .so3-fin-label{font-size:24px;font-weight:600;letter-spacing:.04em}
 .so3-fin-prime strong{font-family:var(--mf-titre);font-size:42px;line-height:.95}
+.so3-fin-prime.combat strong span{display:block;font:inherit;line-height:.82}
 .so3-fin-prime span{font-size:24px;line-height:1.1}
 .so3-fin-prime>b{font-family:var(--mf-titre);font-size:32px}
 .so3-fin-soiree{padding:18px 22px;border:2px solid rgba(233,230,225,.38);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 22px;align-content:center}
