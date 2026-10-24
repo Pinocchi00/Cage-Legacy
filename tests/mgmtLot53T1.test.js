@@ -158,6 +158,7 @@ test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=
   try{
     const html=w.eval(`(()=>{MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.tempsFortActif=1;MGMT_COMBAT.tempsForts=[{raison:'Ouverture'},{raison:'Finition <test>'}];return mgmtCombatFriseHtml();})()`);
     assert.match(html,/so3-frise/);
+    assert.match(html,/aria-label="Frise des 2 moments forts"/);
     assert.equal((html.match(/class="so3-moment/g)||[]).length,2);
     assert.match(html,/actif/);
     assert.match(html,/Finition &lt;test&gt;/);

@@ -376,3 +376,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `mgmt-soiree-cadre.js` (classe de l'en-tête), `ui-cadre.css` (règles dédiées), `index.html` (versions cache), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
 - Écart restant : cela affine l'ouverture, sans convertir toute sa composition historique en blocs `so3-*`. Les critères globaux encore ouverts en reprise 53 (portage exact complet, plage totale 900–1200 s mesurée, lecture forts chronométrée/fondue sur l'image) restent non établis; ce changement ne suffit donc pas à déclarer le lot terminé.
+
+### Reprise 56 — libellé accessible de la frise
+
+- Fait : la région live de la frise annonce maintenant son nombre total de moments forts dans son nom accessible, en complément des états individuels « passé / en cours / à venir ».
+- Fichiers : `mgmt-combat.js` (libellé accessible), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertion du nombre), présente fiche.
+- Vérification ciblée : 19 tests étaient verts avant ajout de l'assertion ; la vérification finale de cette modification est consignée après relance.
+- Le travail reste partiel : cet ajout ne comble pas les critères majeurs de portage intégral des trois maquettes, de fenêtres temporelles réellement séquencées, ni le cumul de référence 900–1200 s (868,38 s mesurées dans la reprise 40). La tranche n'est donc pas déclarée terminée.
