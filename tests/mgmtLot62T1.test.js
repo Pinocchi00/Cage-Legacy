@@ -25,6 +25,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
     assert.equal(result.compteurs.ceremonies,3,'le calcul des prix est exécuté exactement une fois par année');
     assert.equal(result.compteurs.classements,3,'le classement est clôturé exactement une fois par année');
     assert.ok(result.compteurs.prix.includes('revelation'),'la révélation est décernée sur le parcours réel');
+    assert.ok(result.compteurs.prix.includes('retour'),'le retour est décerné sur le parcours réel');
     assert.ok(result.prix.length>0,'les prix sont consignés sur les fiches');
     assert.equal(result.avant,result.apres,'la vérification passive après sauvegarde/rechargement ne modifie pas les clôtures traitées');
     assert.equal(result.valid,true);
