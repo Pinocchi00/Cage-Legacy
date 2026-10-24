@@ -123,6 +123,53 @@ function mgmtOrgClassement(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: P10_T3_GUERRE_CLASSEMENT] — Monde lot 57 T1 ==== */
+/** Classement des huit destiné à la guerre : porte unique sur le classement existant. */
+function mgmtGuerreClassement(m){
+  const classement=mgmtOrgClassement(m);
+  if(!classement) return [];
+  const splitId=mgmtPredecesseurOrgId(m);
+  const rangSplit=classement.findIndex(x=>x.id===splitId);
+  const precedent=Array.isArray(m.guerre&&m.guerre.classementPrecedent)?m.guerre.classementPrecedent:[];
+  return classement.map((ligne,index)=>{
+    const org=mgmtOrgParId(ligne.id), ident=mgmtOrgIdentite(ligne.id);
+    const ancien=precedent.indexOf(ligne.id);
+    const mouvement=ancien<0?0:ancien-index;
+    const mouvementTexte={texte:mouvement>0?`Depuis la dernière soirée, ${org.nom} a gagné ${mouvement} place${mouvement===1?'':'s'} au classement.`:mouvement<0?`Depuis la dernière soirée, ${org.nom} a perdu ${Math.abs(mouvement)} place${mouvement===-1?'':'s'} au classement.`:`Depuis la dernière soirée, ${org.nom} conserve sa place au classement.`,relu:false};
+    return Object.assign({},ligne,{nom:org.nom,ville:ident.ville,annee:ident.annee,
+      mouvement,mouvementTexte});
+  }).map((ligne,index)=>Object.assign(ligne,{
+    devant:index>0?classement[index-1].id:null,
+    derriere:index+1<classement.length?classement[index+1].id:null,
+    estSplit:ligne.id===splitId,
+    duelSplit:ligne.id===splitId?{
+      devant:rangSplit>0?classement[rangSplit-1].id:null,
+      derriere:rangSplit+1<classement.length?classement[rangSplit+1].id:null,
+      mouvement:precedent.indexOf(splitId)<0?0:precedent.indexOf(splitId)-rangSplit
+    }:null
+  }));
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: P10_T4_GUERRE_FIN_ANNEE] — Monde lot 57 T1 ==== */
+/** Clôture explicite d'une saison : mémorise le rang et applique le seul effet
+ *  dont la porte métier existe déjà (confiance du patron). L'appel est idempotent
+ *  par saison; les autres paliers restent aux mécaniques qui les possèdent. */
+function mgmtGuerreFinAnnee(m,annee){
+  if(!m||!Number.isSafeInteger(annee)||annee<1||!m.mondeVivant) return null;
+  const classement=mgmtGuerreClassement(m),split=classement.find(x=>x.estSplit);
+  if(!split) return null;
+  if(!m.guerre) m.guerre={ev:[],rival:null,depuis:m.cycle||0};
+  if(m.guerre.anneeTraitee===annee) return {rang:split.rang,applique:false};
+  const rangPrecedent=m.guerre.rangFinal;
+  m.guerre.classementPrecedent=classement.map(x=>x.id);
+  m.guerre.rangFinal=split.rang;
+  m.guerre.anneeTraitee=annee;
+  if(m.poste&&Number.isInteger(m.poste.conf)&&Number.isInteger(rangPrecedent)&&split.rang<rangPrecedent) m.poste.conf=Math.min(4,m.poste.conf+1);
+  return {rang:split.rang,applique:true};
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_CORR0810_LOT12_ATOUTS] — Corrections du 08/10/2026, lot 12 (D6) : chaque ligne de l'écran Nouvelle partie correspond à un effet que le joueur constate.
    Les lignes ne sont plus écrites à la main : elles se DÉDUISENT du profil, réglage par réglage, et seuls les réglages que le jeu lit existent
    (MGMT_ORG_REGLAGES_LUS — un test échoue si un profil porte un réglage hors de cette liste, ou si une ligne n'a pas de règle). Plus de promesse sans effet.
