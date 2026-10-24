@@ -921,3 +921,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - La suite exacte prescrite passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les deux régressions lot 54 signalées sont donc vertes.
 - `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe. Aucune donnée de sauvegarde nouvelle ni migration. Le compte rendu est le seul fichier de tranche actualisé par cette reprise.
 - La couverture conserve sa limite documentée : les familles sont testées avec leurs faits préparés sur le parcours réel, sans démontrer leur production naturelle par chaque système opérationnel. Aucun écart nouveau ni question pour Anthony.
+
+### Reprise 8 — contrôle final demandé (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits fonctionnels sont déjà présents (`c25e8a60` en tête). Aucun fichier de code ou test de la tranche n'était en attente ; les modifications locales d'agents, `opencode.json` et `sw.js` restent hors périmètre.
+- La suite exacte inter-lots passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56, dont les deux régressions lot 54 signalées. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
+- La tentative requise `git merge origin/main` a été refusée par la politique d'exécution (`git merge*` bloqué). Aucun merge n'est revendiqué ; l'intégration reste à faire par le superviseur. Aucun changement de sauvegarde ni migration.
+- Cette reprise met à jour uniquement le présent compte rendu. Limite inchangée : les tests préparent les faits déclencheurs sur le parcours réel sans prouver que chaque système opérationnel génère naturellement chacun des faits.
