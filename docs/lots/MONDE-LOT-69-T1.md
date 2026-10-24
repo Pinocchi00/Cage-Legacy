@@ -407,3 +407,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde.
 - Écart : aucune capture post-correction n'a permis de confirmer le seuil `grosBlocs` ≤20%; choc à une paire et non trois, parcours fin de contrat/bilan/rechargement strict, et scènes d'arrivée restent les lacunes documentées. La réduction CSS ne tient pas lieu de mesure.
 - Fichiers modifiés : `ui-cadre.css`, `index.html`, `tests/mgmtLot69T1.test.js`, cette fiche. Pas de textes joueur nouveaux.
+
+### Reprise 65
+- Vérifications de reprise : branche `fid-choc`, historique examiné jusqu'à `82abba1a`. L'état de travail comporte seulement des modifications utilisateur sous `.opencode/agents/` et `opencode.json`; elles restent hors de la tranche.
+- Le guide de capture demeure hors des chemins accessibles à l'outil de lecture; aucun dossier `shoot` n'est présent dans le dépôt (`glob *shoot*` ne retourne rien). Je n'ai donc pas produit ni revendiqué de capture. Les mesures déjà consignées ne prouvent pas la conformité post-correction.
+- Fichiers fonctionnels non modifiés dans cette reprise; l'état CSS et les tests proviennent des commits antérieurs. Les critères encore ouverts restent ceux établis à la reprise 64 : trois affiches et score 2-sur-3, vérifications visuelles post-correction, parcours contractuel strict avec rechargement valide, et scènes dédiées d'arrivée/offre.
+- Écart à la fiche : cette reprise ne peut pas établir ces critères par simple audit; aucune image ou réussite non observée n'est revendiquée. Pas de migration de sauvegarde.
