@@ -104,6 +104,31 @@ test('Monde lot 63 T1 — une ligne de l’après échappe le nom injecté en HT
   }finally{w.close();}
 });
 
+test('Monde lot 63 T1 — l’après ne change pas la sauvegarde et préserve une partie ancienne',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261024);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=JSON.parse(w.eval(`(()=>{
+      const m=G.mgmt,avant=JSON.stringify(m),version=MGMT_SAVE_VERSION;
+      mgmtApresCalculer(m);
+      const intact=JSON.stringify(m)===avant, valide=validateMgmt(m);
+      const ancien=JSON.parse(avant);delete ancien.apres;
+      const avantAncien=JSON.stringify(ancien),repare=mgmtRepair(ancien);
+      return JSON.stringify({version,intact,valide,absente:!Object.prototype.hasOwnProperty.call(m,'apres'),
+        ancienneSansCle:!Object.prototype.hasOwnProperty.call(repare,'apres'),ancienneValide:validateMgmt(repare),
+        ancienneConservee:JSON.stringify(repare)===avantAncien});
+    })()`));
+    assert.equal(r.intact,true);
+    assert.equal(r.valide,true);
+    assert.equal(r.absente,true);
+    assert.equal(r.ancienneSansCle,true);
+    assert.equal(r.ancienneValide,true);
+    assert.equal(r.ancienneConservee,true);
+    assert.ok(r.version>0);
+  }finally{w.close();}
+});
+
 test('Monde lot 63 T1 — la suite du lendemain montre les mouvements des autres organisations',()=>{
   const w=newGameWindow({runMain:true});
   try{
