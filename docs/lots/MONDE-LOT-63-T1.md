@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 6 — contrôle après reprises successives (24/10/2026)
+
+- `git log --oneline -12` et `git status` contrôlés sur `p8-apres` : le code de tranche est déjà commité ; les changements locaux dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et exclus.
+- Le contrôle inter-lots demandé passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les deux régressions signalées du lot 54 sont vertes.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint global passe ; `mgmtLot63T1` est inscrit aux scripts `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- La fusion `git merge origin/main` demandée n'a pas pu s'exécuter : la politique de l'environnement bloque toute commande `git merge*`. L'intégration reste à faire par le superviseur ; aucune modification de tests existants ni aucun conflit n'a été introduit. La limite de couverture des familles indiquée plus haut demeure.
+
 ### Reprise finale après intégration — 24/10/2026
 
 - Branche `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà dans l'historique (`8bc3ef47` en tête) ; aucun changement de code n'était en attente. Les fichiers locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et laissés intacts.
