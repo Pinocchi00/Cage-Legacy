@@ -457,3 +457,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `ui-cadre.css` donne maintenant un panneau individuel à chaque affrontement plutôt qu'un fond commun à toute la colonne, selon les trois rangées de la planche ; le test d'écran verrouille ce découpage. `index.html` a été versionné via `_bump.js`.
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Capture `choc` : 0 chevauchement, 0 texte sous 22 px, 0 débordement, mais `grosBlocs=25.6%` (mesure précédente 24.8 %, donc cette modification n'améliore pas le seuil). Le changement est conservé pour ses blocs séparés mais la cible visuelle reste non atteinte.
 - Fichiers modifiés : `ui-cadre.css` (séparation visuelle des trois affiches), `index.html` (cache), `tests/mgmtLot69T1.test.js` (régression de structure), cette fiche. Aucune migration.
+
+### Reprise 71 — parcours contractuel et rechargement réel
+- Le test du parcours fixe désormais le bilan de contrat à `prolonge-augmente`, vérifie son écran avant les offres, accepte l'offre puis passe par le changement et l'arrivée. Le rechargement intermédiaire était invalide car le fixture de test omettait `relu:false`, champ obligatoire d'une offre conforme à `mgmtOffresValide`; le fixture a été corrigé (aucun assouplissement du validateur). La partie rechargée est identique octet pour octet à la sérialisation intermédiaire.
+- Après la soirée et le lendemain, le test exige aussi `validateMgmt(m)`, `mgmtParseAndValidate(mgmtSerialiser(m))` et la conservation de l'organisation d'arrivée. `node --test tests/mgmtLot69T1.test.js` passe 4/4.
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (bilan, offre conforme et reprise/rechargement avant et après soirée), cette fiche. Pas de migration ou de version cache.
+- Restent non atteints : capture/mesure d'arrivée et du bloc offres, le chevauchement identifié dans le bilan, et le seuil visuel du choc (`25.6%` contre ≤20%).

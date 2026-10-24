@@ -8,7 +8,10 @@ const jouerSoirees=require('./helpers/jouerSoirees');
 test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lendemain avec sauvegarde intermédiaire',()=>{
   const w=newGameWindow({runMain:true});
   try{
-    w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],relu:false,refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    const bilan=w.eval(`mgmtPosteBilan(G.mgmt)`);
+    assert.equal(bilan.issue,'prolonge-augmente','la fin de contrat calcule un bilan favorable avant les offres');
+    assert.match(w.eval(`scr_mgmt_poste_bilan()`),/PROLONGÉ/,'le bilan favorable est affiché avant le choix d’offre');
     const renduOffre=w.eval(`mgmtPosteRendu(G.mgmt)`);
     for(const raison of ['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(renduOffre.includes(raison),`raison d'offre absente: ${raison}`);
      const ancien=w.eval(`mgmtOrgNom(G.mgmt)`);
@@ -28,12 +31,17 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
      const identiteNouvelle=w.eval(`(()=>{const m=G.mgmt;return {nom:m.org,roster:Array.isArray(m.roster)&&m.roster.length>0}})()`);
      assert.equal(identiteNouvelle.nom,arrivee.org,'le contrat doit être rattaché à la nouvelle organisation');
      assert.equal(identiteNouvelle.roster,true,'l’effectif du nouvel employeur doit être visible dans la partie');
-    const saved=serialized.slice(3);
-    assert.equal(w.eval(`mgmtSerialiser(G.mgmt)`),saved);
+     const saved=serialized.slice(3);
+     const reload=w.eval(`(()=>{const x=mgmtParseAndValidate(${JSON.stringify(saved)}),raw=JSON.parse(${JSON.stringify(saved)});return {valid:!!x,identique:!!x&&mgmtSerialiser(x)===${JSON.stringify(saved)},validation:validateMgmt(raw),monde:mgmtMondeVivantValide(raw)}})()`);
+     assert.equal(reload.valid,true,`la sauvegarde intermédiaire peut être rechargée et validée: ${JSON.stringify(reload)}`);
+     assert.equal(reload.identique,true,'le rechargement conserve exactement la sauvegarde intermédiaire');
+     assert.equal(w.eval(`mgmtSerialiser(G.mgmt)`),saved);
     w.eval(`G.screen='mgmt_accueil';`);
     assert.equal(jouerSoirees(w,1),1);
-    const lendemain=w.eval(`(()=>{const m=G.mgmt;return {valid:validateMgmt(m),org:mgmtPredecesseurOrgId(m),played:m.eventsPlayed,loaded:!!mgmtParseAndValidate(mgmtSerialiser(m))}})()`);
-    assert.equal(lendemain.org,'garden-of-blood');
+     const lendemain=w.eval(`(()=>{const m=G.mgmt;return {valid:validateMgmt(m),org:mgmtPredecesseurOrgId(m),played:m.eventsPlayed,loaded:!!mgmtParseAndValidate(mgmtSerialiser(m))}})()`);
+     assert.equal(lendemain.valid,true,'la partie reste valide après la soirée de la nouvelle organisation');
+     assert.equal(lendemain.loaded,true,'la sauvegarde se recharge encore après le lendemain');
+     assert.equal(lendemain.org,'garden-of-blood');
     assert.ok(lendemain.played>0);
   }finally{w.close();}
 });
