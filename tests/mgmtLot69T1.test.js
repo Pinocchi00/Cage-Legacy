@@ -78,6 +78,7 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.match(css,/\.ch3-head,\.ch3-title\{grid-column:1\/-1\}/,'en-tête et bandeau traversent les deux colonnes de la maquette');
       assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT\][\s\S]*?\.ch3-screen\{grid-template-rows:54px 68px minmax\(0,1fr\);gap:14px\}/,'la géométrie compacte limite la surface occupée par le bandeau choc');
       assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT2\][\s\S]*?\.ch3-screen\{grid-template-rows:44px 56px minmax\(0,1fr\);gap:10px\}/,'la seconde compaction réduit encore la hauteur des blocs d’en-tête');
+      assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT3\][\s\S]*?\.ch3-screen\{grid-template-rows:36px 44px minmax\(0,1fr\);gap:8px\}/,'la troisième compaction garde l’affiche dominante sans réduire les textes sous le minimum lisible');
      assert.match(css,/\.ch3-title[^\{]*\{[^}]*linear-gradient\(90deg,#E9E6E1[^}]*#E23A2B/s,'le bandeau choc conserve les deux couleurs de la planche');
        assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
        assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');

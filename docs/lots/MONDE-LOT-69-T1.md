@@ -400,3 +400,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts : aucune capture après correction n'a été produite et aucune réduction du taux `grosBlocs` n'est mesurée ; les trois affiches du choc, le parcours contractuel/rechargement strict et les mesures comparatives des écrans restent à valider. Cette retouche ne vaut pas validation visuelle ni achèvement de la tranche.
 - Tests ajoutés : assertion « la seconde compaction réduit encore la hauteur des blocs d’en-tête » dans le test existant des écrans choc/discours.
 - Questions pour Anthony : aucune nouvelle question. Les changements utilisateur hors tranche restent exclus.
+
+### Reprise 64
+- `ui-cadre.css` ajoute une troisième compaction du bandeau choc (lignes 36/44 px, espacement 8 px, titres conservés au-dessus de 22 px) ; `index.html` est versionné par `_bump.js`.
+- `tests/mgmtLot69T1.test.js` verrouille cette géométrie. `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Pas de migration de sauvegarde.
+- Écart : aucune capture post-correction n'a permis de confirmer le seuil `grosBlocs` ≤20%; choc à une paire et non trois, parcours fin de contrat/bilan/rechargement strict, et scènes d'arrivée restent les lacunes documentées. La réduction CSS ne tient pas lieu de mesure.
+- Fichiers modifiés : `ui-cadre.css`, `index.html`, `tests/mgmtLot69T1.test.js`, cette fiche. Pas de textes joueur nouveaux.
