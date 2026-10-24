@@ -178,3 +178,13 @@ test('Monde lot 57 T1 — les quatre métriques et le rang s’accordent aux don
     }
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — l’interface garde une issue lisible quand une rivale n’existe pas',()=>{
+  const w=partie();
+  try{
+    const html=w.eval(`(()=>{G.mgmt.guerre={ev:[],rival:null,depuis:0};return scr_mgmt_guerre();})()`);
+    assert.match(html,/AUCUNE POUR L’INSTANT/);
+    assert.match(html,/Aucune rivale ne s’est encore imposée/);
+    assert.doesNotMatch(html,/undefined|null/);
+  }finally{w.close();}
+});
