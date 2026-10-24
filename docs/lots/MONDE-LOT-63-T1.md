@@ -1,5 +1,11 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
+### Reprise de clôture — 24/10/2026
+
+- Contrôle de reprise : branche `p8-apres`, historique et statut consultés. Les commits de production et de test sont déjà présents ; aucun fichier fonctionnel non commité de cette tranche. Les changements locaux d'agents `.opencode/`, `opencode.json`, `sw.js` et la variation de cache `index.html` restent hors périmètre et ne sont pas inclus.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; inclusion dans `test` et `test:watch` confirmée (`true,true`).
+- Aucun changement de sauvegarde ni migration. Limite honnête inchangée : les tests préparent les faits des dix familles sur le parcours réel, sans prouver que chaque système opérationnel du jeu produit naturellement chacun de ces faits. Le seul changement de tranche de cette reprise est ce compte rendu.
+
 ### Reprise 32 — livraison vérifiée (24/10/2026)
 
 - État consulté sur `p8-apres` (`git log --oneline -12`, `git status`) : les changements fonctionnels et tests de tranche sont déjà commités. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo.
