@@ -10,7 +10,7 @@
    Avec l'agenda seulement : une partie d'avant garde l'ancien écran de soirée (SCREENS.mgmt_soiree d'origine). ==== */
 
 /** Trace de navigation de la soirée (jamais écrite dans la partie) : `commence` porte le cycle de la soirée dont le joueur a pris la main. */
-let MGMT_SOIREE_UI={focus:null,commence:null};
+let MGMT_SOIREE_UI={focus:null,commence:null,resultat:null,resultatTimer:null};
 const mgmtSoCommence=()=>!!(G&&G.mgmt&&G.mgmt.lastEvent&&MGMT_SOIREE_UI.commence===G.mgmt.lastEvent.cycle);
 const mgmtSoAgenda=()=>!!(G&&G.mgmt&&G.mgmt.lastEvent&&mgmtAgendaActif(G.mgmt));
 
@@ -110,7 +110,7 @@ function mgmtSoBandeHtml(prog,index,focus){
     const fait=k<index, cur=k===focus;
     const vue=mgmtVueDuCombat(G.mgmt,k);
     return `<div class="mf-so-card${cur?' cur':''}${fait?' fait':''}"><button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`
-      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">`+[['complet','COMPLET'],['forts','TEMPS FORTS'],['resultat','RÉSULTAT']].map(([v,l])=>mfBouton(l,{jaune:vue===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')+`</div></div>`;
+      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">${mfBouton(vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT',{jaune:true,onclick:`CL.mgmtSoVueSuivante(${k})`})}</div></div>`;
   }).join('')+`</div>`;
 }
 
@@ -180,6 +180,13 @@ function mgmtSoEntreHtml(m,prog,index,focus){
     +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
   return `<div class="so3-soiree">${haut}${mgmtSoBandeHtml(prog,index,focus)}</div>`;
 }
+/* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
+function mgmtSoResultatSeulHtml(m,p){
+  const d=mgmtResultatDetail(m,p.h), gagnant=d&&d.gagnant, perdant=d&&d.perdant;
+  const resultat=d?(d.nul?'Match nul':`${mfNet(gagnant.last||gagnant.name)} bat ${mfNet(perdant.last||perdant.name)}`):'Résultat enregistré';
+  const methode=d?d.methode:'Combat terminé', round=d?mgmtRoundTexte(d):'';
+  return mfEcran(`<main class="mf-contenu"><section class="so3-resultat"><div class="so3-resultat-titre">RÉSULTAT</div><h1>${esc(resultat)}</h1><div class="so3-resultat-meta">${esc(methode)}${round?' · '+esc(round):''}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'})}</section></main>`,{barre:'jeu',grise:true,m,touches:[{ks:['Échap','Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'}]});
+}
 /** L'avant-combat : un côté (ce qu'on a vu, ce qu'on ne sait pas, son dernier combat, trois chiffres publics). */
 function mgmtSoCoteHtml(c,couleur){
   const lignes=c.lignes.length
@@ -239,6 +246,7 @@ function mgmtSoireeFallback(){
 function scr_mgmt_soiree_cadre(){
   const m=G.mgmt, prog=mgmtSoireeProgramme(m), n=prog.length, index=MGMT_SOIREE.index;
   if(!n||prog.some(p=>!p.trace)) return mgmtSoireeFallback();
+  if(MGMT_SOIREE_UI.resultat!==null){ const p=prog[MGMT_SOIREE_UI.resultat]; return p?mgmtSoResultatSeulHtml(m,p):mgmtSoireeFallback(); }
   const moment=(index<=0&&!mgmtSoCommence())?'ouverture':mgmtSoireeMoment(m,Math.max(1,index));
   const focus=MGMT_SOIREE_UI.focus===null?Math.min(index,n-1):Math.max(0,Math.min(n-1,MGMT_SOIREE_UI.focus));
   let corps, touches, grise=true, courant=null;
@@ -273,10 +281,16 @@ Object.assign(CL,{
     if(!p||!p.trace) return;
      const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
      const vue=mgmtVueDuCombat(m,p.i);
-     if(vue==='resultat'){ sortir(); render(); return; }
+      if(vue==='resultat'){ MGMT_SOIREE_UI.resultat=MGMT_SOIREE.index; render(); MGMT_SOIREE_UI.resultatTimer=setTimeout(()=>CL.mgmtSoResultatContinuer(),5000); return; }
      mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
        salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
-  },
+   },
+   mgmtSoResultatContinuer(){
+     if(MGMT_SOIREE_UI.resultat===null) return;
+     if(MGMT_SOIREE_UI.resultatTimer) clearTimeout(MGMT_SOIREE_UI.resultatTimer);
+     MGMT_SOIREE_UI.resultatTimer=null; MGMT_SOIREE_UI.resultat=null;
+     MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render();
+   },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){
     if(!mgmtSoAgenda()) return;
@@ -309,6 +323,11 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index>=n){ CL.mgmtSoRevoir(k); return; }   /* la soirée finie : une pastille rouvre le combat */
     if(!Number.isSafeInteger(k)||k<0||k>=n) return;
     MGMT_SOIREE_UI.focus=k===MGMT_SOIREE.index?null:k; render();
+  },
+  mgmtSoVueSuivante(k){
+    if(!mgmtSoAgenda()) return;
+    const ordre=['complet','forts','resultat'], actuelle=mgmtVueDuCombat(G.mgmt,k);
+    mgmtVueCombatChoisir(k,ordre[(ordre.indexOf(actuelle)+1)%ordre.length]);
   },
   /** Revoir un combat déjà passé de la soirée : l'arène, sans rien changer au déroulé. */
   mgmtSoRevoir(k){
@@ -356,6 +375,7 @@ const MGMT_SO_ANCIENNES_TOUCHES={
 /** Les touches de la soirée : Entrée regarde, P passe, F ouvre l'avant-combat, V change la vue, ← → changent de combat. Sans agenda : celles d'origine. */
 function mgmtSoTouche(nom){
   return function(){
+    if(MGMT_SOIREE_UI.resultat!==null&&(nom==='Enter'||nom==='Escape')){ CL.mgmtSoResultatContinuer(); return; }
     if(!mgmtSoAgenda()){ const f=MGMT_SO_ANCIENNES_TOUCHES[nom]; if(f) f(); return; }
     const m=G.mgmt, n=m.lastEvent.fights.length, i=MGMT_SOIREE.index;
     const ouverture=i<=0&&!mgmtSoCommence();
