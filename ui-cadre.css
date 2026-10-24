@@ -1050,6 +1050,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-titre strong{font-family:var(--mf-titre);font-size:48px;font-weight:800;line-height:1}
 .so3-fin-titre span{font-family:var(--mf-titre);font-size:38px;font-weight:800;line-height:1}
 .so3-fin-cartes{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:16px;min-height:0}
+.so3-fin-cartes.deux-cartes{grid-template-columns:1.25fr 1fr}
 .so3-fin-prime{min-width:0;padding:24px;background:#E9E6E1;color:#0D0B0B;display:flex;flex-direction:column;gap:18px;justify-content:center;box-sizing:border-box}
 .so3-fin-prime.combat{background:#E9E6E1;color:#0D0B0B}
 .so3-fin-prime.performance{background:#252121;color:#E9E6E1}

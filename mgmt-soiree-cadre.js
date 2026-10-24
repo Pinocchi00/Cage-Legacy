@@ -202,9 +202,9 @@ function mgmtSoEntreHtml(m,prog,index,focus){
 
 /* ==== [ANCRE: MGMT_SOIREE_ENTETE_FIN] — Monde lot 65 T1 ==== */
 function mgmtSoEnteteFin(m,prog){
-  const n=prog.length, pips=prog.map(()=>'<i class="mf-so-pip on"></i>').join('');
+  const n=prog.length;
   const date=mgmtSoireeDateTexte(m), salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
-  return `<header class="mf-entete mf-so-entete"><div class="mf-entete-g"><div class="mf-plaque"><span>FIN DE SOIRÉE</span><span class="mf-so-pips" aria-hidden="true">${pips}</span><b class="mf-so-cpt">${esc(n)} / ${esc(n)}</b></div></div><div class="mf-so-dr"><span class="mf-entete-d">Ce soir</span>${date?`<div class="mf-so-chip"><b>${esc(date)}</b><span>${esc(mfNet(salle))}</span></div>`:''}<div class="mf-so-chip org"><b>${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</b><b class="r">${esc(num)}</b></div></div></header>`;
+  return `<header class="mf-entete mf-so-entete"><div class="mf-entete-g"><div class="mf-plaque"><span>FIN DE SOIRÉE</span><b class="mf-so-cpt">${esc(n)} / ${esc(n)}</b></div></div><div class="mf-so-dr"><span class="mf-entete-d">Ce soir</span>${date?`<div class="mf-so-chip"><b>${esc(date)}</b><span>${esc(mfNet(salle))}</span></div>`:''}<div class="mf-so-chip org"><b>${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</b><b class="r">${esc(num)}</b></div></div></header>`;
 }
 /* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
 function mgmtSoResultatSeulHtml(m,p){
@@ -278,7 +278,7 @@ function mgmtSoFinHtml(m,prog){
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
   const ambiance=Math.max(0,Math.min(10,Math.round(rempli/10)));
   const recette=Number(finance.recette)||0;
-  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div class="so3-fin-salle"><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b><small>sur ${esc(finance.capacite||0)} places · record à ${esc(finance.record||'—')}</small></div><div class="so3-fin-ambiance"><span>L'AMBIANCE À LA FIN</span><b>${Array.from({length:10},(_,i)=>`<i class="${i<ambiance?'on':''}"></i>`).join('')}</b><small>${ambiance>=7?'Une grande soirée.':'La soirée est terminée.'}</small></div><div class="so3-fin-recette"><span>LA RECETTE</span><b>${recette<0?'−':'+'} ${esc(mgmtEuros(Math.abs(recette)))}</b><small>PRIMES PAYÉES</small></div></section></section>`;
+  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes${cartes.length===2?' deux-cartes':''}">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div class="so3-fin-salle"><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b><small>sur ${esc(finance.capacite||0)} places · record à ${esc(finance.record||'—')}</small></div><div class="so3-fin-ambiance"><span>L'AMBIANCE À LA FIN</span><b>${Array.from({length:10},(_,i)=>`<i class="${i<ambiance?'on':''}"></i>`).join('')}</b><small>${ambiance>=7?'Une grande soirée.':'La soirée est terminée.'}</small></div><div class="so3-fin-recette"><span>LA RECETTE</span><b>${recette<0?'−':'+'} ${esc(mgmtEuros(Math.abs(recette)))}</b><small>PRIMES PAYÉES</small></div></section></section>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
@@ -306,7 +306,8 @@ function scr_mgmt_soiree_cadre(){
   }
   /* ==== [ANCRE: MGMT_SOIREE_FIN_SANS_DOUBLE_ENTETE] — Monde lot 65 T1 ==== */
   const entete=moment==='fin'?mgmtSoEnteteFin(m,prog):mgmtSoEntete(m,prog,index);
-  return mfEcran(entete+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches});
+  /* ==== [ANCRE: SOIREE_FIN_SANS_RAPPEL_GLOBAL] — Monde lot 65 T1 ==== */
+  return mfEcran(entete+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches,prise:moment!=='fin'});
 }
 /* L'écran d'origine reste celui des parties d'avant l'agenda. */
 const MGMT_SO_ANCIEN=SCREENS.mgmt_soiree;
