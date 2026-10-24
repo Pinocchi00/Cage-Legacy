@@ -280,3 +280,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (15/15), `node_modules/.bin/eslint mgmt-ceremonie.js` (vert), `git diff --check` (vert). Audit de versions toujours signalé uniquement sur `mgmt-accueil.js`, préexistant et hors tranche. `sw.js` restauré, non inclus.
 - Limites restantes : parcours trois années complètes réellement jouées, conformité exacte aux maquettes, historique exhaustif des records/primes/champions et déclencheur anniversaire ne sont toujours pas démontrés. Le test lent de plafond n'a pas été lancé.
 - Fichiers de cette reprise : `mgmt-ceremonie.js` (lecture et rendu des records), `index.html` (bump de version), `tests/mgmtLot55T1.test.js` (attendu de lecture vide) et cette fiche. Aucune migration de sauvegarde. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et exclues.
+
+### Reprise 36
+
+- Contrôle d'entrée : branche `p11-ceremonie-carnet`, HEAD `825d54c`; le dernier commit contient la lecture/rendu des records du carnet. Les seuls changements préexistants hors lot restent `.opencode/agents/*` et `opencode.json`.
+- Test ajouté : « Lot 55 T1 — les records observés sont rendus dans le carnet sans mutation », vérifiant la lecture du résultat de `mgmtRecords(m)` sans altérer l'état de la partie.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (16/16 verts).
+- Les critères plus larges restent à traiter : simulation véritable de trois années de soirées jouées, rendu intégral conforme aux deux maquettes, et test de chargement d'une sauvegarde historique. Ce test ciblé ne prouve pas ces critères. Aucun changement de production ou de format de sauvegarde, donc aucune migration.
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de lecture des records) et cette fiche. Pas de question de spécification nouvelle.
