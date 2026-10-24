@@ -169,6 +169,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Les reprises précédentes et les tests couvrent les trois paires, le booking/soirée normale du choc, l'offre/changement/arrivée/soirée/lendemain, ainsi que l'inscription du test aux scripts `test` et `test:watch`. Cette vérification ne transforme pas les cases visuelles restantes en succès : seuil de gros blocs du choc manqué, chevauchement du bilan persistant, arrivée non capturée.
 - Écart à la fiche : les objectifs visuels complets et la capture d'arrivée ne sont toujours pas atteints. Aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise 59 — championnes adverses sur les affiches
+- `scr_mgmt_choc` cherchait à tort chaque combattante adverse dans le roster Split. Les identifiants adverses sont maintenant résolus dans le roster de l'organisation invitée, de sorte que les trois cartes montrent les noms réellement enregistrés plutôt que le libellé de repli.
+- Le test existant `Monde lot 69 T1 — les écrans choc et discours exposent les blocs validés par les planches Uni*` vérifie désormais la présence du vrai nom adverse pour chacune des paires.
+- Fichiers modifiés : `mgmt-ecran-poste.js` (résolution du roster adverse), `index.html` (`?v=` bump), `tests/mgmtLot69T1.test.js` (assertions d'affichage), cette fiche (compte rendu).
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe ; ESLint ciblé ne signale aucune erreur (le fichier de test est ignoré par la configuration).
+- Pas de migration de sauvegarde. Les captures comparatives et le contrôle visuel de la page blanche avec le programme de capture n'ont pas été reproduits dans cette reprise ; les mesures et autres limites précédemment rapportées demeurent non résolues. Aucun achèvement global n'est revendiqué.
+
 ### Reprise — vérification des captures
 - État de départ : branche `fid-choc`, HEAD `d015ab54`. `git status` montre les mêmes changements hors tranche sous `.opencode/agents/` et `opencode.json`, ainsi que `mgmt-ecran-poste.js` dont `git diff --ignore-all-space` est vide ; aucun fichier de tranche fonctionnel en attente.
 - Lecture du guide externe réussie. Captures relancées séparément à 1920×1080 : choc `grosBlocs=25.1`, contrôles géométriques à zéro ; discours `grosBlocs=18.1`, contrôles à zéro ; bilan `grosBlocs=12.9`, mais un chevauchement persiste entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22). La commande choc-discours-bilan en une fois a dépassé le délai de l'outil après avoir produit le contrôle choc, les deux autres ont ensuite été capturées individuellement.
