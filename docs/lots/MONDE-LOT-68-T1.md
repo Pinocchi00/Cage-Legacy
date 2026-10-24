@@ -170,3 +170,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Test « Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux étapes » renforcé pour vérifier les proportions 55 % / 43 % des panneaux du contrat, conformément au rapport flex de la planche. `node --test tests/mgmtFicheStats.test.js` : 19/19 verts.
 - Écrans : aucune validation visuelle fiable n'a été effectuée dans cette reprise. Les statuts précédents restent : fiche partiellement structurelle, arrivée partiellement structurelle, recruteur et semaine couverts par tests mais non comparés ; relevé/chiffres, menu, meilleurs et records non comparés. Pas de diagnostic d'écart visuel inventé.
 - Aucun JS/CSS applicatif modifié, aucun bump `?v=`, aucune migration. Les cases de corrections et vérifications visuelles restent à faire. Questions : aucune.
+
+### Reprise 21 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. Historique jusqu'à `41d52cf` consulté. Aucun changement non committé de la tranche ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors de la tranche et n'ont pas été intégrées.
+- Tests ciblés `node --test tests/mgmtFicheStats.test.js` : 19/19 verts. `node tools/verif-versions.js origin/main` : aucun écart. `node_modules/.bin/eslint .` : vert.
+- La lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusée par la politique d'accès externe. Les captures précédemment tentées n'ont pas été ouvertes visuellement ; aucun écart d'apparence ne peut être décrit sans inventer. Je ne prétends donc pas à une validation visuelle.
+- État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, meilleurs et records : tests structurels/styles partiels présents, mais aucune comparaison visuelle ouverte ni correction de fidélité complète démontrée. Les cases de fidélité visuelle 1 à 5 ne sont pas achevées.
+- Aucun code applicatif supplémentaire, migration ou bump `?v=` dans cette reprise. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Pas de nouveau commit : aucune modification de tranche préexistante à commiter. `TOUT_EST_FINI` non atteint.
