@@ -161,3 +161,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Les contrôles automatisés de capture trouvent encore 8 chevauchements et 6 textes sous 22 px sur `lendemain` (dont collisions de la barre des touches avec le contenu et noms tronqués) ; `lendemainSuite` ne signale aucun chevauchement, mais détecte 21 éléments sous 22 px et quelques libellés tronqués. Ces défauts ne sont pas considérés résolus malgré les ratios de gros blocs conformes.
 - Modifié : `ui-cadre.css`, règles ciblées pour améliorer la lisibilité des détails, l'empilement des cartes et supprimer le bouton de retour dupliquant la touche clavier ; version de cache augmentée. Pas de modification de sauvegarde.
 - Écart restant : chevauchements/tailles et troncatures signalés par l'outil, à reprendre ; les images comparatives sont sous `C:/Users/antho/AppData/Local/Temp/shots/` et n'ont pas été ouvertes pour inspection directe. Le compte rendu ne revendique donc pas une conformité visuelle complète.
+
+### Reprise 26 — correction dimensionnelle tentée — 24/10/2026
+
+- À l'ouverture, le dernier commit était `26569ec9` ; aucun fichier de tranche n'était localement modifié. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et intacts.
+- Captures suivant `LISEZMOI.txt` après réduction de hauteur : `lendemain` gros blocs 18,9 %, mais 8 chevauchements (dont Revoir/LES CHIFFRES et noms avec barre de touches) ; `lendemainSuite` gros blocs 17,8 %, aucun chevauchement, mais 21 textes sous 22 px et débordements de noms/rangs.
+- Modifié `ui-cadre.css` (dimensions des vues) et monté son cache dans `index.html`. `node --test tests/mgmtEcranLendemain.test.js` passe (7/7) ; `node tools/verif-versions.js origin/main` ne signale aucun écart.
+- La tentative n'a pas résolu la conformité visuelle : la case 4 reste non satisfaite. Les changements de dimensions doivent être repris ; aucune migration ni mécanique modifiée. Aucun jugement manuel des PNG n'est revendiqué.

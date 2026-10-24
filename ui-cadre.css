@@ -2006,12 +2006,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .mgmt-ld-title{font-size:28px;line-height:1.05}
 .ld66-suite .mgmt-ld-sub,.ld66-suite .mgmt-ld-rangs,.ld66-suite .ld3-move span{font-size:22px;line-height:1.15}
 .ld66-suite .ld3-suite-press,.ld66-suite .ld3-suite-moves,.ld66-suite .ld3-suite-results{overflow-wrap:anywhere}
-.ld66-screen{height:760px;gap:12px}
-.ld66-moments{height:360px;min-height:0;flex:none;grid-template-rows:minmax(0,1fr)}
+.ld66-screen{height:680px;gap:12px}
+.ld66-moments{height:310px;min-height:0;flex:none;grid-template-rows:minmax(0,1fr)}
 .ld66-lower{flex:1;grid-template-columns:1.25fr 1fr .9fr;min-height:0}
 .ld66-change,.ld66-press,.ld66-numbers{min-height:0;overflow-wrap:anywhere}
 .ld66-change .mgmt-ld-item{min-height:0}
-.ld66-suite .ld3-suite{height:840px;min-height:0}
+.ld66-suite .ld3-suite{height:760px;min-height:0}
 .ld66-suite .ld3-move span,.ld66-suite .ld3-move em{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
 .ld66-suite .ld3-move b{font-size:30px;line-height:.95;overflow-wrap:anywhere}
 .ld66-suite .ld3-move strong{font-size:30px;line-height:1;white-space:normal}
