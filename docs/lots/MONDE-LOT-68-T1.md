@@ -379,6 +379,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications : `node --test tests/mgmtFicheStats.test.js` (22/22) ; `node --test tests/mgmtReleve.test.js` (5/5) ; `node tools/verif-versions.js origin/main` (aucun écart) ; `node_modules/.bin/eslint .` (vert). `tests/mgmtReleveReduit.test.js` lent non relancé.
 - Écart à la fiche : le contrôle « chevauchements:0 » après-correction n'est pas nouvellement mesuré pour toutes les scènes, et le protocole de comparaison visuelle n'est pas achevé. Les cases visuelles de la tranche restent incomplètes ; `TOUT_EST_FIN` n'est pas revendiqué.
 
+### Reprise 43 du 24/10/2026 — contrôle automatique relancé
+
+- Vérifiés avant reprise : branche `fid-fiches`, historique (`b92911f3` en tête), et statut. Aucun fichier de la tranche n'était en attente de commit ; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères à la tranche et restent intactes.
+- Relance séquentielle du captureur sur les scènes existantes : fiche `{chevauchements:0, textesSous22px:0, debordent:[]}` ; recruteur `{0,0,[]}` ; retours `{0,0,[]}` ; semaine `{0,0,[]}`. Les scores respectifs (fiche `31.2/23.2`, recruteur `26/19.7`, retours `27.1/18.4`, semaine `27.6/22.1`) ne sont pas considérés comme une validation visuelle.
+- Contrôles de contexte (hors périmètre de modification) relancés : accueil `{chevauchements:0,textesSous22px:1,debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{1,3,[]}` (collision « Tout est lu » / « Tout marquer comme lu ») ; tonposte `{6,0,["IL ATTEND DE VOIR","« Je veux voir la suite. »"]}` ; bilan `{1,0,[]}` (collision « REMERCIÉ » / « Il manque 3 combats en carte »). Ils appartiennent aux lots 64/67 et n'ont pas été modifiés.
+- Aucun défaut géométrique n'est signalé sur les quatre scènes de tranche qui existent dans l'outil. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records ne sont toujours pas des scènes fournies par cet outil ; aucun contrôle n'est inventé. Aucun comparatif PNG n'a été ouvert dans cette reprise, donc la fidélité visuelle stricte n'est pas attestée.
+- Pas de modification applicative, test ou sauvegarde ; aucun bump `?v=` ni migration. Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (22/22), `node --test tests/mgmtReleve.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (vert). Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé.
+- Les cases de comparaison/correction complète restent inachevées et `TOUT_EST_FINI` n'est pas revendiqué ; les mesures de géométrie ne prouvent pas la fidélité visuelle et il reste des scènes de tranche sans contrôle.
+
 ### Reprise 44 du 24/10/2026 — contrôles automatiques demandés
 
 - Branche `fid-fiches` confirmée, HEAD initial `c356bb81`. Les seules modifications au départ (`.opencode/agents/*`, `opencode.json`) sont hors périmètre et restent intactes.
