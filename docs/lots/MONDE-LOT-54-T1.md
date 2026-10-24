@@ -80,6 +80,13 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Les limites des cases 1 et 3 restent celles décrites plus haut : malgré une seconde vue navigable, l'ensemble des deux planches n'est pas reproduit fidèlement ; mouvements et objectifs contractuels ne sont pas exhaustifs ; les lignes T3 ne disposent ni d'une garantie d'anti-répétition sur 50 soirées, ni d'une contextualisation de toutes les familles par les faits réels. Aucun changement fonctionnel n'a été effectué dans cette reprise de validation.
 - Aucun état de sauvegarde nouveau ni migration. Les tests ciblés et audits réussis ne suffisent pas à marquer la tranche terminée ; aucun `TOUT_EST_FINI` n'est revendiqué.
 
+### Reprise demandée — 24/10/2026
+
+- Journal consulté : HEAD `746bb50`, branche `p8-lendemain`. Aucun fichier de la tranche n'était modifié ; les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
+- Vérification relancée : `node --test tests/mgmtLot54T1.test.js` passe 22/22, y compris le chemin de partie réelle, la soirée 13-1 contre le n°1 et les tests de couverture CSS/typo. Aucune nouvelle modification fonctionnelle n'a été apportée pendant cette vérification.
+- Cases encore non satisfaites : la composition active ne démontre pas la reproduction exacte de l'ensemble des valeurs et dimensions des deux planches ; T3 ne réagit pas à toutes les données réelles (notamment interpellations, réseaux, revanche et organisations), et ne garantit pas l'anti-répétition sur 50 soirées par historique éditorial. Le suffixe de semaine déjà présent empêche seulement la répétition littérale dans le scénario de test.
+- Aucun état de sauvegarde nouveau ni migration. `mgmtReleveReduit.test.js` non lancé (test lent). Les cases 1 et 3 demeurent incomplètes ; aucune déclaration `TOUT_EST_FINI`.
+
 ### Reprise — 24/10/2026
 
 - Vérification de reprise : branche `p8-lendemain`; les commits antérieurs contiennent déjà les changements de tranche. Aucun fichier de tranche n'était non commité. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent exclues.
