@@ -758,3 +758,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe, `node_modules/.bin/eslint .` passe.
 - Captures relancées : choc 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` (cible ≤20% manquée) ; discours 0 anomalie géométrique et `grosBlocs=18.1%` ; bilan conserve le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). Images non ouvertes visuellement. Pas de scène d'arrivée dédiée capturée.
 - Écarts restant non résolus : objectif de densité du choc, chevauchement du bilan, capture/comparaison visuelle et arrivée dédiée. Aucun `TOUT_EST_FINI` revendiqué pour ces critères non satisfaits.
+
+### Reprise 70 — test à la fin effective du contrat
+- État initial : branche `fid-choc`, HEAD `34934b23`. Les seuls changements Git initiaux sont les modifications utilisateur sous `.opencode/agents/` et `opencode.json`; ils restent hors périmètre.
+- `tests/mgmtLot69T1.test.js` fixe désormais la fin du poste à la date courante et affirme que le parcours démarre effectivement à la fin du contrat avant de calculer le bilan, accepter l'offre, changer d'organisation, recharger la sauvegarde, jouer une soirée et vérifier le lendemain.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe 4/4.
+- Capture choc relancée avec le script externe : rendu visible, zéro chevauchement, zéro texte sous 22 px, aucun débordement, mais `grosBlocs=25.5%` (seuil ≤20% non atteint). Le processus a dépassé le délai de 120 s; aucun résultat nouveau discours/bilan/arrivée ni image visuellement ouverte n'est revendiqué.
+- Fichiers concernés : ce test (précondition réelle de fin de contrat) et cette fiche (compte rendu). Aucune modification de production, de CSS, de cache ou de sauvegarde; aucune migration.
+- Écarts toujours réels : mesure de gros blocs choc hors seuil, mesure connue antérieure du chevauchement bilan non résolue, scène d'arrivée non capturée et images non comparées visuellement. Ces objectifs ne sont pas déclarés achevés.

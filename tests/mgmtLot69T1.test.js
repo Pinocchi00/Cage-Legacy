@@ -8,7 +8,8 @@ const jouerSoirees=require('./helpers/jouerSoirees');
 test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lendemain avec sauvegarde intermédiaire',()=>{
   const w=newGameWindow({runMain:true});
   try{
-    w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],relu:false,refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);m.poste.fin=mgmtCalAujourdhui(m);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],relu:false,refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    assert.equal(w.eval(`mgmtCalAujourdhui(G.mgmt)>=G.mgmt.poste.fin`),true,'le parcours commence bien à la fin effective du contrat');
     const bilan=w.eval(`mgmtPosteBilan(G.mgmt)`);
     assert.equal(bilan.issue,'prolonge-augmente','la fin de contrat calcule un bilan favorable avant les offres');
     assert.match(w.eval(`scr_mgmt_poste_bilan()`),/PROLONGÉ/,'le bilan favorable est affiché avant le choix d’offre');
