@@ -192,3 +192,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun code fonctionnel ni format de sauvegarde modifié à cette reprise ; aucune migration. Catalogue, calcul, affichages Accueil/presse, mouvements des autres organisations et intitulés des tests sont déjà livrés et commités.
 - Limite de couverture conservée : les familles sont testées par préparation individuelle de leurs faits sur une partie créée par le parcours réel ; cela ne démontre pas que les systèmes opérationnels produisent naturellement tous ces faits. Aucune question nouvelle pour Anthony.
 - Cette fiche est le seul fichier de la tranche à modifier/commiter pour ce bilan. Changements locaux d'agents et d'outillage ainsi que la variation de cache `index.html` restent étrangers et exclus.
+
+### Reprise 10 — livraison revérifiée (24/10/2026)
+
+- Branche `p8-apres` confirmée. `git log --oneline -12` montre les commits fonctionnels précédents déjà présents ; le statut ne contient aucun fichier de production/test de la tranche en attente. Les modifications locales d'agents, `opencode.json`, `sw.js` et `index.html` sont étrangères et exclues.
+- Vérifications : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` incluent le test (`true,true`).
+- Aucun changement de production, test ou sauvegarde dans cette reprise ; pas de migration. Aucun écart nouvellement découvert. La limite de couverture déjà signalée subsiste : les tests préparent chaque fait familial sur une partie issue du chemin réel, sans prouver que chaque système opérationnel produise naturellement chacun des faits.
+- Fichier modifié et commité dans cette reprise : cette fiche, pour ce compte rendu. Aucun changement fonctionnel additionnel requis.
