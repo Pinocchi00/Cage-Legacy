@@ -604,3 +604,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Captures complémentaires isolées (1920×1080) : `discours` donne `grosBlocs=18.1%`, aucun chevauchement, texte trop petit ni débordement ; `bilan` donne `grosBlocs=12.9%`, mais conserve le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte principale » (265×22). Ce constat n'est pas corrigé ni masqué.
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne signale aucun écart (19 fichiers comparés) ; `node_modules/.bin/eslint .` passe ; `git diff --check` passe.
 - Écart restant : la cible de gros blocs du choc et la vérification visuelle dédiée arrivée/bilan ne sont pas satisfaites. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 83 — resserrement des affiches et mesures
+- `ui-cadre.css` : affiches du choc resserrées avec noms en 26 px (au-dessus du minimum 22 px) et padding réduit ; `index.html` versionné par `node tools/_bump.js ui-cadre.css`.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Audit `node tools/verif-versions.js origin/main` et ESLint global passent.
+- Captures exécutées avec le shoot pour `choc`, `discours`, `bilan` : choc 25.1 % de gros blocs, discours 18.1 %, bilan 12.9 %. Contrôles chevauchements/tailles/débords : zéro pour choc et discours ; bilan conserve le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). L'ajustement CSS du choc n'a donc pas permis d'atteindre le seuil ≤20 % et le chevauchement bilan n'est pas résolu. Capture d'arrivée dédiée non faite.
+- Aucune migration. Les autres écarts déjà constatés demeurent : captures comparatives visuelles non ouvertes, bilan chevauché, scène arrivée absente. Aucun `TOUT_EST_FINI` revendiqué.
