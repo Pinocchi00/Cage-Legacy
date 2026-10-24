@@ -35,6 +35,16 @@ test('Monde lot 57 T1 — le classement est déterministe',()=>{
   }finally{a.close();b.close();}
 });
 
+test('Monde lot 57 T1 — la variation du rang s’appuie sur le relevé précédent sans tirage',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt,avant=mgmtGuerreClassement(m);m.guerre=m.guerre||{};m.guerre.classementPrecedent=avant.map(x=>x.id).reverse();const apres=mgmtGuerreClassement(m).find(x=>x.estSplit);return JSON.stringify({rang:apres.rang,mouvement:apres.mouvement,duel:apres.duelSplit});})()`));
+    assert.equal(result.mouvement, 8 - result.rang - (result.rang - 1));
+    assert.ok(result.duel);
+    assert.ok(Number.isInteger(result.duel.mouvement));
+  }finally{w.close();}
+});
+
 test('Monde lot 57 T1 — l’écran relie la rivale, les raisons et les duels sans injection',()=>{
   const w=partie();
   try{
