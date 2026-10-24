@@ -367,6 +367,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Aucun changement de sauvegarde ni migration. Limite de couverture inchangée : les tests mettent en scène les faits des dix familles sur le chemin réel sans prouver leur génération naturelle par chaque système opérationnel. Les changements locaux d'outillage et `sw.js` restent exclus.
 - Aucun changement de sauvegarde ni migration. Les dix familles, calcul déterministe/borné, accueil/presse, mouvements d'autres organisations et tests restent livrés par les commits précédents. Limite de couverture inchangée : les tests scénarisent individuellement les faits sur le parcours réel sans prouver leur production naturelle par tous les systèmes du jeu.
 
+### Reprise vérification inter-lots — 24/10/2026
+
+- Confirmés branche `p8-apres`, historique récent et statut : les fichiers fonctionnels/tests de la tranche sont déjà commitées ; seuls des changements étrangers d'outillage et `sw.js` restent locaux.
+- La suite inter-lots prescrite passe **130/130**, y compris les deux régressions du lot 54. `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` incluent le test (true/true).
+- La tentative de fusion `git merge origin/main` est bloquée par la politique d'exécution ; la fusion demeure à effectuer par le superviseur. Aucun changement de production, de test, de sauvegarde ni migration dans cette reprise. La limite de couverture reste celle déjà notée : faits préparés dans le test plutôt que générés naturellement par chaque système. Aucun écart fonctionnel nouveau ni question pour Anthony.
+
 - Reprise 25 (24/10/2026) : branche `p8-apres`, `git log --oneline -12` et statut consultés ; le code, les tests et l'inscription dans `package.json` sont déjà commités (HEAD `faf9b33`). Revalidation fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; l'audit direct de `test` et `test:watch` renvoie `true,true` ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
 
 ### Reprise 9 — vérification inter-lots (24/10/2026)
