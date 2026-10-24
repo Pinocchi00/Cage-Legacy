@@ -429,3 +429,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Les cases précédentes ont apporté le sélecteur par combat et V, carte résultat passable, primes, salle et route lendemain, styles so3 et tests de rendu. Ce contrôle ne clôt pas les écarts majeurs ni ne permet de revendiquer toutes les cases vertes.
 - Aucun changement moteur, sauvegarde, cache ou données de joueur dans cette reprise. `mgmtReleveReduit.test.js` et lint/versions complets non relancés ici ; aucune validation nouvelle n'est revendiquée.
 - État de livraison honnête : tranche encore incomplète. Pas de commit final ni de `TOUT_EST_FINI`.
+
+### Reprise 61 — vérifications locales et commits de la session
+
+- Commits produits : `e56404a` (correction de ligne de carte, test ciblé vert) et `cc82e79` (présent compte rendu). Les modifications externes dans `.opencode/agents/*` et `opencode.json` sont restées hors staging.
+- Contrôles durant cette session : `node --test tests/mgmtLot53T1.test.js` (20/20), `node --test tests/mgmtPasse.test.js tests/mgmtSoiree.test.js` (27/27), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (succès), test lent `mgmtReleveReduit.test.js` lancé en tâche de fond mais pas encore achevé/lu. Vérification de `package.json`: présence dans `test` et `test:watch` confirmée.
+- Critères restant non validés : portage intégral exact des trois maquettes; lecture par fenêtres de 30–60 s avec fondu réel de l'arène; cumul de référence entre 900 et 1200 s (mesure antérieure 868,38 s); test lent de cette exécution en attente. La frise existante et l'accélération hors moments sont conservées sans moteur secondaire.
+- Pas de changement du moteur, de la sauvegarde ou des textes joueur. Ce compte rendu expose l'état partiel; aucune livraison finale ni `TOUT_EST_FINI` n'est revendiqué.
