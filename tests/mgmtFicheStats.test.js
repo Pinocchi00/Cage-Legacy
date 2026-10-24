@@ -36,7 +36,15 @@ test('Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S',()=>{
    w.eval('CL.mgmtSuivre(MGMT_FICHE.id)');html=w.eval("document.querySelector('.mf-fi-onglets').innerHTML");assert.match(html,/SUIVI/);assert.match(html,/aria-pressed="true"/);assert.match(html,/<svg/);
   assert.match(fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8'),/\.mf-fb-suivi\.on\{[^}]*background:#F0B220/);
   const n=w.eval('mgmtSuivis(G.mgmt).length');w.eval("keysHandle({key:'s',preventDefault(){}})");assert.equal(w.eval('mgmtSuivis(G.mgmt).length'),n-1);
-});
+ });
+test('Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des onglets',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const w=monde();open(w,'apercu');
+  const structure=JSON.parse(w.eval("JSON.stringify((()=>{const row=document.querySelector('.mf-fi-onglets'),body=document.querySelector('.mf-fi-corps');return {row:!!row,body:!!body,follow:!!row?.querySelector('.mf-fb-suivi'),count:!!row?.querySelector('.mf-fb-suivi-count'),followInBody:!!body?.querySelector('.mf-fb-suivi'),countInBody:!!body?.querySelector('.mf-fb-suivi-count')}})())"));
+  assert.equal(structure.row,true);assert.equal(structure.body,true);
+  assert.equal(structure.follow,true);assert.equal(structure.count,true);
+  assert.equal(structure.followInBody,false);assert.equal(structure.countInBody,false);
+ });
 test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',()=>{
   const w=monde();open(w);const shape=JSON.parse(w.eval("JSON.stringify((()=>{const panels=[...document.querySelectorAll('.mf-fs-panel')],frames=[...document.querySelectorAll('.mf-fs-frame')],bars=[...document.querySelectorAll('.mf-fs-part')];return {panels:panels.length,frames:frames.length,layers:frames.map(x=>x.firstElementChild?.firstElementChild?.classList.contains('mf-fs-panel')?3:0),segments:bars.map(x=>x.querySelectorAll('.mf-fs-bar i').length),percent:bars.some(x=>x.querySelector('.mf-fs-bar').textContent.includes('%'))}})())"));
   assert.equal(shape.panels,3);assert.equal(shape.frames,3);assert.deepEqual(shape.layers,[3,3,3]);assert.deepEqual(shape.segments,[3,3]);assert.equal(shape.percent,false);
