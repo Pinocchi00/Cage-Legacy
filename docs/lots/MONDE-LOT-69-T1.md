@@ -152,6 +152,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications ciblées et audits à relancer avant commit. Pas de `TOUT_EST_FINI` tant que les écarts visuels restent constatés.
 - Captures complémentaires exécutées : discours `grosBlocs=18.1%`, 0 chevauchement, 0 texte sous 22 px, aucun débordement ; bilan `grosBlocs=12.9%`, mais le contrôle détecte toujours le chevauchement entre « REMERCIÉ » et « Il manque 3 combats en carte ». J'ai augmenté la marge du titre du bilan de 24 à 44 px et bumpé `ui-cadre.css`; le second contrôle reproduit le même chevauchement (aucune correction revendiquée). Test ciblé `mgmtLot69T1.test.js` passe (4/4), audit versions passe.
 
+### Reprise 57
+- État Git initial : branche `fid-choc`, HEAD `0f8cf479`. Aucun fichier fonctionnel de tranche non commité ; `mgmt-ecran-poste.js` est marqué modifié par les fins de ligne, mais `git diff --ignore-all-space` est vide. Les changements sous `.opencode/agents/` et `opencode.json` sont utilisateur et restent hors périmètre.
+- Reproduction de capture réellement lancée via `shoot.js` : `choc` s'affiche (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=25.2%`; `discours` affiche 0 anomalie et `grosBlocs=18.1%`; `bilan` affiche `grosBlocs=12.9%` mais le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22) persiste. Les images n'ont pas pu être ouvertes ici. Aucune scène d'arrivée dédiée n'a été reproduite.
+- Le test `node --test tests/mgmtLot69T1.test.js` passe 4/4 et couvre offre, changement, arrivée, rechargement intermédiaire, soirée/lendemain, proposition reçue non vide, les trois paires et leur résultat par la soirée normale. Le jeu accepte et programme le choc sur la date d'agenda.
+- J'ai essayé une modification de marge/hauteur du titre du bilan suivie d'une capture ; le résultat du contrôle est inchangé, donc cette tentative a été annulée et n'est pas intégrée. Aucun code fonctionnel ou CSS nouveau ne reste à committer. Pas de migration.
+- Limites encore vérifiables au terme de cette reprise : choc au-dessus de la cible `grosBlocs≤20%`; chevauchement du bilan persistant; arrivée sans comparaison/capture dédiée; images non ouvertes pour comparaison visuelle. Le discours satisfait les mesures automatiques disponibles. Je ne présente pas les cases visuelles comme achevées.
+- Modifications hors tranche préexistantes conservées sans staging : `.opencode/agents/*`, `opencode.json` ; les fins de ligne de `mgmt-ecran-poste.js` ne sont pas incluses.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
