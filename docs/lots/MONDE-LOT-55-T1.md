@@ -455,3 +455,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (27/27 verts).
 - Limites non résolues : les écarts des reprises antérieures restent vrais, dont absence de preuve de trois saisons pleines, test de sauvegarde historique complète non effectué, fidélité intégrale aux maquettes non attestée, déclenchement à chaque anniversaire non réalisé (flux lié au terme du contrat). Le test lent `mgmtReleveReduit` n'a pas été exécuté.
 - Aucun changement de sauvegarde ou migration. Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (assertions sur la phrase presse), cette fiche (compte rendu). Aucune question nouvelle pour Anthony; la tranche n'est pas déclarée complète.
+
+### Reprise 59
+
+- Test ajouté : « Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation », qui vérifie pour la cérémonie et le carnet que `mfEcran` reçoit bien un objet d'options avec `barre`, `courant` et l'état `m`.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (28/28); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); présence du test dans `test` et `test:watch`; `git diff --check` (vert).
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (contrôle des options de navigation), cette fiche (compte rendu). Aucun changement de sauvegarde ou migration.
+- Restent non certifiés : intégralité des valeurs et de la composition des maquettes, déclenchement pour chaque anniversaire plutôt qu'au terme du contrat, trois saisons complètes, chargement d'une sauvegarde historique complète, test lent `mgmtReleveReduit`. Cette reprise n'efface pas ces écarts; pas de `TOUT_EST_FINI`.
+- Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.

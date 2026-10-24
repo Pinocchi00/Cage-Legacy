@@ -280,6 +280,22 @@ test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',
   assert.equal((rendu.match(/Pas de /g)||[]).length,6);
   assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
 });
+test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[]}};
+  c.mgmtOrgNom=()=> 'Organisation';
+  c.mgmtOrgClassement=()=>[];
+  let options;
+  c.mfEcran=(_contenu,valeurs)=>{options=valeurs;return 'écran';};
+  c.scr_mgmt_ceremonie();
+  assert.equal(options.barre,'jeu');
+  assert.equal(options.courant,'accueil');
+  assert.equal(options.m,c.G.mgmt);
+  c.scr_mgmt_carnet();
+  assert.equal(options.barre,'jeu');
+  assert.equal(options.courant,'accueil');
+  assert.equal(options.m,c.G.mgmt);
+});
 test('Lot 55 T1 — les prix attribués portent une phrase de presse marquée non relue',()=>{
   const c=charger();
   const hist=[
