@@ -98,6 +98,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         const retourAccueil=w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
         assert.equal(w.eval(`G.screen`),'mgmt_accueil','un choc invalide renvoie vers l’accueil au lieu de rendre une page vide');
         assert.ok(retourAccueil.length>0,'le rendu de secours ne retourne pas une page vide pendant la redirection vers l’accueil');
+        w.eval(`G.screen='mgmt_choc';G.mgmt.choc=null;CL.go('mgmt_choc')`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','la navigation vers un choc absent revient à l’accueil');
+        assert.ok(w.eval(`document.getElementById('app').innerHTML.trim().length>0`),'le chemin de navigation réel vers un choc absent doit afficher l’accueil plutôt qu’une page blanche');
         w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',a:'combattant-absent',b:${JSON.stringify(paires[0].b)}};G.screen='mgmt_choc';`);
         const referenceAbsente=w.eval(`scr_mgmt_choc()`);
         assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition reçue dont le champion principal manque ne laisse pas l’écran choc blanc');

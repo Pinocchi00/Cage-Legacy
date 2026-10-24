@@ -690,3 +690,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Capture discours après cette modification : `grosBlocs=18.1%`, aucun chevauchement, texte inférieur à 22 px ou débordement. L'arrivée dédiée et la capture bilan n'ont pas été reproduites lors de cette étape ; les écarts déjà documentés restent ouverts.
 - Fichiers modifiés : `ui-cadre.css` (tailles du bandeau et des affrontements choc), `index.html` (`?v=` monté par `_bump.js`), cette fiche (mesures). Tests ajoutés : aucun. Aucune migration de sauvegarde.
 - Aucune image n'a été ouverte pour comparaison visuelle. Écart précis : les noms et médaillons gagnent en fidélité dimensionnelle, mais la densité mesurée du choc s'aggrave de 25.1 % à 26.1 % ; pas de prétention d'achèvement global.
+
+### Reprise 88 — navigation de secours du choc
+- `tests/mgmtLot69T1.test.js` ajoute une vérification via `CL.go('mgmt_choc')` quand `m.choc` est absent : l'écran revient à l'accueil et `#app` contient du rendu plutôt qu'une page blanche.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Pas de changement métier ni de sauvegarde, aucun bump requis. `sw.js` a été remis à `origin/main` conformément à la règle de livraison ; les changements sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
+- L'accès aux instructions et aux scènes de capture externes n'est pas autorisé dans cette reprise ; aucune capture nouvelle ni ouverture d'image n'est revendiquée. Les mesures antérieures restent défavorables au choc (grosBlocs au-dessus de 20 %) et au bilan (chevauchement noté) ; l'arrivée dédiée n'a pas de capture établie.
+- Écart à la fiche : la protection contre l'écran blanc est renforcée, mais les objectifs visuels/captures ne sont pas tous satisfaits. Aucun `TOUT_EST_FINI` revendiqué.
