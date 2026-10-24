@@ -299,3 +299,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tentative de réduction des colonnes des rangs et organisations dans `ui-cadre.css` n'a pas modifié le contrôle automatique ; règle expérimentale retirée, pour ne pas enregistrer une modification sans effet. Aucun code de capture ne modifie les données.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Les autres tests demandés et contrôles versions/lint figurent dans les reprises précédentes ; pas de modification de sauvegarde/migration.
 - Écart restant : quatre débordements détectés sur `lendemainSuite`. Cases structurelles et navigation déjà livrées, mais case visuelle 4 non certifiée complète. `cmp-lendemainSuite.png` a été régénérée sous le dossier temporaire de capture ; pas d'inspection visuelle directe revendiquée.
+
+### Reprise 44 — grille mouvements — 24/10/2026
+
+- Modifié `ui-cadre.css` : les mouvements de la suite reprennent la grille en trois colonnes de la maquette (nom/division, rang, organisation), plutôt que de faire tenir les quatre éléments dans deux colonnes ; cache CSS augmenté dans `index.html` par `node tools/_bump.js ui-cadre.css`.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7. Captures comparatives exécutées sur les deux vues : `lendemain` indique 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 % ; `lendemainSuite` indique 0 chevauchement, 0 texte sous 22 px, gros blocs 17 %, mais persiste les débordements « Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ ».
+- `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun test ajouté, aucune migration ou mécanique changée. Modifications locales préexistantes aux agents OpenCode, `opencode.json` et `sw.js` non incluses.
+- Écart : malgré la reprise de géométrie conforme à la maquette, l'outil garde quatre débordements sur la suite ; la case visuelle 4 reste partielle. Captures générées sous `C:/Users/antho/AppData/Local/Temp/shots/`, sans inspection image manuelle revendiquée.
