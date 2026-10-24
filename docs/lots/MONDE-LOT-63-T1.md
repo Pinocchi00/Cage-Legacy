@@ -148,6 +148,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Vérifications réalisées : `node --test tests/mgmtLot63T1.test.js` (2/2), `node tools/verif-versions.js origin/main` (sans écart), ESLint ciblé et `git diff --check`.
 - Aucune nouvelle clé de sauvegarde ni migration. Aucune question pour Anthony ; les critères manquants sont du travail restant, et la tranche n'est pas déclarée terminée.
 
+### Reprise 6 — clôture (24/10/2026)
+
+- Branche `p8-apres`, `git log --oneline -12` et `git status` vérifiés. Aucun fichier fonctionnel de la tranche n'était non commité : les changements locaux visibles concernent seulement `.opencode/agents/*`, `opencode.json`, `sw.js` et une version de cache locale dans `index.html`, tous hors périmètre.
+- Relecture du périmètre P7/P8/P10 du brief et du compte rendu du lot 54. Validation fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
+- Aucun nouveau changement fonctionnel, test ou sauvegarde requis, aucune migration. Les fonctionnalités et tests de la tranche sont déjà livrés par les commits de l'historique ; la partie neuve n'est pas touchée ici.
+- Écart de couverture conservé honnêtement : les tests déclenchent les familles par faits préparés sur le chemin réel, sans prouver que chaque système opérationnel génère naturellement chacun des faits. Le test lent du plafond et `check:rapide` restent du contrôle superviseur, selon les consignes de reprise.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
 ### Reprise 28 — validation et livraison (24/10/2026)
