@@ -37,6 +37,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
 
+### Reprise — vérification et état des critères (24/10/2026)
+
+- Branche `p11-croissance`; HEAD au début `39fa365`. Aucun fichier de la tranche n'était modifié; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et laissées intactes.
+- Vérifications rejouées : `node --test tests/mgmtLot56T1.test.js` (10/10), `node --test tests/mgmtPasse.test.js` (13/13, empreintes), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- La progression causée par les soirées de `mgmtPasseGenerer`, le contrôle de sauvegarde neuve `mgmtReleveReduit.test.js`, et l'effet réel sur l'attrait des agents libres ne sont toujours pas démontrés/branchés. L'affichage n'a pas été vérifié contre tous les détails exacts de la planche; la couverture des effets n'est pas complète.
+- Un essai de test du diffuseur a été abandonné car il ciblait une API inexistante (`mgmtDroitsDiffuseur`); aucun code n'en a résulté. Aucun effet n'est prétendu testé par cet essai.
+- Pas de migration. Ces critères ouverts empêchent honnêtement de déclarer la tranche terminée; aucun commit final n'est donc revendiqué.
+
 ### Reprise 12 — vérifications ciblées (24/10/2026)
 
 - Branche confirmée `p11-croissance`; HEAD `4432508`. Les changements présents dans `.opencode/agents/*` et `opencode.json` sont étrangers à la tranche, non ajoutés.
