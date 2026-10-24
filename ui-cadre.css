@@ -2137,6 +2137,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-mouvement{border-top:2px solid rgba(233,230,225,.16);padding-top:12px}
 /* ==== [ANCRE: MONDE57_T1_MAQUETTE_GRILLE] — Monde lot 57 T1 ==== */
 .gu3{grid-template-rows:auto minmax(0,1fr);align-content:stretch}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_CARTES_MOMENTS] — Monde lot 66 T1 ==== */
+.ld66-moments{height:285px;min-height:285px}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;overflow-wrap:anywhere}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
 .gu3-table{grid-column:1;grid-row:2;min-height:0;overflow:auto}
 .gu3-rivale{grid-column:2;grid-row:2;min-height:0;box-sizing:border-box}
 .gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(180px,1fr) 120px 120px 130px 120px 90px;gap:12px;padding:0 16px}

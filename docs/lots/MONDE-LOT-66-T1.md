@@ -18,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 57 — remontée d’échelle et captures — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `e8519ce2`; aucun changement non commité de la tranche. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
+- Pour répondre au contrôle de reprise, `ui-cadre.css` rétablit la hauteur de 285 px et les noms à 80/64 px (les surcharges ultérieures les avaient ramenés à 32 px). `index.html` : version CSS montée avec `node tools/_bump.js ui-cadre.css`.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7 verts. Captures exécutées séparément : `lendemain` grosBlocs 18,4 %, textes sous 22 px 0, débordements 0, mais 4 chevauchements (détail/carte des chiffres et constat contre touches); `lendemainSuite` grosBlocs 16,7 %, aucun chevauchement ni texte sous 22 px, mais 4 débordements de mouvements (nom, division, rang, organisation). Images comparatives générées dans le dossier temporaire du comparateur.
+- Avant/après : le lendemain garde la composition déjà livrée et retrouve l’échelle conforme (80/64 px, 285 px), mais cette hauteur réintroduit des collisions que les captures signalent. La suite ne change pas et conserve ses débordements connus. La case visuelle n’est donc pas entièrement satisfaite ; aucune inspection manuelle des images n’est revendiquée.
+- Aucun changement de mécanique ni de sauvegarde. Questions pour Anthony : aucune.
+
 ### Reprise 56 — ajustement d’échelle et contrôle — 24/10/2026
 
 - État initial : branche `fid-lendemain`, HEAD `00612c41`; aucun code de tranche non commité. Seules les modifications hors tranche déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont exclues.
