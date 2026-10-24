@@ -258,7 +258,8 @@ test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf co
     jouerSoirees(w,1);
     const result=w.eval(`(()=>{G.screen='mgmt_soiree';render();return document.getElementById('app').innerHTML;})()`);
     assert.equal((result.match(/class="mf-so-lg/g)||[]).length,9);
-    assert.match(result,/SOIRÉE/);
+     assert.match(result,/SOIRÉE/);
+     assert.match(result,/<span>\d+ \/ 9 · COMBATS<\/span>/);
     assert.match(result,/Commencer la soirée/);
     assert.equal((result.match(/class="so3-vue"/g)||[]).length,9);
     assert.match(result,/aria-label="Vue du combat 1 :/);

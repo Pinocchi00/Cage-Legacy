@@ -14,6 +14,13 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 
 ## Compte rendu
 
+### Reprise 43 — compteur de soirée au format de la planche
+
+- Modifié l'en-tête de l'ouverture pour afficher le compteur `événement / combats` (par exemple `4 / 9 · COMBATS`) à côté du nom de la soirée, plutôt que le seul nombre total. Cela rapproche le compteur des valeurs structurelles de `UniSoiree` sans changer les données ni la navigation.
+- Fichiers : `mgmt-soiree-cadre.js` (compteur d'ouverture), `index.html` (version cache montée), `tests/mgmtLot53T1.test.js` (assertion sur le compteur), cette fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 21/21 réussis.
+- Écart restant : le portage exact de la composition visuelle complète n'est pas réalisé. Le critère de cumul de durée de référence 900–1200 s reste non satisfait (référence précédemment mesurée à 868,38 s); cette petite étape ne prétend pas achever la tranche.
+
 ### Reprise 31 — ajout structurel de la carte
 
 - Vérifié au départ : branche `p7-ecran-soiree`, HEAD `76b2205`; les modifications externes `.opencode/agents/*` et `opencode.json` sont restées intactes. Les modifications préexistantes de `package.json` n'ont pas de différence de contenu selon `git diff --ignore-all-space` et ne sont pas de cette tranche.
