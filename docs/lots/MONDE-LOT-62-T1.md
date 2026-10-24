@@ -14,11 +14,11 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 
 ## Compte rendu
 
-- Fichiers modifiés : `mgmt-corps.js` (appel à la clôture de soirée et première implémentation du déclencheur annuel) ; `mgmt-accueil.js` (lien cérémonie séparé du bilan du patron et affiché avant lui).
-- Tests exécutés : `tests/mgmtLot55T1.test.js` et `tests/mgmtLot57T1.test.js`, tous verts (74 tests). `node tools/verif-versions.js origin/main` ne signale aucun écart de version.
-- Tests non faits : aucun `tests/mgmtLot62T1.test.js` n'a été ajouté ; la simulation réelle multi-années, la non-répétition de presse sur 50 soirées, le rechargement, l'ancien format de sauvegarde et le test lent de poids n'ont donc pas été démontrés. Lint non exécuté.
-- Sauvegarde : version inchangée ; aucune clé neuve, le rang annuel existant porte l'état idempotent.
-- Écart bloquant restant : le déclencheur et les liens n'ont pas été validés par le chemin de jeu réel. La détection s'appuie sur les dates de l'agenda et doit être éprouvée avant livraison ; aucun résultat multi-années n'est revendiqué.
-- Questions pour Anthony : aucune question posée ; les preuves manquantes sont un travail restant, pas une décision demandée.
+- Fichiers de la tranche : `mgmt-corps.js` appelle le déclencheur à la clôture et le définit ; `mgmt-accueil.js` affiche d'abord le lien de cérémonie puis celui du bilan ; `mgmt-ceremonie.js` fait varier la formulation d'une année à l'autre sans hasard ; `index.html` porte les versions de cache ; cette fiche consigne le résultat.
+- Tests exécutés : `tests/mgmtLot55T1.test.js` et `tests/mgmtLot57T1.test.js` (74 tests, verts) ; `node tools/verif-versions.js origin/main` (aucun écart). La formulation annuelle est couverte par les tests existants de cinquante années, pas par cinquante soirées jouées.
+- Tests manquants : pas de `tests/mgmtLot62T1.test.js` ajouté ni inscrit dans `test`/`test:watch`. Le chemin de jeu réel trois années, le rechargement, l'ancien format de sauvegarde joué sur une année et les cinquante soirées réelles ne sont pas démontrés. Le test lent de poids et le lint ne sont pas exécutés.
+- Sauvegarde : aucune clé nouvelle ; `MGMT_SAVE_VERSION` inchangé. La détection réutilise `m.guerre.anneeTraitee`.
+- Écarts / reste : le déclencheur compare les dates des soirées de l'agenda et la clôture du rang existante inscrit `anneeTraitee`. Toutefois, la preuve demandée d'intégration réelle n'est pas faite ; la présente livraison ne revendique pas la tranche terminée.
+- Questions pour Anthony : aucune ; les vérifications listées sont du travail restant, pas une question de spécification.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
