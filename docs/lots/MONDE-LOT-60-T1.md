@@ -13,9 +13,11 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
-- Modifiés : `mgmt-recruteur.js` rend l'ajout au suivi idempotent ; `mgmt-ecran-recruteur.js` affiche les états Signé/Suivi et un message textuel de caisse insuffisante.
-- Cases non terminées : le branchement de la signature sur l'écran Contrats existant, les approches rivales déterministes et leur presse, ainsi que le fichier de tests exigé ne sont pas implémentés. Aucun test n'a pu être lancé : `tests/mgmtLot60T1.test.js` n'existait pas.
-- Écart à la fiche : seules des modifications partielles d'affichage et de suivi sont présentes ; versions de cache à mettre à jour et couverture exigée manquante.
-- Questions pour Anthony : aucune ; il reste du travail de code, pas une ambiguïté de spécification.
+- Modifiés : `mgmt-recruteur.js` garde le suivi idempotent et utilise la porte `mgmtContratSigner` lorsqu'un agenda est actif ; `mgmt-ecran-recruteur.js` affiche les états et le manque de caisse ; `mgmt-ecran-recruteur.css` style l'état ajouté.
+- Tests : `tests/mgmtLot42T1.test.js` passe ; 4/5 tests de `tests/mgmtLot42T2.test.js` passent. Le test de signature hostile reste en échec (la signature ne réussit pas sur son scénario avec agenda).
+- Cases non terminées : ouverture de l'écran Contrats pour le profil, retrait au marché après signature, approche rivale déterministe et presse, tests complets `mgmtLot60T1.test.js`, sauvegarde et partie neuve.
+- Écart à la fiche : pas d'approche d'organisation ni de texte presse ajouté ; aucune migration de sauvegarde.
+- Vérifications : `node tools/verif-versions.js origin/main` passe. Les tests ciblés historiques montrent l'échec décrit ; pas de lint global exécuté.
+- Questions pour Anthony : aucune question de spécification. La tranche reste inachevée, principalement parce que le branchement UI des contrats et le cycle d'approche ne sont pas encore réalisés.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

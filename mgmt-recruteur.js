@@ -64,14 +64,25 @@ function mgmtRecruteurRetour(m){
 function mgmtRecruteurSigner(m,idProfil){
   const e=m?.recruteur,profil=e?.retours?.flatMap(x=>x.profils||[]).find(p=>p.id===idProfil);
   if(!profil||m.roster?.some(f=>f.id===profil.id)||typeof mgmtContratSigner!=='function')return null;
-  /* La porte mgmtRecruter signe une ligne du marché et exige une trace. Les profils de mission sont une offre déjà observée : les insérer temporairement dans la même porte, puis retirer la ligne d'offre. */
+  /* ==== [ANCRE: P5_T4_SIGNATURE_PORTE_CONTRATS] — Monde lot 60 T1 ==== */
+  if(!mgmtContratsActif(m)){
+    if(!Array.isArray(m.exterieur)||typeof mgmtExteriorTrace!=='function')return null;
+    const d=divById(profil.cat);if(!d)return null;
+    m.exterieur.push({id:profil.id,name:profil.name,first:profil.first,last:profil.last,ck:profil.ck,div:d.id,generation:0,W:profil.W,L:profil.L,D:profil.D||0,age:profil.age,level:1,career:[{age:profil.age,W:profil.W,L:profil.L,D:profil.D||0}]});
+    const signe=mgmtRecruter(m,profil.id,true);m.exterieur=m.exterieur.filter(x=>x.id!==profil.id);
+    if(signe){signe.cat=profil.cat;signe.style=profil.style;signe.ck=profil.ck;signe.recruteurId=profil.id;}
+    return signe;
+  }
   if(!Array.isArray(m.exterieur)||typeof mgmtExteriorTrace!=='function')return null;
   const div=typeof divById==='function'?divById(profil.cat):null;
   if(!div)return null;
   const ligne={id:profil.id,name:profil.name,first:profil.first,last:profil.last,ck:profil.ck,div:div.id,generation:0,W:profil.W,L:profil.L,D:profil.D||0,age:profil.age,level:1,libre:true,career:[{age:profil.age,W:profil.W,L:profil.L,D:profil.D||0}]};
   m.exterieur.push(ligne);
-  const signé=mgmtRecruter(m,profil.id,true);
+  const offre=mgmtExteriorPourOffre(m,profil.id),n=profil.contrat?.combats||3,b=offre?mgmtBourseSouhaitee(m,offre,false):0;
+  const resultat=offre?mgmtContratSigner(m,profil.id,n,b):null;
   m.exterieur=m.exterieur.filter(x=>x.id!==profil.id);
+  if(!resultat?.ok)return null;
+  const signé=m.roster.find(f=>f.id===profil.id);
   if(!signé)return null;
   signé.cat=profil.cat;signé.style=profil.style;signé.ck=profil.ck;signé.recruteurId=profil.id;
   return signé;
