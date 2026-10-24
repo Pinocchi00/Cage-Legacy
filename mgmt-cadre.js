@@ -82,6 +82,8 @@ function mfAttentes(m){
   if(m.card&&Number.isSafeInteger(m.card.sizeMain)&&Array.isArray(m.card.main)&&m.card.main.length<m.card.sizeMain) out.add('carte');
   if(typeof mgmtOpenCount==='function'&&mgmtOpenCount(m)>0) out.add('preliminaires');
   if(typeof mgmtActuNonLues==='function'&&mgmtActuNonLues(m)>0) out.add('actualites');
+  /* ==== [ANCRE: MONDE64_T1_ATTENTE_CONTRAT] — Monde lot 64 T1 ==== */
+  if(typeof mgmtContratRestants==='function'&&(m.roster||[]).some(f=>f&&f.ct&&mgmtContratRestants(f)<=1)) out.add('contrats');
   return out;
 }
 
@@ -449,8 +451,7 @@ function mfAfficheHtml(m){
   const lignes=d.cat.toUpperCase().split(' ');
   return `<div class="mf-affiche" data-mise="${esc(L.mode)}">`
     +`<div class="mf-nom" style="left:${L.xA}px;top:18px;font-size:${L.fs}px">${esc(L.n1)}</div>`
-    +`<div class="mf-vs" style="left:${L.vsLeft}px;top:${L.vsTop}px;font-size:${L.vsFs}px">VS</div>`
-    +`<div class="mf-vs trait" aria-hidden="true" style="left:${L.vsLeft}px;top:${L.vsTop}px;font-size:${L.vsFs}px;-webkit-text-stroke-width:${L.vsStroke}px">VS</div>`
+    +`<div class="mf-vs" style="left:${L.vsLeft}px;top:${L.vsTop}px;font-size:${L.vsFs}px;-webkit-text-stroke:var(--mf-blanc) ${L.vsStroke}px">VS</div>`
     +`<div class="mf-poids" style="left:${L.boxLeft}px;top:${L.boxTop}px;width:${L.boxW}px;height:${L.boxH}px;font-size:${L.boxFs}px;gap:${L.boxGap}px">${lignes.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`
     +`<div class="mf-nom bas" style="left:${L.xB}px;bottom:18px;font-size:${L.fs}px">${esc(L.n2)}</div>`
     +`<div class="mf-soiree"><div>${esc(d.org.toUpperCase())} FIGHT</div><div><span>NIGHT</span><b>${esc(d.n)}</b></div></div>`
