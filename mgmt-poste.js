@@ -139,6 +139,43 @@ function mgmtChocTirageAcceptation(m,orgId){
   const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(`choc:${String(m.graine||m.seed||m.org||'split')}:${orgId}:${annee}`,'acceptation-choc',m):null;
   return !!stream&&stream()<mgmtChocProbabiliteAcceptation(ligne.rang);
 }
+/* ==== [ANCRE: MONDE_LOT58_T1_CHOC_ANNUEL] — Monde lot 58 T1 ====
+   Prépare une proposition annuelle à partir du calendrier; l'agenda reste
+   l'unique support des soirées et aucune date n'est consommée au refus. ==== */
+const MGMT_CHOC_BILLETTERIE_BONUS=0.25;
+const MGMT_CHOC_PROPOSITION_PAR_RANG=[0.42,0.36,0.3,0.24,0.19,0.14,0.1,0.07];
+function mgmtChocAnnee(m){
+  const jour=m&&m.cal&&Number.isSafeInteger(m.cal.jour)?m.cal.jour:0;
+  return typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():0;
+}
+function mgmtChocValide(choc){
+  return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee);
+}
+function mgmtChocProposition(m){
+  if(!m||!m.mondeVivant||m.choc&&mgmtChocValide(m.choc)&&m.choc.annee===mgmtChocAnnee(m))return null;
+  const rangs=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m);
+  const meilleure=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,rank:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.rank>=0).sort((a,b)=>a.rank-b.rank)[0];
+  if(!meilleure)return null;
+  const partenaires=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(rangs.find(x=>x.id===o.id)||{}).rang||8})).filter(x=>{
+    const c=(m.orgs[x.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[x.o.id].roster||[]}).has(f.id));
+    return !!c;
+  }).sort((a,b)=>a.r-b.r);
+  if(!partenaires.length)return null;
+  const graine=String(m.graine||m.seed||m.org||'split'),annee=mgmtChocAnnee(m);
+  const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(`choc-proposition:${graine}:${active}:${annee}`,'proposition-choc',m):null;
+  if(!stream)return null;
+  const candidat=partenaires.find(({r})=>stream()<MGMT_CHOC_PROPOSITION_PAR_RANG[Math.max(0,Math.min(7,r-1))]);
+  if(!candidat)return null;
+  m.choc={orgId:candidat.o.id,div:meilleure.f.div,jour:typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0,annee,etat:'recu'};
+  return m.choc;
+}
+function mgmtChocRepondre(m,accepte){
+  if(!m||!mgmtChocValide(m.choc)||m.choc.etat!=='recu')return false;
+  if(!accepte){m.choc.etat='refuse';return true;}
+  const base=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):m.choc.jour;
+  for(let j=base+42;j<=base+70;j++)if(mgmtAgendaPoser(m,j,'petite').ok){m.choc.jour=j;m.choc.etat='programme';return true;}
+  return false;
+}
 function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
 function mgmtPosteRenouveler(m,issue){
