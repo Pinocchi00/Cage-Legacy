@@ -548,3 +548,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert), et confirmation que le test figure dans `test` et `test:watch`.
 - Les tests ne changent pas les limites déjà consignées : `mgmtReleveReduit` non exécuté, pas de preuve de trois saisons complètes jouées ni de chargement d'une fixture historique complète, validation visuelle intégrale des maquettes absente, déclenchement de cérémonie lié au terme du contrat plutôt qu'à chaque anniversaire. Ces critères ne sont donc pas certifiés satisfaits.
 - Aucun code métier, test ou sauvegarde n'a été modifié durant cette reprise. Aucun commit artificiel n'est créé, car il n'y a pas de fichier de tranche non commité à livrer; les changements étrangers sont laissés intacts. Aucune migration de sauvegarde. Pas de `TOUT_EST_FINI`.
+
+### Reprise 71
+
+- Ajout du test « Lot 55 T1 — le carnet tolère les collections historiques facultatives absentes » pour contrôler le résultat complet et vide quand une partie existe sans traces facultatives.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (33/33); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert); présence confirmée dans `test` et `test:watch`; `git diff --check` (vert).
+- Aucun changement de production ni de sauvegarde; aucune migration. Les changements étrangers `.opencode/agents/*` et `opencode.json` restent exclus.
+- Les écarts antérieurement établis persistent : essai `mgmtReleveReduit` non passé ici, pas de preuve de trois saisons complètes ou d'une fixture historique complète chargée, reproduction intégrale des maquettes non certifiée, déclenchement à chaque anniversaire non établi. Ces limites interdisent de déclarer toutes les cases de la fiche achevées.

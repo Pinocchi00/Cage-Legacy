@@ -342,3 +342,8 @@ test('Lot 55 T1 — une trace sans vainqueur ne produit aucun prix de finition o
   ]});
   assert.ok(!prix.some(p=>p.id==='ko'||p.id==='soumission'||p.id==='retour'));
 });
+test('Lot 55 T1 — le carnet tolère les collections historiques facultatives absentes',()=>{
+  const c=charger();
+  const carnet=c.mgmtCarnetLire({});
+  assert.equal(JSON.stringify(carnet),JSON.stringify({champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]}));
+});
