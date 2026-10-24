@@ -74,6 +74,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 3 — contrôle inter-lots final (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Aucun changement fonctionnel/test de la tranche n'était en attente ; les modifications locales d'agents, `opencode.json` et `sw.js` sont étrangères et exclues.
+- La suite prescrite passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56. Les deux régressions du lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines) sont vertes.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit aux scripts `test` et `test:watch` (`true,true`).
+- Aucun changement de sauvegarde ni migration. La limite de couverture demeure : les tests préparent séparément les faits des dix familles sur une partie créée par le parcours réel, sans prouver que chaque système opérationnel les produit naturellement. La fusion de `origin/main` reste à effectuer par le superviseur conformément aux comptes rendus antérieurs ; aucune modification étrangère n'est incluse.
+- Cette reprise ne modifie que la fiche. Les fichiers de tranche déjà livrés sont `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`. Aucune question nouvelle pour Anthony.
+
 ### Reprise suite à la demande de contrôle inter-lots — 24/10/2026
 
 - Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Les commits fonctionnels de la tranche sont déjà présents. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et restent hors du commit.
