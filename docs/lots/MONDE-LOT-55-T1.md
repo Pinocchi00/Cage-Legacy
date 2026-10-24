@@ -431,3 +431,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (25/25); `node tools/verif-versions.js origin/main` (aucun écart); ESLint ciblé `mgmt-ceremonie.js` (vert); `git diff --check` (vert). `sw.js`, altéré par l'environnement de test, restauré depuis `origin/main`.
 - Fichiers modifiés : `mgmt-ceremonie.js` (départage du retour), `index.html` (bump de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche. Aucun changement de sauvegarde ni migration.
 - Limites non résolues : le test lent `mgmtReleveReduit` n’a pas été exécuté; le parcours ne prouve pas trois saisons complètes ni le chargement d’une fixture complète ancienne; l'enchaînement suit le terme du contrat plutôt que chaque anniversaire; la fidélité intégrale aux maquettes n'est pas certifiée. Ces écarts empêchent de revendiquer `TOUT_EST_FINI`.
+
+### Reprise 56
+
+- État initial : branche `p11-ceremonie-carnet`, HEAD `930710c`; aucun fichier de la tranche n'était modifié hors commit. Les modifications préexistantes de `.opencode/agents/*` et `opencode.json` restent étrangères et exclues.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (25/25), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert); le test est bien présent dans `test` et `test:watch`.
+- Aucun test lent `mgmtReleveReduit` ni `check:rapide` exécuté, conformément aux consignes de délai. Aucun changement de format de sauvegarde ni migration.
+- Les critères encore non attestés restent explicitement ouverts : test lent de plafond, chargement d'une fixture historique complète, fidélité intégrale aux maquettes, et déclenchement à chaque anniversaire (le flux en place suit le terme du contrat). La simulation présente couvre des soirées de trois années/fenêtres mais ne garantit pas trois saisons pleines. Par conséquent, aucune déclaration `TOUT_EST_FINI`.
+- Aucun changement de production n'a été justifié par ces contrôles; le compte rendu est la seule modification de cette reprise. Aucune question nouvelle pour Anthony.
