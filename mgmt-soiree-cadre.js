@@ -204,7 +204,7 @@ function mgmtSoEntreHtml(m,prog,index,focus){
 function mgmtSoEnteteFin(m,prog){
   const n=prog.length;
   const date=mgmtSoireeDateTexte(m), salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
-  return `<header class="mf-entete mf-so-entete"><div class="mf-entete-g"><div class="mf-plaque"><span>FIN DE SOIRÉE</span><b class="mf-so-cpt">${esc(n)} / ${esc(n)}</b></div></div><div class="mf-so-dr"><span class="mf-entete-d">Ce soir</span>${date?`<div class="mf-so-chip"><b>${esc(date)}</b><span>${esc(mfNet(salle))}</span></div>`:''}<div class="mf-so-chip org"><b>${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</b><b class="r">${esc(num)}</b></div></div></header>`;
+  return `<header class="mf-entete mf-so-entete"><div class="mf-entete-g"><div class="mf-plaque"><span>FIN DE SOIRÉE</span></div><b class="mf-so-cpt">${esc(n)} / ${esc(n)}</b></div><div class="mf-so-dr"><span class="mf-entete-d">Ce soir</span>${date?`<div class="mf-so-chip"><b>${esc(date)}</b><span>${esc(mfNet(salle))}</span></div>`:''}<div class="mf-so-chip org"><b>${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</b><b class="r">${esc(num)}</b></div></div></header>`;
 }
 /* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
 function mgmtSoResultatSeulHtml(m,p){

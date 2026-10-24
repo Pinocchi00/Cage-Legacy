@@ -127,6 +127,8 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.match(header,/Ce soir/);
     assert.match(header,/FIGHT NIGHT/);
     assert.match(header,/\/\s*\d+/);
+    /* Décision : planches Uni* validées par Anthony ; compteur à côté de la plaque du titre. */
+    assert.match(header,/<div class="mf-plaque"><span>FIN DE SOIRÉE<\/span><\/div><b class="mf-so-cpt">\d+ \/ \d+<\/b>/);
     assert.doesNotMatch(header,/mf-so-pips/);
     /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, sans bandeau d'étape suivant. */
     assert.match(screen,/FIN DE SOIRÉE/);
