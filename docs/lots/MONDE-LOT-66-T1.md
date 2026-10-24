@@ -221,3 +221,9 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Élargissement des deux colonnes de rang/organisation de 96 à 112 px et cache CSS augmenté. Ce réglage n'a pas supprimé les quatre débordements selon la capture ; ce défaut demeure ouvert, sans prétention que la case visuelle 4 soit entièrement satisfaite.
 - `node --test tests/mgmtEcranLendemain.test.js` : 7/7. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde.
 - La branche fonctionnelle des deux écrans et la navigation restent déjà livrées dans les commits précédents. Les modifications locales d'agents, `opencode.json` et `sw.js` sont hors tranche et laissées intactes.
+
+### Reprise 34 — vérification de l'état livré — 24/10/2026
+
+- État initial : branche `fid-lendemain`, `git log --oneline -12` montre les commits de livraison déjà présents, et `git status` ne montre aucune modification des fichiers de la tranche. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et restent intactes.
+- La demande de lecture du guide de capture via `read` n'a pas été autorisée par la politique de chemin externe. Les mesures documentées les plus récentes restent donc celles de la reprise 32 : aucun débordement sur le lendemain n'est certifié dans cet état de capture, tandis que la suite conserve quatre débordements signalés. La case visuelle 4 demeure non validée ; le taux de gros blocs, seul, ne suffit pas à déclarer la conformité.
+- Aucun fichier de code de la tranche n'était en attente de commit. Aucun ajustement CSS supplémentaire n'a été fait au jugé, pour ne pas masquer/rogner les éléments ni empirer le rendu sans pouvoir vérifier la capture. Tests, audit et commit final de code restent documentés dans les reprises précédentes.
