@@ -37,4 +37,13 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Écart : la tranche n'est pas terminée ; seuls le test de couverture CSS des classes recruteur et les tests de fiche déjà présents ont été validés. Pas de migration de sauvegarde.
 - Questions pour Anthony : aucune ; il s'agit de travail visuel restant, pas d'une question de spécification.
 
+### Reprise 4 du 24/10/2026
+
+- Historique et état consultés : les commits existants sont conservés ; aucune modification déjà committée n'a été refaite. Les fichiers `.opencode/agents/*` et `opencode.json` restent des modifications hors tranche et ne sont pas inclus.
+- `tests/mgmtFicheStats.test.js` : ajout du test « Monde lot 68 T1 — mission et retours du recruteur gardent leurs blocs de planche », complétant la couverture des classes et de leurs règles CSS. `node --test tests/mgmtFicheStats.test.js` : 11/11 verts.
+- Captures : outil externe de capture/ouverture d'images impossible à utiliser dans ce contexte (lecture du fichier d'instructions temporaire refusée ; aucun dossier shoot/cmp disponible dans le dépôt). Aucune comparaison visuelle n'est revendiquée.
+- Écrans, honnêtement : fiche Aperçu/Statistiques a seulement ses colonnes explicitement positionnées et les tests de structure antérieurs ; fidélité visuelle non validée. Arrivée contrat/espoirs non traitée. Recruteur mission/retours : règles et présence de blocs testées, mais correction et validation visuelles non faites. Semaine, relevé, chiffres du combat, menu, meilleurs et records non traités/non capturés.
+- Versions : aucun fichier applicatif JS/CSS modifié durant cette reprise, donc aucun bump nécessaire. Migration de sauvegarde : aucune. Tests ciblés verts ; contrôle de versions et lint restent à exécuter avant livraison.
+- Écart principal : la demande de fidélité écran par écran et le critère complet de fin ne sont pas atteints. Aucun écart de spécification ajouté ; les limites de validation visuelle sont explicites.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

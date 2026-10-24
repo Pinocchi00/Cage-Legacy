@@ -58,6 +58,16 @@ test('Monde lot 68 T1 — chaque classe des écrans recruteur a une règle',()=>
   assert.ok(classes.length>0);
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),name);
 });
+test('Monde lot 68 T1 — mission et retours du recruteur gardent leurs blocs de planche',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-ecran-recruteur.js'),'utf8');
+  const required=['rc-tabs','rc-layout','rc-left','rc-right','rc-destinations','rc-mission','rc-report','rc-list','rc-open','rc-profile-head','rc-stats','rc-demand','rc-actions'];
+  for(const name of required){
+    assert.match(js,new RegExp(`(?:class="[^"]*\\b${name}\\b|"${name}(?: |")|\\b${name}\\b)`),`bloc ${name}`);
+  }
+  const css=fs.readFileSync(require.resolve('../mgmt-ecran-recruteur.css'),'utf8');
+  for(const name of required)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);
