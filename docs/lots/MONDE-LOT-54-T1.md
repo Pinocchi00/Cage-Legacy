@@ -125,6 +125,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État Git au départ : branche `p8-lendemain`, aucun fichier de tranche non commité. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus.
 - Limites toujours présentes : ce test de non-régression ne complète pas la reproduction intégrale du layout et des valeurs des deux planches, ni les événements T3 contextualisés selon tous les faits réels. Le compte rendu précédent décrit les écarts non résolus ; ils ne sont pas déclarés terminés ici. Pas de nouvelle donnée de sauvegarde.
 
+### Reprise 8 — validation locale (24/10/2026)
+
+- Journal vérifié : branche `p8-lendemain`, HEAD `ca441b1`; les commits de la tranche sont déjà présents. Les seules modifications de travail préexistantes sont `.opencode/agents/*`, `opencode.json` et `sw.js`; elles restent exclues.
+- `node --test tests/mgmtLot54T1.test.js` passe 25/25. Le test inclut le chemin réel de génération et la victoire du 13-1 contre le n°1, D1, la navigation et l'ordre narratif des deux vues.
+- Les éléments livrés de T2 comprennent la navigation vers une page distincte pour presse/mouvements/résultats et les blocs de récit existants. T3 utilise les faits connus et n'invente pas les événements sociaux absents; son offre reste déterministe, à trois lignes maximum, et ses textes incluent la semaine pour prévenir la répétition littérale dans le test sur 50 semaines.
+- Écarts qui empêchent de déclarer la tranche terminée : la composition n'est pas une reproduction exhaustive des dimensions et valeurs des maquettes; les mouvements ne couvrent pas les changements d'organisation hors participants aux combats et ne constituent pas le relevé illustré complet; certaines familles T3 ne peuvent être alimentées faute de systèmes/faits correspondants, et la non-répétition repose sur le marqueur temporel plutôt que sur une mémoire éditoriale persistante. Aucun nouvel état de sauvegarde ni migration.
+- `tests/mgmtReleveReduit.test.js` (lent), ESLint global et le check complet ne sont pas lancés dans cette reprise. `node tools/verif-versions.js origin/main` et ESLint de production restent à exécuter avant livraison.
+
 ### Reprise — objectifs du contrat (24/10/2026)
 
 - `mgmt-ecran-lendemain.js` : les chiffres du contrat lisent désormais la structure réelle `m.poste.obj` (type, cible, état et valeur), avec intitulés lisibles et échappement HTML, au lieu d'attendre une propriété inexistante `objectifs`.
