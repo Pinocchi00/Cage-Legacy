@@ -336,3 +336,15 @@ test('Monde lot 57 T1 — une nouvelle année peut être clôturée après une c
     assert.equal(r.valid,true);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — une place finale moins bonne ne retire aucun acquis de la partie',()=>{
+  const w=partie();
+  try{
+    const resultat=JSON.parse(w.eval(`(()=>{const m=G.mgmt;mgmtPosteInit(m);m.poste.conf=3;m.guerre={ev:[],rival:null,depuis:0,rangFinal:1};const avant={conf:m.poste.conf,treasury:m.treasury,pop:m.pop,eventsPlayed:m.eventsPlayed};const bilan=mgmtGuerreFinAnnee(m,1);return JSON.stringify({avant,apres:{conf:m.poste.conf,treasury:m.treasury,pop:m.pop,eventsPlayed:m.eventsPlayed},bilan});})()`));
+    assert.equal(resultat.bilan.applique,true);
+    assert.ok(resultat.apres.conf>=resultat.avant.conf);
+    assert.ok(resultat.apres.treasury>=resultat.avant.treasury);
+    assert.ok(resultat.apres.pop>=resultat.avant.pop);
+    assert.ok(resultat.apres.eventsPlayed>=resultat.avant.eventsPlayed);
+  }finally{w.close();}
+});
