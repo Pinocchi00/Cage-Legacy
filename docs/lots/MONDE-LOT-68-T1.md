@@ -54,4 +54,14 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Écrans, état honnête : Aperçu et Statistiques conservent les changements déjà committés (dont les colonnes explicites) ; apparence non validée visuellement. Arrivée contrat/espoirs non traitée. Recruteur mission/retours : tests de présence de blocs et de styles, aucune validation visuelle. Semaine, Relevé, chiffres du combat, Menu, Meilleurs et Records : non traités/non capturés.
 - Pas de migration de sauvegarde ni de changement de version applicative dans cette reprise. Les cases 1 (validation visuelle), 2 à 7 ne sont donc pas toutes achevées ; je ne déclare pas `TOUT_EST_FINI`.
 
+### Reprise 6 du 24/10/2026
+
+- Branche et état vérifiés : `fid-fiches`. Les commits précédents contiennent les colonnes de fiche et la couverture recruteur ; aucun fichier applicatif non committé. Les modifications `.opencode/agents/*` et `opencode.json` sont préexistantes, hors tranche, laissées intactes.
+- Ajout du test « Monde lot 68 T1 — chaque classe de la semaine a une règle dédiée » dans `tests/mgmtFicheStats.test.js`, en accord avec la décision des planches Uni validées.
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (12/12 verts), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Le lent `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai maximal de 120 s de l'outil après cinq sorties « Compétences OK » ; son résultat n'est pas confirmé.
+- Écrans, état honnête : fiche Aperçu/Statistiques et recruteur mission/retours ont des modifications/tests antérieurs, mais aucune comparaison visuelle ouverte. Semaine : couverture des classes CSS seulement, pas de correction visuelle. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records : non traités. Aucune capture de comparaison exploitable n'a été produite ; l'accès aux instructions et comparatifs sous `%TEMP%` a été refusé par l'environnement.
+- Migration de sauvegarde : aucune. Tests de structure des écrans non encore ajoutés pour la plupart des écrans listés. Cases 1 à 5 ne sont pas achevées visuellement ; le test lent n'a pas rendu de résultat dans la fenêtre de l'outil. La tranche demeure inachevée.
+- Écarts à la fiche : validation écran par écran avec captures non réalisée. Aucun écart de maquette n'est affirmé sans observation.
+- Questions pour Anthony : aucune ; les éléments non faits sont du travail restant, pas une ambiguïté de spécification.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
