@@ -388,6 +388,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ### Reprise 50
 
+- Contrôle d'entrée : branche conforme `p11-ceremonie-carnet`, HEAD `45d4e91`; les seuls changements hors commit observés sont `.opencode/agents/*` et `opencode.json`, étrangers à cette tranche et laissés intacts.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (32/32 verts); `node tools/verif-versions.js origin/main` (aucun écart); les planches `UniCeremonie` et `UniCarnet` relues.
+- Le constat des limites antérieures demeure : les écrans ne reproduisent pas intégralement les planches, la cérémonie est déclenchée au terme du contrat plutôt qu'à chaque anniversaire, le test de sauvegarde ne charge pas une fixture complète d'ancienne partie, et le test lent `mgmtReleveReduit` n'a pas été lancé. Les parcours multi-fenêtres ne constituent pas trois saisons complètes jouées. La tranche ne peut donc pas être déclarée entièrement conforme sur la seule base des tests verts.
+- Aucun code métier non commité n'était à reprendre/committer. Aucun changement de format de sauvegarde ou migration; aucun changement métier effectué dans cette reprise. Aucun `check:rapide` exécuté, conformément au contrôle rapide superviseur. Pas de question nouvelle pour Anthony.
+
 - Correction livrée : le prix « Combat de l’année », attribué à deux combattants, est maintenant consigné sur les deux fiches de roster, sans doublon. Les autres catégories conservent leur inscription individuelle.
 - Test ajouté : « Lot 55 T1 — le combat de l’année est inscrit sur les deux fiches ».
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (21/21), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). Aucun changement de sauvegarde ni migration.
