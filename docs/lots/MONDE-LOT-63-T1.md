@@ -140,3 +140,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit direct confirme que `test` et `test:watch` incluent `mgmtLot63T1` (`true,true`).
 - Aucun changement de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; la limite de plafond à 1,9 Mo reste donc non vérifiée ici. Les tests de famille exercent chaque fait dans des scénarios ciblés après création via le chemin réel, sans prouver que chaque système opérationnel du jeu génère naturellement tous ces faits.
 - Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et le paramètre de cache local de `index.html` sont hors tranche et exclus. Seule cette fiche est modifiée dans cette reprise.
+
+### Reprise de validation — 24/10/2026
+
+- État contrôlé sur `p8-apres` : les changements fonctionnels et tests de la tranche sont déjà présents dans l'historique ; les seules modifications locales hors tranche restent `.opencode/agents/*`, `opencode.json`, `sw.js` et l'incrément de cache de `index.html` (exclus du commit).
+- Tests ciblés relancés : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond. Le test est directement référencé par `test` et `test:watch` (`true,true`).
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Pas de changement fonctionnel ni de format de sauvegarde, aucune migration. Les dix familles, le calcul, l'accueil/presse et les mouvements sont déjà livrés par les commits antérieurs.
+- Écart de couverture conservé : les tests de familles préparent les faits séparément sur une partie issue du chemin réel ; ils n'établissent pas que chaque système opérationnel génère naturellement chacun des dix faits. Aucun nouveau fichier de tranche modifié ; cette seule entrée de compte rendu est commitée.
