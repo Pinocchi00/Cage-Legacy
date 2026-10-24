@@ -632,4 +632,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajouté : « Lot 55 T1 — les indices de titre restent absolus avec plusieurs traces hors fenêtre », vérifiant que le fait `title_fight` continue de viser l'index absolu de `m.hist` après filtrage de plusieurs relevés anciens.
 - Vérification : `node --test tests/mgmtLot55T1.test.js` (41/41 verts).
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (régression d'index) et cette fiche. Aucun changement de production ou de sauvegarde.
+
+### Reprise 82
+
+- Ajustement du rendu des primes dans le carnet : lorsque la trace existante fournit un montant numérique, celui-ci apparaît à côté du nom et est échappé avant insertion HTML. Aucune valeur n'est calculée ou inventée.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (41/41), `node tools/verif-versions.js origin/main` (aucun écart, 18 fichiers examinés), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert). Le script `mgmt-ceremonie.js` a été bumpé; `sw.js` restauré depuis `origin/main` après effet de bord du test.
+- Fichiers de cette reprise : `mgmt-ceremonie.js` et `index.html` (montée de version), cette fiche. Aucun changement de sauvegarde ni migration.
+- Limites encore présentes selon les reprises précédentes : la reproduction intégrale des planches et le déclenchement à chaque anniversaire ne sont pas certifiés; le test multi-années ne joue pas trois saisons complètes et le test lent `mgmtReleveReduit` n'a pas été lancé. Le test ciblé n'affirme pas la résolution de ces limites.
 - Limites déjà documentées maintenues : test lent `mgmtReleveReduit` non exécuté, conformité visuelle complète non certifiée, cérémonie rattachée au terme du contrat, et parcours simulés n'établissant pas trois saisons complètes ni une fixture complète d'ancienne sauvegarde.
