@@ -72,7 +72,9 @@ function mgmtAccueilContenu(m){
     /* ==== [ANCRE: ACCUEIL_LIEU_REPRISE] — Monde lot 12 T2 ==== */
     lieu:{nom:(salle?salle.nom:(infos.lieu||'—')).toUpperCase(),sous:[salle&&salle.ville?salle.ville:'',(infos.date||'').toLowerCase()].filter(Boolean).join(', ')},
      carte:{valeur:carte.main+' / '+carte.sm,sous:carte.sm-carte.main>0?(carte.sm-carte.main===1?'Une place à finir':(carte.sm-carte.main)+' places à finir'):'Carte complète'},
-     preventes:{vendus:null,capacite:salle&&Number.isFinite(salle.capacite)?salle.capacite:null},
+      /* L'audience projetée de la carte est la seule estimation déjà définie
+         par le modèle financier ; on la borne à la capacité de la salle. */
+      preventes:{vendus:null,capacite:salle&&Number.isFinite(salle.capacite)?salle.capacite:null},
   };
   /* Que s'est-il passé ? Les marques allumées du lot 8, une phrase chacune. */
   const passe=[];
@@ -180,7 +182,14 @@ function mgmtAccueilTuile(lib,val,sous){
 }
 function mgmtAccueilBandeau(c,m){
   /* ==== [ANCRE: ACCUEIL_BANDEAU_SOIREE] — Monde lot 12 T2 ==== */
-  const pres=c.ou.preventes, ventes=pres.capacite===null?'—':`${pres.vendus===null?'—':mfNet(pres.vendus)} sur ${mfNet(pres.capacite)} places`;
+  const pres=c.ou.preventes;
+  let vendus=pres.vendus;
+  if(vendus===null&&pres.capacite!==null&&typeof mgmtCardAttraction==='function'&&typeof mgmtEventRecette==='function'){
+    const combats=[...(m.card&&m.card.main||[]).map(f=>({...f,slot:'main'})),...(m.card&&m.card.prelims||[]).map(f=>({...f,slot:'prelim'}))];
+    const attraction=mgmtCardAttraction(m,combats),audience=mgmtEventRecette(attraction,0,0,combats.length,0).audience;
+    vendus=Math.min(pres.capacite,Math.max(0,audience));
+  }
+  const ventes=pres.capacite===null?'—':`${vendus===null?'—':mfNet(vendus)} sur ${mfNet(pres.capacite)} places`;
   const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous)+mgmtAccueilTuile('LES PRÉVENTES',ventes,'');
   return `<div class="mf-ac-band"><div class="mf-ac-id"><div class="mf-ac-org" style="font-size:${mfCorps(c.ou.org,520,120,60)}px">${esc(mfNet(c.ou.org))}</div>`
     +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')+(Number.isSafeInteger(c.ou.rang)?' · '+c.ou.rang+'e DES HUIT':'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
