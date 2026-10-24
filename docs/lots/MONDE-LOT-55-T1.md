@@ -333,3 +333,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (19/19 verts). `node_modules/.bin/eslint .` est vert; `git diff --check` est vert.
 - `node tools/verif-versions.js origin/main` conserve un unique écart préexistant sur `mgmt-accueil.js` (version égale à origin/main), non modifié et hors tranche. Le diff métier est seulement le nouveau test ciblé; les changements `.opencode/agents/*` et `opencode.json` restent étrangers.
 - Les limites précédentes demeurent : aucune conformité complète aux planches ni trois années pleines jouées certifiées, sauvegarde historique complète non chargée, déclenchement à la fin du contrat plutôt qu'à chaque anniversaire. Aucun changement de sauvegarde ou migration; `mgmtReleveReduit` non relancé. Pas de question de spécification nouvelle.
+
+### Reprise 43
+
+- L'état d'entrée avait déjà un HEAD `b3ff984` portant le message du commit final; aucune modification métier de tranche n'était en attente. J'ai corrigé l'audit de cache sur `mgmt-accueil.js`, fichier de tranche dont l'URL `?v=` était identique à `origin/main`, en montant sa version dans `index.html`.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (19/19, dont la simulation multi-fenêtres jouées); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); `git diff --check` (vert). Le test lent `mgmtReleveReduit` n'a pas été relancé.
+- `sw.js` a été restauré depuis `origin/main` après altération par l'exécution des tests; il n'est pas inclus. Les changements `.opencode/agents/*` et `opencode.json` demeurent étrangers et exclus.
+- Aucun changement de format de sauvegarde ou migration. Les limites précédemment consignées persistent (notamment fidélité intégrale des maquettes et déclencheur au terme du contrat); ce commit corrige uniquement la version de cache requise pour l'accueil. Aucun ajout de test ni changement de textes joueur.
