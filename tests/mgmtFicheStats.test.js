@@ -98,6 +98,15 @@ test('Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux �
   assert.match(inlineStyles,/\.po-card\{left:0;width:55%\}/);
   assert.match(inlineStyles,/\.po-card\+\.po-card\{left:auto;right:0;width:43%\}/);
 });
+test('Monde lot 68 T1 — chaque classe rendue par l’arrivée a une règle dans sa feuille intégrée',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-ecran-espoirs-arrivee.js'),'utf8');
+  const inlineStyles=[...js.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(match=>match[1]).join('\n');
+  const classes=[...new Set([...js.matchAll(/class="([^"]+)"/g)]
+    .flatMap(match=>match[1].split(/\s+/)).filter(name=>/^(?:po|ma)-[\w-]+$/.test(name)))];
+  assert.ok(classes.length>0,'classes de l’arrivée trouvées');
+  for(const name of classes)assert.match(inlineStyles,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+});
 test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
   const w=monde(), screens=JSON.parse(w.eval('JSON.stringify(Object.keys(SCREENS))'));
