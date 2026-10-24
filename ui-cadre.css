@@ -2278,4 +2278,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move>.ld66-move-identity{min-width:0;overflow-wrap:anywhere;word-break:break-word}
 .ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;overflow-wrap:anywhere;word-break:break-word}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_CARTES_MOMENTS_GRILLE_INTERNE] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-moment{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;align-content:stretch;gap:6px;padding:16px 20px}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-moment:not(:first-child) .ld3-names{font-size:64px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;align-self:end}
+.ld66-screen .ld66-lower{min-height:0}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
