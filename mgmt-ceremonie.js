@@ -45,7 +45,7 @@ function mgmtCeremonieInscrire(m,prix,annee){
 
 /* ==== [ANCRE: P11_T3_CARNET_LECTURE] — Monde lot 55 T1 ==== */
 function mgmtCarnetLire(m){
-  if(!m)return {champions:[],espoirs:[],prix:[],defis:[],primes:[],soirees:[]};
+  if(!m)return {champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]};
   const roster=Array.isArray(m.roster)?m.roster:[], hist=Array.isArray(m.hist)?m.hist:[];
   const prix=roster.flatMap(f=>(Array.isArray(f.prixAnnee)?f.prixAnnee:[]).map(p=>({nom:f.name||f.nom||'Combattant',...p}))).filter(p=>p&&Number.isSafeInteger(p.annee));
   const champions=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='title_fight').map(f=>{
