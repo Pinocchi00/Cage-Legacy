@@ -109,3 +109,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Relancés après lecture des deux planches : `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLendemainDemo.test.js` (7/7). `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
 - Les dernières captures documentées restent les comparaisons du 24/10 : gros blocs 19,5 % pour `lendemain`, 18,8 % pour `lendemainSuite`, images stockées sous `C:/Users/antho/AppData/Local/Temp/shots/`. Pas de nouvelle capture ni d'inspection visuelle de ces images dans cette reprise ; les mesures précédentes ne sont pas présentées comme nouvelles.
 - État fonctionnel livré inchangé : structure et navigation déjà commités, aucune migration de sauvegarde. Vérification des autres tests ciblés et audit de versions consignés dans les reprises précédentes. Le test lent hors tranche `mgmtReleveReduit.test.js` n'a pas été relancé ; sa dernière tentative documentée a échoué sur `ENOSPC`.
+
+### Reprise 19 — vérification de clôture — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. L'historique possède le commit fonctionnel `71ee368`; aucun changement local de tranche n'était en attente. Les fichiers d'agents/configuration et `sw.js` apparaissent modifiés mais restent hors périmètre, non ajoutés.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). `node tools/verif-versions.js origin/main` ne détecte aucun écart de cache.
+- Pas de nouvel ajustement de code nécessaire : les deux écrans et leur navigation sont dans les commits antérieurs. Les dernières mesures visuelles consignées sont gros blocs 19,5 % (`lendemain`) et 18,8 % (`lendemainSuite`) ; comparateur non relancé durant cette reprise, et le jugement visuel direct demeure non revendiqué.
+- Aucune modification de sauvegarde/migration. Le test lent hors tranche `mgmtReleveReduit.test.js` reste non relancé, sa dernière tentative étant documentée en échec `ENOSPC`.
