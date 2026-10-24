@@ -227,6 +227,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichier modifié : `tests/mgmtLot69T1.test.js` ajoute un contrôle automatique que le test de tranche est littéralement inclus dans les scripts agrégés `test` et `test:watch` (en plus de ses commandes dédiées/hook pré-test).
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Vérification directe du paquet : les deux scripts contiennent bien `tests/mgmtLot69T1.test.js`.
 - `node tools/verif-versions.js origin/main` passe (16 fichiers examinés). Aucun fichier JS/CSS ni sauvegarde modifié, aucune version de cache à incrémenter.
+
+### Reprise 31 — contrôle de reprise
+- État initial : branche `fid-choc`, HEAD `0958a4cd`; aucun fichier fonctionnel de tranche non commité. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` restent exclues.
+- Tests ciblés : `node --test tests/mgmtLot69T1.test.js` passe 4/4, y compris les trois paires, leur programmation et les résultats via `mgmtRunEvent`, ainsi que le parcours offre/changement/arrivée/rechargement/soirée/lendemain.
+- Captures relancées : choc rendu, 0 chevauchement, 0 texte sous 22 px et aucun débordement, mais `grosBlocs=26.1%` (objectif ≤20% toujours manqué). Discours : mêmes contrôles géométriques à zéro, `grosBlocs=18.1%`. Bilan : 1 chevauchement entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22), `grosBlocs=12.9%`. L'image n'a pas été ouverte ; aucune comparaison visuelle manuelle ni scène dédiée arrivée n'est revendiquée.
+- Une nouvelle tentative de marge CSS sur le bilan n'a pas changé le résultat de la capture ; elle a été annulée et aucun changement CSS/cache n'est conservé.
+- Audit `node tools/verif-versions.js origin/main` passe (19 fichiers examinés). Aucun changement de code ni de sauvegarde dans cette reprise. Les écarts visuels choc/bilan et l'absence de capture dédiée arrivée restent non résolus : cette reprise ne déclare donc pas toutes les cases achevées.
 - Écarts inchangés : ceci ne valide pas le choc à trois affiches ni son booking complet ; le parcours de test n'exerce toujours pas fin de contrat/bilan et le rechargement strict demandé ; les mesures visuelles après corrections, la scène d'arrivée dédiée et les captures/comparaisons restent non réalisées. Aucune nouvelle preuve visuelle n'est revendiquée. Le guide de capture externe n'était pas accessible par l'outil de lecture autorisé.
 - Pas de migration de sauvegarde. Aucun autre fichier modifié ; les changements utilisateur hors tranche sont exclus du commit.
 
