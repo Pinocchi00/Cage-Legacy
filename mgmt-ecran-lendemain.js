@@ -283,6 +283,8 @@ const MGMT_LD_APRES_FAMILLES=[
   {famille:'classement',texte:'Le classement de la division discute de la place de {nom} après le combat.',relu:false},
   {famille:'rivalité',texte:'Le résultat relance la rivalité entre {nom} et son adversaire.',relu:false},
   {famille:'espoir',texte:'Ton espoir {nom} entend poursuivre sur cette lancée.',relu:false},
+  {famille:'titre',texte:'Le titre de {nom} attire l’attention après la soirée.',relu:false},
+  {famille:'prime',texte:'La prime de {nom} souligne sa performance.',relu:false},
 ];
 /** Jusqu'à la prochaine soirée : au plus trois messages hebdomadaires, issus
  *  d'un flux d'identité stable et sans mutation de la sauvegarde. */
@@ -299,7 +301,9 @@ function mgmtLendemainApres(m,semaine){
   const touches=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
   const faits=Array.isArray(m.facts)?m.facts.filter(x=>x&&x.c===cycleSoiree):[];
   const famillesUtilisees=new Set();
-  const catalogue=typeof MGMT_APRES_CATALOGUE!=='undefined'?MGMT_APRES_CATALOGUE:[];
+   const catalogue=(typeof MGMT_APRES_CATALOGUE!=='undefined'?MGMT_APRES_CATALOGUE:[]).concat(
+     MGMT_LD_APRES_FAMILLES.filter(x=>x.famille==='rivalité'||x.famille==='classement').map(x=>({famille:x.famille,textes:[{texte:x.texte,relu:false}]}))
+   );
   const faitPour=(famille,f)=>{
     const t=soiree.find(x=>x.a.id===f.id||x.b.id===f.id);
     if(famille==='interpellation')return faits.find(x=>x.k==='discours'&&x.a===f.id&&(x.interpelle||x.target));
@@ -307,6 +311,8 @@ function mgmtLendemainApres(m,semaine){
     if(famille==='suspension')return touches.find(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0);
     if(famille==='revanche')return faits.find(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche');
     if(famille==='autre organisation')return faits.find(x=>x.k==='interet-organisation'&&x.a===f.id)||((m.guerre&&Array.isArray(m.guerre.ev))?m.guerre.ev.find(x=>x&&x.c===cycleSoiree&&x.x===f.id):null);
+    if(famille==='rivalité')return faits.find(x=>x.k==='rivalite'&&x.c===cycleSoiree&&(x.a===f.id||x.b===f.id));
+    if(famille==='classement')return t;
     if(famille==='espoir')return (Array.isArray(m.espoirs)&&m.espoirs.includes(f.id))||(Array.isArray(m.suivis)&&m.suivis.includes(f.id));
     if(famille==='titre')return t&&(t.title||t.titre||t.championship||t.ceinture);
     if(famille==='salle')return m.lastEvent.finance&&Number(m.lastEvent.finance.spectateurs)>0;
@@ -327,6 +333,12 @@ function mgmtLendemainApres(m,semaine){
       if(!preuve) continue;
       fait=preuve;item=candidat;break;
     }
+    if(!item&&catalogue.length){
+      /* Compatibilité lot 54 : un résultat réel peut nourrir la ligne de
+         classement, sans prétendre qu'une rivalité a été déclarée. */
+      const classement=catalogue.find(x=>x.famille==='classement');
+      if(classement&&!famillesUtilisees.has('classement')){item=classement;fait=soiree.find(x=>x.a.id===f.id||x.b.id===f.id);}
+    }
     if(!item) continue;
     famillesUtilisees.add(item.famille);
     /* La semaine fait partie du fait temporel : elle distingue une reprise
@@ -342,7 +354,9 @@ function mgmtLendemainApres(m,semaine){
       const demande=fait;
       const cible=mgmtFighterById(m,demande.target);
       texte=`Après sa demande, ${nom} veut une revanche${cible?' contre '+cible.name:''}.`;
-     } else if(item.famille==='rivalité'){
+      } else if(item.famille==='classement'){
+       texte=texte.replaceAll('{nom}',nom);
+      } else if(item.famille==='rivalité'){
       const rivalite=fait;
       if(!rivalite) continue;
       const rivalId=rivalite.a===f.id?rivalite.b:rivalite.a;
