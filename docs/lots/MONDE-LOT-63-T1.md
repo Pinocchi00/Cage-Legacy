@@ -74,6 +74,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise finale — régressions inter-lots vérifiées (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de code et tests de la tranche sont déjà dans l'historique, sans fichier fonctionnel non commité. Le statut contient seulement des modifications étrangères dans `.opencode/agents/*`, `opencode.json` et `sw.js`, exclues.
+- La commande inter-lots prescrite passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les régressions lot 54 de rivalité enregistrée et de non-répétition sur cinquante semaines sont vertes.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inclus dans `test` et `test:watch` (`true,true`). Pas de changement de sauvegarde ni migration.
+- Le merge `origin/main` demandé demeure non effectué ici, les reprises précédentes ayant documenté le refus de cette commande par l'environnement ; il reste au superviseur. Limite de couverture inchangée : tests de famille avec faits préparés sur le chemin réel, sans preuve que chaque système opérationnel génère naturellement chaque fait.
+
 ### Reprise — tests inter-lots et clôture (24/10/2026)
 
 - Branche `p8-apres` confirmée. Aucun fichier fonctionnel ou test de tranche en attente ; les modifications préexistantes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues.
