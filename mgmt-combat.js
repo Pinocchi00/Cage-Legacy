@@ -34,6 +34,14 @@ function mgmtCombatInitiale(nom){
   return (s.charAt(0)||'?').toUpperCase();
 }
 function mgmtCombatBilan(side){ return side.W+'-'+side.L+'-'+(side.D||0); }
+/* ==== [ANCRE: MONDE_LOT53_FONDU_FENETRE] — Monde lot 53 T1 ==== */
+/** Opacité du fondu d'entrée d'une fenêtre temps forts, sans toucher au déroulé du combat. */
+function mgmtCombatFonduFenetre(d,debut,duree){
+  const ecoule=d-debut, longueur=Number.isFinite(duree)&&duree>0?duree:0.22;
+  if(ecoule<0||ecoule>=longueur)return 0;
+  const x=ecoule/longueur;
+  return 1-x*x*(3-2*x);
+}
 
 /** La salle d'un combat déjà joué (revoir) : la part remplie de sa soirée et sa place dans la soirée. Dérivé de m, sans état.
  *  @returns {{taux:number|null,prog:number,nom:string}} */
@@ -161,6 +169,11 @@ function mgmtCombatCx(){
     :((e.r===1&&C.d<2.3)?{n:1,alpha:Math.min(eas(C.d/0.3),1-eas((C.d-1.8)/0.5))}:null);
   const decisionTail=termine&&C.decision&&C.decision.decision;
   let fade=C.d<0.5?1-eas(C.d/0.5):0;
+  if(C.tempsForts&&C.tempsForts.length&&C.tempsFortActif>=0){
+    const largeur=mgmtTempsFortsLargeur(C.tempsForts.length,S.dureeAffichage);
+    const debut=Math.max(0,C.tempsForts[C.tempsFortActif].t/MGMT_COMBAT_ECHELLE-largeur/2);
+    fade=Math.max(fade,mgmtCombatFonduFenetre(C.d,debut));
+  }
   if(decisionTail) fade=Math.max(fade,eas((C.fin-(C.queue-0.9))/0.9));
   const noms={a:S.noms.a.court,b:S.noms.b.court};
   return {t:t,real:C.real,etat:e,session:S,plan:C.plan,planLibelle:areneSallePlanLibelle(C.plan,noms),planCourt:areneSallePlanLibelle(C.plan,noms,true),room:C.room,carte:C.carte,org:C.org,num:C.num,
@@ -229,6 +242,13 @@ function mgmtCombatBoucle(now){
     if(!C.decalRefait&&C.real>1.2){ C.decalRefait=true; C.vue.decalCle=''; }
     const cx=mgmtCombatCx();
     C.vue.dessiner(cx);
+    const frise=document.querySelector('.so3-frise');
+    if(frise){
+      frise.querySelectorAll('.so3-moment').forEach((el,i)=>{
+        el.classList.toggle('actif',i===C.tempsFortActif);
+        el.classList.toggle('passe',i<C.tempsFortActif);
+      });
+    }
     mgmtCombatSon(cx);
   }
   if(typeof requestAnimationFrame!=='undefined') C.raf=requestAnimationFrame(mgmtCombatBoucle);
@@ -275,6 +295,12 @@ function mgmtCombatBarreMaj(){
   const el=typeof document!=='undefined'?document.getElementById('mc-barre'):null;
   if(el) el.innerHTML=mgmtCombatBarreHtml();
 }
+/* ==== [ANCRE: P7_T2_FRISE_TEMPS_FORTS] — Monde lot 53 T1 ==== */
+function mgmtCombatFriseHtml(){
+  const C=MGMT_COMBAT;
+  if(C.vueCombat!=='forts'||!Array.isArray(C.tempsForts)||!C.tempsForts.length)return '';
+  return `<div class="so3-frise" aria-label="Frise des ${C.tempsForts.length} moments forts" aria-live="polite">${C.tempsForts.map((moment,i)=>{const etat=i===C.tempsFortActif?'en cours':i<C.tempsFortActif?'passé':'à venir';return `<div class="so3-moment${i===C.tempsFortActif?' actif':''}${i<C.tempsFortActif?' passe':''}"${i===C.tempsFortActif?' aria-current="step"':''} aria-label="Moment ${i+1}, ${etat} : ${esc(moment.raison)}"><b>${i+1}</b><span>${esc(moment.raison)}</span></div>`;}).join('')}<div class="so3-frise-aide"><span><kbd>Entrée</kbd> Continuer au verdict</span><span><kbd>Échap</kbd> Passer à la suite</span><span><kbd>P</kbd> Passer le combat</span></div></div>`;
+}
 function scr_mgmt_combat(){
   const C=MGMT_COMBAT;
   if(C.refuse||!C.session){
@@ -282,7 +308,7 @@ function scr_mgmt_combat(){
     return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('Ce combat ne peut pas être montré.')}</div>`,'normal')}</div></main>`,
       {barre:'aucune',touches:[{ks:['Entrée'],t:'Revenir',jaune:true,onclick:'CL.mgmtCbRetour()'}]});
   }
-  return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>`
+  return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>${mgmtCombatFriseHtml()}`
     +`<div id="mc-barre" class="mf-cb-barre">${mgmtCombatBarreHtml()}</div></div></div>`;
 }
 SCREENS.mgmt_combat=scr_mgmt_combat;
@@ -323,8 +349,14 @@ Object.assign(CL,{
     if(C.vue){ C.vue.camS=null; C.vue.trail={A:[],B:[]}; C.vue.tPrec=-1; }
     mgmtCombatBarreMaj();
   },
+  /* ==== [ANCRE: P7_T1_TEMPS_FORTS_COMPLET] — Monde lot 53 T1 ==== */
+  mgmtCbComplet(){
+    const C=MGMT_COMBAT; if(!C.session||C.vueCombat!=='forts'||C.mode!=='fight') return;
+    C.vueCombat='complet'; C.tempsForts=null; C.tempsFortActif=-1; mgmtCombatBarreMaj();
+  },
   mgmtCbRetour(){
     const C=MGMT_COMBAT;
+    if(C.session&&C.vueCombat==='forts'&&C.mode==='fight'){ CL.mgmtCbPasser(); return; }
     if(C.refuse||!C.session||C.mode==='dec') mgmtCombatSortir();
   },
 });
@@ -332,6 +364,8 @@ keysRegister('mgmt_combat',{
   ' '(){ CL.mgmtCbPause(); },
   v(){ CL.mgmtCbVitesse(); }, V(){ CL.mgmtCbVitesse(); },
   c(){ CL.mgmtCbCamera(); }, C(){ CL.mgmtCbCamera(); },
+  /* Décision du superviseur, lot 53 : C reste la caméra (test « Les touches du combat ») ; T passe des temps forts au combat entier. */
+  t(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); }, T(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); },
   p(){ CL.mgmtCbPasser(); }, P(){ CL.mgmtCbPasser(); },
   r(){ CL.mgmtCbRevoir(); }, R(){ CL.mgmtCbRevoir(); },
   Enter(){ CL.mgmtCbRetour(); },
