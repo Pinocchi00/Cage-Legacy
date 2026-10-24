@@ -81,6 +81,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
        assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
        w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.mgmt.choc.paires[1].div='division-incoherente';G.screen='mgmt_choc';scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une paire qui associe des combattants de divisions différentes revient à l’accueil');
        w.eval(`delete G.mgmt.choc.paires`);
       assert.equal(w.eval(`mgmtChocValide({orgId:'unknown',div:'PAILLE F',jour:0,annee:1,etat:'recu'})`),false);
        const retourAccueil=w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);

@@ -33,7 +33,10 @@ function scr_mgmt_poste(){const m=G&&G.mgmt;if(!m||!m.poste||!MGMT_POSTE_ONGLETS
 function scr_mgmt_choc(){
  const m=G&&G.mgmt,c=m&&m.choc,adversaire=c&&m.orgs&&m.orgs[c.orgId];
  const pairesEcran=c&&Array.isArray(c.paires)&&c.paires.length?c.paires:[c&&{div:c.div,a:c.a,b:c.b}];
- const referencesValides=!!m&&!!c&&typeof c.a==='string'&&typeof c.b==='string'&&!!mgmtFighterById(m,c.a)&&!!(adversaire&&Array.isArray(adversaire.roster)&&adversaire.roster.some(f=>f&&f.id===c.b))&&pairesEcran.length>0&&pairesEcran.every(p=>p&&typeof p.a==='string'&&typeof p.b==='string'&&mgmtFighterById(m,p.a)&&adversaire.roster.some(f=>f&&f.id===p.b));
+  const referencesValides=!!m&&!!c&&typeof c.a==='string'&&typeof c.b==='string'&&!!mgmtFighterById(m,c.a)&&!!(adversaire&&Array.isArray(adversaire.roster)&&adversaire.roster.some(f=>f&&f.id===c.b))&&pairesEcran.length>0&&pairesEcran.every(p=>{
+    const local=p&&mgmtFighterById(m,p.a),invite=p&&adversaire.roster.find(f=>f&&f.id===p.b);
+    return !!p&&typeof p.a==='string'&&typeof p.b==='string'&&!!local&&!!invite&&local.div===p.div&&invite.div===p.div;
+  });
   if(!m||!mgmtChocValide(c)||!referencesValides){if(typeof CL!=='undefined'&&CL.go)CL.go('mgmt_accueil');return typeof scr_mgmt_accueil==='function'?scr_mgmt_accueil():'';}
    const org=mgmtOrgParId(c.orgId),a=mgmtFighterById(m,c.a),b=mgmtFighterById(m,c.b),date=mgmtPosteDateTexte(c.jour),agenda=m.cal&&Array.isArray(m.cal.prochaines)?m.cal.prochaines.find(x=>x.jour===c.jour):null,salle=agenda&&agenda.salle&&typeof mgmtSalleParId==='function'?mgmtSalleParId(m,agenda.salle):null,lieu=salle?[salle.nom,salle.capacite+' places'].join(' · '):'Lieu à confirmer';
     const paires=Array.isArray(c.paires)&&c.paires.length?c.paires:[{div:c.div,a:c.a,b:c.b}],affiches=paires.slice(0,3).map(p=>{const local=mgmtFighterById(m,p.a),adverse=mgmtFighterById(m,p.b);return `<div class="ch3-paire"><div class="ch3-side"><b>${esc(local&&local.name||'Champion de Split')}</b><span>Split · ${esc(p.div)}</span></div><div class="ch3-category"><span class="ch3-vs">VS</span><strong>CHAMPIONNE<br>CONTRE<br>CHAMPIONNE</strong></div><div class="ch3-side ch3-opponent"><b>${esc(adverse&&adverse.name||'Champion invité')}</b><span>${esc(org&&org.nom||c.orgId)} · ${esc(p.div)}</span></div></div>`;}).join('');
