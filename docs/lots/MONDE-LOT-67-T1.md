@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 53
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. Les changements applicatifs antérieurs sont déjà committés.
+- Captures individuelles via `shoot.js` : cérémonie `chevauchements=0`, aucun texte sous 22 px, aucun débordement, `grosBlocs=19,3 %`. Guerre avant retouche : textes tronqués (« Juste devant : Fighting », « Rang inchangé »), `grosBlocs=22,9 %` ; après resserrement de la colonne rivale : aucun chevauchement, aucun texte sous 22 px, aucun débordement, `grosBlocs=22,9 %`, donc seuil de 20 % toujours manqué. Croissance : 0 chevauchement, 3 textes sous 22 px et 4 débordements, `grosBlocs=17,2 %`. Ton poste : aucun défaut automatique, `grosBlocs=19,8 %`. Carnet : 19 chevauchements et noms tronqués, `grosBlocs=16,1 %`. Bilan : 1 chevauchement entre « REMERCIÉ » et « Il manque 3 combats en carte », `grosBlocs=12,9 %`.
+- Retouche : `ui-cadre.css` réduit espaces/padding de l'encart rivalité, `index.html` porte le bump de cache correspondant. Les cmp sont régénérés dans Temp mais l'outil d'image refuse leur ouverture ; je n'affirme pas les avoir inspectés visuellement.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (46/46), `node tools/verif-versions.js origin/main` (sans écart), `node_modules/.bin/eslint .` (vert). Pas de changement de sauvegarde ni test ajouté. `sw.js` généré reste non staged.
+- Fichiers de cette reprise : `ui-cadre.css` (espacement rivalité), `index.html` (version de cache), cette fiche (compte rendu). Critères toujours ouverts : Guerre au-dessus de 20 %, défauts automatiques Croissance/Carnet/Bilan, scène de capture avec six prix et inspection visuelle effective des cmp. Aucun `TOUT_EST_FINI` revendiqué.
+
 ## Compte rendu — reprise 52
 
 - Branche `fid-organisation` confirmée ; l’arbre était propre au départ. La capture prescrite a été exécutée pour cérémonie : 0 chevauchement, 0 texte sous 22 px, aucun débordement, grosBlocs 19,3 %. Pour Guerre : 0 chevauchement et texte sous 22 px, mais débordements « Juste devant : Fighting » et « Rang inchangé », grosBlocs 22,9 %. Une réduction des espacements dans la rivalité Guerre n’a pas modifié ces constats ; je ne la présente donc pas comme une correction réussie.

@@ -2103,6 +2103,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale ul{gap:8px;padding-left:24px}
 .gu3-rivale small{font-size:22px;line-height:1.05;overflow-wrap:anywhere}
 .gu3-rivale .gu3-mouvement{padding-top:8px;line-height:1.05}
+/* ==== [ANCRE: MONDE67_T1_GUERRE_RIVALE_COMPACTE] — Monde lot 67 T1 ==== */
+.gu3-rivale{gap:4px;padding:14px}
+.gu3-rivale ul{gap:4px}
+.gu3-rivale small{margin-top:0;line-height:1.1}
+.gu3-rivale .gu3-mouvement{padding-top:4px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ce3-carnet-ecran{top:108px;height:840px}
 /* ==== [FIN ANCRE] ==== */
