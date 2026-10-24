@@ -1,5 +1,11 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
+### Reprise 32 — livraison vérifiée (24/10/2026)
+
+- État consulté sur `p8-apres` (`git log --oneline -12`, `git status`) : les changements fonctionnels et tests de tranche sont déjà commités. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo.
+- Cette reprise ne modifie que la fiche de tranche pour consigner la validation ; pas de nouvelle clé de sauvegarde ni migration. Le code, le catalogue, les raccordements Accueil/presse, les mouvements et les tests sont dans les commits antérieurs.
+- Limite de couverture maintenue : les tests exercent des faits préparés sur une partie créée par le parcours réel, sans démontrer que chaque système opérationnel génère naturellement tous les faits. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation locale de cache dans `index.html` sont étrangères et exclues.
+
 Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). Brief : `docs/BRIEF-22-10-DES-COMBATTANTS-UNIQUES.md`, lot P8 T3 (lis P7, P8, P10 en entier). Le compte rendu du lot précédent est en bas de `docs/lots/MONDE-LOT-54-T1.md` : lis-le, il dit ce qui n'est **pas** couvert (« les événements T3 contextualisés selon tous les faits réels » et « les mouvements ne couvrent pas les changements d'organisation »).
 
 **Ce qui existe dans `main`** : le lendemain recomposé (`mgmt-ecran-lendemain.js`, `mgmt-lendemain-cadre.js`), le poids d'une histoire (`mgmt-histoires*.js`), les discours (`m.discours`, `mgmt-discours.js`), les rivalités (`mgmt-orgs-agissent.js`, `mgmt-rivalite-orgs.js`, `m.guerre`), la mémoire des combattants (`m.memoire`), l'Accueil et le fil de presse (`mgmt-actualites.js`, `mgmtActuSourceAjouter`).
