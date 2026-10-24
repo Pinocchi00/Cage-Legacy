@@ -411,3 +411,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot53T1.test.js` — 20/20 réussis.
 - Modifié : `mgmt-combat.js` (transition depuis les temps forts), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (test), cette fiche.
 - Toujours non satisfait : le test de cumul complet 900–1200 s, le portage visuel exhaustif exact des maquettes et le chronométrage navigateur du segment temps forts/fondu d'image. Mesure antérieure conservée : 868,38 s; aucune durée artificielle n'a été ajoutée. Le raccourci ne donne pas encore la navigation fenêtre précédente/suivante de la maquette.
+
+### Reprise 60 — reprise après le raccourci de combat entier
+
+- Vérifié au départ : branche `p7-ecran-soiree`, HEAD `99e8213`. Aucun fichier applicatif de la tranche n'est non commité ; les modifications `.opencode/agents/*`, `opencode.json` restent étrangères et exclues.
+- Vérification relancée : `node --test tests/mgmtLot53T1.test.js` — 20/20 réussis. Le test ciblé confirme les comportements déjà présents, mais ne fait pas passer les critères non couverts.
+- État restant : le cumul de référence n'atteint toujours pas l'intervalle exigé selon la mesure consignée (868,38 s contre 900–1200 s). La formule prescrite (durée des combats complets, 45 s forts, 5 s résultat, 10 s de transition) n'a pas été falsifiée. La lecture forts accélère les intervalles hors moments et expose la frise, mais ne garantit pas une fenêtre minutée par moment avec fondu de l'image d'arène. Les portages exacts et exhaustifs des trois maquettes, l'audit de tailles/toutes classes et l'empreinte des anciennes parties restent non établis.
+- Les cases précédentes ont apporté le sélecteur par combat et V, carte résultat passable, primes, salle et route lendemain, styles so3 et tests de rendu. Ce contrôle ne clôt pas les écarts majeurs ni ne permet de revendiquer toutes les cases vertes.
+- Aucun changement moteur, sauvegarde, cache ou données de joueur dans cette reprise. `mgmtReleveReduit.test.js` et lint/versions complets non relancés ici ; aucune validation nouvelle n'est revendiquée.
+- État de livraison honnête : tranche encore incomplète. Pas de commit final ni de `TOUT_EST_FINI`.
