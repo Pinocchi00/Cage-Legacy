@@ -11,4 +11,11 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 4. Tests** (`tests/mgmtLot60T1.test.js`, dans `test` ET `test:watch`) : par le chemin réel (`mgmtPasseGenerer('split',{soirees:3})` puis une mission du recruteur terminée) : signer via l'écran Contrats ; suivre sans doublon ; l'approche d'une rivale sur 200 retours simulés (la fréquence de l'approche est proche de la constante, à ±8 points ; jamais pour un suivi avant 28 jours) ; déterminisme ; classes sans règle = 0 ; échappement ; sauvegarde (clés facultatives, validées, réparées ; partie neuve ≤ plafond : `tests/mgmtReleveReduit.test.js` en arrière-plan ; partie ancienne intacte).
 **[ ] 5. Fin.** Commit final `Monde lot 60 T1 : signer ou suivre` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
+## Compte rendu
+
+- Modifiés : `mgmt-recruteur.js` rend l'ajout au suivi idempotent ; `mgmt-ecran-recruteur.js` affiche les états Signé/Suivi et un message textuel de caisse insuffisante.
+- Cases non terminées : le branchement de la signature sur l'écran Contrats existant, les approches rivales déterministes et leur presse, ainsi que le fichier de tests exigé ne sont pas implémentés. Aucun test n'a pu être lancé : `tests/mgmtLot60T1.test.js` n'existait pas.
+- Écart à la fiche : seules des modifications partielles d'affichage et de suivi sont présentes ; versions de cache à mettre à jour et couverture exigée manquante.
+- Questions pour Anthony : aucune ; il reste du travail de code, pas une ambiguïté de spécification.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

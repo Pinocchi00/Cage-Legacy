@@ -79,5 +79,6 @@ function mgmtRecruteurSigner(m,idProfil){
 function mgmtRecruteurSuivre(m,idProfil){
   const profil=m?.recruteur?.retours?.flatMap(x=>x.profils||[]).find(p=>p.id===idProfil);
   if(!profil||typeof mgmtSuivre!=='function')return false;
+  if(Array.isArray(m.suivis)&&m.suivis.includes(idProfil))return true;
   return mgmtSuivre(m,idProfil);
 }
