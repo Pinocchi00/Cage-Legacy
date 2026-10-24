@@ -24,6 +24,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise — identité du champion invité
+- Modifié : `mgmt-poste.js` mémorise désormais les identifiants des deux champions, dans la même catégorie, dès la réception d'une proposition entrante. Le jeu peut ainsi conserver explicitement les combattants promis au choc plutôt que recalculer une paire ultérieurement.
+- Vérification ciblée : `node --test tests/mgmtLot58T1.test.js` passe (14/14) ; ESLint ciblé passe.
+- Audit de versions : le seul écart est le préexistant `ui-cadre.css` vis-à-vis de `origin/main`. Version cache de `mgmt-poste.js` montée.
+- Toujours non terminé : le chemin de combat réel, le bonus de billetterie, l'effet de classement, le fil de presse et l'écran `UniChoc` ne sont pas réalisés ; aucun test dédié à ce nouvel enregistrement des identifiants n'a encore été ajouté. Les cases 3, 4, 6 et 7 ne sont donc pas déclarées terminées.
+
 ### Reprise — couverture du résultat de choc (incomplète)
 - Modifié : `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — un choc terminé conserve son résultat facultatif et réparé », qui vérifie validation d'un résultat terminé et suppression d'une valeur de résultat invalide par la réparation.
 - Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (13/13). Les scripts `test` et `test:watch` contiennent déjà explicitement le fichier.

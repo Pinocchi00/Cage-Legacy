@@ -166,7 +166,9 @@ function mgmtChocProposition(m){
   if(!stream)return null;
   const candidat=partenaires.find(({r})=>stream()<MGMT_CHOC_PROPOSITION_PAR_RANG[Math.max(0,Math.min(7,r-1))]);
   if(!candidat)return null;
-  m.choc={orgId:candidat.o.id,div:meilleure.f.div,jour:typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0,annee,etat:'recu'};
+   const adverse=(m.orgs[candidat.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[candidat.o.id].roster||[]}).has(f.id));
+   if(!adverse)return null;
+   m.choc={orgId:candidat.o.id,div:meilleure.f.div,jour:typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0,annee,etat:'recu',a:meilleure.f.id,b:adverse.id};
   return m.choc;
 }
 function mgmtChocRepondre(m,accepte){
