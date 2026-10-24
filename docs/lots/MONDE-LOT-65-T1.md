@@ -19,6 +19,13 @@ Branche : `fid-soiree` (la branche courante de ce dossier ; commits ICI ; le sup
 **[x] 5.** Tests ciblés verts ; assertions de présence, styles des classes, touches et T conservées.
 **[x] 6.** `?v=`, versions, audit et lint vérifiés ; changements de cette reprise commités avec le compte rendu. La tranche ne satisfait pas tous les critères visuels, donc pas de déclaration `TOUT_EST_FINI`.
 
+## Compte rendu — reprise 65
+
+- Branche confirmée : `fid-soiree`. Aucun fichier fonctionnel de la tranche n'était non commité ; les changements préexistants `.opencode/*`, `opencode.json` et `sw.js` restent hors périmètre, intacts et non ajoutés.
+- Vérifications fraîches : `node --test tests/mgmtLot53T1.test.js` (24/24), tests ciblés « La soirée en cinq moments » et « Les touches du combat : Espace, V, C, P, R, Entrée » (2/2), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (sans erreur).
+- Aucun changement code/test/capture n'a été fait cette reprise. Dernières mesures consignées avant : fin 36.4/19.3, en cours 29.3/20.1, ouverture 34.2/28.6 (`moyen`/`grosBlocs`). La cible moyen ≤20 n'est pas atteinte ; cours et ouverture dépassent la limite grosBlocs. Le temps forts n'a pas de mesure de comparaison attestée. Les captures fraîches n'ont pas été relancées et les cmp n'ont pas été ouverts cette reprise.
+- Migration : aucune. Écart : fidélité pixel, capture UniTempsForts et objectifs métriques restent non validés ; aucun `TOUT_EST_FIN` revendiqué.
+
 Règles communes : ne touche ni au moteur de combat (`simulateFight` et ses fichiers), ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
 ## Compte rendu
