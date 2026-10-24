@@ -348,7 +348,7 @@ test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la cérém
     assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
   }
 });
-test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',()=>{
+test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la carte vide reste lisible sans lauréat',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
   c.mgmtOrgNom=()=> 'Organisation';
@@ -356,8 +356,8 @@ test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',
   c.mfEcran=contenu=>contenu;
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
-  assert.equal((rendu.match(/Pas de /g)||[]).length,5);
-  assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
+  assert.equal((rendu.match(/Aucun lauréat/g)||[]).length,5);
+  assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();

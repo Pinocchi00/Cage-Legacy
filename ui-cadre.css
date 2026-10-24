@@ -460,7 +460,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-prix-combattant h2{color:#0D0B0B}
 .ce3-prix-combattant strong{font-size:112px;line-height:.8;white-space:normal}
 .ce3-prix:not(.ce3-prix-combattant){clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
-.ce3-prix:not(.ce3-prix-combattant) strong{font-size:54px;line-height:.8}
+.ce3-prix:not(.ce3-prix-combattant){gap:18px}
+.ce3-prix:not(.ce3-prix-combattant) strong{font-size:54px;line-height:1.05}
 .ce3-bilan{flex:none;height:150px;display:grid;grid-template-columns:1fr 2.2fr;gap:16px}
 .ce3-bilan>div,.ce3-bilan>article{min-width:0;padding:14px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;justify-content:center;gap:8px}
 .ce3-bilan>div{flex-direction:row;align-items:center;gap:22px}
