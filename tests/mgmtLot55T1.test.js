@@ -100,6 +100,15 @@ test('Lot 55 T1 — le retour tient compte du dernier combat avant la fenêtre a
   assert.ok(retour);
   assert.equal(retour.laureat,'a');
 });
+test('Lot 55 T1 — le retour départage par poids d’histoire avant la durée d’absence',()=>{
+  const c=charger();
+  c.mgmtHistoirePoidsCombat=(_m,t)=>t.poids;
+  const combat=(id,jour,poids)=>({c:jour,a:{id,name:id},b:{id:`opp-${id}-${jour}`,name:'Adversaire'},winner:'A',family:'decision',poids});
+  const m={hist:[combat('fort',1,0),combat('long',1,0),combat('fort',200,8),combat('long',300,1)]};
+  const retour=c.mgmtCeremonieCalculer(m).find(p=>p.id==='retour');
+  assert.ok(retour);
+  assert.equal(retour.laureat,'fort');
+});
 test('Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les saisons absentes',()=>{
   const c=charger();
   const m={roster:[{id:'x',name:'X',prixAnnee:[{prix:'ko',annee:2025}]}],hist:[{c:12,a:{id:'x',name:'X'},b:{id:'y',name:'Y'},winner:'A',primes:[{titre:'Prime observée'}]}],facts:[{k:'title_fight',fight:0,div:'fly'}],defis:[{id:'d',etat:'fait'}]};

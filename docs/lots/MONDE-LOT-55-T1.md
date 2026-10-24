@@ -423,3 +423,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (24/24), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé `mgmt-ceremonie.js` (vert), `git diff --check` (vert). `mgmt-ceremonie.js` bumpé. Le test demeure déjà inscrit dans les scripts généraux `test` et `test:watch`.
 - Écarts précédemment consignés inchangés : pas de preuve d'exécution de trois saisons complètes ni du chargement d'une fixture complète historique; le test lent `mgmtReleveReduit` n'a pas été exécuté; le déclencheur suit le terme du contrat et la reproduction intégrale des planches n'est pas certifiée. Aucune migration de sauvegarde.
 - Fichiers de cette reprise : `mgmt-ceremonie.js` (départages déterministes), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues.
+
+### Reprise 55
+
+- Correction du départage du « Retour de l’année » : parmi les retours après au moins 182 jours, le choix privilégie désormais le poids d’histoire du combat, puis la position à l’affiche (principal, co-principal, autres), puis la date et l’identifiant pour stabilité. Il ne favorise plus automatiquement la plus longue absence, contrairement au critère de la fiche.
+- Test ajouté : « Lot 55 T1 — le retour départage par poids d’histoire avant la durée d’absence ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (25/25); `node tools/verif-versions.js origin/main` (aucun écart); ESLint ciblé `mgmt-ceremonie.js` (vert); `git diff --check` (vert). `sw.js`, altéré par l'environnement de test, restauré depuis `origin/main`.
+- Fichiers modifiés : `mgmt-ceremonie.js` (départage du retour), `index.html` (bump de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche. Aucun changement de sauvegarde ni migration.
+- Limites non résolues : le test lent `mgmtReleveReduit` n’a pas été exécuté; le parcours ne prouve pas trois saisons complètes ni le chargement d’une fixture complète ancienne; l'enchaînement suit le terme du contrat plutôt que chaque anniversaire; la fidélité intégrale aux maquettes n'est pas certifiée. Ces écarts empêchent de revendiquer `TOUT_EST_FINI`.
