@@ -91,3 +91,9 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+### Compte rendu — reprise 8 (24/10/2026)
+
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — la suite conserve ses trois colonnes de planche et tous les combats ». Sur une soirée jouée par le chemin réel, il vérifie que le rendu des résultats comporte une ligne par combat et que les colonnes presse, mouvements et résultats restent explicites. Le test ciblé passe 17/17.
+- État Git au départ : branche `p8-lendemain`, aucun fichier de tranche non commité. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus.
+- Limites toujours présentes : ce test de non-régression ne complète pas la reproduction intégrale du layout et des valeurs des deux planches, ni les événements T3 contextualisés selon tous les faits réels. Le compte rendu précédent décrit les écarts non résolus ; ils ne sont pas déclarés terminés ici. Pas de nouvelle donnée de sauvegarde.

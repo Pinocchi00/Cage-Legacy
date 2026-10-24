@@ -219,3 +219,21 @@ test('Monde lot 54 T1 — la navigation ouvre le second écran puis revient aux 
     assert.equal(r.retour,'mgmt_lendemain');
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — la suite conserve ses trois colonnes de planche et tous les combats',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>({
+      fights:G.mgmt.lastEvent.fights.length,
+      rows:(mgmtLendemainResultatsHtml(G.mgmt).match(/class="mgmt-ld-item"/g)||[]).length,
+      suite:mgmtLendemainSuiteHtml(G.mgmt)
+    }))()`);
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    assert.equal(r.rows,r.fights,'chaque combat de la soirée doit être consultable dans les résultats');
+    assert.match(css,/\.ld3-suite\s*\{[^}]*grid-template-columns:\s*1\.05fr\s+1\.1fr\s+1fr/s,
+      'presse, mouvements et résultats gardent trois colonnes explicites');
+    assert.match(r.suite,/class="ld3-suite-(?:press|moves|results)"/);
+  }finally{w.close();}
+});
