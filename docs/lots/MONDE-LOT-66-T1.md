@@ -125,3 +125,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Compte rendu avant/après : l'ancien lendemain à cases rouges et chiffres isolés a été remplacé par les cartes de moments, changements pour le joueur, une presse en une et chiffres ; la suite présente la presse, les mouvements et les résultats complets en colonnes. Aucune migration de sauvegarde.
 - Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
 - Questions pour Anthony : aucune.
+
+### Reprise 21 — tests ciblés de confirmation — 24/10/2026
+
+- À la reprise, les commits fonctionnels restent présents (HEAD `d57deab`) ; aucun fichier de code ou test de la tranche n'était en attente. Les changements locaux d'agents/configuration et `sw.js` sont restés intacts et exclus.
+- Relancés séparément : `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLendemainDemo.test.js` (7/7). `node tools/verif-versions.js origin/main` ne détecte aucun écart.
+- La capture n'a pas été relancée lors de cette confirmation ; les dernières mesures consignées restent 19,5 % de gros blocs pour `lendemain` et 18,8 % pour `lendemainSuite`. Aucune inspection directe des PNG n'est revendiquée.
+- Aucun changement fonctionnel ni migration. Compte rendu actualisé uniquement ; les tests et audits ciblés cités ici sont verts.
