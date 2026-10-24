@@ -357,6 +357,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun changement fonctionnel ni de sauvegarde ; aucune migration. Limite connue : les tests déclenchent chaque fait de famille dans des scénarios ciblés après création par le parcours réel, sans prouver que les systèmes opérationnels génèrent naturellement tous ces faits.
 - La fiche seule sera committée. Changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et paramètre cache de `index.html` étrangers à la tranche, exclus. Aucun nouvel écart ni question pour Anthony.
 
+### Reprise 3 — contrôle de clôture courant (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status --short` consultés. Les commits fonctionnels de la tranche sont déjà présents. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et variation de cache dans `index.html` sont hors périmètre et restent intactes.
+- Vérifications relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; présence du test dans `test` et `test:watch` confirmée (`true,true`).
+- Pas de changement de production, de test ou de sauvegarde dans cette reprise ; aucune migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé ; les validations antérieures consignent une mesure de 1 908 745 octets, mais une reprise précédente a signalé une assertion de temps de chargement échouée (943,161 ms contre le seuil). Cette anomalie de timing est rapportée sans la déclarer verte.
+- Limite de couverture : chaque fait familial est injecté séparément dans les scénarios de test après création par le parcours réel ; cela ne démontre pas que tous les systèmes opérationnels génèrent naturellement chaque fait. La fiche seule est modifiée pour ce compte rendu ; aucun nouvel écart ni question pour Anthony.
+
 ### Reprise 5 — vérification de reprise (24/10/2026)
 
 - Branche `p8-apres` confirmée. Le code et les tests fonctionnels sont déjà commités ; aucun fichier fonctionnel de tranche non commité. Vérification ciblée fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9.
