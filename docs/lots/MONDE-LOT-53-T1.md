@@ -377,6 +377,15 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
 - Écart restant : cela affine l'ouverture, sans convertir toute sa composition historique en blocs `so3-*`. Les critères globaux encore ouverts en reprise 53 (portage exact complet, plage totale 900–1200 s mesurée, lecture forts chronométrée/fondue sur l'image) restent non établis; ce changement ne suffit donc pas à déclarer le lot terminé.
 
+### Reprise 56 — reprise après commits partiels
+
+- Départ vérifié : branche `p7-ecran-soiree`, historique jusqu'à `f22c3bc`; une modification locale de mise en forme dans `mgmt-soiree-cadre.js` a été testée puis commise séparément (`e56404a`). Aucun fichier étranger `.opencode/agents/*` ni `opencode.json` n'a été ajouté.
+- Tests ciblés : `node --test tests/mgmtLot53T1.test.js` (20/20), `node --test tests/mgmtPasse.test.js tests/mgmtSoiree.test.js` (27/27; empreintes anciennes intactes). `node tools/verif-versions.js origin/main` ne signale aucun écart et `node_modules/.bin/eslint .` réussit. `mgmtLot53T1.test.js` est bien présent dans `test` et `test:watch`.
+- Fait confirmé dans le code transmis : réglage par combat et touche V, rendu des annonces de primes/montant, carte résultat passable, frise et aide de commandes; la lecture continue d'utiliser l'arène existante et l'accélération hors moments. Aucun changement du moteur, des données de sauvegarde ou des textes visibles.
+- Pas fait et non revendiqué : le portage complet des compositions et valeurs de `UniSoiree`/`UniSoireeFin`; fenêtres de temps forts 30–60 secondes chronométrées avec fondu de l'image d'arène; assertion de cumul 900–1200 s (la mesure consignée est 868,38 s); audit exhaustif des classes/tailles. Le test lent a été relancé en arrière-plan vers `tools/reports/mgmtReleveReduit-lot53-reprise-final.log`; son résultat n'est pas encore confirmé.
+- Écart/choix de lecture : accélération des intervalles hors moments dans l'arène existante, sans second moteur, conformément à la décision du superviseur; le fondu livré porte sur le repère de frise et non sur l'image d'arène. L'estimation exacte n'a pas été majorée artificiellement pour atteindre la cible.
+- Aucun commit final n'est présenté comme livraison : plusieurs critères fonctionnels explicites restent absents malgré les commits intermédiaires.
+
 ### Reprise 56 — vérification à la reprise 3
 
 - Départ : branche `p7-ecran-soiree`, HEAD `cb76287`. Aucun changement de code de la tranche n'était non commité; les modifications locales `.opencode/agents/*` et `opencode.json` sont externes et n'ont pas été touchées.
