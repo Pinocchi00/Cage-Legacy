@@ -541,3 +541,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés) et `node_modules/.bin/eslint .` (vert).
 - Aucun changement de code métier n'a été justifié par ces contrôles. Aucune sauvegarde ni migration modifiée. Les limites précédemment constatées restent honnêtement ouvertes : test lent `mgmtReleveReduit` non exécuté; parcours ne garantissant pas trois saisons pleines; absence de chargement d'une fixture historique complète; conformité intégrale des planches non validée; cérémonie raccordée au terme du contrat plutôt qu'à chaque anniversaire.
 - Cette reprise ne crée pas de commit artificiel et n'affirme pas `TOUT_EST_FINI`, ces critères de la fiche n'étant pas tous établis. Les fichiers étrangers restent hors périmètre.
+
+### Reprise 70
+
+- Contrôle d'entrée : branche `p11-ceremonie-carnet`, HEAD `d6b5285`; le commit portant le message final demandé est déjà dans l'historique. Aucun fichier métier ou test de la tranche n'était non commité. Les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et restent exclues.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert), et confirmation que le test figure dans `test` et `test:watch`.
+- Les tests ne changent pas les limites déjà consignées : `mgmtReleveReduit` non exécuté, pas de preuve de trois saisons complètes jouées ni de chargement d'une fixture historique complète, validation visuelle intégrale des maquettes absente, déclenchement de cérémonie lié au terme du contrat plutôt qu'à chaque anniversaire. Ces critères ne sont donc pas certifiés satisfaits.
+- Aucun code métier, test ou sauvegarde n'a été modifié durant cette reprise. Aucun commit artificiel n'est créé, car il n'y a pas de fichier de tranche non commité à livrer; les changements étrangers sont laissés intacts. Aucune migration de sauvegarde. Pas de `TOUT_EST_FINI`.
