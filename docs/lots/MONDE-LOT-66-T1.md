@@ -116,3 +116,12 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). `node tools/verif-versions.js origin/main` ne détecte aucun écart de cache.
 - Pas de nouvel ajustement de code nécessaire : les deux écrans et leur navigation sont dans les commits antérieurs. Les dernières mesures visuelles consignées sont gros blocs 19,5 % (`lendemain`) et 18,8 % (`lendemainSuite`) ; comparateur non relancé durant cette reprise, et le jugement visuel direct demeure non revendiqué.
 - Aucune modification de sauvegarde/migration. Le test lent hors tranche `mgmtReleveReduit.test.js` reste non relancé, sa dernière tentative étant documentée en échec `ENOSPC`.
+
+### Reprise 20 — contrôle final et livraison — 24/10/2026
+
+- Vérification de tranche : les écrans, styles, tests et navigation déjà livrés dans les commits précédents sont présents ; aucun nouveau changement fonctionnel ou de sauvegarde n'était requis. Le compte rendu est le seul fichier modifié à cette reprise.
+- Captures refaites avec l'outil décrit dans `LISEZMOI.txt` : `lendemain` moyen 24,9 %, gros blocs 19,5 % ; `lendemainSuite` moyen 23,3 %, gros blocs 18,8 %. Les fichiers comparatifs ont été régénérés sous `C:/Users/antho/AppData/Local/Temp/shots/`. Le seuil de gros blocs est conforme ; pas d'inspection image directe revendiquée.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` 7/7, `mgmtLendemainDemo.test.js` 7/7, `mgmtLot54T1.test.js` 30/30, `mgmtLot48T1.test.js` 9/9 et `mgmtSoireeShow.test.js` 18/18. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Compte rendu avant/après : l'ancien lendemain à cases rouges et chiffres isolés a été remplacé par les cartes de moments, changements pour le joueur, une presse en une et chiffres ; la suite présente la presse, les mouvements et les résultats complets en colonnes. Aucune migration de sauvegarde.
+- Écarts : la mesure confirme les gros blocs mais n'atteste pas l'absence de tout chevauchement par inspection visuelle. `mgmtReleveReduit.test.js` (lent, hors tranche) non relancé à cause de l'incident `ENOSPC` documenté précédemment. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes et hors commit.
+- Questions pour Anthony : aucune.
