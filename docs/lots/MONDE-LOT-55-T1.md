@@ -529,3 +529,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert), `git diff --check` (vert).
 - Aucun changement métier, écran, sauvegarde ou migration. Cette assertion ciblée n'efface pas les limites consignées dans les reprises antérieures : conformité visuelle intégrale et déclenchement anniversaire non certifiés; le test lent `mgmtReleveReduit` n'a pas été relancé dans cette reprise.
 - Fichier de tranche modifié : `tests/mgmtLot55T1.test.js`; aucune question nouvelle pour Anthony.
+
+### Reprise 69
+
+- État contrôlé : branche `p11-ceremonie-carnet`, HEAD `f2142fb`; l'historique de tranche inclut déjà le commit portant le message final demandé. Les changements préexistants de `.opencode/agents/*` et `opencode.json` sont étrangers et exclus.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (32/32 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés) et `node_modules/.bin/eslint .` (vert).
+- Aucun changement de code métier n'a été justifié par ces contrôles. Aucune sauvegarde ni migration modifiée. Les limites précédemment constatées restent honnêtement ouvertes : test lent `mgmtReleveReduit` non exécuté; parcours ne garantissant pas trois saisons pleines; absence de chargement d'une fixture historique complète; conformité intégrale des planches non validée; cérémonie raccordée au terme du contrat plutôt qu'à chaque anniversaire.
+- Cette reprise ne crée pas de commit artificiel et n'affirme pas `TOUT_EST_FINI`, ces critères de la fiche n'étant pas tous établis. Les fichiers étrangers restent hors périmètre.
