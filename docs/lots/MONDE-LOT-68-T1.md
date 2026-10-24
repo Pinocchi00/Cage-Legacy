@@ -279,6 +279,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun comparatif `cmp-*.png` n'a été ouvert dans cette reprise ; je n'affirme pas les écarts visuels précis. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Aucun changement hors fiche à commiter.
 - Écart à la fiche : le protocole de capture/ouverture/correction écran par écran demeure non achevé et les cases visuelles 1 à 5 ne sont donc pas validées. Aucun fichier applicatif n'est commité dans cette reprise ; ce compte rendu consigne l'état sans revendiquer `TOUT_EST_FINI`.
 
+### Reprise 40 du 24/10/2026 — contrôle géométrique
+
+- Contrôles actuels, capture à 1920×1080 : fiche (UniFicheStats) `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}` ; recruteur (UniRecruteurMission) `{0, [], 0, []}` ; retours (UniRecruteurRetour) `{0, [], 0, []}` ; semaine (UniSemaine) `{0, [], 0, []}`. La fiche ne reproduit donc plus les deux chevauchements historiques signalés (palmarès/compteur, POIDS/SUIVRE) ; le bouton et son compteur sont déjà dans la rangée des onglets. Pas de correction applicative nécessaire pour ces contrôles.
+- Scènes de contrôle supplémentaires du superviseur, hors périmètre applicatif de cette tranche : accueil `{chevauchements:0,textesSous22px:1,debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{1,3,[]}` (un chevauchement « Tout est lu » / « Tout marquer comme lu ») ; tonposte `{6,0,["IL ATTEND DE VOIR","« Je veux voir la suite."]}` ; bilan `{1,0,[]}`. Aucun de ces écrans parallèles n'a été modifié.
+- Les valeurs de similarité (`moyen`/`grosBlocs`) ne valent pas validation visuelle. Les comparatifs PNG n'ont pas été ouverts. Les scènes arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records ne sont pas disponibles dans les scènes du captureur utilisé et n'ont pas reçu de contrôle automatique dans cette reprise.
+- État honnête : les contrôles géométriques disponibles pour fiche, recruteur, retours et semaine sont sans anomalie, mais le protocole de comparaison visuelle reste incomplet ; les autres écrans cités restent sans contrôle visuel propre. Cases de fidélité et critère final non achevés ; pas de `TOUT_EST_FINI`. Aucun JS/CSS ou test changé, donc aucun bump `?v=` ni migration.
+
 ### Reprise 38 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Historique jusqu'à `6874035f` consulté ; aucun fichier de la tranche en attente de commit. Les modifications `.opencode/agents/*` et `opencode.json` restent hors tranche et intactes.
