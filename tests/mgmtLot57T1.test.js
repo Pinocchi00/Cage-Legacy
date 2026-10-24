@@ -267,3 +267,15 @@ test('Monde lot 57 T1 — la ligne de classement sépare les combattants du top 
     assert.match(r.html,new RegExp(`<span>${r.p}</span>`));
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette et huit lignes',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const html=scr_mgmt_guerre();return JSON.stringify({html,lignes:(html.match(/class="gu3-ligne/g)||[]).length});})()`));
+    assert.equal(result.lignes,8);
+    for(const titre of ['RANG','ORGANISATION','POP.','SALLE','NOTORIÉTÉ','PUISSANCE','ÉVOLUTION']) assert.ok(result.html.includes(titre),`colonne absente: ${titre}`);
+    assert.match(result.html,/juste devant\s*:/i);
+    assert.match(result.html,/juste derrière\s*:/i);
+    assert.match(result.html,/Depuis la dernière soirée/);
+  }finally{w.close();}
+});
