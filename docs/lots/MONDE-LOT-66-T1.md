@@ -639,3 +639,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Non-régression verte : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Les tests existants couvrent les blocs de planche et la règle de style de chaque classe; aucun nouveau test.
 - Avant/après : les deux vues et la navigation étaient déjà présentes; la colonne des mouvements n'est plus débordante par `overflow:visible`, mais défile dans son panneau. Aucun changement de données, sauvegarde, mécanique, ni migration. Le critère de mesure ≤18 % du lendemain et le rapport de débordement des éléments scrollables de la suite demeurent des écarts à la fiche; pas de revendication de conformité visuelle complète.
 - Fichiers modifiés dans cette reprise : `ui-cadre.css` (défilement contrôlé de la colonne mouvements), `index.html` (version de cache CSS via `_bump.js`), cette fiche (résultats et écarts). Questions pour Anthony : aucune.
+
+### Reprise 8 — verrouillage terminal des cartes — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `d9a64e12`; modifications d'agents, `opencode.json` et `sw.js` hors tranche et non ajoutées.
+- `ui-cadre.css` : règle terminale explicite pour la rangée de 285 px, le nom principal à 80 px, les deux autres à 68 px, et les détails à 30 px, afin que les règles historiques ultérieures ne ramènent pas les noms à 32 px. `index.html` bumpé via `node tools/_bump.js ui-cadre.css`.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7/7) et `mgmtLendemainDemo.test.js` (7/7). `node tools/verif-versions.js origin/main` ne relève aucun écart.
+- Avant/après : taille CSS finale des deux noms secondaires portée de 64 à 68 px et priorité de cascade assurée; composition et navigation inchangées. La capture comparative et l'inspection des styles calculés n'ont pas été exécutées dans cette reprise, donc aucun seuil visuel ni absence de chevauchement supplémentaire n'est revendiqué.
+- Aucun changement de données, sauvegarde ou migration. Tests ajoutés : aucun. Fichiers : `ui-cadre.css` (échelle des cartes), `index.html` (cache CSS), cette fiche (compte rendu). Écarts : captures non relancées. Questions pour Anthony : aucune.
