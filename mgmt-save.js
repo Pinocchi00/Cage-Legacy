@@ -362,6 +362,7 @@ function validateMgmt(raw){
   if(raw.duo!==undefined&&!mgmtDuoValide(raw.duo,raw)) return false;   /* Duo T1 */
   if(raw.semaine!==undefined&&!mgmtSemaineValide(raw.semaine)) return false;
   if(raw.recruteur!==undefined&&!mgmtRecruteurValide(raw.recruteur)) return false;
+  if(raw.paliersAnnonces!==undefined&&(!Array.isArray(raw.paliersAnnonces)||raw.paliersAnnonces.length>5||new Set(raw.paliersAnnonces).size!==raw.paliersAnnonces.length||raw.paliersAnnonces.some(id=>!MGMT_PALIERS.some(p=>p.id===id)))) return false;
   if(raw.memoire!==undefined&&!mgmtMemoireValide(raw.memoire)) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
@@ -523,6 +524,8 @@ function validateMgmt(raw){
     }
   }
   if(raw.poste!==undefined&&!mgmtPosteValide(raw.poste)) return false;
+  if(raw.offres!==undefined&&!mgmtOffresValide(raw.offres)) return false;
+  if(raw.choc!==undefined&&!mgmtChocValide(raw.choc)) return false;
   return true;
 }
 
@@ -722,8 +725,11 @@ function mgmtRepair(m){
   if(Object.prototype.hasOwnProperty.call(m,'vues')&&(!m.vues||typeof m.vues!=='object'||Array.isArray(m.vues)||Object.keys(m.vues).length>12||Object.entries(m.vues).some(([k,v])=>!/^(0|[1-9]\d*)$/.test(k)||!['complet','forts','resultat'].includes(v)))) delete m.vues;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'poste')&&!mgmtPosteValide(m.poste)) delete m.poste;
+  if(Object.prototype.hasOwnProperty.call(m,'offres')&&!mgmtOffresValide(m.offres)) delete m.offres;
+  if(Object.prototype.hasOwnProperty.call(m,'choc')&&!mgmtChocValide(m.choc)) delete m.choc;
   if(Object.prototype.hasOwnProperty.call(m,'semaine')&&!mgmtSemaineValide(m.semaine)) delete m.semaine;
   if(Object.prototype.hasOwnProperty.call(m,'recruteur')&&!mgmtRecruteurValide(m.recruteur)) delete m.recruteur;
+  if(Object.prototype.hasOwnProperty.call(m,'paliersAnnonces')&&(!Array.isArray(m.paliersAnnonces)||m.paliersAnnonces.length>5||new Set(m.paliersAnnonces).size!==m.paliersAnnonces.length||m.paliersAnnonces.some(id=>!MGMT_PALIERS.some(p=>p.id===id)))) m.paliersAnnonces=[];
   if(Object.prototype.hasOwnProperty.call(m,'memoire')&&!mgmtMemoireValide(m.memoire)) delete m.memoire;
   if(Object.prototype.hasOwnProperty.call(m,'surnoms')){
     const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);

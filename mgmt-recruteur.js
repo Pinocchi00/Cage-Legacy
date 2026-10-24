@@ -9,6 +9,14 @@ function mgmtRecruteurValide(x){
   return true;
 }
 function mgmtRecruteurJour(m){ return Number.isInteger(m?.cal?.jour)?m.cal.jour:0; }
+/* ==== [ANCRE: CROISSANCE_RECRUTEUR] — Monde lot 56 T1 ====
+   Le palier ajoute 1 % de capacité par niveau (3 % maximum) : mission moins
+   coûteuse, sans changer les tarifs ni les parties qui n'ont pas ce contexte. */
+function mgmtCroissanceCoutRecruteur(m,cout){
+  if(!m||m.mondeVivant!==true||typeof mgmtPaliersCalculer!=='function'||!Number.isFinite(cout)||cout<=0) return cout;
+  const niveau=Math.max(0,Math.min(3,mgmtPaliersCalculer(m).effets.recruteur));
+  return Math.max(0,Math.floor(cout*(1-niveau*0.01)));
+}
 function mgmtRecruteurEtat(m){
   if(!m.recruteur) m.recruteur={mission:null,retours:[],seq:0};
   return m.recruteur;
@@ -19,7 +27,7 @@ function mgmtRecruteurEnvoyer(m,choix){
   if(!d)return false;
   const etat=mgmtRecruteurEtat(m);
   if(etat.mission||!d.categories.includes(choix.cat)||!['lutteur','frappeur','grappler','complet'].includes(choix.style)||![2,3,4].includes(choix.sem)) return false;
-  const cout=d.cout;
+  const cout=mgmtCroissanceCoutRecruteur(m,d.cout);
   const coutCaisse=cout/1000;
   if(!Number.isFinite(m.treasury)||m.treasury<coutCaisse) return false;
   m.treasury-=coutCaisse;
