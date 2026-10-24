@@ -1,5 +1,12 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 52
+
+- Branche `fid-organisation` confirmée ; l’arbre était propre au départ. La capture prescrite a été exécutée pour cérémonie : 0 chevauchement, 0 texte sous 22 px, aucun débordement, grosBlocs 19,3 %. Pour Guerre : 0 chevauchement et texte sous 22 px, mais débordements « Juste devant : Fighting » et « Rang inchangé », grosBlocs 22,9 %. Une réduction des espacements dans la rivalité Guerre n’a pas modifié ces constats ; je ne la présente donc pas comme une correction réussie.
+- Fichier applicatif touché : `ui-cadre.css`, tentative de resserrement de la colonne rivale Guerre ; `index.html` version CSS bumpée. La tentative n’a pas résolu les défauts de débordement. Aucun changement de sauvegarde ni test nouveau.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (46/46) passe. Les images comparatives sont générées par `shoot.js` dans Temp, mais l’outil de lecture ne permet pas de les ouvrir ici ; l’inspection visuelle directe, les scènes avec six prix et rivale forcée, ainsi que les mesures/corrections finales des vues Croissance, Carnet et Bilan restent non validées. Les résultats précédents consignent des défauts sur ces vues.
+- État : les critères de la tranche ne sont pas tous atteints ; aucun `TOUT_EST_FINI` revendiqué. Pas de questions de spécification.
+
 ## Compte rendu — reprise 51
 
 - Branche `fid-organisation` confirmée. `git status` était propre au départ ; les commits précédents, dont `db27705e`, sont déjà dans l'historique.
