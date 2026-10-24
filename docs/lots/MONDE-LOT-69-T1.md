@@ -327,6 +327,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu (reprise 54)
 - Fichiers modifiés : cette fiche uniquement, pour consigner la nouvelle mesure et les limites observées.
+
+### Reprise 66
+- État initial : branche `fid-choc`, HEAD `dfc90bf9`. Aucun fichier fonctionnel de tranche en attente ; les modifications utilisateur sous `.opencode/agents/` et `opencode.json` ont été laissées intactes.
+- `mgmt-ecran-poste.js` borne désormais le rendu des affiches choc aux trois entrées permises par le modèle et la planche. `index.html` a reçu le `?v=` correspondant via `node tools/_bump.js mgmt-ecran-poste.js`.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une expérimentation de test de données auto-générées a échoué car le seed n'a pas de catégorie commune avec deux championnes ; le test a été retiré, sans transformer l'absence de fixture en assertion trompeuse.
+- Pas de migration. Les mesures/captures comparative post-correction et les autres limites déjà documentées (parcours complet strict, validation visuelle de tous les écrans) ne sont pas revendiquées comme satisfaites.
 - Tests ajoutés : aucun ; test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4.
 - Migration de sauvegarde : aucune.
 - Écarts à la fiche : choc supérieur au seuil `grosBlocs` (25.1 %), série de captures interrompue après le choc, aucune mesure nouvelle discours/bilan/arrivée, logique de choc mono-affiche, et parcours actuel incomplet concernant fin de contrat/bilan et rechargement strictement identique. Les cases ne sont pas toutes terminées ; pas de revendication `TOUT_EST_FINI`.
