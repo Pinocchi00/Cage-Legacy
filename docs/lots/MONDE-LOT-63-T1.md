@@ -132,7 +132,7 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Vérifications réalisées : `node --test tests/mgmtLot63T1.test.js` (2/2), `node tools/verif-versions.js origin/main` (sans écart), ESLint ciblé et `git diff --check`.
 - Aucune nouvelle clé de sauvegarde ni migration. Aucune question pour Anthony ; les critères manquants sont du travail restant, et la tranche n'est pas déclarée terminée.
 
- Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
 ### Reprise 28 — validation et livraison (24/10/2026)
 
