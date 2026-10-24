@@ -457,6 +457,10 @@ test('Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix',()=>{
   ];
   assert.deepEqual(JSON.parse(JSON.stringify(c.mgmtCeremonieCalculer({hist}))),[]);
 });
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; le carnet laisse le retour à la barre de navigation',()=>{
+  assert.doesNotMatch(source,/<button type="button" onclick="CL\.go\('mgmt_accueil'\)">Accueil<\/button>/);
+  assert.match(source,/touches:\[\{ks:\['Échap'\],t:'Accueil'\}\]/);
+});
 
 test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles dédiés',()=>{
   const fs=require('node:fs');
