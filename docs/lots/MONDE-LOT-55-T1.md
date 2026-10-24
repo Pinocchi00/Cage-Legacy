@@ -370,3 +370,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications exécutées : `node --test tests/mgmtLot55T1.test.js` (20/20); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert). Le test figure déjà dans les scripts généraux `test` et `test:watch` selon l'état livré antérieurement.
 - Aucun fichier de production n'a nécessité de correction après ces contrôles. Les limites connues ne sont pas masquées : le test ne charge pas une fixture historique complète; `mgmtReleveReduit` n'a pas été lancé; la fidélité intégrale aux maquettes et un déclenchement à chaque anniversaire ne sont pas attestés par ces vérifications (l'enchaînement existant suit la fin du contrat). Pas de changement de format ou migration de sauvegarde.
 - Le commit final est déjà présent dans l'historique; ce relevé de reprise est le seul changement de tranche à committer. Aucun changement étranger n'est ajouté.
+
+### Reprise 48
+
+- État initial : branche conforme `p11-ceremonie-carnet`, HEAD `e45bfaa`, qui contient déjà le commit final demandé. Aucun changement métier de la tranche en attente; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et non touchées.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (20/20 verts, incluant les fenêtres sur trois années, le cas de retour avant fenêtre, la lecture du carnet, l'échappement et 50 éditions); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert).
+- Aucun fichier métier n'a été changé durant cette reprise : l'état courant est déjà commité et les contrôles ne révèlent pas de régression à corriger. Aucun commit artificiel n'est créé.
+- Limites honnêtement conservées : les tests ne démontrent pas trois saisons complètes, le test lent `mgmtReleveReduit` n'a pas été exécuté ici, le chargement d'une fixture complète de sauvegarde ancienne n'est pas couvert, et les reprises précédentes signalent des écarts résiduels à la reproduction intégrale des planches et au déclenchement anniversaire (le raccordement suit le terme du contrat). Aucune migration de sauvegarde.
+- Aucune question nouvelle pour Anthony; les limites ci-dessus sont des critères encore non certifiés, pas des questions de spécification.
