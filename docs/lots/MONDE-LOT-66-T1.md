@@ -63,6 +63,12 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 33 — mesure de la suite et livraison — 24/10/2026
+
+- Guide de capture relu via Python après refus de l'outil de lecture pour le chemin externe. Captures exécutées séparément à 1920×1080 : `lendemain` contrôle automatique 0 chevauchement, 0 texte sous 22 px, aucun débordement; gros blocs 18,4 %. `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, mais quatre débordements signalés (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`), gros blocs 17 %.
+- Tentative de resserrement des colonnes de mouvements dans `ui-cadre.css` n'a pas modifié les quatre alertes. La capture n'a pas pu certifier les corriger ; critère visuel 4 reste partiel. CSS cache bump appliqué.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node tools/verif-versions.js origin/main` et ESLint passent. Pas de changement de sauvegarde. Ne pas revendiquer `TOUT_EST_FINI` : la suite garde quatre débordements automatisés.
+
 ### Reprise 12 — recapture de confirmation — 24/10/2026
 
 - L'état initial montre les commits de tranche déjà présents jusqu'à `9193524`; seuls des fichiers de configuration d'agents et `sw.js` sont modifiés localement, tous hors tranche et laissés intacts.
