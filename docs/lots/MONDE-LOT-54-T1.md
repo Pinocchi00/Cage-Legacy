@@ -163,3 +163,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : la section de suite reçoit un nom accessible explicite (`aria-label`) sans modifier son contenu ni sa navigation.
 - `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et carte complète » vérifie aussi le nom de région. Tests ciblés : 22/22 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé passe ; `package.json` contient le test dans `test` et `test:watch`.
 - Toujours non terminés : les cases 1 et 3 ne satisfont pas exhaustivement la fidélité complète aux planches et le T3 ne déclenche pas toutes les réactions selon les faits réels. Pas de nouvelle sauvegarde. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été exécuté.
+
+### Reprise demandée — 24/10/2026
+
+- Reprise du journal : HEAD `853b9f0`, branche `p8-lendemain` ; aucun fichier de la tranche n'était modifié. Les modifications `.opencode/agents/*` et `opencode.json` restent hors périmètre.
+- Relecture des sections P7/P8 et des deux planches. `node --test tests/mgmtLot54T1.test.js` passe 22/22 ; les tests couvrent déjà le chemin de génération réelle, le cas 13-1 contre le n°1, les trois colonnes de la suite, les styles dédiés, la lisibilité, D1 et le test des 50 semaines.
+- Les écarts de complétude subsistent : les deux compositions actives ne reproduisent pas encore toutes les valeurs et contenus des maquettes ; la logique de l'après ne fournit pas encore toutes les réactions conditionnées aux faits (notamment discours/interpellations et autres organisations). La présence d'un catalogue générique ne suffit pas à prouver ces critères. Les audits versions/lint ne sont pas relancés dans cette passe.
+- Aucun changement de production effectué dans cette passe de validation. Pas de nouvelle clé de sauvegarde ni de migration. La tranche ne peut pas être déclarée terminée tant que les cases 1 et 3 restent incomplètes.
