@@ -24,6 +24,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise 13 — progression partielle
+- Modifié : `package.json`, les scripts agrégés `test` et `test:watch` lancent maintenant explicitement `tests/mgmtLot58T1.test.js` (les alias ciblés existaient déjà).
+- Vérification : `node --test tests/mgmtLot58T1.test.js` passe (12/12) ; vérification directe des deux scripts passe ; `node_modules/.bin/eslint .` passe.
+- Audit cache : `node tools/verif-versions.js origin/main` signale seulement l'écart préexistant `ui-cadre.css`. Aucun JS/CSS de production n'a été modifié cette reprise.
+- Reste non terminé et non revendiqué : choc réellement raccordé au combat champion contre champion, bonus de recette, progression de classement, fil de presse et écran `UniChoc` ; vérification du plafond et fixture ancienne. L'étude T5 est déjà présente et aucun code de changement d'organisation n'a été ajouté. Pas de commit final de tranche.
+- Aucun écart nouveau à la fiche ou question ouverte. Les fichiers locaux hors tranche restent exclus.
+
   - **Reprise 11 — partielle, non terminée.** Branche `p9-renvoi-offres` confirmée ; historique et statut consultés. Les fichiers hors tranche `.opencode/agents/*`, `opencode.json` et `sw.js` restent intacts et ne sont pas ajoutés.
   - **Fichier modifié :** `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — le refus des offres laisse poursuivre puis renouveler le contrat », couvrant le refus de toutes les offres produites, l'attente, l'organisation Split conservée et la prolongation du contrat.
   - **Test ciblé :** `node --test tests/mgmtLot58T1.test.js` passe (11/11).
