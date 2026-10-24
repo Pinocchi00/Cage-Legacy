@@ -1006,6 +1006,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-carte-combat.on .so3-carte-infos .mf-so-lt span:first-child{color:#F0B220}
 .so3-vue{height:42px;max-width:190px;padding:0 12px;border:0;background:#252121;color:rgba(233,230,225,.74);clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;cursor:pointer;transition:background-color .16s ease,color .16s ease}
 .so3-carte-combat.on .so3-vue{background:#E9E6E1;color:#0D0B0B}
+.so3-vue:focus-visible{outline:3px solid #F0B220;outline-offset:4px}
 .so3-prochain{min-height:34px;display:flex;align-items:center;color:#F0B220;font-size:22px;font-weight:600;line-height:1;letter-spacing:.04em}
 .so3-salle{height:42px;display:flex;align-items:center;gap:14px;padding:0 12px;color:#E9E6E1;font-size:22px;line-height:1}
 .so3-salle span{color:rgba(233,230,225,.74);font-weight:600}

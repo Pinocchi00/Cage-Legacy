@@ -481,3 +481,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Bilan honnête : le sélecteur de vue, la carte résultat passable, la frise, les annonces de primes, la salle et la route vers le lendemain sont présents. Le portage complet aux valeurs des trois planches et la lecture des fenêtres avec durée réelle/fondu de l'image ne sont pas établis. Les tests de fenêtre ne prouvent que l'ordre et la durée estimée; ils ne prouvent pas une séquence chronométrée d'interface. La couverture typographique ne constitue pas un audit exhaustif de tout le markup.
 - Aucun changement de code applicatif n'est fait dans cette reprise : un changement cosmétique ou une assertion ne rendrait pas vrais les critères fonctionnels restants. Le test lent, le lint et l'audit de versions ne sont pas relancés ici; les validations précédentes figurent aux reprises antérieures. Aucun changement de sauvegarde, moteur, RNG ou texte joueur.
 - État : critères de fin non atteints; je ne présente pas cette reprise comme livraison finale et ne déclare pas `TOUT_EST_FINI`.
+
+### Reprise 67 — focus clavier du sélecteur de carte
+
+- Fait : le bouton de vue de chaque combat reçoit un contour de focus clavier visible, jaune maquette, avec un décalage de 4 px. Le changement n'altère ni la navigation ni le choix sauvegardé.
+- Fichiers modifiés : `ui-cadre.css` (état `:focus-visible`), `index.html` (version de cache CSS), `tests/mgmtLot53T1.test.js` (assertion de règle), cette fiche.
+- Vérifications : `node --test tests/mgmtLot53T1.test.js` — 21/21; `node tools/verif-versions.js origin/main` — aucun écart; `node_modules/.bin/eslint .` — réussi.
+- État restant : cette amélioration ciblée ne comble pas les écarts substantiels consignés aux reprises 63–66 : maquettes pas intégralement portées, lecture des fenêtres pas chronométrée/fondue sur l'image et cumul mesuré antérieurement de 868,383 s (sous la cible demandée). Je ne revendique pas la fin de tranche.
+- Pas de changement de moteur, sauvegarde ou texte joueur.

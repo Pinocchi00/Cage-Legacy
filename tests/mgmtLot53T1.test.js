@@ -151,6 +151,8 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
     assert.match(r.html,/class="so3-prochain"/);
     assert.match(r.html,/class="so3-salle"/);
     assert.match(r.ouverture,/title="Changer la vue avec V"/);
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    assert.match(css,/\.so3-vue:focus-visible\s*\{[^}]*outline:3px solid #F0B220/);
     assert.equal(r.selected,null);
   }finally{w.close();}
 });
