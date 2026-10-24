@@ -235,7 +235,7 @@ function mgmtSoFinHtml(m,prog){
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>DANS<br>${esc(dans)} JOURS</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${esc(lieu==='LIEU À CHOISIR'?F.aChoisir:lieu)}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`
     :`<div class="mf-so-ph"><div class="mf-so-s">LA SUITE</div><div class="mf-so-h">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>${F.aposer}</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${F.aChoisir}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`;
-  return `<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>`+mgmtSoBandeHtml(prog,prog.length,-1);
+  return `<div class="so3-fin"><div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>${mgmtSoBandeHtml(prog,prog.length,-1)}</div>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){

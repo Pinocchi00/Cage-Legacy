@@ -141,3 +141,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Écarts de maquette : la carte résultat n'est pas encore à la disposition exacte de `UniSoireeFin`; l'écran de soirée reste principalement le cadre antérieur `mf-*`, avec le conteneur `so3-soiree`; la fin conserve la composition historique et seulement ses blocs d'annonces/argent ajoutés antérieurement. La lecture temps forts garde le saut accéléré déjà présent, sans contrôles fenêtre par fenêtre ni fondu dédié.
 - Cumul : le calcul est conservé selon ses éléments prescrits (durée reconstruite des combats complets, 45 s en temps forts, 5 s résultat et transitions); la mesure antérieure de 868,38 s reste sous la cible et n'a pas été maquillée en ajoutant une durée arbitraire.
 - Aucun changement du moteur de combat ou de sauvegarde. Aucun discours/personnage nouveau.
+
+### Reprise 20 — conteneur dédié de fin de soirée
+
+- Fait : encapsulation additive du bloc existant de fin de soirée dans `so3-fin`, avec flexibilité de hauteur et règles de style préfixées. Cela ne change pas le parcours et conserve le lendemain existant. Le test de primes vérifie aussi la présence de la règle CSS.
+- Fichiers modifiés : `mgmt-soiree-cadre.js` (conteneur de fin), `ui-cadre.css` (règles so3-fin), `index.html` (versions cache), `tests/mgmtLot53T1.test.js` (assertion de style), cette fiche.
+- Tests : les huit tests ciblés passent ; `node tools/verif-versions.js origin/main`, ESLint complet et `git diff --check` passent.
+- Non fait : portage des blocs aux valeurs complètes `UniSoiree`/`UniSoireeFin`, réglage/documentation de la vraie lecture fenêtre par fenêtre/fondu et test de passabilité, assertion du cumul 900–1200 s (le test mesure uniquement une valeur positive), test des empreintes historiques, exhaustivité de classes/échappements, inscription dans les listes agrégées `test` et `test:watch`. La fin conserve sa composition mf-*; `so3-fin` est uniquement un conteneur, pas un portage visuel complet.
+- Écart : cumul antérieur constaté à 868,38 s, inférieur à la cible; je n'ai pas faussé la formule prescrite. La branche comprenait déjà la carte résultat passable et la frise des temps forts, mais pas la lecture segmentée avec fondu annoncée par la maquette.
+- Test lent `mgmtReleveReduit.test.js` non relancé dans cette reprise. Aucun changement de sauvegarde, moteur de combat ou discours.

@@ -63,6 +63,7 @@ test('Monde lot 53 T1 — la fin annonce les primes présentes dans les relevés
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     assert.match(css,/\.so3-primes\s*\{/);
     assert.match(css,/\.so3-prime\s*\{/);
+    assert.match(css,/\.so3-fin\s*\{/);
   }finally{w.close();}
 });
 
