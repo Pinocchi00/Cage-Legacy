@@ -71,6 +71,12 @@ test('Monde lot 58 T1 — le rang améliore l’acceptation du choc sans déplac
   assert.equal(r.seed,true);
 });
 
+test('Monde lot 58 T1 — une victoire de choc est prise en compte par le classement des organisations',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const partenaire=mgmtOrgClassement(m).find(x=>x.id!=='split').id;const avant=mgmtOrgClassement(m).findIndex(x=>x.id===partenaire);m.orgs[partenaire].chocPrestige=100;const apres=mgmtOrgClassement(m).findIndex(x=>x.id===partenaire);return {avant,apres}})())`));
+  assert.ok(r.apres<r.avant);
+});
+
 test('Monde lot 58 T1 — le choc refuse un partenaire sans champion de la catégorie',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const own=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!own)return {hasChampion:false};const other=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]);if(!other)return {hasChampion:true,hasOther:false};m.orgs[other.id].roster=(m.orgs[other.id].roster||[]).filter(f=>f.div!==own.div);return {hasChampion:true,hasOther:true,proposed:mgmtChocProposer(m,other.id),received:!!mgmtChocProposition(m)}})())`));

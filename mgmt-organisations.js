@@ -115,7 +115,7 @@ function mgmtOrgClassement(m){
   const lignes=MGMT_ORGANISATIONS.map((o,index)=>{
     const niveaux=mgmtOrgNiveaux(m,o.id), r=rangs[o.id];
     if(!niveaux||!r) return null;
-    const total=['popularite','stade','notoriete','puissance'].reduce((s,k)=>s+r[k],0);
+    const total=['popularite','stade','notoriete','puissance'].reduce((s,k)=>s+r[k],0)-Math.max(0,Number.isSafeInteger(m.orgs&&m.orgs[o.id]&&m.orgs[o.id].chocPrestige)?m.orgs[o.id].chocPrestige:0);
     return {id:o.id,total,niveaux,rangs:r,index};
   }).filter(Boolean);
   lignes.sort((a,b)=>a.total-b.total||a.rangs.puissance-b.rangs.puissance||a.index-b.index);
