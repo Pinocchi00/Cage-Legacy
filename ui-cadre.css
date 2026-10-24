@@ -2127,6 +2127,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,100px) minmax(0,100px);column-gap:8px}
 .ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_NOM_SURPRISE_GRAND] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

@@ -18,6 +18,16 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 10 — échelle du nom principal et capture — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `569b50f8`. Les commits fonctionnels de la tranche sont déjà présents. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intacts.
+- `ui-cadre.css` : la capture précédente indiquait que le nom de la carte principale était revenu à 64 px après des règles successives. J’ai ajouté une règle finale explicite à 80 px, comme demandé dans la reprise; les autres cartes restent à 64 px. `index.html` bumpé avec `node tools/_bump.js ui-cadre.css`.
+- Captures 1920×1080 après modification : `lendemain` — chevauchements 0, textes sous 22 px 0, débordements aucun, `grosBlocs` 20 %, moyen 26,2 %. `lendemainSuite` — chevauchements 0, textes sous 22 px 0, `grosBlocs` 16,9 %, mais débordements persistants dans les mouvements (« Poids plume féminin », « 26ᵉ → 27ᵉ », « chez Split », « Elijah Sanders »). Les fichiers cmp sont régénérés sous `C:/Users/antho/AppData/Local/Temp/shots/`; le défaut de la suite n’est donc pas déclaré résolu.
+- Tests ciblés : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9), `mgmtLot54T1.test.js` (30/30), `mgmtSoireeShow.test.js` (18/18). `node_modules/.bin/eslint .` et `node tools/verif-versions.js origin/main` passent.
+- Écarts : l’objectif des gros blocs est à la limite (20 %) pour le lendemain; les quatre alertes de débordement de la suite demeurent malgré les règles de retour à la ligne existantes. Le guide capture a été lu; pas d’inspection visuelle manuelle des PNG revendiquée. Pas de changement de données, navigation, sauvegarde ou migration.
+- Fichiers de cette reprise : `ui-cadre.css` (taille du nom de la carte surprise), `index.html` (version de cache), cette fiche (mesure et écarts). Tests ajoutés : aucun.
+- Questions pour Anthony : aucune.
+
 ### Reprise 59 — correction du lendemain et contrôle des captures — 24/10/2026
 
 - État de départ : branche `fid-lendemain`, HEAD `a1285179`; aucun changement local de code de tranche. Les modifications déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
