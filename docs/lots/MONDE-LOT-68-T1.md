@@ -83,6 +83,16 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 36 du 24/10/2026
+
+- État initial revérifié : branche `fid-fiches`, HEAD `afa7ab34`. Pas de fichier de la tranche non committé ; les changements `.opencode/agents/*` et `opencode.json` sont restés hors périmètre.
+- Le contrôle de capture a été lancé. Résultats de cette reprise : fiche `{chevauchements:0,textesSous22px:0,debordent:[]}` ; recruteur `{0,0,[]}` ; retours `{0,0,[]}` ; semaine `{0,0,[]}`. Le lancement groupé s'est arrêté après la fiche ; les scènes suivantes ont ensuite été mesurées individuellement. Les comparatifs n'ont pas pu être ouverts avec l'outil d'image disponible ; leurs métriques de similarité ne sont pas prises pour une validation visuelle.
+- Contrôles supplémentaires demandés : accueil `{chevauchements:0,textesSous22px:1,debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{1,3,[]}` ; tonposte `{6,0,["IL ATTEND DE VOIR","« Je veux voir la suite."]}` ; bilan `{1,0,[]}`. Ces écrans sont explicitement hors périmètre (lots 64/67), donc aucun de leurs fichiers n'a été modifié.
+- Test renforcé dans `tests/mgmtFicheStats.test.js` (« Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des onglets ») : valide en plus le placement flex à droite et le compteur lisible à 22 px. Décision : « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (22/22 verts) ; `node tools/verif-versions.js origin/main` (aucun écart). ESLint ciblé ignore ce fichier de tests selon sa configuration. Aucun nouveau JS/CSS applicatif, donc pas de bump `?v=` ni de migration.
+- Relevé écran par écran : fiche, recruteur, retours et semaine satisfont le contrôle automatique de géométrie, mais les images comparatives n'ont pas été ouvertes et la fidélité visuelle globale n'est donc pas attestée. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records : aucun contrôle de scène disponible/établi. Accueil, actualités, tonposte et bilan : mesures ci-dessus, erreurs de contrôle documentées, laissées intactes car attribuées aux lots parallèles.
+- Écart majeur : le contrôle universel demandé pour les écrans de tranche et la comparaison visuelle ne sont pas atteints. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été exécuté. Aucune migration de sauvegarde.
+
 ### Reprise 11 du 24/10/2026
 
 - État initial : branche `fid-fiches`, les commits précédents sont conservés ; modifications `.opencode/agents/*` et `opencode.json` hors tranche laissées intactes.

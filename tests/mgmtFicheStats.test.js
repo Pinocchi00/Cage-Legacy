@@ -44,7 +44,11 @@ test('Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des o
   assert.equal(structure.row,true);assert.equal(structure.body,true);
   assert.equal(structure.follow,true);assert.equal(structure.count,true);
   assert.equal(structure.followInBody,false);assert.equal(structure.countInBody,false);
- });
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  assert.match(css,/\.mf-fi-onglets\{[^}]*display:flex;justify-content:space-between/);
+  assert.match(css,/\.mf-fi-onglets>\.mf-fiche-suivi\{position:static;transform:none;flex:none;margin-left:18px\}/);
+  assert.match(css,/\.mf-fb-suivi-count\{font-size:22px/);
+  });
 test('Monde lot 31 T4 — structure visuelle des panneaux, barres et échelles',()=>{
   const w=monde();open(w);const shape=JSON.parse(w.eval("JSON.stringify((()=>{const panels=[...document.querySelectorAll('.mf-fs-panel')],frames=[...document.querySelectorAll('.mf-fs-frame')],bars=[...document.querySelectorAll('.mf-fs-part')];return {panels:panels.length,frames:frames.length,layers:frames.map(x=>x.firstElementChild?.firstElementChild?.classList.contains('mf-fs-panel')?3:0),segments:bars.map(x=>x.querySelectorAll('.mf-fs-bar i').length),percent:bars.some(x=>x.querySelector('.mf-fs-bar').textContent.includes('%'))}})())"));
   assert.equal(shape.panels,3);assert.equal(shape.frames,3);assert.deepEqual(shape.layers,[3,3,3]);assert.deepEqual(shape.segments,[3,3]);assert.equal(shape.percent,false);
