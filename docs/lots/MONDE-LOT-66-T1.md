@@ -320,3 +320,9 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - CSS : levée du clipping `overflow:hidden` sur la ligne de mouvement et sa première cellule de la suite, sans masquer ni retirer de texte; version de cache montée par `node tools/_bump.js ui-cadre.css`.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7), `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint passe.
 - Capture non exécutée dans cette reprise : le guide temporaire est bloqué par la politique d'accès externe. Les quatre alertes de débordement précédemment relevées restent à confirmer après ce changement; aucune conformité visuelle nouvelle n'est revendiquée. Pas de migration ni de test ajouté.
+
+### Reprise 47 — vérification des commits présents — 24/10/2026
+
+- `git log --oneline -12` confirme que les modifications fonctionnelles sont déjà commités jusqu'à `ae10c6a3`; la branche est `fid-lendemain`. Aucun fichier de tranche non commité n'a été trouvé. Les changements locaux dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et laissés intacts.
+- Vérifications rejouées : `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node --test tests/mgmtLendemainDemo.test.js` (7/7), `node --test tests/mgmtLot48T1.test.js` (9/9), `node --test tests/mgmtLot54T1.test.js` (30/30), `node --test tests/mgmtSoireeShow.test.js` (18/18), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (OK).
+- La capture n'a pas été exécutée à cette reprise ; le guide sous le chemin temporaire demandé n'est pas disponible via les outils autorisés de cette session. Les dernières mesures consignées signalent encore quatre débordements dans `lendemainSuite` ; la case visuelle 4 reste donc non certifiée et `TOUT_EST_FINI` n'est pas revendiqué. Aucun nouveau changement de code, test, donnée ou sauvegarde n'a été effectué.
