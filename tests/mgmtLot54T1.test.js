@@ -121,3 +121,15 @@ test('Monde lot 54 T1 — le catalogue de l’après garde une formulation disti
     }
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — le cadre du lendemain intègre les trois moments et le récit',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`scr_mgmt_lendemain_cadre()`);
+    assert.match(html,/LES TROIS MOMENTS/);
+    assert.match(html,/ld3-moment/);
+    assert.match(html,/TOUS LES RÉSULTATS/);
+  }finally{w.close();}
+});

@@ -1867,4 +1867,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-figure:last-child{border-bottom:0}
 .ld3-figure b{font:600 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
 .ld3-figure span{font-size:22px;text-align:right}
+/* ==== [ANCRE: MONDE54_T1_RECIT_CADRE] — Monde lot 54 T1 ==== */
+.ld3-recit{display:flex;flex-direction:column;gap:10px;padding:12px;background:#0D0B0B;border:2px solid rgba(233,230,225,.38)}
+.ld3-recit-title{margin:0;font:800 30px/1 var(--mgmt-font-display);color:#E23A2B}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

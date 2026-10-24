@@ -63,8 +63,10 @@ function scr_mgmt_lendemain_cadre(){
       +`</div>`,'normal','mf-fin-p mf-ld-pub')
     :mfPanneau(`<div class="mf-fin-t">LE PUBLIC</div><div class="mf-ld-crit"><div class="mf-ld-c"><span>Rien à dire de cette soirée.</span></div></div>`,'normal','mf-fin-p mf-ld-pub');
   const MED=typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):'', PAT=typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'';
-  const change=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.changes)}">CE QUI CHANGE</div><div class="mf-ld-change mf-ancien">${MED}${mgmtLendemainConstatsHtml(m)||'<div class="mf-eff-aucun">Rien à signaler.</div>'}${PAT}</div>`,'normal','mf-fin-p mf-ld-ch');
-  const resultats=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.results)}">LES RÉSULTATS</div><div class="mf-ld-res mf-ancien mgmt-ld-results">${mgmtLendemainResultatsHtml(m)}<button type="button" class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button></div>`,'normal','mf-fin-p mf-ld-rp');
+   const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
+   const recit=`<section class="ld3-recit"><h3 class="ld3-recit-title">LES TROIS MOMENTS</h3>${moments}${mgmtLendemainPrimesHtml(m)}${mgmtLendemainDiscoursHtml(m)}${mgmtLendemainAttentionHtml(m)}${mgmtLendemainPresseHtml(m)}${mgmtLendemainChiffresHtml(m)}</section>`;
+   const change=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.changes)}">CE QUI CHANGE</div><div class="mf-ld-change mf-ancien">${recit}${MED}${mgmtLendemainConstatsHtml(m)||'<div class="mf-eff-aucun">Rien à signaler.</div>'}${PAT}</div>`,'normal','mf-fin-p mf-ld-ch');
+   const resultats=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.results)}">TOUS LES RÉSULTATS</div><div class="mf-ld-res mf-ancien mgmt-ld-results">${mgmtLendemainResultatsHtml(m)}<button type="button" class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button></div>`,'normal','mf-fin-p mf-ld-rp');
   const grille=c
     ?`<div class="mf-fin-grille mf-ld-grille">${mgmtLendemainCaseHtml('LA SALLE',c.salle.v,c.salle.l)}${mgmtLendemainCaseHtml('L’ARGENT',c.argent.v,c.argent.l)}${mgmtLendemainCaseHtml('LA POPULARITÉ',c.pop.v,c.pop.l)}${pub}${change}${resultats}</div>`
     :`<div class="mf-fin-grille mf-ld-grille">${pub}${change}${resultats}</div>`;
