@@ -14,6 +14,15 @@ test('Monde lot 63 T1 — chaque famille de l’après a trois formulations spé
   }finally{w.close();}
 });
 
+test('Monde lot 63 T1 — le catalogue conserve les faits déclencheurs propres à chaque famille',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=w.eval(`(()=>{const fn=mgmtLendemainApres.toString();return {families:MGMT_APRES_CATALOGUE.map(x=>x.famille),checks:['discours','trait_gagne','touched','demande','interet-organisation','espoirs','title','spectateurs','prime','retraite_annoncee'].map(x=>fn.includes(x))}})()`);
+    assert.equal(r.families.length,10);
+    assert.ok(r.checks.every(Boolean));
+  }finally{w.close();}
+});
+
 test('Monde lot 63 T1 — le calcul reste pur, borné et déterministe sur une vraie soirée',()=>{
   const w=newGameWindow({runMain:true});
   try{
