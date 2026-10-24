@@ -21,4 +21,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
  - Vérifications reprise : `node --test tests/mgmtLot56T1.test.js` (2/2), `node --test tests/mgmtPasse.test.js` (13/13), `node --test tests/mgmtReleveReduit.test.js` (6/6, partie neuve 1 908 745 octets sous le plafond de 1,9 Mo) et `node tools/verif-versions.js origin/main` passent. Le contrôle lint mentionné dans le compte rendu précédent était vert.
 - Migration de sauvegarde : aucune (aucune clé nouvelle persistée).
  - Écarts à la fiche : les effets déclarés par les paliers ne sont pas raccordés aux systèmes salles/diffuseur/recruteur/agents ; le franchissement n’est pas annoncé une fois dans l’Accueil et le fil de presse ; le détail visuel ne reprend pas les barres et valeurs exactes de la maquette. Les tests du chemin de progression réel, annonces, effets bornés, empreintes anciennes, validation/réparation de sauvegarde et plafond de partie neuve ne sont pas écrits. Le fichier n’a pas été ajouté aux listes exécutées par `test` et `test:watch` (seuls des scripts dédiés ont été ajoutés). La reprise a vérifié l’état existant sans combler ces écarts.
-- Questions pour Anthony : aucune question de spécification n’a été tranchée par supposition ; continuer le raccordement des effets existants et des annonces avant de considérer la tranche livrée.
+ - Questions pour Anthony : aucune question de spécification n’a été tranchée par supposition ; continuer le raccordement des effets existants et des annonces avant de considérer la tranche livrée.
+
+### Reprise du 24/10/2026
+
+- Branche confirmée : `p11-croissance`. L’historique contient trois commits préalables marqués inachevés (`17cc481`, `59d510c`, `c0ba561`). Aucun fichier de la tranche n’était modifié dans l’arbre au début de cette reprise ; les seuls changements préexistants concernent `.opencode/agents/*` et `opencode.json` et ont été laissés intacts.
+- Vérifications relancées : `node --test tests/mgmtLot56T1.test.js` (2/2) et `node --test tests/mgmtPasse.test.js` (13/13) passent.
+- Cette reprise n’a pas complété le raccordement aux systèmes existants ni les tests requis. En particulier, effets des paliers, annonces uniques Accueil/presse, fidélité visuelle complète à la maquette, empreintes de sauvegarde ancienne, validation/réparation et parcours réel de progression restent à faire. La tranche demeure **inachevée** et ne doit pas être fusionnée comme terminée.
+- Aucun nouveau commit n’a été créé pendant cette reprise : aucun changement fonctionnel de tranche n’a été réalisé. Aucun `TOUT_EST_FINI`.
