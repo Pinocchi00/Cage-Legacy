@@ -264,14 +264,17 @@ function mgmtSoFinHtml(m,prog){
   const rempli=Math.round(mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part*100);
   const org=mgmtOrgNom(m), finLieu=mgmtSoireeSalle(m,0).nom;
   const primes=prog.map(p=>({p,t:m.hist[p.h]})).filter(x=>x.t&&(x.t.pr==='cs'||x.t.pr==='pf'));
-  const cartes=primes.map(({p,t})=>{
+  const cartes=primes.slice().sort((a,b)=>(a.t.pr==='cs'?-1:1)-(b.t.pr==='cs'?-1:1)).map(({p,t})=>{
     const detail=mgmtResultatDetail(m,p.h);
     const noms=t.pr==='cs'?`${p.a.last} · ${p.b.last}`:(detail&&detail.gagnant?(detail.gagnant.last||detail.gagnant.name):p.a.last);
-     return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span><b>${esc(mgmtEuros(Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0))}</b></article>`;
+      const prime=Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0;
+      return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><b>${esc(mgmtEuros(prime))} CHACUN</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
   });
   const finance=m.lastEvent.finance||{};
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
-  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b></div><div><span>L'AMBIANCE À LA FIN</span><b>${'● '.repeat(Math.max(1,Math.min(5,Math.round(rempli/20))) )}</b></div><div><span>RECETTE</span><b>${esc(mgmtEuros(Number(finance.recette)||0))}</b></div><div><span>PRIMES PAYÉES</span><b>${esc(mgmtEuros(Number(finance.primes)||0))}</b></div></section></section>`;
+  const ambiance=Math.max(0,Math.min(10,Math.round(rempli/10)));
+  const recette=Number(finance.recette)||0;
+  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div class="so3-fin-salle"><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b><small>sur ${esc(finance.capacite||0)} places · record à ${esc(finance.record||'—')}</small></div><div class="so3-fin-ambiance"><span>L'AMBIANCE À LA FIN</span><b>${Array.from({length:10},(_,i)=>`<i class="${i<ambiance?'on':''}"></i>`).join('')}</b><small>${ambiance>=7?'Une grande soirée.':'La soirée est terminée.'}</small></div><div class="so3-fin-recette"><span>LA RECETTE</span><b>${recette<0?'−':'+'} ${esc(mgmtEuros(Math.abs(recette)))}</b><small>PRIMES PAYÉES · ${esc(mgmtEuros(Number(finance.primes)||0))}</small></div></section></section>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
