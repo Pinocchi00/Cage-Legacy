@@ -199,3 +199,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Tentative de test bout en bout acceptation → résultat du choc dans `tests/mgmtLot69T1.test.js` : elle a échoué à construire un scénario fiable avec champions adverses de même division pour la graine choisie, comme le test lot 58 conditionnel le signale déjà. Le test expérimental a été retiré ; aucun scénario faux ou sauté n'est présenté comme preuve. Le chemin de soirée est couvert par le test existant de `tests/mgmtLot58T1.test.js`, mais pas ici par un fixture fiable.
 - Vérification ciblée finale et audits avant commit à effectuer. Pas de capture ni migration. La divergence « trois affiches / 2 sur 3 » de la planche demeure, ainsi que les comparaisons/captures, le parcours complet contrat/rechargement strict et les mesures visuelles.
 - Fichier modifié dans cette reprise : cette fiche (compte rendu de la tentative et de sa limite). Aucun écart de version cache.
+
+### Reprise 35
+- État de départ : branche `fid-choc`, HEAD `ddc42057`; aucun fichier de tranche en attente. Les changements utilisateur sous `.opencode/agents/` et `opencode.json` sont conservés et exclus.
+- Vérifications exécutées : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
+- Aucun changement fonctionnel ajouté : le travail de reprise précédent est déjà commité et le test ciblé confirme son périmètre actuel. Pas de migration de sauvegarde.
+- Les critères restant à prouver restent ceux des reprises précédentes : choc 3 contre 3 avec résultat par le parcours normal, mesures post-correction et scènes dédiées/captures, et le parcours complet depuis la fin du contrat avec rechargement strict. Rien dans cette reprise ne permet de les déclarer accomplis. Aucun `TOUT_EST_FINI` revendiqué.
