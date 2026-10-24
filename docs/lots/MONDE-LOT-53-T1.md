@@ -317,7 +317,7 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 - Fait : les lignes de la carte d'ouverture séparent maintenant l'information de combat (libellé et division) des noms des combattants. La grille CSS reprend les quatre colonnes de la maquette (54 px, 190 px, espace flexible, contrôles), au lieu d'entasser les noms dans la colonne d'information.
 - Fichiers modifiés : `mgmt-soiree-cadre.js` (structure des lignes), `ui-cadre.css` (grille et règles des deux classes `so3-*`), `index.html` (versions cache générées par `_bump.js`), présente fiche.
-- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
+- Test ajusté : « Monde lot 53 T1 — le panneau de combat rend les trois vues réglables » vérifie aussi l'aide clavier sur la carte d'ouverture. Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Non fait, donc tranche toujours incomplète : le portage intégral des maquettes, la lecture temps forts temporisée/fondue aux fenêtres, la validation de la cible 900–1200 s, et les autres écarts détaillés dans la reprise 42. Le test lent et les vérifications complètes de fin de tranche restent à exécuter. Pas de modification du moteur ni de sauvegarde.
 
 ### Reprise 44 — typographie des lignes de la carte

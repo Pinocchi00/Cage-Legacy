@@ -141,11 +141,12 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
   try{
     w.eval(`setSeed(5304);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
     jouerSoirees(w,1);
-    const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);const html=mgmtSoEntreHtml(G.mgmt,p,0,0);return {html,selected:MGMT_SOIREE_UI.focus};})()`);
+    const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);const html=mgmtSoEntreHtml(G.mgmt,p,0,0),ouverture=mgmtSoOuvertureHtml(G.mgmt,p);return {html,ouverture,selected:MGMT_SOIREE_UI.focus};})()`);
     for(const label of ['COMPLET','TEMPS FORTS','RÉSULTAT']) assert.ok(r.html.includes(label),label);
     assert.match(r.html,/LE PROCHAIN|CE SOIR/);
     assert.match(r.html,/class="so3-prochain"/);
     assert.match(r.html,/class="so3-salle"/);
+    assert.match(r.ouverture,/title="Changer la vue avec V"/);
     assert.equal(r.selected,null);
   }finally{w.close();}
 });
