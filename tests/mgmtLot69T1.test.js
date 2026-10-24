@@ -67,6 +67,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       const renduProposition=w.eval(`SCREENS.mgmt_choc()`);
       assert.ok(renduProposition.length>0,'une proposition valide issue de mgmtChocProposer ne doit pas laisser l’écran choc vide');
       assert.match(renduProposition,/ch3-screen/);
+      w.eval(`CL.go('mgmt_choc')`);
+      const pageChoc=w.eval(`document.getElementById('app').innerHTML`);
+      assert.match(pageChoc,/CHAMPIONNE CONTRE CHAMPIONNE/,'la navigation réelle vers mgmt_choc doit monter le contenu de la proposition dans la page');
       w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};`);
       w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);

@@ -504,3 +504,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `node tools/verif-versions.js origin/main` passe (20 fichiers examinés) ; `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde ni migration.
 - Fichiers de cette reprise : `mgmt-ecran-poste.js` (validation de la cohérence des paires), `index.html` (version cache), `tests/mgmtLot69T1.test.js` (régression), cette fiche (compte rendu). `sw.js` modifié par l'outil de capture a été restauré depuis `origin/main`.
 - Écarts : la mesure des gros blocs du choc dépasse toujours la cible ; aucune scène/capture d'arrivée ou bilan post-correction n'a été produite. Les autres cases et vérifications sont documentées dans les reprises précédentes ; aucune conformité visuelle globale n'est revendiquée.
+
+### Reprise 75 — reproduction de la navigation choc
+- La scène `choc` de l'outil externe a été relancée sur le dépôt : le contrôle signale 0 chevauchement, 0 texte sous 22 px, 0 débordement et `grosBlocs=36.9%` (objectif ≤20 % non atteint). Cette variation de mesure par rapport aux comptes rendus précédents n'est pas interprétée comme une amélioration.
+- `tests/mgmtLot69T1.test.js` vérifie maintenant après proposition réelle `mgmtChocProposer` que `CL.go('mgmt_choc')` injecte bien le contenu de proposition dans `#app`, en plus de l'appel direct au renderer. Le test ciblé passe 4/4.
+- Capture `discours` : 0 chevauchement, 0 texte sous 22 px, 0 débordement, `grosBlocs=18.1%`. Pas de nouvelle capture d'arrivée ou du bilan.
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (régression navigation/DOM du choc) et cette fiche (mesures et compte rendu). Aucun changement sauvegarde, JS/CSS ou version cache.
+- Écarts : malgré le rendu de contenu confirmé par le chemin `CL.go`, le seuil de gros blocs du choc demeure dépassé ; les captures dédiée arrivée/bilan et le parcours comparatif visuel ne sont pas achevés. Le test parcours existant valide bien bilan favorable, offre acceptée, sérialisation/rechargement identique, soirée et lendemain. Pas de `TOUT_EST_FINI` revendiqué.
