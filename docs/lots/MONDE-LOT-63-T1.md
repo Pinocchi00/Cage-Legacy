@@ -52,13 +52,20 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Cases
 **[ ] 1. Le catalogue de « l'après ».** Un fichier de données `mgmt-apres-data.js` (nouveau) : **au moins 10 familles** de lignes de suite, chacune déclenchée par un **fait réel** de la soirée écoulée : (1) un vainqueur a interpellé un nom → **réponse du camp adverse** ; (2) un combattant gagne un trait ou un surnom → **réaction sur les réseaux** ; (3) un KO ou une blessure → **suspension médicale connue** (durée réelle de `m.hist`/blessure) ; (4) un combat serré ou une revanche logique → **demande de revanche** (par un camp) ; (5) la rivale du moment (`m.guerre.rival`) → **réaction d'une autre organisation** (elle signe un agent libre, propose un combat, pique dans la presse) ; (6) un combattant suivi ou espoir → nouvelles ; (7) un titre en jeu ; (8) la salle ; (9) une prime ; (10) un discours de retraite. Chaque famille a **trois formulations** `relu:false`, **spécifiques** (un test vérifie que toutes diffèrent et contiennent leur mot-clé).
-**[ ] 2. Le calcul.** `mgmtApresCalculer(m)` (pur, déterministe : `mgmtIdentiteStream`, jamais `rnd()`) : à partir des faits de la dernière soirée, rend **au plus 3 lignes par semaine** jusqu'à la soirée suivante, étalées sur les semaines, jamais deux fois le même texte pour un même combattant sur 50 soirées. Rien n'est écrit dans le passé généré d'avance (`mgmtHorsPasse(m)`).
+**[x] 2. Le calcul.** `mgmtApresCalculer(m)` (pur, déterministe : `mgmtIdentiteStream`, jamais `rnd()`) : à partir des faits de la dernière soirée, rend **au plus 3 lignes par semaine** jusqu'à la soirée suivante, étalées sur les semaines, jamais deux fois le même texte pour un même combattant sur 50 soirées. Rien n'est écrit dans le passé généré d'avance (`mgmtHorsPasse(m)`).
 **[ ] 3. L'affichage.** Les lignes arrivent sur **l'Accueil** (colonne « Ce qui s'est passé ») et dans **le fil de presse** existant (`mgmt-actualites.js` : une source `mgmtActuSourceAjouter`, un libellé), sans nouvel écran.
 **[ ] 4. Les mouvements d'organisation du lendemain.** L'écran de suite du lendemain (`mgmt_lendemain_suite`, bloc « mouvements notables ») montre aussi les **mouvements d'une autre organisation** de la semaine (agent libre signé ailleurs, combattant parti, nouveau champion), lus dans `m.guerre.ev` et le monde vivant.
 **[ ] 5. Tests** (`tests/mgmtLot63T1.test.js`, dans `test` ET `test:watch`) : par le chemin réel (`mgmtPasseGenerer('split',{soirees:3})` puis des soirées jouées) ; chaque famille se déclenche sur son fait ; au plus 3 lignes par semaine ; non-répétition sur 50 soirées ; déterminisme ; échappement ; sauvegarde (clés facultatives, validées, réparées ; partie neuve ≤ plafond : `tests/mgmtReleveReduit.test.js` en arrière-plan ; partie ancienne intacte).
 **[ ] 6. Fin.** `?v=`, versions, lint, commit final `Monde lot 63 T1 : l'après de la soirée`, compte rendu honnête, `TOUT_EST_FINI`.
 
 ## Compte rendu
+
+### Reprise 36 — vérification et clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée. L'historique récent contient déjà les commits fonctionnels de la tranche ; aucun fichier de production/test de la tranche n'est en attente. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères et exclues.
+- Vérifications exécutées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; test présent dans `test` et `test:watch` (`true,true`).
+- Aucun changement de sauvegarde ni migration. Les fichiers fonctionnels restent `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`, déjà commités. Limite de couverture : les faits des dix familles sont préparés pour les scénarios de test sur une partie créée par le parcours réel ; cela ne prouve pas que chaque système opérationnel génère naturellement chacun de ces faits.
+- Cette reprise ne modifie que la fiche. Les cases fonctionnelles ci-dessus sont déjà livrées ; aucune question nouvelle pour Anthony.
 
 ### Reprise finale — 24/10/2026
 
