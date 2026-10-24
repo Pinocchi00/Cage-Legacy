@@ -26,6 +26,12 @@ Branche : `fid-soiree` (la branche courante de ce dossier ; commits ICI ; le sup
 - Aucun changement code/test/capture n'a été fait cette reprise. Dernières mesures consignées avant : fin 36.4/19.3, en cours 29.3/20.1, ouverture 34.2/28.6 (`moyen`/`grosBlocs`). La cible moyen ≤20 n'est pas atteinte ; cours et ouverture dépassent la limite grosBlocs. Le temps forts n'a pas de mesure de comparaison attestée. Les captures fraîches n'ont pas été relancées et les cmp n'ont pas été ouverts cette reprise.
 - Migration : aucune. Écart : fidélité pixel, capture UniTempsForts et objectifs métriques restent non validés ; aucun `TOUT_EST_FIN` revendiqué.
 
+## Compte rendu — reprise 66
+
+- Vérifié `git log --oneline -12`, `git status` et la branche : `fid-soiree`, HEAD `c95ded07`. Aucun fichier fonctionnel/test de tranche n'était non commité ; les modifications préexistantes `.opencode/*`, `opencode.json` et `sw.js` sont hors périmètre et restent exclues.
+- Relu `shoot/LISEZMOI.txt` puis lancé les captures isolément à 1920×1080. `soireeFin` : moyen 36.6, grosBlocs 19.4 ; `soiree` : 29.3 / 20.1 ; `soireeOuverture` : 34.2 / 28.6. Les trois contrôles automatiques rapportent chevauchements=0, textesSous22px=0, debordent=[]. Par rapport au relevé antérieur de fin 36.4 / 19.3, le moyen s'est légèrement dégradé et grosBlocs a augmenté de 0.1 ; les objectifs moyen≤20 et grosBlocs≤20 pour la soirée en cours/ouverture restent manqués. Je n'ai pas pu ouvrir le PNG cmp avec le lecteur disponible, donc ne revendique pas d'inspection visuelle directe.
+- `node --test tests/mgmtLot53T1.test.js` : 24/24. Aucun changement de production n'a été fait car les écarts signalés par les captures ne donnent pas de cible localisable sans inspection de l'image, et je n'ai pas fabriqué de correction spéculative. Pas de migration. La capture dédiée UniTempsForts reste à produire ; conformité pixel/score moyen non validés. Aucun `TOUT_EST_FIN` revendiqué.
+
 Règles communes : ne touche ni au moteur de combat (`simulateFight` et ses fichiers), ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
 ## Compte rendu
