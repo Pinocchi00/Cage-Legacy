@@ -300,3 +300,15 @@ test('Monde lot 57 T1 — une identité de rivale absente ne fait pas planter l�
     assert.doesNotMatch(html,/undefined|null/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — la clôture annuelle mémorise le rang et reste idempotente',()=>{
+  const w=partie();
+  try{
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const a=mgmtGuerreFinAnnee(m,1),rang=m.guerre.rangFinal,second=mgmtGuerreFinAnnee(m,1);return JSON.stringify({a,second,rang,annee:m.guerre.anneeTraitee,valid:validateMgmt(m)});})()`));
+    assert.equal(r.a.applique,true);
+    assert.equal(r.second.applique,false);
+    assert.equal(r.a.rang,r.rang);
+    assert.equal(r.annee,1);
+    assert.equal(r.valid,true);
+  }finally{w.close();}
+});

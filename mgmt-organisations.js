@@ -151,6 +151,25 @@ function mgmtGuerreClassement(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: P10_T4_GUERRE_FIN_ANNEE] — Monde lot 57 T1 ==== */
+/** Clôture explicite d'une saison : mémorise le rang et applique le seul effet
+ *  dont la porte métier existe déjà (confiance du patron). L'appel est idempotent
+ *  par saison; les autres paliers restent aux mécaniques qui les possèdent. */
+function mgmtGuerreFinAnnee(m,annee){
+  if(!m||!Number.isSafeInteger(annee)||annee<1||!m.mondeVivant) return null;
+  const classement=mgmtGuerreClassement(m),split=classement.find(x=>x.estSplit);
+  if(!split) return null;
+  if(!m.guerre) m.guerre={ev:[],rival:null,depuis:m.cycle||0};
+  if(m.guerre.anneeTraitee===annee) return {rang:split.rang,applique:false};
+  const rangPrecedent=m.guerre.rangFinal;
+  m.guerre.classementPrecedent=classement.map(x=>x.id);
+  m.guerre.rangFinal=split.rang;
+  m.guerre.anneeTraitee=annee;
+  if(m.poste&&Number.isInteger(m.poste.conf)&&Number.isInteger(rangPrecedent)&&split.rang<rangPrecedent) m.poste.conf=Math.min(4,m.poste.conf+1);
+  return {rang:split.rang,applique:true};
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_CORR0810_LOT12_ATOUTS] — Corrections du 08/10/2026, lot 12 (D6) : chaque ligne de l'écran Nouvelle partie correspond à un effet que le joueur constate.
    Les lignes ne sont plus écrites à la main : elles se DÉDUISENT du profil, réglage par réglage, et seuls les réglages que le jeu lit existent
    (MGMT_ORG_REGLAGES_LUS — un test échoue si un profil porte un réglage hors de cette liste, ou si une ligne n'a pas de règle). Plus de promesse sans effet.

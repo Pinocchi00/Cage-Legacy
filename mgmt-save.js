@@ -486,13 +486,14 @@ function validateMgmt(raw){
      à une partie qui ne l'a pas. Tolérée absente, stricte si présente. */
   if(raw.guerre!==undefined){
     if(!raw.guerre||typeof raw.guerre!=='object'||Array.isArray(raw.guerre)) return false;
-    if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal'].includes(k))) return false;
+    if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal','anneeTraitee'].includes(k))) return false;
     if(raw.guerre.rival!==null&&(typeof raw.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===raw.guerre.rival))) return false;
     if(!Number.isSafeInteger(raw.guerre.depuis)||raw.guerre.depuis<0) return false;
     if(!Array.isArray(raw.guerre.ev)) return false;
     if(raw.guerre.ev.length>40) return false;
     if(raw.guerre.classementPrecedent!==undefined&&(!Array.isArray(raw.guerre.classementPrecedent)||raw.guerre.classementPrecedent.length!==MGMT_ORGANISATIONS.length||raw.guerre.classementPrecedent.some(id=>typeof id!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===id))||new Set(raw.guerre.classementPrecedent).size!==MGMT_ORGANISATIONS.length)) return false;
     if(raw.guerre.rangFinal!==undefined&&(!Number.isSafeInteger(raw.guerre.rangFinal)||raw.guerre.rangFinal<1||raw.guerre.rangFinal>MGMT_ORGANISATIONS.length)) return false;
+    if(raw.guerre.anneeTraitee!==undefined&&(!Number.isSafeInteger(raw.guerre.anneeTraitee)||raw.guerre.anneeTraitee<1)) return false;
     for(const ev of raw.guerre.ev){
       if(!ev||typeof ev!=='object'||Array.isArray(ev)) return false;
       if(typeof ev.o!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===ev.o)) return false;
@@ -835,12 +836,13 @@ function mgmtRepair(m){
      Si présente et malformée, on la supprime (jamais de plantage au chargement). */
   if(m.guerre!==undefined){
     if(!m.guerre||typeof m.guerre!=='object'||Array.isArray(m.guerre)
-       ||Object.keys(m.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal'].includes(k))
+        ||Object.keys(m.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal','anneeTraitee'].includes(k))
       ||m.guerre.rival!==null&&(typeof m.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===m.guerre.rival))
       ||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<0
        ||!Array.isArray(m.guerre.ev)
        ||m.guerre.classementPrecedent!==undefined&&(!Array.isArray(m.guerre.classementPrecedent)||m.guerre.classementPrecedent.length!==MGMT_ORGANISATIONS.length||m.guerre.classementPrecedent.some(id=>typeof id!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===id))||new Set(m.guerre.classementPrecedent).size!==MGMT_ORGANISATIONS.length)
-       ||m.guerre.rangFinal!==undefined&&(!Number.isSafeInteger(m.guerre.rangFinal)||m.guerre.rangFinal<1||m.guerre.rangFinal>MGMT_ORGANISATIONS.length)
+        ||m.guerre.rangFinal!==undefined&&(!Number.isSafeInteger(m.guerre.rangFinal)||m.guerre.rangFinal<1||m.guerre.rangFinal>MGMT_ORGANISATIONS.length)
+       ||m.guerre.anneeTraitee!==undefined&&(!Number.isSafeInteger(m.guerre.anneeTraitee)||m.guerre.anneeTraitee<1)
       ||m.guerre.ev.some(ev=>!ev||typeof ev!=='object'||Array.isArray(ev)
         ||typeof ev.o!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===ev.o)
         ||typeof ev.t!=='string'||!['pris','agent','meme-soir','parti','voisin','pique'].includes(ev.t)
