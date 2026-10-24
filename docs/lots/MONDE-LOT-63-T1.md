@@ -14,6 +14,10 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise 3 : commits `36448de` et `e705d1c` présents ; modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` étrangères à la tranche, non touchées.
+- Vérification de reprise : `node --test tests/mgmtLot63T1.test.js` passe (3/3), `node tools/verif-versions.js origin/main` sans écart, ESLint ciblé sans erreur. La vérification des scripts confirme que `mgmtLot63T1` manque encore des listes agrégées (`false`, `false`).
+- Écarts subsistants explicitement hérités des reprises précédentes : les dix familles cataloguées ne sont pas toutes sélectionnées sur des faits réels, le calcul délègue à l'ancien moteur de huit familles au lieu d'exploiter le catalogue complet, aucun parcours de 50 soirées testées ni preuve d'échappement/sauvegarde n'est ajouté, et l'agrégation du nouveau test dans `test` / `test:watch` manque. Malgré les commandes dédiées existantes, la tranche n'atteint donc pas tous ses critères de fin.
+
 - Reprise depuis les commits `e705d1c` et `8c04a2a` : les modifications locales préexistantes de `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et restent non incluses.
 - `mgmt-ecran-lendemain.js` : la suite ajoute les événements `agent`, `pris`, `parti` et `champion` des organisations rivales enregistrés cette semaine dans `m.guerre.ev`, avec organisation et combattant échappés. `index.html` : version cache montée.
 - `tests/mgmtLot63T1.test.js` : nouveau test « Monde lot 63 T1 — la suite du lendemain montre les mouvements des autres organisations ». Les trois tests ciblés passent.
