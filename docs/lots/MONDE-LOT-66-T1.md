@@ -18,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise — capitales des trois moments — 24/10/2026
+
+- Branche `fid-lendemain` confirmée ; le code fonctionnel de la tranche était déjà commité. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intacts.
+- `ui-cadre.css` : les noms des trois cartes imposent maintenant la police d’affichage condensée en graisse 800 et les capitales comme sur `UniLendemain`; `index.html` versionné avec `_bump.js`.
+- Test `node --test tests/mgmtEcranLendemain.test.js` : 7/7 verts. Capture `lendemain` à 1920×1080 : contrôle détecte 1 chevauchement (méthode contre le titre « LES CHIFFRES »), zéro texte sous 22 px, zéro débordement, gros blocs 21,3 % (objectif ≤20 % non atteint). `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, quatre débordements de libellés de mouvements, gros blocs 17,1 %.
+- Écart : la typographie est renforcée, mais la mesure de capture montre que la conformité visuelle finale n’est pas atteinte; aucune correction d’échelle supplémentaire ou inspection directe d’image n’est revendiquée. Aucun changement de données, mécanique, sauvegarde ou migration.
+- Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ### Reprise 4 — contrôle visuel et dernière correction — 24/10/2026
 
 - État initial vérifié : branche `fid-lendemain`, HEAD `962decfb`; code déjà livré et seul le CSS de la tranche retouché ici. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et restent intacts.

@@ -2167,6 +2167,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-moments{height:285px;min-height:285px}
 .ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;overflow-wrap:anywhere}
 .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+/* ==== [ANCRE: MONDE66_T1_NOMS_MOMENTS_CAPITALES] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-names{font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
+/* ==== [FIN ANCRE] ==== */
 .gu3-table{grid-column:1;grid-row:2;min-height:0;overflow:auto}
 .gu3-rivale{grid-column:2;grid-row:2;min-height:0;box-sizing:border-box}
 .gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(180px,1fr) 120px 120px 130px 120px 90px;gap:12px;padding:0 16px}
