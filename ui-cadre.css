@@ -2091,6 +2091,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-entete{font-size:22px;white-space:nowrap}
 .gu3-ligne>div{overflow:hidden}
 .gu3-ligne strong{overflow:hidden;text-overflow:ellipsis}
+.gu3-ligne strong{white-space:normal;overflow-wrap:anywhere;text-overflow:clip;line-height:1.02}
 .gu3-ligne>span{text-align:right;white-space:nowrap}
 .gu3-ligne .gu3-evolution{text-align:center}
 .gu3-rivale .gu3-mouvement{max-height:none;overflow:visible;white-space:normal;overflow-wrap:anywhere}
