@@ -88,3 +88,7 @@ function mgmtRecruteurProfilDisponible(m,idProfil){
   if(!profil)return true;
   return !!profil&&!m.roster?.some(f=>f.id===idProfil)&&!m.exterieur?.some(f=>f.id===idProfil);
 }
+/* ==== [ANCRE: P5_T4_ETAT_PROFIL_RECRUTEUR] — Monde lot 60 T1 ==== */
+function mgmtRecruteurProfilSuivi(m,idProfil){
+  return !!(m&&typeof idProfil==='string'&&Array.isArray(m.suivis)&&m.suivis.includes(idProfil));
+}

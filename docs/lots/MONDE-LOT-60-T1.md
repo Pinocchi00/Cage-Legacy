@@ -13,10 +13,12 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
-- Modifié : `mgmt-recruteur.js` prépare désormais le profil dans le marché extérieur et ouvre l'écran Contrats existant ; aucune signature n'est faite dans cette porte. `index.html` porte la version du script. `tests/mgmtLot42T1.test.js` adapte le test antérieur de signature directe (décision du brief du 22/10, P5 T4 : Contrats est la porte unique).
-- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts après l'adaptation citée.
-- Cases non terminées : intégrer proprement le bloc d'actions et l'état de caisse du retour (maquette), assurer suivi, implémenter l'approche rivale et sa ligne d'actualité, les délais, les tests prescrits `tests/mgmtLot60T1.test.js` et l'inscription de ce test dans `test`/`test:watch`. La signature finale par l'écran Contrats n'a pas été vérifiée.
-- Écart / vérifications : aucune migration de sauvegarde. Le test prescrit n'existe pas encore ; audit versions, lint et contrôle complet non réalisés. État partiel commité sous `aa059c7`, sans `sw.js`.
+- Modifié dans les commits antérieurs : `mgmt-recruteur.js` prépare le profil sur le marché et ouvre la porte Contrats existante, sans signature directe. `index.html` porte la version du script. Le test antérieur de signature directe a été adapté conformément à la décision du brief du 22/10, P5 T4 : Contrats est la porte unique.
+- Modifié dans cette reprise : ajout de `mgmtRecruteurProfilSuivi` comme requête d'état, sans clé de sauvegarde nouvelle. Version du script mise à jour dans `index.html`.
+- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts.
+- Cases non terminées : le test exigé `tests/mgmtLot60T1.test.js` n'est pas créé ni inscrit dans `test`/`test:watch`. L'approche rivale, son délai de 14/28 jours et sa ligne d'actualité ne sont pas implémentés. La vérification complète de l'écran Contrats et les assertions demandées (maquette/style, échappement, sauvegarde et 200 retours) manquent.
+- Écart / vérifications : aucune migration ni clé de sauvegarde ajoutée. L'écran actuel conserve la structure existante du retour ; aucun contrôle aux valeurs exactes de la planche n'a été réalisé. Audit versions et lint non réalisés dans cette reprise. Les modifications locales préexistantes de `.opencode/agents/*`, `opencode.json` et `tests/mgmtLot42T2.test.js` sont hors tranche et ne sont pas incluses.
+- Questions pour Anthony : aucune question ouverte ; le travail restant est une implémentation prescrite, pas une ambiguïté.
 - Questions pour Anthony : aucune question bloquante identifiée ; les cases restantes sont du travail d'implémentation.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
