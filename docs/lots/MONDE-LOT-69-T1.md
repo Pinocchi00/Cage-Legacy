@@ -106,3 +106,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Le test de tranche est déclenché par `pretest` et `pretest:watch`, et possède des scripts dédiés `test:lot69t1` et `test:watch:lot69t1`. Il n'est toujours pas ajouté littéralement aux longues commandes `test` et `test:watch`.
 - Cases restant non satisfaites : parcours fin de contrat/bilan et rechargement strict identique, lendemain après le parcours complet, trois affrontements choc et leur programmation, comparaisons/captures des écrans et mesures visuelles. Les anciennes limites de modèle choc et d'accès à l'outil de capture restent documentées ci-dessus ; aucune donnée métier ni preuve d'image n'est inventée.
 - Aucun fichier fonctionnel modifié dans cette reprise, pas de migration. Les modifications utilisateur hors tranche ne sont pas incluses. Cette reprise ne satisfait pas toutes les cases et ne revendique pas `TOUT_EST_FINI`.
+
+### Reprise 22
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` vérifie explicitement après acceptation que le nom actif a changé par rapport à l'organisation quittée et que l'identité/roster joueur reste cohérente dans la partie.
+- Test : `node --test tests/mgmtLot69T1.test.js` passe (3/3). Audit `node tools/verif-versions.js origin/main` passe ; ESLint ciblé ne lint pas les tests (fichier ignoré par configuration).
+- Aucune modification JS/CSS ni migration. Les instructions de capture externe n'étaient pas accessibles via l'outil autorisé ; pas de scène ni d'image cmp produite.
+- Écart : cette reprise n'achève pas le chantier complet. Le test ne valide toujours pas fin de contrat → bilan → rechargement strictement identique → lendemain ; les captures comparatives, la fidélité complète des écrans et la prise en charge métier du choc en trois affiches restent non réalisées. Le compte rendu antérieur demeure exact pour ces limites.
