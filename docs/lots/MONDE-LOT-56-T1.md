@@ -37,6 +37,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
 
+### Reprise 12 — vérifications ciblées (24/10/2026)
+
+- Branche confirmée `p11-croissance`; HEAD `4432508`. Les changements présents dans `.opencode/agents/*` et `opencode.json` sont étrangers à la tranche, non ajoutés.
+- Vérifications relancées : `node --test tests/mgmtLot56T1.test.js` (10/10), `node --test tests/mgmtPasse.test.js` (13/13, empreintes comprises), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert). Le test figure dans `test` et `test:watch` selon le compte rendu précédent.
+- `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai outil de 120 secondes et a été interrompu ; le plafond n'est donc pas vérifié dans cette reprise.
+- Aucun code de production nouveau dans cette reprise. Écarts toujours ouverts, selon la tranche : effet diffuseur/agents libres non raccordé, franchissement réel causal par soirées à démontrer, rendu exact de la maquette non attesté et tests d'intégration sauvegarde/empreinte complémentaires absents. La tranche demeure inachevée ; pas de migration.
+
 ### Reprise — reprise après e9e7b90 (24/10/2026)
 
 - Historique confirmé : `e9e7b90 Monde lot 56 T1 : la croissance visible` est déjà commité. Aucun fichier de tranche n'était non commité à la reprise; les modifications `.opencode/agents/*` et `opencode.json` sont des changements externes préexistants, laissés intacts.
