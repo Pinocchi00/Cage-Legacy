@@ -258,3 +258,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtLot55T1.test.js` passe (14/14). `node tools/verif-versions.js origin/main` échoue toujours uniquement sur `mgmt-accueil.js`, écart préexistant hors tranche; aucune modification de ce fichier. L'ESLint global n'a pas été exécuté car la commande enchaînée s'est arrêtée après l'échec du contrôle des versions.
 - Le test emploie une partie réellement générée mais ne simule pas trois années et soirées jouées, et ne charge pas une fixture historique complète. Les écarts majeurs de maquettes et fonctions relevés plus tôt ne sont pas résolus par cette reprise; aucun test lent `mgmtReleveReduit` n'a été lancé.
 - Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (scénario runtime du champ facultatif) et cette fiche. Aucun changement de production ou migration de sauvegarde. Les changements préexistants `.opencode/agents/*` et `opencode.json` restent exclus.
+
+### Reprise 33
+
+- Nouveau test « Lot 55 T1 — trois soirées du passé produisent une lecture de prix déterministe » : crée une partie avec `mgmtPasseGenerer('split', {soirees:3,reculAns:3})`, joue réellement ses trois soirées de passé puis vérifie les relevés présents, la détermination répétable et les marqueurs `relu:false`.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (15/15 vert; la nouvelle simulation prend environ 8,5 secondes).
+- Limite : trois soirées sur un passé dont la configuration remonte trois ans ne représentent pas trois années complètes jouées. Les critères de trois années complètes, de la fidélité exacte aux planches, du déclenchement anniversaire plutôt qu'au terme du contrat, et d'une sauvegarde historique réellement chargée restent non démontrés. La tranche n'est donc pas terminée.
+- Fichier de cette reprise : `tests/mgmtLot55T1.test.js`; aucun changement métier ou de format de sauvegarde. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et non incluses. Aucun test lent `mgmtReleveReduit` exécuté.

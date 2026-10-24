@@ -143,3 +143,20 @@ test('Lot 55 T1 — une partie générée valide le champ facultatif des prix à
     assert.equal(r.annee,2026);
   }finally{w.close();}
 });
+test('Lot 55 T1 — trois soirées du passé produisent une lecture de prix déterministe',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const result=JSON.parse(w.eval(`JSON.stringify((()=>{
+      setSeed(55103);
+      const m=mgmtPasseGenerer('split',{soirees:3,reculAns:3});
+      const jouees=[];
+      for(let k=0;k<3;k++)jouees.push(mgmtPasseSoiree(m,k).jouee);
+      const a=mgmtCeremonieCalculer(m),b=mgmtCeremonieCalculer(m);
+      return {jouees,hist:Array.isArray(m.hist)?m.hist.length:0,identique:JSON.stringify(a)===JSON.stringify(b),valide:a.every(x=>x.relu===false)};
+    })())`));
+    assert.equal(result.jouees.filter(Boolean).length,3);
+    assert.ok(result.hist>0);
+    assert.equal(result.identique,true);
+    assert.equal(result.valide,true);
+  }finally{w.close();}
+});
