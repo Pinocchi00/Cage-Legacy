@@ -445,3 +445,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification `package.json` : `mgmtLot53T1.test.js` est inclus dans `test` et `test:watch`. Version cache de `mgmt-soiree-cadre.js` montée.
 - Restent non validés : portage exhaustif aux valeurs des maquettes; fenêtres de lecture temporisées et fondu de l'image d'arène; durée de référence 900–1200 s (mesures déjà documentées sous 900 s avec les vues par défaut); audit de toutes les tailles/styles et test lent de cette reprise. La durée n'a pas été artificiellement altérée. Aucun moteur de combat ni sauvegarde modifiés.
 - Les modifications `.opencode/agents/*` et `opencode.json` observées au départ sont étrangères et exclues.
+
+### Reprise 63 — assertion stricte du cumul prescrit
+
+- Ajouté au test du chemin réel l'assertion de la plage prescrite, 900–1200 secondes, au lieu de valider seulement une valeur positive.
+- Vérification ciblée : `node --test tests/mgmtLot53T1.test.js` révèle 20 réussites et un échec : graine 5303, durée calculée 868,383 s. La formule reste exactement celle prescrite (durée des combats complets, 45 s forts, 5 s résultat, +10 s par combat); je n'ai pas altéré les durées ni les vues par défaut pour maquiller le résultat.
+- Ce changement met en évidence une incompatibilité observée entre le critère de plage de durée et le chemin réel avec vues par défaut. Les portages graphiques intégraux et la lecture fenêtre par fenêtre réelle demeurent également incomplets, donc cette tranche ne peut pas être déclarée finie. Aucun code de production ni moteur de combat modifié.
+- Fichiers modifiés : `tests/mgmtLot53T1.test.js` (assertion stricte du cumul), cette fiche (compte rendu). Pas de migration ni nouveau texte joueur.

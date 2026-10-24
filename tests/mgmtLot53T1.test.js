@@ -59,7 +59,7 @@ test('Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitio
     w.eval(`setSeed(5303);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
     jouerSoirees(w,1);
     const n=w.eval(`mgmtSoireeDureeEstimee(G.mgmt)`);
-    assert.ok(Number.isFinite(n)&&n>0);
+    assert.ok(Number.isFinite(n)&&n>=900&&n<=1200,`durée estimée hors cible : ${n} s`);
   }finally{w.close();}
 });
 
