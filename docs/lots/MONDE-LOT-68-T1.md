@@ -72,4 +72,13 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Migration de sauvegarde : aucune. Aucun JS/CSS applicatif modifié, donc pas de bump `?v=`. Tests ajoutés dans le fichier existant, déjà référencé par les scripts. Écart majeur : cases visuelles 1 à 5 et livraison complète non atteintes ; aucune prétention à `TOUT_EST_FINI`.
 - Questions pour Anthony : aucune ; les éléments non faits sont du travail restant, pas une ambiguïté de spécification.
 
+### Reprise 8 du 24/10/2026
+
+- Historique et statut consultés : tête `065ea67`, branche `fid-fiches`. Les seules modifications non committées au départ sont `.opencode/agents/*` et `opencode.json`, hors tranche ; laissées intactes.
+- Ajout du test « Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu » dans `tests/mgmtFicheStats.test.js`, avec les identifiants d’écrans effectivement employés par le registre. Décision citée : « planches Uni* validées par Anthony ; l’écran suit la planche ».
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : 14/14 verts. Pas de nouveau fichier de test ni de changement applicatif ; pas de bump `?v=` à faire.
+- La vérification visuelle est toujours non réalisée : l’accès à l’instruction de capture externe et l’ouverture de ses comparatifs n’ont pas été disponibles dans ce contexte. L’écran titre/menu et les captures arrivée, relevé, chiffres, classements ne sont pas comparés. Aucune correction visuelle supplémentaire n’est revendiquée.
+- État écran par écran : fiche (colonnes déjà corrigées, visuel non validé) ; arrivée contrat/espoirs (règles de classes testées partiellement, non validée visuellement) ; recruteur mission/retours (classes et blocs testés, non validé visuellement) ; semaine (classes testées, non validée visuellement) ; relevé/chiffres et classements (couverture partielle des classes, non validés visuellement) ; menu (non traité). Les différences précises ne peuvent pas être affirmées sans ouvrir les comparatifs.
+- Migration de sauvegarde : aucune. Les cases de fidélité visuelle et le critère final ne sont pas atteints ; pas de `TOUT_EST_FINI`.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

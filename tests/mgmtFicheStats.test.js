@@ -86,6 +86,12 @@ test('Monde lot 68 T1 — chaque classe des écrans arrivée, relevé et classem
   assert.ok(classes.length>0);
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),name);
 });
+test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const w=monde(), screens=JSON.parse(w.eval('JSON.stringify(Object.keys(SCREENS))'));
+  for(const screen of ['mgmt_fiche','mgmt_arrivee','mgmt_espoirs_arrivee','mgmt_recruteur_mission','mgmt_recruteur_retours','mgmt_semaine','mgmt_resultats','mgmt_classements','title'])
+    assert.ok(screens.includes(screen),`écran ${screen} enregistré`);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);
