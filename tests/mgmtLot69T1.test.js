@@ -116,6 +116,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
       assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
       assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
+        w.eval(`G.screen='mgmt_accueil';CL.go('mgmt_choc')`);
+        const ecranAccepte=w.eval(`document.getElementById('app').innerHTML`);
+        assert.ok(ecranAccepte.trim().length>0,'le choc accepté/programmé reste rendu lorsqu’on y revient depuis l’Accueil');
+        assert.match(ecranAccepte,/CHAMPIONNE CONTRE CHAMPIONNE/,'le choc programmé conserve son écran exploitable');
        assert.ok(w.eval(`G.mgmt.roster.some(f=>f.id===G.mgmt.choc.a)`),'le champion Split de la proposition reste associé au choc programmé');
        assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
          const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,paires=c.paires;m.cal.prochaines[0].jour=c.jour;m.card.main=paires.map(p=>({a:p.a,b:p.b,cycle:m.cycle,slot:'main'}));m.card.prelims=[];m.card.sizeMain=paires.length;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m),combats=event&&paires.map(p=>event.fights.find(f=>(f.a===p.a&&f.b===p.b)||(f.a===p.b&&f.b===p.a))),traces=paires.map(p=>m.hist.find(h=>h.a&&h.b&&((h.a.id===p.a&&h.b.id===p.b)||(h.a.id===p.b&&h.b.id===p.a))));return {event:!!event,combats:combats&&combats.every(Boolean),traces:traces.every(Boolean),etat:c.etat,resultat:c.resultat,victoires:c.victoires,prestige:m.orgs[c.orgId].chocPrestige||0}})()`);

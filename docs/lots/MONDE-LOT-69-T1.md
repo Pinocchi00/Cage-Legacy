@@ -223,6 +223,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers modifiés : `ui-cadre.css` ajoute une règle explicite de citation italique et une règle de mise en évidence jaune de la condition du choc ; `index.html` reçoit le `?v=` incrémenté ; `tests/mgmtLot69T1.test.js` verrouille la présence des sélecteurs correspondants, les couleurs du bandeau et du VS, le nom grand format du discours et l'absence d'animation sur le choc.
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (3/3).
 - Pas de migration de sauvegarde. Pas de nouvelle capture post-correction.
+
+### Reprise 29 — contrôle écran choc et retour après programmation
+- État de départ : branche `fid-choc`, HEAD `f266824d`. Les changements de configuration `.opencode/agents/*` et `opencode.json` sont préexistants et restent hors tranche.
+- Capture reproduite à 1920×1080 avec la scène choc valide : écran non vide, `chevauchements=0`, `textesSous22px=0`, aucun débordement ; `grosBlocs=25.4%` (objectif ≤20% non atteint). La scène discours donne `grosBlocs=18.1%`, sans anomalie géométrique. Images comparatives non ouvertes visuellement.
+- `tests/mgmtLot69T1.test.js` ajoute un contrôle après acceptation : la navigation de retour vers `mgmt_choc` depuis l’Accueil affiche bien la proposition programmée et son contenu. Les tests ciblés passent 4/4 ; le fichier existant couvre aussi les trois paires et leur résolution normale.
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` (non-vide après retour sur un choc accepté) et cette fiche (mesure et compte rendu). Aucune migration, aucun JS/CSS ni cache modifié.
+- Écarts toujours ouverts : seuil de densité du choc dépassé (25.4%), aucune nouvelle scène/capture dédiée d’arrivée, aucun contrôle visuel humain de `cmp-*.png`; le bloc bilan et les autres critères visuels non re-mesurés dans cette reprise. Pas de `TOUT_EST_FINI` revendiqué.
 - Écarts à la fiche toujours ouverts : modèle/programme du choc à trois combats et preuve de son résultat, comparaison visuelle et seuil ≤20 %, scène d'arrivée dédiée, parcours complet depuis fin de contrat et validation stricte du rechargement. Le guide de capture externe ne peut toujours pas être ouvert par l'outil de lecture dans cet environnement.
 - Cette reprise n'achève pas la tranche ; aucun `TOUT_EST_FINI` revendiqué.
 
