@@ -333,3 +333,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-soiree-cadre.js` (aide du bouton), `index.html` (version cache), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Toujours incomplet : les écarts substantiels consignés plus haut demeurent, en particulier le portage intégral des maquettes, le cumul de référence dans la cible 900–1200 s et la lecture réelle synchronisée sur fenêtres. Cette amélioration d'accessibilité n'est pas présentée comme l'achèvement des cases restantes.
+
+### Reprise 46 — finition du contrôle de vue
+
+- Fait : le bouton de vue de chaque ligne reprend maintenant le biseau polygonal, la hauteur de 42 px, la taille de 24 px et le contraste visuel actif/inactif spécifiés dans la planche `UniSoiree`; une transition légère accompagne le changement d'état.
+- Fichiers modifiés : `ui-cadre.css` (règle du bouton `so3-vue`) et `index.html` (version de cache CSS), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` (18/18), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent.
+- Écart : ce petit ajustement rapproche le sélecteur de la maquette mais ne porte pas l'ensemble des blocs/compositions visuels des trois planches. Les lacunes substantielles et l'estimation mesurée antérieure sous 900 s demeurent; aucun achèvement global n'est revendiqué.
