@@ -161,3 +161,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Validation fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 avec 1 908 745 octets, sous le plafond ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe.
 - Aucun changement de sauvegarde ni migration. La limite de couverture demeure : les dix faits sont préparés séparément dans les tests après création par le parcours réel, sans prouver que tous sont naturellement produits par les systèmes de jeu. Pas de question nouvelle.
 - Seule cette fiche est modifiée pour ce compte rendu ; changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et cache local `index.html` hors tranche, exclus.
+
+### Reprise 5 — livraison vérifiée (24/10/2026)
+
+- Branche `p8-apres` confirmée ; l'historique des douze derniers commits et le statut ont été consultés. Le code, les tests et l'inscription du test dans les scripts `test`/`test:watch` sont déjà commitées ; aucun fichier fonctionnel de tranche n'était en attente.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit direct des scripts renvoie `true,true`.
+- Aucune modification fonctionnelle ou de sauvegarde, aucune migration. Les textes catalogués, calcul, affichages Accueil/presse, mouvements d'organisation et les intitulés des tests sont déjà présents dans les commits de la tranche.
+- Écart de couverture maintenu : chaque famille est testée en préparant son fait sur une partie issue du chemin réel, sans démontrer que chaque système du jeu génère naturellement chacun des faits. `check:rapide` reste réservé au superviseur. Modifications étrangères `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache `index.html` exclues.
+- Fichier modifié dans cette reprise : cette fiche uniquement, pour consigner ces vérifications ; aucun changement de production, test ou sauvegarde.
