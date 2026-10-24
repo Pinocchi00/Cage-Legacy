@@ -70,7 +70,7 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};`);
       w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
-     for(const texte of ['SPLIT','CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+      for(const texte of ['SPLIT','CHAMPIONNE CONTRE CHAMPIONNE','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
     assert.match(choc,/<span class="mf-k">Échap<\/span><span>Répondre plus tard<\/span>/);
      assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
      assert.match(choc,/<span class="mf-k">R<\/span><span>Refuser<\/span>/,'le raccourci de refus doit être visible dans la barre de commandes');
@@ -78,7 +78,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      assert.match(choc,/ch3-vs/);
      assert.match(choc,/Fiche/);
        const triple=w.eval(`scr_mgmt_choc()`);
-       assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
+      assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
+        assert.match(triple,/<span class="ch3-vs">C<\/span><strong>[^<]+<\/strong>/,'chaque affiche reprend le médaillon C et le nom de division de la planche');
        w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
         w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.mgmt.choc.paires[1].div='division-incoherente';G.screen='mgmt_choc';scr_mgmt_choc()`);

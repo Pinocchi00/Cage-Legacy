@@ -250,6 +250,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une première exécution a dépassé le délai de 120 s avant la relance réussie.
 
 ### Reprise 43
+
+- Reprise supervisée : j'ai reproduit la scène `choc` avec le `shoot.js` externe réellement présent. Le contrôle ne montre pas de page blanche : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`. Capture UniChoc : `grosBlocs=25.6%` avant correction.
+- Rapprochement du centre des affiches : chaque paire affiche désormais le médaillon octogonal « C » et sa division, conformément au markup de `UniChoc`, au lieu d'un deuxième « VS » et du libellé répété. Le contrôle après changement reste sans chevauchement/débordement/texte trop petit ; `grosBlocs=25.2%`, toujours au-dessus de l'objectif ≤20 %.
+- Fichiers modifiés : `mgmt-ecran-poste.js` (médaillon/division), `index.html` (`?v=` monté par `_bump.js`), `tests/mgmtLot69T1.test.js` (assertion sur les trois cartes et leur marqueur de division), cette fiche (mesures honnêtes).
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe 4/4, y compris l'assertion d'affichage C/division. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucune capture d'arrivée dédiée. Les tests métier existants affirment les trois paires et leur score majoritaire, mais le booking standard complet sans fixture de test demeure à confirmer.
+- Écart à la fiche : la page blanche rapportée n'a pas été reproduite dans cette exécution. Les mesures de gros blocs du choc ne sont pas au seuil ; les autres écrans/parcours restent à revalider selon les écarts déjà consignés.
+- Questions pour Anthony : aucune.
 - État repris : HEAD `fe0c2ea4`, branche `fid-choc`. Aucune modification fonctionnelle de la tranche n'était en attente ; les modifications sous `.opencode/agents/` et `opencode.json` sont restées hors périmètre.
 - Reproduction effective avec l'outil de capture indiqué dans la fiche : la scène `choc` s'affiche bien (pas d'écran blanc), avec `chevauchements=0`, `textesSous22px=0`, aucun débordement ; mesure `grosBlocs=25.6%` (seuil 20% non atteint). Capture `discours` : contrôles géométriques sans anomalie, `grosBlocs=18.1%` (seuil atteint). Ces résultats confirment que l'écran choc rendu depuis une proposition valide est visible, mais son seuil de blocs reste à corriger.
 - `node --test tests/mgmtLot69T1.test.js` passe (4/4) : parcours offre/changement/arrivée/rechargement/soirée/lendemain, rendu des trois affiches et soirée normale du choc dans le périmètre du test.
