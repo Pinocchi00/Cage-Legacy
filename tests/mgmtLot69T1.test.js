@@ -126,9 +126,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
          assert.equal(w.eval(`G.mgmt.choc.pairesJouees`),3,'les trois affiches jouées sont comptées dans le score final');
          assert.ok(w.eval(`G.mgmt.choc.victoires>=0&&G.mgmt.choc.victoires<=3`),'le score de victoires sur trois est conservé pour déterminer la majorité');
          assert.equal(chocJoue.prestige,chocJoue.victoires>=2?1:0,'le prestige augmente exactement lorsque Split gagne la majorité des trois affrontements');
-     w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
-     const discours=w.eval(`scr_mgmt_discours()`);
-     for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
+      w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'surprise',interpelle:G.mgmt.roster[1].id,lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
+      const discours=w.eval(`scr_mgmt_discours()`);
+      for(const texte of ['di3-cartouche','LA SURPRISE DE LA SOIRÉE','di3-nom','di3-lignes','Une citation de contrôle.','S’ADRESSE À ·','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
       const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
        const classesEcran=[...new Set([...`${choc} ${discours}`.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/).filter(c=>/^(?:ch3|di3)-/.test(c))))];
        for(const classe of classesEcran) assert.ok(css.includes(`.${classe}`),`la classe visible ${classe} doit avoir une règle CSS dédiée`);

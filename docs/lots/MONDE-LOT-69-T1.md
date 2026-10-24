@@ -310,6 +310,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `tests/mgmtLot69T1.test.js` vérifie que la commande « R Refuser » est effectivement exposée dans l'écran choc.
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une première exécution a dépassé le délai de 120 s avant la relance réussie.
 
+### Reprise 6 — contrôle capture et couverture du discours
+- Captures relancées suivant `LISEZMOI.txt` : `choc` s'affiche avec une proposition issue des fonctions du modèle; contrôle géométrique 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=26.1%` (cible ≤20% non atteinte). `discours` : contrôles géométriques à zéro, `grosBlocs=18.1%`. Les images comparatives n'ont pas été ouvertes visuellement.
+- `tests/mgmtLot69T1.test.js` renforce le scénario discours : cartouche « LA SURPRISE DE LA SOIRÉE », citation, ligne « S’ADRESSE À » et commande Continuer vérifiés ensemble. Première assertion utilisait un motif non correspondant au libellé réel; corrigée au motif `surprise` et le test ciblé passe 4/4.
+- Vérifications finales de cette reprise : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (19 fichiers examinés), `node_modules/.bin/eslint .` (vert). Pas de JS/CSS ou sauvegarde modifiés, aucune migration ni version à bump.
+- Restent non conformes/non démontrés : gros blocs du choc au-dessus du seuil, chevauchement bilan rapporté dans les captures précédentes, pas de capture dédiée arrivée ni ouverture comparative des images. Le compte rendu historique atteste la couverture des trois affiches/booking via la soirée, et le parcours offre/changement/arrivée/rechargement/lendemain; cette reprise n'a pas rejoué toutes ces captures.
+- Fichiers de cette reprise : `tests/mgmtLot69T1.test.js` (assertions plus précises des blocs UniDiscours), cette fiche (mesures et limites). Aucun écart de sauvegarde. Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent exclues.
+
 ### Reprise 43
 
 - Reprise supervisée : j'ai reproduit la scène `choc` avec le `shoot.js` externe réellement présent. Le contrôle ne montre pas de page blanche : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`. Capture UniChoc : `grosBlocs=25.6%` avant correction.
