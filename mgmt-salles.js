@@ -29,6 +29,45 @@ const MGMT_COMPTES_MAX=8;
    ajoute MGMT_TETE_AFFICHE_POIDS point de qualité (une carte moyenne ne change pas). */
 const MGMT_TETE_AFFICHE_POIDS=0.5;
 
+/* ==== [ANCRE: CROISSANCE_PALIERS] — Monde lot 56 T1 ====
+   Les rangs sont ceux du classement vivant des huit. Les bonus restent
+   additifs et plafonnés : ils ne retirent jamais une possibilité existante. */
+const MGMT_PALIERS=[
+  {id:'regional',nom:'Régional',popularite:0,rang:8,salle:0,diffuseur:0,recruteur:0,agents:0,texte:'Split s’installe dans sa région.',annonce:{texte:'Dans sa région, Split commence à remplir les petites salles.',relu:false},relu:false},
+  {id:'national',nom:'National',popularite:30,rang:6,salle:1,diffuseur:1,recruteur:1,agents:1,texte:'Split attire désormais l’attention du pays.',annonce:{texte:'La popularité de Split attire désormais le regard des diffuseurs nationaux.',relu:false},relu:false},
+  {id:'europeen',nom:'Européen',popularite:50,rang:4,salle:2,diffuseur:2,recruteur:2,agents:2,texte:'Split commence à compter au-delà des frontières.',annonce:{texte:'Le rang européen de Split ouvre une salle plus vaste au public.',relu:false},relu:false},
+  {id:'mondial',nom:'Mondial',popularite:70,rang:2,salle:3,diffuseur:3,recruteur:3,agents:3,texte:'Split rejoint les organisations qui comptent dans le monde.',annonce:{texte:'Dans le classement mondial, Split attire désormais des agents libres plus ambitieux.',relu:false},relu:false},
+  {id:'sommet',nom:'Le sommet',popularite:90,rang:1,salle:3,diffuseur:3,recruteur:3,agents:3,texte:'Split prend la première place parmi les huit.',annonce:{texte:'Première des huit, Split entre dans une nouvelle dimension de recrutement.',relu:false},relu:false}
+];
+function mgmtPaliersCalculer(m){
+  const pop=Number.isFinite(m&&m.pop)?m.pop:0;
+  const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):null;
+  const ligne=classement&&classement.find(x=>x.id===mgmtPredecesseurOrgId(m));
+  const rang=ligne&&Number.isSafeInteger(ligne.rang)?ligne.rang:8;
+  const paliers=MGMT_PALIERS.filter(p=>pop>=p.popularite&&rang<=p.rang);
+  const next=MGMT_PALIERS.find(p=>!paliers.includes(p))||null;
+  const dernier=paliers.length?paliers[paliers.length-1]:MGMT_PALIERS[0];
+  return {rang,popularite:pop,paliers,next,effets:{salle:dernier.salle,diffuseur:dernier.diffuseur,recruteur:dernier.recruteur,agents:dernier.agents}};
+}
+
+/* ==== [ANCRE: CROISSANCE_ANNONCES] — Monde lot 56 T1 ====
+   Le franchissement est mémorisé uniquement pour les annonces déjà publiées. */
+function mgmtPaliersAnnoncer(m){
+  if(!m||!Array.isArray(m.facts)) return [];
+  if(!Array.isArray(m.paliersAnnonces)) m.paliersAnnonces=[];
+  const c=mgmtPaliersCalculer(m),nouveaux=[];
+  for(const p of c.paliers){
+    if(p.id==='regional') continue;
+    if(m.paliersAnnonces.includes(p.id)) continue;
+    m.paliersAnnonces.push(p.id);
+    const f={k:'croissance',palier:p.id,texte:p.annonce.texte,relu:p.annonce.relu,c:Number.isSafeInteger(m.cycle)?m.cycle:0};
+    if(!Array.isArray(m.croissanceActus)) m.croissanceActus=[];
+    m.croissanceActus.push(f);
+    nouveaux.push(f);
+  }
+  return nouveaux;
+}
+
 /** Les salles d'une partie : dérivées de l'organisation et de l'ordre, jamais tirées au hasard (aucun hasard hors graine).
  *  Les capacités suivent le profil de l'organisation (taille de ses salles). Pur. */
 function mgmtSallesCreer(m){
@@ -73,6 +112,14 @@ function mgmtSalleDefaut(m){
   return best;
 }
 
+/* ==== [ANCRE: CROISSANCE_SALLES] — Monde lot 56 T1 ====
+   Chaque marche ajoute au plus 1 % au remplissage, sans réduire le plafond
+   historique et sans modifier les parties qui n'atteignent aucun palier. */
+function mgmtCroissanceRemplissageBonus(m){
+  if(!m||m.mondeVivant!==true||typeof mgmtPaliersCalculer!=='function') return 0;
+  return Math.max(0,Math.min(0.03,mgmtPaliersCalculer(m).effets.salle*0.01));
+}
+
 /** La qualité d'une carte, de 0 à 1 : son attrait rapporté à celui d'une carte moyenne de même taille. Pur. */
 function mgmtCarteQualite(m,slotted){
   const sm=slotted.filter(x=>x.slot==='main').length, sp=slotted.length-sm;
@@ -86,11 +133,12 @@ function mgmtCarteQualite(m,slotted){
 
 /** Le remplissage : salle, popularité (plafond), qualité de la carte, taille de la soirée. Pur.
  *  @returns {{capacite:number,plafond:number,spectateurs:number,taux:number}} */
-function mgmtRemplissage(salle,pop,taille,qualite){
+function mgmtRemplissage(salle,pop,taille,qualite,m){
   const cap=salle?salle.capacite:0, plafond=mgmtPopPlafond(pop);
   const base=Math.min(cap,plafond);
   const part=MGMT_REMPLI_PART_MIN+(1-MGMT_REMPLI_PART_MIN)*Math.max(0,Math.min(1,qualite));
-  const spectateurs=Math.round(base*part*(MGMT_REMPLI_TAILLE[taille]||MGMT_REMPLI_TAILLE.petite));
+  const bonus=typeof mgmtCroissanceRemplissageBonus==='function'?mgmtCroissanceRemplissageBonus(m):0;
+  const spectateurs=Math.round(base*Math.min(1,part+bonus)*(MGMT_REMPLI_TAILLE[taille]||MGMT_REMPLI_TAILLE.petite));
   return {capacite:cap,plafond,spectateurs,taux:cap>0?spectateurs/cap:0};
 }
 
@@ -169,7 +217,7 @@ function mgmtSallesApplique(m,finance,fights,avant){
   mgmtSallesInit(m);
   const soir=m.cal.prochaines[0]||{taille:'petite'};
   const salle=mgmtSalleParId(m,soir.salle)||mgmtSalleDefaut(m);
-  const r=mgmtRemplissage(salle,m.pop,soir.taille,avant.qualite);
+  const r=mgmtRemplissage(salle,m.pop,soir.taille,avant.qualite,m);
   const sat=mgmtSatisfaction(m,{reclames:avant.reclames,fights,noms:avant.noms});
   finance.ticketing=mgmtBilletterie(r.spectateurs,salle);
   finance.location=mgmtLocation(salle);
