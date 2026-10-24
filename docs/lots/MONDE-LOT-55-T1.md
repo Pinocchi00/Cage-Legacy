@@ -74,3 +74,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - La tranche demeure inachevée : les fonctions et écrans partiels existants n'ont pas été complétés lors de cette reprise. Le raccordement cérémonie/fin d'année, classement final, carnet exposé en navigation secondaire, critères de tests multi-années et 50 soirées, styles/maquettes exhaustifs et intégration du test aux scripts généraux restent absents. Pas d'audit ESLint ni test lent de plafond exécuté.
 - Fichiers de cette reprise : `mgmt-save.js` (validation/réparation), `index.html` (version du script), cette fiche (compte rendu). Aucun changement de version de sauvegarde, donc aucune migration.
 - Écart aux maquettes : toujours complet pour les écrans cérémonie et carnet; pas de prétention de conformité. Aucun nouveau point à demander à Anthony.
+
+### Reprise 9
+
+- État contrôlé : branche `p11-ceremonie-carnet`, HEAD `53a9f21`. Aucun fichier métier de la tranche n'était modifié hors commit. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et non touchées.
+- Vérifications ciblées relancées : `node --test tests/mgmtLot55T1.test.js` (3/3 vert), `node tools/verif-versions.js origin/main` (aucun écart signalé), `node_modules/.bin/eslint mgmt-ceremonie.js mgmt-save.js` (vert).
+- La tranche n'est toujours pas complète : absence de raccordement de l'écran à la fin d'année, rang final des huit organisations et bilan patron intégrés, carnet secondaire incomplet, critères de simulation multi-années / 50 soirées / échappement / règles CSS non établis, et absence des tests de sauvegarde concernés. Le test ne figure toujours pas dans les listes générales `test` et `test:watch`.
+- Aucun test `mgmtReleveReduit` n'a été lancé (test lent). `check:rapide` n'a pas été lancé conformément au contrôle rapide superviseur. Aucune migration de sauvegarde.
+- Le diff local de `package.json` ajoute des scripts `test:lot55t1-suite` et `test:watch:lot55t1-suite` redondants aux deux scripts spécifiques déjà présents dans HEAD; il n'a pas été intégré à cette tranche. Aucun écran supplémentaire ou maquette n'a été livré lors de cette reprise.
+- Livraison toujours inachevée, sans question ouverte de spécification identifiée. Les fichiers métier déjà commis dans les reprises précédentes restent à terminer avant la livraison finale.
