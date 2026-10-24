@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 14
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. L'arbre était propre au début ; les commits précédents de la tranche sont conservés.
+- Ajustement CSS ciblé de la grande carte de cérémonie : le nom du lauréat peut maintenant se replier dans la largeur de carte et ne peut plus dépasser son bloc. `index.html` porte le nouveau `?v=`. Le bump a modifié `sw.js`, restauré depuis `origin/main` et exclu du commit.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (47/47), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent. Migration de sauvegarde : aucune.
+- Fichiers modifiés : `ui-cadre.css` (protection contre le débordement du nom sur la carte combattant) et `index.html` (version cache). Tests ajoutés : aucun ; le test de tranche existant garde ses intitulés et reste vert.
+- Limites : l'accès au protocole de capture dans `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusé par la politique d'accès externe de cet environnement ; aucune capture ni ouverture de `cmp-ceremonie.png` n'est revendiquée. Cette correction ne clôt pas les mesures antérieures signalant des écarts Croissance/Carnet/Bilan/Guerre, ni la capture avec six prix et rivale imposée. La conformité visuelle n'est donc pas certifiée et `TOUT_EST_FINI` n'est pas revendiqué. Aucune question de spécification.
+
 ## Compte rendu — reprise 13
 
 - Branche `fid-organisation` confirmée ; l'historique et l'arbre de travail ont été consultés. Aucun changement applicatif non commité n'était présent au début de cette reprise.
