@@ -6,8 +6,8 @@ const {newGameWindow}=require('./helpers/loadGame');
 
 test('Monde lot 58 T1 — offres facultatives, validées et réparées sans création sur ancienne partie',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const absent=!Object.hasOwn(m,'offres');const base=validateMgmt(m);m.offres=[];const vide=validateMgmt(m);m.offres=[{orgId:'split',poste:'Matchmaker',salaire:3200,texte:'Proposition.',relu:false,refuse:false,raisons:['a','b','c','d']}];const valide=validateMgmt(m);const mauvais=JSON.parse(JSON.stringify(m));mauvais.offres[0].salaire=-1;const refuse=mgmtOffreRefuser(m,0);const refuseValide=validateMgmt(m);const rep=mgmtRepair(mauvais);return {absent,base,vide,valide,refuse,refuseValide,repare:!Object.hasOwn(rep,'offres')}})())`));
-  assert.deepEqual(r,{absent:true,base:true,vide:true,valide:true,refuse:true,refuseValide:true,repare:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const absent=!Object.hasOwn(m,'offres');const base=validateMgmt(m);m.offres=[];const vide=validateMgmt(m);m.offres=[{orgId:'split',poste:'Matchmaker',salaire:3200,texte:'Proposition.',relu:false,refuse:false,raisons:['a','b','c','d']}];const valide=validateMgmt(m);const mauvais=JSON.parse(JSON.stringify(m));mauvais.offres[0].salaire=-1;const refuse=mgmtOffreRefuser(m,0);const refuseValide=validateMgmt(m);const rep=mgmtRepair(mauvais);const ancien=mgmtDefaultAvantH4(),ancienSansOffres=!Object.hasOwn(ancien,'offres'),ancienValide=validateMgmt(ancien);return {absent,base,vide,valide,refuse,refuseValide,repare:!Object.hasOwn(rep,'offres'),ancienSansOffres,ancienValide}})())`));
+  assert.deepEqual(r,{absent:true,base:true,vide:true,valide:true,refuse:true,refuseValide:true,repare:true,ancienSansOffres:true,ancienValide:true});
 });
 
 test('Monde lot 58 T1 — quatre raisons de rejoindre plus fort sont des informations concrètes',()=>{
@@ -55,6 +55,13 @@ test('Monde lot 58 T1 — écran du choc présente la confrontation et ses déci
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const o=MGMT_ORGANISATIONS.find(x=>x.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[x.id]);m.choc={orgId:o.id,div:'H-heavy',jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:'screen-local',b:'screen-adverse'};G.mgmt=m;return {html:scr_mgmt_choc(),screen:typeof SCREENS.mgmt_choc}})())`));
   assert.equal(r.screen,'function');
   for(const phrase of ['LE CHOC DES ORGANISATIONS','PROPOSITION REÇUE','ACCEPTER','REFUSER'])assert.ok(r.html.includes(phrase));
+});
+
+test('Monde lot 58 T1 — une proposition de choc entre dans le fil de presse du champion suivi',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const a=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!a)return {champion:false};const org=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!org)return {champion:true,org:false};const b=m.orgs[org.id].roster.find(f=>f.div===a.div&&mgmtChampionIds({roster:m.orgs[org.id].roster}).has(f.id));m.suivis=[a.id];m.choc={orgId:org.id,div:a.div,jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:a.id,b:b.id};return {champion:true,org:true,rows:mgmtActualites(m).map(x=>({type:x.type,titre:x.titre,texte:x.texte}))}})())`));
+  assert.equal(r.champion,true);
+  if(r.org){assert.ok(r.rows.some(x=>x.type==='choc'&&x.titre.includes('choc des organisations')&&x.texte.includes('propose une soirée commune')));}
 });
 
 test('Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le contrat de Split',()=>{
