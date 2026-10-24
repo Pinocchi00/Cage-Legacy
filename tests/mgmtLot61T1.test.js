@@ -45,3 +45,9 @@ test('Monde lot 61 T1 — une soirée complète se joue après le changement d�
     assert.deepEqual({...etat},{valid:true,org:'garden-of-blood',loaded:true});
   }finally{w.close();}
 });
+
+test('Monde lot 61 T1 — une partie sans monde vivant refuse le changement sans altération',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const avant=mgmtSerialiser(m),ok=mgmtOrgChanger(m,'garden-of-blood');return {ok,identique:mgmtSerialiser(m)===avant}})())`));
+  assert.deepEqual(r,{ok:false,identique:true});
+});
