@@ -113,6 +113,17 @@ test('Lot 55 T1 — un fait de titre garde son index historique après filtrage 
   assert.ok(ko);
   assert.equal(ko.laureat,'champ');
 });
+test('Lot 55 T1 — les indices de titre restent absolus avec plusieurs traces hors fenêtre',()=>{
+  const c=charger();
+  const hist=[
+    {c:1,a:{id:'old',name:'Old'},b:{id:'old-op',name:'Old op'},winner:'A',family:'ko',round:1},
+    {c:100,a:{id:'plain',name:'Plain'},b:{id:'plain-op',name:'Plain op'},winner:'A',family:'ko',round:3,slot:'prelim'},
+    {c:200,a:{id:'title',name:'Title'},b:{id:'title-op',name:'Title op'},winner:'B',family:'ko',round:3,slot:'prelim'},
+    {c:300,a:{id:'late',name:'Late'},b:{id:'late-op',name:'Late op'},winner:'A',family:'ko',round:1,slot:'main'}
+  ];
+  const prix=c.mgmtCeremonieCalculer({hist,facts:[{k:'title_fight',fight:2}]});
+  assert.equal(prix.find(p=>p.id==='ko').laureat,'title-op');
+});
 test('Lot 55 T1 — les égalités de prix sont stables malgré l’ordre des traces',()=>{
   const c=charger();
   const x={c:100,a:{id:'z',name:'Z',W:3,L:0,D:0},b:{id:'o1',name:'O1'},winner:'A',family:'ko',round:1,slot:'main'};

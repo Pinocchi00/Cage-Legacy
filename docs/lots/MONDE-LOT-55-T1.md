@@ -626,3 +626,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (40/40); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` et `git diff --check` (verts).
 - Aucun changement de production ou de sauvegarde. Limites toujours non certifiées : fidélité complète aux maquettes, déclencheur à chaque anniversaire, trois saisons pleines jouées, fixture d'ancienne sauvegarde complète et test lent `mgmtReleveReduit`.
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` et cette fiche. Les changements étrangers `.opencode/agents/*` et `opencode.json` sont exclus. Ces limites empêchent de déclarer `TOUT_EST_FINI`.
+
+### Reprise 81
+
+- Test ajouté : « Lot 55 T1 — les indices de titre restent absolus avec plusieurs traces hors fenêtre », vérifiant que le fait `title_fight` continue de viser l'index absolu de `m.hist` après filtrage de plusieurs relevés anciens.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` (41/41 verts).
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (régression d'index) et cette fiche. Aucun changement de production ou de sauvegarde.
+- Limites déjà documentées maintenues : test lent `mgmtReleveReduit` non exécuté, conformité visuelle complète non certifiée, cérémonie rattachée au terme du contrat, et parcours simulés n'établissant pas trois saisons complètes ni une fixture complète d'ancienne sauvegarde.
