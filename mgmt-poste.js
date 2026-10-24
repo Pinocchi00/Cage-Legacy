@@ -176,6 +176,25 @@ function mgmtChocRepondre(m,accepte){
   for(let j=base+42;j<=base+70;j++)if(mgmtAgendaPoser(m,j,'petite').ok){m.choc.jour=j;m.choc.etat='programme';return true;}
   return false;
 }
+/* ==== [ANCRE: MONDE_LOT58_T1_CHOC_SORTANT] — Monde lot 58 T1 ====
+   Le joueur peut solliciter un partenaire admissible une seule fois par an;
+   le refus ou l'accord sont déterministes et l'agenda reste le calendrier unique. ==== */
+function mgmtChocProposer(m,orgId){
+  if(!m||!m.mondeVivant||m.choc&&mgmtChocValide(m.choc)&&m.choc.annee===mgmtChocAnnee(m))return false;
+  const rangs=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m);
+  const champion=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,r:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.r>=0).sort((a,b)=>a.r-b.r)[0];
+  const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId&&o.id!==active&&m.orgs&&m.orgs[o.id]);
+  if(!champion||!org)return false;
+  const adversaire=(m.orgs[org.id].roster||[]).find(f=>f&&f.div===champion.f.div&&mgmtChampionIds({roster:m.orgs[org.id].roster||[]}).has(f.id));
+  if(!adversaire)return false;
+  const annee=mgmtChocAnnee(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
+  m.choc={orgId:org.id,div:champion.f.div,jour,annee,etat:mgmtChocTirageAcceptation(m,org.id)?'accepte':'refuse',propose:true,a:champion.f.id,b:adversaire.id};
+  if(m.choc.etat==='accepte'){
+    for(let j=jour+42;j<=jour+70;j++)if(mgmtAgendaPoser(m,j,'petite').ok){m.choc.jour=j;m.choc.etat='programme';return true;}
+    m.choc.etat='refuse';
+  }
+  return true;
+}
 function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
 function mgmtPosteRenouveler(m,issue){
