@@ -60,6 +60,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 4 — contrôle de clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits fonctionnels de la tranche sont déjà dans l'historique. Validations fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; ESLint global passe ; le test figure dans `test` et `test:watch` (`true,true`).
+- Pas de clé de sauvegarde nouvelle ni de migration. Les fichiers fonctionnels (catalogue, calcul et raccordements accueil/presse/mouvements), les tests et l'inscription aux scripts sont déjà commités. Couverture : les tests préparent les faits de chaque famille sur le chemin réel, sans établir que tous les systèmes opérationnels les produisent naturellement.
+- Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères à la tranche et restent exclues. Aucun écart nouveau ni question pour Anthony.
+
 ### Reprise 36 — vérification et clôture (24/10/2026)
 
 - Branche `p8-apres` confirmée. L'historique récent contient déjà les commits fonctionnels de la tranche ; aucun fichier de production/test de la tranche n'est en attente. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères et exclues.
