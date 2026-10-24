@@ -380,6 +380,8 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une 
   const rendu=c.scr_mgmt_ceremonie();
   assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,6,'décision : planches Uni* validées par Anthony ; les six prix calculés doivent rester visibles');
   assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
+  for(const texte of ['LES TROPHÉES 2027','CHOISIS PAR LA PRESSE','31 DÉCEMBRE','CAGE HEBDO','COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','COMBAT DE L’ANNÉE','SOUMISSION DE L’ANNÉE','RÉVÉLATION','RETOUR','TROISIÈME DES HUIT','CE QUE ÇA CHANGE EN 2028']) assert.ok(rendu.includes(texte),`bloc cérémonie manquant : ${texte}`);
+  assert.doesNotMatch(rendu,/<button[^>]*>\s*RETOUR\s*<\/button>/,'décision : planches Uni* validées par Anthony ; le bilan s’ouvre par Entrée, sans bouton qui recouvre l’en-tête');
   for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
