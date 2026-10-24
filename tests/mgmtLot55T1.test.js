@@ -269,3 +269,14 @@ test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve l
     assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
   }
 });
+test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[]}};
+  c.mgmtOrgNom=()=> 'Organisation';
+  c.mgmtOrgClassement=()=>[];
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  assert.equal((rendu.match(/Pas de /g)||[]).length,6);
+  assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
+});

@@ -439,3 +439,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucun test lent `mgmtReleveReduit` ni `check:rapide` exécuté, conformément aux consignes de délai. Aucun changement de format de sauvegarde ni migration.
 - Les critères encore non attestés restent explicitement ouverts : test lent de plafond, chargement d'une fixture historique complète, fidélité intégrale aux maquettes, et déclenchement à chaque anniversaire (le flux en place suit le terme du contrat). La simulation présente couvre des soirées de trois années/fenêtres mais ne garantit pas trois saisons pleines. Par conséquent, aucune déclaration `TOUT_EST_FINI`.
 - Aucun changement de production n'a été justifié par ces contrôles; le compte rendu est la seule modification de cette reprise. Aucune question nouvelle pour Anthony.
+
+### Reprise 57
+
+- Test ajouté : « Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat », qui rend la cérémonie avec un historique vide et vérifie les six avis d'absence de lauréat.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (26/26); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); test présent dans `test` et `test:watch`; `git diff --check` (vert).
+- Fichier de tranche modifié : `tests/mgmtLot55T1.test.js` (test de rendu sans candidats). Pas de modification de production, sauvegarde ou migration.
+- Les points non certifiés restent : fidélité intégrale aux planches, déclencheur à chaque anniversaire (l'enchaînement suit la fin du contrat), trois saisons complètes réellement jouées, fixture complète de sauvegarde ancienne et test lent `mgmtReleveReduit`. Aucun changement de code ne les rendrait honnêtement satisfaits dans cette seule vérification ciblée.
+- Les changements préexistants de `.opencode/agents/*` et `opencode.json` sont étrangers et exclus du commit.
