@@ -32,9 +32,10 @@ test('Monde lot 53 T1 — la vue résultat affiche sa carte passable puis fait a
   try{
     w.eval(`setSeed(5305);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
     jouerSoirees(w,1);
-    const r=w.eval(`(()=>{G.screen='mgmt_soiree';const i=MGMT_SOIREE.index;mgmtVueCombatChoisir(i,'resultat');CL.mgmtSoRegarder();return {avant:i,apres:MGMT_SOIREE.index,screen:G.screen};})()`);
+    const r=w.eval(`(()=>{G.screen='mgmt_soiree';const i=MGMT_SOIREE.index,original=setTimeout;let delai=0;window.setTimeout=(fn,ms)=>{delai=ms;return 1;};mgmtVueCombatChoisir(i,'resultat');CL.mgmtSoRegarder();window.setTimeout=original;return {avant:i,apres:MGMT_SOIREE.index,screen:G.screen,delai};})()`);
     assert.equal(r.apres,r.avant);
     assert.equal(r.screen,'mgmt_soiree');
+    assert.equal(r.delai,5000);
     assert.match(w.eval(`document.getElementById('app').innerHTML`),/so3-resultat/);
     w.eval(`CL.mgmtSoResultatContinuer()`);
     assert.equal(w.eval(`MGMT_SOIREE.index`),r.avant+1);

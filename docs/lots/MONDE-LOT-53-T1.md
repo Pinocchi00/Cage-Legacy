@@ -292,6 +292,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18.
 - Aucun effet sur le moteur de combat ou la sauvegarde.
 
+### Reprise 41 — durée de la carte résultat
+
+- Renforcement du test « Monde lot 53 T1 — la vue résultat affiche sa carte passable puis fait avancer la soirée » : il contrôle maintenant explicitement que le minuteur planifie la suite à 5 000 ms, sans attendre cinq secondes dans le test.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18.
+
 ### Reprise 40 — intégration de la suite et bilan de validation
 
 - `tests/mgmtLot53T1.test.js` est maintenant explicitement ajouté aux commandes `test` et `test:watch` de `package.json`; les scripts ciblés dédiés restent présents.
