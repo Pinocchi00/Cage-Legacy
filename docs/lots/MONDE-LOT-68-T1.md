@@ -46,4 +46,12 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Versions : aucun fichier applicatif JS/CSS modifié durant cette reprise, donc aucun bump nécessaire. Migration de sauvegarde : aucune. Tests ciblés verts ; contrôle de versions et lint restent à exécuter avant livraison.
 - Écart principal : la demande de fidélité écran par écran et le critère complet de fin ne sont pas atteints. Aucun écart de spécification ajouté ; les limites de validation visuelle sont explicites.
 
+### Reprise 5 du 24/10/2026
+
+- Historique et branche vérifiés : branche `fid-fiches` ; les commits du lot 68 T1 étaient déjà présents et aucun fichier de la tranche n'était non committé. Les modifications `.opencode/agents/*` et `opencode.json` sont restées hors du périmètre.
+- Capture tentée pour `fiche` avec l'outil indiqué dans `%TEMP%` : planche `UniFicheStats`, mesure retournée `{moyen:31.3, grosBlocs:23}`. La lecture de `cmp-fiche.png` reste refusée par les permissions de lecture externe ; je n'en déduis donc pas de diagnostic visuel et n'ai pas retouché l'écran à l'aveugle. L'outil fourni ne propose pas les écrans arrivée, menu, relevé, chiffres ou classements dans sa liste de scènes.
+- Test ciblé relancé : `node --test tests/mgmtFicheStats.test.js` (11/11 verts). Les tests préexistants et les trois tests ajoutés dans les reprises précédentes couvrent fiche/statistiques et blocs recruteur, mais ne remplacent pas la comparaison visuelle ni la couverture des autres écrans.
+- Écrans, état honnête : Aperçu et Statistiques conservent les changements déjà committés (dont les colonnes explicites) ; apparence non validée visuellement. Arrivée contrat/espoirs non traitée. Recruteur mission/retours : tests de présence de blocs et de styles, aucune validation visuelle. Semaine, Relevé, chiffres du combat, Menu, Meilleurs et Records : non traités/non capturés.
+- Pas de migration de sauvegarde ni de changement de version applicative dans cette reprise. Les cases 1 (validation visuelle), 2 à 7 ne sont donc pas toutes achevées ; je ne déclare pas `TOUT_EST_FINI`.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
