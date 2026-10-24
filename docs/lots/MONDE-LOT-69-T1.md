@@ -683,3 +683,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `node --test tests/mgmtLot69T1.test.js` passe 4/4. `node tools/verif-versions.js origin/main` passe (20 fichiers) et `node_modules/.bin/eslint .` passe.
 - Fichiers modifiés : cette fiche uniquement. Aucun test ajouté, aucune migration. Les changements utilisateur `.opencode/agents/*`, `opencode.json` et `sw.js` demeurent exclus.
 - Écarts persistants : cible de gros blocs du choc manquée, chevauchement bilan non corrigé, arrivée sans capture dédiée ni comparaison visuelle ouverte. Les résultats de tests attestent les fonctionnalités existantes, pas la conformité complète des planches. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 87 — noms et médaillons du choc
+- Reproduction demandée effectuée : scène choc valide affichée via `shoot.js` ; zéro chevauchement, texte sous 22 px ou débordement. L'écran n'est pas blanc dans cette scène. La mesure reste au-dessus de l'objectif : `grosBlocs=25.1%` avant la retouche.
+- `ui-cadre.css` rétablit les tailles de la planche UniChoc pour le titre (46 px), les noms des combattantes (46 px) et le médaillon octogonal de catégorie (54 px). Le test ciblé passe 4/4. La capture choc après modification reste géométriquement saine mais `grosBlocs=26.1%` : le seuil ≤20 % n'est pas atteint, l'ajustement est donc consigné comme écart plutôt que conformité.
+- Capture discours après cette modification : `grosBlocs=18.1%`, aucun chevauchement, texte inférieur à 22 px ou débordement. L'arrivée dédiée et la capture bilan n'ont pas été reproduites lors de cette étape ; les écarts déjà documentés restent ouverts.
+- Fichiers modifiés : `ui-cadre.css` (tailles du bandeau et des affrontements choc), `index.html` (`?v=` monté par `_bump.js`), cette fiche (mesures). Tests ajoutés : aucun. Aucune migration de sauvegarde.
+- Aucune image n'a été ouverte pour comparaison visuelle. Écart précis : les noms et médaillons gagnent en fidélité dimensionnelle, mais la densité mesurée du choc s'aggrave de 25.1 % à 26.1 % ; pas de prétention d'achèvement global.
