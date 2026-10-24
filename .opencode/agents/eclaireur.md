@@ -1,7 +1,7 @@
 ﻿---
 description: Cherche dans le code de Cage Legacy et rend une rÃ©ponse courte (fichier:ligne, signature, appelants). Ã€ appeler au lieu d'ouvrir soi-mÃªme beaucoup de fichiers. Lecture seule.
 mode: subagent
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 steps: 25
 permission:
   edit: deny
