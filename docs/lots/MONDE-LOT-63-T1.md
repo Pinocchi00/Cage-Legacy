@@ -283,6 +283,12 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - La suite inter-lots demandée (lots 54, 63, actualités, 55, 57, 48 et 56) passe **130/130**, notamment les deux régressions lot 54 de rivalité enregistrée et d'anti-répétition. `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe.
 - Aucun changement de sauvegarde ni migration. Les seuls fichiers de la tranche restent `mgmt-apres-data.js`, `mgmt-ecran-lendemain.js`, `tests/mgmtLot63T1.test.js` et `package.json`, déjà commités ; limite de couverture inchangée : les familles sont aussi éprouvées par faits préparés dans un parcours réel, sans prouver que tous les systèmes les produisent naturellement.
 
+### Reprise 8 — validation finale (24/10/2026)
+
+- La suite inter-lots prescrite des sept fichiers passe **130/130**, dont les deux régressions du lot 54. `node tools/verif-versions.js origin/main` ne relève aucun écart ; ESLint global passe ; inclusion du test de tranche dans `test` et `test:watch` confirmée (`true,true`).
+- `git merge origin/main` a été tenté, mais bloqué par la règle d'exécution de l'environnement (`git merge*` interdit). La fusion demeure à effectuer par le superviseur ; les tests ont donc validé l'état courant, sans prétendre que l'intégration a eu lieu.
+- Aucun changement de production, de tests ni de sauvegarde requis ; aucune migration. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et exclues. Limite de couverture maintenue : faits familiaux préparés sur un parcours réel sans démonstration de leur génération naturelle par chaque système de jeu.
+
 ### Reprise 9 — revalidation inter-lots (24/10/2026)
 
 - Branche `p8-apres` confirmée. La suite des sept tests demandés passe **130/130**, dont les deux régressions du lot 54 signalées. `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint global passe et `mgmtLot63T1` figure dans `test` et `test:watch` (`true,true`).
