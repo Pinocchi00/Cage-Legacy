@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
 
 function partie(){
   const w=newGameWindow({runMain:true});
@@ -42,6 +43,16 @@ test('Monde lot 57 T1 — le classement reste relié au classement mondial sur t
     assert.equal(r.saisons.length,3);
     for(const saison of r.saisons){assert.equal(saison.length,8);assert.deepEqual(saison.map(x=>x[1]),[1,2,3,4,5,6,7,8]);}
     assert.equal(new Set(r.saisons.flatMap(s=>s.map(x=>x[0]))).size,8);
+  }finally{w.close();}
+});
+
+test('Monde lot 57 T1 — trois soirées réellement jouées gardent les huit organisations classées',()=>{
+  const w=partie();
+  try{
+    const jouees=jouerSoirees(w,3);
+    assert.equal(jouees,3);
+    const rangs=JSON.parse(w.eval(`JSON.stringify(mgmtGuerreClassement(G.mgmt).map(x=>x.rang))`));
+    assert.deepEqual(rangs,[1,2,3,4,5,6,7,8]);
   }finally{w.close();}
 });
 
