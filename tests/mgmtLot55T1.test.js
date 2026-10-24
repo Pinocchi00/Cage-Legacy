@@ -228,7 +228,8 @@ test('Lot 55 T1 — les formulations de cérémonie ne se répètent pas sur cin
       phrases.add(prix.phrase);
     }
   }
-  assert.equal(phrases.size,200);
+  /* Décision du lot 62 (brief du 22/10, P11 T1) : le retour de l’année exige une interruption réelle entre deux combats, sans seuil fixe ; il est donc décerné aussi dans cette simulation : cinq prix par année, 250 phrases distinctes. */
+  assert.equal(phrases.size,250);
 });
 test('Lot 55 T1 — une partie générée valide le champ facultatif des prix à la sauvegarde',()=>{
   const w=newGameWindow({runMain:true});
