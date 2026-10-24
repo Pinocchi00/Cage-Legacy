@@ -470,3 +470,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (28/28), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés) et `node_modules/.bin/eslint .` (vert).
 - Contrôle des critères encore non couverts selon les reprises précédentes : le test lent `mgmtReleveReduit`, trois saisons intégralement jouées, une fixture historique complète de sauvegarde et certification visuelle intégrale aux planches restent à vérifier. Aucun changement de sauvegarde ni migration n'est attendu dans cette reprise.
 - Les écarts qui ne sont pas corrigés ne sont pas déclarés satisfaits; les modifications d'outillage étrangères ne sont pas ajoutées.
+
+### Reprise 61
+
+- État d'entrée : branche `p11-ceremonie-carnet`, HEAD `5da7dc6` (commit final demandé déjà présent); les seules modifications préexistantes sont `.opencode/agents/*` et `opencode.json`, hors périmètre et laissées intactes.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (28/28 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert); `git diff --check` (vert); le test figure dans `test` et `test:watch`.
+- Tentative de `node --test tests/mgmtReleveReduit.test.js` : délai maximal de l'outil atteint à 120 secondes; aucun résultat vert n'est revendiqué.
+- Aucun changement métier à ajouter sans réouvrir une réalisation dont le diff est déjà commité. Les limites connues restent : test de plafond non achevé, pas de preuve de trois saisons intégralement jouées ni de fixture historique complète chargée, fidélité intégrale aux planches non certifiée et déclenchement anniversaire non établi (le raccordement existant est au terme du contrat). Aucune migration de sauvegarde.
+- Seul ce compte rendu est ajouté lors de cette reprise; aucun fichier d'outillage étranger n'est inclus. Ces critères non certifiés interdisent de déclarer la tranche intégralement terminée.
