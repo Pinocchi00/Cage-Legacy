@@ -331,3 +331,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Branche `p8-apres` confirmée ; les fichiers de code, tests et package de la tranche sont déjà committés. Vérifications exécutées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; `test` et `test:watch` incluent le test (`true,true`).
 - Aucun changement de sauvegarde ni migration. Les dix familles, leur calcul déterministe/borné, l'accueil/presse et les mouvements d'organisation sont présents. Limite : les tests préparent les faits familiaux sur le parcours réel sans prouver que chaque système les produit naturellement.
 - Cette fiche est le seul fichier de tranche à inclure au commit. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et la différence de cache de `index.html` sont étrangères et exclues. Pas de nouvel écart ni question pour Anthony.
+
+### Reprise 12 — validation et commit (24/10/2026)
+
+- Code et tests de tranche déjà commités : `mgmt-apres-data.js` (catalogue), `mgmt-ecran-lendemain.js` (calcul, accueil et mouvements), `mgmt-actualites.js` (fil de presse), `index.html`, `tests/mgmtLot63T1.test.js` et `package.json`. Seule cette fiche est modifiée dans cette reprise.
+- Vérifications fraîches : test ciblé 9/9 ; `tests/mgmtReleveReduit.test.js` 6/6, 1 908 745 octets ; `node tools/verif-versions.js origin/main` sans écart ; ESLint global passe ; `test` et `test:watch` contiennent le test (`true,true`).
+- Aucune modification de sauvegarde ni migration. Limite de couverture : les tests préparent chaque fait sur une partie créée via le parcours réel, sans démontrer que chaque système opérationnel les produit naturellement. Aucun écart nouveau ni question pour Anthony.
+- Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et variation de cache `index.html` exclues comme étrangères à la tranche.
