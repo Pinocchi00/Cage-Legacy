@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 6 — remontée d’échelle et captures — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `72fd45be`; aucun changement local de fichier de tranche. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` demeurent hors périmètre et n’ont pas été ajoutées.
+- `ui-cadre.css` : nouvelle règle terminale rétablit le nom des moments à 80 px pour la première carte et 64 px pour les deux autres, et agrandit les détails. `index.html` version CSS montée via `node tools/_bump.js ui-cadre.css`.
+- Tests : `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Capture 1920×1080 après le changement : `lendemain` grosBlocs 21 %, textes sous 22 px 0, débordements aucun, un chevauchement signalé (« Soumission au round 1, Rear » / « LES CHIFFRES »); `lendemainSuite` grosBlocs 17,6 %, textes sous 22 px 0, zéro chevauchement, quatre débordements de libellés variables dans les mouvements. Le score objectif et l'absence totale de collisions ne sont pas atteints.
+- Le nom principal est réglé à 80 px et les deux autres à 64 px via CSS; aucun résultat d’inspection JavaScript des computed styles n’est revendiqué. Les comparaisons ont été régénérées sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Aucun changement de données, navigation, mécanique ou sauvegarde; aucune migration. Avant/après : l’écran conserve la composition des planches avec une échelle de cartes renforcée; le score de gros blocs et les alertes ci-dessus restent des écarts connus. Aucun test nouveau.
+- Fichiers modifiés : `ui-cadre.css` (échelle et présentation), `index.html` (version de cache), cette fiche (compte rendu). Questions pour Anthony : aucune.
+
 ### Reprise — capitales des trois moments — 24/10/2026
 
 - Branche `fid-lendemain` confirmée ; le code fonctionnel de la tranche était déjà commité. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intacts.
