@@ -498,6 +498,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan p,.ce3-bilan li{margin:0;font-size:22px}
 .ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
 .ce3-bilan ul{grid-template-columns:repeat(2,minmax(0,1fr));padding-left:28px;list-style:disc}
+/* ==== [ANCRE: MONDE67_T1_CEREMONIE_DIMENSIONS_PLANCHE] — Monde lot 67 T1 ==== */
+.ce3-ecran{left:300px;top:20px;width:1564px;height:1040px;padding:0;gap:16px;overflow:hidden}
+.ce3-entete{height:64px;flex:none}
+.ce3-grille{height:760px;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:16px}
+.ce3-prix-combattant{grid-row:1 / span 2}
+.ce3-bilan{height:150px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_MOUVEMENT_TEXTE] — Monde lot 67 T1 ==== */
 .gu3-mouvement{min-width:0;overflow-wrap:anywhere;line-height:1.2}
 /* ==== [ANCRE: MONDE67_T1_GUERRE_TEXTE_RIVALE] — Monde lot 67 T1 ==== */

@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 12
+
+- Branche `fid-organisation` confirmée ; historique consulté et arbre propre avant intervention. Les commits précédents étaient déjà présents.
+- Retouche CSS ciblée de la cérémonie d'après `UniCeremonie` : l'écran reprend la géométrie d'en-tête et les dimensions verticales de la planche, les quatre cartes secondaires forment deux rangées et la carte principale occupe les deux rangées. Version du CSS montée dans `index.html` ; `sw.js` généré par l'outil a été restauré et exclu.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` (47/47), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Fichiers modifiés : `ui-cadre.css` (dimensions/grille de la cérémonie), `index.html` (version de cache), cette fiche. Migration : aucune.
+- Limites : la capture `cmp-ceremonie.png` et son ouverture n'ont pas été réalisées ; je ne certifie donc pas visuellement le résultat, ni le rendu avec six prix, ni les autres vues croissance, Carnet, Ton poste et Bilan. Les défauts mesurés aux reprises précédentes ne sont pas tous réputés clos. Aucune autre correction de ces écrans n'est revendiquée ; pas de `TOUT_EST_FIN`.
+
 ## Compte rendu — reprise 11 (24/10/2026)
 
 - Branche `fid-organisation` confirmée ; historique et état Git consultés. Les commits applicatifs antérieurs étaient déjà présents et aucun changement non commité au début de cette reprise.
