@@ -18,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise — vérification de capture — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. Les commits fonctionnels sont déjà présents ; les modifications préexistantes des agents/configuration et `sw.js` sont restées hors de la tranche.
+- Relu le guide `shoot`. Capture `lendemain` relancée après changement de portée responsive : zéro chevauchement, zéro texte sous 22 px, aucun débordement, mais `grosBlocs=22,5 %` (objectif de reprise ≤18 % non atteint). Les cartes ont toujours des noms stylés à 80/64 px et 285 px; aucune mesure runtime des computed styles n’a été réalisée ici. La capture `lendemainSuite` antérieure détectait encore quatre débordements variables de mouvements.
+- `ui-cadre.css` ajoute une largeur responsive à partir de 1800 px; `index.html` version CSS incrémentée par `_bump.js`. Test ciblé `mgmtEcranLendemain.test.js` : 7/7.
+- Avant/après : le contenu reste conforme à la structure livrée des deux planches; la capture après l’ajustement n’améliore pas le ratio gros blocs. Les défauts persistants de seuil et de libellés suite sont rapportés honnêtement, aucune conformité visuelle complète n’est revendiquée. Pas de donnée, mécanique ou sauvegarde modifiée, aucune migration.
+- Fichiers modifiés : `ui-cadre.css` (règle de largeur responsive), `index.html` (cache), cette fiche (compte rendu). Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ### Reprise 21 — capture et vérifications — 24/10/2026
 
 - État à la reprise : branche `fid-lendemain`, HEAD `e3b29d57`; l'implémentation et les tests de la tranche sont déjà commités. Modifications `.opencode/agents/*`, `opencode.json` et `sw.js` déjà présentes : laissées intactes et hors tranche.
