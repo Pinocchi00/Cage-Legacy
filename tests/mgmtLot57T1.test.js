@@ -197,3 +197,14 @@ test('Monde lot 57 T1 — une organisation hostile reste échappée dans le tabl
     assert.match(html,/&lt;img src=x onerror=alert\(1\)&gt;/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — la clé guerre reste facultative et une valeur malformée est réparée',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const ancien=mgmtDefault('Split');const sans=Object.hasOwn(ancien,'guerre');const valideSans=validateMgmt(ancien);const avec=mgmtDefault('Split');avec.guerre={ev:[],rival:null,depuis:0};const valideAvec=validateMgmt(avec);avec.guerre={ev:'cassé',rival:'organisation-inconnue',depuis:-1};mgmtRepair(avec);return JSON.stringify({sans,valideSans,valideAvec,repare:!Object.hasOwn(avec,'guerre')});})()`));
+    assert.equal(result.sans,false);
+    assert.equal(result.valideSans,true);
+    assert.equal(result.valideAvec,true);
+    assert.equal(result.repare,true);
+  }finally{w.close();}
+});
