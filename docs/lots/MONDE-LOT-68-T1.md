@@ -286,6 +286,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun défaut signalé par le contrôle dans ces trois scènes ; aucune modification de balisage/styles n'est justifiée à l'aveugle. Les mesures ne sont pas une validation visuelle des planches et ne couvrent pas les autres scènes requises. Semaine, accueil, actualités, tonposte, bilan et les scènes ajoutées (arrivée, relevé, chiffres, menu, classements) restent à contrôler ; accueil/actualités/tonposte/bilan restent hors périmètre applicatif de cette tranche.
 - Aucune modification de JS/CSS ou test lors de cette reprise ; aucun bump `?v=` ni migration de sauvegarde. Les cases d'écran et la livraison globale ne sont donc pas achevées ; `TOUT_EST_FIN` n'est pas revendiqué.
 
+### Reprise 39 du 24/10/2026
+
+- Vérifications ciblées relancées : `node --test tests/mgmtFicheStats.test.js` (22/22 verts), `node --test tests/mgmtReleve.test.js` (5/5 verts) ; `node tools/verif-versions.js origin/main` : aucun écart.
+- Les changements des reprises précédentes sont déjà committés ; aucun fichier applicatif/test de cette tranche n'est actuellement en attente. Les changements `.opencode/agents/*` et `opencode.json` restent hors périmètre, non ajoutés.
+- Contrôle de capture demandé : les chemins `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` et `cmp-*.png` sont bloqués par l'accès externe dans cette session. Je ne rapporte donc aucun contrôle nouveau ni résultat après-correction. Les seuls résultats géométriques disponibles restent ceux de la reprise 38 : fiche, recruteur, retours à zéro ; aucun résultat exploitable pour les autres écrans.
+- État écran par écran : fiche Aperçu/Statistiques, Recruteur mission/retours et Semaine gardent les contrôles géométriques antérieurs documentés, sans comparatif ouvert ; arrivée contrat/espoirs, Relevé, chiffres du combat, Menu, Meilleurs et Records n'ont pas de contrôle nouvellement établi. Accueil, Actualités, Ton poste et Bilan restent hors périmètre applicatif demandé, aucune modification faite.
+- Aucun changement JS/CSS ou sauvegarde ; pas de migration ni de bump `?v=`. La fidélité comparative et la mesure complète de tous les écrans restent inachevées ; je ne revendique pas `TOUT_EST_FINI`.
+
 ### Reprise 34 du 24/10/2026
 
 - Branche confirmée : `fid-fiches`. Les changements préexistants `.opencode/agents/*` et `opencode.json` restent hors tranche ; `sw.js` a été rétabli depuis `origin/main` conformément à la consigne.
