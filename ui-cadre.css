@@ -1999,6 +1999,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
    mfEcran porte déjà le titre et l'échéance de la planche. Le contenu commence
    dessous : pas de second bandeau superposé aux pièces communes. ==== */
 .ch3-screen{top:128px;height:856px;grid-template-rows:56px minmax(0,1fr);gap:14px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_AFFICHES_SEPAREES] — Monde lot 69 T1 ====
+   Chaque affrontement constitue son propre bloc, comme les trois rangées de la planche. ==== */
+.ch3-fight{background:none;padding:0}
+.ch3-fight>.ch3-paire{background:#1B1818;padding:0 20px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);border:0}
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}

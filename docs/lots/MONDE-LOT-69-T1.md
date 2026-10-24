@@ -452,3 +452,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (19 fichiers examinés) ; `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde ni migration.
 - Écarts toujours ouverts : choc `grosBlocs` au-dessus du seuil; chevauchement du bilan non corrigé par les règles essayées; parcours strict fin de contrat/rechargement identique non démontré et comparaisons de capture arrivée/offre non faites. La capture choc confirme désormais un contenu visible sans chevauchement et le test fait jouer trois paires réelles.
 - Les modifications préexistantes sous `.opencode/agents/` et `opencode.json` restent hors de cette tranche. Les modifications CSS déjà présentes sans changement utile après normalisation des fins de ligne ne sont pas une raison de les inclure séparément.
+
+### Reprise 70 — rangées d'affiches séparées
+- `ui-cadre.css` donne maintenant un panneau individuel à chaque affrontement plutôt qu'un fond commun à toute la colonne, selon les trois rangées de la planche ; le test d'écran verrouille ce découpage. `index.html` a été versionné via `_bump.js`.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Capture `choc` : 0 chevauchement, 0 texte sous 22 px, 0 débordement, mais `grosBlocs=25.6%` (mesure précédente 24.8 %, donc cette modification n'améliore pas le seuil). Le changement est conservé pour ses blocs séparés mais la cible visuelle reste non atteinte.
+- Fichiers modifiés : `ui-cadre.css` (séparation visuelle des trois affiches), `index.html` (cache), `tests/mgmtLot69T1.test.js` (régression de structure), cette fiche. Aucune migration.
