@@ -326,3 +326,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `ui-cadre.css` et son cache `index.html`, présente fiche.
 - Test : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
 - Non fait : cette correction typographique n'est pas le portage complet de la maquette. Restent la recomposition complète de l'écran/fin, les fenêtres fortes temporisées/fondues, le cumul de référence dans 900–1200 s (mesure antérieure 868,38 s), et les autres lacunes des reprises antérieures. Le lot n'est pas achevé.
+
+### Reprise 45 — indication clavier du sélecteur de vue
+
+- Fait : le contrôle de vue sur chaque ligne de combat indique désormais au survol son raccourci clavier `V`, en complément de son libellé accessible qui donne l'état actif. La commande reste le cycle de vue existant, sans modification des données de sauvegarde.
+- Fichiers : `mgmt-soiree-cadre.js` (aide du bouton), `index.html` (version cache), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18 réussis.
+- Toujours incomplet : les écarts substantiels consignés plus haut demeurent, en particulier le portage intégral des maquettes, le cumul de référence dans la cible 900–1200 s et la lecture réelle synchronisée sur fenêtres. Cette amélioration d'accessibilité n'est pas présentée comme l'achèvement des cases restantes.
