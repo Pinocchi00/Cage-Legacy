@@ -499,3 +499,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Outil `shoot` et images comparatives hors des chemins autorisés dans cette session ; aucun contrôle frais ni ouverture de `cmp-*.png` n'est revendiqué. Les derniers résultats connus sont ceux de la reprise 47 : fiche, recruteur, retours et semaine sans anomalie géométrique. Ils ne sont pas des mesures fraîches. Aucune mesure établie pour arrivée, relevé à l'écran, chiffres, menu, meilleurs ou records.
 - Bilan écran par écran : Fiche Statistiques, recruteur, retours, semaine — géométrie historiquement contrôlée à zéro, fidélité comparative non validée ; Aperçu — pas de mesure distincte ; arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs, records — contrôle visuel non établi. Pas de diagnostic visuel inventé ni de code applicatif retouché à l'aveugle.
 - Aucun test/donnée/fichier JS ou CSS modifié : pas de migration ni de bump `?v=`. Le critère de contrôle géométrique frais sur tous les écrans et de comparaison des maquettes reste inachevé ; `TOUT_EST_FIN` non revendiqué.
+
+### Reprise 50 du 24/10/2026 — état courant
+
+- Branche `fid-fiches` confirmée. `git log --oneline -12` montre que les commits fonctionnels déjà effectués sont présents (`4f8770fb` en tête). `git status` montre seulement `.opencode/agents/*` et `opencode.json`, changements hors tranche laissés intacts.
+- La fiche signale le placement du suivi dans la rangée des onglets ; le contrôle géométrique historique associé est à zéro pour fiche, recruteur, retours et semaine. Les autres scènes listées (arrivée, relevé, chiffres, menu, classements) restent sans mesure documentée dans le dépôt.
+- Cette reprise n'a pas pu accéder à l'instruction/captureur externe ni aux images comparatives : aucun résultat `CONTRÔLE` frais, aucune image ouverte, aucun écart visuel prétendument observé. Pas de changement de code ou de test fait à l'aveugle.
+- Tests ciblés et contrôle versions/lint restent à relancer dans cette reprise. Le critère visuel de la fiche (comparaison et contrôle de toutes les scènes) demeure incomplet ; aucun `TOUT_EST_FIN` revendiqué.
