@@ -77,3 +77,13 @@ test('Monde lot 58 T1 — le choc refuse un partenaire sans champion de la caté
   assert.equal(r.hasChampion,true);
   if(r.hasOther){assert.equal(r.proposed,false);assert.equal(r.received,false);}
 });
+
+test('Monde lot 58 T1 — le refus des offres laisse poursuivre puis renouveler le contrat',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);const id=mgmtPredecesseurOrgId(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');const offres=mgmtOffresCreer(m);offres.forEach((_,i)=>mgmtOffreRefuser(m,i));mgmtOffresAttendre(m);const refus=offres.every(o=>o.refuse);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const bilan=mgmtPosteBilan(m);const poste=mgmtPosteRenouveler(m,bilan.issue);return {id,actif:mgmtPredecesseurOrgId(m),refus,issue:bilan.issue,poste:!!poste,valid:validateMgmt(m)}})())`));
+  assert.equal(r.id,r.actif);
+  assert.equal(r.refus,true);
+  assert.equal(r.issue,'prolonge-augmente');
+  assert.equal(r.poste,true);
+  assert.equal(r.valid,true);
+});
