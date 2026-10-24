@@ -482,6 +482,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
 /* ==== [ANCRE: MONDE67_T1_MOUVEMENT_TEXTE] — Monde lot 67 T1 ==== */
 .gu3-mouvement{min-width:0;overflow-wrap:anywhere;line-height:1.2}
+/* ==== [ANCRE: MONDE67_T1_GUERRE_TEXTE_RIVALE] — Monde lot 67 T1 ==== */
+.gu3-rivale small{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.15}
 /* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */
