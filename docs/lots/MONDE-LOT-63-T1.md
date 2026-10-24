@@ -60,6 +60,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 5 — contrôle et livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée. `git log --oneline -12` montre les commits fonctionnels antérieurs ; aucun fichier de production/test de cette tranche n'est non commité. Seule cette fiche est modifiée pour ce bilan.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit de `test` et `test:watch` renvoie `true,true`.
+- Aucun changement de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; les reprises antérieures documentent une réussite à 1 908 745 octets, sous le plafond.
+- Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangers à la tranche et exclus. Limite de couverture maintenue : les tests déclenchent les faits des familles sur une partie créée par le chemin réel, sans démontrer que chaque système opérationnel produit naturellement chacun de ces faits. Aucun autre écart ni question pour Anthony.
+
 ### Reprise 34 — clôture contrôlée (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les commits de code/test sont déjà présents dans l'historique. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` sans écart, `node_modules/.bin/eslint .` passe et l'inclusion dans `test`/`test:watch` est confirmée (`true,true`).
