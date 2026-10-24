@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 13
+
+- Branche `fid-organisation` confirmée ; l'historique et l'arbre de travail ont été consultés. Aucun changement applicatif non commité n'était présent au début de cette reprise.
+- Ajustement CSS ciblé de Carnet : chaque carte de contenu sépare maintenant titre et lignes, conserve des espacements visibles et autorise le défilement interne des cartes denses. `index.html` porte le nouveau `?v=`. Le bump a touché `sw.js` automatiquement ; le fichier a été restauré depuis `origin/main` et n'est pas inclus.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (47/47), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucune migration de sauvegarde.
+- Fichiers modifiés : `ui-cadre.css` (lisibilité des cartes Carnet), `index.html` (cache CSS), cette fiche. Tests ajoutés : aucun ; le test existant `Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; chaque classe de cérémonie a une règle de style` est vert.
+- Limites non résolues : pas de capture ni d'ouverture visuelle des `cmp-*.png` dans ce tour, pas de scène prouvant les prix remplis/rivale forcée, et les défauts précédemment mesurés sur Guerre, Croissance, Carnet et Bilan ne sont pas clos par cette retouche isolée. Je ne revendique ni la validation des cases visuelles ni `TOUT_EST_FIN`. Aucune migration ; aucune question de spécification.
+
 ## Compte rendu — reprise 12
 
 - Branche `fid-organisation` confirmée ; historique consulté et arbre propre avant intervention. Les commits précédents étaient déjà présents.
