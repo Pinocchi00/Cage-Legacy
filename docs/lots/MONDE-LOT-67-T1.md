@@ -17,6 +17,8 @@ Branche : `fid-organisation` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
+- Reprise 24 : correction additionnelle dans `ui-cadre.css` : le sélecteur d'ordinal visait un `<b>` enfant direct alors que le markup le place dans `section`; il cible maintenant `.ce3-bilan>div>section>b`. Test ciblé ajouté. `node --test tests/mgmtLot55T1.test.js` passe (43/43), `node tools/verif-versions.js origin/main` ne signale aucun écart; ESLint ciblé ne produit aucune erreur (tests ignorés par ESLint). `tools/_bump.js ui-cadre.css` a monté `?v=` dans `index.html`; la modification automatique de `sw.js` a été annulée. Aucune capture/inspection `cmp-*.png` n'a été possible dans ce tour. Les mesures et constats visuels antérieurs restent non vérifiés directement. Restent non réalisés : captures de six prix et rivalité forcée, corrections/cible gros blocs Guerre/Ton poste/Cérémonie, comparaison des vues et test lent Lot 57. Aucun changement de sauvegarde ; aucun `TOUT_EST_FINI` revendiqué.
+
 - Modifiés : `mgmt-ecran-organisation.js` ajoute le composant partagé `mgmtOrgOnglets` et l'affiche sur Organisation ; `mgmt-guerre-ecran.js` affiche les onglets sur le classement ; `mgmt-ecran-poste.js` les affiche sur Ton poste ; `mgmt-ceremonie.js` les ajoute à la cérémonie et Carnet ; `ui-cadre.css` ajoute les styles d'onglets, des cartes ce3 et réduit le risque de chevauchement des cellules du classement. Versions `?v=` actualisées par `tools/_bump.js`.
 - Tests : `tests/mgmtLot55T1.test.js` passe (41 tests) et `tests/mgmtLot57T1.test.js` passe (33 tests, 110 s). Vérification `node tools/verif-versions.js origin/main` passée.
 - Pas de changement de sauvegarde.

@@ -434,3 +434,13 @@ test('Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix',()=>{
   ];
   assert.deepEqual(JSON.parse(JSON.stringify(c.mgmtCeremonieCalculer({hist}))),[]);
 });
+
+test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles dédiés',()=>{
+  const fs=require('node:fs');
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.ce3-bilan>div>section>b\s*\{/);
+  assert.doesNotMatch(css,/\.ce3-bilan>div>b\s*\{/);
+  for(const classe of ['ce3-entete','ce3-prix-combattant','ce3-bilan','ce3-prix']){
+    assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'));
+  }
+});

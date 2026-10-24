@@ -465,7 +465,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan>div>strong{font:800 110px/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
 .ce3-bilan>div>section{display:flex;flex-direction:column;gap:8px;min-width:0}
 .ce3-bilan h2{margin:0;font-size:24px;line-height:1;color:rgba(233,230,225,.74)}
-.ce3-bilan>div>b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
+.ce3-bilan>div>section>b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
 .ce3-bilan p,.ce3-bilan li{margin:0;font-size:22px}
 .ce3-bilan ul{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;margin:0;padding-left:24px;color:#F0B220}
 /* ==== [FIN ANCRE] ==== */
