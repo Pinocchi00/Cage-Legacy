@@ -17,6 +17,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise 17 — état : incomplet.** Branche `p9-renvoi-offres` confirmée ; historique et statut examinés. Les changements hors tranche dans `.opencode/agents/*` et `opencode.json` sont préservés.
+  - **Fichiers modifiés :** `tests/mgmtLot58T1.test.js` renforce le parcours refus puis renouvellement, et `package.json` fait aussi exécuter le test via les hooks `pretest` et `pretest:watch`.
+  - **Tests/contrôles :** `node --test tests/mgmtLot58T1.test.js` passe (4/4) ; ESLint de production ciblé ne donne aucune erreur (le test est ignoré par ESLint). `node tools/verif-versions.js origin/main` signale l'écart préexistant de `ui-cadre.css`, sans lien avec cette reprise.
+  - **Limites vérifiées :** le parcours E2E maintenant renforcé refuse des offres valides avant renouvellement, mais il doit encore être rendu réellement génératif. Le test n'est pas littéralement présent dans les chaînes `test` et `test:watch` (il est inclus dans leurs hooks préalables). Le choc des organisations — proposition/réponse, date de l'agenda, combat, bonus, classement, fil de presse et écran `ch3-` conforme — n'est pas implémenté. Aucun test d'ancienne sauvegarde/plafond n'a été ajouté.
+  - **Écarts à la fiche :** cases 1 à 4 et 6 restent incomplètes ; l'étude T5 de la reprise antérieure reste présente. Pas de changement du format de sauvegarde. Aucune prétention de conformité à la maquette `UniChoc`.
+  - **Décision locale :** les scripts `pretest` et `pretest:watch` exécutent maintenant le nouveau test ciblé, sans réécrire les longues chaînes des tests agrégés. Le test de renouvellement établit deux offres valides, puis mesure le refus et la continuité de contrat ; la génération réelle d'offres dans ce chemin demeure à réparer.
+  - **Questions pour Anthony :** aucune ajoutée ; les détails du choc sont donnés par les précisions superviseur.
+
   - **Reprise 16 — état : incomplet.** Branche `p9-renvoi-offres` confirmée ; commits antérieurs consultés. Changements locaux `.opencode/agents/*` et `opencode.json` préservés, hors tranche.
   - **Modification :** `mgmt-poste.js` sélectionne les organisations de rang approprié selon l'issue réelle du bilan (renvoi vers plus petit, prolongation vers plus grand). `index.html` version cache montée par `_bump.js`.
   - **Tests/contrôles :** `node --test tests/mgmtLot58T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` relève seulement l'ancien écart `ui-cadre.css` contre `origin/main`.
