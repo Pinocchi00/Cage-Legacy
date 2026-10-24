@@ -324,3 +324,15 @@ test('Monde lot 57 T1 — le bilan annuel ne dégrade pas la confiance ni les va
     assert.equal(r.apres.eventsPlayed,r.avant.eventsPlayed);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — une nouvelle année peut être clôturée après une clôture idempotente',()=>{
+  const w=partie();
+  try{
+    const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const premiere=mgmtGuerreFinAnnee(m,1);const doublon=mgmtGuerreFinAnnee(m,1);const suivante=mgmtGuerreFinAnnee(m,2);return JSON.stringify({premiere,doublon,suivante,annee:m.guerre.anneeTraitee,valid:validateMgmt(m)});})()`));
+    assert.equal(r.premiere.applique,true);
+    assert.equal(r.doublon.applique,false);
+    assert.equal(r.suivante.applique,true);
+    assert.equal(r.annee,2);
+    assert.equal(r.valid,true);
+  }finally{w.close();}
+});
