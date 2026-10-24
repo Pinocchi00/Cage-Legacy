@@ -127,6 +127,14 @@ test('Monde lot 68 T1 — chaque classe de la planche menu a une règle',()=>{
   const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
 });
+test('Monde lot 68 T1 — les chiffres de combat gardent les métriques comparées et le relevé par round',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-combat-chiffres.js'),'utf8');
+  for(const metric of ['taille','allonge','sigParMin','precision','encaisseParMin','defense','ameneesPar15','defenseAmenee','controlePar15'])
+    assert.ok(js.includes(`'${metric}'`),`métrique ${metric}`);
+  assert.match(js,/parRound=s\.r\.map/);
+  assert.match(js,/total:\{a,b\}/);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);

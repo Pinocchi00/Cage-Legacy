@@ -147,3 +147,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - État écran par écran : fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans validation comparative visuelle. La couverture est structurelle/tests uniquement ; les corrections visuelles écran par écran demandées restent à faire.
 - Migration : aucune. Aucun fichier applicatif JS/CSS modifié ; pas de bump `?v=`. Tests lents non relancés lors de cette reprise.
 - Écart à la fiche : critère de fidélité visuelle et cases 1 à 5 non achevés ; `TOUT_EST_FINI` non atteint.
+
+### Reprise 18 du 24/10/2026
+
+- Ajout dans `tests/mgmtFicheStats.test.js` du test « Monde lot 68 T1 — les chiffres de combat gardent les métriques comparées et le relevé par round », couvrant les métriques de face-à-face et le résumé par round. Décision citée : planches Uni validées par Anthony ; l'écran suit la planche.
+- Tests : `node --test tests/mgmtFicheStats.test.js` (19/19 verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; `node_modules/.bin/eslint .` (vert).
+- Aucun JS/CSS applicatif modifié, donc pas de bump `?v=` et aucune migration. Le fichier de capture externe et comparatifs restent non accessibles ici : aucune comparaison visuelle ni correction de maquette n'est revendiquée.
+- État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records ne sont pas confirmés visuellement par comparaison. Le test chiffres couvre les métriques des données mais ne valide pas l'écran. Les corrections visuelles et captures prescrites restent à faire ; pas de `TOUT_EST_FINI`.
