@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 57
+
+- Branche `fid-organisation` confirmée. L'historique des douze commits et l'état Git ont été consultés ; les changements précédents étaient déjà committés.
+- Correction du résumé de rang en cérémonie : le suffixe ordinal « e » n'est plus agrandi à la même taille que le chiffre (la maquette demande un grand « 3e » mais sans mot illisible). Règle typographique dédiée ajoutée.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (46/46). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Cache JS/CSS monté via `_bump.js`; `sw.js` restauré et exclu.
+- Limites restantes : cette session n'a pas réussi à ouvrir/lancer le protocole de capture externe, donc aucune capture ni inspection nouvelle des `cmp-*.png` n'est revendiquée. Les reprises antérieures mesurent encore des défauts (Guerre 22,9 %, Croissance/Carnet/Bilan avec débordements ou collisions) et ne démontrent pas une scène avec six prix visibles. La fidélité visuelle des six écrans et le critère complet de la tranche ne sont donc pas certifiés.
+- Fichiers modifiés : `mgmt-ceremonie.js` (ordinal de rang), `ui-cadre.css` (taille du suffixe), `index.html` (versions cache), cette fiche (compte rendu). Migration de sauvegarde : aucune. Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ## Compte rendu — reprise 56
 
 - Branche `fid-organisation` confirmée ; HEAD `153ebd14`, arbre propre au début. Le code de l'étape précédente était déjà commité.

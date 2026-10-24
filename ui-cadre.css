@@ -489,6 +489,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-bilan>div,.ce3-bilan>article{min-width:0;padding:14px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;justify-content:center;gap:8px}
 .ce3-bilan>div{flex-direction:row;align-items:center;gap:22px}
 .ce3-bilan>div>strong{font:800 110px/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
+.ce3-bilan>div>strong small{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;vertical-align:baseline}
 .ce3-bilan>div>section{display:flex;flex-direction:column;gap:8px;min-width:0}
 .ce3-bilan h2{margin:0;font-size:24px;line-height:1;color:rgba(233,230,225,.74)}
 .ce3-bilan>div>section>b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:nowrap}
