@@ -98,3 +98,19 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérification ciblée : `node --test tests/mgmtFicheStats.test.js`, 15/15 verts. Une première assertion a révélé que le titre ne porte pas de classe `title-logo` ; le test a été ajusté aux vrais blocs du markup (`mf-accueil-*`). Aucun JS/CSS applicatif modifié, aucun bump de version ou migration.
 - Captures/écarts visuels : pas de capture comparative ouverte, instructions sous `%TEMP%` inaccessibles dans le contexte et scène capture dédiée non établie. Ainsi aucune fidélité visuelle n'est revendiquée. Fiche aperçu/statistiques : changements antérieurs, visuel non validé ; Arrivée contrat/espoirs : non corrigée/validée ; Recruteur mission/retours : structure/styles partiellement testés, visuel non validé ; Semaine : couverture CSS seulement ; Relevé, chiffres du combat, menu, Meilleurs et Records : pas de comparaison visuelle (menu désormais couvert structurellement par test, non par capture).
 - Limites : cases de corrections écran par écran et validation visuelle restent inachevées. Les différences visuelles précises ne sont pas affirmées sans accès au comparatif. Migration de sauvegarde : aucune. Tests lents : `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
+
+### Reprise 12 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. Historique : les commits du lot déjà présents ; aucun fichier de tranche non committé. Modifications `.opencode` et `opencode.json` hors tranche laissées intactes.
+- `node --test tests/mgmtFicheStats.test.js` : 15/15 verts. Cela confirme les tests structure/style existants, pas une comparaison visuelle.
+- Lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` refusée par les permissions de l'environnement. Aucun `cmp-*.png` n'a pu être ouvert ; aucune correction d'apparence à l'aveugle.
+- État écran par écran : Aperçu/Statistiques (colonnes et structure couvertes par tests, fidélité visuelle non validée) ; Arrivée contrat/espoirs, Recruteur mission/retours, Semaine, Relevé, Chiffres, Menu, Meilleurs et Records (non validés visuellement ; certaines structures/classes testées, corrections et comparaisons restent à faire). Différences visuelles précises non établies.
+- Aucune migration de sauvegarde, modification JS/CSS, ni bump `?v=`. Le critère visuel complet et la livraison ne sont pas atteints ; pas de déclaration `TOUT_EST_FINI`.
+
+### Reprise 13 du 24/10/2026
+
+- Ajout de « Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux étapes » dans `tests/mgmtFicheStats.test.js`. Le test vérifie la présence des blocs contrat/espoirs et de règles CSS correspondantes dans les styles définis par l'écran d'arrivée, conformément à la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (16/16 verts) ; `node tools/verif-versions.js origin/main` (aucun écart). ESLint ciblé a ignoré le fichier de test selon sa configuration (warning, aucune erreur).
+- Capture et comparaison visuelle : non réalisées ; le fichier temporaire externe indiqué pour l'outil n'a pas été accessible dans ce contexte, et aucun comparatif ouvert ne permet un constat écran par écran.
+- État écran par écran : Fiche Aperçu/Statistiques : tests et correction antérieure des colonnes, fidélité visuelle non validée. Arrivée contrat/espoirs : blocs/styles couverts par tests, apparence non validée. Recruteur mission/retours : tests de classes/blocs antérieurs, pas de validation visuelle. Semaine : couverture des classes seulement. Relevé, chiffres du combat, menu, Meilleurs et Records : non comparés visuellement ; menu a une couverture structurelle partielle.
+- Aucun JS/CSS applicatif modifié, donc aucun bump `?v=` ; aucune migration de sauvegarde. Cases de corrections et comparaisons visuelles restent inachevées ; aucun `TOUT_EST_FINI`.

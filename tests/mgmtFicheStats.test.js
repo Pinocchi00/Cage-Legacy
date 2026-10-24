@@ -86,6 +86,15 @@ test('Monde lot 68 T1 — chaque classe des écrans arrivée, relevé et classem
   assert.ok(classes.length>0);
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),name);
 });
+test('Monde lot 68 T1 — arrivée contrat et espoirs garde les blocs des deux étapes',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const js=fs.readFileSync(require.resolve('../mgmt-ecran-espoirs-arrivee.js'),'utf8');
+  for(const block of ['po-flow','po-card','po-title','po-meta','po-objectif','po-note','ma-panel','ma-side','ma-title','ma-lines','ma-leila','ma-counter','ma-intro','ma-cards','ma-card','ma-name','ma-record','ma-stats','ma-status','ma-enter'])
+    assert.match(js,new RegExp(`\\b${block}\\b`),`bloc ${block}`);
+  const inlineStyles=[...js.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(match=>match[1]).join('\n');
+  for(const block of ['po-flow','po-card','po-title','po-meta','po-objectif','po-note','ma-panel','ma-side','ma-title','ma-lines','ma-leila','ma-counter','ma-intro','ma-cards','ma-card','ma-name','ma-record','ma-stats','ma-status','ma-enter'])
+    assert.match(inlineStyles,new RegExp(`\\.${block}(?:[\\s.#:[,{>+~]|\\{)`),`style ${block}`);
+});
 test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
   const w=monde(), screens=JSON.parse(w.eval('JSON.stringify(Object.keys(SCREENS))'));
