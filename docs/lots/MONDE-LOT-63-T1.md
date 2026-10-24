@@ -515,6 +515,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit des scripts `test` et `test:watch` renvoie `true,true`.
 - Aucun changement de sauvegarde ni migration. Fichiers déjà livrés : `mgmt-apres-data.js` (dix familles de formulations `relu:false`), `mgmt-ecran-lendemain.js` (calcul déterministe, Accueil/presse et mouvements inter-organisations), `tests/mgmtLot63T1.test.js` (neuf tests) et `package.json` (scripts). Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
 - Limite de couverture : les tests préparent isolément chaque fait familial sur une partie créée par le chemin réel ; ils ne démontrent pas que tous les systèmes opérationnels génèrent naturellement chacun de ces faits. Aucun écart nouveau ni question pour Anthony.
+
+### Reprise 10 — contrôle demandé (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits de production et tests de tranche sont déjà présents ; les modifications locales des agents, `opencode.json` et `sw.js` restent étrangères et exclues.
+- Suite inter-lots prescrite exécutée : **130/130 réussis**, y compris les tests lot 54 de rivalité enregistrée et de non-répétition sur cinquante semaines. `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe.
+- La commande `git merge origin/main` est refusée par la politique d'exécution (`git merge*` interdite) ; aucune fusion n'est revendiquée, elle reste au superviseur.
+- `tests/mgmtReleveReduit.test.js` n'a pas achevé dans le délai maximal de 300 secondes ; aucun succès frais n'est revendiqué. Les reprises précédentes consignent son passage à 1 908 745 octets. Aucun changement de sauvegarde ni migration.
+- Cette reprise ne change que le compte rendu. Limite de couverture inchangée : les faits familiaux sont préparés sur une partie du parcours réel, sans prouver leur génération naturelle par tous les systèmes opérationnels.
 - Reprise 17 (24/10/2026) : branche `p8-apres` confirmée ; les commits antérieurs de tranche contiennent déjà le catalogue, le calcul, l'affichage, les mouvements rivaux et les tests ciblés. Les modifications locales `.opencode/agents/*`, `opencode.json`, `index.html` et `sw.js` restent étrangères et ne sont pas ajoutées.
 - Correction de l'inscription des tests : `mgmtLot63T1.test.js` figure maintenant directement dans les scripts agrégés `test` et `test:watch` (en plus des hooks déjà présents). Vérification explicite : `true,true`.
 
