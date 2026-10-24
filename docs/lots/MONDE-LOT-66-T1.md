@@ -186,3 +186,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Capture relancée après le changement sur les deux écrans. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, moyen 25,9 %, gros blocs 18,4 %. `lendemainSuite` : chevauchements 0, textes sous 22 px 0, mais débordements persistants (« Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen »), moyen 22,7 %, gros blocs 16,9 %.
 - Case visuelle 4 encore non satisfaite : le contenu des mouvements de la suite continue de déborder après cette correction. Pas de changement de mécanique/sauvegarde. Images régénérées sous `C:/Users/antho/AppData/Local/Temp/shots/`; pas d'inspection manuelle revendiquée.
 - Questions pour Anthony : aucune; poursuivre l'ajustement de la suite à la prochaine reprise, sans masquer ni tronquer ces lignes.
+
+### Reprise 29 — essai suite des mouvements — 24/10/2026
+
+- La suite conservait quatre débordements du comparateur précédent. Tenté une disposition verticale des rangs et noms dans `ui-cadre.css`, avec retour à la ligne forcé; cache CSS augmenté dans `index.html`.
+- Vérifications : `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node --test tests/mgmtLot54T1.test.js` (30/30), `node tools/verif-versions.js origin/main` et ESLint passent.
+- Capture post-correction de `lendemainSuite` : chevauchements 0, textes sous 22px 0, mais quatre débordements demeurent (`14ᵉ → 24ᵉ`, `chez Split`, nom et division). Gros blocs 16,1 %. La tentative n'a donc pas atteint le critère visuel complet; la disposition plus verticale est un écart de maquette et doit être reprise, non tenue pour une solution finale.
+- Aucun changement sauvegarde/mécanique. Fichiers de configuration locaux et `sw.js` exclus du commit.
