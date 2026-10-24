@@ -117,7 +117,7 @@ function mgmtArriveeOuvrir(){
 }
 function scr_mgmt_arrivee(){
   const m=G&&G.mgmt; if(!m) return scr_mgmt_parties();
-  if(mgmtSoireesJoueur(m)>0) return scr_mgmt_accueil();
+  if(mgmtSoireesJoueur(m)>0&&!MGMT_ARRIVEE_CHANGEMENT) return scr_mgmt_accueil();
   const org=mgmtOrgNom(m);
   const orgObj=mgmtOrgParNom(org);
   const ident=orgObj?mgmtOrgIdentite(orgObj.id):null;
@@ -305,10 +305,14 @@ function scr_mgmt_arrivee(){
   return mfEcran(contenu,{barre:'logo',m,plaque:'Ton arrivée',libelle:'',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeOuvrir()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
+/* ==== [ANCRE: MONDE_LOT61_T1_ARRIVEE_CHANGEMENT] — Monde lot 61 T1 ====
+   Une arrivée après mobilité réutilise l'écran historique sans altérer la
+   sauvegarde ni faire croire que la carrière recommence. ==== */
+let MGMT_ARRIVEE_CHANGEMENT=false;
 
 Object.assign(CL,{
   mgmtArriveeOuvrir,
-  mgmtArriveeFin(){ if(G.mgmt&&mgmtSoireesJoueur(G.mgmt)===0&&!(G.mgmt.passe&&G.mgmt.passe.enCours)&&(!Array.isArray(G.mgmt.espoirs)||!G.mgmt.espoirs.length)&&!Array.isArray(G.mgmt.espoirsPropose)){mgmtEspoirsFixer(G.mgmt);saveMgmt();mgmtEspArriveeOuvrir(1,'mgmt_carte');return;} if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
+  mgmtArriveeFin(){ if(MGMT_ARRIVEE_CHANGEMENT){MGMT_ARRIVEE_CHANGEMENT=false;return CL.go('mgmt_accueil');} if(G.mgmt&&mgmtSoireesJoueur(G.mgmt)===0&&!(G.mgmt.passe&&G.mgmt.passe.enCours)&&(!Array.isArray(G.mgmt.espoirs)||!G.mgmt.espoirs.length)&&!Array.isArray(G.mgmt.espoirsPropose)){mgmtEspoirsFixer(G.mgmt);saveMgmt();mgmtEspArriveeOuvrir(1,'mgmt_carte');return;} if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
 });
 keysRegister('mgmt_arrivee',{ ArrowUp(){mgmtArriveeChoisir(-1,false);}, ArrowDown(){mgmtArriveeChoisir(1,false);}, Tab(e){mgmtArriveeChoisir(e&&e.shiftKey?-1:1,true);}, Enter(){mgmtArriveeOuvrir();}, Escape(){CL.go('mgmt_accueil');} });
 /* ==== [FIN ANCRE] ==== */
