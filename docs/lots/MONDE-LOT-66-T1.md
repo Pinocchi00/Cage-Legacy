@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 55 — échelle et nouvelle capture — 24/10/2026
+
+- Branche `fid-lendemain` confirmée, tête initiale `9f4636c3`; les changements de tranche étaient déjà commités. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et restent non ajoutées.
+- La règle terminale pour l'échelle des cartes du lendemain était déjà présente : cartes à 285 px, noms 80 px / 68 px, détails à 30 px. À la capture 1920×1080, après ajustement de l'espacement et du détail, les noms sont toujours au-dessus de 64 px. Captures : `lendemain` gros blocs 19,2 %, moyen 25,7 %, 3 chevauchements résiduels (collision minime de touches du bas avec un titre de constat); `lendemainSuite` gros blocs 16,7 %, moyen 22,5 %, zéro chevauchement et zéro texte sous 22 px, mais 4 débordements restent signalés sur le nom/division/rang/organisation d'un mouvement.
+- Changements conservés : `ui-cadre.css` ajoute des règles de contenu pour éviter le débordement des cartes supérieures et ajuste les cellules des mouvements ; version CSS montée dans `index.html` par `_bump.js`. La correction de césure des mouvements n'a pas modifié les quatre alertes du comparateur ; elles ne sont donc pas déclarées résolues. Les captures comparatives sont générées sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Test ciblé après les modifications : `mgmtEcranLendemain.test.js` (7/7). Aucune donnée, mécanique, sauvegarde ni migration modifiée. Écart à la fiche : case de contrôle visuel partielle en raison des chevauchements (lendemain) et débordements (suite) consignés ci-dessus.
+- Vérifications de livraison : `mgmtLendemainDemo.test.js` (7/7), `mgmtLot54T1.test.js` (30/30), `mgmtLot48T1.test.js` (9/9), `mgmtSoireeShow.test.js` (18/18), audit `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Questions pour Anthony : aucune.
+
 ### Reprise 54 — remontée d’échelle des cartes — 24/10/2026
 
 - État vérifié : branche `fid-lendemain`, HEAD `8b837aea`; code de la tranche déjà livré, seuls fichiers hors tranche préexistants étaient les agents/configuration et `sw.js`.
