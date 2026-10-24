@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 56 — ajustement d’échelle et contrôle — 24/10/2026
+
+- État initial : branche `fid-lendemain`, HEAD `00612c41`; aucun code de tranche non commité. Seules les modifications hors tranche déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont exclues.
+- Modifié `ui-cadre.css` : rétablie la taille typographique des cartes du lendemain après les surcharges compactes qui les réduisaient à 32 px (noms 80 px / 64 px) ; cache CSS monté dans `index.html`. Les cartes ont été mesurées à 255 px après capture pour réduire l'empiètement vertical, malgré l'objectif de planche d'environ 285 px.
+- Captures exécutées à 1920×1080 : `lendemain` grosBlocs 18,4 %, textes sous 22 px 0, débordements 0, mais le contrôle note 4 chevauchements (un détail de combat contre « LES CHIFFRES » et trois chevauchements d'en-tête/touches de la scène de capture). `lendemainSuite` grosBlocs 16,7 %, textes sous 22 px 0, aucun chevauchement, mais quatre débordements de la ligne de mouvement (nom, division, rang, organisation). Fichiers comparatifs sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30) et `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et ESLint passent.
+- Avant/après : le rendu de la structure demeure celui des planches; l'échelle des noms est remontée à au moins 64 px, mais le contrôle capture atteste des collisions/débordements résiduels ci-dessus. La case visuelle n'est donc pas revendiquée comme entièrement satisfaite. Aucun changement de sauvegarde, moteur ou mécanique.
+- Questions pour Anthony : aucune.
+
 ### Reprise 55 — échelle et nouvelle capture — 24/10/2026
 
 - Branche `fid-lendemain` confirmée, tête initiale `9f4636c3`; les changements de tranche étaient déjà commités. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors périmètre et restent non ajoutées.
