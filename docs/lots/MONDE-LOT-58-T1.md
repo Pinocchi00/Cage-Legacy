@@ -24,6 +24,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise 6 — raccordement initial du choc
+- Modifié : `mgmt-corps.js` remplace le dernier combat principal de la soirée datée par le combat champion contre champion mémorisé dans `m.choc`, le passe par `mgmtFightReady`/`simulateFight` comme les autres combats, attribue un bonus de 25 % de billetterie et enregistre résultat/compteur de prestige sur l'organisation partenaire en cas de victoire. Cache de `mgmt-corps.js` monté.
+- Vérification : `node --test tests/mgmtLot58T1.test.js` vert (15/15).
+- Non terminé : le nouveau branchement n'a pas encore son test bout-en-bout d'exécution. Le champ `chocPrestige` est une donnée de résultat, pas encore consommée par le classement existant. Le fil de presse et l'écran `UniChoc` conforme à la maquette ne sont pas codés. Le contrôle plafond et sauvegarde ancienne complète restent à réaliser. Cases 3, 4, 6 et 7 restent incomplètes.
+- Décision/écart : faute de prise en charge d'une valeur externe par le classement, le résultat de victoire est conservé via `m.orgs[id].chocPrestige` ; aucune règle de combat supplémentaire n'est ajoutée. L'affichage reste à faire.
+
 ### Reprise 5 — vérification de l'état conservé
 - Fichiers métier/test : aucun nouveau fichier modifié dans cette reprise ; le travail déjà commité est resté intact.
 - Tests ciblés : `node --test tests/mgmtLot58T1.test.js` passe (15/15). Le nom du test est bien explicitement présent dans `test` et `test:watch`.
