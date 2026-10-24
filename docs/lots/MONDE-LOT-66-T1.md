@@ -249,3 +249,9 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tentative de réglage fidèle aux trois colonnes de mouvements : largeur des colonnes de rang/organisation augmentée et retrait de la largeur forcée sur leurs enfants (`ui-cadre.css`), version CSS montée via `_bump.js`. La mesure automatique n'a pas changé : ces quatre débordements restent non résolus. Aucune conformité visuelle complète n'est revendiquée.
 - `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLot54T1.test.js` (30/30) passent ; `node tools/verif-versions.js origin/main` et ESLint passent. Aucun changement de sauvegarde/mécanique.
 - Fichiers modifiés : `ui-cadre.css` (règles de largeur/retour des mouvements) et `index.html` (cache), cette fiche. Tests ajoutés : aucun ; tests existants inchangés. Migration : aucune. Écart : débordements signalés sur la suite non corrigés malgré l'essai. Questions pour Anthony : aucune.
+
+### Reprise 38 — capture et contrôle — 24/10/2026
+
+- Guide de capture relu. Captures séparées: `lendemain` contrôle à 0 chevauchement, 0 texte sous 22 px, aucun débordement; `grosBlocs` 18,4 %, moyen 25,9 %. `lendemainSuite`: 0 chevauchement, 0 texte sous 22 px, mais quatre débordements (`Poids léger`, `Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`); `grosBlocs` 17 %, moyen 22,7 %.
+- Tentative temporaire de retour à la ligne plus agressif dans les mouvements de la suite : résultat de capture inchangé, règle annulée pour ne pas conserver un changement sans effet. Les défauts précédemment signalés sur les libellés de mouvement restent ouverts et la case visuelle 4 n'est pas intégralement satisfaite.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de donnée, mécanique ou sauvegarde. Les fichiers de configuration/agents et `sw.js` restent hors tranche et ne sont pas inclus.
