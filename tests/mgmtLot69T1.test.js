@@ -12,7 +12,7 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
     const renduOffre=w.eval(`mgmtPosteRendu(G.mgmt)`);
     for(const raison of ['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(renduOffre.includes(raison),`raison d'offre absente: ${raison}`);
      const ancien=w.eval(`mgmtOrgNom(G.mgmt)`);
-     const serialized=w.eval(`(()=>{const m=G.mgmt,ok=mgmtOffreAccepter(m,0);G.mgmt=m;return ok?'OK:'+mgmtSerialiser(m):'NON'})()`);
+      const serialized=w.eval(`(()=>{const m=G.mgmt,ok=mgmtOffreAccepter(m,0);G.mgmt=m;return ok?'OK:'+mgmtSerialiser(m):'NON'})()`);
     assert.notEqual(serialized,'NON');
     assert.equal(w.eval(`G.screen`),'mgmt_arrivee');
     const org=w.eval(`mgmtPredecesseurOrgId(G.mgmt)`);
