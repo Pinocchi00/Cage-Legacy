@@ -8,6 +8,15 @@
 - Limites : accès au protocole/cmp de capture externe refusé par l'environnement ; pas de capture ni d'ouverture visuelle revendiquée. Ce test ne corrige ni ne valide les écarts consignés sur Croissance, Carnet, Guerre, les captures de cérémonie avec prix, ou les autres vues. La tranche reste visuellement non certifiée ; `TOUT_EST_FINI` n'est pas revendiqué.
 - Fichiers : `tests/mgmtLot55T1.test.js` (test des onglets et styles) et cette fiche (compte rendu). Questions pour Anthony : aucune ; les éléments visuels restent à mesurer/corriger.
 
+## Compte rendu — reprise 18
+
+- Branche `fid-organisation` confirmée ; HEAD `50a3dfc6`, arbre propre. Aucun fichier applicatif non commité n'était à reprendre.
+- Protocole de capture lu et lancé individuellement pour les six : Guerre (`grosBlocs=22,9 %`, contrôles automatiques à zéro), Croissance (`17,2 %`, 3 textes sous 22 px, 4 dépassements), Ton poste (`19,8 %`, contrôles automatiques à zéro), Carnet (`15,1 %`, 84 chevauchements, 4 dépassements), Bilan (`12,9 %`, chevauchement REMERCIÉ/aide) et Cérémonie (`21,2 %`, contrôles automatiques à zéro). La commande groupée a dépassé le délai après Guerre, les écrans restants ont été recapturés séparément. Les `cmp-*.png` sont produits hors du dépôt mais ne sont pas ouvrables par l'outil de lecture autorisé dans cet environnement.
+- Inspection des planches HTML : la cérémonie attend une carte combattant, quatre cartes secondaires et le bilan inférieur ; le HTML de production comprend les cinq cartes, les effets et la navigation clavier Entrée. Cette inspection ne remplace pas l'ouverture visuelle des comparatifs.
+- Aucun correctif visuel sûr n'a été apporté dans cette reprise : les défauts de Croissance et Carnet ont été reproduits, mais leur cause géométrique précise ne peut être attribuée sans ouvrir le comparatif. La cérémonie reste au-dessus de la cible de gros blocs. La scène de capture avec prix remplis et le cas Guerre avec rivale déterministe ne sont pas établis.
+- Modifications de code/tests/migration/cache : aucune. Le journal seul a été actualisé. Vérifications ciblées et commit à effectuer avant livraison.
+- Écarts non clos : les cibles visuelles des six écrans et l'inspection explicite de `cmp-ceremonie.png` ne sont pas satisfaites ; aucune conclusion `TOUT_EST_FIN`.
+
 ## Compte rendu — reprise 15
 
 - Branche `fid-organisation` confirmée ; `git status` était propre et les douze derniers commits consultés sont déjà commités. Aucun changement applicatif non commité n'était à reprendre.
