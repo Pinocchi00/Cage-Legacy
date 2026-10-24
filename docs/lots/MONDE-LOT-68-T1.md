@@ -286,6 +286,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Les valeurs de similarité (`moyen`/`grosBlocs`) ne valent pas validation visuelle. Les comparatifs PNG n'ont pas été ouverts. Les scènes arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records ne sont pas disponibles dans les scènes du captureur utilisé et n'ont pas reçu de contrôle automatique dans cette reprise.
 - État honnête : les contrôles géométriques disponibles pour fiche, recruteur, retours et semaine sont sans anomalie, mais le protocole de comparaison visuelle reste incomplet ; les autres écrans cités restent sans contrôle visuel propre. Cases de fidélité et critère final non achevés ; pas de `TOUT_EST_FINI`. Aucun JS/CSS ou test changé, donc aucun bump `?v=` ni migration.
 
+### Reprise 42 du 24/10/2026
+
+- Reprise demandée après commits `19f15987`, `dfc5c184` et précédents ; branche confirmée `fid-fiches`. `git status` montre uniquement des modifications préexistantes dans `.opencode/agents/*` et `opencode.json`, hors tranche, non touchées.
+- Tests ciblés relancés : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts). `node tools/verif-versions.js origin/main` : aucun écart. `node_modules/.bin/eslint .` : vert.
+- Les résultats géométriques disponibles les plus récents restent ceux de la reprise 40 : fiche, recruteur, retours et semaine chacun `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}`. Je ne peux pas produire de mesure fraîche ni ouvrir les PNG dans cette session ; le chemin temporaire `/tmp/p1/shoot` est refusé par l'accès externe et n'est pas un chemin autorisé par l'outil de lecture. Je n'attribue donc pas de nouveaux résultats aux écrans.
+- État écran par écran : fiche Aperçu/Statistiques, recruteur mission/retours et semaine ont ces contrôles historiques à zéro mais restent sans comparaison d'image vérifiable ici ; arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records n'ont aucun contrôle géométrique nouveau. Accueil, actualités, tonposte et bilan restent hors périmètre applicatif et leurs anomalies historiques ne sont pas modifiées.
+- Pas de changement applicatif ni de test dans cette reprise, aucune migration ni aucun bump `?v=`. Cases de fidélité comparative 1 à 5 toujours incomplètes ; les tests verts et contrôles de versions/lint ne remplacent pas ces critères. Aucun `TOUT_EST_FINI`.
+
 ### Reprise 41 du 24/10/2026
 
 - Branche `fid-fiches` confirmée. Les commits fonctionnels précédents sont déjà présents ; les modifications locales de `.opencode/agents/*` et `opencode.json` sont hors tranche, non ajoutées et laissées intactes.
