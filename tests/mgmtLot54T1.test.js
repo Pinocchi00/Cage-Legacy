@@ -136,6 +136,16 @@ test('Monde lot 54 T1 — l’après ne nomme une suspension que si la soirée l
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — l’après ne répète pas une formulation pour un combattant sur cinquante semaines',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const texts=w.eval(`(()=>{const m=G.mgmt,f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),side=x=>({id:x.id,name:x.name,last:x.last,first:x.first,div:x.div,W:x.W,L:x.L,D:x.D}),out=[];for(let week=1;week<=50;week++){const c=m.cycle+week;m.hist.push({c,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(g)});m.lastEvent={cycle:c,fights:[],touched:[],finance:{}};out.push(...mgmtLendemainApres(m,c+1).filter(x=>x.texte.includes(f.name)).map(x=>x.texte));}return out;})()`);
+    assert.ok(texts.length>1);
+    assert.equal(new Set(texts).size,texts.length);
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — le cadre du lendemain intègre les trois moments et le récit',()=>{
   const w=newGameWindow({runMain:true});
   try{

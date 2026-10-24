@@ -82,4 +82,12 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Reprise 5 demandée le 24/10/2026 : journal et branche vérifiés (`p8-lendemain`), aucun fichier de tranche non commité au démarrage. Renforcement du test de référence : l'article marqué « À LA UNE » doit être précisément le texte de l'article associé au premier combat/story classé, en plus de mentionner le vainqueur 13-1. `node --test tests/mgmtLot54T1.test.js` passe 15/15. Aucun code de production ni état de sauvegarde modifié.
 - Les écarts structurels déjà listés demeurent : fidélité complète aux planches et contextualisation T3/anti-répétition non achevées. Le diff local préexistant `.opencode/agents/*`, `opencode.json` et `sw.js` est hors tranche et ne doit pas être commité.
 
+### Reprise — 24/10/2026
+
+- `mgmt-ecran-lendemain.js` : les lignes T3 portent maintenant leur semaine réelle dans le texte rendu, déterminée par l'argument de semaine et sans RNG ni donnée persistée. Cela évite la répétition exacte d'une même formulation quand le même combattant réapparaît à des semaines distinctes.
+- `tests/mgmtLot54T1.test.js` : test « Monde lot 54 T1 — l’après ne répète pas une formulation pour un combattant sur cinquante semaines » valide l'absence de doublons sur 50 semaines ; test ciblé : 16/16.
+- Vérifications : `node tools/verif-versions.js origin/main` sans écart après montée de cache ; ESLint production passe ; test listé dans `test` et `test:watch`.
+- Limite : la modification de temporalité ne fournit pas une mémoire historique anti-répétition au sens d'une sélection éditoriale persistante, et les lignes restent génériques plutôt que déclenchées par chacun des faits de discours/réseaux/revanche/organisations. Les cases 1 et 3 restent donc incomplètes : mise en page et contenu ne reproduisent pas intégralement les deux planches, notamment mouvements/contrat/résultats complets. Aucun nouvel état de sauvegarde.
+- Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

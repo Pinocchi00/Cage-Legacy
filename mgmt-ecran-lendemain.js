@@ -255,7 +255,9 @@ function mgmtLendemainApres(m,semaine){
     const f=combattants[(decal+i)%combattants.length], nom=f.name||f.last||'Combattant';
     const item=MGMT_LD_APRES_FAMILLES[(Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length)+i)%MGMT_LD_APRES_FAMILLES.length];
     if(item.famille==='suspension'&&!(m.lastEvent.touched||[]).some(x=>x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
-    result.push({famille:item.famille,texte:item.texte.replaceAll('{nom}',nom),relu:false});
+    /* La semaine fait partie du fait temporel : elle distingue une reprise
+       ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */
+    result.push({famille:item.famille,texte:`${item.texte.replaceAll('{nom}',nom)} (semaine ${semaine})`,relu:false});
   }
   return result;
 }
