@@ -894,3 +894,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - La commande prescrite `git merge origin/main` a été tentée, mais la politique de l'environnement la refuse. Aucun merge n'est prétendu ; l'intégration reste à effectuer par le superviseur.
 - La suite ciblée prescrite passe **130/130** : tests des lots 54, 63, Actualités, 55, 57, 48 et 56, y compris les deux régressions du lot 54.
 - `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit aux scripts `test` et `test:watch` (`true,true`). Pas de changement de sauvegarde ni migration. Limite de couverture inchangée : les dix familles sont déclenchées par des faits préparés sur une partie créée par le chemin réel, sans prouver leur production naturelle par tous les systèmes opérationnels.
+
+### Reprise finale 4 — vérifications demandées (24/10/2026)
+
+- Branche `p8-apres` confirmée ; historique et statut inspectés. Les changements de production/tests de la tranche sont déjà commités, et aucun fichier fonctionnel non commité n'est à reprendre. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et exclues.
+- La commande ciblée prescrite pour les lots 54, 63, Actualités, 55, 57, 48 et 56 passe **130/130** ; les deux régressions du lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines) passent.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe. La fusion `git merge origin/main` n'a pas pu être exécutée : la politique de l'environnement bloque toute commande `git merge*`; aucune fusion n'est revendiquée, l'intégration reste au superviseur.
+- Aucun changement de sauvegarde ni migration. La limite de couverture demeure : les tests déclenchent les dix familles à partir de faits préparés sur une partie issue du parcours réel, sans prouver que chaque système opérationnel génère naturellement ces faits. Cette reprise ne change que le compte rendu de la fiche.
