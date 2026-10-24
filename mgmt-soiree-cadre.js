@@ -198,8 +198,8 @@ function mgmtSoEntreHtml(m,prog,index,focus){
 function mgmtSoResultatSeulHtml(m,p){
   const d=mgmtResultatDetail(m,p.h), gagnant=d&&d.gagnant, perdant=d&&d.perdant;
   const resultat=d?(d.nul?'Match nul':`${mfNet(gagnant.last||gagnant.name)} bat ${mfNet(perdant.last||perdant.name)}`):'Résultat enregistré';
-  const methode=d?d.methode:'Combat terminé', round=d?mgmtRoundTexte(d):'';
-  return mfEcran(`<main class="mf-contenu"><section class="so3-resultat"><div class="so3-resultat-titre">RÉSULTAT</div><h1>${esc(resultat)}</h1><div class="so3-resultat-meta">${esc(methode)}${round?' · '+esc(round):''}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'})}</section></main>`,{barre:'jeu',grise:true,m,touches:[{ks:['Échap','Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'}]});
+  const methode=d?d.methode:'Combat terminé', round=d?mgmtRoundTexte(d):'', temps=d&&d.temps?d.temps:'';
+  return mfEcran(`<main class="mf-contenu"><section class="so3-resultat"><div class="so3-resultat-titre">RÉSULTAT</div><h1>${esc(resultat)}</h1><div class="so3-resultat-meta">${esc(methode)}${round?' · '+esc(round):''}${temps?' · '+esc(temps):''}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'})}</section></main>`,{barre:'jeu',grise:true,m,touches:[{ks:['Échap','Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoResultatContinuer()'}]});
 }
 /** L'avant-combat : un côté (ce qu'on a vu, ce qu'on ne sait pas, son dernier combat, trois chiffres publics). */
 function mgmtSoCoteHtml(c,couleur){

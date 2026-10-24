@@ -41,6 +41,17 @@ test('Monde lot 53 T1 — la vue résultat affiche sa carte passable puis fait a
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la carte résultat indique le temps de la finition ou du dernier round',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5313);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt)[0],d=mgmtResultatDetail(G.mgmt,p.h);return {temps:d.temps,html:mgmtSoResultatSeulHtml(G.mgmt,p)};})()`);
+    assert.match(r.temps,/^\d{1,2}:\d{2}$/);
+    assert.ok(r.html.includes(`· ${r.temps}`));
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitions',()=>{
   const w=newGameWindow({runMain:true});
   try{

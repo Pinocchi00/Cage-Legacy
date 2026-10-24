@@ -283,3 +283,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Ajout du test « Monde lot 53 T1 — toutes les classes so3 des écrans ont une règle de style ». Il collecte les classes `so3-*` rendues par l'ouverture, l'entre-deux, la fin et le résultat, puis exige un sélecteur CSS pour chacune.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 17/17 réussis.
 - L'audit de classes ne couvre pas les classes préexistantes `mf-*`; elles restent les règles existantes du cadre.
+
+### Reprise 39 — temps sur la carte résultat
+
+- Fait : le détail d'un combat expose maintenant le temps de finition exact du rejeu fidèle; une décision ou un nul sans temps de fin affiche 5:00, temps du dernier round complet. La carte résultat seul affiche cette valeur après la méthode et le round.
+- Fichier ajouté au changement : `mgmt-suivi.js` (champ dérivé `temps` dans le détail du résultat), plus `mgmt-soiree-cadre.js`, `index.html` (versions) et le test ciblé.
+- Test ajouté : « Monde lot 53 T1 — la carte résultat indique le temps de la finition ou du dernier round ».
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 18/18.
+- Aucun effet sur le moteur de combat ou la sauvegarde.
