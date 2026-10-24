@@ -632,3 +632,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Vérifications relancées : `node --test tests/mgmtFicheStats.test.js` (23/23 verts), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
 - Aucun fichier applicatif non committé n'étant présent, aucune correction d'écran ne peut être revendiquée. Les contrôles historiques ne remplacent pas des mesures fraîches : fiche, arrivée, recruteur, retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans validation visuelle complète.
 - Les changements locaux `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés. Pas de migration ni de bump `?v=` requis par les changements de cette reprise. Les critères visuels de la fiche ne sont pas atteints ; `TOUT_EST_FIN` non revendiqué.
+
+### Reprise 8 — relance ciblée
+
+- Branche `fid-fiches` confirmée ; les commits de la tranche sont déjà présents et les seules modifications git préexistantes (`.opencode/agents/*`, `opencode.json`) sont hors périmètre. Aucun fichier applicatif non committé à intégrer.
+- Tests frais : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; `node_modules/.bin/eslint .` (vert).
+- Les instructions de capture temporaires ne sont pas accessibles depuis les outils accordés pour ce tour. Je ne peux donc pas produire ni ouvrir `cmp-*.png`, et n'invente pas de contrôles `CONTRÔLE` frais. Dernières valeurs historiques connues : fiche/recruteur/retours/semaine à zéro géométrique ; les scènes arrivée, relevé, chiffres, menu et classements sans mesure documentée. Accueil, actualités, tonposte et bilan restent hors périmètre et leurs contrôles précédents ne sont pas modifiés.
+- État écran par écran : les tests structurels/styles existants passent, mais aucune comparaison visuelle nouvelle n'est attestée pour fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, meilleurs et records. Aucun changement d'apparence à l'aveugle, aucune migration et aucun bump `?v=`.
+- Écart : les corrections fondées sur comparaison d'image et le contrôle universel demandé ne sont pas démontrés ; je ne prétends pas que la tranche est finie ni ne déclare `TOUT_EST_FINI`.
