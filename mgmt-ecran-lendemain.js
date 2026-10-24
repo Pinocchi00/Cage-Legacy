@@ -189,6 +189,29 @@ function mgmtLendemainMomentsHtml(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MONDE54_T1_MOMENTS_COMPLETES] — Monde lot 54 T1 ==== */
+/** Complète les trois catégories sans dupliquer de combat lorsque la soirée
+ *  n'en contient pas un de chaque type. */
+function mgmtLendemainMomentsCompletsHtml(m){
+  const html=mgmtLendemainMomentsHtml(m);
+  if((html.match(/class="ld3-moment"/g)||[]).length>=3) return html;
+  const stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
+  const hist=Array.isArray(m.hist)?m.hist:[], seen=new Set();
+  for(const match of html.matchAll(/CL\.mgmtLendemainRevoir\((\d+)\)/g)) seen.add(Number(match[1]));
+  const picks=[];
+  for(const s of stories){
+    if(seen.has(s.c)||!hist[s.c]) continue;
+    seen.add(s.c); picks.push(s);
+    if(seen.size>=3) break;
+  }
+  const rest=picks.map(s=>{const t=hist[s.c],a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
+    const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
+    return `<article class="ld3-moment"><div class="ld3-label">LE COMBAT</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+  }).join('');
+  return html+rest;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MONDE54_T1_APRES_CATALOGUE] — Monde lot 54 T1 ==== */
 /* Catalogue T3 : les entrées restent des formulations éditoriales à relire. */
 const MGMT_LD_APRES_FAMILLES=[
@@ -362,7 +385,7 @@ function scr_mgmt_lendemain(){
     +`<div class="mgmt-ld-cols">`
     +`<section class="mgmt-ld-pane mgmt-ld-results">`+mfPanneau(`<div class="mf-sem-in">`
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.results)}</h3>`
-      +mgmtLendemainMomentsHtml(m)
+       +mgmtLendemainMomentsCompletsHtml(m)
       +mgmtLendemainPrimesHtml(m)
       +mgmtLendemainDiscoursHtml(m)
       +mgmtLendemainAttentionHtml(m)

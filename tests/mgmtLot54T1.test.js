@@ -44,6 +44,16 @@ test('Monde lot 54 T1 — brief du 22/10, P8 : la victoire d’un 13-1 sur le n�
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — le lendemain complète trois moments distincts',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const count=w.eval(`(mgmtLendemainMomentsCompletsHtml(G.mgmt).match(/class="ld3-moment"/g)||[]).length`);
+    assert.equal(count,3);
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — D1 : une défaite réduit le score de classement (correction déjà présente, audit du 16/10)',()=>{
   const w=newGameWindow({runMain:true});
   try{
