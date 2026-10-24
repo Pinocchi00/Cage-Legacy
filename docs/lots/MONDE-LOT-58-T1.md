@@ -24,6 +24,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise — renouvellement annuel des propositions entrantes
+- Modifié : `mgmt-ecran-poste.js` ne bloque plus une proposition entrante pour toujours après une réponse (reçue, refusée ou terminée) ; la fonction annuelle existante peut à nouveau examiner l'année suivante. Cache monté avec `node tools/_bump.js`.
+- Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (14/14). ESLint ciblé passe.
+- Audit `node tools/verif-versions.js origin/main` : seul écart signalé, préexistant `ui-cadre.css`.
+- État restant : la tranche n'est pas terminée. Le choc n'est toujours pas raccordé au combat normal, la billetterie +25 % et le classement ne sont pas appliqués, et l'écran `UniChoc` fidèle à la maquette ainsi que le fil de presse manquent. Le contrôle de plafond et la sauvegarde ancienne complète n'ont pas été prouvés. Aucune de ces cases n'est déclarée achevée par cette reprise.
+- Fichiers de travail hors tranche `.opencode/agents/*`, `opencode.json` et `sw.js` exclus.
+
 ### Reprise — identité du champion invité
 - Modifié : `mgmt-poste.js` mémorise désormais les identifiants des deux champions, dans la même catégorie, dès la réception d'une proposition entrante. Le jeu peut ainsi conserver explicitement les combattants promis au choc plutôt que recalculer une paire ultérieurement.
 - Vérification ciblée : `node --test tests/mgmtLot58T1.test.js` passe (14/14) ; ESLint ciblé passe.

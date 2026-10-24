@@ -11,7 +11,10 @@ function mgmtPosteOngletAjouter(id,titre,rendu){
 }
 function mgmtPosteTexteObjectif(o){return mgmtPosteObjectifTexte(o);}
 function mgmtPosteRendu(m){
- if(m.mondeVivant&&!m.choc)mgmtChocProposition(m);
+ /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_ANNUEL_REPRISE] — Monde lot 58 T1 ====
+    Une réponse précédente ne doit pas bloquer les propositions des années
+    suivantes : la porte annuelle est tenue par mgmtChocProposition. ==== */
+ if(m.mondeVivant&&(!m.choc||!mgmtChocValide(m.choc)||m.choc.annee!==mgmtChocAnnee(m)))mgmtChocProposition(m);
  const p=m.poste, phrases=mgmtPosteNiveau(p.conf), hash=String(m.graine||'').split('').reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7), citation=phrases.banque[hash%3].texte;
  const date=mgmtPosteDateTexte(p.fin)+' '+new Date(MGMT_CALENDRIER_DEBUT+p.fin*86400000).getUTCFullYear();
   const fil=[...(p.hist||[]).map(h=>({c:h.s,note:h.note})),...(m.hist||[]).slice(-3)].slice(-3);
