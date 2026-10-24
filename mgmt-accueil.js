@@ -280,12 +280,12 @@ function scr_mgmt_accueil(){
   const karim=retourRecruteur?mfPanneau(`<p class="mf-ac-rs">Karim est rentré${retourRecruteur.bredouille?' bredouille':''} · <button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button></p>`,'normal','mf-ac-p'):'';
    const posteLien=m.poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'';
    const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
-    const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?mfPanneau(`<h2 class="mf-ac-titre">LA SEMAINE DU COMBAT</h2><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button>`,'normal','mf-ac-p') : '';
+     const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?`<div class="mf-ac-semaine"><b>LA SEMAINE DU COMBAT</b><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button></div>` : '';
     /* ==== [ANCRE: P10_T4_RANG_FINAL_ACCUEIL] — Monde lot 57 T1 ==== */
     const guerre=m.guerre&&Number.isInteger(m.guerre.rangFinal)?mfPanneau(`<h2 class="mf-ac-titre">LE CLASSEMENT DES HUIT</h2><p>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit.</p><button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`,'normal','mf-ac-p'):'';
     const bilanLien=bilanVisible?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button><button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:'';
   const espoirsDansAttente=espoirHtml;
-  const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>${semaine}${guerre}${posteLien}${bilanLien}`;
+   const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>${guerre}${posteLien}${bilanLien}`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
