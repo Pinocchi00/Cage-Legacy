@@ -138,3 +138,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Tests ciblés relancés : `node --test tests/mgmtLot56T1.test.js` passe (10/10). `node --test tests/mgmtReleveReduit.test.js` a été tenté deux fois et a dépassé la limite outil de 120 s puis 300 s ; le plafond de partie neuve n'est pas confirmé.
 - Cette reprise n'a pas modifié le code : le parcours réel ne prouve toujours pas un franchissement induit par les soirées, et les branches d'effet diffuseur et d'attrait des agents libres ne sont pas raccordées. Le test de tranche ne couvre pas les empreintes historiques de façon dédiée. La reproduction complète des valeurs de la planche demeure à comparer/corriger. Ces critères restent ouverts, ainsi que lint/audit final après les modifications manquantes.
 - Aucun changement de sauvegarde ni migration. Pas de commit final ni `TOUT_EST_FINI` : les critères de fin de la tranche ne sont pas atteints.
+
+### Reprise 7 — raccordement du diffuseur (24/10/2026)
+
+- Branche confirmée `p11-croissance`; HEAD avant cette reprise `ec50d53`. Changements hors tranche dans `.opencode/agents/*` et `opencode.json` laissés intacts.
+- `mgmt-corps.js` applique maintenant un bonus additif de droits du diffuseur de 1 % par niveau (plafond 3 %), seulement à une soirée d'agenda d'une partie monde vivant. Les parties anciennes et les événements hors agenda gardent leurs calculs. Cache monté dans `index.html`.
+- Vérifications : les tests `mgmtLot56T1.test.js` et `mgmtPasse.test.js` passent (23/23 avant ce raccordement); `node_modules/.bin/eslint .` passe; `node tools/verif-versions.js origin/main` passe après un second bump. `sw.js` avait été incrémenté automatiquement par l'outil et a été restauré depuis `origin/main`, comme demandé.
+- État non terminé : cet effet diffuseur n'a pas encore de test ciblé propre. L'attrait des agents libres reste non raccordé; le franchissement provoqué par plusieurs soirées, la reproduction complète de la maquette, les tests d'empreinte ancienne dédiés et de réparation complète, ainsi que le test lent de plafond ne sont pas tous démontrés dans cette reprise. Le test ciblé doit être relancé après le changement de production. Aucune migration.
+- Fichiers de cette reprise : `mgmt-corps.js` (bonus diffusé), `index.html` (cache), cette fiche. Aucun écart de sauvegarde; aucune question de spécification.
+- État : inachevé; aucun `TOUT_EST_FINI`.

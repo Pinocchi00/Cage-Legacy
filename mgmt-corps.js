@@ -696,6 +696,15 @@ function mgmtRunEvent(m){
      seconde fois, et la recette nette le déduit. */
   const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
     mgmtWinBonuses(m,booked,fights),m.card.sizeMain+m.card.sizePrelims);
+  /* ==== [ANCRE: CROISSANCE_DIFFUSEUR] — Monde lot 56 T1 ====
+     Le palier du diffuseur ajoute jusqu'à 3 % de droits, sans changer la
+     formule de base ni les parties antérieures au monde vivant. */
+  if(agenda&&m.mondeVivant===true&&typeof mgmtPaliersCalculer==='function'){
+    const niveau=Math.max(0,Math.min(3,mgmtPaliersCalculer(m).effets.diffuseur));
+    const bonus=Math.floor(finance.tv*niveau*0.01);
+    finance.tv+=bonus;
+    finance.recette+=bonus;
+  }
   if(agenda) mgmtSallesApplique(m,finance,fights,avantSalle);
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
