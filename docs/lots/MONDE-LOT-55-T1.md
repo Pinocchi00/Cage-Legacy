@@ -580,3 +580,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Limites encore consignées et non certifiées : les fenêtres de test générées ne démontrent pas trois saisons complètes jouées, aucune fixture complète d'ancienne sauvegarde n'est chargée, le test lent `mgmtReleveReduit` n'a pas été exécuté; la reproduction intégrale des planches et le déclenchement à chaque anniversaire ne sont pas établis (le raccordement suit le terme du contrat). Le rapport précédent mentionne en outre des limites de traces historiques du carnet. Aucune migration de sauvegarde.
 - Aucun nouveau commit n'est créé : il n'y a pas de fichier de tranche en attente à committer et le commit final existe déjà. Pas de question de spécification nouvelle; ces limites relèvent d'éléments de réalisation non vérifiés ou incomplets, donc `TOUT_EST_FINI` n'est pas affirmé.
 - Livraison du seul compte rendu de reprise : commit `c192e90`, avec le message de tranche demandé. Aucun fichier étranger n'a été ajouté.
+
+### Reprise 75
+
+- État initial : branche `p11-ceremonie-carnet`, HEAD `b082576`; aucune modification métier de la tranche en attente. Les changements `.opencode/agents/*` et `opencode.json` restent étrangers et exclus.
+- Test ajouté : « Lot 55 T1 — un fait de titre garde son index historique après filtrage annuel ». Il vérifie qu'un relevé hors fenêtre précédant le combat titré ne décale pas l'index `fight` des faits, et que le KO titré est bien retenu.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (36/36); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers); `node_modules/.bin/eslint .` et `git diff --check` (verts). Confirmation : le test figure dans `test` et `test:watch`.
+- Fichier modifié : `tests/mgmtLot55T1.test.js` (régression de l'index des faits). Aucun changement de production, format de sauvegarde ou migration.
+- Les écarts restants ne sont pas résolus par ce test : le test lent `mgmtReleveReduit` n'a pas été lancé; les scénarios ne démontrent toujours pas trois saisons complètes jouées ni le chargement d'une fixture complète d'ancienne sauvegarde; l'intégralité de la fidélité visuelle aux planches n'est pas certifiée et le déclencheur suit le terme du contrat. Ces limites ne sont pas déclarées satisfaites.
+- Modifications étrangères `.opencode/agents/*` et `opencode.json` non incluses. Aucun écart nouveau à la fiche ni question pour Anthony.

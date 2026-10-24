@@ -92,6 +92,17 @@ test('Lot 55 T1 — les prix de finition privilégient titre, surprise, premier 
   assert.equal(ko.laureat,'z');
   assert.equal(ko.stat,1);
 });
+test('Lot 55 T1 — un fait de titre garde son index historique après filtrage annuel',()=>{
+  const c=charger();
+  const m={hist:[
+    {c:1,a:{id:'old',name:'Old'},b:{id:'old-op',name:'Old op'},winner:'A',family:'ko',round:1},
+    {c:100,a:{id:'regular',name:'Regular'},b:{id:'regular-op',name:'Regular op'},winner:'A',family:'ko',round:3,slot:'prelim'},
+    {c:200,a:{id:'champ',name:'Champ'},b:{id:'champ-op',name:'Champ op'},winner:'A',family:'ko',round:3,slot:'prelim'}
+  ],facts:[{k:'title_fight',fight:2}]};
+  const ko=c.mgmtCeremonieCalculer(m).find(p=>p.id==='ko');
+  assert.ok(ko);
+  assert.equal(ko.laureat,'champ');
+});
 test('Lot 55 T1 — les égalités de prix sont stables malgré l’ordre des traces',()=>{
   const c=charger();
   const x={c:100,a:{id:'z',name:'Z',W:3,L:0,D:0},b:{id:'o1',name:'O1'},winner:'A',family:'ko',round:1,slot:'main'};
