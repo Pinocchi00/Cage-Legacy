@@ -230,6 +230,14 @@ test('Monde lot 53 T1 — Entrée passe le combat en temps forts au verdict et l
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — C bascule des temps forts au combat entier sans quitter l’arène',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=w.eval(`(()=>{MGMT_COMBAT.session={};MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.tempsForts=[{t:0}];MGMT_COMBAT.mode='fight';CL.mgmtCbComplet();return {vue:MGMT_COMBAT.vueCombat,frise:MGMT_COMBAT.tempsForts,mode:MGMT_COMBAT.mode};})()`);
+    assert.deepEqual(JSON.parse(JSON.stringify(r)),{vue:'complet',frise:null,mode:'fight'});
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf combats et ses repères de navigation',()=>{
   const w=newGameWindow({runMain:true});
   try{

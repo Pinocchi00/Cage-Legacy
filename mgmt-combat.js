@@ -336,6 +336,11 @@ Object.assign(CL,{
     if(C.vue){ C.vue.camS=null; C.vue.trail={A:[],B:[]}; C.vue.tPrec=-1; }
     mgmtCombatBarreMaj();
   },
+  /* ==== [ANCRE: P7_T1_TEMPS_FORTS_COMPLET] — Monde lot 53 T1 ==== */
+  mgmtCbComplet(){
+    const C=MGMT_COMBAT; if(!C.session||C.vueCombat!=='forts'||C.mode!=='fight') return;
+    C.vueCombat='complet'; C.tempsForts=null; C.tempsFortActif=-1; mgmtCombatBarreMaj();
+  },
   mgmtCbRetour(){
     const C=MGMT_COMBAT;
     if(C.session&&C.vueCombat==='forts'&&C.mode==='fight'){ CL.mgmtCbPasser(); return; }
@@ -345,7 +350,8 @@ Object.assign(CL,{
 keysRegister('mgmt_combat',{
   ' '(){ CL.mgmtCbPause(); },
   v(){ CL.mgmtCbVitesse(); }, V(){ CL.mgmtCbVitesse(); },
-  c(){ CL.mgmtCbCamera(); }, C(){ CL.mgmtCbCamera(); },
+  c(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); else CL.mgmtCbCamera(); },
+  C(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); else CL.mgmtCbCamera(); },
   p(){ CL.mgmtCbPasser(); }, P(){ CL.mgmtCbPasser(); },
   r(){ CL.mgmtCbRevoir(); }, R(){ CL.mgmtCbRevoir(); },
   Enter(){ CL.mgmtCbRetour(); },

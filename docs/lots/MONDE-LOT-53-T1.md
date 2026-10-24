@@ -403,3 +403,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Renforcement du test de la vraie fin de soirée : en plus de vérifier le bloc primes, il exige désormais que les trois annonces (« combat de la soirée » et deux performances) soient réellement présentes dans le rendu produit par une partie générée.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 19/19 réussis.
 - Les écarts principaux ne sont pas résolus par ce contrôle : portage intégral des trois maquettes, durée de référence 900–1200 s, lecture des temps forts avec fenêtres temporisées et fondu sur l'image, restent à faire. Ce commit n'est pas une livraison finale.
+
+### Reprise 59 — raccourci vers le combat entier
+
+- Ajout de la commande `C` pendant une lecture temps forts pour passer au combat entier dans la même arène et au même instant de lecture. Hors d'une lecture temps forts, `C` conserve son usage historique de caméra. Le choix n'écrit rien dans la sauvegarde et le moteur reste intact.
+- Test ajouté : « Monde lot 53 T1 — C bascule des temps forts au combat entier sans quitter l’arène ».
+- Vérification ciblée : `node --test tests/mgmtLot53T1.test.js` — 20/20 réussis.
+- Modifié : `mgmt-combat.js` (transition depuis les temps forts), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (test), cette fiche.
+- Toujours non satisfait : le test de cumul complet 900–1200 s, le portage visuel exhaustif exact des maquettes et le chronométrage navigateur du segment temps forts/fondu d'image. Mesure antérieure conservée : 868,38 s; aucune durée artificielle n'a été ajoutée. Le raccourci ne donne pas encore la navigation fenêtre précédente/suivante de la maquette.
