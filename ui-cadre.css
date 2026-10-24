@@ -2000,6 +2000,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-paire .ch3-side b{font-size:32px}
 .ch3-paire .ch3-category{display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px}
 .ch3-paire .ch3-category .ch3-vs{display:flex;width:34px;height:34px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:22px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DIMENSIONS_PLANCHE] — Monde lot 69 T1 ====
+   Les trois rangées reprennent les dimensions lisibles de la planche UniChoc. ==== */
+.ch3-paire .ch3-side b{font-size:46px}
+.ch3-paire .ch3-category .ch3-vs{width:54px;height:54px;font-size:28px}
 /* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ENTETE_UNIQUE] — Monde lot 69 T1 ====
    mfEcran porte déjà le titre et l'échéance de la planche. Le contenu commence
    dessous : pas de second bandeau superposé aux pièces communes. ==== */

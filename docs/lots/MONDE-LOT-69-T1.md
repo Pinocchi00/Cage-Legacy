@@ -788,3 +788,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Capture choc relancée avec le script externe : rendu visible, zéro chevauchement, zéro texte sous 22 px, aucun débordement, mais `grosBlocs=25.5%` (seuil ≤20% non atteint). Le processus a dépassé le délai de 120 s; aucun résultat nouveau discours/bilan/arrivée ni image visuellement ouverte n'est revendiqué.
 - Fichiers concernés : ce test (précondition réelle de fin de contrat) et cette fiche (compte rendu). Aucune modification de production, de CSS, de cache ou de sauvegarde; aucune migration.
 - Écarts toujours réels : mesure de gros blocs choc hors seuil, mesure connue antérieure du chevauchement bilan non résolue, scène d'arrivée non capturée et images non comparées visuellement. Ces objectifs ne sont pas déclarés achevés.
+
+### Reprise 24/10 — dimensions des affiches selon UniChoc
+- `ui-cadre.css` rétablit pour chacune des trois paires la taille de noms (46 px) et du médaillon central (54 px, lettre 28 px) spécifiée dans le markup de `UniChoc`; ces valeurs prenaient précédemment 32/34/22 px.
+- `tests/mgmtLot69T1.test.js` vérifie la règle de style de fidélité à la planche. Le test ciblé passe 4/4 après la modification et après bump.
+- La scène `choc` a été capturée après le changement : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.3%`. Le rendu est propre géométriquement, mais la densité reste au-dessus du seuil de 20%; les images n'ont pas été ouvertes ici.
+- Fichiers : `ui-cadre.css` (dimensions des noms et médaillons), `index.html` (version cache), `tests/mgmtLot69T1.test.js` (assertion), cette fiche (compte rendu). Pas de migration.
+- Écarts restants : densité choc hors seuil, capture/comparaison visuelle ouverte et scène d'arrivée non établies; l'ancienne mesure de chevauchement du bilan reste à vérifier après correction. Aucun achèvement global n'est revendiqué par cette reprise.

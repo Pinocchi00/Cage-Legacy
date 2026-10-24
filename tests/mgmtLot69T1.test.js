@@ -143,7 +143,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT\][\s\S]*?\.ch3-screen\{grid-template-rows:54px 68px minmax\(0,1fr\);gap:14px\}/,'la géométrie compacte limite la surface occupée par le bandeau choc');
       assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT2\][\s\S]*?\.ch3-screen\{grid-template-rows:44px 56px minmax\(0,1fr\);gap:10px\}/,'la seconde compaction réduit encore la hauteur des blocs d’en-tête');
       assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT3\][\s\S]*?\.ch3-screen\{grid-template-rows:36px 44px minmax\(0,1fr\);gap:8px\}/,'la troisième compaction garde l’affiche dominante sans réduire les textes sous le minimum lisible');
-      assert.match(css,/\.ch3-fight\{background:none;padding:0\}[\s\S]*?\.ch3-fight>\.ch3-paire\{background:#1B1818/,'les trois affiches sont trois blocs distincts comme sur la planche');
+       assert.match(css,/\.ch3-fight\{background:none;padding:0\}[\s\S]*?\.ch3-fight>\.ch3-paire\{background:#1B1818/,'les trois affiches sont trois blocs distincts comme sur la planche');
+       assert.match(css,/\.ch3-paire \.ch3-side b\{font-size:46px\}[\s\S]*?\.ch3-paire \.ch3-category \.ch3-vs\{width:54px;height:54px;font-size:28px\}/,'les noms et médaillons des trois affiches reprennent les dimensions de la planche UniChoc validée par Anthony');
      assert.match(css,/\.ch3-title[^\{]*\{[^}]*linear-gradient\(90deg,#E9E6E1[^}]*#E23A2B/s,'le bandeau choc conserve les deux couleurs de la planche');
        assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
        assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');
