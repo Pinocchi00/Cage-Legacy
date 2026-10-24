@@ -302,3 +302,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (17 fichiers) et `node_modules/.bin/eslint .` passe.
 - Pas de migration. Les modifications utilisateur de `.opencode/agents/` et `opencode.json` restent exclues ; `sw.js` restauré depuis `origin/main` conformément à la règle d'hygiène.
 - Écart restant : cet ajustement ne crée pas les deux affrontements absents du modèle métier, ne fournit pas de nouvelles captures ni mesures, et ne complète pas le parcours contractuel strict. Aucune fidélité visuelle globale ni achèvement de la tranche n'est revendiqué.
+
+### Reprise 51
+- `tests/mgmtLot69T1.test.js` ajoute une assertion de structure de l’écran d’arrivée en plus des contrôles du nom de la nouvelle organisation et de l’absence de l’ancienne.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
+- Aucun JS/CSS modifié, aucune migration. Les captures comparatives et les critères encore ouverts des reprises précédentes ne sont pas revendiqués comme terminés.
