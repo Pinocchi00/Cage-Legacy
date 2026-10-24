@@ -72,7 +72,7 @@ function scr_mgmt_fiche_cadre(){
   }catch(e){ corps=`<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-rp">Cette fiche ne se lit pas pour l’instant.</div></div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`; }
   corps=mgmtAccord(f,corps);
   const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2><div class="mf-fb-wrap">${mgmtFicheBanniereHtml(m,f,champion)}</div>`
-     +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div>${mgmtFicheSuiviBouton(m,f)}<div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
+      +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div>${mgmtFicheSuiviBouton(m,f)}</div>`
     +`<div class="mf-fi-corps">${corps}</div></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',grise:(typeof mgmtPresentationDansSoiree==='function'&&mgmtPresentationDansSoiree())||(typeof mgmtDuoFicheActive==='function'&&mgmtDuoFicheActive()),m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,

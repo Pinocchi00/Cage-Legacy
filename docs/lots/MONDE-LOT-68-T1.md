@@ -339,6 +339,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun changement de JS/CSS ou de sauvegarde : pas de bump `?v=`, aucune migration. Aucun test nouveau, aucun changement de `package.json`. Les scènes d'accueil, actualités, tonposte et bilan restent hors périmètre fonctionnel et ne sont pas modifiées.
 - Écart à la fiche : le contrôle « chevauchements:0 » après-correction n'est pas nouvellement mesuré pour toutes les scènes, et le protocole de comparaison visuelle n'est pas achevé. Les cases visuelles de la tranche restent incomplètes ; `TOUT_EST_FIN` n'est pas revendiqué.
 
+### Reprise du 24/10/2026 — rangée de la fiche
+
+- `mgmt-fiche-cadre.js` : dans la rangée des onglets, le repère clavier « Tab · Onglet suivant » précède maintenant le groupe compteur/bouton de suivi. Le suivi est le dernier bloc à droite, conformément à la position demandée dans les planches. `?v=` monté.
+- `tests/mgmtFicheStats.test.js` : le test « Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des onglets » vérifie aussi que le bloc suivi termine la rangée et que le repère clavier le précède. Décision citée : « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Vérifications : `node --test tests/mgmtFicheStats.test.js` (22/22), `node --test tests/mgmtReleve.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (vert).
+- Contrôles visuels avant/après : aucune mesure nouvelle n'a pu être lancée dans cette session ; le captureur externe n'est pas accessible via les chemins autorisés. Les derniers chiffres documentés restent historiques (reprise 32 : fiche `2→0`, recruteur/retours/semaine `0→0`; les contrôles des autres scènes ne sont pas établis). Aucun résultat après-correction n'est prétendu pour la présente modification.
+- Écrans : modification ciblée de la rangée fiche uniquement. Arrivée, recruteur, retours, semaine, relevé, chiffres du combat, menu et classements ne sont pas corrigés ni validés ici ; comparatifs non ouverts. Accueil, actualités, tonposte et bilan restent hors périmètre fonctionnel, sans modification.
+- Migration de sauvegarde : aucune. Le critère global de contrôle géométrique zéro et de comparaison visuelle écran par écran n'est pas atteint.
+
 ### Reprise 32 du 24/10/2026
 
 - Contrôles automatiques de capture avant correction : fiche `{chevauchements:2, textesSous22px:0, debordent:[]}` (palmarès/compteur et poids/bouton SUIVRE). La fiche a été déplacée du bloc bannière à la rangée des onglets ; le premier essai a montré trois recouvrements avec le nom de style, corrigés en contraignant l'onglet, le bouton de suivi et l'aide Tab dans la rangée. Contrôle après correction fiche : `{chevauchements:0, textesSous22px:0, debordent:[]}`.

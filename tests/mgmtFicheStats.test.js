@@ -40,9 +40,10 @@ test('Monde lot 31 T4 — bouton SUIVI, SUIVRE, aria-pressed et touche S',()=>{
 test('Monde lot 68 T1 — le suivi et son compteur restent dans la rangée des onglets',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
   const w=monde();open(w,'apercu');
-  const structure=JSON.parse(w.eval("JSON.stringify((()=>{const row=document.querySelector('.mf-fi-onglets'),body=document.querySelector('.mf-fi-corps');return {row:!!row,body:!!body,follow:!!row?.querySelector('.mf-fb-suivi'),count:!!row?.querySelector('.mf-fb-suivi-count'),followInBody:!!body?.querySelector('.mf-fb-suivi'),countInBody:!!body?.querySelector('.mf-fb-suivi-count')}})())"));
+   const structure=JSON.parse(w.eval("JSON.stringify((()=>{const row=document.querySelector('.mf-fi-onglets'),body=document.querySelector('.mf-fi-corps');return {row:!!row,body:!!body,follow:!!row?.querySelector('.mf-fb-suivi'),count:!!row?.querySelector('.mf-fb-suivi-count'),followInBody:!!body?.querySelector('.mf-fb-suivi'),countInBody:!!body?.querySelector('.mf-fb-suivi-count'),followLast:row?.lastElementChild?.classList.contains('mf-fiche-suivi'),hintBeforeFollow:row?.children[1]?.classList.contains('mf-fi-tab')}})())"));
   assert.equal(structure.row,true);assert.equal(structure.body,true);
-  assert.equal(structure.follow,true);assert.equal(structure.count,true);
+   assert.equal(structure.follow,true);assert.equal(structure.count,true);
+   assert.equal(structure.followLast,true);assert.equal(structure.hintBeforeFollow,true);
   assert.equal(structure.followInBody,false);assert.equal(structure.countInBody,false);
   const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
   assert.match(css,/\.mf-fi-onglets\{[^}]*display:flex;justify-content:space-between/);
