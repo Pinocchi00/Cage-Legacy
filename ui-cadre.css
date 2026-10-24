@@ -2117,14 +2117,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none;grid-template-columns:1.45fr 1fr 1fr}
 .ld66-screen .ld66-moments .ld3-moment{min-width:0;padding:16px 26px;gap:6px;overflow:hidden}
 .ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.8;overflow-wrap:anywhere;word-break:normal}
-.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
 .ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
 .ld66-screen .ld66-moments .ld3-label{font-size:24px}
 .ld66-screen .ld66-moments .ld66-moment-head{flex:none}
 .ld66-screen .ld66-lower{flex:1;min-height:0;grid-template-columns:1.25fr 1fr .9fr;overflow:hidden}
 .ld66-screen .ld66-lower>section{min-width:0;min-height:0;overflow:hidden}
 .ld66-screen .ld66-lower .ld66-number strong{font-size:32px}
-.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,100px) minmax(0,100px);column-gap:8px}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_NOM_SURPRISE_GRAND] — Monde lot 66 T1 ==== */

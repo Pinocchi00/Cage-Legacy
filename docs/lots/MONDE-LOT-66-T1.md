@@ -18,6 +18,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 24 — échelle du lendemain — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. Le code de tranche était déjà commité ; les seuls changements préexistants hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) restent intacts.
+- Réglé la taille du nom de la première carte à 80 px (les deux autres restent à 64 px) et remis les colonnes de mouvements de la suite aux largeurs de la maquette (120/130 px), avec une identité capable de revenir à la ligne. Version de cache CSS augmentée.
+- Captures 1920×1080 avant/après : `lendemain` donne après changement `grosBlocs=20`, chevauchements 0, textes sous 22 px 0, débordements aucun. `lendemainSuite` garde `grosBlocs=17`, chevauchements 0, textes sous 22 px 0, mais quatre débordements automatiques (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). Cet écart de contenance n'est pas déclaré résolu.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Capture comparative générée à `C:/Users/antho/AppData/Local/Temp/shots/`; la lecture directe des PNG n'est pas revendiquée. Aucune donnée ni sauvegarde modifiée.
+
 ### Reprise 10 — échelle du nom principal et capture — 24/10/2026
 
 - État initial : branche `fid-lendemain`, HEAD `569b50f8`. Les commits fonctionnels de la tranche sont déjà présents. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intacts.
