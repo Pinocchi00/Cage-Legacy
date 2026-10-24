@@ -1,5 +1,11 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
+### Reprise 6 — validation ciblée (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les changements fonctionnels de la tranche sont déjà commités. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` ne relève aucun écart, `node_modules/.bin/eslint .` passe, et le test est bien référencé dans `test` et `test:watch` (`true,true`).
+- Aucun fichier fonctionnel de tranche ne reste à commiter ; cette fiche seule est mise à jour. Pas de changement de sauvegarde ni migration. La variation locale de `index.html` concerne uniquement la longueur du paramètre `?v=` et, comme les modifications locales d'agents, `opencode.json` et `sw.js`, est laissée hors du commit.
+- Limite de couverture inchangée : les faits des familles sont préparés séparément sur une partie créée par le chemin réel ; les tests ne prouvent pas que les systèmes opérationnels génèrent naturellement chacun de ces faits. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé ici ; les validations antérieures consignent 1 908 745 octets et son succès. Aucune question nouvelle pour Anthony.
+
 ### Reprise 14 — livraison vérifiée (24/10/2026)
 
 - `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà dans l'historique (`44af575` en tête) ; aucun fichier de production ou test de la tranche n'est non commité. Les seules modifications locales hors tranche restent `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache dans `index.html` ; elles sont laissées intactes.
