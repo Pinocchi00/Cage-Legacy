@@ -92,8 +92,8 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
   /* Retours d'Anthony du 09/10/2026 : un combat déjà passé se revoit pendant la soirée. */
   const actes=joue
     ?`<div class="mf-so-actes">${mfBouton('Revoir le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtSoRevoir(${k})`})}${mfBouton('Revenir au prochain combat',{touche:'Échap',onclick:'CL.mgmtSoAutre(0)'})}</div>`
-    :libre
-    ?`<div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
+     :libre
+      ?`<div class="mf-so-actes"><div class="mf-so-s">TU LE REGARDES EN</div>${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{jaune:mgmtVueDuCombat(m,k)===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}<div class="mf-so-s">${mgmtVueDuCombat(m,k)==='forts'?'Les moments clés, environ 45 secondes':mgmtVueDuCombat(m,k)==='resultat'?'Le résultat seul':'Le combat en entier'}</div></div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
   return mgmtSoBanniereHtml(av)
     +`<div class="mf-so-cp"><div class="mf-so-rs">`
@@ -108,7 +108,9 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
 function mgmtSoBandeHtml(prog,index,focus){
   return `<div class="mf-so-bande">`+prog.map((p,k)=>{
     const fait=k<index, cur=k===focus;
-    return `<button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`;
+    const vue=mgmtVueDuCombat(G.mgmt,k);
+    return `<div class="mf-so-card${cur?' cur':''}${fait?' fait':''}"><button type="button" class="mf-so-tag${cur?' cur':''}${fait?' fait':''}" aria-label="${esc(p.etiquette)}${fait?', terminé':''}" onclick="CL.mgmtSoFocus(${k})">${fait?MGMT_SO_CHECK:''}<span>${esc(p.court)}</span></button>`
+      +`<div class="mf-so-views" aria-label="Vue du combat ${k+1}">`+[['complet','COMPLET'],['forts','TEMPS FORTS'],['resultat','RÉSULTAT']].map(([v,l])=>mfBouton(l,{jaune:vue===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')+`</div></div>`;
   }).join('')+`</div>`;
 }
 
@@ -246,9 +248,11 @@ Object.assign(CL,{
     if(!mgmtSoAgenda()) return;
     const m=G.mgmt, p=mgmtSoireeProgramme(m)[MGMT_SOIREE.index];
     if(!p||!p.trace) return;
-    const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
-    mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
-      salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir});
+     const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
+     const vue=mgmtVueDuCombat(m,p.i);
+     if(vue==='resultat'){ sortir(); render(); return; }
+     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
+       salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
   },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){
@@ -309,6 +313,8 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index<G.mgmt.lastEvent.fights.length) return;
     const m=G.mgmt, touched=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     MGMT_SOIREE_UI.commence=null; MGMT_SOIREE_UI.focus=null;
+    /* ==== [ANCRE: P7_T2_EFFACER_VUES] — Monde lot 49 T1 ==== */
+    delete m.vues;
     /* Brief démo, lot 6 T2 : le lendemain passe après chaque soirée, blessés ou non. */
     CL.go('mgmt_lendemain');
   },
