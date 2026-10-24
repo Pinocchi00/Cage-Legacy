@@ -74,6 +74,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 9 — contrôle après intégration demandée (24/10/2026)
+
+- Branche confirmée : `p8-apres`. Historique contrôlé ; tous les fichiers fonctionnels et tests de la tranche sont déjà commités. `git status` ne montre que les modifications préexistantes des agents locaux, `opencode.json` et `sw.js`, étrangères à cette tranche.
+- La commande `git merge origin/main` demandée a été tentée mais est bloquée par la politique de l'environnement (`git merge*` interdit). L'intégration de `origin/main` reste donc à effectuer par le superviseur.
+- Le contrôle prescrit passe **130/130** : lots 54, 63, Actualités, 55, 57, 48 et 56 ; les tests de rivalité enregistrée et de non-répétition du lot 54 sont verts. `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; le test de tranche est présent dans `test` et `test:watch` (`true,true`).
+- Aucun code ou test n'a été modifié dans cette reprise, aucun changement de sauvegarde ni migration. Les changements non liés ne sont pas inclus. Limite déclarée inchangée : les faits des familles sont préparés sur le parcours réel dans les tests, sans démonstration de leur production naturelle par chaque système opérationnel.
+
 ### Reprise 6 — contrôle inter-lots et livraison (24/10/2026)
 
 - État initial contrôlé sur `p8-apres` : les commits de production et de tests de la tranche figurent déjà dans `git log --oneline -12`; aucun fichier fonctionnel de tranche n'était non commité. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues.
