@@ -270,3 +270,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et carte complète » vérifie chaque numéro présent dans la carte réelle. Test ciblé : 27/27.
 - Cache JS remonté ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé de production sans erreur. Aucun changement de sauvegarde.
 - Écarts restants : la fidélité intégrale des valeurs et dimensions des planches n'est pas établie et T3 ne possède toujours pas de mémoire éditoriale persistante sur 50 soirées (le test distinctif repose sur le suffixe temporel). Les familles dépendantes de systèmes non présents ne simulent pas de faits. Cette amélioration n'achève donc pas les cases 1 et 3.
+
+### Reprise de validation — 24/10/2026
+
+- `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres utilisent les données de clôture » vérifie aussi la conversion du solde de caisse exprimé en milliers d'euros vers l'affichage en euros (`230` → `230 000 €`). Test ciblé : 27/27.
+- Aucun changement de production ni de sauvegarde. `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint global passe ; les scripts `test` et `test:watch` référencent le fichier. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé et `check:rapide` est laissé au superviseur conformément à la règle de contrôle rapide.
+- Les cases 1 et 3 ne sont toujours pas achevées : conformité exhaustive aux valeurs/layouts des deux maquettes et mémoire éditoriale persistante/contextualisation complète de T3 manquent. Cet ajout renforce seulement le contrôle d'unité de la donnée monétaire, et ne prétend pas atteindre le critère global.

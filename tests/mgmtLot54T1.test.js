@@ -94,8 +94,9 @@ test('Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres 
     assert.match(r.press,/ld3-press/);
     assert.match(r.figures,/SALLE/);
      assert.match(r.figures,/CAISSE/);
-     assert.match(r.figures,/Popularité/);
-     assert.match(r.figures,/ATTEINT · 42 \/ 40/);
+    assert.match(r.figures,/Popularité/);
+    assert.match(r.figures,/ATTEINT · 42 \/ 40/);
+    assert.match(r.figures,/230\s*000\s*€/,'la caisse est affichée depuis les milliers d’euros de m.treasury');
   }finally{w.close();}
 });
 
