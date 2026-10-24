@@ -15,6 +15,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
     let jouees=0;
     while(jouees<180){
       const n=jouer(w,1);if(!n)break;jouees+=n;
+      w.eval('saveMgmt();G.mgmt=null;loadMgmt();');
       const ceremonies=w.eval('window.__lot62.ceremonies');
       if(ceremonies>=3)break;
     }
@@ -24,7 +25,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
     assert.equal(result.compteurs.ceremonies,3,'le calcul des prix est exécuté exactement une fois par année');
     assert.equal(result.compteurs.classements,3,'le classement est clôturé exactement une fois par année');
     assert.ok(result.prix.length>0,'les prix sont consignés sur les fiches');
-    assert.equal(result.avant,result.apres,'une clôture déjà traitée ne se rejoue pas');
+    assert.equal(result.avant,result.apres,'une clôture déjà traitée ne se rejoue pas après sauvegarde/rechargement');
     assert.equal(result.valid,true);
     assert.ok(result.hist>initial);
     const accueil=fs.readFileSync(path.join(__dirname,'..','mgmt-accueil.js'),'utf8');
