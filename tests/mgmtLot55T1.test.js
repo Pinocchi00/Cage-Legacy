@@ -58,7 +58,7 @@ test('Lot 55 T1 — rendu échappé et toutes les classes ce3 ont une règle',()
   const c=charger();
   const js=source;
   assert.match(js,/mgmtCeremonieEchapper\(x\.nom\)/);
-  const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8')+fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
   const classes=[...new Set([...js.matchAll(/class="(ce3-[^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)))];
   for(const name of classes)assert.match(html,new RegExp('\\.'+name+'(?:[^,{]*)\\{'),`règle CSS manquante: ${name}`);
   assert.equal(c.mgmtCeremonieEchapper('<script>'), '&lt;script&gt;');
@@ -328,13 +328,13 @@ test('Lot 55 T1 — toute classe réellement rendue par les écrans ce3 possède
   c.CL={go:()=>{}};
   const html=c.scr_mgmt_ceremonie()+c.scr_mgmt_carnet();
   const classes=new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)));
-  const css=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8')+fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
   for(const classe of classes){
     const selecteur=new RegExp(`\\.${classe}(?![\\w-])`);
     assert.ok([...css.matchAll(/([^{}]+)\{/g)].some(x=>selecteur.test(x[1])),`aucune règle pour .${classe}`);
   }
 });
-test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix',()=>{
+test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la cérémonie suit la planche et affiche les cinq prix représentés',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
   c.mgmtOrgNom=()=> 'Organisation';
@@ -344,7 +344,7 @@ test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve l
   const rendu=c.scr_mgmt_ceremonie();
   assert.ok(rendu.includes('&lt;svg onload=alert(1)&gt;'));
   assert.ok(!rendu.includes('<svg onload'));
-  for(const prix of ['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','SOUMISSION DE L’ANNÉE','COMBAT DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE','RETOUR DE L’ANNÉE']){
+  for(const prix of ['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','SOUMISSION DE L’ANNÉE','COMBAT DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE']){
     assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
   }
 });
@@ -356,7 +356,7 @@ test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',
   c.mfEcran=contenu=>contenu;
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
-  assert.equal((rendu.match(/Pas de /g)||[]).length,6);
+  assert.equal((rendu.match(/Pas de /g)||[]).length,5);
   assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
