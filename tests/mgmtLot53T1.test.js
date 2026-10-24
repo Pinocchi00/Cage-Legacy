@@ -59,6 +59,14 @@ test('Monde lot 53 T1 — les durées forfaitaires suivent les vues et ajoutent 
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la durée forfaitaire d’une soirée complète additionne neuf transitions',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const total=w.eval(`(()=>{const m={vues:{}};mgmtSoireeProgramme=()=>Array.from({length:9},(_,i)=>({i}));for(let i=0;i<9;i++)m.vues[i]='resultat';return mgmtSoireeDureeEstimee(m);})()`);
+    assert.equal(total,135);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — la fin annonce les primes présentes dans les relevés et échappe les noms',()=>{
   const w=newGameWindow({runMain:true});
   try{

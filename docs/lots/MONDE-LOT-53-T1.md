@@ -162,3 +162,18 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Ajout d'un test isolé qui vérifie que le cumul applique exactement 45 s au temps forts, 5 s au résultat et 10 s de transition à chacun des deux combats (70 s au total). Le test protège la formule forfaitaire contre une régression, mais ne démontre pas le critère complet 900–1200 s sur une soirée de neuf combats.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` (9/9 réussis).
 - Les critères principaux non achevés demeurent tels que listés dans les reprises précédentes : portage complet des maquettes, lecture fenêtrée avec fondu et sa passabilité, cible de durée de la carte réelle, audit exhaustif classes/échappement/empreintes, et intégration dans les chaînes principales `test` et `test:watch`. Aucun de ces critères n'est revendiqué comme fait ici.
+
+### Reprise 23 — reprise après commits partiels
+
+- Vérifié au départ : branche `p7-ecran-soiree`, HEAD `c3dabd1`; aucun fichier applicatif de la tranche non commité. Les seuls changements locaux sont les fichiers `.opencode/agents/*` et `opencode.json`, laissés hors de la tranche.
+- Relu le balisage des planches `UniSoiree`, `UniTempsForts` et `UniSoireeFin`. Le dépôt comprend déjà le sélecteur par combat, la touche V, une frise d'arène et la carte résultat passable ; le contrôle ciblé `node --test tests/mgmtLot53T1.test.js` passe (9/9).
+- Les commits présents restent partiels : ils ne portent pas les compositions complètes aux valeurs exactes des trois maquettes, ne prouvent pas la lecture avec fenêtres de 4 s/fondu et sa passabilité fenêtre par fenêtre, et ne testent pas le cumul 900–1200 s ni les empreintes des anciennes parties. La fin utilise toujours l'écran de fin préexistant avec ajouts de primes, sans portage complet de `UniSoireeFin`.
+- La durée cible reste non démontrée : les reprises antérieures consignent une mesure inférieure à 900 s. Je n'ai pas maquillé cette mesure ni changé artificiellement la formule prescrite.
+- Les scripts `test` et `test:watch` visibles dans `package.json` n'intègrent pas `mgmtLot53T1.test.js` dans leur commande principale ; les hooks prétest et les scripts ciblés ne satisfont pas cette exigence.
+- Pas de nouveau changement de code fonctionnel dans cette reprise et aucun commit vide ajouté. La tranche demeure incomplète ; `TOUT_EST_FINI` n'est pas revendiqué.
+
+### Reprise 24 — garde de cumul sur neuf combats
+
+- Ajout du test « la durée forfaitaire d’une soirée complète additionne neuf transitions » : neuf combats en vue résultat donnent 135 s selon la règle de 5 s par combat et 10 s de transition.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 10/10 réussis.
+- Cette assertion ne remplace pas le critère demandé de 900–1200 s pour la carte de référence avec vues par défaut. Elle verrouille uniquement une composante de la formule; aucun affichage ni comportement de lecture n'a été modifié.
