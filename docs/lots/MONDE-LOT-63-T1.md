@@ -53,6 +53,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 4 — validation de clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée ; le code fonctionnel et les tests de la tranche sont déjà commités dans l'historique. Cette reprise ne modifie que cette fiche.
+- Vérifications fraîchement exécutées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Le test de tranche figure dans `test` et `test:watch` (`true,true`).
+- Fichiers livrés et rôles : `mgmt-apres-data.js` fournit les formulations des dix familles marquées `relu:false` ; `mgmt-ecran-lendemain.js` calcule l'après, le raccorde à l'Accueil et à la presse et rend les mouvements d'autres organisations ; `tests/mgmtLot63T1.test.js` couvre le parcours réel, les familles, déterminisme, borne, non-répétition, échappement, sauvegarde et mouvements ; `package.json` inscrit ce test aux deux scripts agrégés. Aucun état de sauvegarde nouveau ni migration.
+- Écart de couverture honnête : les tests font produire chaque famille à partir de faits préparés sur une partie issue du chemin réel, sans prouver que chaque système opérationnel produit naturellement chacun de ces faits. Pas de question nouvelle pour Anthony.
+- Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation locale de cache dans `index.html` sont étrangers à cette reprise et exclus du commit.
+
 ### Reprise 8 — vérification (24/10/2026)
 
 - Branche `p8-apres` confirmée. Le code et les tests de la tranche sont déjà présents dans les commits récents (`ab627d5` en tête) ; aucune modification fonctionnelle de la tranche n'était en attente.
