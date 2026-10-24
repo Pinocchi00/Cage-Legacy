@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 53 — contrôle et correction de libellés suite — 24/10/2026
+
+- Branche `fid-lendemain` confirmée. État initial : commits de tranche présents jusqu'à `d93a9cb0`; seuls des fichiers hors tranche étaient aussi modifiés (`.opencode/agents/*`, `opencode.json`, `sw.js`), laissés intacts.
+- Guide de capture lu et comparateur exécuté. `lendemain` : zéro chevauchement, zéro texte sous 22 px, aucun débordement, grosBlocs 18,4 %. `lendemainSuite` : zéro chevauchement, zéro texte sous 22 px, grosBlocs 16,6 %, mais quatre débordements sur nom, division, rang et organisation. Images `cmp-lendemain.png` et `cmp-lendemainSuite.png` régénérées sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Ajusté `ui-cadre.css` pour permettre la rupture des libellés des éléments imbriqués de la cellule d'identité des mouvements; `index.html` cache CSS augmenté avec `_bump.js`. La nouvelle capture conserve les quatre alertes à l'identique : correction essayée sans effet, écart de la suite reste ouvert.
+- Tests `mgmtEcranLendemain.test.js` (7/7) et `mgmtLendemainDemo.test.js` (7/7) verts. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde ou migration.
+- Avant/après : les vues restent recomposées conformément aux blocs des maquettes ; tentative de corriger les débordements des mouvements n'a pas modifié le constat automatique. Les autres suites de non-régression ne sont pas relancées dans cette reprise. `TOUT_EST_FINI` n'est pas revendiqué : case visuelle 4 encore partielle.
+- Fichiers de cette reprise : `ui-cadre.css` (retour à la ligne des libellés), `index.html` (version de cache), cette fiche (mesures, tests et écart). Tests ajoutés : aucun. Questions pour Anthony : aucune.
+
 ### Reprise 52 — recapture et tests de non-régression — 24/10/2026
 
 - Confirmé la branche `fid-lendemain` et l'état Git : les commits fonctionnels de la tranche sont déjà présents jusqu'à `ec5d2e49`; aucun fichier de code/test de la tranche n'est en attente. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de la tranche et restent exclues.
