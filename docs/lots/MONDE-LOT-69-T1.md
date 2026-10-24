@@ -296,3 +296,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration. Aucun test existant modifié pour modifier son comportement.
 - Écart : le modèle reste mono-affiche, les deux autres affrontements ne sont pas créés par ce changement de présentation; aucune mesure/capture post-correction n'a été produite. Les autres limites de parcours strict arrivée/contrat et preuve visuelle restent ouvertes. La grille s'approche du placement latéral de la planche mais n'est pas revendiquée comme comparaison d'image validée.
 - Modifications utilisateur sous `.opencode/agents/` et `opencode.json` préservées et hors commit.
+
+### Reprise 50
+- Ajustement CSS du bloc affrontement : les éléments de l'affiche existante occupent maintenant toute la hauteur de la zone à trois rangées, évitant de laisser le combat mono-affiche tassé dans la première rangée. `index.html` versionné avec `_bump.js`.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (17 fichiers) et `node_modules/.bin/eslint .` passe.
+- Pas de migration. Les modifications utilisateur de `.opencode/agents/` et `opencode.json` restent exclues ; `sw.js` restauré depuis `origin/main` conformément à la règle d'hygiène.
+- Écart restant : cet ajustement ne crée pas les deux affrontements absents du modèle métier, ne fournit pas de nouvelles captures ni mesures, et ne complète pas le parcours contractuel strict. Aucune fidélité visuelle globale ni achèvement de la tranche n'est revendiqué.
