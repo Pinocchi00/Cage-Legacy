@@ -14,6 +14,10 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise 24 (24/10/2026) : confirmé que le code de production et les tests de la tranche sont déjà commités (HEAD `cfb8b37`), sur `p8-apres`. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; l'audit explicite de `test` et `test:watch` renvoie `true,true` ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
+- Pas de changement fonctionnel ni de format de sauvegarde dans cette reprise ; aucune migration. `tests/mgmtReleveReduit.test.js` et `check:rapide` ne sont pas relancés selon le contrôle rapide superviseur. Limite déjà déclarée : les tests de familles vérifient des faits préparés sur une partie réelle, sans démontrer que chaque système opérationnel produit naturellement tous ces faits ; le test lent du plafond de partie neuve reste à exécuter.
+- Seule la présente fiche est à commiter. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et le paramètre cache de `index.html` sont étrangers à cette reprise et exclus.
+
 - Reprise finale de livraison (24/10/2026) : `p8-apres` confirmée et `git log --oneline -12` consulté ; les changements de production, tests et inscription `package.json` étaient déjà présents dans les commits de la tranche. Aucun fichier fonctionnel de tranche n'était en attente.
 - Vérifications fraîchement relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; l'audit explicite d'inclusion dans `test` et `test:watch` renvoie `true,true` ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe.
 - Faits fonctionnels présents : dix familles à formulations `relu:false`, calcul déterministe/borné avec tests sur déclencheurs de faits, accueil et presse, mouvements des autres organisations dans la suite, absence de clé nouvelle de sauvegarde et préservation d'une sauvegarde ancienne. Aucun format de sauvegarde modifié ni migration.
