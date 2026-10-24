@@ -640,3 +640,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers de cette reprise : `mgmt-ceremonie.js` et `index.html` (montée de version), cette fiche. Aucun changement de sauvegarde ni migration.
 - Limites encore présentes selon les reprises précédentes : la reproduction intégrale des planches et le déclenchement à chaque anniversaire ne sont pas certifiés; le test multi-années ne joue pas trois saisons complètes et le test lent `mgmtReleveReduit` n'a pas été lancé. Le test ciblé n'affirme pas la résolution de ces limites.
 - Limites déjà documentées maintenues : test lent `mgmtReleveReduit` non exécuté, conformité visuelle complète non certifiée, cérémonie rattachée au terme du contrat, et parcours simulés n'établissant pas trois saisons complètes ni une fixture complète d'ancienne sauvegarde.
+
+### Reprise 83
+
+- Contrôle d'entrée : branche `p11-ceremonie-carnet`, HEAD `4613e80`; le commit au message final demandé est déjà présent. Aucun fichier métier de la tranche n'est en attente. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et exclues.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (41/41 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers); `node_modules/.bin/eslint .` (vert); confirmation que le test est dans `test` et `test:watch`.
+- Aucun défaut concret nouveau n'a été révélé dans le périmètre vérifié. Aucun changement de production, test ou sauvegarde n'est justifié par cette passe; ce compte rendu documente les contrôles de reprise et est le seul fichier de tranche à committer.
+- Limites non résolues et non déclarées satisfaites : `mgmtReleveReduit` non exécuté; pas de preuve que trois saisons complètes soient jouées ni qu'une fixture complète d'ancienne sauvegarde soit chargée; fidélité visuelle intégrale des maquettes non certifiée; le raccordement de la cérémonie suit le terme du contrat et non chaque anniversaire. Aucune migration de sauvegarde.
+- Les seuls autres fichiers modifiés sont les changements préexistants `.opencode/agents/*` et `opencode.json`; ils sont exclus. En conséquence, malgré les tests ciblés verts, `TOUT_EST_FINI` n'est pas revendiqué.
