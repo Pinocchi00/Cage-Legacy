@@ -295,3 +295,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : le rendu des résultats retourne une chaîne vide si aucun `lastEvent` valide ou tableau `fights` n'est présent, au lieu de planter sur les données absentes/malformées.
 - `tests/mgmtLot54T1.test.js` : test « Monde lot 54 T1 — les résultats tolèrent une carte de soirée absente ou malformée » ajouté. `node --test tests/mgmtLot54T1.test.js` passe 29/29.
 - Aucune donnée de sauvegarde nouvelle. Les cases 1 et 3 restent incomplètes selon les limites documentées plus haut (fidélité exhaustive aux deux planches et contextualisation/anti-répétition éditoriale T3 persistante) ; cette correction de robustesse ne les déclare pas terminées. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
+
+### Reprise demandée — 24/10/2026 (contrôle de livraison)
+
+- Branche `p8-lendemain` confirmée. `git log --oneline -12` montre que les changements de tranche sont déjà commités jusqu'à `1b0eb29`; aucun fichier de tranche n'était modifié au départ. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et n'ont pas été touchées.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 29/29 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint des trois fichiers JS de production passe.
+- Aucun nouveau code n'a été nécessaire au contrôle de livraison. Cas 2, 4 et 5 sont testés selon les limites inscrites ci-dessus. Les cases 1 et 3 ne sont pas achevées : il subsiste des écarts de composition/contenu aux planches et les lignes de l'après ne disposent pas d'une mémoire éditoriale persistante sur 50 soirées. Aucune nouvelle clé de sauvegarde ni migration.
+- `tests/mgmtReleveReduit.test.js` (lent), le lint global et `check:rapide` ne sont pas lancés conformément aux consignes de contrôle de cette reprise. Aucun nouveau commit n'est créé puisqu'aucun changement fonctionnel ou de tranche n'est en attente.
