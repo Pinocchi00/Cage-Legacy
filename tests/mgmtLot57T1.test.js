@@ -35,6 +35,16 @@ test('Monde lot 57 T1 — le classement est déterministe',()=>{
   }finally{a.close();b.close();}
 });
 
+test('Monde lot 57 T1 — le classement reste relié au classement mondial sur trois saisons simulées',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`(()=>{setSeed(570103);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});const saisons=[];for(let an=0;an<3;an++){saisons.push(mgmtGuerreClassement(m).map(x=>[x.id,x.rang]));if(an<2){m.cycle++;if(typeof mgmtOrgsAgir==='function')mgmtOrgsAgir(m);}}return JSON.stringify({saisons});})()`));
+    assert.equal(r.saisons.length,3);
+    for(const saison of r.saisons){assert.equal(saison.length,8);assert.deepEqual(saison.map(x=>x[1]),[1,2,3,4,5,6,7,8]);}
+    assert.equal(new Set(r.saisons.flatMap(s=>s.map(x=>x[0]))).size,8);
+  }finally{w.close();}
+});
+
 test('Monde lot 57 T1 — la variation du rang s’appuie sur le relevé précédent sans tirage',()=>{
   const w=partie();
   try{
