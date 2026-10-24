@@ -15,6 +15,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+- État de reprise : toujours inachevé. Tests ciblés et empreintes de `mgmtPasse.test.js` revérifiés verts (4/4 et 13/13) ; audit `node tools/verif-versions.js origin/main` vert. ESLint ciblé signale le test ignoré par la configuration (pas d'erreur de code).
+- Restent non faits : raccordement des seuils aux quatre systèmes, progression réelle par `mgmtPasseGenerer` et soirées, intégration du test dans les tableaux `test`/`test:watch`, couverture sauvegarde facultative/validation/réparation et vérification de plafond rejouée en arrière-plan. L'écran n'est pas conforme à toute la maquette. Je ne revendique pas la fin.
+- Les effets contenus actuellement dans `mgmtPALIERS` sont des métadonnées et ne modifient pas encore les systèmes concernés ; ce décalage demeure explicite.
+
   - État : **inachevé**. Le critère de fin de la fiche n’est pas atteint ; ne pas fusionner comme tranche terminée.
 - Fichiers modifiés : `mgmt-salles.js` (table de cinq paliers et dérivation pure sur popularité/rang), `mgmt-ecran-organisation.js` (premier affichage de la croissance sur Organisation), `ui-cadre.css` (règles `cr3-*`), `index.html` (versions cache), `package.json` (scripts dédiés), `tests/mgmtLot56T1.test.js` (tests de dérivation et de classes).
 - Tests ajoutés : « Croissance — cinq paliers sont dérivés sans mutation et répondent à la popularité et au rang » ; « Croissance — les classes cr3 de l’écran ont des règles dédiées et aucun petit texte ».

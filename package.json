@@ -6,6 +6,8 @@
   "scripts": {
     "pretest:watch": "node --test tests/mgmtLot47T1.test.js tests/mgmtLot56T1.test.js",
     "pretest": "node --test tests/mgmtLot47T1.test.js tests/mgmtLot56T1.test.js",
+    "test:lot56t1": "node --test tests/mgmtLot56T1.test.js",
+    "test:watch:lot56t1": "node --test --watch tests/mgmtLot56T1.test.js",
     "test:lot48t1": "node --test tests/mgmtLot48T1.test.js",
     "test:watch:lot48t1": "node --test --watch tests/mgmtLot48T1.test.js",
     "test:traits-fiche": "node --test tests/mgmtTraitsFiche.test.js",
