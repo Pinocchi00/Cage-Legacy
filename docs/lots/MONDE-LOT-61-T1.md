@@ -16,9 +16,10 @@ Branche : `p9-changer-org` (la branche courante de ce dossier ; commits ICI ; le
 
 - `mgmt-poste.js` : l'échange actif/stocké conserve l'ordre canonique des organisations. Constat : l'étude était exacte sur les sous-parties, mais l'ordre des clés est également une contrainte stricte de `mgmtMondeVivantValide`; sans remise en ordre, le premier échange rendait la sauvegarde invalide.
 - `tests/mgmtLot61T1.test.js` : test ciblé de l'échange depuis le chemin de génération du monde, conservation des identifiants de combattants et validation.
+- Le même fichier ajoute « Monde lot 61 T1 — Split puis retour restaure le roster et le monde valide » ; `package.json` expose le test via `test:lot61t1` et `test:watch:lot61t1`.
 - Migration de sauvegarde : aucune ; `MGMT_SAVE_VERSION` inchangé.
-- Vérifications : `node --test tests/mgmtLot61T1.test.js` vert. Le test précédent `mgmtLot58T1.test.js` a dépassé la limite de 120 s disponible et n'a pas été confirmé.
-- Écarts : l'intégration presse/rivalité, l'arrivée recalculée, le trajet retour, la validation des suivis/espoirs, les autres tests bout en bout, l'inscription du nouveau test dans les scripts généraux, le lint et le commit de livraison ne sont pas réalisés. Le contrôle versions a été lancé mais interrompu par délai.
+- Vérifications : `node --test tests/mgmtLot61T1.test.js` vert (2/2) ; `node tools/verif-versions.js origin/main` sans écart.
+- Écarts : l'intégration presse/rivalité, l'arrivée recalculée, la validation des suivis/espoirs, les autres tests bout en bout, le lint et le test lent de plafond ne sont pas réalisés. Les tests ciblés prennent environ 90 s et n'ont pas pu couvrir davantage dans ce tour. `test`/`test:watch` agrégés ne listent pas directement ce test ; scripts dédiés ajoutés.
 - Questions pour Anthony : aucune.
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
