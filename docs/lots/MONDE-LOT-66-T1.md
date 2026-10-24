@@ -18,6 +18,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 10 — taille du nom principal — 24/10/2026
+
+- État initial : branche `fid-lendemain`, les commits précédents de la tranche déjà présents. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre, non modifiées et non ajoutées.
+- Ajustement terminal dans `ui-cadre.css` : le nom de la surprise est maintenant défini à 108 px comme le balisage de `UniLendemain` (noms des deux autres cartes : 64 px). Version CSS montée dans `index.html` avec `node tools/_bump.js`.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7. `node tools/verif-versions.js origin/main` : aucun écart.
+- Capture non relancée : le guide `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` n'est pas accessible dans cet environnement. L'échelle demandée est réglée dans le CSS mais la mesure computed-style et l'image comparée après cette modification ne sont pas certifiées. Aucun autre écart de comportement ou de données.
+- Fichiers modifiés : `ui-cadre.css` (échelle du nom), `index.html` (cache CSS), cette fiche (compte rendu). Aucun test nouveau, aucune migration. Avant/après : les dimensions déclarées reprennent la valeur du nom principal de la maquette ; absence de mesure de capture après ajustement à signaler.
+- Questions pour Anthony : aucune.
+
 ### Reprise finale — ajustement et captures — 24/10/2026
 
 - État de départ : branche `fid-lendemain`, code de tranche déjà commité. Modifications des agents OpenCode, `opencode.json` et `sw.js` laissées hors périmètre.
