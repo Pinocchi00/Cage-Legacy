@@ -2196,6 +2196,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
 .ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{font-size:22px;line-height:1.1;text-align:right}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_FLUIDES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.68fr);column-gap:8px}
+.ld66-suite .ld3-move>div:first-child,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_CARTE_MOMENT_CONTENUE] — Monde lot 66 T1 ==== */
 .ld66-moments .ld3-moment{box-sizing:border-box;padding:16px 20px;gap:8px;overflow:hidden}
 .ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:68px;line-height:.8}
