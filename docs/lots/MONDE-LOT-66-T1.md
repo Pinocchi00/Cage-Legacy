@@ -242,6 +242,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Réexécutés séparément avec succès : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9), `mgmtLot54T1.test.js` (30/30) et `mgmtSoireeShow.test.js` (18/18). `node tools/verif-versions.js origin/main` confirme aucun écart.
 - Aucun nouveau changement de code ou test ; les commits fonctionnels précédents livrent déjà les deux écrans. La capture précédente mesure des gros blocs à 19,5 % (`lendemain`) et 18,8 % (`lendemainSuite`) ; le regard visuel direct, les chevauchements et le test lent `mgmtReleveReduit.test.js` (hors tranche, dernière tentative connue échouée sur `ENOSPC`) ne sont pas certifiés par cette reprise.
 
+### Reprise 9 — capture et vérifications de reprise — 24/10/2026
+
+- État Git : branche `fid-lendemain`, les commits fonctionnels sont au HEAD (`3063625c`) ; aucun fichier de tranche non commité. Les modifications des agents/configuration et `sw.js` restent hors tranche, laissées intactes.
+- Guide de capture lu via Python après refus de lecture directe du chemin temporaire. Comparateur relancé séparément : `lendemain` a zéro chevauchement, zéro texte sous 22 px et zéro débordement, mais `grosBlocs=20,9 %` (objectif ≤18 % de la reprise non atteint). `lendemainSuite` a zéro chevauchement et zéro texte sous 22 px, mais quatre débordements (`Jonas Bühler`, `Poids mi-moyen`, `6ᵉ → 11ᵉ`, `chez Split`), `grosBlocs=17,6 %`.
+- Le CSS terminal fixe explicitement les noms à 80 px pour la carte surprise et 64 px pour les deux autres, et les cartes à 285 px; pas de correction risquée sans pouvoir ouvrir les comparatifs. Captures générées sous `C:/Users/antho/AppData/Local/Temp/shots/`. La mesure JavaScript des styles calculés et l’inspection d’image ne sont pas effectuées, donc l’échelle n’est pas certifiée par cette reprise.
+- Avant/après : les structures des deux écrans restent celles déjà livrées. Aucun nouveau changement fonctionnel, donnée, navigation ou sauvegarde. L’objectif visuel strict (≤18 % pour lendemain et aucun débordement en suite) demeure partiellement non satisfait.
+- Questions pour Anthony : aucune.
+
 ### Reprise 18 — contrôle de remise — 24/10/2026
 
 - Branche confirmée : `fid-lendemain`. L'historique contient déjà le commit de livraison `facc4d3`; aucune modification locale de code/test de cette tranche n'était en attente. Les modifications locales de configuration/agents et `sw.js` restent hors périmètre et intactes.
