@@ -207,3 +207,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node tools/verif-versions.js origin/main` a été tenté, mais le processus Node a terminé sur une erreur mémoire fatale (heap out of memory). Il ne s'agit pas d'un résultat vert; l'audit de versions reste non vérifié pour cette reprise. Aucun `check:rapide` n'a été lancé, conformément à la consigne superviseur.
 - Aucun code métier n'a été modifié durant cette reprise et aucun commit n'est créé : le test ciblé vert ne rend pas les cases manquantes terminées, et le contrôle de versions a échoué. `mgmtReleveReduit` n'a pas été lancé. Aucune migration de sauvegarde ni question ouverte nouvelle.
 - Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et ne doivent pas être incluses. Pas de `TOUT_EST_FINI`.
+
+### Reprise 26
+
+- État initial : branche conforme `p11-ceremonie-carnet`, HEAD `8dbbe89`. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et non touchées.
+- Nouveau test « Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les saisons absentes » : confirme la lecture de prix, champions, primes, défis, soirées existantes et retour vide honnête. Tests ciblés : 9/9 verts. ESLint ciblé sur les fichiers JS métier : vert.
+- `node tools/verif-versions.js origin/main` signale un écart préexistant sur `mgmt-accueil.js` (version identique à origin/main) ; ce fichier est étranger et n’a pas été modifié par cette reprise. Le test ne démontre toujours pas les simulations de trois années ni la non-répétition sur 50 soirées.
+- État livré toujours incomplet : conformité exacte aux maquettes et scénarios multi-années/non-répétition restent non établis. Aucune migration de sauvegarde.
+- Test ciblé relancé lors de la reprise suivante : les 9 tests existants passent. Une assertion expérimentale sur la table lexicale des formulations a échoué car la constante n'est pas exposée par le contexte VM; assertion retirée, aucun comportement métier affecté.
