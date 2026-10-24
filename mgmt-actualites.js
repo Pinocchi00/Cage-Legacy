@@ -26,9 +26,9 @@ mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).fi
 /* ==== [ANCRE: P2_T5_SURNOMS_GAGNES_ACTUALITES] — Monde lot 40 T1 ==== */
 mgmtActuSourceAjouter({type:'surnom',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='surnom'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'surnom',c:x.c,id:x.a,donnees:x}));}});
 function mgmtActualites(m,opts){
-  if(!m||!Array.isArray(m.suivis)||!m.suivis.length)return [];
+  if(!m)return [];
   opts=opts||{}; const ids=mgmtSuivis(m), cycles=Number.isSafeInteger(opts.cycles)&&opts.cycles>=0?opts.cycles:8, depuis=Math.max(0,(Number.isSafeInteger(m.cycle)?m.cycle:0)-cycles+1), brut=[];
-  for(const s of MGMT_ACTU_SOURCES){try{brut.push(...s.lire(m,ids,depuis));}catch(e){}}
+  if(ids.length) for(const s of MGMT_ACTU_SOURCES){try{brut.push(...s.lire(m,ids,depuis));}catch(e){}}
   const rang=new Map(), rows=[];
   const dernier=new Map();
    for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const moi=mgmtActuNom(m,x.id);if(!moi)continue;const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, adversaire=mgmtActuNom(m,x.adv||''),a=adversaire?adversaire.n:(x.adv||''),d=x.donnees||{};let banque,vars,detail='';
@@ -41,7 +41,11 @@ function mgmtActualites(m,opts){
      if(x.type==='espoir'){banque=null;}
       rows.push({cle,type:x.type,c:x.c,id:x.id,nom:moi.n,org:moi.org,div:moi.div,titre:x.type==='espoir'?'Leïla te donne des nouvelles de '+moi.n:x.type==='surnom'?'La presse l’appelle désormais « '+d.nom+' »':phrase,texte:x.type==='espoir'?'Il a combattu ce soir.':detail,sous:typeof mgmtEstEspoir==='function'&&mgmtEstEspoir(m,x.id)?'Ton espoir':null,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
   }
-  rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
+   for(const [i,f] of (m.croissanceActus||[]).entries()) if(f&&typeof f.palier==='string'&&typeof f.texte==='string'){
+     const cle='croissance|'+f.palier+'|'+(Number.isSafeInteger(f.c)?f.c:i);
+     rows.push({cle,type:'croissance',c:Number.isSafeInteger(f.c)?f.c:0,id:'split',nom:mgmtOrgNom(m),org:'split',div:null,titre:f.texte,texte:'Palier franchi · '+f.palier,lu:Array.isArray(m.actuLu)&&m.actuLu.includes(cle)});
+   }
+   rows.sort((a,b)=>b.c-a.c||b.cle.localeCompare(a.cle)); return rows.slice(0,Number.isSafeInteger(opts.max)?Math.max(0,opts.max):60);
 }
 function mgmtActuLire(m,cle){if(!m||typeof cle!=='string')return false;if(!Array.isArray(m.actuLu))m.actuLu=[];if(m.actuLu.includes(cle))return false;m.actuLu.push(cle);m.actuLu=m.actuLu.slice(-300);return true;}
 function mgmtActuToutLire(m){if(!m)return 0;const l=mgmtActualites(m);for(const x of l)mgmtActuLire(m,x.cle);return l.length;}
