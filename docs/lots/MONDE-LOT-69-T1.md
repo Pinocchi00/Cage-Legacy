@@ -78,6 +78,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Je n'ai pas pu ouvrir le fichier d'instructions de capture externe avec l'outil de lecture autorisé ; aucune capture/cmp n'est revendiquée. Les écarts fonctionnels et visuels précédemment consignés demeurent : choc à trois affiches, contrôle comparatif arrivée/discours/bilan, et parcours contractuel complet avec rechargement identique et lendemain.
 - Vérifications à cette reprise : le test ciblé et l'audit de versions sont relancés avant livraison. Aucun changement de sauvegarde. Cette reprise n'achève pas toutes les cases et ne revendique pas `TOUT_EST_FINI`.
 
+### Reprise 24
+- État au départ : branche `fid-choc`; l'historique contient déjà les reprises partielles précédentes. Le test `tests/mgmtLot69T1.test.js` avait une modification utilisateur de mise en forme non commitée ; conservée.
+- Fichiers modifiés dans cette reprise : `package.json` ajoute explicitement `tests/mgmtLot69T1.test.js` aux commandes agrégées `test` et `test:watch`, en plus des hooks existants ; `tests/mgmtLot69T1.test.js` garde le changement de mise en forme préexistant ; cette fiche consigne l'état.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; la présence du test dans les deux commandes agrégées est confirmée.
+- Aucun changement de sauvegarde ni de cache JS/CSS. Les cases métier/visuelles non satisfaites restent celles décrites aux reprises précédentes : choc à trois affiches, comparaisons/captures, et parcours intégral strict.
+- Écart : les commandes d'agrégation sont maintenant corrigées, mais cette seule correction ne vaut pas achèvement des critères restants. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 18
 - Lecture des instructions de capture : `LISEZMOI.txt` précise la commande `shoot.js`, les contrôles chevauchement/tailles/débords et les sorties `cmp-*.png`. Le dossier `shoot` n'existe pas dans ce dépôt ; aucune capture n'a donc été produite. Les planches restent la référence de structure.
 - Modification : `tests/mgmtLot69T1.test.js` contrôle aussi la présence des classes de titre, citation et détails du choc, afin de verrouiller ces blocs de la maquette. Les tests `node --test tests/mgmtLot69T1.test.js` passent (2/2).
