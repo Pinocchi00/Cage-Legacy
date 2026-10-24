@@ -154,6 +154,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - La fusion prescrite `git merge origin/main` n'a pas été effectuée : l'environnement a refusé la commande, explicitement interdite par sa politique. Aucun conflit ne pouvait donc être résolu ici ; le superviseur devra fusionner puis relancer les tests inter-lots.
 - Seule cette fiche est modifiée par cette reprise. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus. La couverture et les limites fonctionnelles décrites aux comptes rendus précédents restent inchangées.
 
+### Reprise — contrôle final inter-lots (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de code et tests de la tranche sont déjà présents, sans fichier fonctionnel de tranche non commité.
+- La suite prescrite passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les régressions lot 54 de rivalité et d'anti-répétition sur cinquante semaines sont vertes.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inscrit dans `test` et `test:watch` (`true,true`). Pas de changement de sauvegarde ni migration.
+- La fusion `git merge origin/main` a été tentée, mais bloquée par la politique de l'environnement. L'intégration reste au superviseur. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus.
+- Limite de couverture inchangée : les tests déclenchent les faits familiaux préparés sur une partie réelle, sans prouver que tous les systèmes opérationnels produisent naturellement chacun de ces faits. Aucun écart nouveau ni question pour Anthony.
+
 ### Reprise finale — tests inter-lots (24/10/2026)
 
 - Branche `p8-apres` confirmée ; aucun fichier de production ou test de la tranche n'est modifié localement. Les changements `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et laissés intacts.
