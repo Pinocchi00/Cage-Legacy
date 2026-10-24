@@ -110,3 +110,15 @@ test('Monde lot 57 T1 — les raisons hostiles de rivalité sont échappées dan
     assert.ok(html.includes('&lt;img'));
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — chaque classe gu3 affichée possède une règle CSS',()=>{
+  const w=partie();
+  try{
+    const html=w.eval('scr_mgmt_guerre()');
+    const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+    const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('gu3-')))];
+    assert.ok(classes.length>0);
+    const sansRegle=classes.filter(c=>!new RegExp('\\.'+c+'(?:[ .:{,#]|\\s*\\{)').test(css));
+    assert.deepEqual(sansRegle,[]);
+  }finally{w.close();}
+});
