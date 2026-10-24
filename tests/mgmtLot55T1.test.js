@@ -70,10 +70,11 @@ test('Lot 55 T1 — le retour tient compte du dernier combat avant la fenêtre a
 });
 test('Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les saisons absentes',()=>{
   const c=charger();
-  const m={roster:[{id:'x',name:'X',prixAnnee:[{prix:'ko',annee:2025}]}],hist:[{c:12,primes:[{titre:'Prime observée'}]}],facts:[{k:'champion',nom:'X'}],defis:[{id:'d',etat:'fait'}]};
+  const m={roster:[{id:'x',name:'X',prixAnnee:[{prix:'ko',annee:2025}]}],hist:[{c:12,a:{id:'x',name:'X'},b:{id:'y',name:'Y'},winner:'A',primes:[{titre:'Prime observée'}]}],facts:[{k:'title_fight',fight:0,div:'fly'}],defis:[{id:'d',etat:'fait'}]};
   const carnet=c.mgmtCarnetLire(m);
   assert.equal(carnet.prix.length,1);
   assert.equal(carnet.champions.length,1);
+  assert.equal(carnet.champions[0].nom,'X');
   assert.equal(carnet.primes[0].titre,'Prime observée');
   assert.equal(carnet.defis.length,1);
   assert.equal(carnet.soirees.length,1);

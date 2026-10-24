@@ -48,7 +48,12 @@ function mgmtCarnetLire(m){
   if(!m)return {champions:[],espoirs:[],prix:[],defis:[],primes:[],soirees:[]};
   const roster=Array.isArray(m.roster)?m.roster:[], hist=Array.isArray(m.hist)?m.hist:[];
   const prix=roster.flatMap(f=>(Array.isArray(f.prixAnnee)?f.prixAnnee:[]).map(p=>({nom:f.name||f.nom||'Combattant',...p}))).filter(p=>p&&Number.isSafeInteger(p.annee));
-  const champions=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='champion').map(f=>({fait:f}));
+  const champions=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='title_fight').map(f=>{
+    const t=hist[f.fight];
+    if(!t||!['A','B'].includes(t.winner))return null;
+    const laureat=t.winner==='A'?t.a:t.b;
+    return {fait:f,nom:laureat.name||laureat.nom||'Champion',div:f.div,jour:t.c};
+  }).filter(Boolean);
   const espoirs=(Array.isArray(m.espoirs)?m.espoirs:[]).map(id=>{const f=roster.find(x=>x&&x.id===id);if(!f)return null;const rang=typeof mgmtDivisionRanking==='function'?(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===id)+1:0;return rang>0?{nom:f.name||f.nom||'Combattant',rang}:null;}).filter(Boolean);
    const primes=(Array.isArray(m.hist)?m.hist:[]).flatMap(t=>Array.isArray(t.primes)?t.primes:[]);
    const records=typeof mgmtRecords==='function'?mgmtRecords(m):null;
@@ -75,7 +80,7 @@ if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
 function scr_mgmt_carnet(){
   const m=G&&G.mgmt;if(!m)return '';const c=mgmtCarnetLire(m);
   const liste=(xs,fn)=>xs.length?xs.map(fn).join(''):'<p>Rien encore.</p>';
-   const body=`<main class="ce3-ecran"><h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.fait.nom||x.fait.fighter||'Champion')}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>RECORDS DE TES SOIRÉES</h2>${liste(c.records,x=>`<p>${mgmtCeremonieEchapper(x.type||x.label||'Record')} · ${mgmtCeremonieEchapper(x.valeur??x.value??'')}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}</p>`)}</article></section><button type="button" onclick="CL.go('mgmt_accueil')">Accueil</button></main>`;
+   const body=`<main class="ce3-ecran"><h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.div||'Catégorie')} · soirée ${mgmtCeremonieEchapper(x.jour)}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>RECORDS DE TES SOIRÉES</h2>${liste(c.records,x=>`<p>${mgmtCeremonieEchapper(x.type||x.label||'Record')} · ${mgmtCeremonieEchapper(x.valeur??x.value??'')}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}</p>`)}</article></section><button type="button" onclick="CL.go('mgmt_accueil')">Accueil</button></main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'TON CARNET',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_carnet=scr_mgmt_carnet;
