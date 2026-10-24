@@ -18,6 +18,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 58 — échelle des cartes et nouvelle capture — 24/10/2026
+
+- État de départ : branche `fid-lendemain`, `git status` sans fichier de tranche en attente; les commits fonctionnels sont déjà présents. Seuls agents/configuration et `sw.js` étaient modifiés hors périmètre et laissés intacts.
+- CSS `ui-cadre.css` : rétabli un panneau de moments de 285 px, noms à 64 px minimum (dont la carte principale), contenu inférieur flexible et colonnes de mouvement bornées; cache CSS bumpé via `_bump.js`. Cette mesure de typographie est inférieure aux 80 px indiqués pour le nom principal dans la note de reprise, mais respecte le critère explicite de mesure ≥64 px et préserve les cartes complètes sans débordement.
+- Captures 1920×1080 via `shoot.js` : `lendemain` moyen 25,8 %, gros blocs 19,5 %, zéro texte <22 px, zéro débordement, trois chevauchements résiduels de lignes des constats avec les touches de navigation. `lendemainSuite` moyen 22,7 %, gros blocs 16,9 %, zéro chevauchement et zéro texte <22 px, mais quatre débordements signalés dans les mouvements (« Poids plume féminin », « 26ᵉ → 27ᵉ », « chez Split », « Elijah Sanders »). Les cibles automatiques de chevauchement/débordement ne sont donc pas toutes atteintes; je ne certifie pas la conformité visuelle complète.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucune donnée, navigation, mécanique de combat ou sauvegarde modifiée; pas de migration. Les écarts à la planche qui restent sont consignés ci-dessus. Questions pour Anthony : aucune.
+
 ### Reprise 57 — remontée d’échelle et captures — 24/10/2026
 
 - État initial : branche `fid-lendemain`, HEAD `e8519ce2`; aucun changement non commité de la tranche. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
