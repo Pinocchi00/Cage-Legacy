@@ -118,3 +118,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 20/20 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé de `mgmt-ecran-lendemain.js` passe.
 - Limites honnêtes : le rendu des mouvements reflète désormais les variations organisationnelles des participants, mais la composition/valeurs complètes des deux planches ne sont pas démontrées, les chiffres de contrat restent partiels et l'après n'a pas de contextualisation complète aux faits réels (discours, réseaux, revanche et organisations) ni de mémoire persistante anti-répétition sur 50 soirées. Les cases 1 et 3 ne sont donc toujours pas entièrement satisfaites. Aucun état de sauvegarde ajouté.
 - Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et exclus du commit.
+
+### Reprise — contrôle de livraison (24/10/2026)
+
+- Journal vérifié : les changements de tranche sont déjà commités (HEAD `94da647`); les seuls fichiers locaux modifiés sont `.opencode/agents/*`, `opencode.json` et `sw.js`, donc aucune modification étrangère n'est staged.
+- Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 20/20 ; `node tools/verif-versions.js origin/main` ne signale aucun écart. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé ici.
+- Le travail reste non achevé : en particulier les sorties actuelles ne prouvent pas toutes les valeurs/layouts exacts des maquettes, les faits de contrat/résultats sont incomplets et T3 ne conditionne pas l'ensemble de ses familles aux événements réels. Le suffixe de semaine limite les répétitions de formulation sur les semaines observées, mais ne constitue pas une mémoire anti-répétition éditoriale persistante sur 50 soirées.
+- Aucun fichier de tranche n'étant modifié, aucun commit supplémentaire n'est créé. Aucune donnée de sauvegarde ou migration nouvelle.
