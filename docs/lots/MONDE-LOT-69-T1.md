@@ -216,3 +216,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `tests/mgmtLot69T1.test.js` poursuit désormais la fixture choc jusqu'à `mgmtRunEvent` : l'affrontement local/adverse est placé en principal, la soirée normale s'exécute et le statut/résultat du choc sont vérifiés.
 - Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
 - Limites maintenues : le parcours est le choc mono-affiche du modèle existant, pas les trois combats montrés sur la planche. Les critères restant (parcours contractuel strict, captures/scènes dédiées et conformité visuelle mesurée) ne sont pas déclarés terminés.
+
+### Reprise 38
+- État vérifié : branche `fid-choc`, les modifications présentes sous `.opencode/agents/` et `opencode.json` restent hors de la tranche.
+- La lecture du guide externe a finalement fonctionné. Nouvelle capture `choc` lancée avec `shoot.js` à 1920×1080 : contrôle automatique `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=25.1%` (au-dessus de 20 %). La commande a dépassé le délai maximal de 120 s pendant la série d'écrans ; aucune capture nouvelle de discours/bilan ni des scènes arrivée/offre n'est établie par cette tentative.
+- Test ciblé et audits : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe.
+- Aucun code fonctionnel nouveau ni migration. Critères encore ouverts : écart visuel du choc, captures/mesures du reste des écrans, choc mono-affiche au lieu des trois affrontements de la planche, et parcours contrat-bilan avec rechargement strict. Pas de `TOUT_EST_FINI` revendiqué.
