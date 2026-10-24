@@ -22,6 +22,12 @@ test('Monde lot 61 T1 — le changement sauvegardé se recharge à l’identique
   assert.deepEqual(r,{identique:true,org:'garden-of-blood',rng:true,sansOrphelins:true});
 });
 
+test('Monde lot 61 T1 — le calendrier de chaque organisation reste en place pendant l’échange',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);const cible=Object.keys(m.orgs)[0],jour=m.cal.jour,agenda=JSON.stringify(m.agenda),calendrier=JSON.stringify(m.orgs[cible].cal);const ok=mgmtOrgChanger(m,cible,{salaire:1234});return {ok,jourInchange:m.cal.jour===jour,agendaPromu:JSON.stringify(m.agenda)===JSON.stringify(m.orgs.split.agenda),calendrierPromu:JSON.stringify(m.cal)===calendrier}})())`));
+  assert.deepEqual(r,{ok:true,jourInchange:true,agendaPromu:true,calendrierPromu:true});
+});
+
 test('Monde lot 61 T1 — accepter une offre confirme le départ et montre l’arrivée de la nouvelle organisation',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(61);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],salaire:4321}];window.confirm=()=>true;G.mgmt=m;const ok=mgmtOffreAccepter(m,0);return {ok,org:mgmtPredecesseurOrgId(m),screen:G.screen,arrival:document.getElementById('app').textContent.includes('Ton arrivée'),salaire:m.poste.salaire,espoirs:Array.isArray(m.espoirsPropose)}})())`));
