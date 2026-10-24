@@ -248,6 +248,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `mgmt-ecran-poste.js` branche maintenant le raccourci R de la barre du choc sur le refus existant (`mgmtChocRepondre(..., false)`), avec sauvegarde et rafraîchissement comme les autres décisions. `index.html` versionné avec `node tools/_bump.js mgmt-ecran-poste.js`.
 - `tests/mgmtLot69T1.test.js` vérifie que la commande « R Refuser » est effectivement exposée dans l'écran choc.
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Une première exécution a dépassé le délai de 120 s avant la relance réussie.
+
+### Reprise 43
+- État repris : HEAD `fe0c2ea4`, branche `fid-choc`. Aucune modification fonctionnelle de la tranche n'était en attente ; les modifications sous `.opencode/agents/` et `opencode.json` sont restées hors périmètre.
+- Reproduction effective avec l'outil de capture indiqué dans la fiche : la scène `choc` s'affiche bien (pas d'écran blanc), avec `chevauchements=0`, `textesSous22px=0`, aucun débordement ; mesure `grosBlocs=25.6%` (seuil 20% non atteint). Capture `discours` : contrôles géométriques sans anomalie, `grosBlocs=18.1%` (seuil atteint). Ces résultats confirment que l'écran choc rendu depuis une proposition valide est visible, mais son seuil de blocs reste à corriger.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4) : parcours offre/changement/arrivée/rechargement/soirée/lendemain, rendu des trois affiches et soirée normale du choc dans le périmètre du test.
+- Audit `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Pas de nouveau changement de code, pas de migration. Le bilan initial comportait un chevauchement ; il n'a pas été recapturé dans cette reprise.
+- Écarts qui restent : choc au-dessus des 20% de gros blocs ; aucune validation post-correction des écrans bilan/arrivée ; le parcours n'a pas été refait de bout en bout depuis la fin de contrat dans cette reprise. Pas de `TOUT_EST_FINI` revendiqué.
 - Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
 - Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
 
