@@ -286,7 +286,7 @@ function mgmtCombatBarreMaj(){
 function mgmtCombatFriseHtml(){
   const C=MGMT_COMBAT;
   if(C.vueCombat!=='forts'||!Array.isArray(C.tempsForts)||!C.tempsForts.length)return '';
-  return `<div class="so3-frise" aria-label="Moments forts">${C.tempsForts.map((moment,i)=>`<div class="so3-moment${i===C.tempsFortActif?' actif':''}${i<C.tempsFortActif?' passe':''}"><b>${i+1}</b><span>${esc(moment.raison)}</span></div>`).join('')}</div>`;
+  return `<div class="so3-frise" aria-label="Moments forts" aria-live="polite">${C.tempsForts.map((moment,i)=>{const etat=i===C.tempsFortActif?'en cours':i<C.tempsFortActif?'passé':'à venir';return `<div class="so3-moment${i===C.tempsFortActif?' actif':''}${i<C.tempsFortActif?' passe':''}"${i===C.tempsFortActif?' aria-current="step"':''} aria-label="Moment ${i+1}, ${etat} : ${esc(moment.raison)}"><b>${i+1}</b><span>${esc(moment.raison)}</span></div>`;}).join('')}</div>`;
 }
 function scr_mgmt_combat(){
   const C=MGMT_COMBAT;

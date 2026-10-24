@@ -177,3 +177,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Ajout du test « la durée forfaitaire d’une soirée complète additionne neuf transitions » : neuf combats en vue résultat donnent 135 s selon la règle de 5 s par combat et 10 s de transition.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 10/10 réussis.
 - Cette assertion ne remplace pas le critère demandé de 900–1200 s pour la carte de référence avec vues par défaut. Elle verrouille uniquement une composante de la formule; aucun affichage ni comportement de lecture n'a été modifié.
+
+### Reprise 25 — états accessibles dans la frise
+
+- Ajout d'un état vocal explicite à chaque repère de la frise (« passé », « en cours », « à venir »), avec `aria-current="step"` sur le repère actif et une région `aria-live="polite"`. Les raisons restent échappées.
+- Tests : `node --test tests/mgmtLot53T1.test.js` — 10/10 ; `node tools/verif-versions.js origin/main` — aucun écart ; `node_modules/.bin/eslint .` — réussi.
+- Fichiers : `mgmt-combat.js` (attributs accessibles sur la frise), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertions des états et de l'échappement), présente fiche.
+- Cette reprise ne termine pas le lot. Les compositions complètes `UniSoiree` et `UniSoireeFin`, la lecture fenêtrée accélérée/fondue passable, l'assertion de cumul 900–1200 s et la vérification d'empreintes anciennes restent non satisfaites. Le test ne couvre pas exhaustivement les classes et n'est pas inscrit aux listes principales `test` et `test:watch`.
+- Aucun changement du moteur de combat, de sauvegarde ou de la formule de durée. Les changements locaux `.opencode/agents/*` et `opencode.json` sont étrangers et exclus du commit ; `sw.js` est restauré à `origin/main`.

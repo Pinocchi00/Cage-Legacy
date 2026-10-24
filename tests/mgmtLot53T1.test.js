@@ -103,6 +103,9 @@ test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=
     assert.equal((html.match(/class="so3-moment/g)||[]).length,2);
     assert.match(html,/actif/);
     assert.match(html,/Finition &lt;test&gt;/);
+    assert.match(html,/aria-current="step"/);
+    assert.match(html,/Moment 1, passé : Ouverture/);
+    assert.match(html,/Moment 2, en cours : Finition &lt;test&gt;/);
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     for(const c of ['so3-frise','so3-moment','so3-moment b','so3-moment span','so3-moment.actif','so3-moment.passe'])assert.match(css,new RegExp(`\\.${c.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}\\s*\\{`));
   }finally{w.close();}
