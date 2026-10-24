@@ -101,9 +101,10 @@ function mgmtRecruteurApprocher(m){
   const jour=mgmtRecruteurJour(m),prises=[];
   for(const retour of m.recruteur.retours){
     const age=jour-(Number.isSafeInteger(retour.jour)?retour.jour:jour);
-    if(age<0||age>14)continue;
+    if(age<0)continue;
     for(const p of retour.profils||[]){
-      if(!mgmtRecruteurProfilDisponible(m,p.id)||mgmtRecruteurProfilSuivi(m,p.id)&&age<28)continue;
+      const suivi=mgmtRecruteurProfilSuivi(m,p.id);
+      if(!mgmtRecruteurProfilDisponible(m,p.id)||age>(suivi?28:14)||suivi&&age<28)continue;
       const rng=mgmtIdentiteStream(p.id,'recruteur-approche-'+retour.n,m);
       const rivale=typeof mgmtRivaleDuMoment==='function'?mgmtRivaleDuMoment(m):null;
       let orgId=rivale,proba=rivale?MGMT_RECRUTEUR_PROBA_RIVALE:MGMT_RECRUTEUR_PROBA_PROXIMITE;
