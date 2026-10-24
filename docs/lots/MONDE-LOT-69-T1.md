@@ -345,3 +345,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - J'ai relu les écrans et le balisage de `UniBilanPatron`; cette vérification n'est pas une preuve de capture et n'efface pas les mesures antérieures. Les limites restent réelles : modèle de choc mono-combat, seuil visuel choc précédemment mesuré à 25,1 %, et absence de parcours contractuel intégral avec rechargement strict valide.
 - Aucun changement fonctionnel supplémentaire n'a été introduit : inventer deux combats ou un déroulé contractuel non attesté par le modèle/tests présenterait une fonctionnalité fausse comme achevée. Pas de migration ni de capture nouvelle revendiquée.
 - Écart : la tranche ne satisfait pas toutes ses cases; aucun `TOUT_EST_FINI` revendiqué. Les changements utilisateurs hors tranche n'ont pas été touchés.
+
+### Reprise 57
+- Fichiers modifiés : `mgmt-ecran-poste.js` marque les quatre raisons de chaque offre avec une classe dédiée; `ui-cadre.css` les présente comme une liste distincte (filet jaune, espacement compact); `index.html` reçoit les versions mises à jour par `_bump.js`; `tests/mgmtLot69T1.test.js` vérifie leur structure et leur style.
+- Test ajouté : l’assertion « les quatre raisons sont isolées comme liste dans l’offre » et son contrôle de style, dans le test existant « Monde lot 69 T1 — les raisons d’offre restent échappées dans le bilan du poste ».
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4); `node tools/verif-versions.js origin/main` passe (17 fichiers); `node_modules/.bin/eslint .` passe.
+- Pas de migration de sauvegarde. Aucun changement utilisateur hors tranche n'a été inclus.
+- Écarts inchangés : modèle du choc une seule affiche, conformité/captures comparatives non validées dans cette reprise, et parcours fin de contrat/bilan avec reprise sauvegardée identique non démontré. Le changement améliore la hiérarchie du bloc d’offres mais ne constitue pas une validation de capture. Aucune scène `shoot`/`cmp` ni mesure nouvelle produite.
+- Questions pour Anthony : aucune nouvelle question. Les critères de la tranche restent incomplets; aucun `TOUT_EST_FINI` n'est revendiqué.

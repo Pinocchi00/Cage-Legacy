@@ -87,12 +87,15 @@ test('Monde lot 69 T1 — les raisons d’offre restent échappées dans le bila
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(6903);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],poste:'ENTRAÎNEUR',salaire:4321,texte:'Offre de contrôle',raisons:['<img src=x onerror=alert(1)>','Résultats récents','Projet sportif','Confiance de la direction'],refuse:false}];G.mgmt=m;`);
-    const rendu=w.eval('mgmtPosteRendu(G.mgmt)');
+     const rendu=w.eval('mgmtPosteRendu(G.mgmt)');
+     assert.equal((rendu.match(/class="po2-raison"/g)||[]).length,4,'les quatre raisons sont isolées comme liste dans l’offre');
     assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
     assert.ok(!rendu.includes('<img src=x onerror=alert(1)>'));
     assert.equal(w.eval('G.mgmt.offres[0].raisons.length'),4,'une offre du bilan présente exactement quatre raisons');
     assert.equal(w.eval('new Set(G.mgmt.offres[0].raisons).size'),4,'les quatre raisons d’offre doivent rester distinctes');
-    for(const raison of ['Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(rendu.includes(raison),`raison absente du bilan: ${raison}`);
+     for(const raison of ['Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(rendu.includes(raison),`raison absente du bilan: ${raison}`);
+     const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+     assert.match(css,/\.po2-offre>p\.po2-raison\{[^}]*border-left:3px solid #F0B220/,'les raisons sont séparées visuellement du texte de l’offre');
   }finally{w.close();}
 });
 
