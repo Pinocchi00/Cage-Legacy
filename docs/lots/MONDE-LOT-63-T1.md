@@ -312,6 +312,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Branche `p8-apres` et historique vérifiés ; les commits fonctionnels et de tests de la tranche sont déjà présents. Aucune modification fonctionnelle non commité de la tranche à intégrer ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangères et exclues.
 - La suite inter-lots prescrite passe **130/130**, incluant les deux régressions du lot 54. `node tools/verif-versions.js origin/main` ne relève aucun écart, ESLint global passe, et `mgmtLot63T1` est référencé dans `test` et `test:watch` (`true true`).
 - `tests/mgmtReleveReduit.test.js` a été relancé, mais a dépassé le délai de 120 secondes de l'outil ; aucun résultat frais n'est revendiqué ici. Les comptes rendus précédents consignent sa réussite à 1 908 745 octets. Aucun changement de sauvegarde ni migration.
+
+### Reprise 5 — vérification demandée (24/10/2026)
+
+- Branche `p8-apres` ; les changements de tranche sont déjà commités. Les modifications locales d'agents, `opencode.json` et `sw.js` restent étrangères et exclues.
+- La suite inter-lots prescrite passe **130/130**, y compris les régressions lot 54 de rivalité enregistrée et de non-répétition sur cinquante semaines.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; `mgmtLot63T1` est inclus dans `test` et `test:watch` (`true,true`). Aucun changement de sauvegarde ni migration.
+- `git merge origin/main` a été tenté, mais la politique d'exécution bloque cette commande ; la fusion reste au superviseur. Aucun test existant n'a été modifié. Limite de couverture inchangée : les faits des familles sont préparés dans les tests sur le parcours réel, sans démontrer leur production naturelle par chacun des systèmes opérationnels.
 - Seul ce compte rendu est modifié. Les familles, le calcul, les affichages Accueil/presse, les mouvements inter-organisations et les tests sont déjà commités. Limite inchangée : les scénarios préparent les faits sur une partie issue du chemin réel sans prouver la génération naturelle par tous les systèmes. Le merge `origin/main` n'a pas été exécuté, l'environnement refusant les commandes `git merge*` ; il reste au superviseur. Aucun écart fonctionnel nouveau ni question pour Anthony.
 
 - Reprise de livraison (24/10/2026) : branche `p8-apres` et `git log --oneline -12`/`git status` vérifiés. Les fichiers fonctionnels de la tranche sont déjà commités ; seule cette fiche sera ajoutée au commit de reprise.
