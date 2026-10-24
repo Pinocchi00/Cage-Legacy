@@ -189,6 +189,33 @@ function mgmtLendemainMomentsHtml(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MONDE54_T1_APRES_CATALOGUE] — Monde lot 54 T1 ==== */
+/* Catalogue T3 : les entrées restent des formulations éditoriales à relire. */
+const MGMT_LD_APRES_FAMILLES=[
+  {famille:'interpellation',texte:'{nom} répond aux questions après sa soirée.',relu:false},
+  {famille:'réseaux',texte:'Les supporters de {nom} commentent encore son dernier combat.',relu:false},
+  {famille:'suspension',texte:'Le retour de {nom} attend la fin de sa suspension médicale.',relu:false},
+  {famille:'revanche',texte:'Le camp de {nom} réclame une revanche.',relu:false},
+  {famille:'autre organisation',texte:'Une autre organisation suit désormais {nom}.',relu:false},
+  {famille:'classement',texte:'La division discute de la place de {nom} après le combat.',relu:false},
+  {famille:'rivalité',texte:'Le résultat relance l’opposition entre {nom} et son adversaire.',relu:false},
+  {famille:'espoir',texte:'Ton espoir {nom} entend poursuivre sur cette lancée.',relu:false},
+];
+/** Jusqu'à la prochaine soirée : au plus trois messages hebdomadaires, issus
+ *  d'un flux d'identité stable et sans mutation de la sauvegarde. */
+function mgmtLendemainApres(m,semaine){
+  const cycleSoiree=m&&m.lastEvent&&m.lastEvent.cycle;
+  if(!m||!Number.isSafeInteger(semaine)||!Number.isSafeInteger(cycleSoiree)||semaine<=cycleSoiree) return [];
+  const dernier=(Array.isArray(m.hist)?m.hist:[]).filter(t=>t&&t.a&&t.b).slice(-1)[0];
+  if(!dernier) return [];
+  const gagnant=dernier.winner==='B'?dernier.b:dernier.a;
+  const nom=gagnant.name||gagnant.last||'Combattant';
+  const stream=mgmtIdentiteStream(String(gagnant.id||nom),'lendemain-apres|'+semaine,m);
+  const decal=Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length), n=Math.min(3,1+Math.floor(stream()*3));
+  return Array.from({length:n},(_,i)=>{const item=MGMT_LD_APRES_FAMILLES[(decal+i)%MGMT_LD_APRES_FAMILLES.length];return {famille:item.famille,texte:item.texte.replaceAll('{nom}',nom),relu:false};});
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MONDE54_T1_LENDEMAIN_RECOMPOSE] — Monde lot 54 T1 ==== */
 /** Les primes attribuées pour cette soirée, dans l'ordre établi par P7 T3. */
 function mgmtLendemainPrimesHtml(m){

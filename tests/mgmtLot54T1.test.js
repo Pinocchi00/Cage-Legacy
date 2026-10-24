@@ -80,3 +80,15 @@ test('Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres 
     assert.match(r.figures,/CAISSE/);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — l’après propose au plus trois lignes déterministes parmi huit familles',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const r=w.eval(`(()=>{const m=G.mgmt,f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),side=x=>({id:x.id,name:x.name,last:x.last,first:x.first,div:x.div,W:x.W,L:x.L,D:x.D});m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',round:3,rounds:3,a:side(f),b:side(g)});m.lastEvent={cycle:m.cycle,fights:[],finance:{}};const a=mgmtLendemainApres(m,m.cycle+1),b=mgmtLendemainApres(m,m.cycle+1);return {a,b,count:MGMT_LD_APRES_FAMILLES.length};})()`);
+    assert.equal(r.count>=8,true);
+    assert.equal(r.a.length<=3,true);
+    assert.deepEqual(r.a,r.b);
+    assert.ok(r.a.every(x=>x.relu===false));
+  }finally{w.close();}
+});
