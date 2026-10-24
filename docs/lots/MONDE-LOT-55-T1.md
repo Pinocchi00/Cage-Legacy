@@ -265,3 +265,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (15/15 vert; la nouvelle simulation prend environ 8,5 secondes).
 - Limite : trois soirées sur un passé dont la configuration remonte trois ans ne représentent pas trois années complètes jouées. Les critères de trois années complètes, de la fidélité exacte aux planches, du déclenchement anniversaire plutôt qu'au terme du contrat, et d'une sauvegarde historique réellement chargée restent non démontrés. La tranche n'est donc pas terminée.
 - Fichier de cette reprise : `tests/mgmtLot55T1.test.js`; aucun changement métier ou de format de sauvegarde. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères et non incluses. Aucun test lent `mgmtReleveReduit` exécuté.
+
+### Reprise 34
+
+- Mise à jour effective du titre de la cérémonie : l’année de jeu calculée s’affiche désormais comme dans la planche `LES TROPHÉES 2027`, au lieu du titre sans millésime. Le texte de date fixe et la composition complète de la maquette restent à réaliser.
+- Vérification après bump : `node --test tests/mgmtLot55T1.test.js` (15/15 verts); ESLint ciblé `mgmt-ceremonie.js mgmt-save.js` vert; `git diff --check` vert.
+- `node tools/verif-versions.js origin/main` retrouve seulement l’écart préexistant de `mgmt-accueil.js`, non modifié et hors tranche. Les fichiers d’outillage `.opencode/agents/*` et `opencode.json` sont exclus; `sw.js`, altéré par le test, a été restauré depuis `origin/main`.
+- Les cases majeures restant à réaliser ne changent pas par cette reprise : simulation réellement jouée sur trois années, carnet exhaustif des records historiques, conformité intégrale aux planches et vérification de sauvegarde historique. Le test lent `mgmtReleveReduit` n’a pas été lancé. Aucun changement de version de sauvegarde ni migration.
+- Fichiers métier de cette reprise : `mgmt-ceremonie.js` (titre annuel) et `index.html` (version du script); cette fiche (compte rendu). Aucun écart nouveau ni question pour Anthony.
