@@ -478,3 +478,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Tentative de `node --test tests/mgmtReleveReduit.test.js` : délai maximal de l'outil atteint à 120 secondes; aucun résultat vert n'est revendiqué.
 - Aucun changement métier à ajouter sans réouvrir une réalisation dont le diff est déjà commité. Les limites connues restent : test de plafond non achevé, pas de preuve de trois saisons intégralement jouées ni de fixture historique complète chargée, fidélité intégrale aux planches non certifiée et déclenchement anniversaire non établi (le raccordement existant est au terme du contrat). Aucune migration de sauvegarde.
 - Seul ce compte rendu est ajouté lors de cette reprise; aucun fichier d'outillage étranger n'est inclus. Ces critères non certifiés interdisent de déclarer la tranche intégralement terminée.
+
+### Reprise 62
+
+- Reprise demandée avec les mêmes conditions : branche conforme `p11-ceremonie-carnet`; HEAD comporte déjà le commit final de tranche. Aucun fichier métier n'est en attente; les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et exclues.
+- Contrôles fraîchement relancés : `node --test tests/mgmtLot55T1.test.js` (28/28 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert) et `git diff --check` (vert).
+- Aucun défaut nouveau n'a été identifié justifiant une modification métier. `git status` ne montre que les changements étrangers déjà consignés; aucun commit artificiel n'est créé.
+- Limites toujours non certifiées : le test lent `mgmtReleveReduit` n'est pas relancé ici, absence de démonstration de trois saisons intégralement jouées et d'une ancienne sauvegarde chargée depuis une fixture complète, fidélité visuelle intégrale aux planches non validée et déclenchement anniversaire non établi (le flux existant suit le terme du contrat). Aucune modification de sauvegarde ou migration. Ces écarts empêchent toujours d'affirmer que toutes les cases de la fiche sont achevées.
