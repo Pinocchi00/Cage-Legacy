@@ -196,6 +196,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit direct des scripts renvoie `true,true`.
 - Aucune modification fonctionnelle ou de sauvegarde, aucune migration. Les textes catalogués, calcul, affichages Accueil/presse, mouvements d'organisation et les intitulés des tests sont déjà présents dans les commits de la tranche.
 - Écart de couverture maintenu : chaque famille est testée en préparant son fait sur une partie issue du chemin réel, sans démontrer que chaque système du jeu génère naturellement chacun des faits. `check:rapide` reste réservé au superviseur. Modifications étrangères `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache `index.html` exclues.
+
+### Reprise 8 — livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Code et tests de la tranche déjà commités dans les commits précédents ; changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et variation de cache `index.html` étrangers, exclus.
+- Validation fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; test présent dans `test` et `test:watch` (`true,true`).
+- Aucun changement de sauvegarde ni migration. Le test lent du plafond n'a pas été relancé dans cette reprise ; la limite de couverture demeure : les tests préparent les dix faits indépendamment sur une partie issue du chemin réel, sans démontrer leur production naturelle par tous les systèmes. Pas de question nouvelle. La fiche seule est modifiée pour ce compte rendu.
 - Fichier modifié dans cette reprise : cette fiche uniquement, pour consigner ces vérifications ; aucun changement de production, test ou sauvegarde.
 
 ### Reprise 7 — livraison (24/10/2026)
