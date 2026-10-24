@@ -216,3 +216,13 @@ test('Monde lot 57 T1 — l’état guerre accepte les champs de classement et d
     assert.equal(valide,true);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — un rang final hors des huit est réparé sans toucher aux anciennes parties',()=>{
+  const w=partie();
+  try{
+    const resultat=JSON.parse(w.eval(`(()=>{const ancien=mgmtDefault('Split');const avant=JSON.stringify(ancien);const m=mgmtDefault('Split');m.guerre={ev:[],rival:null,depuis:0,rangFinal:9};const invalide=validateMgmt(m);mgmtRepair(m);return JSON.stringify({invalide,ancienInchange:avant===JSON.stringify(ancien),guerreRetiree:!Object.hasOwn(m,'guerre')});})()`));
+    assert.equal(resultat.invalide,false);
+    assert.equal(resultat.ancienInchange,true);
+    assert.equal(resultat.guerreRetiree,true);
+  }finally{w.close();}
+});
