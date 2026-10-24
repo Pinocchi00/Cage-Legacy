@@ -14,3 +14,10 @@ Branche : `fid-choc` (la branche courante de ce dossier ; commits ICI ; le super
 **[ ] 7.** `?v=`, versions, lint ; commit final `Monde lot 69 T1 : le choc, l'arrivée et le discours fidèles aux planches` ; compte rendu honnête ; `TOUT_EST_FINI`.
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- `mgmt-ecran-poste.js` : début d'alignement de l'écran choc (libellés de la confrontation, citation, partage de recette, condition et actions/indications clavier). La contre-proposition affichée n'est pas reliée : aucune fonction métier existante n'a été trouvée pour la traiter.
+- Aucun test neuf ni capture de comparaison livrés. `node --test tests/mgmtLot58T1.test.js` passe (19 tests) ; son premier lancement a dépassé le délai de 120 s, le second a terminé après 172 s.
+- Arrêt incomplet : les écrans arrivée/discours/bilan, le parcours bout en bout, la fidélité complète aux planches, les captures, l'audit versions/lint et le commit restent à faire. Les styles du choc n'ont pas encore été ajustés aux blocs supplémentaires.
+- Questions pour Anthony : aucune ; l'absence de logique de contre-proposition empêche de rendre le bouton fonctionnel sans inventer une règle métier.
