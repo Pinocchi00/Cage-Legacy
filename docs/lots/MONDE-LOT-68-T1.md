@@ -279,6 +279,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun comparatif `cmp-*.png` n'a été ouvert dans cette reprise ; je n'affirme pas les écarts visuels précis. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Aucun changement hors fiche à commiter.
 - Écart à la fiche : le protocole de capture/ouverture/correction écran par écran demeure non achevé et les cases visuelles 1 à 5 ne sont donc pas validées. Aucun fichier applicatif n'est commité dans cette reprise ; ce compte rendu consigne l'état sans revendiquer `TOUT_EST_FINI`.
 
+### Reprise 45 du 24/10/2026
+
+- Branche `fid-fiches` confirmée ; tête initiale `bb0f3aa7`. Aucun fichier applicatif ou test de la tranche non committé. Les changements des agents OpenCode et `opencode.json` sont étrangers à cette tranche et préservés, non ajoutés.
+- Vérifications fraîches : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; `node_modules/.bin/eslint .` (vert).
+- Je n'ai pas pu relire le guide du captureur ni ouvrir ses images de comparaison dans cette session. Aucun résultat `CONTRÔLE` frais n'est revendiqué : les quatre écrans avec métriques historiques à zéro sont fiche, recruteur, retours, semaine (voir reprise 40), mais celles-ci ne sont pas une capture actuelle. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records restent sans validation par comparaison accessible. Accueil, actualités, tonposte et bilan sont hors périmètre.
+- Aucun changement de code ou de test n'a été justifié sans observation exploitable ; pas de migration, bump `?v=` ou commit applicatif. Écart à la fiche : les comparatifs et les corrections visuelles écran par écran restent incomplets. Aucun `TOUT_EST_FINI`.
+
 ### Reprise 40 du 24/10/2026 — contrôle géométrique
 
 - Contrôles actuels, capture à 1920×1080 : fiche (UniFicheStats) `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}` ; recruteur (UniRecruteurMission) `{0, [], 0, []}` ; retours (UniRecruteurRetour) `{0, [], 0, []}` ; semaine (UniSemaine) `{0, [], 0, []}`. La fiche ne reproduit donc plus les deux chevauchements historiques signalés (palmarès/compteur, POIDS/SUIVRE) ; le bouton et son compteur sont déjà dans la rangée des onglets. Pas de correction applicative nécessaire pour ces contrôles.
