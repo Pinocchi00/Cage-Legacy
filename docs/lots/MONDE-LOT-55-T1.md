@@ -98,3 +98,19 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : tests ciblés `mgmtLot55T1` (3/3), versions sans écart, ESLint ciblé vert.
 - Reste non réalisé : raccordement automatique à la fin d'année, tests de trois années et 50 soirées, conformité complète aux planches, inscription annuelle automatique, accès du carnet dans la navigation secondaire, tests sauvegarde/échappement/classes, ajout aux listes générales `test` et `test:watch`, test lent. Tranche inachevée.
 - Écart à la planche : classement compact plutôt qu'en tuiles; pas de déclencheur cérémonie. Fichiers : `mgmt-ceremonie.js`, `index.html`, cette fiche. Aucune migration ni question pour Anthony.
+
+### Reprise 12
+
+- État initial : branche `p11-ceremonie-carnet`, HEAD `92199d1`; aucun changement métier non commité. Les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et restent intactes.
+- Vérifications relancées : `node --test tests/mgmtLot55T1.test.js` (3/3 vert), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé `mgmt-ceremonie.js mgmt-save.js` (vert).
+- Les cases restantes n'ont pas été complétées : les trois tests actuels ne couvrent pas les parcours multi-années, l'absence de répétition sur 50 soirées, le CSS complet, l'échappement rendu, ni le parcours de sauvegarde. Le test n'est présent que dans les scripts spécifiques `test:lot55t1` et `test:watch:lot55t1`, pas dans les scripts généraux `test` / `test:watch`.
+- L'écran et le carnet précédemment livrés restent partiels : aucun déclenchement cérémonie de fin d'année ni accès du carnet via la navigation secondaire n'est confirmé; le compte rendu antérieur documente les écarts aux planches. Pas de test lent `mgmtReleveReduit` lancé. Aucune migration de sauvegarde.
+- Cette reprise n'a pas modifié le code de la tranche et ne crée pas de commit artificiel. La livraison reste inachevée; aucune question de spécification nouvelle.
+
+### Reprise 13
+
+- Ajout de l'entrée « Carnet » à la navigation management existante et enregistrement de `mgmt_carnet` dans les écrans enveloppés par cette navigation.
+- Le lien visible de bilan en accueil mène maintenant d'abord à la cérémonie lorsqu'un bilan de contrat est dû; la cérémonie permet ensuite de marquer le bilan consulté et d'ouvrir l'écran existant du patron. Il n'y a pas de notion persistée de fin d'année distincte du terme du contrat : ce raccordement suit donc le déclencheur de fin de contrat déjà présent.
+- Tests relancés : `node --test tests/mgmtLot55T1.test.js` (3/3 vert); bump des trois scripts modifiés et `node tools/verif-versions.js origin/main` (aucun écart).
+- La tranche reste inachevée : calcul, tests parcours trois années/50 soirées/échappement/CSS/sauvegardes et intégration `test`/`test:watch` ne sont pas complétés; l'écran ne reproduit pas toute la maquette et le carnet n'expose pas toutes les traces historiques attendues. `mgmtReleveReduit` et ESLint global non exécutés. Aucun changement de version de sauvegarde ni migration.
+- Fichiers de cette reprise : `mgmt-screens.js` (entrée navigation carnet), `mgmt-accueil.js` (déclencheur fin de contrat), `mgmt-ceremonie.js` (enchaînement vers le bilan), `index.html` (versions des scripts), cette fiche. Les modifications d'outillage préexistantes restent étrangères. Aucune question pour Anthony; les travaux listés sont à réaliser, pas des ambiguïtés.

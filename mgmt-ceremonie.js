@@ -60,7 +60,7 @@ function scr_mgmt_ceremonie(){
   const prix=mgmtCeremonieCalculer(m), cards=MGMT_CEREMONIE_PRIX.map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
-  const lien=`<button type="button" onclick="CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;
+   const lien=`<button type="button" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;
   const body=`<main class="ce3-ecran"><h1>LES TROPHÉES DE FIN D’ANNÉE</h1><p>CHOISIS PAR LA PRESSE</p><section class="ce3-grille">${cards}</section><section class="ce3-classement"><h2>CLASSEMENT FINAL DES HUIT</h2><ol>${rangs}</ol></section>${lien}</main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'LES TROPHÉES',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
