@@ -242,3 +242,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `mgmt-soiree-cadre.js` (bouton par ligne de carte), `ui-cadre.css` (styles `so3-carte-combat` et `so3-vue`), `index.html` (version cache CSS), `tests/mgmtLot53T1.test.js` (vérification du bouton sur les neuf lignes), cette fiche.
 - Test exécuté : `node --test tests/mgmtLot53T1.test.js` — 13/13 réussis.
 - Non fait : la recomposition fidèle complète de la maquette reste à faire; cette étape ajoute seulement le contrôle par combat au rendu actuel. Lecture fenêtre/fondu, carte fin fidèle et test de durée complète restent ouverts.
+
+### Reprise 33 — commandes et fondu de la lecture forts
+
+- Fait : la touche Entrée pendant la lecture `forts` envoie désormais l'arène existante au verdict, comme Échap; au verdict, Entrée revient à la soirée. La nouvelle fenêtre active reçoit un fondu CSS court de 220 ms. Les fenêtres restent calculées sur la trace et les segments entre elles sont accélérés par l'arène actuelle (`MGMT_TF_VITESSE`), sans moteur de lecture parallèle ni modification du moteur de combat.
+- Fichiers modifiés : `mgmt-combat.js` (Entrée passe au verdict pour les temps forts), `ui-cadre.css` (fondu actif), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (passage au verdict et règle de fondu), cette fiche.
+- Tests : `node --test tests/mgmtLot53T1.test.js` — 14/14 réussis.
+- Écart documenté : ce fondu concerne la frise d'étapes, pas une transition entre images de l'arène. La durée de 30–60 s est encore vérifiée par la fonction d'estimation des intervalles, pas chronométrée dans un navigateur réel.

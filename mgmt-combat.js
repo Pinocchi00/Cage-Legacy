@@ -338,6 +338,7 @@ Object.assign(CL,{
   },
   mgmtCbRetour(){
     const C=MGMT_COMBAT;
+    if(C.session&&C.vueCombat==='forts'&&C.mode==='fight'){ CL.mgmtCbPasser(); return; }
     if(C.refuse||!C.session||C.mode==='dec') mgmtCombatSortir();
   },
 });

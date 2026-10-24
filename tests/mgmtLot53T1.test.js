@@ -145,6 +145,17 @@ test('Monde lot 53 T1 — les repères de temps forts conservent l’ordre et l�
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — Entrée passe le combat en temps forts au verdict et la frise fond brièvement',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=w.eval(`(()=>{MGMT_COMBAT.session={};MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.mode='fight';MGMT_COMBAT.refuse=false;CL.mgmtCbRetour();return MGMT_COMBAT.mode;})()`);
+    assert.equal(r,'dec');
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    assert.match(css,/\.so3-moment\.actif\s*\{[^}]*animation:so3-fondu \.22s/);
+    assert.match(css,/@keyframes so3-fondu\s*\{/);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf combats et ses repères de navigation',()=>{
   const w=newGameWindow({runMain:true});
   try{

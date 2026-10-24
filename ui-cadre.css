@@ -1004,8 +1004,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-moment{flex:1;min-width:0;min-height:58px;padding:8px 10px;box-sizing:border-box;display:flex;align-items:center;gap:10px;background:#252121;color:#E9E6E1;opacity:.72;transition:opacity .18s ease,background-color .18s ease}
 .so3-moment b{font-family:var(--mf-titre);font-size:26px}
 .so3-moment span{font-size:22px;line-height:1.05}
-.so3-moment.actif{background:#F0B220;color:#0D0B0B;opacity:1}
+.so3-moment.actif{background:#F0B220;color:#0D0B0B;opacity:1;animation:so3-fondu .22s ease both}
 .so3-moment.passe{opacity:.4}
+@keyframes so3-fondu{from{opacity:.35}to{opacity:1}}
 .so3-resultat{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;background:#121010;border:2px solid rgba(233,230,225,.38);color:#E9E6E1}
 .so3-resultat-titre{font-family:var(--mf-titre);font-size:36px;line-height:1;color:#F0B220}
 .so3-resultat h1{margin:0;font-family:var(--mf-titre);font-size:64px;line-height:1.05}
