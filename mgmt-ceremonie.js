@@ -26,7 +26,7 @@ function mgmtCeremonieCalculer(m){
     } else if(p.id==='ko'||p.id==='soumission'){
        cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').filter(({t})=>p.id==='ko'?t.family==='ko':t.family==='sub').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b;const publicOdds=Number(t.publicOddsWinner??t.pronosticPublic?.[t.winner]??t.pronostic?.[t.winner]);return {t,i,side,score:(titres.has(i)?3:0)+(Number.isFinite(publicOdds)&&publicOdds<35?2:0)+(t.round===1?2:0)+(t.slot==='main'||t.slot==='co-main'?1:0)};}).sort((a,b)=>b.score-a.score||a.t.c-b.t.c||a.i-b.i)[0];
     } else if(p.id==='combat'){
-        cand=h.map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((t.knockdownsA||0)+(t.knockdownsB||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
+        cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>({t,i,score:typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0))})).sort((a,b)=>b.score-a.score||b.t.c-a.t.c||b.i-a.i)[0];
     } else if(p.id==='revelation'){
        cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||String(a.id).localeCompare(String(b.id)))[0];
     } else if(p.id==='retour'){
@@ -57,7 +57,10 @@ function mgmtCarnetLire(m){
 function mgmtCeremonieEchapper(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function scr_mgmt_ceremonie(){
   const m=G&&G.mgmt;if(!m)return '';
-  const prix=mgmtCeremonieCalculer(m), cards=MGMT_CEREMONIE_PRIX.map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
+   const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
+   const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
+   mgmtCeremonieInscrire(m,prix,annee);
+   const cards=MGMT_CEREMONIE_PRIX.map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
    const lien=`<button type="button" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;

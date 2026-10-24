@@ -114,3 +114,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Tests relancés : `node --test tests/mgmtLot55T1.test.js` (3/3 vert); bump des trois scripts modifiés et `node tools/verif-versions.js origin/main` (aucun écart).
 - La tranche reste inachevée : calcul, tests parcours trois années/50 soirées/échappement/CSS/sauvegardes et intégration `test`/`test:watch` ne sont pas complétés; l'écran ne reproduit pas toute la maquette et le carnet n'expose pas toutes les traces historiques attendues. `mgmtReleveReduit` et ESLint global non exécutés. Aucun changement de version de sauvegarde ni migration.
 - Fichiers de cette reprise : `mgmt-screens.js` (entrée navigation carnet), `mgmt-accueil.js` (déclencheur fin de contrat), `mgmt-ceremonie.js` (enchaînement vers le bilan), `index.html` (versions des scripts), cette fiche. Les modifications d'outillage préexistantes restent étrangères. Aucune question pour Anthony; les travaux listés sont à réaliser, pas des ambiguïtés.
+
+### Reprise 14
+
+- État initial : HEAD `506b04e`, branche conforme. Les seuls changements déjà présents hors tranche sont les fichiers `.opencode/agents/*` et `opencode.json`; ils restent intacts et ne sont pas inclus.
+- Correction apportée : l’écran de cérémonie inscrit désormais ses prix lors de l’affichage, avec une année dérivée du calendrier du jeu; le prix du combat ne peut plus être attribué à un relevé nul sans vainqueur. `mgmt-ceremonie.js` et sa version `index.html` ont été mis à jour.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (3/3), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé sur `mgmt-ceremonie.js` et `mgmt-save.js` (vert).
+- Reste non réalisé : les critères complets et tests d’au moins trois saisons jouées, non-répétition sur 50 soirées, couverture sauvegarde/échappement/classes, intégration du test dans les scripts généraux `test` et `test:watch`, test lent `mgmtReleveReduit`, exécution ESLint globale et conformité complète des deux maquettes ne sont pas établis. Les développements métier et écrans antérieurs restent partiels, notamment les historiques du carnet.
+- Aucun changement de format ni migration de sauvegarde. Test ajouté dans cette reprise : aucun. Écarts aux maquettes : persistants et documentés ci-dessus; le raccordement antérieur déclenche la cérémonie au terme du contrat, pas à chaque anniversaire calendaire. Pas de question pour Anthony.
+- La tranche n’est pas déclarée terminée : le commit final requis et les cases manquantes restent à faire.
