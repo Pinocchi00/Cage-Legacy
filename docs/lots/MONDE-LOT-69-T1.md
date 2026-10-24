@@ -112,3 +112,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test : `node --test tests/mgmtLot69T1.test.js` passe (3/3). Audit `node tools/verif-versions.js origin/main` passe ; ESLint ciblé ne lint pas les tests (fichier ignoré par configuration).
 - Aucune modification JS/CSS ni migration. Les instructions de capture externe n'étaient pas accessibles via l'outil autorisé ; pas de scène ni d'image cmp produite.
 - Écart : cette reprise n'achève pas le chantier complet. Le test ne valide toujours pas fin de contrat → bilan → rechargement strictement identique → lendemain ; les captures comparatives, la fidélité complète des écrans et la prise en charge métier du choc en trois affiches restent non réalisées. Le compte rendu antérieur demeure exact pour ces limites.
+
+### Reprise 23
+- État de départ : branche `fid-choc`, aucun fichier fonctionnel de tranche modifié ; les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent exclus.
+- Vérifications relancées : `node --test tests/mgmtLot69T1.test.js` passe (3/3) et `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
+- Vérification package : le test est exécuté par `pretest`/`pretest:watch` et possède ses scripts dédiés `test:lot69t1`/`test:watch:lot69t1`. Les longues commandes agrégées ne l'incluent toujours pas textuellement ; leur hook de pré-test l'exécute bien.
+- État des cases : le code ne peut revendiquer les trois affiches (la décision documentée du lot 58 conserve un seul combat, sans scénario de fabrication des deux autres), ni parcours complet fin de contrat/bilan/rechargement identique/lendemain. Aucune comparaison d'image ou mesure visuelle n'a été réalisée. Le guide externe de capture ne peut pas être lu avec les permissions présentes.
+- Aucun code fonctionnel, CSS, scène de capture ou fichier généré n'a été modifié. Aucune migration de sauvegarde. Cette reprise ne satisfait pas la totalité de la tranche et ne revendique pas `TOUT_EST_FINI`.
