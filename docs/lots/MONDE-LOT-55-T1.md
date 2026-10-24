@@ -485,3 +485,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Contrôles fraîchement relancés : `node --test tests/mgmtLot55T1.test.js` (28/28 verts), `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés), `node_modules/.bin/eslint .` (vert) et `git diff --check` (vert).
 - Aucun défaut nouveau n'a été identifié justifiant une modification métier. `git status` ne montre que les changements étrangers déjà consignés; aucun commit artificiel n'est créé.
 - Limites toujours non certifiées : le test lent `mgmtReleveReduit` n'est pas relancé ici, absence de démonstration de trois saisons intégralement jouées et d'une ancienne sauvegarde chargée depuis une fixture complète, fidélité visuelle intégrale aux planches non validée et déclenchement anniversaire non établi (le flux existant suit le terme du contrat). Aucune modification de sauvegarde ou migration. Ces écarts empêchent toujours d'affirmer que toutes les cases de la fiche sont achevées.
+
+### Reprise 63
+
+- État initial : branche conforme `p11-ceremonie-carnet`, HEAD `bd3dbe5`; aucun changement métier non commité. Les modifications `.opencode/agents/*` et `opencode.json` sont étrangères et restent exclues.
+- Test ajouté « Lot 55 T1 — les règles ce3 n’abaissent pas la typographie sous 22 px » : contrôle les déclarations `font-size` des règles préfixées de la cérémonie et du carnet.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (29/29 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` et `git diff --check` (verts).
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de garde typographique) et cette fiche (compte rendu). Aucun changement de production, de sauvegarde ou migration.
+- Les limites antérieures demeurent : pas de preuve de trois saisons intégralement jouées, pas de chargement d'une fixture complète d'ancienne sauvegarde, pas de certification visuelle intégrale des maquettes ni de déclenchement à chaque anniversaire; le test lent `mgmtReleveReduit` n'a pas été exécuté. Ces critères ne sont pas déclarés satisfaits.

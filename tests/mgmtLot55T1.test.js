@@ -255,6 +255,16 @@ test('Lot 55 T1 — le rendu du carnet échappe les noms provenant des fiches',(
   assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
   assert.ok(!rendu.includes('<img src=x'));
 });
+test('Lot 55 T1 — les règles ce3 n’abaissent pas la typographie sous 22 px',()=>{
+  const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  const regles=[...html.matchAll(/\.ce3-[^{]+\{([^}]+)\}/g)].map(x=>x[1]);
+  assert.ok(regles.length>0,'aucune règle ce3 trouvée');
+  for(const regle of regles){
+    for(const [,valeur] of regle.matchAll(/font-size\s*:\s*([\d.]+)px/gi)){
+      assert.ok(Number(valeur)>=22,`taille trop petite : ${valeur}px`);
+    }
+  }
+});
 test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
