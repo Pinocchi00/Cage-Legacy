@@ -74,7 +74,7 @@ function scr_mgmt_ceremonie(){
    const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
    mgmtCeremonieInscrire(m,prix,annee);
     const cartesVisibles=['combattant','ko','combat','soumission','revelation'];
-    const cards=MGMT_CEREMONIE_PRIX.filter(p=>cartesVisibles.includes(p.id)).map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
+   const cards=MGMT_CEREMONIE_PRIX.filter(p=>cartesVisibles.includes(p.id)).map(p=>{const v=prix.find(x=>x.id===p.id),classe=p.id==='combattant'?'ce3-prix-combattant':'ce3-prix';return `<article class="${classe}"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
     const bilan=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m).find(o=>o.estSplit):null;
