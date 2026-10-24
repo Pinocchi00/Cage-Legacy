@@ -124,14 +124,16 @@ function mgmtSoPrimesFinHtml(m){
     if(!t||t.c!==cycle||(t.pr!=='cs'&&t.pr!=='pf')) continue;
     const type=t.pr;
     const nom=id=>{const s=t.a&&t.a.id===id?t.a:t.b&&t.b.id===id?t.b:null;return s?mfNet(s.name||s.last||'?'):'?';};
-    const cle=type+':'+(t.a&&t.a.id)+':'+(t.b&&t.b.id);
+    const cle=type+':'+(t.a&&t.a.id)+':'+(t.b&&t.b.id)+':'+(t.c||'');
     if(vus.has(cle)) continue;
     vus.add(cle);
     const award=type==='cs'?`<b>${esc(nom(t.a&&t.a.id))} · ${esc(nom(t.b&&t.b.id))}</b>`:`<b>${esc(nom(t.winner==='A'?t.a&&t.a.id:t.winner==='B'?t.b&&t.b.id:t.a&&t.a.id))}</b>`;
     lignes.push(`<div class="so3-prime"><span>${type==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE'}</span>${award}</div>`);
   }
   if(!lignes.length) return '';
-  return `<section class="so3-primes" aria-label="Primes annoncées">${lignes.join('')}</section>`;
+  const finance=m&&m.lastEvent&&m.lastEvent.finance||{};
+  const milliers=Number.isFinite(finance.primes)?finance.primes:0;
+  return `<section class="so3-primes" aria-label="Primes annoncées"><h2>LES PRIMES DE LA SOIRÉE</h2>${lignes.join('')}<div class="so3-total"><span>ARGENT VERSÉ</span><b>${esc(mgmtEuros(milliers))}</b></div></section>`;
 }
 
 /** Ce que dit Leïla à l'ouverture : combien de préliminaires, et qui attend. */
