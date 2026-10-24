@@ -247,3 +247,16 @@ test('Monde lot 54 T1 — la suite conserve ses trois colonnes de planche et tou
     assert.match(r.suite,/class="ld3-suite-(?:press|moves|results)"/);
   }finally{w.close();}
 });
+
+test('Monde lot 54 T1 — le premier écran respecte l’ordre narratif P8 T2',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
+    const html=w.eval(`scr_mgmt_lendemain_cadre()`);
+    const sections=['LES TROIS MOMENTS','PERFORMANCE DE LA SOIRÉE','À LA UNE','LES CHIFFRES','TOUS LES RÉSULTATS'];
+    const positions=sections.map(label=>html.indexOf(label));
+    assert.ok(positions.every(p=>p>=0),`sections manquantes: ${positions}`);
+    assert.deepEqual(positions,[...positions].sort((a,b)=>a-b),`ordre réel: ${positions}`);
+  }finally{w.close();}
+});

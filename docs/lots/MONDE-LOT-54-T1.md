@@ -103,3 +103,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : la projection de l'après tolère désormais un `lastEvent.touched` absent ou malformé et ne tente une lecture de suspension que dans un tableau de faits valides. Cache JS monté ; aucun nouvel état de sauvegarde.
 - `tests/mgmtLot54T1.test.js` : test ajouté « Monde lot 54 T1 — l’après tolère un champ de touchés malformé sans inventer de suspension ». Test ciblé : 18/18 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé sans erreur.
 - Les cases 1 et 3 ne sont pas complètes : restent à porter exactement les deux planches dans leur composition et valeurs (dont mouvements/contrat), ainsi qu'à corréler toutes les familles T3 aux faits réels. La tranche n'est pas déclarée terminée par cette correction de robustesse. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de cette tranche et sont exclues.
+
+### Reprise supplémentaire — 24/10/2026
+
+- `tests/mgmtLot54T1.test.js` : test ajouté « Monde lot 54 T1 — le premier écran respecte l’ordre narratif P8 T2 », qui contrôle dans le rendu actif la succession moments, primes, presse, chiffres et résultats. Vérification ciblée : 19/19.
+- Vérification des versions par `node tools/verif-versions.js origin/main` : aucun écart. Les scripts `test` et `test:watch` contiennent déjà le fichier de test.
+- Le test ne prouve pas la complétude de toutes les valeurs des planches : les mouvements/contrat ne sont pas encore démontrés dans cet ordre par le rendu du premier écran. Les réactions T3 demeurent partiellement génériques ; la validation de suspension repose seulement sur un fait `touched` connu, sans couverture exhaustive des réponses, réseaux, revanche et organisations. Aucune donnée nouvelle de sauvegarde.
+- Modifications Git étrangères à la tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) laissées intactes et exclues.
