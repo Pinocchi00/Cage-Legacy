@@ -2156,6 +2156,18 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE66_T1_NOM_SURPRISE_GRAND] — Monde lot 66 T1 ==== */
 .ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_ECHELLE_ET_ENTETE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen{height:856px;top:128px;gap:12px}
+.ld66-screen .ld66-moments{height:285px;min-height:285px}
+.ld66-screen .ld66-moments .ld3-names{font-size:68px;line-height:.82;letter-spacing:-.02em}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
+.ld66-screen .ld66-moments .ld66-rewatch{font-size:24px}
+.ld66-screen .ld66-lower{gap:12px}
+.ld66-screen .ld66-change,.ld66-screen .ld66-press,.ld66-screen .ld66-numbers{padding:12px}
+.ld66-screen .ld66-press .mgmt-ld-title{font-size:44px;line-height:.95}
+.ld66-suite .ld3-suite{height:856px;max-height:calc(100vh - 224px)}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
