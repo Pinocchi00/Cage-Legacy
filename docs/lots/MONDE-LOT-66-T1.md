@@ -140,6 +140,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` sans écart. ESLint non relancé dans cette reprise.
 - Écart/limite : ajustements CSS ne résolvent pas les problèmes de chevauchement et petits textes détectés automatiquement; ils sont documentés pour une reprise visuelle supplémentaire. Aucun changement de sauvegarde/migration ni des fichiers de moteur.
 
+### Reprise 25 — nouvelles mesures et correction de taille — 24/10/2026
+
+- La capture à 1920×1080 a été relancée après lecture de `LISEZMOI.txt`. Avant correction, `lendemain` affichait 11 chevauchements (dont les cartes empiétant sur « Les chiffres ») ; `lendemainSuite` 21 textes sous 22 px et plusieurs débordements. Les captures sont dans le dossier temporaire du comparateur.
+- `ui-cadre.css` : hauteur des moments désormais bornée à 360 px avec une répartition verticale explicite, et taille minimale/retour à la ligne des textes des mouvements et constats. Cache CSS monté avec `node tools/_bump.js ui-cadre.css`.
+- Tests réussis : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot54T1.test.js` (30/30). `node tools/verif-versions.js origin/main` sans écart ; ESLint passe.
+- Après correction, mesure `lendemain` : gros blocs 19,1 %, mais encore 7 chevauchements et un débordement du texte des touchés vers la barre des touches. `lendemainSuite` : gros blocs 17,8 %, 0 chevauchement, mais 21 textes sous 22 px et des débordements de noms/rangs. La case visuelle 4 n'est donc pas entièrement satisfaite ; aucun chevauchement nul ni absence de troncature n'est revendiqué.
+- Aucun changement de données, moteur ou sauvegarde. Les captures n'ont pas fait l'objet d'une inspection manuelle ; les contrôles automatiques signalent les défauts résiduels ci-dessus.
+
 ### Reprise 21 — tests ciblés de confirmation — 24/10/2026
 
 - À la reprise, les commits fonctionnels restent présents (HEAD `d57deab`) ; aucun fichier de code ou test de la tranche n'était en attente. Les changements locaux d'agents/configuration et `sw.js` sont restés intacts et exclus.
