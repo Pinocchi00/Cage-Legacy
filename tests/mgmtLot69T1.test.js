@@ -49,7 +49,11 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      assert.match(choc,/ch3-vs/);
      assert.match(choc,/Fiche/);
      assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');
-    w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
+     const programmation=w.eval(`(()=>{const m=G.mgmt,ok=mgmtChocRepondre(m,true);return {ok,etat:m.choc.etat,jour:m.choc.jour,agenda:m.cal.prochaines.some(s=>s.jour===m.choc.jour)}})()`);
+     assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
+     assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
+     assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
+     w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
      const discours=w.eval(`scr_mgmt_discours()`);
      for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
      const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');

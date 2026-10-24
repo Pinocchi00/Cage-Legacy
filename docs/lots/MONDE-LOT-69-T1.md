@@ -175,3 +175,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `node tools/verif-versions.js origin/main` passe (16 fichiers examinés). Aucun fichier JS/CSS ni sauvegarde modifié, aucune version de cache à incrémenter.
 - Écarts inchangés : ceci ne valide pas le choc à trois affiches ni son booking complet ; le parcours de test n'exerce toujours pas fin de contrat/bilan et le rechargement strict demandé ; les mesures visuelles après corrections, la scène d'arrivée dédiée et les captures/comparaisons restent non réalisées. Aucune nouvelle preuve visuelle n'est revendiquée. Le guide de capture externe n'était pas accessible par l'outil de lecture autorisé.
 - Pas de migration de sauvegarde. Aucun autre fichier modifié ; les changements utilisateur hors tranche sont exclus du commit.
+
+### Reprise 31
+- `tests/mgmtLot69T1.test.js` vérifie maintenant le chemin d’acceptation du choc : la proposition passe à `programme` et une date de soirée correspondante est inscrite dans l’agenda.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Pas de migration de sauvegarde, aucun JS/CSS modifié. La vérification porte sur la programmation, pas sur les trois affrontements ni sur l’exécution/résultat du combat. Les écarts de maquette et de parcours des reprises précédentes demeurent ; pas de nouvelle capture comparative produite.
+- Changements utilisateur sous `.opencode/agents/` et `opencode.json` laissés hors du commit.
