@@ -83,6 +83,14 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 11 du 24/10/2026
+
+- État initial : branche `fid-fiches`, les commits précédents sont conservés ; modifications `.opencode/agents/*` et `opencode.json` hors tranche laissées intactes.
+- Vérification ciblée : `node --test tests/mgmtFicheStats.test.js` (15/15 verts) ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` sont à relancer avant une livraison.
+- Tentative de test supplémentaire des règles CSS du relevé : retirée après constat que `mgmt-releve.js` ne contient que la représentation des données et aucun markup/classe d'écran ; un tel test donnerait un faux critère. Les classes `.mf-*` de l'écran ne sont pas identifiées dans cette tranche, et aucun faux succès n'est revendiqué.
+- Captures visuelles non réalisées : les écrans listés dans les reprises précédentes restent non validés ; aucun diagnostic visuel ou changement d'apparence n'est affirmé. Outil de capture externe et ouverture des comparatifs indisponibles dans le contexte.
+- Aucun fichier applicatif modifié, aucune migration ni bump de version. Écart majeur : les corrections et comparaisons visuelles exigées restent à faire ; `TOUT_EST_FINI` n'est pas atteint.
+
 ### Reprise 10 du 24/10/2026
 
 - Historique consulté : `dafc87c` en tête, branche `fid-fiches`. Au départ, aucun fichier de tranche non committé ; les neuf changements `.opencode/agents/*` et `opencode.json` sont hors tranche et restent intacts.
