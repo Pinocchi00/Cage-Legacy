@@ -82,3 +82,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtLot56T1.test.js` passe (7/7).
 - Restent inachevés et non couverts : les effets réels du diffuseur, du budget recruteur et des agents libres ; annonce déclenchée dans le parcours Accueil après un vrai franchissement (la fonction d'annonce est testée isolément) ; détail exact de la maquette (barres/marches) ; test d'empreinte ancienne dédiée et sauvegarde facultative malformée/réparée ; plafond lent non relancé dans cette reprise. Le bonus de salle seul est branché. Aucun nouveau champ requis ni migration.
 - L'écran existant expose l'aperçu mais ne reproduit pas tous les éléments aux valeurs exactes du HTML de la maquette ; écart assumé et non résolu. La tranche n'est pas déclarée terminée.
+
+### Reprise 9 — effet recruteur et garde-fous sauvegarde (24/10/2026)
+
+- Historique/branche consultés : `p11-croissance`, HEAD `648d5d0`. Les modifications hors tranche préexistantes (`.opencode/agents/*`, `opencode.json`) sont conservées sans staging. Aucun fichier de la tranche n'était modifié avant cette reprise.
+- Ajout d'un effet de croissance réel au budget du recruteur : remise additive de 1 % par niveau (plafond 3 %), seulement en monde vivant ; les anciennes parties gardent strictement le coût d'origine. L'index `?v=` est monté.
+- Ajout du test de validation/réparation des champs d'annonce facultatifs; les clés ne sont pas ajoutées à une partie ancienne.
+- Tests verts : `node --test tests/mgmtLot56T1.test.js` (9/9) et `node --test tests/mgmtPasse.test.js` (13/13, empreintes incluses). `node tools/verif-versions.js origin/main` repasse sans écart après bump. Le test de tranche est explicitement listé dans `test` et `test:watch`.
+- Restent non faits : effet diffuseur et attrait agents libres, scénario de franchissement effectif après soirées et vérification explicite des annonces sur ce parcours, reproduction complète aux valeurs de la maquette (marches détaillées), contrôle de plafond `mgmtReleveReduit.test.js` (timeout de 120 s) et correction des points incomplets dans les tests d'effet/rendu. `node_modules/.bin/eslint .` passe. Pas de changement de version de sauvegarde.
+- Fichiers de cette reprise : `mgmt-recruteur.js` (remise de mission), `index.html` (version cache), `tests/mgmtLot56T1.test.js` (couvertures sauvegarde et effet recruteur), cette fiche (compte rendu). Écarts à la fiche : ci-dessus; aucune question nouvelle.
+- État : **inachevé**, critère de fin non atteint; aucun `TOUT_EST_FINI`.

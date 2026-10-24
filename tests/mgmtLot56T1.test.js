@@ -52,6 +52,12 @@ test('Croissance — aucun bonus de remplissage ne dépasse le plafond historiqu
   assert.ok(r.every(x=>x.spectateurs>=0));
 });
 
+test('Croissance — le budget du recruteur gagne jusqu’à 3 % sans réduire celui des anciennes parties',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();const cout=10000;const ancien=mgmtCroissanceCoutRecruteur(m,cout);m.mondeVivant=true;m.orgs={};m.pop=100;const nouveau=mgmtCroissanceCoutRecruteur(m,cout);return JSON.stringify({ancien,nouveau,max:mgmtCroissanceCoutRecruteur(m,cout)});})()`));
+  assert.equal(r.ancien,10000); assert.ok(r.nouveau<=r.ancien); assert.ok(r.nouveau>=9700); assert.equal(r.max,9700);
+});
+
 test('Croissance — une partie créée par le passé généré reste valide après des soirées',()=>{
   const win=newGameWindow({runMain:true});
   try{
@@ -60,4 +66,10 @@ test('Croissance — une partie créée par le passé généré reste valide apr
     const r=win.eval(`(()=>{const m=G.mgmt;return {valide:validateMgmt(m),paliers:mgmtPaliersCalculer(m).paliers.map(p=>p.id),ancienneSansCle:!Object.hasOwn(mgmtDefault(),'croissanceActus'),sauvee:!!mgmtParseAndValidate(mgmtSerialiser(m))};})()`);
     assert.equal(r.valide,true);assert.equal(r.ancienneSansCle,true);assert.equal(r.sauvee,true);assert.ok(Array.isArray(r.paliers));
   }finally{win.close();}
+});
+
+test('Croissance — les annonces facultatives sont validées et réparées sans toucher une ancienne partie',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();const ancienne=!Object.hasOwn(m,'paliersAnnonces')&&!Object.hasOwn(m,'croissanceActus');const propre=validateMgmt(m);const invalide=Object.assign({},m,{paliersAnnonces:['inconnu'],croissanceActus:[{palier:3,texte:'x'}]});const refuse=!validateMgmt(invalide);mgmtRepair(invalide);return JSON.stringify({ancienne,propre,refuse,repare:validateMgmt(invalide),clePresente:Object.hasOwn(invalide,'croissanceActus')});})()`));
+  assert.deepEqual(r,{ancienne:true,propre:true,refuse:true,repare:true,clePresente:true});
 });
