@@ -15,7 +15,8 @@ function scr_mgmt_discours(){
   const cible=d.interpelle?mgmtDiscoursNom(m,d.interpelle):null;
   const ton={fier:'FIER',emu:'ÉMU',provocateur:'PROVOCATEUR',humble:'HUMBLE'}[d.ton]||'APRÈS LE COMBAT';
   const motif={principal:'COMBAT PRINCIPAL', 'co-principal':'CO-PRINCIPAL', surprise:'LA SURPRISE DE LA SOIRÉE','combat-fou':'UN COMBAT FOU'}[d.motif]||'APRÈS LE COMBAT';
-  const contenu=`<main class="mf-contenu di3-scene"><div class="di3-cartouche">${esc(motif)}</div><h1 class="di3-nom">${esc(nom)}</h1><div class="di3-emotion">${esc(ton)}</div><div class="di3-lignes">${d.lignes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>${d.interpelle?`<div class="di3-interpelle">S’ADRESSE À · ${esc(cible&&cible.name||d.interpelle)}</div>`:''}<button type="button" class="di3-suite" onclick="CL.mgmtDiscoursContinuer()">Continuer</button></main>`;
+  const morceaux=nom.trim().split(/\s+/),surnom=morceaux.pop()||nom,prenoms=morceaux.join(' ');
+  const contenu=`<main class="mf-contenu di3-scene"><div class="di3-entete"><div class="di3-cartouche">${esc(motif)}</div><div class="di3-contexte">${esc(ton)} · ${esc(d.motif==='principal'?'combat principal':'après le combat')}</div></div><div class="di3-identite">${prenoms?`<div class="di3-prenoms">${esc(prenoms)}</div>`:''}<h1 class="di3-nom">${esc(surnom)}</h1></div><blockquote class="di3-lignes">${d.lignes.map(x=>`<p>${esc(x)}</p>`).join('')}</blockquote>${d.interpelle?`<div class="di3-interpelle">S’ADRESSE À · ${esc(cible&&cible.name||d.interpelle)}</div>`:''}<button type="button" class="di3-suite" onclick="CL.mgmtDiscoursContinuer()">Continuer</button></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:true,m,plaque:'Après le combat',droite:mgmtOrgNom(m),touches:[{ks:['Échap','Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtDiscoursContinuer()'}]});
 }
 SCREENS.mgmt_discours=scr_mgmt_discours;

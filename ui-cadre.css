@@ -2063,10 +2063,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{min-height:calc(100vh - 180px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:72px 110px;gap:24px;background:#0D0B0B;color:#E9E6E1}
+.di3-entete{display:flex;align-items:center;gap:18px}
+.di3-contexte{font-size:26px;line-height:1}
+.di3-identite{display:flex;flex-direction:column;gap:8px}
+.di3-prenoms{font:800 56px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
-.di3-nom{font-size:88px;line-height:.9;font-weight:800;margin:0;max-width:1180px;overflow-wrap:anywhere}
+.di3-nom{font:800 clamp(88px,12vw,230px)/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase;margin:0;max-width:1180px;white-space:nowrap}
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
-.di3-lignes{display:flex;flex-direction:column;gap:12px;max-width:1180px;font-size:30px;line-height:1.2}
+.di3-lignes{display:flex;flex-direction:column;gap:12px;max-width:1180px;margin:0;border-left:4px solid #F0B220;padding:8px 0 8px 24px;font-size:30px;line-height:1.2;font-style:italic}
 .di3-lignes p{margin:0}
 .di3-interpelle{font-size:28px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-suite{font:inherit;font-size:28px;min-height:64px;padding:0 28px;background:#E23A2B;color:#0D0B0B;border:0;cursor:pointer}
