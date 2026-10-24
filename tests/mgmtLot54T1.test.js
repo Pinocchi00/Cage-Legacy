@@ -173,6 +173,16 @@ test('Monde lot 54 T1 — les blocs ld3 de la suite ont chacun une règle de sty
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — les deux écrans du lendemain gardent un corps de texte lisible',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  const styles=css.match(/\.ld3-[^{]+\{[^}]*\}/g)||[];
+  assert.ok(styles.length>0,'les composants ld3 ont des règles dédiées');
+  for(const rule of styles){
+    const sizes=[...rule.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/g)].map(x=>Number(x[1]));
+    for(const size of sizes) assert.ok(size>=22,`${rule.slice(0,80)} utilise ${size}px`);
+  }
+});
+
 test('Monde lot 54 T1 — la navigation ouvre le second écran puis revient aux moments',()=>{
   const w=newGameWindow({runMain:true});
   try{

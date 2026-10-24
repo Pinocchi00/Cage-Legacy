@@ -54,4 +54,10 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Écarts restant avant la fin : les pages ne reproduisent pas encore toutes les dimensions/valeurs des maquettes et les lignes d'après n'ont toujours pas de mémoire anti-répétition sur 50 soirées ni de réactions complètes conditionnées aux faits (interpellations/discours, revanche, réactions des autres organisations). Le test de référence existant confirme l'histoire 13-1 dans les moments et presse, D1 reste préexistant au classement et aucun changement de sauvegarde n'a été introduit.
 - Reprise du 24/10/2026 : ajout du test « Monde lot 54 T1 — les blocs ld3 de la suite ont chacun une règle de style dédiée », qui extrait les classes `ld3-*` produites par la suite et vérifie leur présence dans `ui-cadre.css`. Le test ciblé passe 13/13. Ceci protège la couverture CSS mais ne prétend pas achever la fidélité dimensionnelle des maquettes ni T3.
 
+### Reprise supplémentaire — 24/10/2026
+
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — les deux écrans du lendemain gardent un corps de texte lisible », qui vérifie que les tailles `font-size` exprimées en pixels dans les règles `.ld3-*` restent au moins à 22 px.
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 14/14 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé ne rapporte aucune erreur (le fichier de test est ignoré par la configuration). `package.json` inclut le test dans `test` et `test:watch`.
+- Ce test complète une vérification de lisibilité, mais ne corrige pas les manques restants : reproduction intégrale des deux planches, résultats complets et mouvements conformes, réponses T3 liées aux événements et anti-répétition sur 50 soirées. Aucun état de sauvegarde ajouté. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
