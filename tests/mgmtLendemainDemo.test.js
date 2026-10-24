@@ -20,12 +20,12 @@ test('Le lendemain passe après chaque soirée, même sans blessé ni suspendu',
   assert.equal(r.ecran,'mgmt_lendemain');
 });
 
-test('Le lendemain affiche la salle, l’argent et la popularité de m.lastEvent.finance, au spectateur et à l’euro près', () => {
+test('Le lendemain affiche les chiffres de m.lastEvent.finance dans le bloc de la planche validée', () => {
   const w=neuve();
   const r=res(w,`${JOUER} jouer(); const m=G.mgmt, f=m.lastEvent.finance; CL.go('mgmt_lendemain');
     const t=document.getElementById('app').textContent.replace(/\\s+/g,' ');
-    return {spect:t.includes(String(f.spectateurs).replace(/\\B(?=(\\d{3})+(?!\\d))/g,' ')),cap:t.includes('sur '+f.capacite),rec:t.includes(mgmtEuros(Math.abs(f.recette)).replace(/\\s+/g,' ')),pop:t.includes(f.popAvant+' → '+f.popApres),note:t.includes(f.satisfaction+' SUR 100')};`);
-  assert.deepEqual(r,{spect:true,cap:true,rec:true,pop:true,note:true});
+    return {spect:t.includes(String(f.spectateurs).replace(/\\B(?=(\\d{3})+(?!\\d))/g,' ')),cap:t.includes('sur '+f.capacite),rec:t.includes(mgmtEuros(Math.abs(f.recette)).replace(/\\s+/g,' ')),pop:t.includes(f.popAvant+' → '+f.popApres),public:t.includes(String(f.satisfaction))&&t.includes('/ 100')};`);
+  assert.deepEqual(r,{spect:true,cap:true,rec:true,pop:true,public:true});
 });
 
 test('Les trois raisons de la satisfaction sont gardées avec la soirée, validées, et rechargées', () => {
@@ -43,13 +43,13 @@ test('Une carte sans combat réclamé, puis une carte avec un combat réclamé j
   assert.notEqual(r.sans,r.avec); assert.notEqual(r.avec,r.rate); assert.notEqual(r.sans,r.rate);
 });
 
-test('Après une carte ratée, l’écran dit la détermination et jamais l’échec ; une carte réussie ne la dit pas', () => {
+test('Après une carte ratée, les blocs de la planche validée remplacent l’ancien commentaire de satisfaction', () => {
   const w=neuve();
   const r=res(w,`${JOUER} jouer(); const m=G.mgmt, f=m.lastEvent.finance;
     f.satisfaction=20; f.criteres={reclame:0,serres:0.1,noms:0.1,reclames:1}; CL.go('mgmt_lendemain'); const rate=document.getElementById('app').textContent;
     f.satisfaction=90; f.criteres={reclame:1,serres:1,noms:1,reclames:1}; CL.go('mgmt_lendemain'); const reussi=document.getElementById('app').textContent;
-    return {det:rate.includes(MGMT_LD_CRITERES.determination.texte),echec:/échec/i.test(rate),detReussi:reussi.includes(MGMT_LD_CRITERES.determination.texte)};`);
-  assert.deepEqual(r,{det:true,echec:false,detReussi:false});
+     return {blocs:rate.includes('LES CHIFFRES')&&rate.includes('CAGE HEBDO · LA UNE'),ancien:rate.includes(MGMT_LD_CRITERES.determination.texte),reussi:reussi.includes('LES CHIFFRES')};`);
+  assert.deepEqual(r,{blocs:true,ancien:false,reussi:true});
 });
 
 test('Aucun montant en euros dans le panneau central du booking', () => {

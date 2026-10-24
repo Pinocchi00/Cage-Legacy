@@ -33,4 +33,12 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Capture : l'outil `read` a refusé l'accès à `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` (chemin externe bloqué par l'environnement). Sans ses instructions, aucun comparateur ni `cmp-*.png` n'a été lancé. Le ratio après ajustement, l'absence de chevauchement et le seuil `grosBlocs ≤ 20 %` restent donc non vérifiés ; aucun résultat visuel n'est revendiqué.
 - Aucun nouveau changement de code, test, sauvegarde ou migration n'était nécessaire au vu des commits existants. La case de capture/mesure reste à confirmer ; aucun nouveau commit créé dans cette reprise.
 
+### Reprise 9 — 24/10/2026
+
+- Reprise depuis `258b963` sur `fid-lendemain`. Aucun fichier de tranche n'était modifié à l'ouverture ; les changements présents dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et laissés intacts.
+- Adapté `tests/mgmtLendemainDemo.test.js` : assertions de l'ancienne ligne « satisfaction SUR 100 » et du commentaire de détermination ont été remplacées par des assertions sur les chiffres et les blocs de la nouvelle planche, avec la décision « planches Uni* validées par Anthony ; l'écran suit la planche ». Les autres vérifications de calcul/sauvegarde restent inchangées.
+- Vérification ciblée : `mgmtEcranLendemain.test.js` 7/7, `mgmtLendemainDemo.test.js` 7/7, `mgmtLot54T1.test.js` 30/30 et `mgmtLot48T1.test.js` 9/9 passent. `mgmtSoireeShow.test.js` a dépassé la limite de 120 s sans résultat final. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Capture : la lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusée par la politique de chemin externe de l'environnement ; aucun outil de capture ni `cmp-*.png` n'a donc pu être lancé. Les ratios, chevauchements et comparaison visuelle après ajustement restent non certifiés.
+- Pas de modification de moteur, de sauvegarde ou de migration. Pas d'autre écart fonctionnel identifié ; mesure visuelle toujours à confirmer.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
