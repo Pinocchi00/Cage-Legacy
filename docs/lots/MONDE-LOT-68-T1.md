@@ -330,6 +330,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Écart à la fiche : corrections et contrôles actuels de toutes les scènes, puis fidélité visuelle par comparaison, restent incomplets. Tests lents `tests/mgmtReleveReduit.test.js` non relancé. Aucune migration. `TOUT_EST_FINI` non revendiqué.
 - Écart à la fiche : le critère de livraison globale n'est pas atteint ; contrairement à l'exigence de cette reprise, les comparatifs n'ont pu être ouverts et les scènes manquantes ne sont pas capturées. `TOUT_EST_FINI` n'est pas atteint.
 
+### Reprise 41 du 24/10/2026
+
+- État repris : branche `fid-fiches`, HEAD `38811937`. L'historique `git log --oneline -12` et `git status` ont été examinés. Aucun fichier applicatif ou test de la tranche n'est non committé ; les changements `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés.
+- Contrôles ciblés relancés : `node --test tests/mgmtFicheStats.test.js` (22/22) et `node --test tests/mgmtReleve.test.js` (5/5), verts. `node tools/verif-versions.js origin/main` : aucun écart ; `node_modules/.bin/eslint .` : vert.
+- Le travail effectué dans cette reprise est cette mise à jour du compte rendu : aucune correction applicative supplémentaire n'a été faite faute d'un constat de capture directement vérifiable ici. Le fichier temporaire d'instructions et les comparatifs sont hors des chemins de lecture autorisés par l'environnement ; les données historiques de contrôles ne sont pas présentées comme un résultat nouveau.
+- Bilan écran par écran : fiche statistiques a historiquement un contrôle géométrique à zéro après déplacement du bouton suivi ; Aperçu, arrivée (contrat/espoirs), recruteur mission/retours, semaine, relevé, chiffres du combat, menu, meilleurs et records n'ont pas de comparaison d'image nouvellement validée dans cette reprise. Les seules valeurs détaillées disponibles sont celles des reprises précédentes ; aucune différence d'apparence non observée n'est inventée.
+- Aucun changement de JS/CSS ou de sauvegarde : pas de bump `?v=`, aucune migration. Aucun test nouveau, aucun changement de `package.json`. Les scènes d'accueil, actualités, tonposte et bilan restent hors périmètre fonctionnel et ne sont pas modifiées.
+- Écart à la fiche : le contrôle « chevauchements:0 » après-correction n'est pas nouvellement mesuré pour toutes les scènes, et le protocole de comparaison visuelle n'est pas achevé. Les cases visuelles de la tranche restent incomplètes ; `TOUT_EST_FIN` n'est pas revendiqué.
+
 ### Reprise 32 du 24/10/2026
 
 - Contrôles automatiques de capture avant correction : fiche `{chevauchements:2, textesSous22px:0, debordent:[]}` (palmarès/compteur et poids/bouton SUIVRE). La fiche a été déplacée du bloc bannière à la rangée des onglets ; le premier essai a montré trois recouvrements avec le nom de style, corrigés en contraignant l'onglet, le bouton de suivi et l'aide Tab dans la rangée. Contrôle après correction fiche : `{chevauchements:0, textesSous22px:0, debordent:[]}`.
