@@ -62,7 +62,7 @@ function scr_mgmt_lendemain_cadre(){
   const change=mgmtLendemainConstatsHtml(m)||'<p>Rien à signaler.</p>';
   const presse=typeof mgmtLendemainPresseHtml==='function'?mgmtLendemainPresseHtml(m):'';
   const chapeau=typeof mgmtLendemainDiscoursHtml==='function'?mgmtLendemainDiscoursHtml(m):'';
-  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
+  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droite:`${nom} Fight Night ${m.eventsPlayed+1}`,
     touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓','Tab'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain=scr_mgmt_lendemain_cadre;
@@ -75,7 +75,7 @@ function scr_mgmt_lendemain_suite(){
   const nom=mgmtOrgNom(m);
   const retour=`<button class="ld3-suite-back" type="button" onclick="CL.go('mgmt_lendemain')">Retour aux trois moments</button>`;
   return mfEcran(`<main class="mf-contenu ld66-suite"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}${retour}</div></main>`,{
-    barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain · la suite',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
+    barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:'La suite',droite:`${nom} Fight Night ${m.eventsPlayed+1}`,
     touches:[{ks:['↑'],t:'Les trois moments',onclick:"CL.go('mgmt_lendemain')"},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain_suite=scr_mgmt_lendemain_suite;
