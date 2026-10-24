@@ -18,9 +18,10 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
     const org=w.eval(`mgmtPredecesseurOrgId(G.mgmt)`);
     assert.equal(org,'garden-of-blood');
      const arrivee=w.eval(`(()=>{const m=G.mgmt;return {org:mgmtOrgNom(m),html:scr_mgmt_arrivee()}})()`);
-      assert.ok(arrivee.org);
-      assert.ok(arrivee.html.includes(arrivee.org),'l’écran d’arrivée doit afficher la nouvelle organisation');
-      assert.notEqual(arrivee.org,ancien,'l’arrivée ne doit pas conserver l’organisation quittée dans l’en-tête');
+       assert.ok(arrivee.org);
+       assert.ok(arrivee.html.includes(arrivee.org),'l’écran d’arrivée doit afficher la nouvelle organisation');
+       assert.notEqual(arrivee.org,ancien,'l’arrivée ne doit pas conserver l’organisation quittée dans l’en-tête');
+       assert.ok(!arrivee.html.includes(ancien),'aucun bloc d’arrivée ne doit réafficher l’ancienne organisation');
      const identiteNouvelle=w.eval(`(()=>{const m=G.mgmt;return {nom:m.org,roster:Array.isArray(m.roster)&&m.roster.length>0}})()`);
      assert.equal(identiteNouvelle.nom,arrivee.org,'le contrat doit être rattaché à la nouvelle organisation');
      assert.equal(identiteNouvelle.roster,true,'l’effectif du nouvel employeur doit être visible dans la partie');

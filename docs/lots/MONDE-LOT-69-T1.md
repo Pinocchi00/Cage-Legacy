@@ -188,3 +188,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Aucune modification fonctionnelle supplémentaire ni capture produite. L'accès au guide externe de capture est refusé dans cet environnement, donc aucune scène ni mesure nouvelle n'est revendiquée.
 - Les écarts non résolus restent : validation visuelle comparative des écrans, trois combats pour le choc, et scénario fin de contrat/bilan puis rechargement strictement identique. Le test existant couvre une partie de la transition d'offre et confirme soirée/lendemain ainsi que programmation de l'agenda, mais ne satisfait pas ces critères intégraux. Aucun changement de sauvegarde ni migration.
 - Cette reprise ne déclare pas la tranche achevée et ne revendique pas `TOUT_EST_FINI`.
+
+### Reprise 33
+- `tests/mgmtLot69T1.test.js` renforce le contrôle de l’arrivée : le HTML rendu doit contenir la nouvelle organisation et exclure le nom de l’organisation quittée.
+- Vérifications ciblées : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
+- Pas de migration ni de modification JS/CSS. Le test complète la vérification de transition existante, mais ne constitue pas une capture comparative et ne prouve pas le parcours contractuel complet.
+- Écarts inchangés : l’exigence de trois combats choc n’est pas représentée par la logique existante mono-combat ; les seuils visuels post-correction et les scènes arrivée/offre n’ont pas de nouvelles preuves ; le test de parcours ne couvre pas la fin de contrat/bilan ni un rechargement valide strictement identique. Aucun `TOUT_EST_FINI` revendiqué.
