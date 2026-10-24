@@ -55,6 +55,24 @@ function mgmtTempsFortsDuree(m,combat){
   if(duree>curseur)temps+=(duree-curseur)/MGMT_TF_VITESSE;
   return Math.round(temps);
 }
+/* ==== [ANCRE: P7_T2_DUREE_SOIREE] — Monde lot 53 T1 ==== */
+/** Estimation pure du temps de lecture d'une carte, en secondes. */
+function mgmtSoireeDureeEstimee(m){
+  const prog=typeof mgmtSoireeProgramme==='function'?mgmtSoireeProgramme(m):[];
+  return prog.reduce((total,p)=>{
+    const vue=mgmtVueDuCombat(m,p.i);
+    let duree=vue==='forts'?45:vue==='resultat'?5:0;
+    if(vue==='complet'){
+      const t=p.trace;
+      const replay=t&&typeof mgmtReplayFight==='function'?mgmtReplayFight(t):null;
+      if(replay&&typeof areneConstruire==='function'){
+        const s=areneConstruire(replay,{a:t.a.name,b:t.b.name},{echelle:MGMT_COMBAT_ECHELLE,pause:MGMT_COMBAT_PAUSE});
+        duree=s&&Number.isFinite(s.dureeAffichage)?s.dureeAffichage:0;
+      }
+    }
+    return total+duree+10;
+  },0);
+}
 function mgmtVueDuCombat(m,i){
   const options=typeof MGMT_REGLAGES!=='undefined'?MGMT_REGLAGES:null;
   const v=m&&m.vues&&m.vues[i]; if(['complet','forts','resultat'].includes(v))return v;

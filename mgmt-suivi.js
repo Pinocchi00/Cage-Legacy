@@ -100,17 +100,19 @@ function mgmtResultatDetail(m,i){
   if(MGMT_DETAIL_MEMO.has(t)) return MGMT_DETAIL_MEMO.get(t);
   const nul=t.winner==='D';
   const g=nul?t.a:(t.winner==='A'?t.a:t.b), p=nul?t.b:(t.winner==='A'?t.b:t.a);
-  let methode=MGMT_FAMILY_LABELS[t.family]||'', geste='', secoue='';
+  let methode=MGMT_FAMILY_LABELS[t.family]||'', geste='', secoue='', temps='';
   let res=null;
   try{ res=mgmtReplayFight(t); }catch(e){ res=null; }
   if(res&&typeof areneVerdictFidele==='function'&&areneVerdictFidele(t,res)){
     methode=res.method||methode;
     if(typeof res.moveName==='string') geste=res.moveName;
+    if(typeof res.finishTimeStr==='string') temps=res.finishTimeStr;
     const cible=res.winner==='A'?'B':(res.winner==='B'?'A':null);
     const st=(cible&&res.stats)?res.stats[cible]:null;
     secoue=st?Math.max(0,Math.round(Number(st.wobbled)||0)):0;
   }
-  const d={i,c:t.c,slot:t.slot,family:t.family,round:t.round,rounds:t.rounds,nul,gagnant:g,perdant:p,methode,geste,secoue,
+  if(!temps&&(t.family==='dec'||t.family==='draw')) temps='5:00';
+  const d={i,c:t.c,slot:t.slot,family:t.family,round:t.round,rounds:t.rounds,nul,gagnant:g,perdant:p,methode,geste,secoue,temps,
     cat:g.div,titre:!!(m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.fight===i)};
   MGMT_DETAIL_MEMO.set(t,d);
   return d;
