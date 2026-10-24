@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 15
+
+- Branche `fid-organisation` confirmée ; `git status` était propre et les douze derniers commits consultés sont déjà commités. Aucun changement applicatif non commité n'était à reprendre.
+- Tentative de lecture préalable du protocole externe `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` refusée par la politique d'accès externe. Le comparatif PNG ne peut donc pas être relu/généré ici et je ne revendique pas d'inspection visuelle.
+- Le code courant et la planche `UniCroissance` ont été consultés : la vue existante porte déjà des styles de cérémonie et de guerre, mais les points déjà documentés restent non clos, notamment les petits textes/débordements de Croissance, les collisions Carnet, le seuil Guerre, et la preuve de capture avec prix remplis. Cette reprise ne fait pas passer ces éléments pour validés.
+- Modifié : cette fiche seulement, pour tracer l'état réel de reprise. Pas de test ajouté, aucune migration de sauvegarde, aucune version de cache à monter. Les modifications `.opencode` mentionnées dans les historiques antérieurs ne concernent pas la tranche.
+- Vérifications et livraison : le test ciblé et les contrôles de versions/lint doivent être relancés avant commit ; faute de comparatif exploitable, les critères visuels et `TOUT_EST_FIN` ne sont pas certifiés.
+
 ## Compte rendu — reprise 14
 
 - Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. L'arbre était propre au début ; les commits précédents de la tranche sont conservés.
