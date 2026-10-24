@@ -195,3 +195,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `tests/mgmtLot53T1.test.js` (test du réglage indépendant) et cette fiche (compte rendu). Aucune migration de sauvegarde.
 - Tests ajoutés : « Monde lot 53 T1 — la touche V règle la vue du combat sélectionné ».
 - État : incomplet; critères de fin non atteints. Le commit de reprise porte le titre `Monde lot 53 T1 (inachevé) : test explicite du réglage de vue`.
+
+### Reprise 27 — vérification depuis la reprise 5
+
+- Vérifié au départ : branche `p7-ecran-soiree`, HEAD `ddea9cd`; les commits antérieurs sont déjà présents et il n'y a aucun changement applicatif non commité. Les changements dans `.opencode/agents/*` et `opencode.json` sont étrangers et restent hors commit.
+- Vérification locale relancée : `node --test tests/mgmtLot53T1.test.js` — 11/11 réussis ; `node tools/verif-versions.js origin/main` — aucun écart ; `node_modules/.bin/eslint .` — réussi.
+- État inchangé de ce qui reste : les écrans ne sont pas complètement portés aux compositions/valeurs des maquettes ; la frise existe mais les fenêtres de lecture de 4 s, leur fondu et leur durée réelle/passabilité par fenêtre ne sont pas implémentés ; le calcul complet 900–1200 s n'est pas démontré ; les tests exhaustifs de styles, d'empreintes historiques et l'inscription explicite dans les commandes principales `test` et `test:watch` restent absents. La fin garde l'ancienne composition enrichie, sans portage complet de `UniSoireeFin`.
+- Choix conforme à la décision du superviseur : l'arène actuelle reste en place et les segments hors moments forts sont accélérés, sans second moteur ni modification du moteur de combat. La carte résultat de cinq secondes existante avance et reste passable.
+- Aucun fichier applicatif supplémentaire n'a été modifié lors de cette reprise : les vérifications n'établissent pas les critères fonctionnels manquants, et une déclaration d'achèvement serait inexacte. Aucun nouveau commit de livraison n'est produit sur ce constat.
