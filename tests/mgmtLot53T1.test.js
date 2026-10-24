@@ -51,6 +51,14 @@ test('Monde lot 53 T1 — le cumul estimé inclut chaque combat et ses transitio
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — les durées forfaitaires suivent les vues et ajoutent la transition',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const n=w.eval(`(()=>{const m={vues:{0:'forts',1:'resultat'}};mgmtSoireeProgramme=()=>[{i:0},{i:1}];return mgmtSoireeDureeEstimee(m);})()`);
+    assert.equal(n,70);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — la fin annonce les primes présentes dans les relevés et échappe les noms',()=>{
   const w=newGameWindow({runMain:true});
   try{

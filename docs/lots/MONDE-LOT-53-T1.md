@@ -156,3 +156,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifié au démarrage : branche `p7-ecran-soiree`, HEAD `3fa359a`; aucun changement applicatif non commité. Les modifications `.opencode/agents/*` et `opencode.json` restent étrangères.
 - Le dernier commit intitulé comme livraison contient encore uniquement un ajout de conteneur/style et une assertion associée. Les cases fonctionnelles non couvertes ci-dessus restent effectivement à faire ; le titre du commit ne constitue pas une preuve d'achèvement.
 - Je ne transforme pas les limites déjà documentées (notamment l'estimation sous 900 s et l'absence de fenêtre temporisée) en assertions vertes artificielles. Pour achever cette reprise, les cas restants doivent être implémentés et validés dans les fichiers applicatifs avant livraison.
+
+### Reprise 22 — contrôle des durées forfaitaires
+
+- Ajout d'un test isolé qui vérifie que le cumul applique exactement 45 s au temps forts, 5 s au résultat et 10 s de transition à chacun des deux combats (70 s au total). Le test protège la formule forfaitaire contre une régression, mais ne démontre pas le critère complet 900–1200 s sur une soirée de neuf combats.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` (9/9 réussis).
+- Les critères principaux non achevés demeurent tels que listés dans les reprises précédentes : portage complet des maquettes, lecture fenêtrée avec fondu et sa passabilité, cible de durée de la carte réelle, audit exhaustif classes/échappement/empreintes, et intégration dans les chaînes principales `test` et `test:watch`. Aucun de ces critères n'est revendiqué comme fait ici.
