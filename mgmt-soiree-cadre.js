@@ -199,6 +199,13 @@ function mgmtSoEntreHtml(m,prog,index,focus){
   const prochain=p?`<aside class="so3-prochain so3-prochain-panneau"><h2>LE PROCHAIN · ${esc(p.etiquette)}</h2><div class="so3-prochain-noms"><b>${esc(soFirst(a))} ${esc(soLast(a))}</b><span>CONTRE</span><b>${esc(soFirst(b))} ${esc(soLast(b))}</b></div>${mfVoix('Leïla',leila)}<div class="so3-prochain-vue"><span>TU LE REGARDES EN</span><b>${vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT'}</b></div>${mfBouton('Regarder',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}</aside>`:'';
   return `<div class="so3-tableau"><section class="so3-bandeau"><div><b>LA SALLE</b><strong>${esc(places)} / ${esc(finance.capacite||salle.capacite)}</strong></div><div><b>L'AMBIANCE</b><strong>${'● '.repeat(ambiance)}${'○ '.repeat(5-ambiance)}</strong></div><span>Ça monte</span><div><b>LA RECETTE</b><strong>${esc(mgmtEuros(Number(finance.recette)||0))}</strong></div></section><div class="so3-corps"><section class="so3-carte"><h2>LA CARTE</h2>${rows}</section>${prochain}</div></div>`;
 }
+
+/* ==== [ANCRE: MGMT_SOIREE_ENTETE_FIN] — Monde lot 65 T1 ==== */
+function mgmtSoEnteteFin(m,prog){
+  const n=prog.length, pips=prog.map(()=>'<i class="mf-so-pip on"></i>').join('');
+  const date=mgmtSoireeDateTexte(m), salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
+  return `<header class="mf-entete mf-so-entete"><div class="mf-entete-g"><div class="mf-plaque"><span>FIN DE SOIRÉE</span><span class="mf-so-pips" aria-hidden="true">${pips}</span><b class="mf-so-cpt">${esc(n)} / ${esc(n)}</b></div></div><div class="mf-so-dr"><span class="mf-entete-d">Ce soir</span>${date?`<div class="mf-so-chip"><b>${esc(date)}</b><span>${esc(mfNet(salle))}</span></div>`:''}<div class="mf-so-chip org"><b>${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</b><b class="r">${esc(num)}</b></div></div></header>`;
+}
 /* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
 function mgmtSoResultatSeulHtml(m,p){
   const d=mgmtResultatDetail(m,p.h), gagnant=d&&d.gagnant, perdant=d&&d.perdant;
@@ -291,7 +298,7 @@ function scr_mgmt_soiree_cadre(){
       {ks:['Entrée'],t:focus===index?'Regarder le combat':(focus<index?'Revoir le combat':'Revenir au prochain combat'),jaune:true,onclick:focus===index?'CL.mgmtSoRegarder()':(focus<index?`CL.mgmtSoRevoir(${focus})`:'CL.mgmtSoAutre(0)')}];
   }
   /* ==== [ANCRE: MGMT_SOIREE_FIN_SANS_DOUBLE_ENTETE] — Monde lot 65 T1 ==== */
-  const entete=moment==='fin'?'':mgmtSoEntete(m,prog,index);
+  const entete=moment==='fin'?mgmtSoEnteteFin(m,prog):mgmtSoEntete(m,prog,index);
   return mfEcran(entete+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches});
 }
 /* L'écran d'origine reste celui des parties d'avant l'agenda. */
