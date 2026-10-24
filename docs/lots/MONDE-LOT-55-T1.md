@@ -407,3 +407,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (22/22); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` (vert); confirmation que le test est dans `test` et `test:watch`.
 - Aucun changement de production ni de sauvegarde. Limites précédemment documentées inchangées : pas de preuve de trois saisons complètes, de chargement d'une fixture complète d'ancienne sauvegarde, de conformité intégrale aux planches, ni de déclenchement à chaque anniversaire; le test lent `mgmtReleveReduit` n'a pas été lancé.
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de rendu hostile) et cette fiche. Les modifications étrangères `.opencode/agents/*` et `opencode.json` restent exclues. Aucune migration ni question nouvelle pour Anthony.
+
+### Reprise 53
+
+- Ajout du test « Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix » : contrôle l'échappement d'un nom d'organisation fourni par le classement et la présence des six rubriques dans le rendu de cérémonie.
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (23/23); `node tools/verif-versions.js origin/main` (aucun écart); `node_modules/.bin/eslint .` et `git diff --check` (verts). Confirmation de la présence du test dans `test` et `test:watch`.
+- Aucun changement de production ou de sauvegarde dans cette reprise; aucune migration. Les modifications d'outillage `.opencode/agents/*` et `opencode.json` restent étrangères et non incluses.
+- Limites toujours réelles : fidélité intégrale au markup des maquettes et déclenchement à chaque anniversaire non démontrés (l'enchaînement actuel suit le terme du contrat); le parcours n'exécute pas trois saisons complètes, et le test lent `mgmtReleveReduit` ainsi que le chargement d'une sauvegarde historique complète ne sont pas validés. Ces critères empêchent de certifier la fiche entièrement achevée.
+- Fichiers de cette reprise : `tests/mgmtLot55T1.test.js` (test d'échappement/rubriques) et cette fiche (compte rendu). Aucun écart nouveau ni question pour Anthony.

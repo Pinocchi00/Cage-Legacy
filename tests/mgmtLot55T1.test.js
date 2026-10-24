@@ -239,3 +239,17 @@ test('Lot 55 T1 — le rendu du carnet échappe les noms provenant des fiches',(
   assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
   assert.ok(!rendu.includes('<img src=x'));
 });
+test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[]}};
+  c.mgmtOrgNom=()=> 'Organisation';
+  c.mgmtOrgClassement=()=>[{id:'x',nom:'<svg onload=alert(1)>'}];
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  assert.ok(rendu.includes('&lt;svg onload=alert(1)&gt;'));
+  assert.ok(!rendu.includes('<svg onload'));
+  for(const prix of ['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','SOUMISSION DE L’ANNÉE','COMBAT DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE','RETOUR DE L’ANNÉE']){
+    assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
+  }
+});
