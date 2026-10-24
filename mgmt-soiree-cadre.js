@@ -243,13 +243,14 @@ function mgmtSoFinHtml(m,prog){
     +`<div class="mf-so-fcw"><div class="mf-so-fc"><div class="mf-so-fcl"><div class="mf-so-fb"><div class="mf-so-s">${F.lieu}</div><div class="mf-so-big">${esc(mfNet(salle||'—')).replace(' ','<br>')}</div></div>`
     +`<div class="mf-so-fb"><div class="mf-so-s">${F.maintenant}</div><div class="mf-so-big">${F.resultats[0]}<br>${F.resultats[1]}</div></div></div>`
     +`<div class="mf-so-fcr"><div class="mf-so-s">${F.etat}</div>${ligne(F.prelims,nPre+' / '+nPre)}${ligne(F.main,nMain+' / '+nMain)}${ligne(F.principal,F.joue)}</div></div>`
-    +`<div class="mf-so-fp"><span class="mf-puce">${F.rouvertes}</span>${mfBouton('Voir les résultats',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</div></div>`;
+     +`<div class="mf-so-fp"><span class="mf-puce">${F.rouvertes}</span>${mfBouton('Voir le lendemain',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</div></div>`;
   const droite=sd
     ?`<div class="mf-so-ph"><div class="mf-so-s">${esc(sd.jour)} ${esc(sd.mois)}</div><div class="mf-so-h">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>DANS<br>${esc(dans)} JOURS</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${esc(lieu==='LIEU À CHOISIR'?F.aChoisir:lieu)}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`
     :`<div class="mf-so-ph"><div class="mf-so-s">LA SUITE</div><div class="mf-so-h">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>${F.aposer}</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${F.aChoisir}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`;
-  return `<div class="so3-fin"><div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>${mgmtSoBandeHtml(prog,prog.length,-1)}</div>`;
+  const rempli=Math.round(mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part*100);
+  return `<div class="so3-fin"><header class="so3-fin-entete"><strong>FIN DE SOIRÉE</strong><span>${esc(prog.length)} / ${esc(prog.length)}</span></header><div class="so3-salle" aria-label="Salle finale à ${esc(rempli)} pour cent"><span>SALLE FINALE</span><div class="so3-salle-piste"><i style="width:${esc(rempli)}%"></i></div><b>${esc(rempli)}%</b></div><div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>${mgmtSoBandeHtml(prog,prog.length,-1)}</div>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
@@ -269,7 +270,7 @@ function scr_mgmt_soiree_cadre(){
     touches=[{ks:['Entrée'],t:'Commencer la soirée',jaune:true,onclick:'CL.mgmtSoCommencer()'}];
   }else if(moment==='fin'){
     corps=mgmtSoFinHtml(m,prog); grise=false; courant='resultats';
-    touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir les résultats',jaune:true,onclick:'CL.mgmtSoFin()'}];
+     touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir le lendemain',jaune:true,onclick:'CL.mgmtSoFin()'}];
   }else{
     corps=mgmtSoEntreHtml(m,prog,index,focus);
     touches=[{ks:['←','→'],t:'Autre combat'},...(focus<index?[{ks:['Échap'],t:'Prochain combat',onclick:'CL.mgmtSoAutre(0)'}]:[{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'}]),

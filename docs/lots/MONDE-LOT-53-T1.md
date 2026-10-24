@@ -270,3 +270,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Test ajouté : « Monde lot 53 T1 — la fin annonce le combat de la soirée et les deux performances du relevé »; vérifie les trois lignes et les deux bénéficiaires sélectionnés.
 - Vérification : test ciblé 15/15 après correction de l'attendu sur les noms normalisés en capitales.
 - Écart : le repli des fixtures incomplètes conserve l'annonce depuis les relevés de cycle; la fin complète et la composition graphique de `UniSoireeFin` restent à achever.
+
+### Reprise 37 — tête et salle finale
+
+- Fait : l'écran final ajoute l'en-tête « FIN DE SOIRÉE » avec le compte de combats, une jauge du remplissage final calculée avec `mgmtSoireeSalle`, et le libellé du bouton devient « Voir le lendemain » tout en gardant le même appelant et la route existante.
+- Fichiers : `mgmt-soiree-cadre.js`, `ui-cadre.css`, `index.html` (versions), `tests/mgmtLot53T1.test.js` (fin générée par voie réelle), cette fiche.
+- Test ciblé : 16/16 réussis.
+- Écart : la composition centrale de fin reste bâtie sur les panneaux existants plutôt que portée intégralement à la grille `UniSoireeFin`.

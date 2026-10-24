@@ -99,6 +99,19 @@ test('Monde lot 53 T1 — la fin annonce le combat de la soirée et les deux per
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendemain existant',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5311);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoFinHtml(m,p);})()`);
+    assert.match(html,/FIN DE SOIRÉE/);
+    assert.match(html,/class="so3-salle" aria-label="Salle finale/);
+    assert.match(html,/Voir le lendemain/);
+    assert.match(html,/class="so3-primes"/);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',()=>{
   const w=newGameWindow({runMain:true});
   try{
