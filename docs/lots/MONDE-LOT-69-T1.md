@@ -168,3 +168,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (3/3, ~34 s).
 - Écarts encore présents : choc toujours mono-combat et parcours complet exigé non établi ; captures/mesures comparatives des écrans et conformité des arrivées non validées. Guide capture externe inaccessible par l'outil autorisé.
 - Pas de changement de sauvegarde. Aucun achèvement global revendiqué.
+
+### Reprise 30
+- Fichier modifié : `tests/mgmtLot69T1.test.js` ajoute un contrôle automatique que le test de tranche est littéralement inclus dans les scripts agrégés `test` et `test:watch` (en plus de ses commandes dédiées/hook pré-test).
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Vérification directe du paquet : les deux scripts contiennent bien `tests/mgmtLot69T1.test.js`.
+- `node tools/verif-versions.js origin/main` passe (16 fichiers examinés). Aucun fichier JS/CSS ni sauvegarde modifié, aucune version de cache à incrémenter.
+- Écarts inchangés : ceci ne valide pas le choc à trois affiches ni son booking complet ; le parcours de test n'exerce toujours pas fin de contrat/bilan et le rechargement strict demandé ; les mesures visuelles après corrections, la scène d'arrivée dédiée et les captures/comparaisons restent non réalisées. Aucune nouvelle preuve visuelle n'est revendiquée. Le guide de capture externe n'était pas accessible par l'outil de lecture autorisé.
+- Pas de migration de sauvegarde. Aucun autre fichier modifié ; les changements utilisateur hors tranche sont exclus du commit.

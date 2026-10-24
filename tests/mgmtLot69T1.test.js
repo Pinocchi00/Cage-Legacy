@@ -72,3 +72,9 @@ test('Monde lot 69 T1 — les raisons d’offre restent échappées dans le bila
     for(const raison of ['Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(rendu.includes(raison),`raison absente du bilan: ${raison}`);
   }finally{w.close();}
 });
+
+test('Monde lot 69 T1 — le parcours de tranche est inclus aux suites standard et watch',()=>{
+  const packageJson=require('../package.json');
+  assert.match(packageJson.scripts.test,/tests\/mgmtLot69T1\.test\.js/);
+  assert.match(packageJson.scripts['test:watch'],/tests\/mgmtLot69T1\.test\.js/);
+});
