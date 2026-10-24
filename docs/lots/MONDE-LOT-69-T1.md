@@ -270,3 +270,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écart : le test couvre uniquement la proposition mono-combat prise en charge par le modèle lot 58 ; il ne crée ni les deux autres affrontements ni un score 2-sur-3. Le parcours fin de contrat/bilan avec rechargement strict, les scènes dédiées et les comparaisons visuelles restent non réalisés. Aucune donnée de combat supplémentaire n'a été inventée.
 - Fichiers modifiés : `tests/mgmtLot69T1.test.js` (assertion de persistance du résultat), cette fiche (compte rendu). Pas de migration ni de version de cache.
 - Modifications utilisateur sous `.opencode/agents/` et `opencode.json` préservées et exclues.
+
+### Reprise 46
+- État de reprise : branche `fid-choc`; HEAD `c057ca70`. Le seul changement non fonctionnel de tranche au départ était une indentation accidentelle dans `tests/mgmtLot69T1.test.js` ; remise au format cohérent du fichier.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Aucun changement métier ni de sauvegarde.
+- La fiche exige encore des critères qui ne sont pas couverts par l'état présent : choc à trois affrontements/2-sur-3, parcours contractuel complet avec rechargement valide, comparaisons visuelles post-correction et scènes/captures dédiées. L'accès aux instructions externes et la production des captures ne sont pas établis dans cette reprise ; aucune preuve visuelle n'est revendiquée.
+- Fichier modifié de cette reprise : cette fiche (compte rendu). Le changement d'indentation du test est uniquement du whitespace, confirmé par `git diff --ignore-all-space`, et n'est pas inclus dans le commit. Aucun écart de cache ou migration.
