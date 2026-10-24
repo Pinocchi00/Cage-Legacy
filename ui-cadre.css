@@ -2045,6 +2045,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE70_T1_POSTE_SCROLL] — Monde lot 70 T1 ==== */
 .po2-scene{box-sizing:border-box;max-height:calc(100% - 224px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .po2-scene>.po2-grid{min-height:0}
+/* ==== [ANCRE: MONDE70_T1_POSTE_PANNEAUX_BORNES] — Monde lot 70 T1 ==== */
+.po2-scene{display:flex;flex-direction:column;min-height:0}
+.po2-scene>.po2-grid{flex:1;min-height:0;grid-template-rows:minmax(0,1fr)}
+.po2-grid>.po2-card{min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .po2-lien,.po2-action,.po2-tab{font:600 24px 'Saira Condensed','Arial Narrow',sans-serif;color:#E9E6E1;background:#252121;border:2px solid rgba(233,230,225,.38);padding:12px 18px;cursor:pointer}
 .po2-tabs{display:flex;gap:12px;margin:0 0 18px}
 .po2-tab[aria-selected="true"]{color:#0D0B0B;background:#F0B220}
