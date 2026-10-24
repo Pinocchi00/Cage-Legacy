@@ -2018,7 +2018,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-screen{grid-template-rows:64px minmax(0,1fr)}
 .ch3-title{font-size:46px;gap:24px;padding:8px 0}
 .ch3-title .ch3-vs{width:54px;height:54px;font-size:28px}
-.ch3-paire .ch3-side b{font-size:32px}
+.ch3-paire .ch3-side b{font-size:30px}
 .ch3-paire .ch3-category .ch3-vs{width:38px;height:38px;font-size:22px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */

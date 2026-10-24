@@ -342,6 +342,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
 - Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
 
+### Reprise 44 — densité de l’affiche
+- État de départ : branche `fid-choc`, HEAD `ea6050f0`; modifications utilisateur sous `.opencode/agents/` et `opencode.json` préservées hors tranche.
+- Réduction de 2 px des noms sur les cartes choc dans `ui-cadre.css`; version du cache montée via `node tools/_bump.js ui-cadre.css`.
+- Capture choc rejouée : affichage valide, 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=25.4%`, amélioration minime par rapport à 25.5 %, mais toujours au-dessus de l’objectif ≤20 %. L’image n’a pas été ouverte. Ne revendique donc pas la conformité visuelle complète.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4, y compris le parcours offre/changement/arrivée/soirée/lendemain et le choc à trois affiches avec résultat par le chemin normal. Pas de migration de sauvegarde.
+- Fichiers modifiés : `ui-cadre.css` (taille des noms d’affiche) et `index.html` (version cache), plus cette fiche. Tests ajoutés : aucun dans cette reprise.
+- Écarts restants documentés : seuil de densité du choc non atteint, bilan précédemment mesuré avec chevauchement, scène dédiée d’arrivée et capture/comparaison visuelle non établies. Le parcours et les trois paires ont une couverture de test, mais aucune nouvelle comparaison visuelle n’est revendiquée.
+
 ### Reprise 69 — reproduction demandée
 - État Git : branche `fid-choc`, HEAD vérifié via `git log`; aucun fichier de la tranche n'était modifié au départ. Les changements utilisateurs sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
 - Lancement de la scène demandée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. La capture affiche l'écran choc issu d'une proposition valide (pas de page blanche) ; contrôle `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=26.1%` (seuil ≤20% non atteint).
