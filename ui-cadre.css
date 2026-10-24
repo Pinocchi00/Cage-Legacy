@@ -2157,3 +2157,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move em{grid-column:3;grid-row:1 / span 2;justify-self:stretch;text-align:right}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{display:block;min-width:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_MOUVEMENT_IDENTITE_COLONNE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld66-move-identity{display:flex;min-width:0;max-width:100%;flex-direction:column;gap:6px;overflow-wrap:anywhere}
+.ld66-suite .ld66-move-identity b,.ld66-suite .ld66-move-identity span{display:block;min-width:0;max-width:100%;grid-column:auto;grid-row:auto;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */
