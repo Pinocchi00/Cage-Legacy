@@ -248,11 +248,18 @@ Object.assign(CL,{
     if(!mgmtSoAgenda()) return;
     const m=G.mgmt, p=mgmtSoireeProgramme(m)[MGMT_SOIREE.index];
     if(!p||!p.trace) return;
-     const sortir=function(){ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; };
-     const vue=mgmtVueDuCombat(m,p.i);
-     if(vue==='resultat'){ sortir(); render(); return; }
-     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
-       salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
+    const sortir=function(){
+      const m=G.mgmt, combat=mgmtSoireeTrace(m,MGMT_SOIREE.index);
+      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render(); };
+      const d=m.discours&&m.discours.c===m.eventsPlayed&&Array.isArray(m.discours.d)
+        ?m.discours.d.find(x=>combat&&x&&[x.a,x.adv].includes(combat.a.id)&&[x.a,x.adv].includes(combat.b.id)):null;
+      if(d&&typeof mgmtDiscoursEcran==='function'&&mgmtDiscoursEcran(m,d,avancer)) return;
+      avancer();
+    };
+    const vue=mgmtVueDuCombat(m,p.i);
+    if(vue==='resultat'){ sortir(); return; }
+    mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat',
+      salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:sortir,vue});
   },
   /** Passer un combat : le résultat est connu, la soirée avance (la connaissance se lit sur m.hist). */
   mgmtSoPasser(){
