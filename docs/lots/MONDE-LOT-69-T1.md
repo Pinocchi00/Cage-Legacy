@@ -642,3 +642,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichier modifié : cette fiche, compte rendu des mesures et des tentatives annulées. Aucun changement de version cache conservé. Vérifications `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` à effectuer avant livraison.
 - Écarts à la fiche : seuil `grosBlocs≤20%` du choc manqué; chevauchement bilan persistant; capture arrivée absente et comparaison visuelle non faite. Aucune fin de contrat complète n'a été reproduite dans cette reprise. Aucun `TOUT_EST_FINI` revendiqué.
 - Questions pour Anthony : aucune nouvelle question.
+
+### Reprise 85 — reproduction de la scène choc
+- Branche confirmée `fid-choc`. La seule modification de source détectée au départ (`mgmt-ecran-poste.js`) est une différence de fins de ligne : `git diff --ignore-all-space` est vide et elle reste exclue du commit. Les changements sous `.opencode/agents/` et `opencode.json` restent hors tranche.
+- Commande de capture demandée exécutée : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Le contrôle confirme que l'écran est rendu avec une proposition reçue : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=25.1%`. L'écran n'est donc pas blanc dans cette reproduction ; le seuil de gros blocs ≤20 % reste non atteint.
+- Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4, dont proposition réelle + `CL.go`, trois paires et résolution par le chemin normal, ainsi que le parcours offre/changement/rechargement/arrivée/soirée/lendemain.
+- Pas de changement fonctionnel durable, de test ajouté, de migration ni de version cache requise. Écart : la cible de gros blocs reste dépassée ; cette reprise ne produit pas de preuve visuelle ouverte ni de nouvelle scène dédiée arrivée/bilan. Aucun `TOUT_EST_FINI` revendiqué.
