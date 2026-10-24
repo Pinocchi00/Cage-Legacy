@@ -375,6 +375,17 @@ test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation
   assert.equal(options.courant,'accueil');
   assert.equal(options.m,c.G.mgmt);
 });
+
+test('Monde lot 67 T1 — les quatre vues Organisation exposent les onglets communs',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const html=w.eval(`(()=>{const m=G.mgmt;mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(G.mgmt,{soirees:3});return ['mgmt_guerre','mgmt_organisation','mgmt_poste','mgmt_carnet'].map(id=>{CL.go(id);return document.body.innerHTML;}).join(' ');})()`);
+    for(const label of ['LE CLASSEMENT DES HUIT','LA CROISSANCE','TON POSTE','TON CARNET']) assert.ok(html.includes(label),`onglet absent: ${label}`);
+    assert.match(html,/ArrowDown/);
+    assert.match(html,/ArrowUp/);
+    assert.match(html,/Escape/);
+  }finally{w.close();}
+});
 test('Lot 55 T1 — les prix attribués portent une phrase de presse marquée non relue',()=>{
   const c=charger();
   const hist=[
