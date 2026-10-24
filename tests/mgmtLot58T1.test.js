@@ -31,6 +31,13 @@ test('Monde lot 58 T1 — les invitations conservent le poste et une formulation
   assert.ok(n.every(o=>o.poste==='matchmaker'&&o.texte.toLowerCase().includes(o.poste)&&o.relu===false));
 });
 
+test('Monde lot 58 T1 — un bilan positif ouvre la voie aux approches avant le renouvellement',()=>{
+  const w=newGameWindow({runMain:true});
+  const n=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=4;m.poste.obj.forEach(o=>{o.e='tenu';});G.mgmt=m;const html=scr_mgmt_poste_bilan();const renouvellement=mgmtPosteRenouveler(m,mgmtPosteBilan(m).issue);return {html,renouvele:!!renouvellement}})())`));
+  assert.match(n.html,/mgmtOffresCreer\(G\.mgmt\);mgmtPosteRenouveler/);
+  assert.equal(n.renouvele,true);
+});
+
 test('Monde lot 58 T1 — le joueur peut attendre après le renvoi sans changer d’organisation',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');m.offres=[];mgmtOffresCreer(m);const org=m.org;const attendu=mgmtOffresAttendre(m);return {attendu,refusees:m.offres.every(o=>o.refuse),orgIdentique:m.org===org,poste:!!m.poste}})())`));
