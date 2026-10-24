@@ -155,3 +155,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - État non terminé : cet effet diffuseur n'a pas encore de test ciblé propre. L'attrait des agents libres reste non raccordé; le franchissement provoqué par plusieurs soirées, la reproduction complète de la maquette, les tests d'empreinte ancienne dédiés et de réparation complète, ainsi que le test lent de plafond ne sont pas tous démontrés dans cette reprise. Le test ciblé doit être relancé après le changement de production. Aucune migration.
 - Fichiers de cette reprise : `mgmt-corps.js` (bonus diffusé), `index.html` (cache), cette fiche. Aucun écart de sauvegarde; aucune question de spécification.
 - État : inachevé; aucun `TOUT_EST_FINI`.
+
+### Reprise — vérification et test de borne du diffuseur (24/10/2026)
+
+- Branche confirmée `p11-croissance`; les fichiers `.opencode/agents/*` et `opencode.json` déjà modifiés sont étrangers à cette tranche, laissés intacts.
+- Ajout dans `tests/mgmtLot56T1.test.js` du test « Croissance — les effets déclarés du diffuseur restent positifs et bornés ». Il vérifie les bornes arithmétiques du niveau déclaré (0–3 %) ; ce test **ne** valide pas le raccordement à une soirée réelle.
+- Vérifications : `node --test tests/mgmtLot56T1.test.js` passe (11/11), `node --test tests/mgmtPasse.test.js` passe (13/13, empreintes), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Le test de plafond `mgmtReleveReduit.test.js` n'a pas été rejoué.
+- Critères restant ouverts : effet et test réel des agents libres; événement de soirée réel testant l'effet diffuseur; franchissement provoqué par le chemin généré et les soirées; contrôle explicite empreinte ancienne dans le test de tranche; intégralité de la maquette à confirmer/corriger; test lent de plafond. Le test de progression présent vérifie la validation après une soirée, non un changement de palier causé par celle-ci.
+- Fichiers de cette reprise : `tests/mgmtLot56T1.test.js` (test de borne déclaré), cette fiche (compte rendu). Pas de migration. Aucune question de spécification. État honnête : tranche encore inachevée.

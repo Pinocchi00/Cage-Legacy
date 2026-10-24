@@ -69,6 +69,12 @@ test('Croissance — le budget du recruteur gagne jusqu’à 3 % sans réduire c
   assert.equal(r.ancien,10000); assert.ok(r.nouveau<=r.ancien); assert.ok(r.nouveau>=9700); assert.equal(r.max,9700);
 });
 
+test('Croissance — les effets déclarés du diffuseur restent positifs et bornés',()=>{
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(()=>{const m=mgmtDefault();m.mondeVivant=true;m.pop=100;m.orgs={};const niveau=mgmtPaliersCalculer(m).effets.diffuseur;const droits=10000;return JSON.stringify({niveau,base:droits,avecBonus:droits+Math.floor(droits*niveau*0.01),ancien:droits});})()`));
+  assert.ok(r.niveau>=0&&r.niveau<=3); assert.ok(r.avecBonus>=r.base); assert.ok(r.avecBonus<=r.base*1.03); assert.equal(r.ancien,r.base);
+});
+
 test('Croissance — une partie créée par le passé généré reste valide après des soirées',()=>{
   const win=newGameWindow({runMain:true});
   try{
