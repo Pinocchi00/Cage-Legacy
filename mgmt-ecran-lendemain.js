@@ -299,58 +299,63 @@ function mgmtLendemainApres(m,semaine){
   const touches=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
   const faits=Array.isArray(m.facts)?m.facts.filter(x=>x&&x.c===cycleSoiree):[];
   const famillesUtilisees=new Set();
+  const catalogue=typeof MGMT_APRES_CATALOGUE!=='undefined'?MGMT_APRES_CATALOGUE:[];
+  const faitPour=(famille,f)=>{
+    const t=soiree.find(x=>x.a.id===f.id||x.b.id===f.id);
+    if(famille==='interpellation')return faits.find(x=>x.k==='discours'&&x.a===f.id&&(x.interpelle||x.target));
+    if(famille==='réseaux')return faits.find(x=>x.k==='trait_gagne'&&x.a===f.id||x.k==='surnom'&&x.a===f.id||x.k==='reseaux'&&x.a===f.id);
+    if(famille==='suspension')return touches.find(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0);
+    if(famille==='revanche')return faits.find(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche');
+    if(famille==='autre organisation')return faits.find(x=>x.k==='interet-organisation'&&x.a===f.id)||((m.guerre&&Array.isArray(m.guerre.ev))?m.guerre.ev.find(x=>x&&x.c===cycleSoiree&&x.x===f.id):null);
+    if(famille==='espoir')return (Array.isArray(m.espoirs)&&m.espoirs.includes(f.id))||(Array.isArray(m.suivis)&&m.suivis.includes(f.id));
+    if(famille==='titre')return t&&(t.title||t.titre||t.championship||t.ceinture);
+    if(famille==='salle')return m.lastEvent.finance&&Number(m.lastEvent.finance.spectateurs)>0;
+    if(famille==='prime')return faits.find(x=>x.k==='prime'&&x.a===f.id);
+    if(famille==='retraite')return faits.find(x=>x.a===f.id&&(x.k==='retired'||x.k==='retraite_annoncee'));
+    return null;
+  };
   for(let i=0;i<Math.min(n,combattants.length);i++){
     const f=combattants[(decal+i)%combattants.length], nom=f.name||f.last||'Combattant';
-    let item=null, depart=Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length);
-    for(let pas=0;pas<MGMT_LD_APRES_FAMILLES.length;pas++){
-      const candidat=MGMT_LD_APRES_FAMILLES[(depart+pas+i)%MGMT_LD_APRES_FAMILLES.length];
+    let item=null, fait=null, depart=Math.floor(stream()*catalogue.length);
+    for(let pas=0;pas<catalogue.length;pas++){
+      const candidat=catalogue[(depart+pas+i)%catalogue.length];
       if(famillesUtilisees.has(candidat.famille)) continue;
       /* Une réaction d'après n'est publiée que si la soirée en porte le fait.
          Les familles sans événement actuellement enregistré restent au
          catalogue, mais ne fabriquent pas de nouvelles « nouvelles ». */
-      if(candidat.famille==='interpellation'&&!faits.some(x=>x.k==='discours'&&x.a===f.id&&typeof x.target==='string')) continue;
-      if(candidat.famille==='revanche'&&!faits.some(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche')) continue;
-      if(candidat.famille==='suspension'&&!touches.some(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
-      if(candidat.famille==='réseaux'&&!faits.some(x=>x.k==='reseaux'&&x.a===f.id)) continue;
-      if(candidat.famille==='autre organisation'&&!faits.some(x=>x.k==='interet-organisation'&&x.a===f.id)) continue;
-      if(candidat.famille==='rivalité'&&!faits.some(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id))) continue;
-      item=candidat;break;
+      const preuve=faitPour(candidat.famille,f);
+      if(!preuve) continue;
+      fait=preuve;item=candidat;break;
     }
     if(!item) continue;
     famillesUtilisees.add(item.famille);
     /* La semaine fait partie du fait temporel : elle distingue une reprise
        ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */
-    let texte=item.texte.replaceAll('{nom}',nom);
+    const variantes=item.textes||[];
+    if(!variantes.length) continue;
+    const variant=variantes[Math.floor(stream()*variantes.length)];
+    let texte=variant.texte.replaceAll('{nom}',nom);
     if(item.famille==='interpellation'){
-      const appel=faits.find(x=>x.k==='discours'&&x.a===f.id&&typeof x.target==='string');
-      if(!appel) continue;
-      const cible=mgmtFighterById(m,appel.target);
-      texte=`Après son interpellation, ${nom} attend une réponse de ${cible?cible.name:appel.target}.`;
+      const appel=fait, cible=mgmtFighterById(m,appel.interpelle||appel.target);
+      if(cible) texte=texte.replace('{nom}',nom)+' La cible est '+cible.name+'.';
     } else if(item.famille==='revanche'){
-      const demande=faits.find(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche');
-      if(!demande) continue;
+      const demande=fait;
       const cible=mgmtFighterById(m,demande.target);
       texte=`Après sa demande, ${nom} veut une revanche${cible?' contre '+cible.name:''}.`;
      } else if(item.famille==='rivalité'){
-      const rivalite=faits.find(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id));
+      const rivalite=fait;
       if(!rivalite) continue;
       const rivalId=rivalite.a===f.id?rivalite.b:rivalite.a;
       const rival=mgmtFighterById(m,rivalId);
        if(!rival) continue;
        texte=`La rivalité entre ${nom} et ${rival.name} se poursuit après leur combat.`;
      } else if(item.famille==='suspension'){
-       const fait=touches.find(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0);
-       if(!fait) continue;
-       texte=`La suspension médicale de ${nom} court encore pour ${fait.days} jours.`;
+        texte=`La suspension médicale de ${nom} court encore pour ${fait.days} jours.`;
      } else if(item.famille==='réseaux'){
-       const fait=faits.find(x=>x.k==='reseaux'&&x.a===f.id);
-       if(!fait) continue;
-       texte=`Sur les réseaux, ${nom} est au centre des réactions après son combat.`;
+        texte=texte.replace('{nom}',nom);
      } else if(item.famille==='autre organisation'){
-       const fait=faits.find(x=>x.k==='interet-organisation'&&x.a===f.id);
-       if(!fait) continue;
-       const organisation=typeof fait.org==='string'?fait.org:(typeof fait.organisation==='string'?fait.organisation:'');
-       texte=organisation?`${organisation} suit désormais ${nom}.`:`Une autre organisation suit désormais ${nom}.`;
+        const organisation=typeof fait.org==='string'?fait.org:(typeof fait.organisation==='string'?fait.organisation:'');
+        if(organisation) texte=organisation+' : '+texte;
      }
     result.push({famille:item.famille,texte:`${texte} (semaine ${semaine})`,relu:false});
   }
