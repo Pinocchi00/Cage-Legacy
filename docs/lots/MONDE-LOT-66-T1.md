@@ -306,3 +306,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7. Captures comparatives exécutées sur les deux vues : `lendemain` indique 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 % ; `lendemainSuite` indique 0 chevauchement, 0 texte sous 22 px, gros blocs 17 %, mais persiste les débordements « Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ ».
 - `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun test ajouté, aucune migration ou mécanique changée. Modifications locales préexistantes aux agents OpenCode, `opencode.json` et `sw.js` non incluses.
 - Écart : malgré la reprise de géométrie conforme à la maquette, l'outil garde quatre débordements sur la suite ; la case visuelle 4 reste partielle. Captures générées sous `C:/Users/antho/AppData/Local/Temp/shots/`, sans inspection image manuelle revendiquée.
+
+### Reprise 45 — cellules de mouvements bornées — 24/10/2026
+
+- Ajouté dans `ui-cadre.css` une règle pour borner les cellules de mouvement de `lendemainSuite` (sans réduire le plancher typographique de 22 px ni supprimer de contenu) ; version de cache CSS montée dans `index.html`.
+- Après capture des deux étapes : `lendemain` conserve 0 chevauchement, 0 texte sous 22 px, aucun débordement (gros blocs 18,4 %). `lendemainSuite` conserve 0 chevauchement et 0 texte sous 22 px (gros blocs 17 %), mais les quatre alertes de débordement — « Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ » — n'ont pas changé. La règle tentée est donc insuffisante ; le critère visuel de la case 4 reste incomplet.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node tools/verif-versions.js origin/main` et ESLint passent. Aucune migration ni changement de mécanique ; aucun nouveau test.
+- Fichiers de cette reprise : `ui-cadre.css` (cellules bornées), `index.html` (cache), cette fiche. Comparatifs régénérés dans le dossier temporaire défini par le guide ; écart restant honnêtement déclaré, sans inspection manuelle des PNG.

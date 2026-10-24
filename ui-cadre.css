@@ -2080,6 +2080,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:12px}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 .ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{justify-self:end;text-align:right}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_MOUVEMENT_CONTENUES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{box-sizing:border-box;grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);gap:8px;overflow:hidden}
+.ld66-suite .ld3-move>div:first-child{min-width:0;max-width:100%;overflow:hidden}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{box-sizing:border-box;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move strong{font-size:22px;line-height:1.1}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
