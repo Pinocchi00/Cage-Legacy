@@ -51,7 +51,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
   try{
     w.eval(`setSeed(6902);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);G.mgmt=m;`);
     w.eval(`(()=>{const orgId=Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),org=G.mgmt.orgs[orgId],paires=mgmtChocPaires(G.mgmt,orgId),a=paires[0]&&mgmtFighterById(G.mgmt,paires[0].a)||G.mgmt.roster[0],b=paires[0]&&org.roster.find(f=>f.id===paires[0].b)||org.roster[0];G.mgmt.choc={orgId,div:paires[0]&&paires[0].div||'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:a.id,b:b.id,...(paires.length?{paires}:{})}})()`);
-     assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
+       assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
+       assert.ok(w.eval(`SCREENS.mgmt_choc().length>0`),'la scène de capture choc valide doit produire du HTML avant toute navigation');
       const orgId=w.eval(`G.mgmt.choc.orgId`);
      const propositions=w.eval(`G.mgmt.choc.paires?G.mgmt.choc.paires.length:0`);
       assert.equal(propositions,3,'les trois divisions communes de champions produisent chacune une affiche');

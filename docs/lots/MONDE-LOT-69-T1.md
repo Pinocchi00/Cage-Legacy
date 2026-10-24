@@ -704,3 +704,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de changement métier ni de sauvegarde, aucun bump requis. `sw.js` a été remis à `origin/main` conformément à la règle de livraison ; les changements sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
 - L'accès aux instructions et aux scènes de capture externes n'est pas autorisé dans cette reprise ; aucune capture nouvelle ni ouverture d'image n'est revendiquée. Les mesures antérieures restent défavorables au choc (grosBlocs au-dessus de 20 %) et au bilan (chevauchement noté) ; l'arrivée dédiée n'a pas de capture établie.
 - Écart à la fiche : la protection contre l'écran blanc est renforcée, mais les objectifs visuels/captures ne sont pas tous satisfaits. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 89 — rendu de scène choc valide
+- `tests/mgmtLot69T1.test.js` ajoute une assertion directe que `SCREENS.mgmt_choc()` rend du HTML avec la proposition valide créée par `mgmtChocProposer`, avant navigation.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
+- Aucun changement JS/CSS ni sauvegarde. Cette assertion est une vérification de rendu en test, pas une nouvelle capture. Les écarts de densité choc, chevauchement bilan, comparaison visuelle et capture dédiée arrivée restent ouverts ; aucun `TOUT_EST_FINI` revendiqué.
