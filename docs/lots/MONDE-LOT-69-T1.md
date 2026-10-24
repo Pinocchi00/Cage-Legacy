@@ -360,3 +360,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
 - Pas de migration ni de version cache modifiée. Aucun nouveau résultat visuel/capture : les mesures antérieures demeurent le dernier état documenté. Le test couvre encore le parcours partiel existant, non la fin de contrat complète avec rechargement identique valide.
 - Écarts non résolus : le modèle choc reste mono-affiche, les captures et mesures comparatives post-correction ne sont pas établies, et le parcours complet demandé n'est pas démontré. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 59
+- `tests/mgmtLot69T1.test.js` vérifie maintenant que chaque classe de tranche rendue par le choc et le discours possède un sélecteur de style correspondant dans `ui-cadre.css`.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Aucun changement JS/CSS, sauvegarde, version de cache ou scène de capture. Les écarts déjà notés restent ouverts : choc trois affiches/2-sur-3, parcours contractuel intégral avec rechargement valide, comparaison des quatre écrans et mesures/captures conformes. Cette assertion de couverture CSS ne prétend pas établir de fidélité visuelle.
+- Fichiers de cette reprise : test ciblé et fiche de tranche. Pas de migration. Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent exclues.
