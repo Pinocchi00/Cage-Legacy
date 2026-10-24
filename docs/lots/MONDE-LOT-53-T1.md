@@ -466,6 +466,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 21/21 réussis avec cette assertion limitée.
 - Limites encore présentes : la lecture temps forts accélère entre fenêtres sans durée de lecture réelle chronométrée; les écarts aux compositions exactes de maquette et au critère 900–1200 s demeurent. Aucun changement de production dans cette reprise.
 
+### Reprise 66 — compteur de combats sur la carte d’ouverture
+
+- Corrigé le compteur à côté du nom de l’organisation : à l'ouverture, aucun combat n'a encore été joué; il affiche maintenant `0 / 9 · COMBATS`. Le test du rendu réel verrouille explicitement cette valeur.
+- Fichiers : `mgmt-soiree-cadre.js` (compteur fondé sur l'index de combat), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (assertion d'ouverture), cette fiche.
+- Vérifications : test tranche ciblé 21/21; `node tools/verif-versions.js origin/main`, ESLint complet et `git diff --check` réussis. `sw.js` restauré depuis `origin/main`.
+- Non terminé : calcul mesuré 868,383 s plutôt que les 900–1200 s prescrites; lecture temps forts accélérée entre moments sans chronométrage réel 30–60 s ni fondu de l'image d'arène; compositions complètes des maquettes encore partielles. Le test lent n'a pas été relancé ici.
+- Choix de lecture : une seule arène, accélération hors moments, sans second moteur. Aucun changement de sauvegarde, moteur ou texte joueur.
+
 ### Reprise 65 — vérification de l’état transmis
 
 - Vérifié au départ : branche `p7-ecran-soiree`, HEAD `756b686`. Les modifications `.opencode/agents/*` et `opencode.json` sont étrangères à la tranche; elles restent intactes et hors staging.

@@ -177,7 +177,7 @@ function mgmtSoOuvertureHtml(m,prog){
     +`<div class="mf-so-ls">${main.map((p,k)=>ligne(p,main.length-k,false,hm)).join('')}</div>`
     +`<div class="mf-so-pied">${mfBouton('Commencer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoCommencer()'})}</div></div>`;
    const corps=`<div class="mf-so-ban2 so3-entete"><div><div class="mf-so-s2">CE SOIR${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
-     +`<div class="mf-so-n"><b>${esc(num)}</b><span>${esc(num)} / ${esc(prog.length)} · COMBATS</span></div></div>`
+     +`<div class="mf-so-n"><b>${esc(num)}</b><span>${esc(Math.min(MGMT_SOIREE.index,prog.length))} / ${esc(prog.length)} · COMBATS</span></div></div>`
     +`<div class="mf-so-cr">${gauche}${droite}</div>`;
   return `<section class="so3-ouverture" aria-label="La carte de ce soir">${mfPanneau(corps,'choisi','mf-so-ouv')}</section>`;
 }
