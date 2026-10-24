@@ -309,14 +309,27 @@ function mgmtLendemainApres(m,semaine){
       if(!demande) continue;
       const cible=mgmtFighterById(m,demande.target);
       texte=`Après sa demande, ${nom} veut une revanche${cible?' contre '+cible.name:''}.`;
-    } else if(item.famille==='rivalité'){
+     } else if(item.famille==='rivalité'){
       const rivalite=faits.find(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id));
       if(!rivalite) continue;
       const rivalId=rivalite.a===f.id?rivalite.b:rivalite.a;
       const rival=mgmtFighterById(m,rivalId);
-      if(!rival) continue;
-      texte=`La rivalité entre ${nom} et ${rival.name} se poursuit après leur combat.`;
-    }
+       if(!rival) continue;
+       texte=`La rivalité entre ${nom} et ${rival.name} se poursuit après leur combat.`;
+     } else if(item.famille==='suspension'){
+       const fait=touches.find(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0);
+       if(!fait) continue;
+       texte=`La suspension médicale de ${nom} court encore pour ${fait.days} jours.`;
+     } else if(item.famille==='réseaux'){
+       const fait=faits.find(x=>x.k==='reseaux'&&x.a===f.id);
+       if(!fait) continue;
+       texte=`Sur les réseaux, ${nom} est au centre des réactions après son combat.`;
+     } else if(item.famille==='autre organisation'){
+       const fait=faits.find(x=>x.k==='interet-organisation'&&x.a===f.id);
+       if(!fait) continue;
+       const organisation=typeof fait.org==='string'?fait.org:(typeof fait.organisation==='string'?fait.organisation:'');
+       texte=organisation?`${organisation} suit désormais ${nom}.`:`Une autre organisation suit désormais ${nom}.`;
+     }
     result.push({famille:item.famille,texte:`${texte} (semaine ${semaine})`,relu:false});
   }
   return result;

@@ -231,3 +231,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `mgmt-ecran-lendemain.js` : lorsqu'un fait `rivalite` de la soirée existe, le message T3 nomme désormais les deux combattants du fait, et aucun message de rivalité n'est rendu si le rival ne peut pas être résolu dans le roster. Le cache JS a été monté.
 - `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — une rivalité enregistrée nomme bien les deux combattants ». Le test ciblé passe 26/26 ; `test` et `test:watch` référencent déjà le fichier.
 - Cette reprise améliore le lien aux faits, sans prétendre régler les limites restantes : fidélité dimensionnelle exhaustive des deux maquettes, toutes les familles sociales/interorganisationnelles alimentées par leurs systèmes réels, et mémoire anti-répétition persistante au-delà du suffixe temporel. Aucune nouvelle clé de sauvegarde. Les autres changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` restent étrangers à la tranche et exclus.
+
+### Reprise — contextualisation des réactions T3 (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : les réactions de suspension, réseaux et autre organisation reprennent désormais le fait de la soirée sélectionné ; la suspension donne le nombre de jours connu, et une organisation est nommée seulement si le fait fournit son nom. Aucun fait absent n'est simulé.
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé des fichiers de production passe. Le cache de `mgmt-ecran-lendemain.js` est monté.
+- Aucun nouvel état de sauvegarde. Les écrans et la projection T3 restent soumis aux limites déjà consignées : composition non exhaustive vis-à-vis des planches, et absence de systèmes de données pour toutes les réactions et de mémoire éditoriale persistante. Ce complément ne déclare pas la tranche intégralement achevée.
