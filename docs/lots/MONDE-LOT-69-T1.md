@@ -251,6 +251,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Restent non réalisés : trois affiches dans le modèle du choc, comparaisons/captures conformes des écrans, scène dédiée arrivée, et parcours complet strict fin de contrat/rechargement. Cette correction ne satisfait pas ces cases et ne prétend pas achever la tranche.
 - Changements utilisateur préexistants sous `.opencode/agents/` et `opencode.json` exclus du commit.
 
+### Reprise 44
+- État contrôlé : branche `fid-choc`, HEAD `cfb74364`; les seules modifications initiales étaient les configurations utilisateur sous `.opencode/agents/` et `opencode.json`, laissées intactes.
+- Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe (4/4), notamment le passage du choc par `mgmtRunEvent` et la conservation du résultat, l'arrivée après changement, et l'inclusion dans les commandes agrégées.
+- J'ai tenté d'ajouter une assertion selon laquelle trois noms aléatoires de l'effectif de la nouvelle organisation apparaissent sur l'écran d'arrivée ; elle échoue (Wesley Boyd absent). Je l'ai retirée plutôt que de changer la maquette sans vérification. Cela confirme que l'effectif complet à l'écran n'est pas démontré.
+- Le guide de capture externe n'a pas pu être lu avec `read` (accès refusé) ; je n'ai produit aucune capture. Aucune modification de code conservée ni migration de sauvegarde.
+- Les autres critères non atteints restent : trois affiches et score 2-sur-3 du choc, parcours complet fin de contrat/bilan avec rechargement strict, mesure visuelle post-correction et scènes d'arrivée/offre. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 43
 - `tests/mgmtLot69T1.test.js` vérifie maintenant qu'après `mgmtRunEvent`, le gagnant du combat choc apparaît aussi dans la carte résolue et que son résultat est conservé dans `m.hist`.
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
