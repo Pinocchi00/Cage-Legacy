@@ -493,3 +493,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot55T1.test.js` (29/29 verts); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` et `git diff --check` (verts).
 - Fichiers modifiés : `tests/mgmtLot55T1.test.js` (test de garde typographique) et cette fiche (compte rendu). Aucun changement de production, de sauvegarde ou migration.
 - Les limites antérieures demeurent : pas de preuve de trois saisons intégralement jouées, pas de chargement d'une fixture complète d'ancienne sauvegarde, pas de certification visuelle intégrale des maquettes ni de déclenchement à chaque anniversaire; le test lent `mgmtReleveReduit` n'a pas été exécuté. Ces critères ne sont pas déclarés satisfaits.
+
+### Reprise 64
+
+- Test ajouté « Lot 55 T1 — calcul et lecture du carnet ne tirent aucun hasard » : vérifie lexicalement que le fichier de cérémonie ne fait appel ni à `Math.random()` ni à `rnd()`.
+- Vérification ciblée : `node --test tests/mgmtLot55T1.test.js` (30/30 verts). `node tools/verif-versions.js origin/main` (aucun écart; 17 fichiers examinés).
+- Fichiers modifiés : `tests/mgmtLot55T1.test.js` (garde-fou déterminisme), cette fiche (compte rendu). Aucun changement de production/sauvegarde ni migration.
+- Limites précédemment consignées inchangées : test lent `mgmtReleveReduit` non validé, pas de preuve de trois saisons complètes ou de fixture complète d'ancienne sauvegarde, fidélité intégrale aux planches non certifiée, déclencheur au terme du contrat plutôt qu'à chaque anniversaire. La tranche n'est pas déclarée entièrement achevée.

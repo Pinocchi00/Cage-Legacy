@@ -6,6 +6,9 @@ const vm=require('node:vm');
 const {newGameWindow}=require('./helpers/loadGame');
 const source=fs.readFileSync(require('node:path').join(__dirname,'..','mgmt-ceremonie.js'),'utf8');
 function charger(){const c={mgmtCalAujourdhui:()=>365,mgmtHistoirePoidsCombat:()=>0};vm.createContext(c);vm.runInContext(source,c);return c;}
+test('Lot 55 T1 — calcul et lecture du carnet ne tirent aucun hasard',()=>{
+  assert.doesNotMatch(source,/\b(?:Math\.random|rnd)\s*\(/);
+});
 test('Lot 55 T1 — le calcul des prix est pur et déterministe',()=>{
   const m={hist:[{c:1,a:{id:'a',name:'A'},b:{id:'b',name:'B'},winner:'A',family:'ko',round:1,slot:'main'},{c:2,a:{id:'a',name:'A'},b:{id:'c',name:'C'},winner:'A',family:'sub',round:2},{c:3,a:{id:'a',name:'A'},b:{id:'d',name:'D'},winner:'A',family:'ko',round:1}],roster:[{id:'a'}]};
   const c=charger(), before=JSON.stringify(m);assert.deepEqual(c.mgmtCeremonieCalculer(m),c.mgmtCeremonieCalculer(m));assert.equal(JSON.stringify(m),before);
