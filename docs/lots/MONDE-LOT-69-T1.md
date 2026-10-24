@@ -276,3 +276,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Aucun changement métier ni de sauvegarde.
 - La fiche exige encore des critères qui ne sont pas couverts par l'état présent : choc à trois affrontements/2-sur-3, parcours contractuel complet avec rechargement valide, comparaisons visuelles post-correction et scènes/captures dédiées. L'accès aux instructions externes et la production des captures ne sont pas établis dans cette reprise ; aucune preuve visuelle n'est revendiquée.
 - Fichier modifié de cette reprise : cette fiche (compte rendu). Le changement d'indentation du test est uniquement du whitespace, confirmé par `git diff --ignore-all-space`, et n'est pas inclus dans le commit. Aucun écart de cache ou migration.
+
+### Reprise 47
+- Vérifié `fid-choc` et l'historique jusqu'à `9c5704e5`. Le changement en attente de `tests/mgmtLot69T1.test.js` est uniquement de l'indentation (`git diff --ignore-all-space` vide) : conformément à la règle de livraison, il n'est pas inclus.
+- Le guide de capture a été lu depuis le chemin externe. Capture choc relancée : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=25.1%`, donc hors de l'objectif ≤20 %. Pas de capture nouvelle de discours, bilan ou arrivée dans cette reprise.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). `node tools/verif-versions.js origin/main` passe (16 fichiers) et `node_modules/.bin/eslint .` passe.
+- Aucun changement de code fonctionnel, sauvegarde ou version de cache. Le modèle du choc expose toujours une seule affiche (`a`/`b`) et ne permet pas de construire honnêtement la carte 3 contre 3 de la planche ; le parcours choc/résultat couvert n'est donc pas équivalent au 2-sur-3. Le parcours contractuel strict avec rechargement/reprise identique et capture dédiée d'arrivée restent non démontrés.
+- Écart à la fiche : les seuils visuels, la structure multi-affiches et le parcours complet ne sont pas atteints. Aucun `TOUT_EST_FIN` revendiqué.
