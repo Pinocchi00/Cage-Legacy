@@ -28,8 +28,10 @@ function scr_mgmt_guerre(){
   const raisons=rival?mgmtRivaleRaisons(m,rival).slice(0,3).map(r=>`<li>${esc(r.raison)} · soirée ${esc(r.soiree)}</li>`).join(''):'<li>Aucune rivale ne s’est encore imposée.</li>';
    const orgRivale=rival?mgmtOrgParId(rival):null;
    const maker=rival&&MGMT_MATCHMAKERS&&MGMT_MATCHMAKERS[rival];
-   const devant=split&&split.duelSplit.devant?mgmtOrgParId(split.duelSplit.devant).nom:'Personne';
-   const derriere=split&&split.duelSplit.derriere?mgmtOrgParId(split.duelSplit.derriere).nom:'Personne';
+    const orgDevant=split&&split.duelSplit.devant?mgmtOrgParId(split.duelSplit.devant):null;
+    const orgDerriere=split&&split.duelSplit.derriere?mgmtOrgParId(split.duelSplit.derriere):null;
+    const devant=orgDevant&&orgDevant.nom||'Personne';
+    const derriere=orgDerriere&&orgDerriere.nom||'Personne';
    /* Proposition de texte joueur, encore à relire ; le fait affiché est le mouvement de rang calculé. */
    const mouvement=split&&split.mouvement||0;
     const phraseMouvement={texte:mouvement>0?`Depuis la dernière soirée, Split a gagné ${mouvement} place${mouvement===1?'':'s'} et se rapproche du haut du classement.`:mouvement<0?`Depuis la dernière soirée, Split a perdu ${Math.abs(mouvement)} place${mouvement===-1?'':'s'} ; les organisations devant elle ont pris l’avantage.`:'Depuis la dernière soirée, Split garde sa place : aucun rang ne la sépare de sa position précédente.',relu:false};
