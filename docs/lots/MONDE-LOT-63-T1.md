@@ -132,4 +132,11 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 - Vérifications réalisées : `node --test tests/mgmtLot63T1.test.js` (2/2), `node tools/verif-versions.js origin/main` (sans écart), ESLint ciblé et `git diff --check`.
 - Aucune nouvelle clé de sauvegarde ni migration. Aucune question pour Anthony ; les critères manquants sont du travail restant, et la tranche n'est pas déclarée terminée.
 
-Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+### Reprise 28 — validation et livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée ; historique consulté. Le code fonctionnel et les tests de la tranche sont déjà dans les commits précédents, aucun fichier non commité de production/test de la tranche.
+- Vérification fraîche : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit direct confirme que `test` et `test:watch` incluent `mgmtLot63T1` (`true,true`).
+- Aucun changement de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise ; la limite de plafond à 1,9 Mo reste donc non vérifiée ici. Les tests de famille exercent chaque fait dans des scénarios ciblés après création via le chemin réel, sans prouver que chaque système opérationnel du jeu génère naturellement tous ces faits.
+- Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et le paramètre de cache local de `index.html` sont hors tranche et exclus. Seule cette fiche est modifiée dans cette reprise.
