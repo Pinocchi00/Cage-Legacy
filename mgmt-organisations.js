@@ -134,8 +134,10 @@ function mgmtGuerreClassement(m){
   return classement.map((ligne,index)=>{
     const org=mgmtOrgParId(ligne.id), ident=mgmtOrgIdentite(ligne.id);
     const ancien=precedent.indexOf(ligne.id);
+    const mouvement=ancien<0?0:ancien-index;
+    const mouvementTexte={texte:mouvement>0?`Depuis la dernière soirée, ${org.nom} a gagné ${mouvement} place${mouvement===1?'':'s'} au classement.`:mouvement<0?`Depuis la dernière soirée, ${org.nom} a perdu ${Math.abs(mouvement)} place${mouvement===-1?'':'s'} au classement.`:`Depuis la dernière soirée, ${org.nom} conserve sa place au classement.`,relu:false};
     return Object.assign({},ligne,{nom:org.nom,ville:ident.ville,annee:ident.annee,
-      mouvement:ancien<0?0:ancien-index});
+      mouvement,mouvementTexte});
   }).map((ligne,index)=>Object.assign(ligne,{
     devant:index>0?classement[index-1].id:null,
     derriere:index+1<classement.length?classement[index+1].id:null,
