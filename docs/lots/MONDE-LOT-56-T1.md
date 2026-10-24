@@ -163,3 +163,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications : `node --test tests/mgmtLot56T1.test.js` passe (11/11), `node --test tests/mgmtPasse.test.js` passe (13/13, empreintes), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Le test de plafond `mgmtReleveReduit.test.js` n'a pas été rejoué.
 - Critères restant ouverts : effet et test réel des agents libres; événement de soirée réel testant l'effet diffuseur; franchissement provoqué par le chemin généré et les soirées; contrôle explicite empreinte ancienne dans le test de tranche; intégralité de la maquette à confirmer/corriger; test lent de plafond. Le test de progression présent vérifie la validation après une soirée, non un changement de palier causé par celle-ci.
 - Fichiers de cette reprise : `tests/mgmtLot56T1.test.js` (test de borne déclaré), cette fiche (compte rendu). Pas de migration. Aucune question de spécification. État honnête : tranche encore inachevée.
+
+### Reprise 5 — contrôles ciblés (24/10/2026)
+
+- Branche confirmée `p11-croissance`. `git log --oneline -12` et `git status` consultés : la tranche n'avait aucun changement non commité ; les modifications `.opencode/agents/*` et `opencode.json` sont externes et laissées intactes.
+- Vérifications relancées : `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe (24/24, empreintes comprises) ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe ; présence dans `test` et `test:watch` vérifiée (`true true`).
+- Ces résultats ne ferment pas les écarts recensés ci-dessus : le test dit parcours réel valide après une soirée, sans démontrer de palier nouvellement franchi ; le bonus diffuseur est couvert seulement par borne arithmétique ; aucun attrait agents libres effectif n'est raccordé ; l'empreinte spécifique et la vérification lente du plafond n'ont pas été rejouées ; l'écran n'est pas vérifié comme reproduction exacte de toute la planche.
+- Pas de changement de code ou de sauvegarde dans cette reprise, donc pas de commit de tranche créé. Aucune migration. État : **inachevé** ; aucun `TOUT_EST_FINI`.
