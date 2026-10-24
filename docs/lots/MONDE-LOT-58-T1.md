@@ -24,6 +24,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise 5 — vérification de l'état conservé
+- Fichiers métier/test : aucun nouveau fichier modifié dans cette reprise ; le travail déjà commité est resté intact.
+- Tests ciblés : `node --test tests/mgmtLot58T1.test.js` passe (15/15). Le nom du test est bien explicitement présent dans `test` et `test:watch`.
+- Contrôles : `node_modules/.bin/eslint .` passe. `node tools/verif-versions.js origin/main` signale uniquement l'écart préexistant `ui-cadre.css` (`?v=lot37t1traits4xxxxx` inchangé contre `origin/main`).
+- État restant : la ligne de base de tests est verte, mais la case 3 est toujours incomplète selon les critères de la fiche : le combat champion invité n'est pas raccordé au parcours normal de `mgmtRunEvent`, le bonus billetterie et la progression de classement ne sont pas appliqués, et il manque l'écran `UniChoc` et son intégration au fil de presse. La case 4 ne démontre pas un parcours génératif avec des offres effectivement reçues. La preuve de plafond `mgmtReleveReduit.test.js` et de chargement d'une sauvegarde ancienne complète reste à exécuter/compléter. Ces éléments ne sont pas masqués par le résultat vert des tests ciblés.
+- Hors tranche : modifications locales de `.opencode/agents/*`, `opencode.json` et `sw.js` conservées sans ajout.
+
 ### Reprise — résolution de l’adversaire invité (incomplète)
 - Modifiés : `mgmt-bureau.js` et `index.html`. Le résolveur `mgmtFighterById` sait maintenant retrouver le champion adverse au sein de `m.orgs[choc.orgId].roster`, uniquement pendant un choc programmé, sans copier ce combattant dans le roster Split. La version cache du JS a été montée.
 - Test ajouté : « Monde lot 58 T1 — le résolveur retrouve le champion invité sans l’ajouter au roster de Split ».
