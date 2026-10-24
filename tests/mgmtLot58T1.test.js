@@ -85,6 +85,13 @@ test('Monde lot 58 T1 — accepter un choc le pose dans l’agenda entre six et 
   if(r.partenaire){assert.equal(r.ok,true);assert.equal(r.etat,'programme');assert.ok(r.delta>=42&&r.delta<=70);assert.equal(r.agenda,true);assert.equal(r.valide,true);}
 });
 
+test('Monde lot 58 T1 — une proposition de choc reste limitée à une par année',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const champion=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!champion)return {champion:false};const partenaire=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===champion.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!partenaire)return {champion:true,partenaire:false};m.choc={orgId:partenaire.id,div:champion.div,jour:0,annee:mgmtChocAnnee(m),etat:'refuse'};return {champion:true,partenaire:true,proposed:mgmtChocProposer(m,partenaire.id)}})())`));
+  assert.equal(r.champion,true);
+  if(r.partenaire)assert.equal(r.proposed,false);
+});
+
 test('Monde lot 58 T1 — un choc terminé conserve son résultat facultatif et réparé',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});const champion=(m.roster||[]).find(f=>mgmtChampionIds(m).has(f.id));if(!champion)return {champion:false};const org=MGMT_ORGANISATIONS.find(o=>o.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[o.id]&&(m.orgs[o.id].roster||[]).some(f=>f.div===champion.div&&mgmtChampionIds({roster:m.orgs[o.id].roster||[]}).has(f.id)));if(!org)return {champion:true,org:false};m.choc={orgId:org.id,div:champion.div,jour:40,annee:mgmtChocAnnee(m),etat:'termine',resultat:'victoire',a:champion.id,b:'partenaire'};const valid=validateMgmt(m);const bad=JSON.parse(JSON.stringify(m));bad.choc.resultat='nul';const repaired=mgmtRepair(bad);return {champion:true,org:true,valid,repaired:!Object.hasOwn(repaired,'choc')}})())`));
