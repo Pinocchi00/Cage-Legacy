@@ -60,6 +60,14 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 5 — contrôle inter-lots et état du merge (24/10/2026)
+
+- Confirmés branche `p8-apres`, état et historique ; les commits fonctionnels de cette tranche sont déjà présents. Aucun fichier fonctionnel/test non commité n'est à reprendre.
+- Le contrôle ciblé demandé, `node --test tests/mgmtLot54T1.test.js tests/mgmtLot63T1.test.js tests/mgmtActualitesEcran.test.js tests/mgmtLot55T1.test.js tests/mgmtLot57T1.test.js tests/mgmtLot48T1.test.js tests/mgmtLot56T1.test.js`, passe 130/130. Les deux régressions lot 54 (rivalité enregistrée et non-répétition sur cinquante semaines) passent.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe. Aucune migration ni modification de sauvegarde.
+- La fusion prescrite `git merge origin/main` n'a pas été effectuée : l'environnement a refusé la commande, explicitement interdite par sa politique. Aucun conflit ne pouvait donc être résolu ici ; le superviseur devra fusionner puis relancer les tests inter-lots.
+- Seule cette fiche est modifiée par cette reprise. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à la tranche et restent exclus. La couverture et les limites fonctionnelles décrites aux comptes rendus précédents restent inchangées.
+
 ### Reprise finale — tests inter-lots (24/10/2026)
 
 - Branche `p8-apres` confirmée ; aucun fichier de production ou test de la tranche n'est modifié localement. Les changements `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers et laissés intacts.
