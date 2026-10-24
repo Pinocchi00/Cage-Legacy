@@ -36,7 +36,7 @@ test('Monde lot 57 T1 — le classement est déterministe',()=>{
   }finally{a.close();b.close();}
 });
 
-test('Monde lot 57 T1 — le classement reste relié au classement mondial sur trois saisons simulées',()=>{
+test('Monde lot 57 T1 — trois lectures saisonnières restent reliées au classement mondial',()=>{
   const w=newGameWindow({runMain:true});
   try{
     const r=JSON.parse(w.eval(`(()=>{setSeed(570103);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});const saisons=[];for(let an=0;an<3;an++){saisons.push(mgmtGuerreClassement(m).map(x=>[x.id,x.rang]));if(an<2){m.cycle++;if(typeof mgmtOrgsAgir==='function')mgmtOrgsAgir(m);}}return JSON.stringify({saisons});})()`));
