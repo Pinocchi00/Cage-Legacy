@@ -28,6 +28,18 @@ test('Monde lot 57 T1 — le classement de guerre relie les huit rangs existants
   }finally{w.close();}
 });
 
+test('Monde lot 57 T1 — le classement de guerre conserve le départage des quatre mesures source',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const m=G.mgmt,source=mgmtOrgClassement(m),guerre=mgmtGuerreClassement(m);return JSON.stringify({source:source.map(x=>({id:x.id,total:x.total,rangs:x.rangs,niveaux:x.niveaux})),guerre:guerre.map(x=>({id:x.id,total:x.total,rangs:x.rangs,niveaux:x.niveaux}))});})()`));
+    assert.deepEqual(result.guerre,result.source);
+    for(const ligne of result.guerre){
+      assert.equal(ligne.total,Object.values(ligne.rangs).reduce((s,r)=>s+r,0));
+      for(const mesure of ['notoriete','popularite','puissance','stade']) assert.ok(Object.hasOwn(ligne.niveaux,mesure));
+    }
+  }finally{w.close();}
+});
+
 test('Monde lot 57 T1 — le classement est déterministe',()=>{
   const a=partie(),b=partie();
   try{
