@@ -497,7 +497,6 @@ function validateMgmt(raw){
   if(raw.guerre!==undefined){
     if(!raw.guerre||typeof raw.guerre!=='object'||Array.isArray(raw.guerre)) return false;
     if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu','classementPrecedent','rangFinal','anneeTraitee'].includes(k))) return false;
-    if(Object.keys(raw.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))) return false;
     if(raw.guerre.rival!==null&&(typeof raw.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===raw.guerre.rival))) return false;
     if(!Number.isSafeInteger(raw.guerre.depuis)||raw.guerre.depuis<0) return false;
     if(!Array.isArray(raw.guerre.ev)) return false;
@@ -861,7 +860,6 @@ function mgmtRepair(m){
        ||m.guerre.classementPrecedent!==undefined&&(!Array.isArray(m.guerre.classementPrecedent)||m.guerre.classementPrecedent.length!==MGMT_ORGANISATIONS.length||m.guerre.classementPrecedent.some(id=>typeof id!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===id))||new Set(m.guerre.classementPrecedent).size!==MGMT_ORGANISATIONS.length)
         ||m.guerre.rangFinal!==undefined&&(!Number.isSafeInteger(m.guerre.rangFinal)||m.guerre.rangFinal<1||m.guerre.rangFinal>MGMT_ORGANISATIONS.length)
        ||m.guerre.anneeTraitee!==undefined&&(!Number.isSafeInteger(m.guerre.anneeTraitee)||m.guerre.anneeTraitee<1)
-      ||Object.keys(m.guerre).some(k=>!['ev','rival','depuis','fondu'].includes(k))
       ||m.guerre.rival!==null&&(typeof m.guerre.rival!=='string'||!MGMT_ORGANISATIONS.some(o=>o.id===m.guerre.rival))
       ||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<0
       ||!Array.isArray(m.guerre.ev)
