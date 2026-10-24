@@ -1987,6 +1987,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-title{font-size:26px;padding:2px 0;gap:12px}
 .ch3-title .ch3-vs{width:30px;height:30px;font-size:22px}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TRIPLE_AFFICHE] — Monde lot 69 T1 ==== */
+.ch3-fight{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr));gap:8px}
+.ch3-fight>.ch3-paire{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);align-items:center;gap:12px;min-height:0;border-bottom:1px solid rgba(233,230,225,.2)}
+.ch3-fight>.ch3-paire:last-child{border-bottom:0}
+.ch3-paire .ch3-side{gap:6px}
+.ch3-paire .ch3-side b{font-size:32px}
+.ch3-paire .ch3-category{display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px}
+.ch3-paire .ch3-category .ch3-vs{display:flex;width:34px;height:34px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:22px}
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}

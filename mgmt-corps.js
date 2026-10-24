@@ -637,9 +637,10 @@ function mgmtRunEvent(m){
      Le champion invité prend le dernier emplacement principal de la soirée
      déjà programmée; le combat suit ensuite exactement le moteur normal. ==== */
   const choc=m.choc&&m.choc.etat==='programme'&&m.cal&&m.cal.prochaines&&m.cal.prochaines[0]&&m.cal.prochaines[0].jour===m.choc.jour?m.choc:null;
-  if(choc&&typeof choc.a==='string'&&typeof choc.b==='string'){
-    const principal=booked.filter(x=>x.slot==='main').pop();
-    if(principal){principal.a=choc.a;principal.b=choc.b;principal.title=false;principal.choc=true;}
+   if(choc&&typeof choc.a==='string'&&typeof choc.b==='string'){
+     const principales=booked.filter(x=>x.slot==='main'),paires=Array.isArray(choc.paires)&&choc.paires.length?choc.paires:[{a:choc.a,b:choc.b}];
+     const jouees=paires.slice(0,principales.length);
+     jouees.forEach((paire,i)=>{const principal=principales[principales.length-jouees.length+i];if(principal){principal.a=paire.a;principal.b=paire.b;principal.title=false;principal.choc=true;}});
   }
   /* Lot 7 : avec l'agenda, l'ordre de passage est celui d'une vraie soirée — les premiers préliminaires (early prelims), les
      préliminaires, puis les combats de la carte principale en remontant, le principal en dernier. */
@@ -714,11 +715,15 @@ function mgmtRunEvent(m){
     finance.tv+=bonus;
     finance.recette+=bonus;
   }
-  if(choc&&fights.some(f=>f.a===choc.a&&f.b===choc.b)){
-    const resultat=fights.find(f=>f.a===choc.a&&f.b===choc.b);
-    if(resultat){
-      choc.resultat=resultat.winner==='A'?'victoire':'defaite';choc.etat='termine';
-      if(choc.resultat==='victoire'){
+   if(choc&&fights.some(f=>f.choc||f.a===choc.a&&f.b===choc.b)){
+     const paires=Array.isArray(choc.paires)&&choc.paires.length?choc.paires:[{a:choc.a,b:choc.b}],resultats=paires.map(p=>({p,f:fights.find(f=>(f.a===p.a&&f.b===p.b)||(f.a===p.b&&f.b===p.a))})).filter(x=>x.f);
+     if(resultats.length){
+       const victoires=resultats.filter(({p,f})=>(f.winner==='A'&&f.a===p.a)||(f.winner==='B'&&f.b===p.a)).length;
+       /* Les affiches sont jouées local d'abord ; le résultat de la première reste le champ historique compatible. */
+       const premiere=resultats[0].f,premierePaire=resultats[0].p;
+       const premierGagne=(premiere.winner==='A'&&premiere.a===premierePaire.a)||(premiere.winner==='B'&&premiere.b===premierePaire.a);
+       choc.resultat=premierGagne?'victoire':'defaite';choc.victoires=victoires;choc.pairesJouees=resultats.length;choc.etat='termine';
+       if(victoires>resultats.length/2){
         const partenaire=m.orgs&&m.orgs[choc.orgId];
         if(partenaire){partenaire.chocPrestige=(Number.isFinite(partenaire.chocPrestige)?partenaire.chocPrestige:0)+1;}
       }

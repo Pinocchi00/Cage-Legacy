@@ -53,6 +53,14 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      assert.match(choc,/<span class="mf-k or">Entrée<\/span><span>Accepter<\/span>/);
      assert.match(choc,/ch3-vs/);
      assert.match(choc,/Fiche/);
+      w.eval(`G.mgmt.choc.paires=[{div:'PAILLE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'MOUCHE F',a:G.mgmt.choc.a,b:G.mgmt.choc.b},{div:'COQ F',a:G.mgmt.choc.a,b:G.mgmt.choc.b}]`);
+      const triple=w.eval(`scr_mgmt_choc()`);
+      assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
+      w.eval(`delete G.mgmt.choc.paires`);
+      assert.equal(w.eval(`mgmtChocValide({orgId:'unknown',div:'PAILLE F',jour:0,annee:1,etat:'recu'})`),false);
+      w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
+      assert.equal(w.eval(`G.screen`),'mgmt_accueil','un choc invalide renvoie vers l’accueil au lieu de rendre une page vide');
+      w.eval(`G.mgmt.choc={orgId:Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:G.mgmt.roster[0].id,b:G.mgmt.orgs[Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood')].roster[0].id};G.screen='mgmt_choc'`);
      assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');
      const programmation=w.eval(`(()=>{const m=G.mgmt,ok=mgmtChocRepondre(m,true);return {ok,etat:m.choc.etat,jour:m.choc.jour,agenda:m.cal.prochaines.some(s=>s.jour===m.choc.jour)}})()`);
       assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
@@ -63,8 +71,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,a=c.a,b=c.b; m.cal.prochaines[0].jour=c.jour;m.card.main=[{a,b,cycle:m.cycle,slot:'main'}];m.card.prelims=[];m.card.sizeMain=1;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m),fight=event&&event.fights.find(f=>(f.a===a&&f.b===b)||(f.a===b&&f.b===a)),trace=m.hist.find(h=>h.a&&h.b&&h.a.id===a&&h.b.id===b)||m.hist.find(h=>h.a&&h.b&&h.a.id===b&&h.b.id===a);return {event:!!event,fight:!!fight,etat:c.etat,resultat:c.resultat,eventWinner:fight&&fight.winner,traceWinner:trace&&trace.winner}})()`);
        assert.equal(chocJoue.event,true,'la soirée programmée doit passer par le résolveur normal');
        assert.equal(chocJoue.fight,true,'le champion adverse doit figurer en combat principal');
-        assert.equal(chocJoue.etat,'termine');
-        assert.ok(['victoire','defaite'].includes(chocJoue.resultat),'le résultat du choc doit être enregistré');
+         assert.equal(chocJoue.etat,'termine');
+         assert.ok(['victoire','defaite'].includes(chocJoue.resultat),'le résultat du choc doit être enregistré');
+         assert.equal(w.eval(`G.mgmt.choc.pairesJouees`),1,'une seule affiche jouée se résout comme un score sur une paire');
+         assert.ok(w.eval(`G.mgmt.choc.victoires===0||G.mgmt.choc.victoires===1`),'le score de victoires est conservé pour déterminer la majorité');
         assert.ok(['A','B','D'].includes(chocJoue.eventWinner),'le résultat du combat doit aussi figurer dans la soirée résolue');
         assert.ok(['A','B','D'].includes(chocJoue.traceWinner),'le résultat du combat doit être conservé dans l’historique des soirées');
      w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'principal',lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
