@@ -325,6 +325,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Relecture de `UniChoc` : la planche définit trois affiches séparées, tandis que le modèle métier lot 58 expose une seule paire `a`/`b`. Je n'ai pas inventé les deux autres affiches ni modifié la sémantique du booking sans données/modèle correspondants. Le test existant prouve seulement l'exécution et l'enregistrement du résultat pour cette paire.
 - Vérification ciblée `node --test tests/mgmtLot69T1.test.js` : 4/4. Aucun changement fonctionnel, aucune migration. Cette reprise ne prétend pas que les critères ouverts sont satisfaits.
 
+### Reprise 55
+- État vérifié : branche `fid-choc`, HEAD `fafbe5b9`. Les seuls changements non commités sont les modifications utilisateur sous `.opencode/agents/` et `opencode.json` ; ils sont exclus.
+- Vérification actuelle : `node --test tests/mgmtLot69T1.test.js` passe (4/4), y compris le parcours offre/changement/rechargement/arrivée/soirée/lendemain et l'exécution des trois paires choc via `mgmtRunEvent`. `node tools/verif-versions.js origin/main` passe (19 fichiers) ; `node_modules/.bin/eslint .` passe.
+- La logique multi-paires et le rendu des trois affiches sont déjà présents dans le HEAD. La vérification ciblée actuelle confirme ces tests, mais ne produit pas de capture ni de mesure actuelle des seuils `grosBlocs`; les comparaisons arrivée/offre ne sont pas établies non plus.
+- Aucun fichier de la tranche n'était modifié au départ et aucun changement fonctionnel nouveau n'a été fait dans cette reprise. Pas de migration. Les critères visuels mesurés et les scènes dédiées restent non prouvés ; aucun `TOUT_EST_FINI` n'est revendiqué.
+
 ## Compte rendu (reprise 54)
 - Fichiers modifiés : cette fiche uniquement, pour consigner la nouvelle mesure et les limites observées.
 
