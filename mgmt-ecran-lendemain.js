@@ -338,6 +338,13 @@ function mgmtLendemainApres(m,semaine){
   }
   return result;
 }
+/* ==== [ANCRE: P8_T3_APRES_CALCUL] — Monde lot 63 T1 ==== */
+/** Porte pure conservée pour l’Accueil et la presse. Les lignes restent
+ *  dérivées des faits de soirée et ne créent aucun historique rétroactif. */
+function mgmtApresCalculer(m){
+  if(!m||!mgmtHorsPasse(m)||!Number.isSafeInteger(m.cycle)) return [];
+  return mgmtLendemainApres(m,m.cycle).slice(0,3).map(x=>({...x}));
+}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MONDE54_T1_LENDEMAIN_RECOMPOSE] — Monde lot 54 T1 ==== */

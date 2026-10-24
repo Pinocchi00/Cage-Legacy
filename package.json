@@ -36,6 +36,8 @@
     "test:lot41t1": "node --test tests/mgmtLot41T1.test.js",
     "test:lot54t1": "node --test tests/mgmtLot54T1.test.js",
     "test:watch:lot54t1": "node --test --watch tests/mgmtLot54T1.test.js",
+    "test:lot63t1": "node --test tests/mgmtLot63T1.test.js",
+    "test:watch:lot63t1": "node --test --watch tests/mgmtLot63T1.test.js",
     "test:lot51t1": "node --test tests/mgmtLot51T1.test.js",
     "test:watch:lot51t1": "node --test --watch tests/mgmtLot51T1.test.js",
     "test:lot53t1": "node --test tests/mgmtLot53T1.test.js",

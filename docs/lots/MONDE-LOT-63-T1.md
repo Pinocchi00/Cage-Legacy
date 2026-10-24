@@ -12,4 +12,16 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 **[ ] 5. Tests** (`tests/mgmtLot63T1.test.js`, dans `test` ET `test:watch`) : par le chemin réel (`mgmtPasseGenerer('split',{soirees:3})` puis des soirées jouées) ; chaque famille se déclenche sur son fait ; au plus 3 lignes par semaine ; non-répétition sur 50 soirées ; déterminisme ; échappement ; sauvegarde (clés facultatives, validées, réparées ; partie neuve ≤ plafond : `tests/mgmtReleveReduit.test.js` en arrière-plan ; partie ancienne intacte).
 **[ ] 6. Fin.** `?v=`, versions, lint, commit final `Monde lot 63 T1 : l'après de la soirée`, compte rendu honnête, `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- `mgmt-apres-data.js` : début de catalogue de dix familles, trois formulations chacune, marquées `relu:false`.
+- `mgmt-ecran-lendemain.js` : ajout de la porte `mgmtApresCalculer`, pure et déterministe par délégation à la projection préexistante.
+- `mgmt-actualites.js` : ajout d'un libellé et d'une source d'actualité pour les lignes calculées.
+- `index.html` : script data ajouté à l'ordre de chargement et versions cache montées.
+- `tests/mgmtLot63T1.test.js` : tests « Monde lot 63 T1 — chaque famille de l’après a trois formulations spécifiques relu:false » et « Monde lot 63 T1 — le calcul reste pur, borné et déterministe sur une vraie soirée » ; test ciblé : 2/2.
+- `package.json` contient des commandes dédiées `test:lot63t1` et `test:watch:lot63t1`, mais le nouveau test n'a pas été ajouté aux listes principales `test` et `test:watch`.
+- Écarts importants : le catalogue n'est pas encore le moteur de sélection; les trois formulations ne sont donc pas toutes utilisées dans les sorties; les faits réels ne couvrent pas les dix familles; l'anti-répétition sur 50 soirées n'est pas garantie par une mémoire d'historique; le fil de presse n'est pas vérifié pour les textes selon chaque fait; les mouvements d'autres organisations du lendemain ne sont pas ajoutés. Les contrôles de sauvegarde, de plafond, le test lent `mgmtReleveReduit.test.js`, la suite `mgmtLot54T1.test.js` et le lint global ne sont pas exécutés ici.
+- Vérifications réalisées : `node --test tests/mgmtLot63T1.test.js` (2/2), `node tools/verif-versions.js origin/main` (sans écart), ESLint ciblé et `git diff --check`.
+- Aucune nouvelle clé de sauvegarde ni migration. Aucune question pour Anthony ; les critères manquants sont du travail restant, et la tranche n'est pas déclarée terminée.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
