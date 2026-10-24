@@ -1,7 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P3_T2_ACTUALITES] — Monde lot 33 T2 ==== */
 const MGMT_ACTU_SOURCES=[];
-const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE'};
+const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE',choc:'CHOC DES ORGANISATIONS'};
 function mgmtActuSourceAjouter(src){
   if(!src||typeof src.type!=='string'||typeof src.lire!=='function'||MGMT_ACTU_SOURCES.some(x=>x.type===src.type)) return false;
   MGMT_ACTU_SOURCES.push(src); return true;
@@ -31,6 +31,10 @@ mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).fi
 mgmtActuSourceAjouter({type:'recruteur_signe',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='recruteur_profil_signe'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'recruteur_signe',c:x.c,id:x.a,donnees:x}));}});
 /* ==== [ANCRE: P2_T5_SURNOMS_GAGNES_ACTUALITES] — Monde lot 40 T1 ==== */
 mgmtActuSourceAjouter({type:'surnom',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='surnom'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'surnom',c:x.c,id:x.a,donnees:x}));}});
+/* ==== [ANCRE: MONDE_LOT58_T1_ACTUALITE_CHOC] — Monde lot 58 T1 ====
+   Une proposition est une actualité du monde même si aucun combattant n'est
+   suivi; elle réutilise l'identité du champion, sans créer de fait sauvegardé. ==== */
+mgmtActuSourceAjouter({type:'choc',lire(m,ids,depuis){const c=m&&m.choc;if(!c||!mgmtChocValide(c)||!['recu','propose','programme','termine'].includes(c.etat)||!ids.includes(c.a))return [];return [{type:'choc',c:Number.isSafeInteger(m.cycle)?Math.max(depuis,m.cycle):depuis,id:c.a,donnees:c}];}});
 /* ==== [ANCRE: P10_T1_ACTUALITE_RIVALE] — Monde lot 45 T1 ==== */
 mgmtActuSourceAjouter({type:'rivale',lire(m,ids,depuis){
   if(!m||!m.guerre||!m.guerre.rival||!ids.length||!Number.isSafeInteger(m.guerre.depuis)||m.guerre.depuis<depuis) return [];
@@ -43,7 +47,8 @@ function mgmtActualites(m,opts){
   const rang=new Map(), rows=[];
   const dernier=new Map();
    for(const x of brut){if(!x||!ids.includes(x.id)||!Number.isSafeInteger(x.c))continue; const moi=mgmtActuNom(m,x.id);if(!moi)continue;const k=x.type+'|'+x.c+'|'+x.id,n=(rang.get(k)||0)+1;rang.set(k,n);const cle=k+'|'+n, adversaire=mgmtActuNom(m,x.adv||''),a=adversaire?adversaire.n:(x.adv||''),d=x.donnees||{};let banque,vars,detail='';
-      if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
+      if(x.type==='choc'){const org=mgmtOrgParId(d.orgId);banque=['Une proposition de choc des organisations est en discussion'];vars={};detail=d.propose?'Split propose une soirée commune à '+(org?org.nom:d.orgId)+', champion contre champion.':(org?org.nom:d.orgId)+' propose une soirée commune contre Split, champion contre champion.';}
+      else if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
        else if(x.type==='recruteur_signe'){banque=MGMT_ACTU_RECRUTEUR_SIGNE;vars={n:moi.n};detail='Repéré lors du retour du recruteur, il a choisi de signer avec une autre organisation.';}
        else if(x.type==='discours'){banque=['{n} s’adresse à {cible} après sa victoire'];vars={n:moi.n,cible:a};detail='Après sa victoire, il remercie son équipe et parle de la suite.';}
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}

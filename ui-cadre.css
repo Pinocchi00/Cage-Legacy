@@ -1895,11 +1895,24 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-card h2,.po2-bilan h1{font:800 44px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0 0 16px}
 .po2-card h3{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:24px 0 8px}
 .po2-card p,.po2-bilan p{font-size:24px;line-height:1.2;margin:12px 0}
+.po2-offre{border-top:2px solid rgba(233,230,225,.16);padding:8px 0 16px}
 .po2-card strong{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .po2-bilan{width:min(900px,90%);margin:20px auto;font-size:24px}
 .po2-bilan h1{font-size:88px;color:#F0B220}
 .po2-bilan .po2-citation{font-style:italic}
 .po2-action{background:#F0B220;color:#0D0B0B;font:800 34px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT58_T1_CHOC_STYLE] — Monde lot 58 T1 ==== */
+.ch3-screen{position:absolute;left:300px;top:20px;width:1564px;height:1010px;box-sizing:border-box;padding:0;background:#0D0B0B;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif;display:flex;flex-direction:column;gap:20px}
+.ch3-head{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px}
+.ch3-head h1{font:800 56px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0;border:2px solid rgba(233,230,225,.38);padding:8px 18px}
+.ch3-head strong,.ch3-head span{font-size:22px;white-space:nowrap}
+.ch3-fight{flex:1;min-height:0;display:grid;grid-template-columns:1fr 170px 1fr;align-items:center;gap:16px;padding:0 20px;background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.ch3-side{display:flex;flex-direction:column;gap:12px;align-items:flex-end}.ch3-side b{font:800 46px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif}.ch3-side span{font-size:22px;color:rgba(233,230,225,.74)}
+.ch3-opponent{align-items:flex-start}.ch3-category{text-align:center;font-size:22px;font-weight:600;line-height:1.25;color:#F0B220}
+.ch3-terms{background:#121010;border:2px solid rgba(233,230,225,.5);padding:24px;display:flex;flex-direction:column;gap:10px}.ch3-terms h2{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0}.ch3-terms p,.ch3-status{font-size:24px;line-height:1.2;margin:6px 0}
+.ch3-detail{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:8px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px}.ch3-detail span{color:rgba(233,230,225,.74)}.ch3-detail b{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;text-align:right}
+.ch3-actions{display:flex;gap:12px}.ch3-button,.ch3-back{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;padding:12px 22px;background:#F0B220;color:#0D0B0B;border:0;cursor:pointer}.ch3-back{align-self:flex-start;background:#252121;color:#E9E6E1;font-size:24px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
