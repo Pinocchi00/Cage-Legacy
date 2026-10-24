@@ -59,3 +59,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtReleveReduit.test.js` a dépassé la limite de 120 s de l'outil et a été interrompu ; plafond de nouvelle partie donc non revérifié cette reprise.
 - État toujours **inachevé** : `mgmtPasseGenerer` et les soirées ne sont pas couverts pour les franchissements ; les effets des paliers ne sont pas raccordés aux systèmes existants ; pas d'annonce déclenchée au parcours Accueil ; maquette toujours seulement partiellement suivie. Il reste aussi à inscrire le test directement dans les listes `test` et `test:watch` : les hooks `pretest`/`pretest:watch` l'exécutent, mais le contrôle explicite des listes renvoie `false false`.
 - Écarts/question : aucune nouvelle question. Les effets restent à implémenter ; aucune conclusion de fin de tranche n'est justifiée.
+
+### Reprise 4 — poursuite (24/10/2026)
+
+- `git log --oneline -12` et `git status` vérifiés sur `p11-croissance`. Aucun fichier de la tranche n'était modifié avant cette reprise; les modifications `.opencode/agents/*`, `opencode.json` préexistantes restent hors de cette tranche.
+- Correction de l'inscription du test : `tests/mgmtLot56T1.test.js` est désormais explicitement référencé dans les scripts `test` et `test:watch` (la vérification Node renvoie `true true`).
+- Vérifications : test de tranche 6/6, `mgmtPasse.test.js` 13/13 avec empreintes, audit `node tools/verif-versions.js origin/main` sans écart et `node_modules/.bin/eslint .` sans erreur.
+- Toujours inachevé : pas d'intégration réelle des paliers diffuseur/recruteur/attrait agents; le franchissement via `mgmtPasseGenerer` et soirées n'est pas couvert; aucune preuve que les annonces sont déclenchées par le parcours Accueil; maquette partielle; validation/réparation facultative et plafond de sauvegarde neuve non revérifiés. Le test lent `mgmtReleveReduit.test.js` n'a pas été lancé cette reprise. Aucun résultat ci-dessus ne permet d'affirmer que toutes les cases sont finies.
+- Lint global vert. Les changements personnels préexistants hors tranche ne sont pas ajoutés.
