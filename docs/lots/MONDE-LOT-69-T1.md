@@ -307,3 +307,8 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `tests/mgmtLot69T1.test.js` ajoute une assertion de structure de l’écran d’arrivée en plus des contrôles du nom de la nouvelle organisation et de l’absence de l’ancienne.
 - Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
 - Aucun JS/CSS modifié, aucune migration. Les captures comparatives et les critères encore ouverts des reprises précédentes ne sont pas revendiqués comme terminés.
+
+### Reprise 52
+- Changements : `ui-cadre.css` donne des traitements visuellement distincts aux actions « Contre-proposer » (sombre) et « Refuser » (rouge), en cohérence avec la hiérarchie de décision de l'écran choc ; `index.html` reçoit la version cache CSS via `node tools/_bump.js`. `tests/mgmtLot69T1.test.js` verrouille ces deux traitements.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4).
+- Pas de migration. Écarts encore présents : aucune nouvelle capture/mesure n'a été effectuée ; les critères d'achèvement déjà notés (trois combats et score 2-sur-3, parcours contractuel complet avec reprise strictement identique, scènes d'arrivée et validation visuelle des quatre écrans) ne sont pas tous établis. Cette retouche CSS ne les prétend pas satisfaits.
