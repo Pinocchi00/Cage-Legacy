@@ -17,6 +17,13 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise 20 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Les changements préexistants dans `.opencode/agents/*` et `opencode.json` restent hors tranche et ne sont pas inclus.
+  - **Fichiers modifiés :** `mgmt-poste.js` maintient une variable de fonction d'offre dédiée au texte et à la donnée `poste` (toujours « matchmaker ») ; `index.html` a la version de cache montée par `_bump.js` ; `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — les invitations conservent le poste et une formulation cohérente ».
+  - **Tests/contrôles :** `node --test tests/mgmtLot58T1.test.js` passe (5/5). ESLint ciblé a échoué sur une référence globale indéfinie lors du premier essai ; la référence a été retirée, mais le lint n'a pas encore été relancé après correction. `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `ui-cadre.css`.
+  - **Non réalisé :** choc des organisations (proposition/réponse, agenda, combat et écran `UniChoc`), intégration du test dans les listes agrégées, contrôle du plafond de sauvegarde, contrôle E2E sous conditions réelles et vérification lint finale restent à faire. Étude T5 et tests de sauvegarde facultative préexistants.
+  - **Écarts/décisions :** aucun changement au format de sauvegarde. Le test de formulation ne valide pas une fonction de poste propre aux organisations, puisque le modèle actuel n'en expose pas ; il vérifie la valeur actuelle « matchmaker ». Pas de conformité revendiquée à la maquette du choc.
+  - **Questions pour Anthony :** aucune.
+
   - **Reprise 19 — état : incomplet.** Branche vérifiée `p9-renvoi-offres`. Le diff de départ ne contenait aucun fichier métier non commité ; les changements locaux `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés.
   - **Fichier modifié :** `tests/mgmtLot58T1.test.js` : le test « Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le contrat de Split » utilise désormais `mgmtOffresCreer` et refuse les offres effectivement générées, au lieu de fabriquer une liste de propositions.
   - **Test exécuté :** `node --test tests/mgmtLot58T1.test.js` passe (4/4). La génération normale sur cette partie neuve ne fournit actuellement aucune offre admissible ; le test démontre donc le chemin « aucune offre à refuser » et le renouvellement, pas un refus de propositions réellement reçues.

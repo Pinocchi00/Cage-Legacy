@@ -24,6 +24,13 @@ test('Monde lot 58 T1 — quatre raisons de rejoindre plus fort sont des informa
   assert.match(n.html,/LES OFFRES/);
 });
 
+test('Monde lot 58 T1 — les invitations conservent le poste et une formulation cohérente',()=>{
+  const w=newGameWindow({runMain:true});
+  const n=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');return mgmtOffresCreer(m).map(o=>({poste:o.poste,texte:o.texte,relu:o.relu}))})())`));
+  assert.ok(n.length<=3);
+  assert.ok(n.every(o=>o.poste==='matchmaker'&&o.texte.toLowerCase().includes(o.poste)&&o.relu===false));
+});
+
 test('Monde lot 58 T1 — le joueur peut attendre après le renvoi sans changer d’organisation',()=>{
   const w=newGameWindow({runMain:true});
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=0;m.poste.obj.forEach(o=>o.e='cours');m.offres=[];mgmtOffresCreer(m);const org=m.org;const attendu=mgmtOffresAttendre(m);return {attendu,refusees:m.offres.every(o=>o.refuse),orgIdentique:m.org===org,poste:!!m.poste}})())`));

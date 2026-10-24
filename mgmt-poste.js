@@ -93,10 +93,12 @@ function mgmtOffresCreer(m){
   const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(cle,'choix-offres',m):null;
   const ordre=candidats.map(x=>({x,k:stream?stream():0})).sort((a,b)=>a.k-b.k||Math.abs(a.x.r-rang)-Math.abs(b.x.r-rang));
   const nombre=Math.min(candidats.length,Math.max(2,Math.min(3,candidats.length)));
-  const salaireBase=m.poste.salaire;
-  m.offres=ordre.slice(0,nombre).map(({x:{o,r}})=>{
-    const delta=Math.min(0.3,Math.max(-0.3,(rang-r)/10));
-    return {orgId:o.id,poste:'Matchmaker',salaire:Math.max(0,Math.round(salaireBase*(1+delta))),texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de matchmaker chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)};
+   const salaireBase=m.poste.salaire;
+   const poste='matchmaker';
+   m.offres=ordre.slice(0,nombre).map(({x:{o,r}})=>{
+     const delta=Math.min(0.3,Math.max(-0.3,(rang-r)/10));
+     const fonction=typeof poste==='string'&&poste.trim()?poste.trim():'matchmaker';
+     return {orgId:o.id,poste:fonction,salaire:Math.max(0,Math.round(salaireBase*(1+delta))),texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de ${fonction.toLowerCase()} chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)};
   });
   return m.offres;
 }
