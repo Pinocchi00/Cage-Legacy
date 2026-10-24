@@ -859,3 +859,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `git merge origin/main` n'a pas pu être exécuté : l'environnement interdit explicitement les commandes `git merge*`. L'intégration reste à effectuer par le superviseur ; aucun merge n'est revendiqué.
 - Tentative du test lent `node --test tests/mgmtReleveReduit.test.js` interrompue par le délai maximal de l'outil (120 s), après les messages « Compétences OK » ; aucun résultat de test ni mesure de taille n'est donc revendiqué cette fois-ci. Aucun changement de sauvegarde ni migration. Limite de couverture conservée : les faits familiaux sont exercés dans des scénarios préparés sur une partie réelle, sans preuve que les systèmes opérationnels les produisent tous naturellement.
 - Aucun changement de code requis : catalogue, calcul, Accueil/presse, mouvements inter-organisations et tests sont déjà livrés. Seule cette fiche est modifiée par cette reprise ; aucun écart fonctionnel nouveau ni question pour Anthony.
+
+### Reprise 9 — validation inter-lots (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Les changements fonctionnels de la tranche sont déjà commités ; seuls les changements locaux d'agents, `opencode.json` et `sw.js` sont hors périmètre et laissés intacts.
+- La suite demandée des sept fichiers passe **130/130**, y compris les deux exigences lot 54 concernant la rivalité enregistrée et la non-répétition sur cinquante semaines. `node tools/verif-versions.js origin/main` ne relève aucun écart et ESLint global passe.
+- Le test de plafond `tests/mgmtReleveReduit.test.js` a été relancé, mais a dépassé le délai de 120 secondes de l'outil ; aucun résultat de cette exécution n'est revendiqué. Une reprise précédente consigne sa réussite à 1 908 745 octets.
+- `git merge origin/main` est interdit par la politique de commandes de l'environnement ; la fusion reste à faire par le superviseur. Aucun test existant n'a été modifié. Aucun changement de sauvegarde/migration ni changement fonctionnel de tranche dans cette reprise ; la limite de couverture décrite plus haut demeure.
