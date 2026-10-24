@@ -430,12 +430,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-entete h1{margin:0;font:800 48px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1}
 .ce3-entete p,.ce3-entete strong{font-size:24px;margin:0}
 .ce3-grille{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:14px}
-.ce3-prix{min-width:0;box-sizing:border-box;padding:20px 22px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.ce3-prix,.ce3-prix-combattant{min-width:0;box-sizing:border-box;padding:20px 22px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;gap:12px;overflow:hidden}
 .ce3-prix:first-child{grid-row:span 2;background:#F0B220;color:#0D0B0B;border-color:#F0B220}
-.ce3-prix h2{margin:0;color:#F0B220;font-size:24px;line-height:1.05}
+.ce3-prix h2,.ce3-prix-combattant h2{margin:0;color:#F0B220;font-size:24px;line-height:1.05}
 .ce3-prix:first-child h2{color:#0D0B0B}
 .ce3-prix strong{font:800 52px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;overflow-wrap:anywhere}
-.ce3-prix p{margin:auto 0 0;font-size:24px;line-height:1.15}
+.ce3-prix p,.ce3-prix-combattant p{margin:auto 0 0;font-size:24px;line-height:1.15}
 .ce3-prix-vide{padding-top:18px}
 .ce3-classement{flex:none;max-height:150px;overflow:auto;padding:10px 14px;background:#121010;border:2px solid rgba(233,230,225,.38)}
 .ce3-ecran>button{flex:none;align-self:flex-start;min-height:54px;padding:8px 24px;background:#E23A2B;color:#0D0B0B;border:0;font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
