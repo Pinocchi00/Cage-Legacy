@@ -279,3 +279,12 @@ test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette 
     assert.match(result.html,/Depuis la dernière soirée/);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — une identité de rivale absente ne fait pas planter l’écran',()=>{
+  const w=partie();
+  try{
+    const html=w.eval(`(()=>{const rival=mgmtRivaleDuMoment,raisons=mgmtRivaleRaisons;mgmtRivaleDuMoment=()=> 'organisation-inconnue';mgmtRivaleRaisons=()=>[];try{return scr_mgmt_guerre();}finally{mgmtRivaleDuMoment=rival;mgmtRivaleRaisons=raisons;}})()`);
+    assert.match(html,/AUCUNE POUR L’INSTANT/);
+    assert.doesNotMatch(html,/undefined|null/);
+  }finally{w.close();}
+});
