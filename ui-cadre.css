@@ -1044,6 +1044,65 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-contexte b{height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;display:flex;align-items:center;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:.9}
 .so3-fin .mf-so-haut{flex:1;min-height:0}
 .so3-fin .mf-so-bande{flex:none}
+/* ==== [ANCRE: MONDE65T1_FIN_PLANCHE] — Monde lot 65 T1 ==== */
+.so3-fin-recomposee{height:100%;min-height:0;display:grid;grid-template-rows:470px 280px 64px;gap:16px;color:#E9E6E1}
+.so3-fin-titre{height:64px;box-sizing:border-box;padding:0 18px;border:2px solid rgba(233,230,225,.38);display:flex;align-items:center;gap:28px}
+.so3-fin-titre strong{font-family:var(--mf-titre);font-size:48px;font-weight:800;line-height:1}
+.so3-fin-titre span{font-family:var(--mf-titre);font-size:38px;font-weight:800;line-height:1}
+.so3-fin-cartes{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:16px;min-height:0}
+.so3-fin-cartes.deux-cartes{grid-template-columns:1.25fr 1fr}
+.so3-fin-prime{min-width:0;padding:24px;background:#E9E6E1;color:#0D0B0B;display:flex;flex-direction:column;gap:18px;justify-content:center;box-sizing:border-box}
+.so3-fin-prime.combat{background:#E9E6E1;color:#0D0B0B}
+.so3-fin-prime.performance{background:#252121;color:#E9E6E1}
+.so3-fin-prime b{color:#F0B220;font-family:var(--mf-titre);font-size:30px}
+.so3-fin-prime.combat strong{font-size:104px;line-height:.8}
+.so3-fin-prime.performance strong{font-size:92px;line-height:.8}
+.so3-fin-label{font-size:24px;font-weight:600;letter-spacing:.04em}
+.so3-fin-prime strong{font-family:var(--mf-titre);font-size:42px;line-height:.95}
+.so3-fin-prime.combat strong span{display:block;font:inherit;line-height:.82}
+.so3-fin-prime span{font-size:24px;line-height:1.1}
+.so3-fin-prime>b{font-family:var(--mf-titre);font-size:40px;line-height:.8}
+.so3-fin-soiree{padding:18px 22px;border:2px solid rgba(233,230,225,.38);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:12px 22px;align-content:center}
+.so3-fin-soiree h2{grid-column:1/-1;margin:0;font-family:var(--mf-titre);font-size:34px}
+.so3-fin-soiree>div{display:flex;flex-direction:column;gap:8px;font-size:22px}
+.so3-fin-soiree>div span{color:rgba(233,230,225,.74)}
+.so3-fin-soiree>div b{font-family:var(--mf-titre);font-size:30px}
+.so3-fin-salle,.so3-fin-ambiance,.so3-fin-recette{display:flex;flex-direction:column;gap:8px;font-size:22px}
+.so3-fin-salle b,.so3-fin-recette b{font-family:var(--mf-titre);font-size:64px;line-height:.8}
+.so3-fin-salle small,.so3-fin-ambiance small,.so3-fin-recette small{font-size:22px;color:rgba(233,230,225,.74)}
+.so3-fin-ambiance b{display:flex;gap:8px}
+.so3-fin-ambiance i{width:34px;height:34px;flex:none;background:#B32A1E;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.so3-fin-ambiance i.on{background:#F0B220}
+.so3-fin-recette{grid-column:auto}
+.so3-fin-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px}
+/* ==== [ANCRE: MGMT_LOT65_T1_TABLEAU_CSS] — Monde lot 65 T1 : carte de soirée fidèle à UniSoiree. ==== */
+.so3-tableau{height:100%;min-height:0;display:flex;flex-direction:column;gap:16px;color:#E9E6E1}
+.so3-bandeau{min-height:76px;display:grid;grid-template-columns:1fr 1.35fr auto 1fr;align-items:center;gap:22px;padding:8px 18px;border:2px solid rgba(233,230,225,.38);box-sizing:border-box}
+.so3-bandeau>div{display:flex;align-items:center;gap:14px;font-size:22px;white-space:nowrap}
+.so3-bandeau>div b,.so3-prochain-vue span{font-size:22px;color:rgba(233,230,225,.74)}
+.so3-bandeau>div strong{font-family:var(--mf-titre);font-size:30px}
+.so3-bandeau>span{font-family:var(--mf-titre);font-size:28px;color:#F0B220}
+.so3-corps{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px}
+.so3-carte{min-height:0;display:flex;flex-direction:column}
+.so3-carte h2,.so3-prochain-panneau h2{margin:0;padding:10px 14px;border-bottom:2px solid rgba(233,230,225,.38);font-family:var(--mf-titre);font-size:34px}
+.so3-ligne{flex:1;min-height:0;display:grid;grid-template-columns:42px 168px minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid rgba(233,230,225,.16)}
+.so3-ligne.courant{background:rgba(240,178,32,.08);outline:2px solid #F0B220}
+.so3-ligne.fait{opacity:.75}
+.so3-rang{font-family:var(--mf-titre);font-size:30px}
+.so3-categorie{display:flex;flex-direction:column;font-size:22px;white-space:nowrap}
+.so3-categorie small{font-size:22px;color:rgba(233,230,225,.74)}
+.so3-noms{font-family:var(--mf-titre);font-size:30px;white-space:nowrap}
+.so3-carte-vues{display:flex;gap:4px}
+.so3-vue{height:42px;padding:0 10px;font-size:22px}
+.so3-vue.choisi{background:#E9E6E1;color:#0D0B0B}
+.so3-carte-methode{font-size:22px}
+.so3-prochain{min-width:0}
+.so3-prochain-panneau{padding:12px 16px;background:#121010;border:2px solid rgba(233,230,225,.38);display:flex;flex-direction:column;gap:18px;box-sizing:border-box}
+.so3-prochain-panneau h2{padding:4px 0;color:#F0B220}
+.so3-prochain-noms{display:flex;flex-direction:column;gap:8px;font-family:var(--mf-titre);font-size:42px;line-height:.95;overflow-wrap:anywhere}
+.so3-prochain-noms span{font-size:24px;color:rgba(233,230,225,.74)}
+.so3-prochain-vue{display:flex;flex-direction:column;gap:8px;font-size:22px}
+.so3-prochain-vue b{font-family:var(--mf-titre);font-size:30px;color:#F0B220}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche

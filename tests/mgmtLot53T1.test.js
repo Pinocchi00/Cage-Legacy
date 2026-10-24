@@ -119,13 +119,68 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     w.eval(`setSeed(5311);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
     jouerSoirees(w,1);
     const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoFinHtml(m,p);})()`);
-    assert.match(html,/FIN DE SOIRÉE/);
-    assert.match(html,/class="so3-fin-contexte"/);
-    assert.match(html,/Ce soir/);
-    assert.match(html,/class="so3-salle" aria-label="Salle finale/);
-     assert.match(html,/Voir le lendemain/);
-     assert.match(html,/class="so3-primes"/);
-     assert.equal((html.match(/class="so3-prime"/g)||[]).length,3);
+    const header=w.eval(`mgmtSoEnteteFin(G.mgmt,mgmtSoireeProgramme(G.mgmt))`);
+    const screen=w.eval(`(()=>{MGMT_SOIREE.index=mgmtSoireeProgramme(G.mgmt).length;MGMT_SOIREE_UI.focus=null;G.screen='mgmt_soiree';mgmtProchaineChose=()=>({texte:'rappel de test',onclick:''});return scr_mgmt_soiree_cadre();})()`);
+    /* Décision : planches Uni* validées par Anthony ; le titre vit dans l'en-tête commun, pas une seconde fois dans le contenu. */
+    assert.match(html,/aria-label="Fin de soirée"/);
+    assert.match(header,/FIN DE SOIRÉE/);
+    assert.match(header,/Ce soir/);
+    assert.match(header,/FIGHT NIGHT/);
+    assert.match(header,/\/\s*\d+/);
+    /* Décision : planches Uni* validées par Anthony ; l'en-tête de fin garde date, lieu et numéro d'événement. */
+    assert.match(header,/mf-so-chip"><b>[^<]+<\/b><span>[^<]+<\/span><\/div>/);
+    assert.match(header,/mf-so-chip org"><b>[^<]+ FIGHT NIGHT<\/b><b class="r">\d+<\/b>/);
+    /* Décision : planches Uni* validées par Anthony ; compteur à côté de la plaque du titre. */
+    assert.match(header,/<div class="mf-plaque"><span>FIN DE SOIRÉE<\/span><\/div><b class="mf-so-cpt">\d+ \/ \d+<\/b>/);
+    assert.doesNotMatch(header,/mf-so-pips/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, sans bandeau d'étape suivant. */
+    assert.match(screen,/FIN DE SOIRÉE/);
+    assert.match(screen,/class="so3-fin-recomposee"/);
+    assert.doesNotMatch(screen,/mf-prise|rappel de test/);
+    /* Décision : planches Uni* validées par Anthony ; la fin n'affiche pas les commandes de vues du combat en cours. */
+    assert.doesNotMatch(screen,/TEMPS FORTS|COMPLET/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(html,/class="so3-fin-soiree"/);
+    /* Décision : planches Uni* validées par Anthony ; les données réelles déterminent les cartes, sans les réduire quand deux performances existent. */
+    assert.match(html,/class="so3-fin-cartes"/);
+    assert.equal((html.match(/class="so3-fin-prime performance"/g)||[]).length,2);
+    assert.match(html,/LA SALLE/);
+    assert.match(html,/LA SOIRÉE/);
+    assert.match(html,/L'AMBIANCE À LA FIN/);
+    assert.equal((html.match(/<i class="(?:on)?"><\/i>/g)||[]).length,10);
+    assert.match(html,/LA RECETTE/);
+    /* Décision : planches Uni* validées par Anthony ; les cartes portent leur rôle explicitement plutôt que par leur position. */
+    assert.equal((html.match(/class="so3-fin-prime (?:combat|performance)"/g)||[]).length,3);
+    assert.match(html,/class="so3-fin-prime combat"/);
+    /* Décision : planches Uni* validées par Anthony ; le combat occupe la carte principale avant les performances. */
+    assert.ok(html.indexOf('class="so3-fin-prime combat"')<html.indexOf('class="so3-fin-prime performance"'));
+    /* Décision : planches Uni* validées par Anthony ; les deux noms du combat sont empilés dans la carte claire. */
+    assert.match(html,/class="so3-fin-prime combat"[\s\S]*?<strong><span>[^<]+<\/span><span>[^<]+<\/span><\/strong>/);
+    assert.equal((html.match(/class="so3-fin-prime performance"/g)||[]).length,2);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(html,/COMBAT DE LA SOIRÉE/);
+    assert.match(html,/PERFORMANCE DE LA SOIRÉE/);
+    assert.match(html,/PRIMES PAYÉES/);
+    /* Décision : planches Uni* validées par Anthony ; sous la recette, le libellé est « primes payées », sans répéter le total. */
+    assert.match(html,/<small>PRIMES PAYÉES<\/small>/);
+    assert.doesNotMatch(html,/<small>PRIMES PAYÉES ·/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, avec les actions visibles au-dessus de la barre de touches. */
+    assert.match(html,/class="so3-fin-actions"[^>]*>[\s\S]*Tous les résultats[\s\S]*Le lendemain/);
+    /* Décision : planches Uni* validées par Anthony ; les deux actions de fin gardent leur libellé et leur touche. */
+    assert.match(html,/<span class="mf-k">R<\/span><span class="mf-bouton-t">Tous les résultats<\/span>/);
+    assert.match(html,/<span class="mf-k">Entrée<\/span><span class="mf-bouton-t">Le lendemain<\/span>/);
+    /* Décision : planches Uni* validées par Anthony ; noms, salle et pastilles reprennent leurs tailles et formes de la planche. */
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    assert.match(css,/\.so3-fin-prime\.combat strong\{font-size:104px;line-height:\.8\}/);
+    assert.match(css,/\.so3-fin-prime\.performance strong\{font-size:92px;line-height:\.8\}/);
+    assert.match(css,/\.so3-fin-salle b,\.so3-fin-recette b\{font-family:var\(--mf-titre\);font-size:64px;line-height:\.8\}/);
+    assert.match(css,/\.so3-fin-ambiance i\{width:34px;height:34px;flex:none/);
+    assert.match(css,/\.so3-fin-recomposee\{[^}]*grid-template-rows:470px 280px 64px/);
+    /* Décision : planches Uni* validées par Anthony ; les trois colonnes de salle/ambiance/recette ne se chevauchent pas. */
+    assert.match(css,/\.so3-fin-soiree\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,1\.2fr\) minmax\(0,1fr\)/);
+    assert.match(css,/\.so3-fin-recette\{grid-column:auto\}/);
+    assert.match(css,/\.so3-fin-actions\{[^}]*justify-content:flex-end/);
+    assert.doesNotMatch(html,/SPLIT FIGHT NIGHT TERMINÉE|OÙ EN EST LA SOIRÉE|mf-so-fcw|mf-so-ph/);
   }finally{w.close();}
 });
 
@@ -148,13 +203,32 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
     jouerSoirees(w,1);
     const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);const html=mgmtSoEntreHtml(G.mgmt,p,0,0),ouverture=mgmtSoOuvertureHtml(G.mgmt,p);return {html,ouverture,selected:MGMT_SOIREE_UI.focus};})()`);
     for(const label of ['COMPLET','TEMPS FORTS','RÉSULTAT']) assert.ok(r.html.includes(label),label);
-    assert.match(r.html,/LE PROCHAIN|CE SOIR/);
-    assert.match(r.html,/class="so3-prochain"/);
-    assert.match(r.html,/class="so3-salle"/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(r.html,/LE PROCHAIN/);
+    assert.match(r.html,/class="so3-prochain so3-prochain-panneau"/);
+    assert.match(r.html,/class="so3-bandeau"/);
     assert.match(r.ouverture,/title="Changer la vue avec V"/);
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     assert.match(css,/\.so3-vue:focus-visible\s*\{[^}]*outline:3px solid #F0B220/);
     assert.equal(r.selected,null);
+  }finally{w.close();}
+});
+
+/* ==== [ANCRE: MONDE65T1_TEST_CARTE_NEUF_COMBATS] — Monde lot 65 T1 ==== */
+test('Monde lot 65 T1 — la soirée en cours expose ses neuf lignes, bandeau et vues par combat',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6501);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoEntreHtml(m,p,0,0);})()`);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.equal((html.match(/class="so3-ligne/g)||[]).length,9);
+    assert.equal((html.match(/class="so3-vue(?: choisi)?"/g)||[]).length,27);
+    for(const bloc of ['so3-bandeau','so3-carte','so3-prochain-panneau','LA SALLE',"L'AMBIANCE",'LA RECETTE','LA CARTE','LE PROCHAIN','TU LE REGARDES EN']) assert.ok(html.includes(bloc),bloc);
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    for(const classe of ['so3-tableau','so3-bandeau','so3-corps','so3-carte','so3-ligne','so3-rang','so3-categorie','so3-noms','so3-carte-vues','so3-prochain-panneau','so3-prochain-noms','so3-prochain-vue']){
+      assert.match(css,new RegExp(`\\.${classe}[^{}]*\\{`),`règle absente pour .${classe}`);
+    }
   }finally{w.close();}
 });
 
