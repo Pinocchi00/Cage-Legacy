@@ -136,6 +136,8 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     /* Décision : planches Uni* validées par Anthony ; les cartes portent leur rôle explicitement plutôt que par leur position. */
     assert.equal((html.match(/class="so3-fin-prime (?:combat|performance)"/g)||[]).length,3);
     assert.match(html,/class="so3-fin-prime combat"/);
+    /* Décision : planches Uni* validées par Anthony ; le combat occupe la carte principale avant les performances. */
+    assert.ok(html.indexOf('class="so3-fin-prime combat"')<html.indexOf('class="so3-fin-prime performance"'));
     /* Décision : planches Uni* validées par Anthony ; les deux noms du combat sont empilés dans la carte claire. */
     assert.match(html,/class="so3-fin-prime combat"[\s\S]*?<strong><span>[^<]+<\/span><span>[^<]+<\/span><\/strong>/);
     assert.equal((html.match(/class="so3-fin-prime performance"/g)||[]).length,2);
