@@ -71,7 +71,7 @@ function scr_mgmt_ceremonie(){
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
    const lien=`<button type="button" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;
-   const body=`<main class="ce3-ecran"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p><section class="ce3-grille">${cards}</section><section class="ce3-classement"><h2>CLASSEMENT FINAL DES HUIT</h2><ol>${rangs}</ol></section>${lien}</main>`;
+    const body=`<main class="ce3-ecran"><header class="ce3-entete"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p><strong>31 DÉCEMBRE · CAGE HEBDO</strong></header><section class="ce3-grille">${cards}</section><section class="ce3-classement"><h2>CLASSEMENT FINAL DES HUIT</h2><ol>${rangs}</ol></section>${lien}</main>`;
   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'LES TROPHÉES',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;

@@ -507,3 +507,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications exécutées : `node --test tests/mgmtLot55T1.test.js` (30/30 verts, dont le parcours de relevés issus de trois années et le test de cinquante années); `node tools/verif-versions.js origin/main` (aucun écart, 17 fichiers examinés); `node_modules/.bin/eslint .` (vert).
 - Le test de plafond `mgmtReleveReduit` n'a pas été exécuté cette reprise. Les contrôles ciblés ne prouvent pas trois saisons complètes réellement simulées ni le chargement d'une fixture complète d'ancienne sauvegarde; la fidélité intégrale aux valeurs des maquettes n'a pas fait l'objet d'une validation visuelle. Le raccordement de l'écran reste celui du terme du contrat décrit précédemment, et non chaque anniversaire calendaire.
 - Aucun changement de sauvegarde ou migration. Les modifications préexistantes `.opencode/agents/*` et `opencode.json` restent non incluses. Les critères résiduels ci-dessus ne sont pas déclarés satisfaits.
+
+### Reprise 66
+
+- Amélioration de l'en-tête de cérémonie d'après la planche `UniCeremonie` : affichage du 31 décembre et de « Cage Hebdo » aux côtés du titre annuel et de la mention « choisis par la presse ». Nouvelle règle de style `ce3-entete`, typographie à 24 px; toutes les classes `ce3-` gardent une règle dédiée.
+- Vérification ciblée après bump : `node --test tests/mgmtLot55T1.test.js` (30/30 verts).
+- Aucun changement de sauvegarde ni migration. L'écran reste une adaptation, pas une reproduction certifiée de toute la composition de la planche. Les limites de la reprise 65 (trois saisons complètes, fixture de sauvegarde ancienne, déclenchement anniversaire, test lent) restent non résolues; ne pas les présenter comme satisfaites.
+- Fichiers à commiter : `mgmt-ceremonie.js`, `index.html` et cette fiche. Modifications étrangères `.opencode/agents/*` et `opencode.json` exclues.
