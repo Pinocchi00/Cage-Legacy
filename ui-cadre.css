@@ -1044,6 +1044,23 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-contexte b{height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;display:flex;align-items:center;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:.9}
 .so3-fin .mf-so-haut{flex:1;min-height:0}
 .so3-fin .mf-so-bande{flex:none}
+/* ==== [ANCRE: MONDE65T1_FIN_PLANCHE] — Monde lot 65 T1 ==== */
+.so3-fin-recomposee{height:100%;min-height:0;display:grid;grid-template-rows:64px minmax(250px,1fr) 280px;gap:22px;color:#E9E6E1}
+.so3-fin-titre{height:64px;box-sizing:border-box;padding:0 18px;border:2px solid rgba(233,230,225,.38);display:flex;align-items:center;gap:28px}
+.so3-fin-titre strong{font-family:var(--mf-titre);font-size:48px;font-weight:800;line-height:1}
+.so3-fin-titre span{font-family:var(--mf-titre);font-size:38px;font-weight:800;line-height:1}
+.so3-fin-cartes{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:16px;min-height:0}
+.so3-fin-prime{min-width:0;padding:24px;background:#E9E6E1;color:#0D0B0B;display:flex;flex-direction:column;gap:18px;justify-content:center;box-sizing:border-box}
+.so3-fin-prime:nth-child(n+2){background:#252121;color:#E9E6E1}
+.so3-fin-label{font-size:24px;font-weight:600;letter-spacing:.04em}
+.so3-fin-prime strong{font-family:var(--mf-titre);font-size:42px;line-height:.95}
+.so3-fin-prime span{font-size:24px;line-height:1.1}
+.so3-fin-prime>b{font-family:var(--mf-titre);font-size:32px}
+.so3-fin-soiree{padding:18px 22px;border:2px solid rgba(233,230,225,.38);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 22px;align-content:center}
+.so3-fin-soiree h2{grid-column:1/-1;margin:0;font-family:var(--mf-titre);font-size:34px}
+.so3-fin-soiree>div{display:flex;flex-direction:column;gap:8px;font-size:22px}
+.so3-fin-soiree>div span{color:rgba(233,230,225,.74)}
+.so3-fin-soiree>div b{font-family:var(--mf-titre);font-size:30px}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche

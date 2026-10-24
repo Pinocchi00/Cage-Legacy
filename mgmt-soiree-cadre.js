@@ -251,7 +251,15 @@ function mgmtSoFinHtml(m,prog){
       +`<div class="mf-so-pc"><div class="mf-so-sn"><b>${esc(num+1)}</b><span>${F.aposer}</span></div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-lieu"><i></i><span>${F.aChoisir}</span></div></div><div class="mf-so-fl"><span class="mf-k">→</span></div></div>`;
   const rempli=Math.round(mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part*100);
   const org=mgmtOrgNom(m), finLieu=mgmtSoireeSalle(m,0).nom;
-  return `<div class="so3-fin"><header class="so3-fin-entete"><div class="so3-fin-titre"><strong>FIN DE SOIRÉE</strong><span>${esc(prog.length)} / ${esc(prog.length)}</span></div><div class="so3-fin-contexte"><span>Ce soir</span><b>${esc(date||'SOIRÉE')} · ${esc(mfNet(finLieu||'—'))}</b><b>${esc(mfNet(org))} FIGHT NIGHT</b></div></header><div class="so3-salle" aria-label="Salle finale à ${esc(rempli)} pour cent"><span>SALLE FINALE</span><div class="so3-salle-piste"><i style="width:${esc(rempli)}%"></i></div><b>${esc(rempli)}%</b></div><div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}${mfPanneau(centre,'choisi','mf-so-c')}${mfPanneau(droite,'cote','mf-so-d')}</div>${mgmtSoBandeHtml(prog,prog.length,-1)}</div>`;
+  const primes=prog.map(p=>({p,t:m.hist[p.h]})).filter(x=>x.t&&(x.t.pr==='cs'||x.t.pr==='pf'));
+  const cartes=primes.map(({p,t})=>{
+    const detail=mgmtResultatDetail(m,p.h);
+    const noms=t.pr==='cs'?`${p.a.last} · ${p.b.last}`:(detail&&detail.gagnant?(detail.gagnant.last||detail.gagnant.name):p.a.last);
+    return `<article class="so3-fin-prime"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${esc(mfNet(noms))}</strong><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span><b>${esc(mgmtEuros(Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0))}</b></article>`;
+  });
+  const finance=m.lastEvent.finance||{};
+  const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
+  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><header class="so3-fin-titre"><strong>FIN DE SOIRÉE</strong><span>${esc(prog.length)} / ${esc(prog.length)}</span></header><div class="so3-fin-cartes">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b></div><div><span>L'AMBIANCE À LA FIN</span><b>${'● '.repeat(Math.max(1,Math.min(5,Math.round(rempli/20))) )}</b></div><div><span>RECETTE</span><b>${esc(mgmtEuros(Number(finance.recette)||0))}</b></div><div><span>PRIMES PAYÉES</span><b>${esc(mgmtEuros(Number(finance.primes)||0))}</b></div></section></section>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
@@ -271,7 +279,7 @@ function scr_mgmt_soiree_cadre(){
     touches=[{ks:['Entrée'],t:'Commencer la soirée',jaune:true,onclick:'CL.mgmtSoCommencer()'}];
   }else if(moment==='fin'){
     corps=mgmtSoFinHtml(m,prog); grise=false; courant='resultats';
-     touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir le lendemain',jaune:true,onclick:'CL.mgmtSoFin()'}];
+     touches=[{ks:['R'],t:'Tous les résultats',onclick:'CL.go("mgmt_resultats")'},{ks:['Entrée'],t:'Le lendemain',jaune:true,onclick:'CL.mgmtSoFin()'}];
   }else{
     corps=mgmtSoEntreHtml(m,prog,index,focus);
     touches=[{ks:['←','→'],t:'Autre combat'},...(focus<index?[{ks:['Échap'],t:'Prochain combat',onclick:'CL.mgmtSoAutre(0)'}]:[{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'}]),

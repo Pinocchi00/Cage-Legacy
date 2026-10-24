@@ -16,3 +16,11 @@ Branche : `fid-soiree` (la branche courante de ce dossier ; commits ICI ; le sup
 **[ ] 6.** `?v=`, versions, lint ; commit final `Monde lot 65 T1 : la soirée fidèle aux planches` ; compte rendu honnête (avant/après `moyen`, `grosBlocs`) ; `TOUT_EST_FINI`.
 
 Règles communes : ne touche ni au moteur de combat (`simulateFight` et ses fichiers), ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- Modifiés : `mgmt-soiree-cadre.js` remplace partiellement l'ancien contenu de fin par des cartes de primes et un résumé de salle/recette ; `ui-cadre.css` donne des styles à ce nouveau balisage ; `index.html` versions actualisées ; `tests/mgmtSoireeShow.test.js` met à jour l'attente sur le lendemain et vérifie les nouveaux blocs.
+- Tests : `La soirée en cinq moments — ouverture, entre-deux, attente du principal, avant-combat, fin` mis à jour (décision citée dans le test).
+- Migration de sauvegarde : aucune.
+- Écarts : tranche incomplète. Le tableau de soirée en cours, les temps forts et les captures/comparaisons ne sont pas faits. Aucun `moyen`/`grosBlocs` fiable n'a pu être mesuré ; les captures demandées n'ont pas été produites. Fin présente encore seulement les primes réellement inscrites dans les traces (deux pour la fixture de test, pas trois cartes garanties). La vérification ciblée finale (`node --test tests/mgmtSoireeShow.test.js`) passe (18/18), ESLint ciblé passe et `node tools/verif-versions.js origin/main` ne signale aucun écart.
+- Questions pour Anthony : aucune question de spécification n'est soulevée ; reprise nécessaire pour compléter et vérifier les cases restantes.

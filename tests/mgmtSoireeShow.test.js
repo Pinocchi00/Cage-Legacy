@@ -57,8 +57,10 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   for(let i=0;i<8;i++) touche(win,'p');
   assert.equal(win.eval(`MGMT_SOIREE.index`),8); assert.ok(maj(win).includes('COMBAT PRINCIPAL'),'l\'attente du principal');
   touche(win,'p'); assert.equal(win.eval(`MGMT_SOIREE.index`),9);
-  /* Décision du brief du 22/10, P7 (écrans) : la fin de soirée est celle de la planche UniSoireeFin, dont le bouton mène « Voir le lendemain ». */
-  assert.ok(maj(win).includes('VOIR LE LENDEMAIN')); assert.ok(texte(win).includes('Les sections sont rouvertes')); assert.ok(maj(win).includes('JOUÉ'));
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.ok(maj(win).includes('LE LENDEMAIN')); assert.ok(texte(win).includes('LA SOIRÉE'));
+  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-prime').length`),2);
+  assert.equal(win.eval(`document.querySelectorAll('.mf-so-bande').length`),0);
 });
 
 test('Pendant la soirée, aucune section de la barre ne s\'ouvre ; elles se rouvrent à la fin', () => {
