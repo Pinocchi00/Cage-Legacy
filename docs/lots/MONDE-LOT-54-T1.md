@@ -60,4 +60,11 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 14/14 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé ne rapporte aucune erreur (le fichier de test est ignoré par la configuration). `package.json` inclut le test dans `test` et `test:watch`.
 - Ce test complète une vérification de lisibilité, mais ne corrige pas les manques restants : reproduction intégrale des deux planches, résultats complets et mouvements conformes, réponses T3 liées aux événements et anti-répétition sur 50 soirées. Aucun état de sauvegarde ajouté. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
 
+### Bilan de reprise — 24/10/2026
+
+- Reprise demandée : journal consulté (`cd016ac` en tête) et branche vérifiée (`p8-lendemain`). Les changements de code précédents étaient déjà commités ; les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et restent exclues.
+- Vérification actuelle : `node --test tests/mgmtLot54T1.test.js` passe 14/14. La soirée de référence vérifie explicitement le 13-1 contre le n°1, la première histoire, le premier titre presse et le premier moment ; D1 est présent dans `mgmt-carte.js` et le test n'altère pas le moteur.
+- Critères toujours non atteints : les deux écrans ne reproduisent pas l'intégralité des valeurs/layouts des planches; mouvements et résultats ne sont pas exhaustifs (dont les objectifs de contrat); le catalogue T3 est déterministe, limité à trois propositions et marqué `relu:false`, mais n'a ni mémoire anti-répétition garantie sur 50 soirées ni contextualisation fiable de toutes les familles aux faits (discours, revanche, réseaux et autres organisations). La famille suspension est filtrée si la soirée ne porte pas un fait de blessure connu.
+- Aucune nouvelle clé de sauvegarde ni migration. `test` et `test:watch` référencent le fichier. Le travail existant ne justifie donc pas `TOUT_EST_FINI`; les vérifications lancées ici sont les tests ciblés uniquement.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
