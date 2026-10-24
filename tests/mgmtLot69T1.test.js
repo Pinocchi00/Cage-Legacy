@@ -54,9 +54,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
      assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
       const orgId=w.eval(`G.mgmt.choc.orgId`);
      const propositions=w.eval(`G.mgmt.choc.paires?G.mgmt.choc.paires.length:0`);
-     assert.equal(propositions,3,'les trois divisions communes de champions produisent chacune une affiche');
-     const paires=JSON.parse(JSON.stringify(w.eval(`G.mgmt.choc.paires`)));
-     const affiche=w.eval(`(()=>{const c=G.mgmt.choc,o=G.mgmt.orgs[c.orgId],locaux=mgmtChampionIds(G.mgmt),visiteurs=mgmtChampionIds({roster:o.roster,facts:o.facts||[],hist:o.hist||[]});return (c.paires||[]).map(p=>({p,local:locaux.has(p.a),visiteur:visiteurs.has(p.b)}))})()`);
+      assert.equal(propositions,3,'les trois divisions communes de champions produisent chacune une affiche');
+      const paires=JSON.parse(JSON.stringify(w.eval(`G.mgmt.choc.paires`)));
+      assert.equal(w.eval(`(()=>{const c=JSON.parse(JSON.stringify(G.mgmt.choc));c.paires[1].a=c.paires[0].a;return mgmtChocValide(c)})()`),false,'un champion ne peut pas être engagé dans plusieurs paires du même choc');
+      const affiche=w.eval(`(()=>{const c=G.mgmt.choc,o=G.mgmt.orgs[c.orgId],locaux=mgmtChampionIds(G.mgmt),visiteurs=mgmtChampionIds({roster:o.roster,facts:o.facts||[],hist:o.hist||[]});return (c.paires||[]).map(p=>({p,local:locaux.has(p.a),visiteur:visiteurs.has(p.b)}))})()`);
       assert.ok(affiche.every(x=>x.local&&x.visiteur),'chaque affiche réellement créée oppose des champions présents des deux organisations');
       assert.equal(new Set(affiche.flatMap(x=>[x.p.a,x.p.b])).size,affiche.length*2,'aucun combattant ne figure dans plusieurs affiches');
       w.eval(`G.mgmt.choc=null;G.mgmt.chocAnnee=-1;`);
