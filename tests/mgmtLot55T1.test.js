@@ -148,6 +148,12 @@ test('Lot 55 T1 — le carnet lit les traces disponibles sans recalculer les sai
   assert.equal(carnet.soirees.length,1);
   assert.equal(JSON.stringify(c.mgmtCarnetLire({})),JSON.stringify({champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]}));
 });
+test('Lot 55 T1 — le carnet lit aussi les primes consignées dans les faits historiques',()=>{
+  const c=charger(),m={hist:[{c:120,a:{id:'f',name:'A'},b:{id:'b',name:'B'},winner:'A'}],facts:[{k:'prime',a:'f',fight:0,c:120,nom:'Combat de la soirée',montant:250}]};
+  const carnet=c.mgmtCarnetLire(m);
+  assert.equal(carnet.primes.length,1);
+  assert.deepEqual(JSON.parse(JSON.stringify(carnet.primes[0])),{nom:'Combat de la soirée',montant:250,jour:120,combattant:'f'});
+});
 test('Lot 55 T1 — les records observés sont rendus dans le carnet sans mutation',()=>{
   const c=charger();
   c.mgmtRecords=m=>({unCombat:[{type:'Plus long combat',valeur:'25:00'}]});

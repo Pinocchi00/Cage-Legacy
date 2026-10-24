@@ -589,3 +589,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichier modifié : `tests/mgmtLot55T1.test.js` (régression de l'index des faits). Aucun changement de production, format de sauvegarde ou migration.
 - Les écarts restants ne sont pas résolus par ce test : le test lent `mgmtReleveReduit` n'a pas été lancé; les scénarios ne démontrent toujours pas trois saisons complètes jouées ni le chargement d'une fixture complète d'ancienne sauvegarde; l'intégralité de la fidélité visuelle aux planches n'est pas certifiée et le déclencheur suit le terme du contrat. Ces limites ne sont pas déclarées satisfaites.
 - Modifications étrangères `.opencode/agents/*` et `opencode.json` non incluses. Aucun écart nouveau à la fiche ni question pour Anthony.
+
+### Reprise 76
+
+- État initial contrôlé : branche conforme `p11-ceremonie-carnet`, HEAD `4e393e1`; seules les modifications d'outillage `.opencode/agents/*` et `opencode.json` étaient déjà présentes hors de la tranche.
+- Correction concrète du carnet : les primes déjà enregistrées comme faits historiques `k: 'prime'` dans `m.facts` étaient invisibles car la lecture ne cherchait que `m.hist[].primes`. Le carnet lit maintenant ces faits (libellé, montant, jour et combattant) sans recalculer les primes. Test ajouté : « Lot 55 T1 — le carnet lit aussi les primes consignées dans les faits historiques ».
+- Vérifications : `node --test tests/mgmtLot55T1.test.js` (37/37), `node tools/verif-versions.js origin/main` (aucun écart, 18 fichiers examinés), ESLint ciblé `mgmt-ceremonie.js` (vert), test présent dans `test` et `test:watch`. `sw.js`, altéré par le test, a été restauré depuis `origin/main` et n'est pas inclus.
+- Fichiers de cette reprise : `mgmt-ceremonie.js` (lecture des traces de primes), `index.html` (version de cache), `tests/mgmtLot55T1.test.js` (régression), cette fiche (compte rendu). Aucun changement de format de sauvegarde ni migration.
+- Limites toujours non certifiées : test lent `mgmtReleveReduit` non exécuté; pas de preuve de trois saisons complètes réellement jouées ni de chargement d'une fixture complète ancienne; fidélité visuelle intégrale aux maquettes non certifiée; cérémonie raccordée au terme du contrat et non à chaque anniversaire. Ces limites restent à considérer au bilan, malgré le test ciblé vert.
+- Les modifications étrangères `.opencode/agents/*` et `opencode.json` ne sont pas incluses.

@@ -55,7 +55,13 @@ function mgmtCarnetLire(m){
     return {fait:f,nom:laureat.name||laureat.nom||'Champion',div:f.div,jour:t.c};
   }).filter(Boolean);
   const espoirs=(Array.isArray(m.espoirs)?m.espoirs:[]).map(id=>{const f=roster.find(x=>x&&x.id===id);if(!f)return null;const rang=typeof mgmtDivisionRanking==='function'?(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===id)+1:0;return rang>0?{nom:f.name||f.nom||'Combattant',rang}:null;}).filter(Boolean);
-   const primes=(Array.isArray(m.hist)?m.hist:[]).flatMap(t=>Array.isArray(t.primes)?t.primes:[]);
+    const primes=(Array.isArray(m.hist)?m.hist:[]).flatMap(t=>Array.isArray(t.primes)?t.primes:[]);
+    /* Les primes effectivement jouées sont consignées comme faits, avec leur index de relevé. */
+    for(const f of Array.isArray(m.facts)?m.facts:[]){
+      if(!f||f.k!=='prime')continue;
+      const combat=Number.isSafeInteger(f.fight)?hist[f.fight]:null;
+      primes.push({nom:f.nom||f.id||'Prime',montant:Number.isFinite(f.montant)?f.montant:null,jour:f.c??(combat&&combat.c),combattant:f.a||null});
+    }
    const records=typeof mgmtRecords==='function'?mgmtRecords(m):null;
    return {champions,espoirs,prix,records:records&&Array.isArray(records.unCombat)?records.unCombat:[],defis:Array.isArray(m.defis)?m.defis.filter(d=>d&&d.etat==='fait'):[],primes,soirees:hist.filter(t=>t&&t.c!==undefined)};
 }
