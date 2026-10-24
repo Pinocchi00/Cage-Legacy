@@ -18,6 +18,7 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
       const n=jouer(w,1);if(!n)break;jouees+=n;
       w.eval('saveMgmt();G.mgmt=null;loadMgmt();');
       const ceremonies=w.eval('window.__lot62.ceremonies');
+      assert.equal(w.eval('window.__lot62.classements'),ceremonies,'chaque clôture annuelle accompagne exactement un calcul de cérémonie');
       if(ceremonies>=3)break;
     }
      const result=w.eval(`(()=>{const m=G.mgmt;const prix=m.roster.flatMap(f=>(f.prixAnnee||[]).map(p=>p.annee));const avant=JSON.stringify(m.guerre);return {annees:m.guerre&&m.guerre.anneeTraitee||0,prix,valid:validateMgmt(m),hist:m.hist.length,jour:m.cal.jour,avant,apres:JSON.stringify(m.guerre),liens:scr_mgmt_accueil(),compteurs:window.__lot62}})()`);
