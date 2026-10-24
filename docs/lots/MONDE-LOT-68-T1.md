@@ -14,6 +14,15 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 
 ## Compte rendu
 
+### Reprise du 24/10/2026 — reprise 52
+
+- Branche vérifiée : `fid-fiches`. L'historique contient déjà plusieurs commits de livraison du lot (`62636e79` en tête) ; `git status` ne signale que des modifications préexistantes dans `.opencode/agents/*` et `opencode.json`, laissées hors tranche.
+- Les contrôles `CONTRÔLE` les plus récents du compte rendu (reprise 51) sont : fiche Statistiques, recruteur mission, retours et semaine chacun `{chevauchements:0,textesSous22px:0,debordent:[]}`. Les mesures ne valent pas ouverture du comparatif.
+- L'outil d'image et le guide temporaire ne sont pas accessibles via les chemins de lecture autorisés de cette session. Je n'affirme donc ni capture fraîche ni différence visuelle observée. Les écrans ajoutés/à scènes manquantes (arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs, records) restent sans mesure de géométrie dans ce contexte ; l'Aperçu n'a pas de contrôle distinct documenté.
+- Les captures historiques hors périmètre restent accueil `{chevauchements:0,textesSous22px:1}`, actualités `{1,3}`, tonposte `{6,0}`, bilan `{1,0}` ; aucune de leurs sources n'a été modifiée.
+- Cette reprise n'ajoute pas de code de jeu : les quatre scènes mesurables sont déjà à zéro selon le contrôle précédent et aucune autre mesure exploitable n'est disponible pour corriger sans supposition. Comparaison visuelle et mesures dédiées restent incomplètes. Aucune migration de sauvegarde ; aucun bump `?v=` requis. Les tests ciblés sont à relancer avant livraison.
+- Écart à la fiche : le critère universel de contrôle/correction ainsi que l'ouverture des comparatifs ne sont pas établis pour tous les écrans. Pas de `TOUT_EST_FINI`.
+
 - `ui-cadre.css` : remplacement des sélecteurs `:nth-child` de colonnes de l'aperçu de la fiche par des sélecteurs adjacents explicites ; version `?v=` montée.
 - `tests/mgmtFicheStats.test.js` : test « Monde lot 68 T1 — colonnes de l’aperçu explicites, sans position nth-of-type ».
 - Test ciblé `node --test tests/mgmtFicheStats.test.js` : vert (9 tests). `node tools/verif-versions.js origin/main` : aucun écart.
