@@ -81,7 +81,7 @@ function scr_mgmt_ceremonie(){
     const cards=ordreCartes.map(id=>cartesParId.get(id)).filter(Boolean).map(p=>{const v=prix.find(x=>x.id===p.id),classe=p.id==='combattant'?'ce3-prix-combattant':'ce3-prix';return `<article class="${classe}"><h2>${mgmtCeremonieEchapper(p.titre)}</h2>${v?`<strong>${mgmtCeremonieEchapper(v.nom)}</strong><p>${mgmtCeremonieEchapper(v.phrase)}</p>`:`<p class="ce3-prix-vide">Aucun candidat cette année.</p>`}</article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
-    const bilan=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m).find(o=>o.estSplit):null;
+    const bilan=typeof mgmtOrgClassement==='function'?(mgmtOrgClassement(m)||[]).find(o=>o.estSplit):null;
     const rang=bilan&&Number.isFinite(Number(bilan.rang))?Number(bilan.rang):null;
     const nomsClassement=Array.isArray(classement)?classement.map(o=>mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')).join(', '):'';
       const ordinal=['','PREMIÈRE','DEUXIÈME','TROISIÈME','QUATRIÈME','CINQUIÈME','SIXIÈME','SEPTIÈME','HUITIÈME'][rang]||'—';
