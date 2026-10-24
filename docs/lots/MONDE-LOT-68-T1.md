@@ -210,3 +210,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun changement JS/CSS, migration de sauvegarde ou bump `?v=`. `tests/mgmtReleveReduit.test.js` non relancé.
 - État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, meilleurs et records : tests structurels/CSS partiels accumulés ; la vérification visuelle comparative requise n'a pas été réalisée et aucune différence précise n'est affirmée sans observation des images. Les changements visuels demandés restent inachevés.
 - Écart à la fiche : les cases 1 à 5 ne sont pas validées par capture et correction écran par écran. Aucun fichier temporaire de comparaison n'a pu être ouvert avec les outils disponibles pour cette reprise. Pas de `TOUT_EST_FINI`.
+
+### Reprise 26 du 24/10/2026
+
+- Branche `fid-fiches` confirmée, état vérifié : les modifications `.opencode/agents/*` et `opencode.json` restent hors tranche et ne sont pas incluses.
+- Arrivée / contrat : corrigé le texte fixe des trois issues de fin d'année pour reprendre la formulation complète de la planche (« À la fin de l’année, trois issues : … ») ; version `?v=` montée.
+- Vérification ciblée : `node --test tests/mgmtFicheStats.test.js` (21/21 verts). Pas de changement de test requis pour ce changement de texte fixe ; aucune migration.
+- Comparaison de capture non réalisée dans cette reprise : aucun visuel n'est revendiqué. État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records n'ont toujours pas été validés par une comparaison visuelle ouverte ; les corrections antérieures restent documentées plus haut. Pour ces écrans, fidélité visuelle et écarts d'image précis non établis.
+- Écart : la modification textuelle du contrat n'achève pas les cases visuelles de la fiche. Les vérifications versions/lint et la livraison sont à finir avant tout bilan final. Aucun `TOUT_EST_FINI`.
