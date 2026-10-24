@@ -24,6 +24,7 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Réglé la taille du nom de la première carte à 80 px (les deux autres restent à 64 px) et remis les colonnes de mouvements de la suite aux largeurs de la maquette (120/130 px), avec une identité capable de revenir à la ligne. Version de cache CSS augmentée.
 - Captures 1920×1080 avant/après : `lendemain` donne après changement `grosBlocs=20`, chevauchements 0, textes sous 22 px 0, débordements aucun. `lendemainSuite` garde `grosBlocs=17`, chevauchements 0, textes sous 22 px 0, mais quatre débordements automatiques (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). Cet écart de contenance n'est pas déclaré résolu.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Capture comparative générée à `C:/Users/antho/AppData/Local/Temp/shots/`; la lecture directe des PNG n'est pas revendiquée. Aucune donnée ni sauvegarde modifiée.
+- Un second essai de césure forcée des libellés de mouvement, suivi d'une nouvelle capture de la suite, laisse les quatre alertes inchangées. Écart persistant, aucune correction complète revendiquée.
 
 ### Reprise 10 — échelle du nom principal et capture — 24/10/2026
 
