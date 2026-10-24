@@ -1,5 +1,11 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 49
+
+- Branche `fid-organisation` confirmée ; `git log --oneline -12` montre les livraisons précédentes et l'arbre était propre avant cette reprise. Le protocole `shoot.js` a été lu et lancé pour Cérémonie après une retouche ciblée : le texte de la carte principale passe à 28 px et sa largeur max à 440 px, comme la maquette. `cmp-ceremonie.png` régénéré hors dépôt ; le contrôle rapporte 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=19,3 %` (score moyen 26,7). Le PNG n'a pas été ouvert visuellement par l'outil disponible.
+- `node --test tests/mgmtLot55T1.test.js` passe 46/46 ; `node --test tests/mgmtLot57T1.test.js` passe 33/33 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. CSS cache bumpé via `_bump.js`; `sw.js` généré restauré depuis `origin/main` et exclu. Aucun changement de sauvegarde.
+- Fichiers de cette reprise : `ui-cadre.css` (typographie de la carte combattant), `index.html` (version CSS), cette fiche. Captures avec prix réels dans le navigateur non produites ; le test Lot 55 couvre uniquement le rendu des prix synthétiques. Les défauts documentés sur Guerre, Croissance, Carnet et Bilan ne sont pas réinspectés/corrigés ici. La tranche reste inachevée : je ne revendique pas `TOUT_EST_FIN`.
+
 ## Compte rendu — reprise 38
 
 - Branche `fid-organisation` confirmée ; les commits antérieurs sont présents et l'arbre de travail était propre. Le protocole de capture est lisible depuis le shell. Capture individuelle cérémonie exécutée : contrôle automatique `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=20,8 %`, score moyen 29,6. Le seuil demandé ≤20 % reste donc manqué.
