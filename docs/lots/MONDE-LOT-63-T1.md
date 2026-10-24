@@ -245,6 +245,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ### Reprise 9 — livraison finale (24/10/2026)
 
+- Reprise actuelle : validation fraîche réussie — `node --test tests/mgmtLot63T1.test.js` (9/9), `node --test tests/mgmtReleveReduit.test.js` (6/6, 1 908 745 octets), `node tools/verif-versions.js origin/main` (aucun écart), ESLint global et présence dans `test`/`test:watch` (`true,true`).
+- Pas de modification fonctionnelle ni de sauvegarde ; aucune migration. Les changements de tranche sont déjà commités. Couverture connue : les tests préparent chaque fait après création par le chemin réel, sans prouver leur production naturelle par chacun des systèmes du jeu.
+- Modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et cache `index.html` étrangères et exclues ; cette fiche seule sera commitée pour le bilan.
+
 - Branche `p8-apres`, historique et statut vérifiés. Les changements fonctionnels de la tranche sont déjà commités ; aucune modification fonctionnelle non committée à reprendre. La seule modification de tranche réalisée ici est cette entrée de compte rendu.
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; les scripts `test` et `test:watch` incluent bien `mgmtLot63T1` (`true,true`).
 - Aucun format de sauvegarde modifié ni migration. Les fichiers de production, catalogue, affichage Accueil/presse, mouvements d'organisation et test de tranche restent ceux des commits antérieurs. Écart de couverture connu : les tests déclenchent isolément les faits des familles sur le parcours réel, sans démontrer que chaque système opérationnel les génère naturellement. Aucun nouveau point à signaler à Anthony.
