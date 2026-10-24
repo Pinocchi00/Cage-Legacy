@@ -12,4 +12,13 @@ Branche : `p9-changer-org` (la branche courante de ce dossier ; commits ICI ; le
 **[ ] 5. Tests** (`tests/mgmtLot61T1.test.js`, dans `test` ET `test:watch`) : par le chemin réel (`mgmtPasseGenerer('split',{soirees:3})` + `mgmtMondeVivantGenerer` + des soirées jouées) : l'échange conserve les combattants ; aller **Split → autre → Split** rend une partie cohérente ; la partie jouée dans la nouvelle organisation (une soirée complète) ne plante pas ; aucune clé orpheline ; le rechargement est identique ; les empreintes de `tests/mgmtPasse.test.js` ne bougent pas pour une partie sans changement ; déterminisme (jamais `rnd()`).
 **[ ] 6. Fin.** `?v=`, versions, lint ; commit final `Monde lot 61 T1 : changer d'organisation` ; compte rendu honnête ; `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- `mgmt-poste.js` : ajout de l'échange des champs de simulation et de l'acceptation confirmée d'une offre.
+- `mgmt-ecran-poste.js` : ajout du bouton d'acceptation à côté du refus.
+- Tests ajoutés : aucun. Vérification ciblée exécutée : `tests/mgmtLot48T1.test.js` (9 tests verts).
+- Migration de sauvegarde : aucune ; le numéro de version n'a pas été modifié.
+- Écarts : le transfert générique des champs n'a pas été couvert par les tests de bout en bout exigés ; conséquences presse/rivalité, validation après échange et écran d'arrivée recalculé restent à finir. L'étude reste exacte sur la structure générale des sous-parties, mais ne détaillait pas les champs joueur à conserver.
+- Questions pour Anthony : aucune posée ; la tranche reste incomplète et ne revendique pas `TOUT_EST_FINI`.
+
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

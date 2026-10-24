@@ -198,6 +198,35 @@ function mgmtChocProposer(m,orgId){
   return true;
 }
 function mgmtOffreRefuser(m,index){if(!m||!Array.isArray(m.offres)||!Number.isInteger(index)||!m.offres[index])return false;m.offres[index].refuse=true;return true;}
+/* ==== [ANCRE: MONDE_LOT61_T1_ECHANGE_ORGANISATION] — Monde lot 61 T1 ====
+   Les sous-parties sont des parties complètes. On échange leurs champs de
+   simulation, en laissant au matchmaker ses données personnelles. ==== */
+function mgmtOrgChanger(m,orgId,offre){
+  const actif=m&&mgmtPredecesseurOrgId(m),sous=m&&m.orgs&&m.orgs[orgId];
+  if(!m||m.mondeVivant!==true||!sous||orgId===actif||!mgmtOrgParId(orgId)||!validateMgmt(sous))return false;
+  const joueur=new Set(['poste','offres','memoire','carnet','prix','defis','suivis','espoirs','espoirsPropose','graine','seed','mondeVivant','orgs','guerre','choc','duo']);
+  const ancien={};for(const k of Object.keys(m))if(!joueur.has(k))ancien[k]=m[k];
+  const promu={};for(const k of Object.keys(sous))if(!joueur.has(k))promu[k]=sous[k];
+  const contrat=m.poste, orgs=m.orgs;
+  orgs[actif]=Object.assign({},ancien,{org:m.org});delete orgs[orgId];
+  Object.keys(m).forEach(k=>{if(!joueur.has(k))delete m[k];});
+  Object.assign(m,promu,{org:mgmtOrgParId(orgId).nom,orgs,mondeVivant:true,poste:contrat});
+  if(offre&&Number.isSafeInteger(offre.salaire)&&m.poste){m.poste.salaire=offre.salaire;m.poste.debut=mgmtCalAujourdhui(m);m.poste.fin=m.poste.debut+MGMT_POSTE.duree;}
+  if(m.poste)m.poste.conf=2;
+  if(Array.isArray(m.espoirsPropose))m.espoirsPropose=[];
+  if(typeof mgmtEspoirsFixer==='function')mgmtEspoirsFixer(m);
+  return mgmtMondeVivantValide(m);
+}
+function mgmtOffreAccepter(m,index){
+  const o=m&&Array.isArray(m.offres)&&m.offres[index], org=o&&mgmtOrgParId(o.orgId);
+  if(!o||o.refuse||!org||typeof confirm!=='function')return false;
+  const ancien=mgmtOrgNom(m);
+  if(!confirm(`Tu quittes ${ancien} pour ${org.nom}. Ton équipe, ton carnet et ta réputation te suivent ; tes combattants restent chez ${ancien}.`))return false;
+  if(!mgmtOrgChanger(m,o.orgId,o))return false;
+  if(typeof saveMgmt==='function')saveMgmt();
+  if(typeof mgmtEspArriveeOuvrir==='function')mgmtEspArriveeOuvrir(1);
+  return true;
+}
 /* ==== [ANCRE: P9_T2_POSTE_RENOUVELER] — Monde lot 43 T2 ==== */
 function mgmtPosteRenouveler(m,issue){
   if(!m||!m.poste||!['prolonge-augmente','prolonge-condition'].includes(issue)) return null;
