@@ -17,6 +17,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise 21 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Les changements déjà présents sous `.opencode/agents/*` et `opencode.json` sont hors tranche et n'ont pas été ajoutés.
+  - **Fichier modifié :** `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — une proposition refusee reste facultative et ne signe aucun changement », qui vérifie le refus d'une offre produite par le générateur lorsqu'une candidate existe, la validité de sauvegarde et l'absence de changement d'organisation. Si la partie n'a aucune candidate, le test vérifie le chemin sans offre.
+  - **Vérification :** `node --test tests/mgmtLot58T1.test.js` passe (6/6) ; `git diff --check` passe.
+  - **Non réalisé dans cette reprise :** l'écran et le déroulement jouable du choc, l'inscription du test dans les listes agrégées, le test du plafond et la fixture de sauvegarde ancienne. Cette reprise ne satisfait donc pas le critère final.
+
   - **Reprise 20 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Les changements préexistants dans `.opencode/agents/*` et `opencode.json` restent hors tranche et ne sont pas inclus.
   - **Fichiers modifiés :** `mgmt-poste.js` maintient une variable de fonction d'offre dédiée au texte et à la donnée `poste` (toujours « matchmaker ») ; `index.html` a la version de cache montée par `_bump.js` ; `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — les invitations conservent le poste et une formulation cohérente ».
   - **Tests/contrôles :** `node --test tests/mgmtLot58T1.test.js` passe (5/5). ESLint ciblé a échoué sur une référence globale indéfinie lors du premier essai ; la référence a été retirée, mais le lint n'a pas encore été relancé après correction. `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `ui-cadre.css`.
