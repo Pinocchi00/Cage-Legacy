@@ -256,3 +256,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers : `mgmt-soiree-cadre.js` (intitulé contextuel), `ui-cadre.css` (classe `so3-prochain`), `index.html` (versions), `tests/mgmtLot53T1.test.js` (présence du panneau), présente fiche.
 - Vérification : `node --test tests/mgmtLot53T1.test.js` — 14/14.
 - Écart restant : la mise en page d'ensemble `UniSoiree` n'est pas encore portée (composition trois panneaux `mf-*` conservée); la ligne dédiée de progression de salle n'est pas encore rendue.
+
+### Reprise 35 — progression de la salle entre combats
+
+- Fait : ajout d'une ligne de progression de salle au panneau d'entre-deux, calculée via la porte existante `mgmtSoireeSalle(m,index)`; elle affiche un taux dérivé du remplissage et une jauge, sans nouvelle clé sauvegardée.
+- Fichiers : `mgmt-soiree-cadre.js`, `ui-cadre.css`, `index.html` (versions), `tests/mgmtLot53T1.test.js` (rendu), présente fiche.
+- Vérification : test ciblé 14/14 réussi.
+- Écart : les proportions et la composition générale ne sont pas encore l'exacte grille de la maquette; la ligne est une adaptation dans le cadre existant.

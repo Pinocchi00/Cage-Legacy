@@ -174,6 +174,7 @@ function mgmtSoOuvertureHtml(m,prog){
 /** L'entre-deux et l'attente du principal : un seul écran, celui du combat qui vient. */
 function mgmtSoEntreHtml(m,prog,index,focus){
   const av=mgmtAvantCombat(m,focus);
+  const salle=mgmtSoireeSalle(m,focus), taux=Math.round(salle.part*100);
   const prec=prog[focus-1];
   const gauche=prec?mgmtSoResultatHtml(m,prec,'TERMINÉ')
     :`<div class="mf-so-ph"><div class="mf-so-s">CE SOIR · ${esc(prog.length)} COMBATS</div><div class="mf-so-h">OUVERTURE</div></div>`
@@ -181,7 +182,7 @@ function mgmtSoEntreHtml(m,prog,index,focus){
   const haut=`<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}`
     +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index,focus<index,focus):'','choisi','mf-so-c')
     +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
-  return `<div class="so3-soiree">${haut}${mgmtSoBandeHtml(prog,index,focus)}</div>`;
+  return `<div class="so3-soiree">${haut}<div class="so3-salle" aria-label="Salle à ${esc(taux)} pour cent"><span>LA SALLE MONTE</span><div class="so3-salle-piste"><i style="width:${esc(taux)}%"></i></div><b>${esc(taux)}%</b></div>${mgmtSoBandeHtml(prog,index,focus)}</div>`;
 }
 /* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
 function mgmtSoResultatSeulHtml(m,p){
