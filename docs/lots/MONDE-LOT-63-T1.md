@@ -7,6 +7,13 @@
 - Aucun changement de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé : son dernier compte rendu disponible indique 1 908 745 octets et réussite. Limite de couverture inchangée : les familles sont déclenchées à partir de faits préparés sur une partie créée par le parcours réel, sans preuve que tous les systèmes opérationnels produisent naturellement chacun de ces faits.
 - Cette reprise ne change que le compte rendu de la fiche ; aucun écart nouveau ni question pour Anthony.
 
+### Reprise 6 — contrôle inter-lots (24/10/2026)
+
+- Branche `p8-apres` confirmée. Le code et les tests de tranche sont déjà commités ; aucune modification fonctionnelle n'était en attente.
+- La suite inter-lots prescrite passe **130/130** : `mgmtLot54T1`, `mgmtLot63T1`, `mgmtActualitesEcran`, `mgmtLot55T1`, `mgmtLot57T1`, `mgmtLot48T1` et `mgmtLot56T1`. Les deux régressions signalées du lot 54 (rivalité enregistrée et absence de répétition sur cinquante semaines) sont vertes.
+- `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde ni migration.
+- Le merge `origin/main` demandé reste à faire par le superviseur ; les précédents contrôles consignent que l'environnement bloque la commande `git merge`. Les changements locaux des agents, `opencode.json` et `sw.js` sont étrangers à cette tranche et ne sont pas inclus. Pas de nouveau changement de couverture ni question pour Anthony.
+
 ### Reprise 6 — validation ciblée (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les changements fonctionnels de la tranche sont déjà commités. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` ne relève aucun écart, `node_modules/.bin/eslint .` passe, et le test est bien référencé dans `test` et `test:watch` (`true,true`).
