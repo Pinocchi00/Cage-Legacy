@@ -137,6 +137,23 @@ test('Monde lot 54 T1 — le catalogue de l’après garde une formulation disti
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — l’après ne formule une revanche qu’après une demande enregistrée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const result=w.eval(`(()=>{
+      const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id);
+      m.lastEvent={cycle:m.cycle,fights:[],touched:[]};m.hist.push({c:m.cycle,a:{id:a.id},b:{id:b.id}});
+      const sans=Array.from({length:80},(_,i)=>mgmtLendemainApres(m,m.cycle+i+1)).flat().filter(x=>x.famille==='revanche');
+      m.facts.push({c:m.cycle,k:'demande',a:a.id,target:b.id,want:'revanche'});
+      const avec=Array.from({length:80},(_,i)=>mgmtLendemainApres(m,m.cycle+i+1)).flat().filter(x=>x.famille==='revanche');
+      return {sans:sans.length,avec:avec.map(x=>x.texte),a:a.name||a.last,b:b.name||b.last};
+    })()`);
+    assert.equal(result.sans,0);
+    assert.ok(result.avec.some(text=>text.includes('revanche')));
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — l’après ne nomme une suspension que si la soirée l’a enregistrée',()=>{
   const w=newGameWindow({runMain:true});
   try{

@@ -184,3 +184,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 22/22 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé sur le fichier de production passe. Le cache du script est monté.
 - Aucun nouvel état de sauvegarde. Les limites des cases 1 et 3 restent les suivantes : reproduction complète de toutes les valeurs/layouts de planche, contextualisation de toutes les familles T3 aux faits et mémoire éditoriale stricte anti-répétition sur 50 soirées. Ces critères ne sont pas déclarés achevés.
 - Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` étrangères à la tranche, exclues.
+
+### Reprise — réactions de revanche conditionnées (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : le message de la famille « revanche » n'est plus proposé par défaut. Il n'apparaît que si les faits de la soirée contiennent une demande `want:'revanche'` du combattant ; le rendu nomme le rival lorsque l'identifiant cible est résolu. Les demandes ne déclenchent donc plus une réaction inventée.
+- `tests/mgmtLot54T1.test.js` : test ajouté « Monde lot 54 T1 — l’après ne formule une revanche qu’après une demande enregistrée » ; test ciblé complet : 23/23. Cache JS monté par `node tools/_bump.js`.
+- Aucun nouvel état de sauvegarde. Les autres manques demeurent : toutes les valeurs/layouts des planches ne sont pas démontrées, et T3 ne contextualise pas encore intégralement les interpellations, réseaux et réactions des autres organisations. Le test lent `mgmtReleveReduit.test.js` n'a pas été lancé.

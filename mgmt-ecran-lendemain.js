@@ -275,6 +275,7 @@ function mgmtLendemainApres(m,semaine){
   const stream=mgmtIdentiteStream(combattants.map(f=>f.id).sort().join('|'),'lendemain-apres|'+semaine,m);
   const decal=Math.floor(stream()*combattants.length), n=Math.min(3,1+Math.floor(stream()*3)), result=[];
   const touches=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
+  const faits=Array.isArray(m.facts)?m.facts.filter(x=>x&&x.c===cycleSoiree):[];
   const famillesUtilisees=new Set();
   for(let i=0;i<Math.min(n,combattants.length);i++){
     const f=combattants[(decal+i)%combattants.length], nom=f.name||f.last||'Combattant';
@@ -288,7 +289,19 @@ function mgmtLendemainApres(m,semaine){
     if(item.famille==='suspension'&&!touches.some(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
     /* La semaine fait partie du fait temporel : elle distingue une reprise
        ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */
-    result.push({famille:item.famille,texte:`${item.texte.replaceAll('{nom}',nom)} (semaine ${semaine})`,relu:false});
+    let texte=item.texte.replaceAll('{nom}',nom);
+    if(item.famille==='interpellation'){
+      const appel=faits.find(x=>x.k==='discours'&&x.a===f.id&&typeof x.target==='string');
+      if(!appel) continue;
+      const cible=mgmtFighterById(m,appel.target);
+      texte=`Après son interpellation, ${nom} attend une réponse de ${cible?cible.name:appel.target}.`;
+    } else if(item.famille==='revanche'){
+      const demande=faits.find(x=>x.k==='demande'&&x.a===f.id&&x.want==='revanche');
+      if(!demande) continue;
+      const cible=mgmtFighterById(m,demande.target);
+      texte=`Après sa demande, ${nom} veut une revanche${cible?' contre '+cible.name:''}.`;
+    }
+    result.push({famille:item.famille,texte:`${texte} (semaine ${semaine})`,relu:false});
   }
   return result;
 }
