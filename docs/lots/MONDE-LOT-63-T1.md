@@ -26,6 +26,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 7 — contrôle final de livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits de production et de tests de la tranche sont déjà présents ; aucune modification fonctionnelle non commitée à reprendre.
+- Vérifications relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; le test lent `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe. Inclusion dans `test` et `test:watch` confirmée (`true,true`).
+- Pas de nouvelle donnée de sauvegarde ni de migration. La limite de couverture demeure : les dix faits sont testés individuellement sur une partie issue du chemin réel, sans preuve que chaque système opérationnel génère naturellement ces faits.
+- Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et le changement de version de cache local dans `index.html` sont hors tranche et restent exclues. Fichier modifié pour ce bilan : cette fiche uniquement.
+
 ### Reprise 33 — livraison finale (24/10/2026)
 
 - Reprise sur `p8-apres`, HEAD `1ffab99` ; code de production et tests de la tranche déjà commités. Aucun fichier fonctionnel non commité. Cette reprise consigne les vérifications ; les changements locaux `.opencode/`, `opencode.json`, `sw.js` et la variation de cache `index.html` restent exclus.
