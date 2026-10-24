@@ -243,3 +243,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Captures : l'accès à `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est bloqué par les permissions ; aucun comparatif n'a pu être ouvert. Pas de correction ni de validation visuelle revendiquée.
 - État écran par écran : fiche Aperçu/Statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, Meilleurs et Records restent visuellement non comparés ; certains changements et tests structurels sont décrits dans les reprises antérieures, mais les cases de fidélité par captures et corrections ne sont pas achevées. Écarts visuels précis non établis.
 - Aucun changement applicatif, test ou migration dans cette reprise ; aucun bump `?v=` requis. Écart principal : fidélité visuelle et protocole capture→ouverture→correction incomplets, donc la livraison finale et `TOUT_EST_FINI` ne sont pas atteints.
+
+### Reprise 30 du 24/10/2026
+
+- Branche et historique vérifiés : `fid-fiches`, tête `cd33270`. Aucun fichier de tranche n'était modifié ; les changements présents dans `.opencode/agents/*` et `opencode.json` sont hors périmètre et préservés.
+- Instructions de capture lues à `%TEMP%/p1/shoot/LISEZMOI.txt`. L'outil gère un sous-ensemble des scènes ; arrivée, relevé, chiffres, menu et classements exigent des scènes ajoutées. Les images comparatives sont générées hors du dépôt.
+- Une tentative de test de couverture des classes fiche a été retirée après échec sur des hooks qui ne sont pas des sélecteurs CSS autonomes (`mf-fi-cage`, puis `mf-fi-bas`). Le test naïf aurait été trompeur ; aucun changement de test n'est conservé.
+- État écran par écran : fiche, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records restent sans comparaison visuelle ouverte. Les tests structurels antérieurs demeurent décrits dans les reprises précédentes ; aucune fidélité visuelle n'est revendiquée.
+- Aucun fichier applicatif ou test modifié, aucune migration et aucun bump `?v=`. Aucune correction visuelle ni nouveau commit de code dans cette reprise. Les cases visuelles 1 à 5 restent inachevées ; pas de `TOUT_EST_FINI`.
