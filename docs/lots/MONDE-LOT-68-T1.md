@@ -403,6 +403,15 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Aucun défaut nouveau vérifiable dans le code ou les tests ciblés ne justifie une retouche applicative à l'aveugle. Aucun JS/CSS, test ou sauvegarde modifié ; aucun bump `?v=` ni migration. Pas de fichier de tranche en attente de commit.
 - État écran par écran : fiche, recruteur, retours et semaine ont des mesures historiques de contrôle à zéro (reprises 32/34/38), sans validation comparative ouverte ; Aperçu n'a pas de mesure distincte établie. Arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records restent sans mesure propre ni comparaison exploitable. Aucune différence visuelle précise n'est inventée.
 
+### Reprise 49 du 24/10/2026 — contrôles frais sans image
+
+- Branche confirmée `fid-fiches`, tête initiale `2a23394e`. Les seuls fichiers modifiés à l'ouverture (`.opencode/agents/*`, `opencode.json`) sont hors tranche ; aucun changement non committé de code applicatif de cette tranche.
+- Le guide du captureur a été lu. Contrôles frais individuels : fiche `{chevauchements:0,exemples:[],textesSous22px:0,debordent:[]}` ; recruteur `{0,[],0,[]}` ; retours `{0,[],0,[]}` ; semaine `{0,[],0,[]}`. Fiche confirme donc que le bouton de suivi et son compteur ne se chevauchent pas.
+- Contrôles de contexte : accueil `{0, textesSous22px:1, debordent:["LA SEMAINE DU COMBAT","Ouvrir la semaine du com","Le classement des huit","Ton poste"]}` ; actualités `{1, exemples:["« Tout est lu » x « Tout marquer comme lu »"], textesSous22px:3, debordent:[]}` ; tonposte `{6, textesSous22px:0, debordent:["IL ATTEND DE VOIR","« Je veux voir la suite."]}` ; bilan `{1, exemples:["« REMERCIÉ » x « Il manque 3 combats en carte »"], textesSous22px:0, debordent:[]}`. Ce sont des écrans des lots 64/67 explicitement exclus ; aucun de leurs fichiers n'est modifié ici.
+- Les chiffres de similarité ne sont pas une validation visuelle. Les comparatifs PNG n'ont pas été ouverts. Le captureur ne propose pas les scènes arrivée contrat/espoirs, relevé, chiffres, menu, meilleurs et records ; leurs contrôles géométriques restent non établis dans cette reprise. Pas d'écart visuel inventé.
+- Aucun défaut géométrique neuf dans les quatre écrans de tranche mesurables ; aucune correction applicative à l'aveugle. Tests et audit à relancer. Migration et bump `?v=` : aucun changement applicatif.
+- État honnête : fiche, recruteur mission/retours et semaine sont à zéro sur les contrôles disponibles. Les autres écrans de la tranche gardent les limites documentées ci-dessus ; le contrôle des écrans hors périmètre révèle les anomalies ci-dessus sans autoriser de les modifier. Fidélité comparative complète et cases de capture non achevées ; `TOUT_EST_FIN` non revendiqué.
+
 ### Reprise 43 du 24/10/2026
 
 - Branche contrôlée : `fid-fiches`. `git log --oneline -12` et `git status` consultés ; les changements `.opencode/agents/*` et `opencode.json` restent hors tranche. Aucun changement applicatif non committé à reprendre.
