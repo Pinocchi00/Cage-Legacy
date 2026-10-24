@@ -187,6 +187,7 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     jouerSoirees(w,1);
     const html=w.eval(`mgmtLendemainSuiteHtml(G.mgmt)`);
     assert.match(html,/LE LENDEMAIN · LA SUITE/);
+    assert.match(html,/aria-label="Le lendemain, la suite"/);
     assert.match(html,/CAGE HEBDO/);
     assert.match(html,/LES MOUVEMENTS/);
     assert.match(html,/TOUS LES RÉSULTATS/);

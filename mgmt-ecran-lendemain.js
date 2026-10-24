@@ -243,7 +243,7 @@ function mgmtLendemainSuiteHtml(m){
   const presse=mgmtLendemainPresseHtml(m);
   const resultats=mgmtLendemainResultatsHtml(m);
   const mouvements=mgmtLendemainMouvementsHtml(m)+mgmtLendemainConstatsHtml(m);
-  return `<section class="ld3-suite"><h2 class="ld3-suite-title">LE LENDEMAIN · LA SUITE</h2>`
+  return `<section class="ld3-suite" aria-label="Le lendemain, la suite"><h2 class="ld3-suite-title">LE LENDEMAIN · LA SUITE</h2>`
     +`<div class="ld3-suite-press"><h3 class="ld3-suite-heading">CAGE HEBDO</h3>${presse}</div>`
     +`<div class="ld3-suite-moves"><h3 class="ld3-suite-heading">LES MOUVEMENTS</h3>${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div>`
     +`<div class="ld3-suite-results"><h3 class="ld3-suite-heading">TOUS LES RÉSULTATS</h3>${resultats}</div></section>`;

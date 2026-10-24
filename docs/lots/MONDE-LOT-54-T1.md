@@ -157,3 +157,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `ui-cadre.css` : réglages typographiques distincts sur les cartes des trois moments, renforçant la hiérarchie visuelle de la planche (surprise dominante, finition et guerre secondaires) ; version de cache montée. Écart aux dimensions exactes de la maquette toujours présent : le cadre applicatif actif n'est pas une reproduction pixel-perfect de la planche.
 - `tests/mgmtLot54T1.test.js` : test « Monde lot 54 T1 — les moments reprennent la hiérarchie typographique de la planche ». Tests ciblés : 22/22 ; `node tools/verif-versions.js origin/main` sans écart. ESLint ciblé : aucune erreur de production ; le fichier de test est ignoré par la configuration.
 - Aucun état de sauvegarde ajouté. T3 reste partiel (familles non toutes déclenchées par leurs faits réels) et les deux planches ne sont toujours pas reproduites intégralement ; mouvements/résultats et navigation existent mais ne démontrent pas toutes les valeurs spécifiées. Les critères 1 et 3 ne sont pas déclarés achevés. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` exclues.
+
+### Reprise — région accessible de la suite (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : la section de suite reçoit un nom accessible explicite (`aria-label`) sans modifier son contenu ni sa navigation.
+- `tests/mgmtLot54T1.test.js` : le test « Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et carte complète » vérifie aussi le nom de région. Tests ciblés : 22/22 ; `node tools/verif-versions.js origin/main` sans écart ; ESLint ciblé passe ; `package.json` contient le test dans `test` et `test:watch`.
+- Toujours non terminés : les cases 1 et 3 ne satisfont pas exhaustivement la fidélité complète aux planches et le T3 ne déclenche pas toutes les réactions selon les faits réels. Pas de nouvelle sauvegarde. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été exécuté.
