@@ -172,6 +172,23 @@ function mgmtLendemainResultatsHtml(m){
   return html;
 }
 
+/* ==== [ANCRE: MONDE54_T1_MOMENTS] — Monde lot 54 T1 ==== */
+/** Trois combats racontés par leur nature, le premier restant l'histoire la
+ *  plus lourde de P8 T1. Les liens réutilisent strictement le Revoir existant. */
+function mgmtLendemainMomentsHtml(m){
+  const hist=Array.isArray(m.hist)?m.hist:[], stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
+  const used=new Set(), picks=[];
+  const add=(label,find)=>{const s=stories.find(x=>!used.has(x.c)&&find(x,hist[x.c]));if(s){used.add(s.c);picks.push({label,s});}};
+  add('LA SURPRISE',s=>s.type==='surprise');
+  add('LA FINITION',(_s,t)=>t&&['ko','sub','stop'].includes(t.family));
+  add('LA GUERRE',(_s,t)=>t&&t.rounds>=5);
+  return picks.map(({label,s})=>{const t=hist[s.c];if(!t)return '';const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
+    const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
+    return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+  }).join('');
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Les constats factuels de la soirée (§1) : entrées et sorties du top 15
  *  mondial — la seule loi de classement (mgmtDivisionRanking, ancre
  *  MGMT_LOT2_CLASSEMENT, recalcul au cycle explicite T6-1), limitée aux
@@ -253,6 +270,7 @@ function scr_mgmt_lendemain(){
     +`<div class="mgmt-ld-cols">`
     +`<section class="mgmt-ld-pane mgmt-ld-results">`+mfPanneau(`<div class="mf-sem-in">`
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.results)}</h3>`
+      +mgmtLendemainMomentsHtml(m)
       +mgmtLendemainResultatsHtml(m)
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
       +`</div>`,'normal','mf-sem-p')+`</section>`

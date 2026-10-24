@@ -1846,3 +1846,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .se-combat{padding:10px 0;border-bottom:1px solid rgba(233,230,225,.16)}
 .se-diminue{font-size:22px;color:#F0B220}
 .se-card{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
+.ld3-moment{box-sizing:border-box;padding:16px 18px;margin:0 0 10px;background:#121010;border:2px solid rgba(233,230,225,.5);display:flex;flex-direction:column;gap:8px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.ld3-label{font:800 26px/1 var(--mgmt-font-display);color:var(--mf-jaune)}
+.ld3-names{font:800 32px/1.05 var(--mgmt-font-display);color:#E9E6E1}
+.ld3-detail{font:600 22px/1.2 var(--mgmt-font-body);color:rgba(233,230,225,.74)}

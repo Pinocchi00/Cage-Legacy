@@ -31,14 +31,16 @@ test('Monde lot 54 T1 — brief du 22/10, P8 : la victoire d’un 13-1 sur le n�
       const cycle=m.cycle, fight={c:cycle,slot:'main',rounds:3,seed:0,round:3,winner:'A',family:'dec',
         a:side(f),b:side(other),s:{d:900,c:[]}};
       m.hist.push(fight);m.lastEvent={cycle,fights:[{a:f.id,b:other.id,winner:'A',family:'dec'}],touched:[],finance:{spectateurs:0,recette:0}};
-      const stories=mgmtHistoiresSoiree(m,m.eventsPlayed), press=mgmtMediasLendemain(m);
+      const stories=mgmtHistoiresSoiree(m,m.eventsPlayed), press=mgmtMediasLendemain(m), moments=mgmtLendemainMomentsHtml(m);
       return {top:top.id,first:stories[0]&&stories[0].type,winner:stories[0]&&stories[0].a,
-        press:press[0]&&press[0].texte};
+        press:press[0]&&press[0].texte,moments};
     })()`);
     assert.notEqual(r.missing,true,'la partie générée contient deux combattants dans la division');
     assert.equal(r.first,'surprise');
     assert.equal(r.winner,r.top);
     assert.ok(r.press,'la presse du lendemain produit un premier titre');
+    assert.match(r.moments,/ld3-moment/);
+    assert.match(r.moments,/Revoir/);
   }finally{w.close();}
 });
 
