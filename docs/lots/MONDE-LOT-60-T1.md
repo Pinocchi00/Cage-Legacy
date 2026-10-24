@@ -13,11 +13,11 @@ Branche : `p5-signer-suivre` (la branche courante de ce dossier ; commits ICI ; 
 
 ## Compte rendu
 
-- Modifiés : `mgmt-recruteur.js` garde le suivi idempotent et utilise la porte `mgmtContratSigner` lorsqu'un agenda est actif ; `mgmt-ecran-recruteur.js` affiche les états et le manque de caisse ; `mgmt-ecran-recruteur.css` style l'état ajouté.
-- Tests : `tests/mgmtLot42T1.test.js` passe ; 4/5 tests de `tests/mgmtLot42T2.test.js` passent. Le test de signature hostile reste en échec (la signature ne réussit pas sur son scénario avec agenda).
-- Cases non terminées : ouverture de l'écran Contrats pour le profil, retrait au marché après signature, approche rivale déterministe et presse, tests complets `mgmtLot60T1.test.js`, sauvegarde et partie neuve.
-- Écart à la fiche : pas d'approche d'organisation ni de texte presse ajouté ; aucune migration de sauvegarde.
-- Vérifications : `node tools/verif-versions.js origin/main` passe. Les tests ciblés historiques montrent l'échec décrit ; pas de lint global exécuté.
-- Questions pour Anthony : aucune question de spécification. La tranche reste inachevée, principalement parce que le branchement UI des contrats et le cycle d'approche ne sont pas encore réalisés.
+- Modifié dans ce tour : `mgmt-recruteur.js` ajoute `mgmtRecruteurProfilDisponible`, porte commune permettant de rejeter un profil déjà dans l'effectif ou le marché extérieur ; signature, suivi idempotent et présentation des états existaient déjà dans les commits précédents.
+- Tests : `node --test tests/mgmtLot42T1.test.js` — 9 tests verts. `tests/mgmtLot60T1.test.js` n'existe pas encore ; les exigences de bout en bout ne sont donc pas validées.
+- Cases non terminées : ouverture explicite de l'écran Contrats, retrait des profils signés du marché via la porte d'admission, approche rivale déterministe et presse, tests requis (dont sauvegarde/classement/échappement), vérification de partie neuve.
+- Écart : aucun écran supplémentaire ni migration de sauvegarde ajoutés. Cette tranche demeure inachevée ; `mgmtRecruteurProfilDisponible` n'est pas encore consommée par les écrans Contrats.
+- Vérifications : test ciblé historique P5 T1 vert ; aucun lint global ni audit versions exécuté dans ce tour.
+- Questions pour Anthony : aucune ; le travail restant est identifié et doit être implémenté, non soumis à arbitrage.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

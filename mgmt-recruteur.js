@@ -93,3 +93,9 @@ function mgmtRecruteurSuivre(m,idProfil){
   if(Array.isArray(m.suivis)&&m.suivis.includes(idProfil))return true;
   return mgmtSuivre(m,idProfil);
 }
+/* ==== [ANCRE: P5_T4_PROFIL_DISPONIBLE] — Monde lot 60 T1 ==== */
+function mgmtRecruteurProfilDisponible(m,idProfil){
+  if(!m||typeof idProfil!=='string')return false;
+  const profil=m.recruteur?.retours?.flatMap(r=>r.profils||[]).find(p=>p.id===idProfil);
+  return !!profil&&!m.roster?.some(f=>f.id===idProfil)&&!m.exterieur?.some(f=>f.id===idProfil);
+}
