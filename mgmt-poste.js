@@ -86,8 +86,17 @@ function mgmtOffresCreer(m){
   if(!m||m.mondeVivant!==true||!Array.isArray(MGMT_ORGANISATIONS)||!m.poste)return [];
   const ranks=mgmtOrgClassement(m)||[],active=mgmtPredecesseurOrgId(m),rang=(ranks.find(x=>x.id===active)||{}).rang||4;
   const pool=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(ranks.find(x=>x.id===o.id)||{}).rang||8}));
-  const candidats=pool.filter(x=>rang<=2?x.r<rang:x.r>rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r).slice(0,rang<=2?1:3);
-  m.offres=candidats.map(({o,r})=>({orgId:o.id,poste:'Matchmaker',salaire:3200+Math.max(0,8-r)*200,texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de matchmaker chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)}));
+  const candidats=pool.filter(x=>rang<=2?x.r<rang:x.r>rang).sort((a,b)=>Math.abs(a.r-rang)-Math.abs(b.r-rang)||a.r-b.r);
+  const graine=String(m.graine||m.seed||m.org||'split');
+  const cle=`offres:${graine}:${m.poste.saison}:${m.poste.fin}:${active}`;
+  const stream=typeof mgmtIdentiteStream==='function'?mgmtIdentiteStream(cle,'choix-offres',m):null;
+  const ordre=candidats.map(x=>({x,k:stream?stream():0})).sort((a,b)=>a.k-b.k||Math.abs(a.x.r-rang)-Math.abs(b.x.r-rang));
+  const nombre=Math.min(candidats.length,Math.max(2,Math.min(3,candidats.length)));
+  const salaireBase=m.poste.salaire;
+  m.offres=ordre.slice(0,nombre).map(({x:{o,r}})=>{
+    const delta=Math.min(0.3,Math.max(-0.3,(rang-r)/10));
+    return {orgId:o.id,poste:'Matchmaker',salaire:Math.max(0,Math.round(salaireBase*(1+delta))),texte:`${typeof o.patron==='string'&&o.patron.trim()?o.patron.trim():'Le matchmaker'} souhaite te confier le poste de matchmaker chez ${o.nom}.`,relu:false,refuse:false,raisons:mgmtPosteRaisons(m,o.id)};
+  });
   return m.offres;
 }
 /* ==== [ANCRE: P9_T4_ATTENDRE_OFFRES] — Monde lot 58 T1 ====
