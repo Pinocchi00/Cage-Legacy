@@ -80,6 +80,14 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Les limites des cases 1 et 3 restent celles décrites plus haut : malgré une seconde vue navigable, l'ensemble des deux planches n'est pas reproduit fidèlement ; mouvements et objectifs contractuels ne sont pas exhaustifs ; les lignes T3 ne disposent ni d'une garantie d'anti-répétition sur 50 soirées, ni d'une contextualisation de toutes les familles par les faits réels. Aucun changement fonctionnel n'a été effectué dans cette reprise de validation.
 - Aucun état de sauvegarde nouveau ni migration. Les tests ciblés et audits réussis ne suffisent pas à marquer la tranche terminée ; aucun `TOUT_EST_FINI` n'est revendiqué.
 
+### Reprise — robustesse des résultats malformés (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : le rendu « Tous les résultats » ignore désormais les éléments de combat absents ou dont les identifiants A/B ne sont pas des chaînes, sans perdre les lignes valides. Version de cache montée.
+- `tests/mgmtLot54T1.test.js` : le test existant « Monde lot 54 T1 — les résultats tolèrent une carte de soirée absente ou malformée » couvre maintenant une carte réelle contenant également des entrées corrompues ; intitulé conservé.
+- Vérifications : `node --test tests/mgmtLot54T1.test.js` passe 29/29 ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Aucun état de sauvegarde ni migration.
+- Écarts à la fiche : les cases 1 et 3 ne sont pas exhaustivement achevées malgré les deux vues navigables et les améliorations précédentes : composition/valeurs exactes des planches et mémoire éditoriale persistante T3 ne sont pas garanties. Le test lent `tests/mgmtReleveReduit.test.js` et `check:rapide` sont laissés au superviseur. Aucune question ouverte.
+- Les changements locaux préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et ne sont pas inclus.
+
 ### Reprise demandée — 24/10/2026
 
 - Journal consulté : HEAD `746bb50`, branche `p8-lendemain`. Aucun fichier de la tranche n'était modifié ; les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.

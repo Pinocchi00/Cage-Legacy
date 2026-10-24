@@ -10,16 +10,20 @@ test('Monde lot 54 T1 — les résultats tolèrent une carte de soirée absente 
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    jouerSoirees(w,1);
     const r=w.eval(`(()=>{
       const m=G.mgmt;
       const avant=mgmtLendemainResultatsHtml(m);
+      m.lastEvent.fights.push(null,{a:42,b:'invalide',winner:'A'});
+      const lignesMalformees=mgmtLendemainResultatsHtml(m);
       m.lastEvent={fights:null};
       const malforme=mgmtLendemainResultatsHtml(m);
       m.lastEvent=null;
       const absent=mgmtLendemainResultatsHtml(m);
-      return {avant,malforme,absent};
+      return {avant,lignesMalformees,malforme,absent};
     })()`);
     assert.equal(typeof r.avant,'string');
+    assert.equal(r.lignesMalformees,r.avant,'une entrée de combat malformée est ignorée sans perdre les résultats valides');
     assert.equal(r.malforme,'');
     assert.equal(r.absent,'');
   }finally{w.close();}
