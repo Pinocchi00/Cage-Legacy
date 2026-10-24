@@ -18,6 +18,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 52 — recapture et tests de non-régression — 24/10/2026
+
+- Confirmé la branche `fid-lendemain` et l'état Git : les commits fonctionnels de la tranche sont déjà présents jusqu'à `ec5d2e49`; aucun fichier de code/test de la tranche n'est en attente. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de la tranche et restent exclues.
+- Relu `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` et capturé séparément les deux écrans à 1920×1080. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, `grosBlocs` 18,4 %. `lendemainSuite` : chevauchements 0, textes sous 22 px 0, `grosBlocs` 17 %, mais quatre débordements de la colonne des mouvements (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »). Le critère visuel de la case 4 reste donc non satisfait ; aucun CSS n'a été modifié à l'aveugle.
+- `node --test tests/mgmtEcranLendemain.test.js` (7/7) et `node --test tests/mgmtLendemainDemo.test.js` (7/7) passent. `node tools/verif-versions.js origin/main` ne signale aucun écart. Pas de migration ni de changement fonctionnel/test dans cette reprise.
+- Avant/après : les vues recomposées et la navigation restent livrées dans l'historique ; le lendemain passe le contrôle automatique visuel, tandis que la suite garde quatre débordements mesurés. Écart explicitement non résolu ; pas de revendication `TOUT_EST_FINI`. Fichiers modifiés dans cette reprise : cette fiche uniquement (mesures et vérifications). Questions pour Anthony : aucune.
+
 ### Reprise 46 — contrôles d'écran et tests ciblés — 24/10/2026
 
 - Confirmé la branche `fid-lendemain` et l'historique : les changements fonctionnels de la tranche sont déjà commités (`f8d561b2` au sommet) ; aucun fichier de code de tranche n'était en attente. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et intactes.
