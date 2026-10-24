@@ -267,3 +267,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe ; présence du test dans `test` et `test:watch` confirmée (`true,true`).
 - Aucun changement de sauvegarde ni migration. Limite de couverture conservée : les tests préparent les faits familiaux séparément après création par le parcours réel, sans établir que tous les systèmes opérationnels les génèrent naturellement.
 - Seule cette fiche est incluse au commit de reprise. Les modifications étrangères `.opencode/agents/*`, `opencode.json`, `sw.js` et la différence de paramètre cache dans `index.html` restent exclues. Aucun nouvel écart ni question pour Anthony.
+
+### Reprise 3 — reprise finale (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status --short` consultés. Le code et les tests de tranche sont déjà dans l'historique ; aucun changement fonctionnel en attente.
+- Vérifications relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint global passe ; inclusion dans `test` et `test:watch` confirmée (`true,true`).
+- Aucune nouvelle donnée de sauvegarde, aucune migration. Limite conservée : les faits des dix familles sont préparés dans des scénarios ciblés issus du parcours réel, sans prouver que tous les systèmes les génèrent naturellement. Test lent et `check:rapide` laissés au contrôle superviseur conformément au contrôle rapide.
+- Cette fiche est le seul fichier de tranche modifié. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et cache de `index.html` restent étrangers et exclus du commit. Aucun nouvel écart ni question pour Anthony.
