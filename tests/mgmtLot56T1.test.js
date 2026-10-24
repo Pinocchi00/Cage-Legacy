@@ -20,6 +20,15 @@ test('Croissance — les franchissements sont publiés une seule fois et restent
   assert.ok(r.annonces.every(x=>x.relu===false));
 });
 
+test('Croissance — l’accueil déclenche les annonces et leur seconde visite ne les répète pas',()=>{
+  const win=newGameWindow({runMain:true});
+  try{
+    win.eval("setSeed(56);G.mgmt=mgmtDefault();G.mgmt.mondeVivant=true;G.mgmt.orgs={};G.mgmt.pop=100;G.mgmt.facts=[];scr_mgmt_accueil();");
+    const r=JSON.parse(win.eval(`(()=>{const premiere=G.mgmt.croissanceActus.length;scr_mgmt_accueil();return JSON.stringify({premiere,seconde:G.mgmt.croissanceActus.length,fil:mgmtActualites(G.mgmt).filter(x=>x.type==='croissance').length});})()`));
+    assert.equal(r.premiere,4);assert.equal(r.seconde,4);assert.equal(r.fil,4);
+  }finally{win.close();}
+});
+
 test('Croissance — les classes cr3 de l’écran ont des règles dédiées et aucun petit texte',()=>{
   const win=newGameWindow({runMain:true});
   const r=win.eval(`(()=>{setSeed(7);CL.mgmtEnter(1);CL.go('mgmt_organisation'); const html=document.getElementById('app').innerHTML; const classes=[...html.matchAll(/class="([^"]*cr3-[^"]*)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(x=>x.startsWith('cr3-'));return {classes,html,screen:G.screen};})()`);

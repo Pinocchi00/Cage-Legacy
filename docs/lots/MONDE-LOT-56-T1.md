@@ -37,6 +37,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Migration : aucune ; clé facultative `croissanceActus`, si présente validée/réparée. Questions pour Anthony : aucune. La tranche demeure **inachevée**.
 - Aucun `TOUT_EST_FINI`.
 
+### Reprise — reprise après e9e7b90 (24/10/2026)
+
+- Historique confirmé : `e9e7b90 Monde lot 56 T1 : la croissance visible` est déjà commité. Aucun fichier de tranche n'était non commité à la reprise; les modifications `.opencode/agents/*` et `opencode.json` sont des changements externes préexistants, laissés intacts.
+- Ajout de couverture de l'intégration existante des annonces à l'Accueil : le premier affichage publie les quatre marches qualifiées, le suivant ne les duplique pas et le fil de presse les expose. Test intitulé « Croissance — l’accueil déclenche les annonces et leur seconde visite ne les répète pas ».
+- Vérifications réussies : `node --test tests/mgmtLot56T1.test.js` (10/10), `node --test tests/mgmtPasse.test.js` (13/13, empreintes), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .`; le test figure dans `test` et `test:watch` (`true true`).
+- Critères encore incomplets : le calcul des paliers n'est pas relié aux capacités réelles du diffuseur ni à l'attrait des agents libres; le test de parcours réel ne démontre pas un franchissement provoqué par soirées (il valide la partie après en avoir joué une); absence d'empreinte ancienne explicitement dédiée dans le test de tranche; test `mgmtReleveReduit.test.js` non rejoué dans cette reprise; l'écran ne reproduit pas intégralement les valeurs et éléments exacts de la planche. Les effets vérifiés sont seulement salle et recruteur, et l'UI reste partielle. Aucun fichier de production modifié dans cette reprise.
+- Migration : aucune. Écarts et travail restant listés explicitement; la tranche ne remplit toujours pas tous les critères de fin et aucun `TOUT_EST_FINI` n'est revendiqué.
+
 ### Reprise du 24/10/2026 — effet incrémental salle
 
 - Modifié `mgmt-salles.js` : ajout du bonus additif au remplissage par palier de salle (1 % par niveau, plafond 3 %), activé uniquement pour monde vivant et transmis explicitement au calcul réel de la soirée. Anciennes parties/appels sans contexte inchangés.
