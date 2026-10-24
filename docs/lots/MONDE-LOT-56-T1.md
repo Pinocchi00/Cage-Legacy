@@ -193,3 +193,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node --test tests/mgmtReleveReduit.test.js` a été lancé avec un délai de 300 secondes et interrompu par la limite de l'outil. Le plafond de taille ne peut donc pas être revendiqué comme vérifié dans cette reprise.
 - État du code existant : salle, recruteur et droits du diffuseur disposent de raccordements; le contrôle du diffuseur reste une borne arithmétique, pas une assertion d'effet au cours d'une soirée. L'attrait des agents libres n'est pas branché. Le parcours testé crée et joue une soirée mais ne démontre pas de franchissement causé par celle-ci. La reproduction exacte de la maquette et l'empreinte dédiée de compatibilité ancienne restent à compléter.
 - Aucun changement de production n'a été fait dans cette reprise. Pas de migration. La tranche reste inachevée; aucun commit final ni `TOUT_EST_FINI` n'est revendiqué.
+
+### Reprise 9 — vérification au 24/10/2026
+
+- Branche `p11-croissance` confirmée. `git log --oneline -12` et `git status` consultés : aucun fichier de tranche non commité à reprendre ; seuls `.opencode/agents/*` et `opencode.json` sont modifiés et laissés intacts.
+- Vérifications ciblées exécutées : `node --test tests/mgmtLot56T1.test.js tests/mgmtPasse.test.js` passe (24/24, tests d'empreinte historiques compris). Le test de tranche inclut la génération via `mgmtPasseGenerer('split',{soirees:3})`, mais ne démontre pas qu'une soirée provoque un changement de palier.
+- État constaté : paliers, annonces d'accueil/fil, bonus salle et recruteur, ajout TV sur événement agenda, rendu organisation et validation/réparation facultative sont présents. Cependant l'effet agents libres n'est encore que déclaré, le test diffuseur n'est qu'arithmétique, l'écran n'est pas prouvé conforme à tous les détails exacts de la planche et le contrôle de plafond lent n'est pas confirmé.
+- Pas de migration. Pas de changement de production dans cette reprise. L'inscription dans les listes est conservée par les commits existants. État honnête : critères incomplets, aucun `TOUT_EST_FINI`.
