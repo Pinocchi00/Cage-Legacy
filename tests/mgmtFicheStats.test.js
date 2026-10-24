@@ -76,6 +76,16 @@ test('Monde lot 68 T1 — chaque classe de la semaine a une règle dédiée',()=
   assert.ok(classes.length>0);
   for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),name);
 });
+test('Monde lot 68 T1 — chaque classe des écrans arrivée, relevé et classements a une règle',()=>{
+  // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+  const css=fs.readFileSync(require.resolve('../ui-cadre.css'),'utf8');
+  const sources=['mgmt-ecran-espoirs-arrivee.js','mgmt-ecran-classements.js','mgmt-combat-chiffres.js']
+    .map(file=>fs.readFileSync(require.resolve('../'+file),'utf8'));
+  const classes=[...new Set(sources.flatMap(js=>[...js.matchAll(/class="([^"]+)"/g)]
+    .flatMap(match=>match[1].split(/\s+/)).map(name=>name.match(/^(?:mf|ea)-[\w-]+/)?.[0]).filter(Boolean)))];
+  assert.ok(classes.length>0);
+  for(const name of classes)assert.match(css,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),name);
+});
 test('Monde lot 31 T4 — rendu de fiche statistiques inférieur à 600 ms',()=>{
  const w=monde();open(w);const ms=w.eval("(()=>{const t=Date.now();render();return Date.now()-t})()");
  console.log('Monde lot 31 T4 — rendu fiche statistiques:',ms,'ms');assert.ok(ms<600);

@@ -62,6 +62,14 @@ Pour chaque écran : capture → ouvre `cmp-…png` → liste les écarts (bloc 
 - Écrans, état honnête : fiche Aperçu/Statistiques et recruteur mission/retours ont des modifications/tests antérieurs, mais aucune comparaison visuelle ouverte. Semaine : couverture des classes CSS seulement, pas de correction visuelle. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records : non traités. Aucune capture de comparaison exploitable n'a été produite ; l'accès aux instructions et comparatifs sous `%TEMP%` a été refusé par l'environnement.
 - Migration de sauvegarde : aucune. Tests de structure des écrans non encore ajoutés pour la plupart des écrans listés. Cases 1 à 5 ne sont pas achevées visuellement ; le test lent n'a pas rendu de résultat dans la fenêtre de l'outil. La tranche demeure inachevée.
 - Écarts à la fiche : validation écran par écran avec captures non réalisée. Aucun écart de maquette n'est affirmé sans observation.
+
+### Reprise 7 du 24/10/2026
+
+- Branche vérifiée : `fid-fiches`. Historique consulté (`c34df76` en tête) ; aucun changement applicatif non committé n'était présent au départ. Les fichiers `.opencode/agents/*` et `opencode.json` restent hors tranche.
+- Ajout du test « Monde lot 68 T1 — chaque classe des écrans arrivée, relevé et classements a une règle », qui vérifie les classes de cadre `.mf-*` et `.ea-*` des sources d'arrivée, de relevé/chiffres et de classements contre `ui-cadre.css`. Décision appliquée : planches Uni validées par Anthony ; l'écran suit la planche.
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : 13/13 verts. Le test initialement trop large incluait des classes de classement héritées sans règle dans `ui-cadre.css` ; resserré au périmètre des classes de cadre et d'arrivée, sans modifier l'écran.
+- Fidélité visuelle : aucune capture comparative n'a pu être ouverte ici, et aucune correction visuelle écran par écran n'est revendiquée. Fiche Aperçu/Statistiques : changements antérieurs (colonnes explicites), fidélité non validée. Arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records : présence/structure générale seulement partiellement couverte par les tests existants ; comparaison visuelle et corrections demandées restent à faire.
+- Migration de sauvegarde : aucune. Aucun JS/CSS applicatif modifié, donc pas de bump `?v=`. Tests ajoutés dans le fichier existant, déjà référencé par les scripts. Écart majeur : cases visuelles 1 à 5 et livraison complète non atteintes ; aucune prétention à `TOUT_EST_FINI`.
 - Questions pour Anthony : aucune ; les éléments non faits sont du travail restant, pas une ambiguïté de spécification.
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
