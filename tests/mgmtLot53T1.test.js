@@ -63,3 +63,16 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
     assert.equal(r.selected,null);
   }finally{w.close();}
 });
+
+test('Monde lot 53 T1 — la frise des temps forts reflète le moment actif',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const html=w.eval(`(()=>{MGMT_COMBAT.vueCombat='forts';MGMT_COMBAT.tempsFortActif=1;MGMT_COMBAT.tempsForts=[{raison:'Ouverture'},{raison:'Finition <test>'}];return mgmtCombatFriseHtml();})()`);
+    assert.match(html,/so3-frise/);
+    assert.equal((html.match(/class="so3-moment/g)||[]).length,2);
+    assert.match(html,/actif/);
+    assert.match(html,/Finition &lt;test&gt;/);
+    const css=require('fs').readFileSync('ui-cadre.css','utf8');
+    for(const c of ['so3-frise','so3-moment','so3-moment b','so3-moment span','so3-moment.actif','so3-moment.passe'])assert.match(css,new RegExp(`\\.${c.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}\\s*\\{`));
+  }finally{w.close();}
+});

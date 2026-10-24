@@ -994,6 +994,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-prime b{font-family:var(--mf-titre);font-size:30px;line-height:1}
 .so3-total{display:flex;justify-content:space-between;align-items:center;font-size:24px;line-height:1.1}
 .so3-total b{color:#F0B220;font-family:var(--mf-titre);font-size:30px;line-height:1}
+/* ==== [ANCRE: P7_T2_FRISE_CSS] — Monde lot 53 T1 ==== */
+.so3-frise{position:absolute;z-index:5;left:5%;right:5%;bottom:88px;display:flex;gap:8px;pointer-events:none}
+.so3-moment{flex:1;min-width:0;min-height:58px;padding:8px 10px;box-sizing:border-box;display:flex;align-items:center;gap:10px;background:#252121;color:#E9E6E1;opacity:.72;transition:opacity .18s ease,background-color .18s ease}
+.so3-moment b{font-family:var(--mf-titre);font-size:26px}
+.so3-moment span{font-size:22px;line-height:1.05}
+.so3-moment.actif{background:#F0B220;color:#0D0B0B;opacity:1}
+.so3-moment.passe{opacity:.4}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche

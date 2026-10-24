@@ -78,6 +78,12 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Choix de lecture documenté par le code existant : le lecteur conserve l'arène actuelle et accélère les segments hors moments forts via `MGMT_TF_VITESSE`; aucun moteur parallèle ni changement du moteur de combat.
 - Ce commit de reprise ne satisfait donc pas les critères finaux et ne peut être présenté comme l'achèvement de la tranche.
 
+### Reprise 14 — frise visible en arène
+
+- Le travail non commité à la reprise ajoutait le rendu de la frise en bas de l'arène, avec les moments actifs/passés et l'échappement du libellé. J'ai conservé cette modification et ajouté son test ciblé : 6/6 réussis.
+- Fichiers tranche concernés dans cet état : `mgmt-combat.js`, `ui-cadre.css`, `index.html`, `tests/mgmtLot53T1.test.js`. Les autres modifications présentes à la reprise (`.opencode/agents/*`, `opencode.json`) sont étrangères et restent hors commit ; `sw.js` a été remis à `origin/main` conformément à la consigne.
+- Toujours restant : écrans complets aux valeurs des planches, fenêtre/finition passable et résultat seul, assertion de durée 900–1200 s, tests d'empreintes/styles/exhaustivité et inscription dans les listes `test` / `test:watch`. Le travail reste incomplet ; aucune conformité globale n'est revendiquée.
+
 ### Reprise 12 — état réel à la reprise 3
 
 - Vérifié : branche `p7-ecran-soiree`, HEAD `c9e7708`; l'arbre applicatif de la tranche ne contient aucun changement non commité. Les changements `.opencode/agents/*` et `opencode.json` sont étrangers et restent intacts.
@@ -87,3 +93,10 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - État : critères de fin non atteints ; aucun changement fonctionnel supplémentaire ni commit vide n'est produit. Les commits antérieurs de reprise demeurent partiels.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+### Reprise 13 — frise de temps forts (inachevée)
+
+- Ajouté au seul écran d'arène existant un bandeau de frise `so3-*` pour les combats en temps forts. Le repère courant est rafraîchi au fil de la lecture ; le texte des moments est échappé. Le moteur n'a pas été modifié et l'accélération hors fenêtres existante est conservée.
+- Contrôle ciblé : `node --test tests/mgmtLot53T1.test.js` (6 réussis), dont un test du nombre de repères, de l'état actif et de l'échappement. Versions de `mgmt-combat.js` et `ui-cadre.css` montées.
+- Travail restant conséquent : portage des écrans soirée et fin aux valeurs des planches, fenêtres réellement testées 30–60 s avec commandes/fondu conforme, résultat seul, assertion 900–1200 s, test des empreintes historiques, intégration directe aux listes `test`/`test:watch` et test exhaustif des classes. Le cumul mesuré antérieurement (868,38 s) reste hors cible. Ce commit ne termine donc pas la tranche.
+- Écart de lecture : la frise illustre la sélection des moments et leur progression, mais ne transforme pas l'arène en lecture fenêtrée interactive ; l'implémentation reste l'accélération existante, sans fondu dédié ni passage au verdict spécialement géré. Aucun changement de sauvegarde.

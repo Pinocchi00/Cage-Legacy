@@ -229,6 +229,13 @@ function mgmtCombatBoucle(now){
     if(!C.decalRefait&&C.real>1.2){ C.decalRefait=true; C.vue.decalCle=''; }
     const cx=mgmtCombatCx();
     C.vue.dessiner(cx);
+    const frise=document.querySelector('.so3-frise');
+    if(frise){
+      frise.querySelectorAll('.so3-moment').forEach((el,i)=>{
+        el.classList.toggle('actif',i===C.tempsFortActif);
+        el.classList.toggle('passe',i<C.tempsFortActif);
+      });
+    }
     mgmtCombatSon(cx);
   }
   if(typeof requestAnimationFrame!=='undefined') C.raf=requestAnimationFrame(mgmtCombatBoucle);
@@ -275,6 +282,12 @@ function mgmtCombatBarreMaj(){
   const el=typeof document!=='undefined'?document.getElementById('mc-barre'):null;
   if(el) el.innerHTML=mgmtCombatBarreHtml();
 }
+/* ==== [ANCRE: P7_T2_FRISE_TEMPS_FORTS] — Monde lot 53 T1 ==== */
+function mgmtCombatFriseHtml(){
+  const C=MGMT_COMBAT;
+  if(C.vueCombat!=='forts'||!Array.isArray(C.tempsForts)||!C.tempsForts.length)return '';
+  return `<div class="so3-frise" aria-label="Moments forts">${C.tempsForts.map((moment,i)=>`<div class="so3-moment${i===C.tempsFortActif?' actif':''}${i<C.tempsFortActif?' passe':''}"><b>${i+1}</b><span>${esc(moment.raison)}</span></div>`).join('')}</div>`;
+}
 function scr_mgmt_combat(){
   const C=MGMT_COMBAT;
   if(C.refuse||!C.session){
@@ -282,7 +295,7 @@ function scr_mgmt_combat(){
     return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('Ce combat ne peut pas être montré.')}</div>`,'normal')}</div></main>`,
       {barre:'aucune',touches:[{ks:['Entrée'],t:'Revenir',jaune:true,onclick:'CL.mgmtCbRetour()'}]});
   }
-  return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>`
+  return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>${mgmtCombatFriseHtml()}`
     +`<div id="mc-barre" class="mf-cb-barre">${mgmtCombatBarreHtml()}</div></div></div>`;
 }
 SCREENS.mgmt_combat=scr_mgmt_combat;
