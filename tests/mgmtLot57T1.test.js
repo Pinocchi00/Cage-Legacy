@@ -208,3 +208,11 @@ test('Monde lot 57 T1 — la clé guerre reste facultative et une valeur malform
     assert.equal(result.repare,true);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — l’état guerre accepte les champs de classement et de rang final',()=>{
+  const w=partie();
+  try{
+    const valide=w.eval(`(()=>{const m=mgmtDefault('Split');m.guerre={ev:[],rival:null,depuis:0,classementPrecedent:MGMT_ORGANISATIONS.map(o=>o.id),rangFinal:4};return validateMgmt(m);})()`);
+    assert.equal(valide,true);
+  }finally{w.close();}
+});
