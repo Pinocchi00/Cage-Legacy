@@ -236,3 +236,15 @@ test('Monde lot 57 T1 — les duels et le mouvement utilisent le relevé de clas
     assert.equal(details.mouvement,details.precedentRang-details.rang);
   }finally{w.close();}
 });
+
+test('Monde lot 57 T1 — le score global est bien la somme des quatre rangs existants',()=>{
+  const w=partie();
+  try{
+    const result=JSON.parse(w.eval(`(()=>{const rows=mgmtGuerreClassement(G.mgmt);return JSON.stringify(rows.map(x=>({rang:x.rang,somme:Object.values(x.rangs).reduce((a,b)=>a+b,0),rangs:x.rangs})));})()`));
+    assert.equal(result.length,8);
+    for(const row of result){
+      assert.equal(row.somme,row.rangs.popularite+row.rangs.stade+row.rangs.notoriete+row.rangs.puissance);
+    }
+    for(let i=1;i<result.length;i++) assert.ok(result[i-1].somme<=result[i].somme);
+  }finally{w.close();}
+});
