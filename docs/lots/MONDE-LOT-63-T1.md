@@ -26,6 +26,13 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+### Reprise 33 — livraison finale (24/10/2026)
+
+- Reprise sur `p8-apres`, HEAD `1ffab99` ; code de production et tests de la tranche déjà commités. Aucun fichier fonctionnel non commité. Cette reprise consigne les vérifications ; les changements locaux `.opencode/`, `opencode.json`, `sw.js` et la variation de cache `index.html` restent exclus.
+- Vérifications : test ciblé `tests/mgmtLot63T1.test.js`, test lent `tests/mgmtReleveReduit.test.js`, audit `node tools/verif-versions.js origin/main` et ESLint global. Inclusion dans les scripts `test` et `test:watch` contrôlée.
+- Pas de migration ni de nouvelle clé sauvegardée. Couverture honnête : les tests déclenchent les dix familles avec les faits préparés sur une partie créée par le parcours réel, sans démontrer que chaque système opérationnel génère naturellement chacun de ces faits.
+- Aucun écart de code restant à cette tranche ; aucun point nouveau pour Anthony.
+
 ### Reprise finale — 24/10/2026
 
 - Vérifiés la branche `p8-apres`, l'historique récent et le statut. Le code de tranche est déjà commité dans l'historique ; aucun fichier fonctionnel en attente. Le seul changement de tranche en cours est cette fiche.
