@@ -244,13 +244,20 @@ const MGMT_LD_APRES_FAMILLES=[
 function mgmtLendemainApres(m,semaine){
   const cycleSoiree=m&&m.lastEvent&&m.lastEvent.cycle;
   if(!m||!Number.isSafeInteger(semaine)||!Number.isSafeInteger(cycleSoiree)||semaine<=cycleSoiree) return [];
-  const dernier=(Array.isArray(m.hist)?m.hist:[]).filter(t=>t&&t.a&&t.b).slice(-1)[0];
-  if(!dernier) return [];
-  const gagnant=dernier.winner==='B'?dernier.b:dernier.a;
-  const nom=gagnant.name||gagnant.last||'Combattant';
-  const stream=mgmtIdentiteStream(String(gagnant.id||nom),'lendemain-apres|'+semaine,m);
-  const decal=Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length), n=Math.min(3,1+Math.floor(stream()*3));
-  return Array.from({length:n},(_,i)=>{const item=MGMT_LD_APRES_FAMILLES[(decal+i)%MGMT_LD_APRES_FAMILLES.length];return {famille:item.famille,texte:item.texte.replaceAll('{nom}',nom),relu:false};});
+  const soiree=(Array.isArray(m.hist)?m.hist:[]).filter(t=>t&&t.c===cycleSoiree&&t.a&&t.b);
+  if(!soiree.length) return [];
+  const combattants=[];
+  for(const t of soiree) for(const f of [t.a,t.b]) if(f.id&&!combattants.some(x=>x.id===f.id)) combattants.push(f);
+  if(!combattants.length) return [];
+  const stream=mgmtIdentiteStream(combattants.map(f=>f.id).sort().join('|'),'lendemain-apres|'+semaine,m);
+  const decal=Math.floor(stream()*combattants.length), n=Math.min(3,1+Math.floor(stream()*3)), result=[];
+  for(let i=0;i<Math.min(n,combattants.length);i++){
+    const f=combattants[(decal+i)%combattants.length], nom=f.name||f.last||'Combattant';
+    const item=MGMT_LD_APRES_FAMILLES[(Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length)+i)%MGMT_LD_APRES_FAMILLES.length];
+    if(item.famille==='suspension'&&!(m.lastEvent.touched||[]).some(x=>x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
+    result.push({famille:item.famille,texte:item.texte.replaceAll('{nom}',nom),relu:false});
+  }
+  return result;
 }
 /* ==== [FIN ANCRE] ==== */
 
