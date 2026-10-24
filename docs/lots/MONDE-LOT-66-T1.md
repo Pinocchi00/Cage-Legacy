@@ -262,3 +262,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Ajout d'une règle de retour à la ligne/largeur bornée sur les cellules de mouvement (`ui-cadre.css`) et bump de version dans `index.html`. Cette correction n'a pas changé les alertes au comparateur : elle est donc explicitement non suffisante, et la case visuelle 4 reste non satisfaite.
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de sauvegarde, de mécanique ou de tests. La capture `lendemainSuite` est régénérée sous le dossier temporaire du comparateur ; l'inspection directe de l'image reste non revendiquée.
 - Écart ouvert : quatre débordements de libellés dans la suite, malgré le respect du seuil des gros blocs. Pas de question pour Anthony.
+
+### Reprise 39 — diagnostic et essai de retour à la ligne — 24/10/2026
+
+- Capture `lendemainSuite` relancée suivant `LISEZMOI.txt` : chevauchements 0, textes sous 22 px 0, mais les quatre alertes déjà connues persistent (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), `grosBlocs` 17 % et moyen 22,7 %.
+- Essai supplémentaire dans `ui-cadre.css` : autoriser la coupure de mots dans les cellules de mouvements. Cache CSS monté. La capture post-changement produit exactement les mêmes alertes ; cette tentative n'a donc pas corrigé le débordement et ne constitue pas une résolution de la case 4.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de données, de mécanique ou de sauvegarde. Modifications préexistantes d'agents/configuration et `sw.js` restent hors tranche.
+- Écart toujours ouvert : quatre débordements du comparateur dans la suite ; le seuil gros blocs est conforme mais la tranche ne peut être certifiée visuellement complète. Aucune question pour Anthony.
