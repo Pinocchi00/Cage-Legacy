@@ -166,6 +166,9 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     assert.doesNotMatch(html,/<small>PRIMES PAYÉES ·/);
     /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, avec les actions visibles au-dessus de la barre de touches. */
     assert.match(html,/class="so3-fin-actions"[^>]*>[\s\S]*Tous les résultats[\s\S]*Le lendemain/);
+    /* Décision : planches Uni* validées par Anthony ; les deux actions de fin gardent leur libellé et leur touche. */
+    assert.match(html,/<span class="mf-k">R<\/span><span class="mf-bouton-t">Tous les résultats<\/span>/);
+    assert.match(html,/<span class="mf-k">Entrée<\/span><span class="mf-bouton-t">Le lendemain<\/span>/);
     /* Décision : planches Uni* validées par Anthony ; noms, salle et pastilles reprennent leurs tailles et formes de la planche. */
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     assert.match(css,/\.so3-fin-prime\.combat strong\{font-size:104px;line-height:\.8\}/);
