@@ -123,3 +123,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Reste non réalisé : les critères complets et tests d’au moins trois saisons jouées, non-répétition sur 50 soirées, couverture sauvegarde/échappement/classes, intégration du test dans les scripts généraux `test` et `test:watch`, test lent `mgmtReleveReduit`, exécution ESLint globale et conformité complète des deux maquettes ne sont pas établis. Les développements métier et écrans antérieurs restent partiels, notamment les historiques du carnet.
 - Aucun changement de format ni migration de sauvegarde. Test ajouté dans cette reprise : aucun. Écarts aux maquettes : persistants et documentés ci-dessus; le raccordement antérieur déclenche la cérémonie au terme du contrat, pas à chaque anniversaire calendaire. Pas de question pour Anthony.
 - La tranche n’est pas déclarée terminée : le commit final requis et les cases manquantes restent à faire.
+
+### Reprise 15
+
+- Ajout de deux assertions ciblées aux tests : classes `ce3-` équipées d'une règle CSS et échappement; présence des chemins de validation/réparation facultative des prix. Le test spécialisé est désormais inclus dans les suites générales `test` et `test:watch`.
+- Vérification : `node --test tests/mgmtLot55T1.test.js` (5/5) et `node tools/verif-versions.js origin/main` (aucun écart).
+- Limites toujours présentes et non masquées : les parcours trois années simulées et 50 soirées n'ont pas été construits; le test de sauvegarde vérifie la présence des garde-fous du code plutôt qu'un chargement fixture ancien; la planche intégrale et l'absence de répétition de formulation ne sont pas démontrées. Le bilan patron est un lien depuis la cérémonie, et le déclencheur suit le terme du contrat tel que documenté en reprise 13, pas chaque anniversaire.
+- Le test lent `mgmtReleveReduit` n'a pas été lancé. Pas de migration de sauvegarde. Les changements étrangers `.opencode/agents/*` et `opencode.json` restent non inclus.
+- Cette tranche ne satisfait donc pas honnêtement tous les critères et ne peut recevoir le commit final ni `TOUT_EST_FINI`.
