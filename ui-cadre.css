@@ -2145,3 +2145,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-interpelle{font-size:28px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-suite{font:inherit;font-size:28px;min-height:64px;padding:0 28px;background:#E23A2B;color:#0D0B0B;border:0;cursor:pointer}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_RESPONSIVE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-suite-moves{min-width:0;overflow:visible}
+.ld66-suite .ld3-move{box-sizing:border-box;width:100%;min-width:0;overflow:visible;grid-template-columns:minmax(0,1fr) minmax(0,104px) minmax(0,112px);gap:8px}
+.ld66-suite .ld3-move>div:first-child{min-width:0;max-width:100%;overflow:visible}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+/* ==== [FIN ANCRE] ==== */

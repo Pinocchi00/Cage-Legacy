@@ -367,6 +367,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Le guide `LISEZMOI.txt` a été lu via Python et les comparatifs exécutés sur les deux écrans. `lendemain` : 0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %. `lendemainSuite` après plusieurs ajustements de grille (trois colonnes souples, contenu conservé) : 0 chevauchement, 0 texte sous 22 px, mais le contrôle relève encore quatre débordements, désormais « Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ » et « chez Split » ; gros blocs 16,8 %.
 - `ui-cadre.css` ajusté sur les cellules de mouvements pour éviter les colonnes rigides et autoriser les retours à la ligne ; version de cache montée avec `node tools/_bump.js ui-cadre.css`. Le contenu n'est ni masqué ni tronqué. La correction n'a pas supprimé les alertes, et la case visuelle 4 reste non satisfaite pour la suite.
 - Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde/migration.
+
+### Reprise 49 — correction ciblée et capture — 24/10/2026
+
+- Branche `fid-lendemain` et HEAD déjà livré confirmés. Les fichiers modifiés hors tranche (`.opencode/agents/*`, `opencode.json`, `sw.js`) restent exclus.
+- Après mesure initiale, `lendemain` reste conforme au contrôle automatique. `lendemainSuite` signale toujours quatre débordements de libellés (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), sans chevauchement ni texte sous 22 px.
+- Tenté une règle CSS additionnelle de cellules souples et non rognées dans `ui-cadre.css`, cache monté avec `node tools/_bump.js ui-cadre.css`. Recapture suite inchangée pour les quatre alertes (moyen 22,8 %, gros blocs 17,1 %) ; cette tentative n'est pas considérée comme une résolution.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de données, mécanique ou sauvegarde. Pas de nouveau test ni migration.
+- Écart restant : case capture 4 incomplète, la suite conserve quatre débordements. Captures comparatives produites par l'outil sous son dossier temporaire ; aucun examen manuel des PNG n'est revendiqué. Les vues et navigation restent celles déjà livrées.
 - Écart de livraison honnête : le lendemain satisfait le contrôle automatique ; la suite conserve quatre éléments signalés en débordement. Comparatifs régénérés sous le dossier temporaire du guide ; aucun jugement visuel manuel des PNG n'est revendiqué. Modifications locales agents/configuration et `sw.js` toujours exclues.
 
 ### Reprise 49 — contrôle visuel final — 24/10/2026
