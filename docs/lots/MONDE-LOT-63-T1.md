@@ -172,3 +172,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Aucune modification fonctionnelle ou de sauvegarde, aucune migration. Les textes catalogués, calcul, affichages Accueil/presse, mouvements d'organisation et les intitulés des tests sont déjà présents dans les commits de la tranche.
 - Écart de couverture maintenu : chaque famille est testée en préparant son fait sur une partie issue du chemin réel, sans démontrer que chaque système du jeu génère naturellement chacun des faits. `check:rapide` reste réservé au superviseur. Modifications étrangères `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation du cache `index.html` exclues.
 - Fichier modifié dans cette reprise : cette fiche uniquement, pour consigner ces vérifications ; aucun changement de production, test ou sauvegarde.
+
+### Reprise 7 — livraison (24/10/2026)
+
+- Branche `p8-apres` confirmée ; le journal montre les changements fonctionnels de tranche déjà commitées. Les seuls fichiers de travail modifiés sont les réglages locaux d'agents/outillage, `sw.js` et l'incrément local du cache dans `index.html` ; ils sont étrangers à la tranche et exclus.
+- Vérifications relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond de 1,9 Mo. Pas de clé nouvelle de sauvegarde, donc aucune migration.
+- Le catalogue de dix familles, calcul, Accueil/presse, mouvements rivaux et tests étaient déjà présents dans l'historique ; aucune modification de code requise dans cette reprise. Limite de couverture : les familles sont vérifiées par scénarios préparés sur une partie réelle, sans établir que chaque système opérationnel les génère naturellement.
