@@ -27,7 +27,6 @@ const MGMT_OP_LIGNES={
     /* Monde lot 44 T1 : l'option masque la salle, jamais les primes. */
     {cle:'salleAmbiance',lib:'AMBIANCE DE SALLE',aide:'La salle réagit aux combats, entre deux combats. Masquée, elle continue de vivre ; les primes ne changent pas.',choix:[[true,'AFFICHÉE'],[false,'MASQUÉE']]},
   ],
-  soiree:[{cle:'sansDiscours',lib:'DISCOURS APRÈS COMBAT',aide:'Les vainqueurs prennent la parole après les combats qui comptent.',choix:[[false,'AFFICHÉS'],[true,'MASQUÉS']]}],
   son:[
     {cle:'general',lib:'VOLUME GÉNÉRAL',aide:'Tout le son du jeu.',niveau:true},
     {cle:'musique',lib:'MUSIQUE',aide:'La musique des menus et de la soirée.',niveau:true},
@@ -35,7 +34,7 @@ const MGMT_OP_LIGNES={
     {cle:'coups',lib:'LES COUPS',aide:'Les impacts dans la cage.',niveau:true},
     {cle:'silence',lib:'SON COUPÉ HORS DU JEU',aide:'Le jeu se tait quand tu passes sur une autre fenêtre.',choix:[[true,'OUI'],[false,'NON']]},
   ],
-  soiree:[{cle:'vue',lib:'VUE DES COMBATS',aide:'Le réglage par défaut ou une vue commune à toute la soirée.',choix:[['defaut','PAR DÉFAUT'],['entier','TOUT EN ENTIER'],['resultat','TOUT EN RÉSULTAT']]}],
+  soiree:[{cle:'vue',lib:'VUE DES COMBATS',aide:'Le réglage par défaut ou une vue commune à toute la soirée.',choix:[['defaut','PAR DÉFAUT'],['entier','TOUT EN ENTIER'],['resultat','TOUT EN RÉSULTAT']]},{cle:'sansDiscours',lib:'DISCOURS APRÈS COMBAT',aide:'Les vainqueurs prennent la parole après les combats qui comptent.',choix:[[false,'AFFICHÉS'],[true,'MASQUÉS']]}],
   partie:[
     {cle:'sauver',lib:'SAUVEGARDER',aide:'La partie s’enregistre aussi toute seule après chaque soirée.',action:'SAUVEGARDER MAINTENANT',touche:'Entrée'},
     {cle:'arrivee',lib:'REVOIR MON ARRIVÉE',aide:'L’écran de ton arrivée : l’organisation, ce que tu hérites, la première soirée.',action:'OUVRIR'},
