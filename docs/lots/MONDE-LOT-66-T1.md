@@ -315,6 +315,12 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun test ajouté, aucune migration ou mécanique changée. Modifications locales préexistantes aux agents OpenCode, `opencode.json` et `sw.js` non incluses.
 - Écart : malgré la reprise de géométrie conforme à la maquette, l'outil garde quatre débordements sur la suite ; la case visuelle 4 reste partielle. Captures générées sous `C:/Users/antho/AppData/Local/Temp/shots/`, sans inspection image manuelle revendiquée.
 
+### Reprise 47 — capture et diagnostic — 24/10/2026
+
+- Relu le guide de capture, branche `fid-lendemain` confirmée. Capture initiale: `lendemain` conforme au contrôle automatique (0 chevauchement, 0 texte sous 22 px, aucun débordement, gros blocs 18,4 %); `lendemainSuite` conserve quatre débordements (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), sans chevauchement ni petit texte, gros blocs 17 %.
+- Le contrôle de `lendemainSuite` après vérification montre les mêmes quatre alertes, les autres indicateurs inchangés (0 chevauchement, 0 texte sous 22 px, gros blocs 17 %). L'essai de réaffirmer les propriétés de grille ne modifiait pas le comportement en raison de règles ultérieures plus spécifiques : essai retiré, aucun CSS ni cache modifié. Test `mgmtEcranLendemain.test.js` : 7/7 ; `mgmtLendemainDemo.test.js` : 7/7.
+- Écart avant/après : les vues restent recomposées d'après les deux planches et le lendemain demeure propre au contrôle; les libellés de mouvements de la suite sont toujours signalés en débordement. Pas de migration. Fichiers modifiés de cette reprise : cette fiche uniquement. Tests ajoutés : aucun. Questions : aucune.
+
 ### Reprise 45 — cellules de mouvements bornées — 24/10/2026
 
 - Ajouté dans `ui-cadre.css` une règle pour borner les cellules de mouvement de `lendemainSuite` (sans réduire le plancher typographique de 22 px ni supprimer de contenu) ; version de cache CSS montée dans `index.html`.
