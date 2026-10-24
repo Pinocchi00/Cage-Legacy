@@ -57,6 +57,9 @@ test('Monde lot 62 T1 — une sauvegarde historique v14 chargée joue une soiré
     const jouees=jouer(w,1);
     assert.ok(jouees>=1,'une soirée est jouée depuis la sauvegarde historique migrée');
     assert.equal(w.eval('validateMgmt(G.mgmt)'),true,'la partie historique reste valide après la soirée');
+    w.eval('saveMgmt();G.mgmt=null;loadMgmt();');
+    assert.equal(w.eval('validateMgmt(G.mgmt)'),true,'la partie historique reste valide après sauvegarde et rechargement');
+    assert.ok(w.eval('G.mgmt.hist.length')>=charge.hist.length,'la progression historique est conservée au rechargement');
   }finally{w.close();}
 });
 
