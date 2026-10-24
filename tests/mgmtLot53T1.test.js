@@ -120,12 +120,17 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     jouerSoirees(w,1);
     const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoFinHtml(m,p);})()`);
     const header=w.eval(`mgmtSoEnteteFin(G.mgmt,mgmtSoireeProgramme(G.mgmt))`);
+    const screen=w.eval(`(()=>{MGMT_SOIREE.index=mgmtSoireeProgramme(G.mgmt).length;MGMT_SOIREE_UI.focus=null;return scr_mgmt_soiree_cadre();})()`);
     /* Décision : planches Uni* validées par Anthony ; le titre vit dans l'en-tête commun, pas une seconde fois dans le contenu. */
     assert.match(html,/aria-label="Fin de soirée"/);
     assert.match(header,/FIN DE SOIRÉE/);
     assert.match(header,/Ce soir/);
     assert.match(header,/FIGHT NIGHT/);
     assert.match(header,/\/\s*\d+/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, sans bandeau d'étape suivant. */
+    assert.match(screen,/FIN DE SOIRÉE/);
+    assert.match(screen,/class="so3-fin-recomposee"/);
+    assert.doesNotMatch(screen,/PROCHAINE ÉTAPE|Aucune soirée n'est posée/);
     /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
     assert.match(html,/class="so3-fin-soiree"/);
     assert.match(html,/LA SALLE/);
