@@ -471,3 +471,9 @@ test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles d�
     assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'));
   }
 });
+
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; ordre des cartes de cérémonie suit la planche',()=>{
+  const ordre=source.match(/const ordreCartes=\[([^\]]+)\]/);
+  assert.ok(ordre);
+  assert.deepEqual([...ordre[1].matchAll(/'([^']+)'/g)].map(m=>m[1]),['combattant','ko','combat','soumission','revelation','retour']);
+});
