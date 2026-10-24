@@ -249,3 +249,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Fichiers modifiés : `mgmt-combat.js` (Entrée passe au verdict pour les temps forts), `ui-cadre.css` (fondu actif), `index.html` (version cache), `tests/mgmtLot53T1.test.js` (passage au verdict et règle de fondu), cette fiche.
 - Tests : `node --test tests/mgmtLot53T1.test.js` — 14/14 réussis.
 - Écart documenté : ce fondu concerne la frise d'étapes, pas une transition entre images de l'arène. La durée de 30–60 s est encore vérifiée par la fonction d'estimation des intervalles, pas chronométrée dans un navigateur réel.
+
+### Reprise 34 — en-tête « Le prochain »
+
+- Fait : le panneau du combat à venir porte maintenant son intitulé, son étiquette de carte et sa division au-dessus de la bannière. Les mêmes données déjà rendues par le panneau gardent les palmarès résumés et les enjeux; pas de nouvelle donnée de partie.
+- Fichiers : `mgmt-soiree-cadre.js` (intitulé contextuel), `ui-cadre.css` (classe `so3-prochain`), `index.html` (versions), `tests/mgmtLot53T1.test.js` (présence du panneau), présente fiche.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 14/14.
+- Écart restant : la mise en page d'ensemble `UniSoiree` n'est pas encore portée (composition trois panneaux `mf-*` conservée); la ligne dédiée de progression de salle n'est pas encore rendue.

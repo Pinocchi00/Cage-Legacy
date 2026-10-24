@@ -95,7 +95,7 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
      :libre
       ?`<div class="mf-so-actes"><div class="mf-so-s">TU LE REGARDES EN</div>${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{jaune:mgmtVueDuCombat(m,k)===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}<div class="mf-so-s">${mgmtVueDuCombat(m,k)==='forts'?'Les moments clés, environ 45 secondes':mgmtVueDuCombat(m,k)==='resultat'?'Le résultat seul':'Le combat en entier'}</div></div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
-  return mgmtSoBanniereHtml(av)
+   return `<div class="so3-prochain">LE PROCHAIN · ${esc(av.etiquette)} · ${esc(av.divLabel)}</div>`+mgmtSoBanniereHtml(av)
     +`<div class="mf-so-cp"><div class="mf-so-rs">`
     +soLigne(`<span class="mf-so-v">${a.rang===null?'—':esc(a.rang)}</span>`,'Classement',`<span class="mf-so-v">${b.rang===null?'—':esc(b.rang)}</span>`)
     +soLigne(`<span class="mf-so-v">${esc(a.palmares)}</span>`,'Palmarès',`<span class="mf-so-v">${esc(b.palmares)}</span>`)

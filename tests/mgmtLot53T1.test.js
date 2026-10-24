@@ -91,6 +91,7 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
     const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);const html=mgmtSoEntreHtml(G.mgmt,p,0,0);return {html,selected:MGMT_SOIREE_UI.focus};})()`);
     for(const label of ['COMPLET','TEMPS FORTS','RÉSULTAT']) assert.ok(r.html.includes(label),label);
     assert.match(r.html,/LE PROCHAIN|CE SOIR/);
+    assert.match(r.html,/class="so3-prochain"/);
     assert.equal(r.selected,null);
   }finally{w.close();}
 });
