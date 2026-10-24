@@ -80,7 +80,9 @@
     "test:watch:lot60t1": "node --test --watch tests/mgmtLot60T1.test.js",
     "test:lot60t1": "node --test tests/mgmtLot60T1.test.js",
     "test:lot55t1": "node --test tests/mgmtLot55T1.test.js",
-    "test:watch:lot55t1": "node --test --watch tests/mgmtLot55T1.test.js"
+    "test:watch:lot55t1": "node --test --watch tests/mgmtLot55T1.test.js",
+    "test:lot62t1": "node --test tests/mgmtLot62T1.test.js",
+    "test:watch:lot62t1": "node --test --watch tests/mgmtLot62T1.test.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",

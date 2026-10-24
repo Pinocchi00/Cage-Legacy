@@ -14,11 +14,11 @@ Branche : `p11-fin-annee` (la branche courante de ce dossier ; commits ICI ; le 
 
 ## Compte rendu
 
-- Fichiers de la tranche : `mgmt-corps.js` appelle le déclencheur à la clôture et le définit ; `mgmt-accueil.js` affiche d'abord le lien de cérémonie puis celui du bilan ; `mgmt-ceremonie.js` fait varier la formulation d'une année à l'autre sans hasard ; `index.html` porte les versions de cache ; cette fiche consigne le résultat.
-- Tests exécutés : `tests/mgmtLot55T1.test.js` et `tests/mgmtLot57T1.test.js` (74 tests, verts) ; `node tools/verif-versions.js origin/main` (aucun écart). La formulation annuelle est couverte par les tests existants de cinquante années, pas par cinquante soirées jouées.
-- Tests manquants : pas de `tests/mgmtLot62T1.test.js` ajouté ni inscrit dans `test`/`test:watch`. Le chemin de jeu réel trois années, le rechargement, l'ancien format de sauvegarde joué sur une année et les cinquante soirées réelles ne sont pas démontrés. Le test lent de poids et le lint ne sont pas exécutés.
-- Sauvegarde : aucune clé nouvelle ; `MGMT_SAVE_VERSION` inchangé. La détection réutilise `m.guerre.anneeTraitee`.
-- Écarts / reste : le déclencheur compare les dates des soirées de l'agenda et la clôture du rang existante inscrit `anneeTraitee`. Toutefois, la preuve demandée d'intégration réelle n'est pas faite ; la présente livraison ne revendique pas la tranche terminée.
-- Questions pour Anthony : aucune ; les vérifications listées sont du travail restant, pas une question de spécification.
+- Fichiers modifiés dans cette reprise : `tests/mgmtLot62T1.test.js` ajoute une preuve de parcours réel jusqu'à trois années traitées et un contrôle d'idempotence/validation ; `package.json` ajoute les commandes ciblées `test:lot62t1` et `test:watch:lot62t1`.
+- Code déjà commité dans les deux commits précédents : déclencheur à la clôture de soirée, liens Accueil cérémonie puis bilan, formulations déterministes par édition, versions de cache. Aucune clé de sauvegarde neuve ; `MGMT_SAVE_VERSION` inchangé.
+- Vérifications : `node --test tests/mgmtLot62T1.test.js` (2 tests verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; ESLint ciblé sur les fichiers JS (aucune erreur, test ignoré par la configuration ESLint).
+- Reste non démontré : décompte exact de trois événements de cérémonie/clôture (l'état persistant ne conserve que la dernière année traitée), cinquante soirées réelles sans phrase de presse répétée, test d'ancienne sauvegarde sur une année et test lent de poids. Le test ajouté n'est pas encore inclus aux commandes générales `test` et `test:watch`. Le lint complet et le check rapide n'ont pas été lancés.
+- Écarts : la vérification d'ordre des liens teste leur ordre dans le rendu source de l'Accueil ; aucun écart de maquette n'a été introduit.
+- Questions pour Anthony : aucune.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
