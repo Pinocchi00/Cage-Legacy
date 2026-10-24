@@ -271,6 +271,13 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Aucun changement de sauvegarde, de mécanique ou de tests. La capture `lendemainSuite` est régénérée sous le dossier temporaire du comparateur ; l'inspection directe de l'image reste non revendiquée.
 - Écart ouvert : quatre débordements de libellés dans la suite, malgré le respect du seuil des gros blocs. Pas de question pour Anthony.
 
+### Reprise 45 — cellules de mouvements et recapture — 24/10/2026
+
+- Recapture initiale sur la suite: zéro chevauchement et zéro texte sous 22 px, mais quatre débordements (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), moyen 22,7 %, gros blocs 17 %.
+- Ajout d'une règle de bornage des cellules de mouvements dans `ui-cadre.css` et bump du cache CSS. La recapture n'a pas changé les quatre alertes ; cet essai n'est donc pas présenté comme une correction réussie. Pas de changement fonctionnel, de données ou de sauvegarde.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7 ; `node tools/verif-versions.js origin/main` sans écart. La conformité visuelle de la suite reste partielle, le seuil des gros blocs est conforme mais les quatre débordements persistent.
+- Fichiers de cette reprise : `ui-cadre.css` (bornage additionnel des cellules) et cette fiche (compte rendu). Tests ajoutés : aucun. Migration : aucune. Questions pour Anthony : aucune.
+
 ### Reprise 39 — diagnostic et essai de retour à la ligne — 24/10/2026
 
 - Capture `lendemainSuite` relancée suivant `LISEZMOI.txt` : chevauchements 0, textes sous 22 px 0, mais les quatre alertes déjà connues persistent (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »), `grosBlocs` 17 % et moyen 22,7 %.

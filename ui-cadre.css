@@ -2100,6 +2100,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span{grid-column:1}
 .ld66-suite .ld3-move strong{grid-column:2;grid-row:1 / span 2}
 .ld66-suite .ld3-move em{grid-column:3;grid-row:1 / span 2}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_BORNEES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{width:100%;min-width:0;box-sizing:border-box}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-all;white-space:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
