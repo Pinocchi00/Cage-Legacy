@@ -9,6 +9,8 @@ test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lend
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    const renduOffre=w.eval(`mgmtPosteRendu(G.mgmt)`);
+    for(const raison of ['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(renduOffre.includes(raison),`raison d'offre absente: ${raison}`);
     const serialized=w.eval(`(()=>{const m=G.mgmt,ok=mgmtOffreAccepter(m,0);G.mgmt=m;return ok?'OK:'+mgmtSerialiser(m):'NON'})()`);
     assert.notEqual(serialized,'NON');
     assert.equal(w.eval(`G.screen`),'mgmt_arrivee');
