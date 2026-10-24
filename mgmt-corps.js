@@ -633,6 +633,14 @@ function mgmtRunEvent(m){
   const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
     position:f.slot==='main'?Math.max(0,m.card.main.length-1-m.card.main.findIndex(x=>x===f)):null,
     title:f.title===true,rounds:mgmtBoutRounds(m,f),source:f}));
+  /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_COMBAT] — Monde lot 58 T1 ====
+     Le champion invité prend le dernier emplacement principal de la soirée
+     déjà programmée; le combat suit ensuite exactement le moteur normal. ==== */
+  const choc=m.choc&&m.choc.etat==='programme'&&m.cal&&m.cal.prochaines&&m.cal.prochaines[0]&&m.cal.prochaines[0].jour===m.choc.jour?m.choc:null;
+  if(choc&&typeof choc.a==='string'&&typeof choc.b==='string'){
+    const principal=booked.filter(x=>x.slot==='main').pop();
+    if(principal){principal.a=choc.a;principal.b=choc.b;principal.title=false;principal.choc=true;}
+  }
   /* Lot 7 : avec l'agenda, l'ordre de passage est celui d'une vraie soirée — les premiers préliminaires (early prelims), les
      préliminaires, puis les combats de la carte principale en remontant, le principal en dernier. */
   if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)){
@@ -697,14 +705,34 @@ function mgmtRunEvent(m){
      seconde fois, et la recette nette le déduit. */
   const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
     mgmtWinBonuses(m,booked,fights),m.card.sizeMain+m.card.sizePrelims);
+  /* ==== [ANCRE: CROISSANCE_DIFFUSEUR] — Monde lot 56 T1 ====
+     Le palier du diffuseur ajoute jusqu'à 3 % de droits, sans changer la
+     formule de base ni les parties antérieures au monde vivant. */
+  if(agenda&&m.mondeVivant===true&&typeof mgmtPaliersCalculer==='function'){
+    const niveau=Math.max(0,Math.min(3,mgmtPaliersCalculer(m).effets.diffuseur));
+    const bonus=Math.floor(finance.tv*niveau*0.01);
+    finance.tv+=bonus;
+    finance.recette+=bonus;
+  }
+  if(choc&&fights.some(f=>f.a===choc.a&&f.b===choc.b)){
+    const resultat=fights.find(f=>f.a===choc.a&&f.b===choc.b);
+    if(resultat){
+      choc.resultat=resultat.winner==='A'?'victoire':'defaite';choc.etat='termine';
+      if(choc.resultat==='victoire'){
+        const partenaire=m.orgs&&m.orgs[choc.orgId];
+        if(partenaire){partenaire.chocPrestige=(Number.isFinite(partenaire.chocPrestige)?partenaire.chocPrestige:0)+1;}
+      }
+    }
+  }
   if(agenda) mgmtSallesApplique(m,finance,fights,avantSalle);
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
      si T < 0 avant la soirée et R > 0. */
   const debtBefore=Number.isSafeInteger(m.treasury)&&m.treasury<0;
-  m.treasury=(Number.isSafeInteger(m.treasury)?m.treasury:MGMT_TREASURY_START)+finance.recette;
+  const recette=finance.recette+(choc&&choc.etat==='termine'?Math.round(finance.ticketing*MGMT_CHOC_BILLETTERIE_BONUS):0);
+  m.treasury=(Number.isSafeInteger(m.treasury)?m.treasury:MGMT_TREASURY_START)+recette;
   if(!Array.isArray(m.recettes)) m.recettes=[];
-  m.recettes.push(finance.recette);
+  m.recettes.push(recette);
   while(m.recettes.length>2) m.recettes.shift();
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences.push(finance.audience);
@@ -734,6 +762,7 @@ function mgmtRunEvent(m){
   mgmtMondeApresSoiree(m,premier);
   /* Poids de la sauvegarde (1,9 Mo, sacré ; `main` y est collé à 21 octets) : les six ans de passé de chaque organisation n'écrivent pas de mémoire. */
   if((m.memoire!==undefined||typeof mgmtMemoireSoiree==='function')&&!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)) mgmtMemoireSoiree(m);
+  if(recette!==finance.recette)finance.recette=recette;
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   /* ==== [ANCRE: P11_T2_DEFIS_FIN_SOIREE] — Monde lot 46 T1 ==== */
   /* Une seule évaluation par soirée jouée, à la clôture : lit m.hist,

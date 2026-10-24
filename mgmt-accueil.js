@@ -115,6 +115,7 @@ function mgmtAccueilContenu(m){
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
+  for(const f of (m.croissanceActus||[]).slice(-5)) if(f&&typeof f.texte==='string') ailleurs.push({parts:[mgmtAccueilT(f.texte)],detail:'Palier de croissance · presse'});
   const divs=allDivisions();
   if(divs.length){
     const div=divs[(m.cycle||0)%divs.length];
@@ -273,7 +274,10 @@ function mgmtAccueilHeritage(m,c){
 
 function scr_mgmt_accueil(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
-  const m=G.mgmt, c=mgmtAccueilContenu(m);
+  const m=G.mgmt;
+  const annonces=typeof mgmtPaliersAnnoncer==='function'?mgmtPaliersAnnoncer(m):[];
+  if(annonces.length&&typeof saveMgmt==='function') saveMgmt();
+  const c=mgmtAccueilContenu(m);
   if(typeof mgmtRecruteurRetour==='function') mgmtRecruteurRetour(m);
   if(MGMT_ACCUEIL.cur>=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)) MGMT_ACCUEIL.cur=Math.min(MGMT_ACCUEIL_MAX_PASSE,c.passe.length)-1;
   /* ==== [ANCRE: ACCUEIL_TROIS_COLONNES] — Monde lot 12 T2 ==== */
