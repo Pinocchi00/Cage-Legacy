@@ -24,6 +24,12 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+### Reprise 16 — réparer le test de classement du choc
+- Modifié : `tests/mgmtLot58T1.test.js`. L’assertion compare maintenant la baisse du total de classement (-1) plutôt qu’une hausse garantie de place, car les ex æquo ne changent pas nécessairement la position. Décision fondée sur la précision superviseur : le champ `chocPrestige` nourrit le total classé.
+- Test ciblé : `node --test tests/mgmtLot58T1.test.js` passe (17/17).
+- État restant : les cases 3 et 6 n’atteignent toujours pas complètement leurs critères : fil de presse dédié et écran `UniChoc`/préfixe `ch3-` à réaliser; partie neuve sous plafond et sauvegarde ancienne à vérifier. Vérifications globales finales non lancées. Ce correctif isolé ne constitue pas la fin de tranche.
+- Fichiers étrangers préservés et exclus : `.opencode/agents/*`, `opencode.json`, `sw.js`.
+
 ### Reprise 15 — le prestige du choc entre dans le classement
 - Modifié : `mgmt-organisations.js` prend le compteur facultatif `m.orgs[id].chocPrestige` en compte dans le total de classement; `tests/mgmtLot58T1.test.js` ajoute « Monde lot 58 T1 — une victoire de choc est prise en compte par le classement des organisations ».
 - Vérification : l'exécution ciblée n'a pas abouti dans le délai de 120 secondes lors de la deuxième tentative; le premier essai a échoué car il testait une partie sans monde vivant. Le test a ensuite été ajusté pour initialiser le monde vivant, mais son résultat reste inconnu.

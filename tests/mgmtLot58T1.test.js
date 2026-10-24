@@ -73,8 +73,10 @@ test('Monde lot 58 T1 — le rang améliore l’acceptation du choc sans déplac
 
 test('Monde lot 58 T1 — une victoire de choc est prise en compte par le classement des organisations',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const partenaire=mgmtOrgClassement(m).find(x=>x.id!=='split').id;const avant=mgmtOrgClassement(m).findIndex(x=>x.id===partenaire);m.orgs[partenaire].chocPrestige=100;const apres=mgmtOrgClassement(m).findIndex(x=>x.id===partenaire);return {avant,apres}})())`));
-  assert.ok(r.apres<r.avant);
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const partenaire=mgmtOrgClassement(m).find(x=>x.id!=='split').id;const avant=mgmtOrgClassement(m).find(x=>x.id===partenaire).total;m.orgs[partenaire].chocPrestige=1;const apres=mgmtOrgClassement(m).find(x=>x.id===partenaire).total;return {avant,apres}})())`));
+  // Brief du 22/10, précision du superviseur : le résultat du choc nourrit le
+  // total déjà classé; une place peut rester identique en cas d'égalité.
+  assert.equal(r.apres,r.avant-1);
 });
 
 test('Monde lot 58 T1 — le choc refuse un partenaire sans champion de la catégorie',()=>{
