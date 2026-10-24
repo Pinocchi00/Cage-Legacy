@@ -410,3 +410,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets, sous le plafond ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe ; présence dans `test` et `test:watch` confirmée (`true,true`).
 - Pas de changement de sauvegarde ni migration. Limite de couverture conservée : les dix faits sont exercés individuellement sur le parcours réel, sans preuve qu'ils soient tous générés naturellement par les systèmes opérationnels. Aucun nouvel écart ni question pour Anthony ; `check:rapide` est réservé au superviseur.
 - Compte rendu : code/catalogue, raccordements Accueil/presse et mouvements déjà livrés ; test ciblé déjà livré avec ses intitulés dans `tests/mgmtLot63T1.test.js`. Seule cette fiche est modifiée dans cette reprise.
+
+### Reprise 15 — clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée ; `git log --oneline -12` et `git status` consultés. Aucun fichier fonctionnel de la tranche ne reste non commité ; les modifications `.opencode/agents/*`, `opencode.json`, `sw.js` et la variation locale de cache `index.html` sont étrangères et exclues.
+- Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node --test tests/mgmtReleveReduit.test.js` passe 6/6 et mesure 1 908 745 octets (sous le plafond) ; `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe. Inclusion du test dans `test` et `test:watch` confirmée (`true,true`).
+- Pas de nouvelle clé de sauvegarde ni migration. Le catalogue, le calcul, l'affichage Accueil/presse, les mouvements d'autres organisations et les tests sont déjà livrés dans l'historique. Cette reprise ne modifie que cette fiche.
+- Limite honnête maintenue : les scénarios ciblent séparément les faits des dix familles sur une partie créée par le chemin réel, sans prouver que chaque système opérationnel génère naturellement chacun d'eux. Aucun nouvel écart ni question pour Anthony ; `check:rapide` reste réservé au superviseur.
