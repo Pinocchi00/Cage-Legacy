@@ -1061,6 +1061,34 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-fin-soiree>div{display:flex;flex-direction:column;gap:8px;font-size:22px}
 .so3-fin-soiree>div span{color:rgba(233,230,225,.74)}
 .so3-fin-soiree>div b{font-family:var(--mf-titre);font-size:30px}
+/* ==== [ANCRE: MGMT_LOT65_T1_TABLEAU_CSS] — Monde lot 65 T1 : carte de soirée fidèle à UniSoiree. ==== */
+.so3-tableau{height:100%;min-height:0;display:flex;flex-direction:column;gap:16px;color:#E9E6E1}
+.so3-bandeau{min-height:76px;display:grid;grid-template-columns:1fr 1.35fr auto 1fr;align-items:center;gap:22px;padding:8px 18px;border:2px solid rgba(233,230,225,.38);box-sizing:border-box}
+.so3-bandeau>div{display:flex;align-items:center;gap:14px;font-size:22px;white-space:nowrap}
+.so3-bandeau>div b,.so3-prochain-vue span{font-size:22px;color:rgba(233,230,225,.74)}
+.so3-bandeau>div strong{font-family:var(--mf-titre);font-size:30px}
+.so3-bandeau>span{font-family:var(--mf-titre);font-size:28px;color:#F0B220}
+.so3-corps{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px}
+.so3-carte{min-height:0;display:flex;flex-direction:column}
+.so3-carte h2,.so3-prochain-panneau h2{margin:0;padding:10px 14px;border-bottom:2px solid rgba(233,230,225,.38);font-family:var(--mf-titre);font-size:34px}
+.so3-ligne{flex:1;min-height:0;display:grid;grid-template-columns:42px 168px minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid rgba(233,230,225,.16)}
+.so3-ligne.courant{background:rgba(240,178,32,.08);outline:2px solid #F0B220}
+.so3-ligne.fait{opacity:.75}
+.so3-rang{font-family:var(--mf-titre);font-size:30px}
+.so3-categorie{display:flex;flex-direction:column;font-size:22px;white-space:nowrap}
+.so3-categorie small{font-size:22px;color:rgba(233,230,225,.74)}
+.so3-noms{font-family:var(--mf-titre);font-size:30px;white-space:nowrap}
+.so3-carte-vues{display:flex;gap:4px}
+.so3-vue{height:42px;padding:0 10px;font-size:22px}
+.so3-vue.choisi{background:#E9E6E1;color:#0D0B0B}
+.so3-carte-methode{font-size:22px}
+.so3-prochain{min-width:0}
+.so3-prochain-panneau{padding:12px 16px;background:#121010;border:2px solid rgba(233,230,225,.38);display:flex;flex-direction:column;gap:18px;box-sizing:border-box}
+.so3-prochain-panneau h2{padding:4px 0;color:#F0B220}
+.so3-prochain-noms{display:flex;flex-direction:column;gap:8px;font-family:var(--mf-titre);font-size:42px;line-height:.95;overflow-wrap:anywhere}
+.so3-prochain-noms span{font-size:24px;color:rgba(233,230,225,.74)}
+.so3-prochain-vue{display:flex;flex-direction:column;gap:8px;font-size:22px}
+.so3-prochain-vue b{font-family:var(--mf-titre);font-size:30px;color:#F0B220}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche

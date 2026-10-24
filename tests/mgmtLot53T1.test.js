@@ -120,12 +120,11 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
     jouerSoirees(w,1);
     const html=w.eval(`(()=>{const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoFinHtml(m,p);})()`);
     assert.match(html,/FIN DE SOIRÉE/);
-    assert.match(html,/class="so3-fin-contexte"/);
-    assert.match(html,/Ce soir/);
-    assert.match(html,/class="so3-salle" aria-label="Salle finale/);
-     assert.match(html,/Voir le lendemain/);
-     assert.match(html,/class="so3-primes"/);
-     assert.equal((html.match(/class="so3-prime"/g)||[]).length,3);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(html,/class="so3-fin-soiree"/);
+    assert.match(html,/LA SALLE/);
+    assert.match(html,/LA SOIRÉE/);
+    assert.equal((html.match(/class="so3-fin-prime"/g)||[]).length,3);
   }finally{w.close();}
 });
 
@@ -148,9 +147,10 @@ test('Monde lot 53 T1 — le panneau de combat rend les trois vues réglables',(
     jouerSoirees(w,1);
     const r=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);const html=mgmtSoEntreHtml(G.mgmt,p,0,0),ouverture=mgmtSoOuvertureHtml(G.mgmt,p);return {html,ouverture,selected:MGMT_SOIREE_UI.focus};})()`);
     for(const label of ['COMPLET','TEMPS FORTS','RÉSULTAT']) assert.ok(r.html.includes(label),label);
-    assert.match(r.html,/LE PROCHAIN|CE SOIR/);
-    assert.match(r.html,/class="so3-prochain"/);
-    assert.match(r.html,/class="so3-salle"/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(r.html,/LE PROCHAIN/);
+    assert.match(r.html,/class="so3-prochain so3-prochain-panneau"/);
+    assert.match(r.html,/class="so3-bandeau"/);
     assert.match(r.ouverture,/title="Changer la vue avec V"/);
     const css=require('fs').readFileSync('ui-cadre.css','utf8');
     assert.match(css,/\.so3-vue:focus-visible\s*\{[^}]*outline:3px solid #F0B220/);

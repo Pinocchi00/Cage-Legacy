@@ -183,16 +183,21 @@ function mgmtSoOuvertureHtml(m,prog){
 }
 /** L'entre-deux et l'attente du principal : un seul écran, celui du combat qui vient. */
 function mgmtSoEntreHtml(m,prog,index,focus){
-  const av=mgmtAvantCombat(m,focus);
-  const salle=mgmtSoireeSalle(m,focus), taux=Math.round(salle.part*100);
-  const prec=prog[focus-1];
-  const gauche=prec?mgmtSoResultatHtml(m,prec,'TERMINÉ')
-    :`<div class="mf-so-ph"><div class="mf-so-s">CE SOIR · ${esc(prog.length)} COMBATS</div><div class="mf-so-h">OUVERTURE</div></div>`
-      +`<div class="mf-so-pc"><div class="mf-so-qui">${esc(mfNet(mgmtOrgNom(m)))}<br>FIGHT NIGHT ${esc(m.eventsPlayed||1)}</div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-m">${esc(mgmtSoireeSalle(m,0).nom)}</div></div><div class="mf-so-fl"></div></div>`;
-  const haut=`<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}`
-    +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index,focus<index,focus):'','choisi','mf-so-c')
-    +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
-  return `<div class="so3-soiree">${haut}<div class="so3-salle" aria-label="Salle à ${esc(taux)} pour cent"><span>LA SALLE MONTE</span><div class="so3-salle-piste"><i style="width:${esc(taux)}%"></i></div><b>${esc(taux)}%</b></div>${mgmtSoBandeHtml(prog,index,focus)}</div>`;
+  /* ==== [ANCRE: MGMT_LOT65_T1_TABLEAU_SOIREE] — Monde lot 65 T1 : vue fidèle à UniSoiree. ==== */
+  const salle=mgmtSoireeSalle(m,focus), taux=Math.round(salle.part*100), finance=m.lastEvent.finance||{};
+  const places=Math.round((finance.capacite||salle.capacite)*salle.part);
+  const ambiance=Math.max(1,Math.min(5,Math.round(taux/20)));
+  const rows=prog.map((p,k)=>{
+    const fait=k<index, courant=k===focus, vue=mgmtVueDuCombat(m,k);
+    const detail=fait?mgmtResultatDetail(m,p.h):null;
+    const gauche=detail&&detail.gagnant?`${detail.gagnant.last||detail.gagnant.name} bat ${detail.perdant.last||detail.perdant.name}`:`${p.a.last} contre ${p.b.last}`;
+    const boutons=fait?`<span class="so3-carte-methode">${esc(detail?detail.methode:'Terminé')}</span>`:
+      `<div class="so3-carte-vues" aria-label="Vues du combat ${k+1}">${[['complet','COMPLET'],['forts','TEMPS FORTS'],['resultat','RÉSULTAT']].map(([v,l])=>`<button type="button" class="so3-vue${vue===v?' choisi':''}" aria-pressed="${vue===v?'true':'false'}" onclick="mgmtVueCombatChoisir(${k},'${v}')">${l}</button>`).join('')}</div>`;
+    return `<div class="so3-ligne${courant?' courant':''}${fait?' fait':''}"><b class="so3-rang">${k+1}</b><span class="so3-categorie">${esc(p.etiquette)}<small>${esc(soCat(p.div))}</small></span><strong class="so3-noms">${esc(gauche)}</strong>${boutons}</div>`;
+  }).join('');
+  const p=prog[focus], a=p&&p.a, b=p&&p.b, leila=mgmtSoLeila(m,prog), vue=p?mgmtVueDuCombat(m,p.i):'forts';
+  const prochain=p?`<aside class="so3-prochain so3-prochain-panneau"><h2>LE PROCHAIN · ${esc(p.etiquette)}</h2><div class="so3-prochain-noms"><b>${esc(soFirst(a))} ${esc(soLast(a))}</b><span>CONTRE</span><b>${esc(soFirst(b))} ${esc(soLast(b))}</b></div>${mfVoix('Leïla',leila)}<div class="so3-prochain-vue"><span>TU LE REGARDES EN</span><b>${vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT'}</b></div>${mfBouton('Regarder',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}</aside>`:'';
+  return `<div class="so3-tableau"><section class="so3-bandeau"><div><b>LA SALLE</b><strong>${esc(places)} / ${esc(finance.capacite||salle.capacite)}</strong></div><div><b>L'AMBIANCE</b><strong>${'● '.repeat(ambiance)}${'○ '.repeat(5-ambiance)}</strong></div><span>Ça monte</span><div><b>LA RECETTE</b><strong>${esc(mgmtEuros(Number(finance.recette)||0))}</strong></div></section><div class="so3-corps"><section class="so3-carte"><h2>LA CARTE</h2>${rows}</section>${prochain}</div></div>`;
 }
 /* ==== [ANCRE: P7_T1_RESULTAT_SEUL] — Monde lot 53 T1 ==== */
 function mgmtSoResultatSeulHtml(m,p){
