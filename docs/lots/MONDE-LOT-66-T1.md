@@ -76,3 +76,10 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Guide de capture relu par shell et comparateur rejoué séparément : `lendemain` moyen 24,9 %, gros blocs 19,5 % ; `lendemainSuite` moyen 23,3 %, gros blocs 18,8 %. Les captures `cmp-lendemain.png` et `cmp-lendemainSuite.png` ont été régénérées. Aucun jugement visuel direct des images n'est revendiqué.
 - Tests ciblés réussis : `mgmtEcranLendemain.test.js` 7/7, `mgmtLendemainDemo.test.js` 7/7, `mgmtLot54T1.test.js` 30/30, `mgmtLot48T1.test.js` 9/9 et `mgmtSoireeShow.test.js` 18/18 (ce dernier nécessite un délai de 300 s). `node tools/verif-versions.js origin/main` sans écart ; `node_modules/.bin/eslint .` passe.
 - Aucun nouveau changement fonctionnel, test ou état de sauvegarde. Les changements de code prévus sont déjà présents dans les commits précédents ; seule cette actualisation du compte rendu est commise dans cette reprise. La conformité des ratios est mesurée ; l'inspection visuelle manuelle et le test lent `mgmtReleveReduit.test.js` restent non effectués ici.
+
+### Reprise 14 — contrôle final — 24/10/2026
+
+- Relu le guide de capture et régénéré les comparaisons : `lendemain` moyen 24,9 %, gros blocs 19,5 % ; `lendemainSuite` moyen 23,3 %, gros blocs 18,8 %. Les fichiers `cmp-lendemain.png` et `cmp-lendemainSuite.png` sont créés dans le dossier temporaire indiqué par l'outil.
+- `node --test tests/mgmtEcranLendemain.test.js` : 7/7 ; `tests/mgmtSoireeShow.test.js` : 18/18. `node tools/verif-versions.js origin/main` et ESLint passent.
+- Tentative du test lent `mgmtReleveReduit.test.js` : 2/6 passent, 4 échouent sur `ENOSPC` lors de l'écriture des sauvegardes temporaires (disque sans espace). Ce test concerne un relevé de la tranche 31, pas les écrans du lendemain ; aucun fichier de code de la tranche ne change ici.
+- Aucun fichier de tranche modifié à l'ouverture ; les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et non commitées. Aucun jugement d'inspection manuelle des PNG n'est ajouté ; seul le seuil mesuré de gros blocs est confirmé.
