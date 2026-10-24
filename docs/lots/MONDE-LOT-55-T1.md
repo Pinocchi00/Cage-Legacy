@@ -131,3 +131,11 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Limites toujours présentes et non masquées : les parcours trois années simulées et 50 soirées n'ont pas été construits; le test de sauvegarde vérifie la présence des garde-fous du code plutôt qu'un chargement fixture ancien; la planche intégrale et l'absence de répétition de formulation ne sont pas démontrées. Le bilan patron est un lien depuis la cérémonie, et le déclencheur suit le terme du contrat tel que documenté en reprise 13, pas chaque anniversaire.
 - Le test lent `mgmtReleveReduit` n'a pas été lancé. Pas de migration de sauvegarde. Les changements étrangers `.opencode/agents/*` et `opencode.json` restent non inclus.
 - Cette tranche ne satisfait donc pas honnêtement tous les critères et ne peut recevoir le commit final ni `TOUT_EST_FINI`.
+
+### Reprise 16
+
+- Reprise vérifiée sur `p11-ceremonie-carnet`, HEAD `9b4c0ee`. Aucun fichier métier non commité ; les changements `.opencode/agents/*` et `opencode.json` restent étrangers.
+- Relecture de P9 et P11 et des deux planches : les fonctions et écrans déjà décrits dans les reprises précédentes sont présents, mais ne sont pas encore la réalisation complète attendue (notamment l'historique des records dans le carnet, les formulations qui ne se répètent pas, la maquette exacte et les parcours trois années simulées).
+- Vérifications de reprise : `node --test tests/mgmtLot55T1.test.js` (5/5), `node tools/verif-versions.js origin/main` (aucun écart), ESLint ciblé `mgmt-ceremonie.js mgmt-save.js` (vert). Le test lent `mgmtReleveReduit` et la suite complète n'ont pas été lancés.
+- Aucun nouveau fichier métier n'a été modifié durant cette reprise. Le dépôt ne présente donc aucun changement métier à committer avant de compléter les critères restants. Le compte rendu n'est pas un substitut au travail manquant : je ne prétends pas que la tranche est terminée, et ne déclare pas `TOUT_EST_FINI`.
+- Écarts restant à traiter : intégration du test dans les listes générales `test`/`test:watch`, tests parcours multi-années/50 soirées et sauvegarde réelle, contrôle exhaustif des classes CSS et de la planche, ainsi que données carnet plus complètes. Aucune migration de sauvegarde ni question ouverte nouvelle.
