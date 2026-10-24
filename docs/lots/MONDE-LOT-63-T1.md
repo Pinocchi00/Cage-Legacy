@@ -728,3 +728,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - `node tools/verif-versions.js origin/main` ne relève aucun écart et `node_modules/.bin/eslint .` passe. Aucun changement de sauvegarde ni migration ; le test lent `mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise.
 - `git merge origin/main` a été tenté, mais explicitement refusé par la politique de l'environnement. Aucune fusion n'a donc été effectuée ; le superviseur devra l'intégrer puis relancer les tests. La couverture des faits naturels reste la limite déjà déclarée.
 - Seule cette fiche est modifiée pour consigner le contrôle. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères et exclues ; aucun écart nouveau ni question pour Anthony.
+
+### Reprise 7 — validation du contrôle de clôture (24/10/2026)
+
+- Branche `p8-apres` confirmée ; les commits de la tranche sont déjà présents (`1c5268a6` en tête). Le contrôle inter-lots demandé passe 130/130, incluant les deux régressions du lot 54 (rivalité enregistrée et non-répétition). `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; le test est inscrit dans `test` et `test:watch` (`true,true`).
+- Aucun changement fonctionnel ou de sauvegarde requis ; aucune migration. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre ; aucun changement de `index.html` n'est inclus. La fusion `origin/main` a été tentée mais interdite par la politique de l'environnement, elle reste à effectuer par le superviseur.
+- Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé dans cette reprise. Limite de couverture maintenue : les tests déclenchent les familles à partir de faits préparés sur le chemin réel, sans prouver leur production naturelle par chaque système. Pas de question nouvelle pour Anthony.
