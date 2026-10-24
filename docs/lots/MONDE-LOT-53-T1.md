@@ -69,4 +69,13 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Tests ajoutés à cette reprise : aucun ; les 4 tests ciblés existants passent. La demande détaillée du test de cumul et d'empreintes reste non satisfaite.
 - Questions pour Anthony : aucune question formulée ; plusieurs critères demeurent non implémentés, et cette tranche ne répond pas au critère de fin.
 
+### Reprise 11 — contrôle ciblé et test du panneau
+
+- Vérifié : branche `p7-ecran-soiree`, HEAD de départ `8114643`; pas de changement antérieur de cette tranche non commité. Les changements `.opencode/agents/*` et `opencode.json` préexistants sont étrangers à la tranche et restent intacts.
+- Relus les trois maquettes. Le panneau de sélection déjà existant affiche bien les trois vues et les informations d'avant-combat; cette reprise ajoute un test du rendu réel du panneau, « Monde lot 53 T1 — le panneau de combat rend les trois vues réglables ».
+- Tests : `node --test tests/mgmtLot53T1.test.js` (5 pass). `node tools/verif-versions.js origin/main` (aucun écart). `node_modules/.bin/eslint .` (réussi). `node --test tests/mgmtReleveReduit.test.js` a dépassé le délai de 120 s de l'outil avant de rendre un résultat; il n'est donc pas déclaré vert.
+- Toujours non livré et non revendiqué comme fait : le portage des valeurs `UniSoiree` et `UniSoireeFin`, la frise/fondu, la carte résultat-seul avec temporisation, la fenêtre 30–60 s vérifiée, la plage d'estimation 900–1200 s, les tests complets d'empreintes/styles/échappement et l'inscription dans les listes principales `test`/`test:watch`. L'estimation demeure signalée sous la plage cible (868,38 s précédemment observés); elle n'a pas été artificiellement gonflée.
+- Choix de lecture documenté par le code existant : le lecteur conserve l'arène actuelle et accélère les segments hors moments forts via `MGMT_TF_VITESSE`; aucun moteur parallèle ni changement du moteur de combat.
+- Ce commit de reprise ne satisfait donc pas les critères finaux et ne peut être présenté comme l'achèvement de la tranche.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
