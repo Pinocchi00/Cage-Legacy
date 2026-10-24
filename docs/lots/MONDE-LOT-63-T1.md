@@ -1,5 +1,12 @@
 # Monde lot 63 T1 (P8 T3) — l'histoire qui continue après la soirée : réponses, réseaux, revanches, autres organisations
 
+### Reprise 5 — état et validations (24/10/2026)
+
+- Branche `p8-apres` confirmée. Les commits fonctionnels de la tranche sont déjà présents dans l'historique (`8e035434` en tête) ; aucun fichier de production ou test de cette tranche n'est en attente. Les modifications locales `.opencode/agents/*`, `opencode.json`, `sw.js` et `index.html` sont étrangères à la tranche et exclues.
+- Validations fraîchement relancées : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe ; l'audit des scripts `test` et `test:watch` renvoie `true,true`.
+- Aucun changement de sauvegarde ni migration. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé : son dernier compte rendu disponible indique 1 908 745 octets et réussite. Limite de couverture inchangée : les familles sont déclenchées à partir de faits préparés sur une partie créée par le parcours réel, sans preuve que tous les systèmes opérationnels produisent naturellement chacun de ces faits.
+- Cette reprise ne change que le compte rendu de la fiche ; aucun écart nouveau ni question pour Anthony.
+
 ### Reprise 6 — validation ciblée (24/10/2026)
 
 - Branche `p8-apres` confirmée ; les changements fonctionnels de la tranche sont déjà commités. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9, `node tools/verif-versions.js origin/main` ne relève aucun écart, `node_modules/.bin/eslint .` passe, et le test est bien référencé dans `test` et `test:watch` (`true,true`).
