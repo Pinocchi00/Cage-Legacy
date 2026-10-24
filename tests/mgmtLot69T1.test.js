@@ -47,3 +47,13 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
     for(const texte of ['di3-nom','di3-lignes','Une citation de contrôle.','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
   }finally{w.close();}
 });
+
+test('Monde lot 69 T1 — les raisons d’offre restent échappées dans le bilan du poste',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6903);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],poste:'ENTRAÎNEUR',salaire:4321,texte:'Offre de contrôle',raisons:['<img src=x onerror=alert(1)>','Résultats récents','Projet sportif','Confiance de la direction'],refuse:false}];G.mgmt=m;`);
+    const rendu=w.eval('mgmtPosteRendu(G.mgmt)');
+    assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
+    assert.ok(!rendu.includes('<img src=x onerror=alert(1)>'));
+  }finally{w.close();}
+});

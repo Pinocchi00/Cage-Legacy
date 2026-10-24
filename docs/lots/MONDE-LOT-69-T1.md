@@ -85,3 +85,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Limites restantes : la logique métier ne porte qu'un combat dans `m.choc` (aucune donnée fiable n'établit les deux autres affiches ni un booking 2-sur-3) ; le parcours du test n'est pas fin de contrat → bilan → rechargement valide strict → lendemain ; les captures et mesures comparatives des quatre écrans n'ont pas été faites. Le bloc bilan, l'arrivée et le discours n'ont pas été comparés visuellement dans cette reprise.
 - Vérification environnement : la branche est `fid-choc`. Les modifications utilisateur hors tranche sous `.opencode/agents/` et `opencode.json` sont préservées. Aucune migration de sauvegarde.
 - Écart à la fiche : la tranche n'est toujours pas entièrement satisfaite ; cette reprise ajoute seulement une assertion structurelle. Aucun achèvement global revendiqué.
+
+### Reprise 19
+- Fichiers modifiés : `tests/mgmtLot69T1.test.js` ajoute un test d'échappement des raisons d'offre injectées dans le rendu du poste ; le balisage joueur doit rester textuel et ne pas introduire d'élément HTML.
+- Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3). `node tools/verif-versions.js origin/main` passe (16 fichiers comparés).
+- Pas de migration, pas de fichier JS/CSS modifié et donc pas de version de cache à incrémenter. Les hooks `pretest` et `pretest:watch` exécutent déjà ce fichier de test.
+- Les cases de maquette et le parcours intégral restent incomplets comme décrit aux reprises précédentes. Le test est une vérification de sécurité du bloc d'offres et ne constitue pas une comparaison visuelle ; aucune capture n'est revendiquée.
+- Écart : la logique du lot 58 transporte un seul combat (`a`/`b`) et ne dispose pas des trois rencontres convenues ; la fiche ne donne pas la règle métier pour construire les deux autres combats et le format de sauvegarde ne représente pas ces appariements. Je n'ai pas fabriqué de données ni étendu ce modèle par supposition. L'accès aux instructions de capture hors dépôt reste refusé par la politique de l'environnement.
+- Commit partiel de reprise : les critères restant listés dans les reprises précédentes ne sont pas atteints ; aucun `TOUT_EST_FINI` revendiqué.
