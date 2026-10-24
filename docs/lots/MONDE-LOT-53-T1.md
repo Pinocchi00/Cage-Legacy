@@ -235,3 +235,10 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Réexamen des lacunes avec les maquettes : l'écran d'ouverture reste en ancien balisage `mf-*`, la fin conserve sa composition historique, la frise ne fait pas jouer les fenêtres selon le calendrier de durée du brief, et le test de cumul ne vérifie pas la plage exigée 900–1200 s. Les tests de classes exhaustives et d'empreintes historiques sont toujours absents. L'inscription explicite du test dans les chaînes longues `test`/`test:watch` n'est pas établie ; les hooks prétest et scripts dédiés actuels ne satisfont pas cette formulation.
 - Rien n'a été modifié dans les fichiers de production à cette reprise : les commits antérieurs n'ont pas terminé les critères fonctionnels et un nouveau changement de vérification ne justifierait pas un faux commit de livraison. Aucun résultat n'est présenté comme achevé. Aucune migration de sauvegarde, aucune modification du moteur de combat.
 - État final de cette reprise : 13 tests ciblés verts, mais tranche encore incomplète ; ne pas annoncer `TOUT_EST_FINI`.
+
+### Reprise 32 — sélecteurs de vue sur la carte
+
+- Fait : chaque ligne de combat de l'ouverture de soirée porte désormais un bouton compact d'état de vue (`COMPLET`, `TEMPS FORTS` ou `RÉSULTAT`) et commande la rotation déjà existante du choix de ce combat. L'état sélectionné est visuellement distingué. Les noms et libellés dynamiques restent échappés.
+- Fichiers modifiés : `mgmt-soiree-cadre.js` (bouton par ligne de carte), `ui-cadre.css` (styles `so3-carte-combat` et `so3-vue`), `index.html` (version cache CSS), `tests/mgmtLot53T1.test.js` (vérification du bouton sur les neuf lignes), cette fiche.
+- Test exécuté : `node --test tests/mgmtLot53T1.test.js` — 13/13 réussis.
+- Non fait : la recomposition fidèle complète de la maquette reste à faire; cette étape ajoute seulement le contrôle par combat au rendu actuel. Lecture fenêtre/fondu, carte fin fidèle et test de durée complète restent ouverts.

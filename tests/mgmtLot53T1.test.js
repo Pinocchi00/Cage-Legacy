@@ -154,5 +154,7 @@ test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf co
     assert.equal((result.match(/class="mf-so-lg/g)||[]).length,9);
     assert.match(result,/SOIRÉE/);
     assert.match(result,/Commencer la soirée/);
+    assert.equal((result.match(/class="so3-vue"/g)||[]).length,9);
+    assert.match(result,/aria-label="Vue du combat 1 :/);
   }finally{w.close();}
 });
