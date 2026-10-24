@@ -14,6 +14,10 @@ Branche : `p8-apres` (la branche courante de ce dossier ; commits ICI ; le super
 
 ## Compte rendu
 
+- Reprise de livraison (24/10/2026) : branche `p8-apres` confirmée, état consulté ; les commits de code de la tranche sont déjà présents (HEAD `7f4f3f5`). Le test ciblé `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; vérification directe des scripts `test` et `test:watch` : `true,true` ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Aucune modification fonctionnelle ni de sauvegarde dans cette reprise. Les modifications locales d'agents, `opencode.json`, `sw.js` et la variation de cache de `index.html` sont hors tranche et exclues. Test lent `tests/mgmtReleveReduit.test.js` non relancé, laissé au superviseur ; le parcours de familles confirme des faits ciblés sur une partie créée par le chemin réel mais ne prouve pas que tous les systèmes produisent naturellement ces faits.
+- Le compte rendu ci-dessous conserve l'historique des reprises. Aucun nouveau fichier de tranche n'est en attente ; cette entrée seule sera commitée.
+
 - Reprise 24 (24/10/2026) : confirmé que le code de production et les tests de la tranche sont déjà commités (HEAD `cfb8b37`), sur `p8-apres`. Vérifications fraîches : `node --test tests/mgmtLot63T1.test.js` passe 9/9 ; l'audit explicite de `test` et `test:watch` renvoie `true,true` ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; `node_modules/.bin/eslint .` passe.
 - Pas de changement fonctionnel ni de format de sauvegarde dans cette reprise ; aucune migration. `tests/mgmtReleveReduit.test.js` et `check:rapide` ne sont pas relancés selon le contrôle rapide superviseur. Limite déjà déclarée : les tests de familles vérifient des faits préparés sur une partie réelle, sans démontrer que chaque système opérationnel produit naturellement tous ces faits ; le test lent du plafond de partie neuve reste à exécuter.
 - Seule la présente fiche est à commiter. Les changements locaux `.opencode/agents/*`, `opencode.json`, `sw.js` et le paramètre cache de `index.html` sont étrangers à cette reprise et exclus.
