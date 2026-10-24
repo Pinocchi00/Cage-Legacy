@@ -155,3 +155,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration de sauvegarde. Le guide de capture externe n'est pas accessible dans cet environnement ; les captures et mesures de comparaison post-correction n'ont donc pas été produites.
 - Cases restantes : les trois combats ne sont toujours pas portés par le modèle d'événement mono-combat et n'ont pas été inventés ; arrivée/bilan/discours non vérifiés par comparaison d'image ; parcours fin de contrat → rechargement strictement identique → lendemain non couvert intégralement. Les mesures antérieures (choc 25,1 %, discours 23,4 %, bilan avec chevauchement) ne prouvent pas la conformité actuelle.
 - Écart documenté : le bandeau est un rapprochement structurel/couleur ; il ne constitue pas une capture validée et n'achève pas la tranche. Aucun `TOUT_EST_FINI` revendiqué.
+
+### Reprise 28
+- Fichiers modifiés : `ui-cadre.css` ajoute une règle explicite de citation italique et une règle de mise en évidence jaune de la condition du choc ; `index.html` reçoit le `?v=` incrémenté ; `tests/mgmtLot69T1.test.js` verrouille la présence des sélecteurs correspondants, les couleurs du bandeau et du VS, le nom grand format du discours et l'absence d'animation sur le choc.
+- Test ciblé : `node --test tests/mgmtLot69T1.test.js` passe (3/3).
+- Pas de migration de sauvegarde. Pas de nouvelle capture post-correction.
+- Écarts à la fiche toujours ouverts : modèle/programme du choc à trois combats et preuve de son résultat, comparaison visuelle et seuil ≤20 %, scène d'arrivée dédiée, parcours complet depuis fin de contrat et validation stricte du rechargement. Le guide de capture externe ne peut toujours pas être ouvert par l'outil de lecture dans cet environnement.
+- Cette reprise n'achève pas la tranche ; aucun `TOUT_EST_FINI` revendiqué.
