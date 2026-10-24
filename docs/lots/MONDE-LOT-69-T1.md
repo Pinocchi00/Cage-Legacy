@@ -338,3 +338,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Aucun code ni test modifié durant cette reprise. Les instructions de capture externe n'ont pas pu être lues par l'outil autorisé et aucun dossier/scène `shoot` n'a été trouvé dans le dépôt ; aucune nouvelle image ou mesure n'est revendiquée.
 - Les cases ouvertes restent : affiches triples/score du choc, seuil visuel post-correction, captures arrivée/offre, parcours complet fin de contrat-bilan-rechargement strict. Aucun changement de sauvegarde.
 - Compte rendu honnête : travail déjà commité consulté et testé, mais la tranche n'atteint pas encore tous ses critères ; pas de `TOUT_EST_FINI`. Aucun autre écart ou question nouvelle.
+
+### Reprise 56
+- Reprise de l'état : branche `fid-choc`, dernier commit `1d2e5f3b`; aucune modification de code de la tranche n'était en attente. Les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent exclus.
+- J'ai vérifié les éléments concrets du rendu existant : `scr_mgmt_choc()` lie les décisions et la fiche, le test de tranche fait passer la soirée choc dans `mgmtRunEvent` et vérifie le résultat historique; les assertions du parcours d'offre valident l'organisation d'arrivée et le lendemain. Le test est inclus aux scripts `test` et `test:watch`.
+- J'ai relu les écrans et le balisage de `UniBilanPatron`; cette vérification n'est pas une preuve de capture et n'efface pas les mesures antérieures. Les limites restent réelles : modèle de choc mono-combat, seuil visuel choc précédemment mesuré à 25,1 %, et absence de parcours contractuel intégral avec rechargement strict valide.
+- Aucun changement fonctionnel supplémentaire n'a été introduit : inventer deux combats ou un déroulé contractuel non attesté par le modèle/tests présenterait une fonctionnalité fausse comme achevée. Pas de migration ni de capture nouvelle revendiquée.
+- Écart : la tranche ne satisfait pas toutes ses cases; aucun `TOUT_EST_FINI` revendiqué. Les changements utilisateurs hors tranche n'ont pas été touchés.
