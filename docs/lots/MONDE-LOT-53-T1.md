@@ -14,6 +14,14 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 
 ## Compte rendu
 
+### Reprise 31 — ajout structurel de la carte
+
+- Vérifié au départ : branche `p7-ecran-soiree`, HEAD `76b2205`; les modifications externes `.opencode/agents/*` et `opencode.json` sont restées intactes. Les modifications préexistantes de `package.json` n'ont pas de différence de contenu selon `git diff --ignore-all-space` et ne sont pas de cette tranche.
+- Fait : encapsulation de l'ouverture de soirée dans une section sémantique `so3-ouverture`, avec règle CSS préfixée, et montée des versions `?v=` de CSS et JS.
+- Vérification : `node --test tests/mgmtLot53T1.test.js` — 13/13 réussis ; `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent. `sw.js` restauré depuis `origin/main` et exclu.
+- Non fait : cette reprise n'achève pas les critères des cases 1 à 6. Le portage intégral des valeurs des trois maquettes, les fenêtres temporisées passables avec fondu, l'assertion 900–1200 s, la sélection exacte des trois primes, l'audit exhaustif styles/échappement/empreintes, l'intégration aux chaînes principales `test`/`test:watch` et le test lent restent à traiter. Aucune mesure 15–20 minutes n'est revendiquée.
+- Aucun changement du moteur de combat, des données de sauvegarde ou des textes joueur. Aucun commit n'est fait sous le titre de livraison finale puisque les critères de fin ne sont pas atteints.
+
 - Fait : lecture de la section P7 du brief et des trois planches ; conservation de la porte `mgmt-soiree-cadre.js` et des choix de vue existants. Ajout d'un rendu additif des primes depuis `m.hist` dans le bloc de fin, avec échappement et styles `so3-*`. Ajout du test ciblé et commande dédiée `test:lot53t1` / `test:watch:lot53t1`.
 - Fichiers modifiés : `mgmt-soiree-cadre.js` (annonces de primes), `ui-cadre.css` (styles des classes ajoutées), `index.html` (cache CSS), `tests/mgmtLot53T1.test.js` (3 tests), `package.json` (commande ciblée, prétest/pretest:watch), présente fiche.
 - Tests ajoutés (intitulés) : « voie réelle : une passe générée ouvre une soirée jouable », « le choix de vue reste indépendant pour chaque combat », « la fin annonce les primes présentes dans les relevés et échappe les noms ».

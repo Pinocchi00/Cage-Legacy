@@ -166,7 +166,7 @@ function mgmtSoOuvertureHtml(m,prog){
   const corps=`<div class="mf-so-ban2"><div><div class="mf-so-s2">CE SOIR${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
     +`<div class="mf-so-n"><b>${esc(num)}</b><span>${esc(prog.length)} COMBATS</span></div></div>`
     +`<div class="mf-so-cr">${gauche}${droite}</div>`;
-  return mfPanneau(corps,'choisi','mf-so-ouv');
+  return `<section class="so3-ouverture" aria-label="La carte de ce soir">${mfPanneau(corps,'choisi','mf-so-ouv')}</section>`;
 }
 /** L'entre-deux et l'attente du principal : un seul écran, celui du combat qui vient. */
 function mgmtSoEntreHtml(m,prog,index,focus){
