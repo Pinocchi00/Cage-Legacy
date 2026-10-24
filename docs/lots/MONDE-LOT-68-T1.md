@@ -154,3 +154,11 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Tests : `node --test tests/mgmtFicheStats.test.js` (19/19 verts) ; `node tools/verif-versions.js origin/main` (aucun écart) ; `node_modules/.bin/eslint .` (vert).
 - Aucun JS/CSS applicatif modifié, donc pas de bump `?v=` et aucune migration. Le fichier de capture externe et comparatifs restent non accessibles ici : aucune comparaison visuelle ni correction de maquette n'est revendiquée.
 - État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres, menu, meilleurs et records ne sont pas confirmés visuellement par comparaison. Le test chiffres couvre les métriques des données mais ne valide pas l'écran. Les corrections visuelles et captures prescrites restent à faire ; pas de `TOUT_EST_FINI`.
+
+### Reprise 19 du 24/10/2026
+
+- Arrivée / contrat : largeur des deux panneaux ajustée à la hiérarchie de la planche (contrat dominant à 55 %, attentes à 43 %, espacement restant), au lieu de deux panneaux égaux. `?v=` du script monté par `node tools/_bump.js mgmt-ecran-espoirs-arrivee.js`.
+- Test ciblé `node --test tests/mgmtFicheStats.test.js` : 19/19 verts ; `node tools/verif-versions.js origin/main` : aucun écart ; ESLint ciblé : vert.
+- Comparaison et ouverture du comparatif visuel toujours non réalisées (l’accès externe au dossier shoot reste refusé). Ce changement de géométrie est fondé sur la hiérarchie gauche/droite de la planche HTML, pas présenté comme une validation visuelle.
+- État écran par écran : seule la largeur des panneaux de l’étape contrat a été corrigée ; tous les autres aspects de cet écran, les espoirs, la fiche, recruteur, semaine, relevé, chiffres, menu et classements ne sont pas validés par capture. Les corrections visuelles et le critère final restent à accomplir.
+- Migration de sauvegarde : aucune. Aucun test nouveau ; pas d’écart de donnée.
