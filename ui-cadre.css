@@ -1971,6 +1971,30 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-suite-results .mgmt-ld-sub,.ld3-suite-results .mgmt-ld-rangs{font-size:22px;line-height:1.15}
 .ld3-suite-back{margin-top:10px}
 @media(max-width:1100px){.ld3-moments{grid-template-columns:1fr}.ld3-suite{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:auto}.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:1}}
+/* ==== [ANCRE: MONDE66_T1_LENDEMAIN_PLANCHES] — Monde lot 66 T1 ==== */
+.ld66-screen{height:calc(100vh - 180px);max-width:1564px;margin:0 auto;display:flex;flex-direction:column;gap:16px;padding-top:12px;box-sizing:border-box;color:#E9E6E1}
+.ld66-moments{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;min-height:300px;flex:.82}
+.ld66-moments .ld3-moment{margin:0;min-height:0;padding:24px 26px;gap:14px}
+.ld66-moments .ld3-label{font-size:26px}
+.ld66-moments .ld3-meta{font-size:26px}
+.ld66-moments .ld3-names{font-size:64px;line-height:.8;white-space:normal;overflow-wrap:anywhere}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:72px}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1}
+.ld66-moments .mgmt-ld-link{font-size:24px;min-height:44px}
+.ld66-lower{display:grid;grid-template-columns:1.25fr 1fr .9fr;gap:16px;flex:1.18;min-height:0}
+.ld66-lower>section{box-sizing:border-box;min-width:0;min-height:0;padding:16px;background:#121010;border:2px solid rgba(233,230,225,.5);overflow:hidden}
+.ld66-lower h2{margin:0 0 14px;font:800 36px/.9 var(--mgmt-font-display);color:#E9E6E1}
+.ld66-change,.ld66-press{font:500 24px/1.15 var(--mgmt-font-body)}
+.ld66-change .mgmt-ld-item{padding:9px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.ld66-press .ld3-press{margin:0;padding:0;border:0}
+.ld66-press .mgmt-ld-item,.ld66-press p{font-size:24px;line-height:1.2}
+.ld66-numbers{display:flex;flex-direction:column;gap:12px}
+.ld66-number{display:flex;flex-direction:column;gap:5px;padding:8px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.ld66-number b{font:600 22px/1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+.ld66-number strong{font:800 30px/1 var(--mgmt-font-display);color:#E9E6E1}
+.ld66-number span{font:500 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+.ld66-suite .ld3-suite{height:calc(100vh - 210px);margin:0 auto}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE57_T1_STYLES] — Monde lot 57 T1 ==== */
 .gu3{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(360px,.8fr);gap:24px;padding:24px;height:100%;box-sizing:border-box;overflow:auto}

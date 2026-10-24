@@ -220,7 +220,12 @@ function mgmtLendemainMouvementsHtml(m){
 /** Complète les trois catégories sans dupliquer de combat lorsque la soirée
  *  n'en contient pas un de chaque type. */
 function mgmtLendemainMomentsCompletsHtml(m){
-  const html=mgmtLendemainMomentsHtml(m);
+  let html=mgmtLendemainMomentsHtml(m);
+  /* ==== [ANCRE: MONDE66_T1_HIERARCHIE_MOMENTS] — Monde lot 66 T1 ==== */
+  const labels=['LA SURPRISE','LA FINITION','LA GUERRE'];
+  let index=0;
+  html=html.replace(/(<article class="ld3-moment">[\s\S]*?<div class="ld3-label">)[^<]*(<\/div>)/g,(article,avant,apres)=>avant+(labels[index++]||'LE MOMENT')+apres);
+  /* ==== [FIN ANCRE] ==== */
   if((html.match(/class="ld3-moment"/g)||[]).length>=3) return html;
   const stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
   const hist=Array.isArray(m.hist)?m.hist:[], seen=new Set();

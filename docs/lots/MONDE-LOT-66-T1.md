@@ -16,4 +16,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 **[ ] 5.** Tests : les existants (notamment `mgmtLot54T1`, `mgmtLot48T1`, `mgmtSoireeShow`) restent verts ; ceux qui décrivaient l'ancienne structure sont **mis à jour en citant la décision** (« planches Uni* validées par Anthony ; l'écran suit la planche ») ; ajoute des tests de présence des blocs et « chaque classe a sa règle ».
 **[ ] 6.** `?v=`, versions, lint ; commit final `Monde lot 66 T1 : le lendemain fidèle aux planches` ; compte rendu honnête (avant/après) ; `TOUT_EST_FINI`.
 
+## Compte rendu
+
+- Modifiés : `mgmt-lendemain-cadre.js` compose l'écran du lendemain en moments, changements, presse et chiffres et relie les touches ; `mgmt-ecran-lendemain.js` présente les moments dans l'ordre Surprise/Finition/Guerre ; `ui-cadre.css` porte le style `ld66-*` sans animation ; `index.html` reçoit les versions de cache ; deux fichiers de tests adaptent leurs assertions obsolètes à la décision « planches Uni* validées par Anthony ; l'écran suit la planche ».
+- Captures : `lendemainSuite` : grosBlocs 18,8 %, moyen 23,3 % ; `lendemain` : grosBlocs 20,8 %, moyen 26,1 % après un essai de recalage (les ratios testés .68/1.32 étaient moins bons et ont été annulés). Captures et comparaisons dans `/Temp/shots`. Le seuil ≤20 % du premier écran n'est pas atteint ; je n'ai pas pu contrôler l'image pixel par pixel.
+- Tests ciblés verts : `mgmtLot54T1.test.js` (30), `mgmtEcranLendemain.test.js` (7), `mgmtLot48T1.test.js` (9) et `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Aucun changement de sauvegarde ni migration.
+- Écart restant : le premier écran conserve un écart visuel résiduel mesuré à grosBlocs 20,8 %, au-dessus de l'objectif. L'affichage branche les contenus existants, sans inventer de mécanique ; les valeurs textuelles de la presse restent issues des données de partie.
+- Compte rendu honnête : le code et les tests demandés sont livrés, mais le seuil de capture de la case 4 n'est pas atteint ; la tranche n'est donc pas déclarée entièrement finie. Aucun nouveau fichier de test, donc `package.json` n'a pas à changer.
+- Questions pour Anthony : aucune question ouverte ; le seul écart à signaler est le seuil visuel de grosBlocs (20,8 % contre ≤20 % demandé).
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.

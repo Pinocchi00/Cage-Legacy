@@ -56,23 +56,14 @@ function scr_mgmt_lendemain_cadre(){
   if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
   const c=mgmtLendemainCases(m);
   const nom=mgmtOrgNom(m);
-  const pub=c&&c.public
-    ?mfPanneau(`<div class="mf-fin-t">LE PUBLIC · ${esc(c.public.score)} SUR 100</div><div class="mf-ld-crit">`
-      +c.public.criteres.map(x=>`<div class="mf-ld-c${x.ok?' ok':''}"><i></i><span>${esc(x.texte)}</span></div>`).join('')
-      +(c.public.decu?`<div class="mf-ld-det">${esc(MGMT_LD_CRITERES.determination.texte)}</div>`:'')
-      +`</div>`,'normal','mf-fin-p mf-ld-pub')
-    :mfPanneau(`<div class="mf-fin-t">LE PUBLIC</div><div class="mf-ld-crit"><div class="mf-ld-c"><span>Rien à dire de cette soirée.</span></div></div>`,'normal','mf-fin-p mf-ld-pub');
-  const MED=typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):'', PAT=typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'';
-   const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
-    const recit=`<section class="ld3-recit"><h3 class="ld3-recit-title">LES TROIS MOMENTS</h3><div class="ld3-moments">${moments}</div>${mgmtLendemainPrimesHtml(m)}${mgmtLendemainDiscoursHtml(m)}${mgmtLendemainAttentionHtml(m)}${mgmtLendemainPresseHtml(m)}${mgmtLendemainChiffresHtml(m)}</section>`;
-    const mouvements=mgmtLendemainMouvementsHtml(m);
-    const change=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.changes)}">CE QUI CHANGE</div><div class="mf-ld-change mf-ancien">${recit}${MED}${mouvements?`<section class="ld3-change-movements"><h3 class="ld3-suite-heading">MOUVEMENTS DE CLASSEMENT</h3>${mouvements}</section>`:''}${mgmtLendemainConstatsHtml(m)||'<div class="mf-eff-aucun">Rien à signaler.</div>'}${PAT}</div>`,'normal','mf-fin-p mf-ld-ch');
-    const resultats=mfPanneau(`<div class="mf-fin-t" aria-label="${esc(MGMT_LD_LABELS.results)}">TOUS LES RÉSULTATS</div><div class="mf-ld-res mf-ancien mgmt-ld-results">${mgmtLendemainResultatsHtml(m)}<button type="button" class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button><button type="button" class="ld3-suite-forward" onclick="CL.mgmtLendemainSuite()">Lire la suite du lendemain</button></div>`,'normal','mf-fin-p mf-ld-rp');
-  const grille=c
-    ?`<div class="mf-fin-grille mf-ld-grille">${mgmtLendemainCaseHtml('LA SALLE',c.salle.v,c.salle.l)}${mgmtLendemainCaseHtml('L’ARGENT',c.argent.v,c.argent.l)}${mgmtLendemainCaseHtml('LA POPULARITÉ',c.pop.v,c.pop.l)}${pub}${change}${resultats}</div>`
-    :`<div class="mf-fin-grille mf-ld-grille">${pub}${change}${resultats}</div>`;
-  return mfEcran(`<main class="mf-contenu mf-finances" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}">${grille}</main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
-    touches:[{ks:['R'],t:'Voir les résultats',onclick:'CL.mgmtLendemainResultats()'},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
+  const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
+  const publicHtml=c&&c.public?`<div class="ld66-number"><b>PUBLIC</b><strong>${esc(c.public.score)} / 100</strong></div>`:'';
+  const chiffres=c?`<section class="ld66-numbers"><h2>LES CHIFFRES</h2><div class="ld66-number"><b>LA SALLE</b><strong>${esc(c.salle.v)}</strong><span>${c.salle.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>L’ARGENT</b><strong>${esc(c.argent.v)}</strong><span>${c.argent.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>POPULARITÉ</b><strong>${esc(c.pop.v)}</strong><span>${c.pop.l.map(esc).join(' · ')}</span></div>${publicHtml}</section>`:'';
+  const change=mgmtLendemainConstatsHtml(m)||'<p>Rien à signaler.</p>';
+  const presse=typeof mgmtLendemainPresseHtml==='function'?mgmtLendemainPresseHtml(m):'';
+  const chapeau=typeof mgmtLendemainDiscoursHtml==='function'?mgmtLendemainDiscoursHtml(m):'';
+  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
+    touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓','Tab'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain=scr_mgmt_lendemain_cadre;
 
@@ -83,7 +74,7 @@ function scr_mgmt_lendemain_suite(){
   if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
   const nom=mgmtOrgNom(m);
   const retour=`<button class="ld3-suite-back" type="button" onclick="CL.go('mgmt_lendemain')">Retour aux trois moments</button>`;
-  return mfEcran(`<main class="mf-contenu"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}${retour}</div></main>`,{
+  return mfEcran(`<main class="mf-contenu ld66-suite"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}${retour}</div></main>`,{
     barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain · la suite',libelle:'',droite:`${nom} Fight Night ${m.eventsPlayed}`,
     touches:[{ks:['↑'],t:'Les trois moments',onclick:"CL.go('mgmt_lendemain')"},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
@@ -92,6 +83,12 @@ SCREENS.mgmt_lendemain_suite=scr_mgmt_lendemain_suite;
 
 Object.assign(CL,{
   mgmtLendemainSuite(){ if(G&&G.mgmt) CL.go('mgmt_lendemain_suite'); },
+  mgmtLendemainRevoirSelectionne(){
+    const m=G&&G.mgmt;
+    if(!m) return;
+    const html=mgmtLendemainMomentsCompletsHtml(m), match=html.match(/CL\.mgmtLendemainRevoir\((\d+)\)/);
+    if(match) CL.mgmtLendemainRevoir(Number(match[1]));
+  },
   /** Referme la soirée et ouvre la liste des résultats. */
   mgmtLendemainResultats(){
     if(!G||!G.mgmt) return;
@@ -108,8 +105,16 @@ Object.assign(CL,{
 keysRegister('mgmt_lendemain',{
   '1'(){ CL.mgmtLendemainNext(); },
   Enter(){ CL.mgmtLendemainNext(); },
-  Escape(){ CL.mgmtLendemainNext(); },
-  r(){ CL.mgmtLendemainResultats(); },
-  R(){ CL.mgmtLendemainResultats(); },
+  Escape(){},
+  r(){ CL.mgmtLendemainRevoirSelectionne(); },
+  R(){ CL.mgmtLendemainRevoirSelectionne(); },
+  ArrowDown(){ CL.mgmtLendemainSuite(); },
+  Tab(){ CL.mgmtLendemainSuite(); },
+});
+keysRegister('mgmt_lendemain_suite',{
+  ArrowUp(){ CL.go('mgmt_lendemain'); },
+  Tab(){ CL.go('mgmt_lendemain'); },
+  Enter(){ CL.mgmtLendemainNext(); },
+  Escape(){},
 });
 /* ==== [FIN ANCRE] ==== */

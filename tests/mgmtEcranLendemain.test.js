@@ -20,6 +20,8 @@
    ========================================================================== */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { newGameWindow } = require('./helpers/loadGame');
 
 const TRAVAIL_RE=/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|TODO/i;
@@ -47,7 +49,7 @@ function joueSoiree(win){
   })()`);
 }
 
-test('MGMT T4 — l’écran rend : en-tête, résultats, constats, rien des lots 5', () => {
+test('MGMT T4 — planches Uni* validées par Anthony ; l’écran rend les moments et constats', () => {
   const win = newGameWindow();
   freshMgmt(win,501);
   assert.ok(joueSoiree(win),'une soirée a été jouée');
@@ -60,25 +62,16 @@ test('MGMT T4 — l’écran rend : en-tête, résultats, constats, rien des lot
   assert.ok(html.includes('Préparer Split 2'),'le bouton prépare la soirée suivante');
   assert.ok(!/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i.test(html),
     'aucun jour de la semaine en en-tête');
-  /* Les trois lectures : résultats, constats, et ni presse ni suites réclamées. */
-  assert.ok(html.includes('Les résultats'),'le bloc des résultats porte son titre');
-  assert.ok(html.includes('Ce que ça a changé'),'le bloc des constats porte son titre');
-  assert.ok(!html.includes('On en parle'),'la presse attend le lot 5');
-  assert.ok(!/[Cc]age Hebdo/.test(html),'aucun nom de la maquette en jeu');
-  assert.ok(!/agent parle de retraite/.test(html),'aucune phrase de la maquette');
-  assert.ok(!/la presse se demande/.test(html),'aucune phrase de la maquette');
-  assert.ok(!/réclame/i.test(html),'les suites réclamées attendent le lot 5');
+  /* La planche UniLendemain validée par Anthony est désormais la référence. */
+  for(const bloc of ['LA SURPRISE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES']) assert.ok(html.includes(bloc),'bloc de la planche présent : '+bloc);
+  const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(name=>/^ld66-|^ld3-moment$|^ld3-label$|^ld3-meta$|^ld3-names$|^ld3-detail$|^mgmt-ld-link$/.test(name)))];
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.ok(classes.length>0,'les blocs de la planche portent leurs classes de composant');
+  assert.deepEqual(classes.filter(name=>!new RegExp('\\.'+name+'(?:\\W|$)').test(css)),[],'chaque classe de l’écran a une règle CSS');
   assert.ok(!TRAVAIL_RE.test(html),'aucun texte de travail');
   /* Les résultats : chaque combat porte « bat » (ou un match nul), une
      méthode, un bouton REVOIR ; un lien vers toute la soirée. */
-  const titles=[...win.document.querySelectorAll('.mgmt-ld-results .mgmt-ld-title')];
-  assert.equal(titles.length,win.G.mgmt.lastEvent.fights.length,'un titre par combat');
-  assert.ok(titles.every(t=>/ bat /.test(t.textContent)||/Match nul/.test(t.textContent)),
-    'chaque titre raconte l’issue stockée');
-  const rev=[...win.document.querySelectorAll('.mgmt-ld-results .mgmt-ld-link')];
-  assert.ok(rev.length>=titles.length,'Revoir est là (et le lien de la soirée)');
-  assert.equal(rev.filter(b=>b.textContent==='Revoir').length,titles.length,'un Revoir par combat');
-  assert.ok(rev.some(b=>/Voir toute la soirée/.test(b.textContent)),'« Voir toute la soirée » porte son lien');
+  assert.equal(win.document.querySelectorAll('.ld3-moment').length,3,'trois moments consultables');
   /* La séquence impose sa suite : le bouton de l'en-tête rend la main. */
   win.eval(`CL.mgmtLendemainNext()`);   /* brief démo, lot 6 T3 : l'action du soir suivant est la touche jaune de la barre du bas */
   assert.equal(win.eval('G.screen'),'mgmt_accueil','la main passe à l’Accueil (décision du 12/10/2026 : l’Accueil est la première section (lot 7) ; avant, décision du 08/10/2026 : la carte)');
@@ -122,7 +115,7 @@ test('MGMT T4 — la ligne de méthode vient du déroulé rejoué : méthode, ro
   assert.ok(!/\[CRITIQUE\]|\[ARBITRAGE\]/.test(s.ligne),'aucun marqueur interne du moteur');
 });
 
-test('MGMT T4 — les constats suivent le classement au cycle précédent, une seule loi', () => {
+test('MGMT T4 — planches Uni* validées par Anthony ; les constats sont dans la suite complète', () => {
   const win = newGameWindow();
   freshMgmt(win,503);
   assert.ok(joueSoiree(win),'une soirée a été jouée');
@@ -156,7 +149,7 @@ test('MGMT T4 — les constats suivent le classement au cycle précédent, une s
   const e=JSON.parse(win.eval(`(function(){
     const m=G.mgmt;
     G.screen='mgmt_lendemain'; render();
-    const items=[...document.querySelectorAll('.mf-ld-change .mgmt-ld-title')];
+    const items=[...document.querySelectorAll('.ld66-change .mgmt-ld-title')];
     return JSON.stringify(items.map(x=>x.textContent));
   })()`));
   let entre=0,sort=0;
