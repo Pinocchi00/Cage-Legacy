@@ -160,6 +160,15 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Limites encore vérifiables au terme de cette reprise : choc au-dessus de la cible `grosBlocs≤20%`; chevauchement du bilan persistant; arrivée sans comparaison/capture dédiée; images non ouvertes pour comparaison visuelle. Le discours satisfait les mesures automatiques disponibles. Je ne présente pas les cases visuelles comme achevées.
 - Modifications hors tranche préexistantes conservées sans staging : `.opencode/agents/*`, `opencode.json` ; les fins de ligne de `mgmt-ecran-poste.js` ne sont pas incluses.
 
+### Reprise 58 — contrôle de rendu et bilan
+- État de départ : branche `fid-choc`, HEAD `a4751820`. Les fichiers `.opencode/agents/*` et `opencode.json` sont des changements utilisateur exclus. `mgmt-ecran-poste.js` et `ui-cadre.css` apparaissent modifiés au `git status`, mais `git diff --ignore-all-space` ne montre pas de changement de contenu au départ (fins de ligne seulement).
+- Captures isolées lancées par `shoot.js` à 1920×1080 : choc rendu depuis la proposition valide, 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=25.1%` ; discours, 0 anomalie géométrique et `grosBlocs=18.1%` ; bilan, `grosBlocs=12.9%`, avec le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22).
+- Tentative de correction du bilan : disposition en colonne avec espacement explicite, marges neutralisées. Après incrément du `?v=`, une nouvelle capture donne toujours exactement le même chevauchement ; correction non prouvée et critère non satisfait.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe. Pas de changement de sauvegarde.
+- Fichiers modifiés dans cette reprise : `ui-cadre.css` (tentative d'espacement du bilan), `index.html` (`?v=` associé), cette fiche (mesures et limites). Tests ajoutés : aucun. Pas de capture `cmp-*` ajoutée au dépôt ; la scène dédiée d'arrivée et l'ouverture visuelle comparative des images restent absentes.
+- Les reprises précédentes et les tests couvrent les trois paires, le booking/soirée normale du choc, l'offre/changement/arrivée/soirée/lendemain, ainsi que l'inscription du test aux scripts `test` et `test:watch`. Cette vérification ne transforme pas les cases visuelles restantes en succès : seuil de gros blocs du choc manqué, chevauchement du bilan persistant, arrivée non capturée.
+- Écart à la fiche : les objectifs visuels complets et la capture d'arrivée ne sont toujours pas atteints. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
