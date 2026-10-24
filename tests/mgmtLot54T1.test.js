@@ -6,6 +6,25 @@ const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
 
+test('Monde lot 54 T1 — les résultats tolèrent une carte de soirée absente ou malformée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const r=w.eval(`(()=>{
+      const m=G.mgmt;
+      const avant=mgmtLendemainResultatsHtml(m);
+      m.lastEvent={fights:null};
+      const malforme=mgmtLendemainResultatsHtml(m);
+      m.lastEvent=null;
+      const absent=mgmtLendemainResultatsHtml(m);
+      return {avant,malforme,absent};
+    })()`);
+    assert.equal(typeof r.avant,'string');
+    assert.equal(r.malforme,'');
+    assert.equal(r.absent,'');
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — la partie réelle classe la surprise majeure avant les autres histoires',()=>{
   const w=newGameWindow({runMain:true});
   try{

@@ -138,6 +138,7 @@ function mgmtLendemainRangTexte(m,id,nom){
 
 function mgmtLendemainResultatsHtml(m){
   const e=m.lastEvent;
+  if(!e||!Array.isArray(e.fights)) return '';
   let html='', mains=0, prelims=0;
   /* Corrections du 08/10, 3.1 : les combats sont dans l'ordre de passage — le DERNIER de la carte principale est le combat principal. */
   const nMain=e.fights.filter((x,k)=>{ const tk=mgmtSoireeTrace(m,k); return tk&&tk.slot==='main'; }).length;

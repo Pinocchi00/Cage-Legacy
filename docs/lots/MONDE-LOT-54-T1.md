@@ -289,3 +289,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Journal consulté : `bb6e1ee` en tête, branche `p8-lendemain`. Les commits antérieurs de la tranche sont déjà committés ; les changements étrangers `.opencode/agents/*`, `opencode.json` et `sw.js` restent exclus.
 - Validation relancée : `node --test tests/mgmtLot54T1.test.js` passe 27/27 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint ciblé sur `mgmt-ecran-lendemain.js`, `mgmt-lendemain-cadre.js` et `mgmt-accueil.js` passe. Le test figure dans `test` et `test:watch`.
 - État honnête inchangé : cas 2 (soirée de référence) et 4 (D1 déjà présent) vérifiés ; cas 5 couvert par les tests existants. Les cases 1 et 3 ne satisfont toujours pas la totalité des critères de fidélité aux deux planches, ni la mémoire éditoriale persistante et l'ensemble des réactions T3. Aucun changement fonctionnel ni de sauvegarde dans cette reprise. `tests/mgmtReleveReduit.test.js` et `check:rapide` laissés au superviseur selon la consigne.
+
+### Reprise — robustesse des résultats (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : le rendu des résultats retourne une chaîne vide si aucun `lastEvent` valide ou tableau `fights` n'est présent, au lieu de planter sur les données absentes/malformées.
+- `tests/mgmtLot54T1.test.js` : test « Monde lot 54 T1 — les résultats tolèrent une carte de soirée absente ou malformée » ajouté. `node --test tests/mgmtLot54T1.test.js` passe 29/29.
+- Aucune donnée de sauvegarde nouvelle. Les cases 1 et 3 restent incomplètes selon les limites documentées plus haut (fidélité exhaustive aux deux planches et contextualisation/anti-répétition éditoriale T3 persistante) ; cette correction de robustesse ne les déclare pas terminées. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été lancé.
