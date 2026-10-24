@@ -1,5 +1,13 @@
 # Monde lot 67 T1 — fidélité aux maquettes : la page Organisation (classement des huit, croissance, Ton poste, Ton carnet) et la cérémonie
 
+## Compte rendu — reprise 11 (24/10/2026)
+
+- Branche `fid-organisation` confirmée ; historique et état Git consultés. Les commits applicatifs antérieurs étaient déjà présents et aucun changement non commité au début de cette reprise.
+- Protocole de capture relu puis cérémonie recapturée individuellement. Mesure : `grosBlocs=19,9 %`, chevauchements=0, textes sous 22 px=0, débordements=[] ; comparatif écrit sous `%TEMP%/shots/`. La capture par défaut n'assure pas six lauréats : la planche présente cinq cartes de prix, et ce tour n'a pas préparé de scène remplie. Le PNG généré n'a pas été ouvert avec l'outil image dans cette session.
+- Ajout d'un test de présence vérifiant que chaque classe réellement rendue par la cérémonie a une règle dans `ui-cadre.css`, en citant la décision de suivre les planches validées par Anthony. `node --test tests/mgmtLot55T1.test.js` passe (47/47) ; le test est déjà inclus dans `test` et `test:watch`. Audit versions `node tools/verif-versions.js origin/main` et ESLint global passent.
+- Fichier modifié : `tests/mgmtLot55T1.test.js` (audit exhaustif des styles de classes de cérémonie) ; cette fiche (journal). Aucune migration de sauvegarde. Aucun fichier JS/CSS modifié.
+- Écarts non clos : aucune capture nouvellement contrôlée pour Guerre, Croissance, Ton poste, Carnet et Bilan ; les défauts signalés dans les reprises précédentes ne sont pas résolus ici. Pas de scène de capture vérifiant des prix remplis, et pas d'inspection visuelle effective de `cmp-ceremonie.png`. Les cases de fidélité globale de la fiche restent donc à valider ; pas de `TOUT_EST_FINI` revendiqué.
+
 ## Compte rendu — reprise 10
 
 - Branche `fid-organisation` confirmée ; `git log --oneline -12` et `git status` consultés. Les précédents travaux étaient déjà commités. Lecture du protocole `shoot/LISEZMOI.txt` et captures individuelles exécutées pour les six écrans.

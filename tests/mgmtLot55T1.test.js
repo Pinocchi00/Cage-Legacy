@@ -475,6 +475,19 @@ test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles d�
   }
 });
 
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; chaque classe de cérémonie a une règle de style',()=>{
+  const c=charger();
+  c.G={mgmt:{hist:[],roster:[],facts:[]}};
+  c.mgmtOrgClassement=()=>[];
+  c.mgmtOrgNom=()=> 'Split';
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  const classes=[...new Set([...rendu.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)))];
+  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const classe of classes) assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'),`classe de cérémonie sans règle de style: ${classe}`);
+});
+
 test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; ordre des cartes de cérémonie suit la planche',()=>{
   const ordre=source.match(/const ordreCartes=\[([^\]]+)\]/);
   assert.ok(ordre);
