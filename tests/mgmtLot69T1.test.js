@@ -89,7 +89,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
            const nomAdverse=w.eval(`G.mgmt.orgs[${JSON.stringify(orgId)}].roster.find(f=>f.id===${JSON.stringify(paire.b)}).name`);
            assert.ok(triple.includes(nomAdverse),`l’affiche doit afficher la championne adverse réelle: ${nomAdverse}`);
          }
-         assert.match(triple,/<span class="ch3-vs">C<\/span><strong>[^<]+<\/strong>/,'chaque affiche reprend le médaillon C et le nom de division de la planche');
+        assert.match(triple,/<span class="ch3-vs">C<\/span><strong>[^<]+<\/strong>/,'chaque affiche reprend le médaillon C et le nom de division de la planche');
+        w.eval(`G.mgmt.choc.paires=G.mgmt.choc.paires.slice(0,1);G.screen='mgmt_choc';`);
+        assert.match(w.eval(`scr_mgmt_choc()`),/SI SPLIT GAGNE 1 SUR 1 · PASSE 2e/,'la règle de majorité reflète les paires réellement disputées quand le choc n’en comporte qu’une');
+        w.eval(`G.mgmt.choc.paires=${JSON.stringify(paires)};G.screen='mgmt_choc';`);
        w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
         w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.mgmt.choc.paires[1].div='division-incoherente';G.screen='mgmt_choc';scr_mgmt_choc()`);
