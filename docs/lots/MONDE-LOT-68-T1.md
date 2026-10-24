@@ -201,3 +201,12 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - `node --test tests/mgmtFicheStats.test.js` : 21/21 verts.
 - Capture/comparaison non réalisées : aucune correction d'apparence ni fidélité visuelle n'est revendiquée. Fiche, arrivée, recruteur, semaine, relevé, chiffres, menu et classements restent sans comparaison visuelle exploitable ; corrections visuelles restantes.
 - Aucun fichier applicatif JS/CSS ni donnée de sauvegarde modifié ; pas de migration ni de bump `?v=`. Tests lents non relancés. `TOUT_EST_FINI` non atteint.
+
+### Reprise 25 du 24/10/2026
+
+- Branche confirmée : `fid-fiches`. Les changements `.opencode/agents/*` et `opencode.json` restent hors tranche. Aucun fichier applicatif non committé au début de cette reprise.
+- Test « Monde lot 68 T1 — chaque classe rendue par l’arrivée a une règle dans sa feuille intégrée » renforcé : couverture explicite des blocs `po-quote` et `po-issues`, présents dans l’étape contrat. Décision : « planches Uni* validées par Anthony ; l’écran suit la planche ».
+- `node --test tests/mgmtFicheStats.test.js` : 21/21 verts. `node tools/verif-versions.js origin/main` : aucun écart. `node_modules/.bin/eslint .` : vert.
+- Aucun changement JS/CSS, migration de sauvegarde ou bump `?v=`. `tests/mgmtReleveReduit.test.js` non relancé.
+- État écran par écran : fiche aperçu/statistiques, arrivée contrat/espoirs, recruteur mission/retours, semaine, relevé, chiffres du combat, menu, meilleurs et records : tests structurels/CSS partiels accumulés ; la vérification visuelle comparative requise n'a pas été réalisée et aucune différence précise n'est affirmée sans observation des images. Les changements visuels demandés restent inachevés.
+- Écart à la fiche : les cases 1 à 5 ne sont pas validées par capture et correction écran par écran. Aucun fichier temporaire de comparaison n'a pu être ouvert avec les outils disponibles pour cette reprise. Pas de `TOUT_EST_FINI`.

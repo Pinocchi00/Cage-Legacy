@@ -106,6 +106,10 @@ test('Monde lot 68 T1 — chaque classe rendue par l’arrivée a une règle dan
     .flatMap(match=>match[1].split(/\s+/)).filter(name=>/^(?:po|ma)-[\w-]+$/.test(name)))];
   assert.ok(classes.length>0,'classes de l’arrivée trouvées');
   for(const name of classes)assert.match(inlineStyles,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
+  // Les panneaux du contrat ont aussi des blocs sémantiques qui ne sont pas
+  // portés par une classe ma-/po- dans le markup (citation et échéances).
+  for(const name of ['po-quote','po-issues'])
+    assert.match(inlineStyles,new RegExp(`\\.${name}(?:[\\s.#:[,{>+~]|\\{)`),`style ${name}`);
 });
 test('Monde lot 68 T1 — les écrans de la tranche restent enregistrés dans le jeu',()=>{
   // Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
