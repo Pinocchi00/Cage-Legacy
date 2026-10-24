@@ -346,7 +346,7 @@ function mgmtLendemainPrimesHtml(m){
   const facts=(Array.isArray(m.facts)?m.facts:[]).filter(f=>f&&f.k==='prime'&&f.c===m.lastEvent.cycle);
   const vus=new Set();
   return facts.filter(f=>{const key=f.fight+'|'+f.type;if(vus.has(key))return false;vus.add(key);return true;})
-    .map(f=>{const t=m.hist&&m.hist[f.fight],fighter=mgmtFighterById(m,f.a),name=fighter?fighter.name:(t&&t.a&&t.a.id===f.a?t.a.name:t&&t.b&&t.b.name)||'Combattant';
+    .map(f=>{const t=m.hist&&m.hist[f.fight],fighter=mgmtFighterById(m,f.a),name=(fighter&&fighter.name)||(t&&t.a&&t.a.id===f.a&&t.a.name)||(t&&t.b&&t.b.id===f.a&&t.b.name)||'Combattant';
       const label=f.type==='cs'?'COMBAT DE LA SOIRÉE':'PERFORMANCE DE LA SOIRÉE';
       return `<div class="ld3-prime"><b>${esc(label)}</b><span>${esc(name)}</span><span>${esc(mgmtEuros((f.m||0)/1000))}</span></div>`;}).join('');
 }

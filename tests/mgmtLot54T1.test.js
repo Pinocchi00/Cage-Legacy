@@ -109,6 +109,16 @@ test('Monde lot 54 T1 — le lendemain assemble primes, discours facultatif et s
   }finally{w.close();}
 });
 
+test('Monde lot 54 T1 — une prime sans nom exploitable garde un libellé de repli',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
+    const html=w.eval(`(()=>{const m=G.mgmt,f=m.roster[0],g=m.roster.find(x=>x.id!==f.id),i=m.hist.length;f.name='';m.hist.push({c:m.cycle,slot:'main',winner:'A',family:'dec',a:{id:f.id,name:''},b:{id:g.id,name:g.name}});m.lastEvent={cycle:m.cycle,fights:[],finance:{}};m.facts.push({c:m.cycle,k:'prime',a:f.id,fight:i,type:'pf',m:1000});return mgmtLendemainPrimesHtml(m);})()`);
+    assert.match(html,/Combattant/);
+    assert.doesNotMatch(html,/undefined/);
+  }finally{w.close();}
+});
+
 test('Monde lot 54 T1 — la presse suit le poids des histoires et les chiffres utilisent les données de clôture',()=>{
   const w=newGameWindow({runMain:true});
   try{

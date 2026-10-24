@@ -310,3 +310,9 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 - Vérifications relancées : `node --test tests/mgmtLot54T1.test.js` passe 29/29 ; `node tools/verif-versions.js origin/main` ne signale aucun écart ; ESLint des trois fichiers JS de production passe.
 - Aucun nouveau code n'a été nécessaire au contrôle de livraison. Cas 2, 4 et 5 sont testés selon les limites inscrites ci-dessus. Les cases 1 et 3 ne sont pas achevées : il subsiste des écarts de composition/contenu aux planches et les lignes de l'après ne disposent pas d'une mémoire éditoriale persistante sur 50 soirées. Aucune nouvelle clé de sauvegarde ni migration.
 - `tests/mgmtReleveReduit.test.js` (lent), le lint global et `check:rapide` ne sont pas lancés conformément aux consignes de contrôle de cette reprise. Aucun nouveau commit n'est créé puisqu'aucun changement fonctionnel ou de tranche n'est en attente.
+
+### Reprise — libellé de repli des primes (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : le nom du bénéficiaire de prime utilise maintenant le premier nom exploitable (roster puis trace) ou « Combattant » ; la version cache a été montée.
+- `tests/mgmtLot54T1.test.js` : ajout du test « Monde lot 54 T1 — une prime sans nom exploitable garde un libellé de repli ». Vérification ciblée : 30/30.
+- Aucun changement de sauvegarde. Les écarts globaux des cases 1 et 3 demeurent : la composition/layout exacts des planches et une mémoire éditoriale persistante T3 sur 50 soirées ne sont pas entièrement réalisés. `tests/mgmtReleveReduit.test.js` et `check:rapide` sont laissés au superviseur.
