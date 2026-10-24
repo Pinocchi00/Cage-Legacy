@@ -257,6 +257,16 @@ test('Monde lot 53 T1 — Entrée passe le combat en temps forts au verdict et l
   }finally{w.close();}
 });
 
+test('Monde lot 53 T1 — le fondu d’une fenêtre assombrit brièvement l’image de l’arène',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const niveaux=w.eval(`(()=>[mgmtCombatFonduFenetre(10,10),mgmtCombatFonduFenetre(10.11,10),mgmtCombatFonduFenetre(10.22,10)])()`);
+    assert.equal(niveaux[0],1);
+    assert.ok(niveaux[1]>0&&niveaux[1]<1);
+    assert.equal(niveaux[2],0);
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — C bascule des temps forts au combat entier sans quitter l’arène',()=>{
   const w=newGameWindow({runMain:true});
   try{
