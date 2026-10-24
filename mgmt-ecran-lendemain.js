@@ -275,9 +275,16 @@ function mgmtLendemainApres(m,semaine){
   const stream=mgmtIdentiteStream(combattants.map(f=>f.id).sort().join('|'),'lendemain-apres|'+semaine,m);
   const decal=Math.floor(stream()*combattants.length), n=Math.min(3,1+Math.floor(stream()*3)), result=[];
   const touches=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
+  const famillesUtilisees=new Set();
   for(let i=0;i<Math.min(n,combattants.length);i++){
     const f=combattants[(decal+i)%combattants.length], nom=f.name||f.last||'Combattant';
-    const item=MGMT_LD_APRES_FAMILLES[(Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length)+i)%MGMT_LD_APRES_FAMILLES.length];
+    let item=null, depart=Math.floor(stream()*MGMT_LD_APRES_FAMILLES.length);
+    for(let pas=0;pas<MGMT_LD_APRES_FAMILLES.length;pas++){
+      const candidat=MGMT_LD_APRES_FAMILLES[(depart+pas+i)%MGMT_LD_APRES_FAMILLES.length];
+      if(!famillesUtilisees.has(candidat.famille)){item=candidat;break;}
+    }
+    if(!item) break;
+    famillesUtilisees.add(item.famille);
     if(item.famille==='suspension'&&!touches.some(x=>x&&x.id===f.id&&Number.isSafeInteger(x.days)&&x.days>0)) continue;
     /* La semaine fait partie du fait temporel : elle distingue une reprise
        ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */
