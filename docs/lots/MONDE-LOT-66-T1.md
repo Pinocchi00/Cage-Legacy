@@ -48,4 +48,10 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 - Tests après cet ajustement : `mgmtEcranLendemain.test.js` 7/7 et `mgmtLendemainDemo.test.js` 7/7 ; audit `node tools/verif-versions.js origin/main` et ESLint passent.
 - À vérifier au bilan : aucune capture image n'a été ouverte pour jugement visuel des chevauchements. Les indicateurs mesurés sont conformes aux seuils gros blocs ; aucun autre écart identifié.
 
+### Reprise 10 — captures vérifiées — 24/10/2026
+
+- Relu `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` puis relancé le comparateur sur les deux écrans. Mesures obtenues : `lendemain` — `grosBlocs` 19,5 %, `moyen` 24,9 % ; `lendemainSuite` — `grosBlocs` 18,8 %, `moyen` 23,3 %. Les images `cmp-lendemain.png` et `cmp-lendemainSuite.png` sont produites sous `C:/Users/antho/AppData/Local/Temp/shots/` par l'outil. Aucun jugement visuel sur leur contenu n'est revendiqué.
+- Test ciblé relancé : `node --test tests/mgmtEcranLendemain.test.js` (7/7). Les autres vérifications et l'ajustement CSS décrits ci-dessus sont déjà présents dans les commits précédents ; aucun fichier de tranche n'était non commité à la reprise. Les seules modifications locales préexistantes sont des fichiers de configuration/agents et `sw.js`, laissés hors de cette tranche.
+- L'objectif mesuré `grosBlocs ≤ 20 %` est atteint sur les deux écrans ; les images comparatives restent accessibles pour contrôle visuel ultérieur. Aucun changement de code ou de sauvegarde ajouté dans cette reprise.
+
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
