@@ -388,6 +388,8 @@ function validateMgmt(raw){
   /* Facultatif : une partie d'avant le lot n'en porte pas. Quand il est là,
      seuls des identifiants connus, soixante entrées au plus. */
   if(raw.defis!==undefined&&!mgmtDefisValide(raw.defis)) return false;
+  /* ==== [ANCRE: P11_T1_PRIX_VALIDATION] — Monde lot 55 T1 ==== */
+  if(Array.isArray(raw.roster)&&raw.roster.some(f=>f&&f.prixAnnee!==undefined&&(!Array.isArray(f.prixAnnee)||f.prixAnnee.length>30||f.prixAnnee.some(p=>!p||!['combattant','ko','soumission','combat','revelation','retour'].includes(p.prix)||!Number.isSafeInteger(p.annee)||typeof p.relu!=='boolean')))) return false;
   if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
@@ -724,6 +726,12 @@ function mgmtRepair(m){
     const surnoms=mgmtSurnomsGagnesReparer(m.surnoms);
     if(surnoms===undefined) delete m.surnoms;
     else m.surnoms=surnoms;
+  }
+  /* ==== [ANCRE: P11_T1_PRIX_REPARATION] — Monde lot 55 T1 ==== */
+  if(Array.isArray(m.roster)) for(const f of m.roster){
+    if(!f||!Object.prototype.hasOwnProperty.call(f,'prixAnnee')) continue;
+    if(!Array.isArray(f.prixAnnee)){delete f.prixAnnee;continue;}
+    f.prixAnnee=f.prixAnnee.filter(p=>p&&['combattant','ko','soumission','combat','revelation','retour'].includes(p.prix)&&Number.isSafeInteger(p.annee)&&typeof p.relu==='boolean').slice(-30);
   }
   /* ==== [ANCRE: MONDE_LOT33_T1_MIGRATION_SUIVIS] — Monde lot 33 T1 ==== */
   const cercleAncien=Array.isArray(m.cercle)?m.cercle:[];
