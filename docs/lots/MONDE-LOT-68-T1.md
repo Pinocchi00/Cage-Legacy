@@ -286,6 +286,14 @@ Règles communes : **additif** pour les données ; ne touche ni au moteur de com
 - Je n'ai pas pu relire le guide du captureur ni ouvrir ses images de comparaison dans cette session. Aucun résultat `CONTRÔLE` frais n'est revendiqué : les quatre écrans avec métriques historiques à zéro sont fiche, recruteur, retours, semaine (voir reprise 40), mais celles-ci ne sont pas une capture actuelle. Arrivée contrat/espoirs, relevé, chiffres du combat, menu, meilleurs et records restent sans validation par comparaison accessible. Accueil, actualités, tonposte et bilan sont hors périmètre.
 - Aucun changement de code ou de test n'a été justifié sans observation exploitable ; pas de migration, bump `?v=` ou commit applicatif. Écart à la fiche : les comparatifs et les corrections visuelles écran par écran restent incomplets. Aucun `TOUT_EST_FINI`.
 
+### Reprise 46 du 24/10/2026
+
+- Historique consulté : `78172147` en tête, branche `fid-fiches`. Aucun changement non committé de la tranche ; les modifications `.opencode/agents/*` et `opencode.json` restent hors périmètre et n'ont pas été ajoutées.
+- Vérifications ciblées fraîches : `node --test tests/mgmtFicheStats.test.js tests/mgmtReleve.test.js` (28/28 verts). `node tools/verif-versions.js origin/main` : aucun écart.
+- La correction demandée du suivi est présente dans le code actuel : `.mf-fiche-suivi` est rendue dans `.mf-fi-onglets`; la règle dédiée la place statiquement dans cette rangée, et le compteur est associé au bouton. Les tests concernés sont verts.
+- Pas de nouvelle capture `CONTRÔLE` dans cette reprise : le chemin d'instructions de capture se trouve hors des répertoires autorisés de lecture dans cet environnement. Aucun résultat de géométrie « avant/après » n'est inventé. Arrivée, recruteur, retours, semaine, relevé, chiffres, menu, meilleurs et records ne sont donc pas déclarés géométriquement conformes sur une mesure fraîche ; les écrans accueil/actualités/tonposte/bilan restent hors du périmètre de modification.
+- Aucun changement applicatif ou test n'a été justifié sans contrôle exploitable. Migration et bump `?v=` : aucun. Le test lent `tests/mgmtReleveReduit.test.js` n'a pas été relancé. Fidélité par comparatif et critère de fin toujours non atteints ; pas de `TOUT_EST_FINI`.
+
 ### Reprise 40 du 24/10/2026 — contrôle géométrique
 
 - Contrôles actuels, capture à 1920×1080 : fiche (UniFicheStats) `{chevauchements:0, exemples:[], textesSous22px:0, debordent:[]}` ; recruteur (UniRecruteurMission) `{0, [], 0, []}` ; retours (UniRecruteurRetour) `{0, [], 0, []}` ; semaine (UniSemaine) `{0, [], 0, []}`. La fiche ne reproduit donc plus les deux chevauchements historiques signalés (palmarès/compteur, POIDS/SUIVRE) ; le bouton et son compteur sont déjà dans la rangée des onglets. Pas de correction applicative nécessaire pour ces contrôles.
