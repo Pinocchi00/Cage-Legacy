@@ -379,3 +379,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Migration de sauvegarde : aucune.
 - Écarts à la fiche : affiches du choc toujours mono-combat côté modèle, parcours complet fin de contrat → bilan → rechargement strict valide non prouvé, capture discours/bilan et scène d'arrivée non obtenues ; le choc mesuré à 25.1% de gros blocs dépasse la cible. Les changements utilisateur préexistants hors tranche restent exclus.
 - Questions pour Anthony : aucune nouvelle question ; aucune règle métier supplémentaire n'a été supposée.
+
+### Reprise 61
+- `ui-cadre.css` compacte l'en-tête et le bandeau du choc (hauteurs, espacements et taille du VS) dans les styles de tranche afin de réduire l'emprise des blocs. `index.html` a reçu le `?v=` incrémenté par `node tools/_bump.js ui-cadre.css`.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` passe (17 fichiers), `node_modules/.bin/eslint .` passe.
+- Pas de capture post-correction : le taux de gros blocs de l'écran choc n'est donc pas mesuré après ce changement et le seuil ≤20 % n'est pas revendiqué. Les autres écarts consignés restent ouverts (affiches du choc, parcours complet strict, comparaisons arrivée/discours/bilan et scènes dédiées).
+- Fichiers de cette reprise : `ui-cadre.css` (compacité du choc), `index.html` (version cache), cette fiche (compte rendu). Pas de migration de sauvegarde. Modifications utilisateur sous `.opencode/agents/` et `opencode.json` laissées intactes.

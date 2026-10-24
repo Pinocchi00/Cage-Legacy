@@ -1967,6 +1967,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-button.ch3-counter{background:#252121;color:#E9E6E1;border:2px solid rgba(233,230,225,.5)}
 .ch3-button.ch3-refuse{background:#E23A2B;color:#0D0B0B}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_COMPACT] — Monde lot 69 T1 ==== */
+.ch3-screen{grid-template-rows:54px 68px minmax(0,1fr);gap:14px}
+.ch3-head{min-height:54px}
+.ch3-head h1{font-size:48px;padding:6px 14px}
+.ch3-title{font-size:40px;padding:8px 0}
+.ch3-title .ch3-vs{width:46px;height:46px;font-size:24px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
