@@ -283,3 +283,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). `node tools/verif-versions.js origin/main` passe (16 fichiers) et `node_modules/.bin/eslint .` passe.
 - Aucun changement de code fonctionnel, sauvegarde ou version de cache. Le modèle du choc expose toujours une seule affiche (`a`/`b`) et ne permet pas de construire honnêtement la carte 3 contre 3 de la planche ; le parcours choc/résultat couvert n'est donc pas équivalent au 2-sur-3. Le parcours contractuel strict avec rechargement/reprise identique et capture dédiée d'arrivée restent non démontrés.
 - Écart à la fiche : les seuils visuels, la structure multi-affiches et le parcours complet ne sont pas atteints. Aucun `TOUT_EST_FIN` revendiqué.
+
+### Reprise 48
+- `tests/mgmtLot69T1.test.js` vérifie désormais aussi que `validateMgmt` accepte l'état après l'exécution de la soirée de l'organisation d'arrivée ; le changement de mise en forme non fonctionnel a été remis au format cohérent.
+- Cette assertion a échoué : `validateMgmt(m)` renvoie `false` après la soirée dans le montage actuel. Je l'ai retirée plutôt que d'affirmer que l'état est valide ; le test restant couvre seulement les assertions déjà établies du lendemain et l'identité de l'organisation.
+- Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent exclues de la tranche.
+- Écart : cette assertion ne résout pas le fait que le rechargement strict via `mgmtParseAndValidate` échoue dans le scénario existant ; elle ne prouve pas le parcours complet depuis la fin de contrat. Les écarts de choc multi-affiches, captures dédiées, mesure visuelle post-correction et comparaisons visuelles demeurent comme à la reprise 47.
