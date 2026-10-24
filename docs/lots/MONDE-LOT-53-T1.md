@@ -78,4 +78,12 @@ Branche : `p7-ecran-soiree` (la branche courante de ce dossier ; commits ICI ; l
 - Choix de lecture documenté par le code existant : le lecteur conserve l'arène actuelle et accélère les segments hors moments forts via `MGMT_TF_VITESSE`; aucun moteur parallèle ni changement du moteur de combat.
 - Ce commit de reprise ne satisfait donc pas les critères finaux et ne peut être présenté comme l'achèvement de la tranche.
 
+### Reprise 12 — état réel à la reprise 3
+
+- Vérifié : branche `p7-ecran-soiree`, HEAD `c9e7708`; l'arbre applicatif de la tranche ne contient aucun changement non commité. Les changements `.opencode/agents/*` et `opencode.json` sont étrangers et restent intacts.
+- Test relancé : `node --test tests/mgmtLot53T1.test.js` (5 réussis). Le calcul de durée vérifie seulement une valeur finie positive et ne couvre pas la plage 900–1200 s.
+- L'implémentation complète des critères restants n'a pas été réalisée dans cette reprise : carte `UniSoiree`/fin `UniSoireeFin`, frise/fondu et temps forts temporisés, résultat seul passable, test de cumul conforme, audit complet des classes et test d'empreintes. Le test reste seulement dans `pretest`/`pretest:watch` et non dans les longues commandes principales.
+- Le calcul existant respecte les constituants documentés (temps forts 45 s, résultat 5 s, combat complet issu de la durée reconstruite, transition 10 s). Une mesure antérieure donnait 868,38 s : augmenter arbitrairement le temps ou déformer la formule pour passer la cible n'est pas une solution fidèle. Ce point reste une limite de livraison, pas une ambiguïté à faire trancher.
+- État : critères de fin non atteints ; aucun changement fonctionnel supplémentaire ni commit vide n'est produit. Les commits antérieurs de reprise demeurent partiels.
+
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
