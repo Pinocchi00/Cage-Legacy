@@ -17,6 +17,14 @@ Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-t
 
 ## Compte rendu
 
+  - **Reprise 19 — état : incomplet.** Branche vérifiée `p9-renvoi-offres`. Le diff de départ ne contenait aucun fichier métier non commité ; les changements locaux `.opencode/agents/*` et `opencode.json` sont hors tranche et préservés.
+  - **Fichier modifié :** `tests/mgmtLot58T1.test.js` : le test « Monde lot 58 T1 — refuser toutes les offres puis progresser prolonge le contrat de Split » utilise désormais `mgmtOffresCreer` et refuse les offres effectivement générées, au lieu de fabriquer une liste de propositions.
+  - **Test exécuté :** `node --test tests/mgmtLot58T1.test.js` passe (4/4). La génération normale sur cette partie neuve ne fournit actuellement aucune offre admissible ; le test démontre donc le chemin « aucune offre à refuser » et le renouvellement, pas un refus de propositions réellement reçues.
+  - **Non réalisé, bloquant le critère final :** le choc des organisations, l'écran `UniChoc` fidèle, les propositions et leur limite annuelle, le combat par la soirée normale, le bonus et le résultat de classement restent absents. Le test n'est toujours pas inscrit littéralement dans les scripts agrégés `test` et `test:watch`; sauvegarde ancienne et contrôle du plafond non ajoutés. Pas de changement de code de ces systèmes lors de cette reprise.
+  - **Écarts à la fiche :** cases 3, 4 et 6 incomplètes ; l'étude T5 reste réalisée. Aucun changement de version de sauvegarde. Pas de déclaration de conformité à la maquette.
+  - **Décisions/limites observées :** la vérification a prouvé qu'une nouvelle partie générée par `mgmtPasseGenerer('split',{soirees:3})` peut avoir zéro organisation admissible pour les offres de renvoi. Le test ne force pas des candidates artificielles afin de ne pas confondre génération réelle et fixture synthétique.
+  - **Questions pour Anthony :** aucune ; les décisions du superviseur sont appliquées.
+
   - **Reprise 18 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Pas de fichiers métier de la tranche non commités trouvés ; les modifications locales `.opencode/agents/*` et `opencode.json` préexistantes ont été préservées.
   - **Modification :** `package.json` ajoute des alias ciblés `test:monde58t1` et `test:watch:monde58t1`. Les hooks `pretest` et `pretest:watch` exécutaient déjà `mgmtLot58T1.test.js`.
   - **Vérifications :** `node --test tests/mgmtLot58T1.test.js` vert (4/4). `node tools/verif-versions.js origin/main` signale l'écart préexistant `ui-cadre.css`. Vérification directe des chaînes `test`/`test:watch` : les deux ne contiennent pas le nom du test.
