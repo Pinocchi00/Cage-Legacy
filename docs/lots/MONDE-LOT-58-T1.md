@@ -10,12 +10,19 @@ Branche : `p9-renvoi-offres` (la branche courante de ce dossier ; commits ICI ; 
 **[ ] 3. Le choc des organisations.** Une soirée commune, champion contre champion, **au plus une fois par an** : une autre organisation la propose et le joueur accepte ou refuse, ou le joueur la propose et l'autre répond (la probabilité d'accepter dépend du rang : une organisation bien classée reçoit plus de propositions et voit les siennes plus souvent acceptées). Accepté, le choc est **programmé** comme une soirée spéciale (utilise l'agenda existant, sans second système) ; y gagner fait monter l'organisation. Écran `UniChoc`, préfixe `ch3-`, chaque classe a sa règle, aucun texte sous 22 px.
 **[ ] 4. Rester est une vraie voie** : un test de bout en bout montre qu'une partie qui refuse toutes les offres et fait monter Split continue (contrat prolongé, pas de plantage).
 **[x] 5. L'étude de T5 (document, pas de code)** : `docs/lots/ETUDE-CHANGER-D-ORGANISATION.md` inventorie la forme connue de `m.orgs[id]`, les éléments à échanger, les risques de sauvegarde et un plan en tranches. Elle précise les points qui restent à inventorier avant le code. **Aucun code de T5.**
-**[~] 6. Tests** (`tests/mgmtLot58T1.test.js`, dans `test` ET `test:watch`) ; sauvegarde facultative, validée, réparée ; partie neuve ≤ plafond (`tests/mgmtReleveReduit.test.js` en arrière-plan) ; partie ancienne intacte. Le fichier couvre à ce stade la validation/réparation et les quatre raisons/offres, mais n'est pas encore inclus dans les agrégats `test` et `test:watch` ; le plafond et les parcours de sauvegarde ancienne restent à ajouter.
+**[~] 6. Tests** (`tests/mgmtLot58T1.test.js`, dans `test` ET `test:watch`) ; sauvegarde facultative, validée, réparée ; partie neuve ≤ plafond (`tests/mgmtReleveReduit.test.js` en arrière-plan) ; partie ancienne intacte. Le fichier couvre la validation/réparation et les raisons/offres ; il est exécuté par `pretest` et `pretest:watch` et dispose de commandes ciblées, mais n'est pas listé littéralement dans les deux commandes agrégées. Le plafond et une fixture complète de sauvegarde ancienne restent à ajouter.
 **[ ] 7. Fin.** Commit final `Monde lot 58 T1 : le renvoi, les offres et le choc` ; compte rendu honnête ; `TOUT_EST_FINI` seulement si tout est vert et commité.
 
 Règles communes : **additif** ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
 ## Compte rendu
+
+  - **Reprise 18 — état : incomplet.** Branche `p9-renvoi-offres` confirmée. Pas de fichiers métier de la tranche non commités trouvés ; les modifications locales `.opencode/agents/*` et `opencode.json` préexistantes ont été préservées.
+  - **Modification :** `package.json` ajoute des alias ciblés `test:monde58t1` et `test:watch:monde58t1`. Les hooks `pretest` et `pretest:watch` exécutaient déjà `mgmtLot58T1.test.js`.
+  - **Vérifications :** `node --test tests/mgmtLot58T1.test.js` vert (4/4). `node tools/verif-versions.js origin/main` signale l'écart préexistant `ui-cadre.css`. Vérification directe des chaînes `test`/`test:watch` : les deux ne contiennent pas le nom du test.
+  - **Reste non réalisé :** cas 3 (choc jouable et écran conforme), les déficiences précisées en cases 1/2, cas 4 E2E génératif, l'inclusion littérale dans les commandes agrégées, test du plafond, tests de sauvegarde ancienne et vérifications ESLint globales. Pas de choc/soirée codés durant cette reprise : la modification ne satisfait pas la fiche.
+  - **Écart/décision :** aucun texte joueur ni code T5 ajouté. L'alias ne remplace pas l'inscription explicite exigée dans les scripts agrégés. Aucune affirmation de conformité à UniChoc.
+  - **Questions pour Anthony :** aucune ; décisions du superviseur appliquées comme autorité.
 
   - **Reprise 17 — état : incomplet.** Branche `p9-renvoi-offres` confirmée ; historique et statut examinés. Les changements hors tranche dans `.opencode/agents/*` et `opencode.json` sont préservés.
   - **Fichiers modifiés :** `tests/mgmtLot58T1.test.js` renforce le parcours refus puis renouvellement, et `package.json` fait aussi exécuter le test via les hooks `pretest` et `pretest:watch`.

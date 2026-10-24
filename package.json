@@ -9,6 +9,8 @@
     "test:lot48t1": "node --test tests/mgmtLot48T1.test.js",
     "test:lot58t1": "node --test tests/mgmtLot58T1.test.js",
     "test:watch:lot58t1": "node --test --watch tests/mgmtLot58T1.test.js",
+    "test:monde58t1": "node --test tests/mgmtLot58T1.test.js",
+    "test:watch:monde58t1": "node --test --watch tests/mgmtLot58T1.test.js",
     "test:watch:lot48t1": "node --test --watch tests/mgmtLot48T1.test.js",
     "test:traits-fiche": "node --test tests/mgmtTraitsFiche.test.js",
     "test:watch:traits-fiche": "node --test --watch tests/mgmtTraitsFiche.test.js",
