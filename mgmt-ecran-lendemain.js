@@ -298,7 +298,7 @@ function mgmtLendemainApres(m,semaine){
       if(candidat.famille==='rivalité'&&!faits.some(x=>x.k==='rivalite'&&(x.a===f.id||x.b===f.id))) continue;
       item=candidat;break;
     }
-    if(!item) break;
+    if(!item) continue;
     famillesUtilisees.add(item.famille);
     /* La semaine fait partie du fait temporel : elle distingue une reprise
        ultérieure du même sujet sans stocker d'historique dans la sauvegarde. */

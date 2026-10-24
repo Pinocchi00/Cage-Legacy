@@ -95,6 +95,12 @@ Branche : `p8-lendemain` (la branche courante de ce dossier ; commits ICI ; le s
 - Cases encore non satisfaites : la composition active ne démontre pas la reproduction exacte de l'ensemble des valeurs et dimensions des deux planches ; T3 ne réagit pas à toutes les données réelles (notamment interpellations, réseaux, revanche et organisations), et ne garantit pas l'anti-répétition sur 50 soirées par historique éditorial. Le suffixe de semaine déjà présent empêche seulement la répétition littérale dans le scénario de test.
 - Aucun état de sauvegarde nouveau ni migration. `mgmtReleveReduit.test.js` non lancé (test lent). Les cases 1 et 3 demeurent incomplètes ; aucune déclaration `TOUT_EST_FINI`.
 
+### Reprise — poursuite des propositions T3 (24/10/2026)
+
+- `mgmt-ecran-lendemain.js` : si une cible combattante ne possède aucun fait admissible pour les familles T3, la sélection continue d'examiner les autres participants au lieu d'interrompre toute la semaine. Le plafond de trois propositions, l'absence d'événement inventé et le déterminisme restent inchangés.
+- Cache JS monté par `node tools/_bump.js mgmt-ecran-lendemain.js`. `node --test tests/mgmtLot54T1.test.js` passe 30/30.
+- Aucune donnée de sauvegarde nouvelle. Les manques structurants de fidélité intégrale aux deux planches et d'alimentation/mémoire éditoriale persistante T3 restent consignés ci-dessus ; cette correction ne les prétend pas résolus.
+
 ### Reprise — 24/10/2026
 
 - Vérification de reprise : branche `p8-lendemain`; les commits antérieurs contiennent déjà les changements de tranche. Aucun fichier de tranche n'était non commité. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent exclues.
