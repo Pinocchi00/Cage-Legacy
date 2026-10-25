@@ -15,6 +15,14 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 ## Compte rendu
 
+### Reprise 35 — Accueil, suppression du détail redondant
+
+- Branche `polissage`; historique consulté, aucun fichier de tranche suivi non commité au départ. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
+- Dans `mgmt-accueil.js`, les actualités de palier restent annoncées dans le fil ; suppression du sous-libellé redondant « Palier de croissance · presse » qui créait une boîte supplémentaire. `index.html` a reçu le bump `?v=` de `mgmt-accueil.js`.
+- Test `node --test tests/mgmtAccueil.test.js` : 21/21. Contrôle Accueil avant : `1/0/[]`, collision palier/Ton poste ; après : `2/0/[]`, collisions Landon Schultz/Ton poste (77x19). La modification n'a donc pas corrigé le chevauchement et la case Accueil reste ouverte.
+- Autres dernières mesures historiques documentées : Carnet `135/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`; Ton poste `5/0/[Jean-Michel Delatour, IL ATTEND DE VOIR, « Je veux voir la suite. »]`; Croissance `0/3/[27 combattants…, 29 combattants…, Poids coq féminin, 21 combattants…]`; Bilan et Actualités `0/0/[]` (non recapturés cette reprise). La capture groupée s'est arrêtée après Accueil au délai outil.
+- État : aucun critère global de zéro atteint ou vérifié. Les cas restants exigent correction et nouvelles captures ; pas de test neuf ni migration de sauvegarde dans cette reprise. Aucune question pour Anthony.
+
 ### Reprise 33 — tentative de croissance
 
 - Branche vérifiée : `polissage`, HEAD initial `0d82e18b`. Aucun fichier suivi de la tranche n'était non commité ; les changements étrangers `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.

@@ -115,7 +115,7 @@ function mgmtAccueilContenu(m){
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
-  for(const f of (m.croissanceActus||[]).slice(-5)) if(f&&typeof f.texte==='string') ailleurs.push({parts:[mgmtAccueilT(f.texte)],detail:'Palier de croissance · presse'});
+  for(const f of (m.croissanceActus||[]).slice(-5)) if(f&&typeof f.texte==='string') ailleurs.push({parts:[mgmtAccueilT(f.texte)]});
   const divs=allDivisions();
   if(divs.length){
     const div=divs[(m.cycle||0)%divs.length];
