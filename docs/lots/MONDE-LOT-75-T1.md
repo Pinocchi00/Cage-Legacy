@@ -21,8 +21,8 @@ Les données viennent de `mgmtPaliers*`, `m.croissance`, `mgmtOrgMoneyHtml` : **
 
 ## Compte rendu
 
-- Modifié : `mgmt-guerre-ecran.js` (libellé de l'en-tête désormais « SPLIT · rang DES HUIT » et colonne d'évolution renommée « ▲/▼ ») ; `index.html` (version de cache du script montée).
+- Modifié : `mgmt-guerre-ecran.js` (libellé de l'en-tête et colonne d'évolution, commit précédent) ; `ui-cadre.css` (noms de lignes sans rognage, retour à la ligne) ; `index.html` (version CSS montée).
 - Tests ajoutés : aucun. Test ciblé exécuté : `node --test tests/mgmtOrganisations.test.js` (9/9 verts).
 - Migration de sauvegarde : aucune.
-- Écarts à la fiche / travail restant : cette tranche n'est pas achevée. L'interface `croissance` n'a pas été portée sur la planche ; `guerre` conserve le tableau et ses styles incomplets. Les scènes `guerre,guerreLong,croissance,croissanceLong` n'ont pas été capturées, donc aucune ligne CONTRÔLE avant/après ne peut être rapportée. Vérification `node tools/verif-versions.js origin/main` sans écart. Le repli d'exécution local n'a permis que le changement partiel ci-dessus.
-- Questions pour Anthony : aucune ; continuer la fidélisation sur les deux écrans et relever les quatre lignes CONTRÔLE.
+- Écarts à la fiche / travail restant : cette tranche reste inachevée. Seule l'adaptation anti-coupure des noms de la guerre a été faite dans ce tour ; le tableau ne reprend pas encore toute la maquette. L'écran `croissance` n'a pas été porté. Les quatre scènes `guerre,guerreLong,croissance,croissanceLong` n'ont pas été capturées et les lignes CONTRÔLE ne sont donc pas disponibles. Vérification `node tools/verif-versions.js origin/main` sans écart ; seul le test ciblé ci-dessus a été lancé.
+- Questions pour Anthony : aucune.

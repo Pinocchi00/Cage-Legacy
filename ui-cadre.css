@@ -2817,6 +2817,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale ul{gap:4px}
 .gu3-rivale small{margin-top:0;line-height:1.1}
 .gu3-rivale .gu3-mouvement{padding-top:4px}
+/* ==== [ANCRE: MONDE75_T1_GUERRE_NOMS_ENTIERS] — Monde lot 75 T1 ==== */
+.gu3-ligne>div{overflow:visible;}
+.gu3-ligne strong{overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;word-break:normal;font-size:26px;line-height:1.02;}
+.gu3-ligne{min-height:74px;height:auto;}
+.gu3{grid-template-columns:minmax(0,1.45fr) minmax(360px,.8fr);}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ce3-carnet-ecran{top:108px;height:840px}
