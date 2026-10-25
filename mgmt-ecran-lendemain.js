@@ -146,7 +146,8 @@ function mgmtLendemainResultatsHtml(m){
     const f=e.fights[i];
     if(!f) continue;
     const t=mgmtSoireeTrace(m,i);
-    const idA=typeof f.a==='string'?f.a:f.a&&f.a.id, idB=typeof f.b==='string'?f.b:f.b&&f.b.id;
+    const idA=typeof f.a==='string'?f.a:(f.a&&typeof f.a==='object'?f.a.id:null), idB=typeof f.b==='string'?f.b:(f.b&&typeof f.b==='object'?f.b.id:null);
+    if(typeof idA!=='string'||typeof idB!=='string') continue;
     const frA=mgmtFighterById(m,idA), frB=mgmtFighterById(m,idB);
     const na=t?t.a.name:(frA?frA.name:'?');
     const nb=t?t.b.name:(frB?frB.name:'?');
