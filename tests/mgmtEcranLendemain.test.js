@@ -60,8 +60,9 @@ test('MGMT T4 — planches Uni* validées par Anthony ; l’écran rend les mome
   assert.equal(win.eval('G.mgmt.eventsPlayed'),1,'une seule soirée jouée');
   assert.ok(html.includes('Le lendemain de Split 1'),'l’en-tête porte la soirée jouée');
   assert.ok(html.includes('Préparer Split 2'),'le bouton prépare la soirée suivante');
-  assert.ok(!/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b/i.test(html),
-    'aucun jour de la semaine en en-tête');
+   /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+   assert.match(html,/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d+\s+\p{L}+/iu,
+     'le jour et la date de la soirée suivante sont dans l’en-tête');
   /* La planche UniLendemain validée par Anthony est désormais la référence. */
   for(const bloc of ['LA SURPRISE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES']) assert.ok(html.includes(bloc),'bloc de la planche présent : '+bloc);
    const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(name=>/^ld66-|^ld3-moment$|^ld3-label$|^ld3-meta$|^ld3-names$|^ld3-detail$|^mgmt-ld-link$/.test(name)))];

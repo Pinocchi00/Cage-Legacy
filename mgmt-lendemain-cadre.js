@@ -56,13 +56,17 @@ function scr_mgmt_lendemain_cadre(){
   if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
   const c=mgmtLendemainCases(m);
   const nom=mgmtOrgNom(m);
+  const jour=typeof mgmtSoireeJour==='function'?mgmtSoireeJour(m,m.eventsPlayed):null;
+  const date=Number.isSafeInteger(jour)&&typeof mgmtJourDate==='function'?mgmtJourDate(jour):null;
+  const dateTexte=date?`${['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][new Date(date.ts).getUTCDay()]} ${date.jour} ${date.mois[0]+date.mois.slice(1).toLowerCase()}`:'';
+  const enteteDroite=`<div class="ld74-entete"><span>${esc(dateTexte)}</span><strong>${esc(nom)} FIGHT NIGHT <b>${esc(m.eventsPlayed+1)}</b></strong></div>`;
   const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
   const publicHtml=c&&c.public?`<div class="ld66-number"><b>PUBLIC</b><strong>${esc(c.public.score)} / 100</strong></div>`:'';
   const chiffres=c?`<section class="ld66-numbers"><h2>LES CHIFFRES</h2><div class="ld66-number"><b>LA SALLE</b><strong>${esc(c.salle.v)}</strong><span>${c.salle.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>L’ARGENT</b><strong>${esc(c.argent.v)}</strong><span>${c.argent.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>POPULARITÉ</b><strong>${esc(c.pop.v)}</strong><span>${c.pop.l.map(esc).join(' · ')}</span></div>${publicHtml}</section>`:'';
   const change=mgmtLendemainConstatsHtml(m)||'<p>Rien à signaler.</p>';
   const presse=typeof mgmtLendemainPresseHtml==='function'?mgmtLendemainPresseHtml(m):'';
   const chapeau=typeof mgmtLendemainDiscoursHtml==='function'?mgmtLendemainDiscoursHtml(m):'';
-  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droite:`${nom} Fight Night ${m.eventsPlayed+1}`,
+  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droiteHtml:enteteDroite,
     touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓','Tab'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain=scr_mgmt_lendemain_cadre;
