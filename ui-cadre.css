@@ -2893,6 +2893,27 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet-liste{flex:1 1 0;min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .ce3-carnet-ecran .ce3-carnet-liste>p{box-sizing:border-box;max-width:100%;margin:0;padding:5px 0;overflow-wrap:anywhere;line-height:1.12}
+/* ==== [ANCRE: LOT72_T1_CARNET_PLANCHE] — Monde lot 72 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;flex:none}
+.ce3-carnet-ecran .ce3-carnet-stat{min-width:0;text-align:center;padding:8px;background:#1B1818;border:2px solid rgba(233,230,225,.16)}
+.ce3-carnet-ecran .ce3-carnet-stat strong{display:block;font:800 38px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}
+.ce3-carnet-ecran .ce3-carnet-stat span{display:block;font-size:22px;line-height:1.1}
+.ce3-carnet-ecran .ce3-carnet-deux-panneaux{grid-template-columns:1.45fr 1fr;grid-template-rows:minmax(0,1fr);grid-auto-flow:column;min-height:0}
+.ce3-carnet-ecran .ce3-carnet-panel{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet-faits .ce3-carnet-liste,.ce3-carnet-ecran .ce3-carnet-defis{flex:1 1 0;min-height:0;overflow-y:auto}
+.ce3-carnet-ecran .ce3-carnet-faits .ce3-carnet-liste>p{display:flex;align-items:center;gap:12px;font-size:24px}
+.ce3-carnet-ecran .ce3-carnet-medaille{display:inline-flex;flex:none;width:36px;height:36px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;font-size:24px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ce3-carnet-ecran .ce3-carnet-espoirs-titre{flex:none;margin-top:10px!important}
+.ce3-carnet-ecran .ce3-carnet-defi{padding:12px 14px;margin-bottom:10px;background:#1B1818;border:2px solid rgba(233,230,225,.16)}
+.ce3-carnet-ecran .ce3-carnet-defi p{font-size:24px;line-height:1.1;margin:0 0 10px;overflow-wrap:anywhere}
+.ce3-carnet-ecran .ce3-carnet-defi>b{display:block;margin-top:8px;color:#F0B220;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.ce3-carnet-ecran .ce3-carnet-progression{height:8px;background:#252121}
+.ce3-carnet-ecran .ce3-carnet-progression span{display:block;height:8px;background:#E9E6E1}
+.ce3-carnet-ecran .ce3-carnet-archive{display:none}
+.ce3-carnet-ecran .ce3-carnet-defis-panel{min-width:0;min-height:0;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet-historique{flex:none;max-height:180px;min-height:0;overflow-y:auto;overscroll-behavior:contain;border-top:2px solid rgba(233,230,225,.16);padding-top:8px}
+.ce3-carnet-ecran .ce3-carnet-historique h2{font-size:22px}
+.ce3-carnet-ecran .ce3-carnet-historique .ce3-carnet-liste{max-height:64px;overflow-y:auto}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;background:#0D0B0B;color:#E9E6E1}
