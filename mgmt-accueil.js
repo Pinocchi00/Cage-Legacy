@@ -179,9 +179,9 @@ function mgmtAccueilTitre(texte,droite=''){
   return `<div class="mf-ac-hd"><div><div class="mf-ac-h">${esc(texte)}</div><div class="mf-ac-trait"></div></div>${droite?`<div class="mf-ac-hs">${esc(droite)}</div>`:''}</div>`;
 }
 function mgmtAccueilTuile(lib,val,sous){
-  return `<div class="mf-ac-tuile"><div class="mf-ac-tl">${esc(lib)}</div><div class="mf-ac-tv" style="font-size:${mfCorps(val,182,40)}px">${esc(mfNet(val))}</div><div class="mf-ac-ts">${esc(sous||'')}</div></div>`;
+  return `<div class="mf-ac-tuile"><div class="mf-ac-tl">${esc(lib)}</div><div class="mf-ac-tv" style="font-size:${mfCorps(val,236,56,32)}px">${esc(mfNet(val))}</div><div class="mf-ac-ts">${esc(sous||'')}</div></div>`;
 }
-function mgmtAccueilBandeau(c,m){
+function mgmtAccueilBandeau(c,m,liens=''){
   /* ==== [ANCRE: ACCUEIL_BANDEAU_SOIREE] — Monde lot 12 T2 ==== */
   const pres=c.ou.preventes;
   let vendus=pres.vendus;
@@ -190,10 +190,12 @@ function mgmtAccueilBandeau(c,m){
     const attraction=mgmtCardAttraction(m,combats),audience=mgmtEventRecette(attraction,0,0,combats.length,0).audience;
     vendus=Math.min(pres.capacite,Math.max(0,audience));
   }
-  const ventes=pres.capacite===null?'—':`${vendus===null?'—':mfNet(vendus)} sur ${mfNet(pres.capacite)} places`;
-  const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous)+mgmtAccueilTuile('LES PRÉVENTES',ventes,'');
-  return `<div class="mf-ac-band"><div class="mf-ac-id"><div class="mf-ac-org" style="font-size:${mfCorps(c.ou.org,520,120,60)}px">${esc(mfNet(c.ou.org))}</div>`
-    +`<div class="mf-ac-idt"><div class="mf-ac-l">${esc((c.ou.ville?c.ou.ville+' · ':'')+(c.ou.annee?'DEPUIS '+c.ou.annee:'')+(Number.isSafeInteger(c.ou.rang)?' · '+c.ou.rang+'e DES HUIT':'')).toUpperCase()}</div><div class="mf-ac-d">${esc(c.ou.date)}</div></div></div>`
+  const ventes=vendus===null?'—':mfNet(vendus), ventesSous=pres.capacite===null?'':`sur ${mfNet(pres.capacite)} places`;
+  const tuiles=mgmtAccueilTuile('Prochaine soirée',c.ou.soiree.dans,c.ou.soiree.nom)+mgmtAccueilTuile('Le lieu',c.ou.lieu.nom,c.ou.lieu.sous)+mgmtAccueilTuile('La carte',c.ou.carte.valeur,c.ou.carte.sous)+mgmtAccueilTuile('LES PRÉVENTES',ventes,ventesSous);
+  /* Planche UniAccueil : « SPLIT » en 96 px, une seule ligne dessous (ville · depuis · rang · date), quatre colonnes séparées par un filet, sans cadre ni case. */
+  const ligne=[c.ou.ville?esc(c.ou.ville):'',c.ou.annee?'depuis '+esc(c.ou.annee):'',Number.isSafeInteger(c.ou.rang)?`<b>${c.ou.rang}e des huit</b>`:'',esc(c.ou.date)].filter(Boolean).join(' · ');
+  return `<div class="mf-ac-band"><div class="mf-ac-id"><div class="mf-ac-org" style="font-size:${mfCorps(c.ou.org,330,96,56)}px">${esc(mfNet(c.ou.org))}</div>`
+    +`<div class="mf-ac-d">${ligne}</div>${liens}</div>`
     +`<div class="mf-ac-tuiles">${tuiles}</div></div>`;
 }
 function mgmtAccueilAttend(m,c,extra=''){
@@ -307,8 +309,8 @@ function scr_mgmt_accueil(){
     ].filter(Boolean).join('');
     const rangFinal=guerre?`<span>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit</span>`:'';
     const rangeeLiens=liensAccueil||rangFinal?`<div class="mf-ac-liens-complementaires">${rangFinal}${liensAccueil}</div>`:'';
-    const corps=`${karim}${rangeeLiens}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
-  const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
+    const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
+  const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m,rangeeLiens)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
     touches:[{ks:['A','E'],t:'Section'},{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Entrée'],t:'Ouvrir',jaune:true}]});

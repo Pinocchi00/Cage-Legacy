@@ -1917,17 +1917,18 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac .mf-ac-ev,.mf-ac .mf-ac-aide{flex-wrap:wrap}
 .mf-ac .mf-ac-lib{white-space:normal}
 .mf-ac .mf-ac-rt,.mf-ac .mf-ac-evt,.mf-ac .mf-ac-ap{overflow-wrap:anywhere}
-.mf-ac-band{height:140px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.mf-ac-id{display:flex;align-items:center;gap:26px;min-width:0}
-.mf-ac-org{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.69;white-space:nowrap}
-.mf-ac-idt{display:flex;flex-direction:column;gap:10px}
+.mf-ac-band{height:150px;flex:none;padding:0 30px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.mf-ac-id{display:flex;flex-direction:column;align-items:flex-start;gap:14px;min-width:0}
+.mf-ac-org{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.72;white-space:nowrap}
+.mf-ac-d{font-size:24px;line-height:1.2;white-space:nowrap}
+.mf-ac-d b{font-weight:700}
 .mf-ac-l{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap}
-.mf-ac-d{font-size:26px;line-height:1.05}
-.mf-ac-tuiles{display:flex;gap:10px}
-.mf-ac-tuile{width:210px;height:112px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px;overflow:hidden}
-.mf-ac-tl,.mf-ac-ts{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap;overflow:hidden}
-.mf-ac-tl{font-weight:600}
-.mf-ac-tv{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap}
+.mf-ac-tuiles{display:flex;background:rgba(13,11,11,.86);padding:18px 0}
+.mf-ac-tuile{display:flex;flex-direction:column;gap:10px;padding:0 26px;border-left:2px solid var(--mf-ligne);min-width:0}
+.mf-ac-tl,.mf-ac-ts{font-size:22px;line-height:1.15;color:var(--mf-texte2);white-space:nowrap}
+.mf-ac-ts{font-size:24px;color:var(--mf-blanc)}
+.mf-ac-tl{font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.mf-ac-tv{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.9;white-space:nowrap}
 .mf-ac-cols{display:flex;align-items:stretch;gap:18px;min-height:700px;flex:1 0 auto}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_SEMAINE_SANS_CHEVAUCHEMENT] — Monde lot 64 T1 ==== */
 .mf-ac-cols~.mf-ac-p{flex:none;max-height:calc(100vh - 250px);overflow:auto}
@@ -1974,9 +1975,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-ailleurs-saison{min-height:0;overflow:auto}
 .mf-ac-ailleurs-saison .mf-ac-p{width:100%;max-height:none}
 .mf-ac-hd{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
-.mf-ac-h{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.75;white-space:nowrap}
+.mf-ac-h{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.75;white-space:nowrap}
 .mf-ac-trait{width:56px;height:8px;margin-top:12px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
-.mf-ac-hs{font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-ac-hs{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;text-transform:uppercase;color:var(--mf-texte2);white-space:nowrap}
 .mf-ac-ev{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--mf-sep);padding:10px 0;flex:none}
 .mf-ac-ev.sel{background:var(--mf-blanc);color:var(--mf-noir);padding-left:10px;padding-right:10px}
 .mf-ac-ev.sel .mf-ac-rs{color:var(--mf-noir)}
@@ -3301,3 +3302,6 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-contenu.ld66-screen .ld66-lower{height:auto;flex:1 1 0;min-height:0;overflow:hidden}
 .mf-contenu.ld66-screen .ld66-lower>section{min-height:0;overflow:auto;overscroll-behavior:contain}
 /* ==== [FIN ANCRE] ==== */
+.mf-ac-liens-complementaires{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;font-size:22px;line-height:1.2;color:var(--mf-texte2)}
+.mf-ac-liens-complementaires button{background:none;border:0;padding:0;margin:0;font:inherit;color:var(--mf-blanc);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;cursor:pointer}
+.mf-ac-liens-complementaires span{white-space:nowrap}
