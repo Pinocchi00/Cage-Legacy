@@ -35,6 +35,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 25/10 — capture finale — 25/10/2026
+
+- Branche `fid-lendemain` confirmée. `git log --oneline -12` et `git status` vérifiés : les commits de code de la tranche sont déjà présents; les seules modifications non commitées (`.opencode/agents/*`, `opencode.json`, `sw.js`) ne relèvent pas de cette tranche et ont été laissées intactes.
+- Lu `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` et relancé la capture `lendemain` séparément à 1920×1080. Le contrôle automatise `chevauchements=0`, `textesSous22px=0`, `debordent=[]`; `grosBlocs=22,8 %` et `moyen=28,9 %`. Le seuil de reprise renforcé ≤18 % n'est pas atteint. Les comparatifs sont générés dans le dossier temporaire `shots` par l'outil.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7); `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. Pas de changement fonctionnel, de donnée ni de sauvegarde dans cette reprise; aucune migration.
+- Capture également relancée séparément pour `lendemainSuite` : `chevauchements=0`, `textesSous22px=0`, `grosBlocs=17,9 %`, mais débordements `Poids léger`, `chez Split`, `Jonas Bühler`, `Poids mi-moyen`. La colonne mouvements reste donc un écart non résolu.
+- `node --test tests/mgmtLot48T1.test.js` passe (9/9). Pas de changement fonctionnel, de donnée ni de sauvegarde dans cette reprise; aucune migration. La conformité visuelle totale n'est pas revendiquée.
+- Fichier modifié : cette fiche (résultats de capture et contrôles). Aucun test ajouté; aucune version de cache à monter. Questions pour Anthony : aucune.
+
 ### Reprise actuelle — hauteur des moments et captures — 25/10/2026
 
 - Branche `fid-lendemain`; commits antérieurs consultés. Pas de changements de code de tranche en attente au départ; modifications locales des agents, `opencode.json` et `sw.js` laissées hors périmètre.
