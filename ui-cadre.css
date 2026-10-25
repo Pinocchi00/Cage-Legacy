@@ -2251,7 +2251,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet{display:grid;flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-flow:row;gap:14px;min-height:0}
 .ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-height:0;max-height:100%;overflow:auto}
 /* ==== [ANCRE: MONDE70_T1_CARNET_PANNEAUX_ISOLES] — Monde lot 70 T1 ==== */
-.ce3-carnet-ecran .ce3-carnet{height:0;flex:1 1 0;grid-template-rows:repeat(4,minmax(150px,1fr));grid-auto-rows:minmax(150px,1fr)}
+.ce3-carnet-ecran .ce3-carnet{height:0;flex:1 1 0;grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);align-content:stretch;overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article{position:relative;min-height:0;max-height:none;overflow-x:hidden;overflow-y:auto;contain:strict}
 /* ==== [ANCRE: MONDE70_T1_POSTE_ZONE_BORNEE] — Monde lot 70 T1 ==== */
 .po2-scene{box-sizing:border-box;display:flex;flex-direction:column;height:auto;min-height:0;bottom:144px;max-height:none;overflow:hidden}
