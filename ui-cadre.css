@@ -2062,7 +2062,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;overflow-wrap:anywhere}
 .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
 .ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
-.ld66-moments .ld3-label,.ld66-moments .ld3-meta{font-size:26px}
+ .ld66-moments .ld3-label,.ld66-moments .ld3-meta{font-size:26px}
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT] — Monde lot 66 T1 ====
+   La cascade terminale doit préserver une hauteur de titre contenant deux
+   lignes avant d'afficher le pronostic et le contexte. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;white-space:normal;overflow-wrap:anywhere}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1.05;flex:none}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);gap:6px 8px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ld66-change .mgmt-ld-item{overflow:hidden}
 .ld66-change .mgmt-ld-title,.ld66-change .mgmt-ld-detail{font-size:22px;line-height:1.1;overflow-wrap:anywhere}
