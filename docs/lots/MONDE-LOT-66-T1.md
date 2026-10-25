@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise finale — éviter le recouvrement des titres — 25/10/2026
+
+- Branche `fid-lendemain` vérifiée. L’historique montre que le gros de la tranche et la dernière correction de capture sont déjà committés; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche et intactes.
+- Avant : une surcharge tardive rétablissait un interligne `.82` et un nom principal de 80 px après les règles de contenance; les noms sur deux lignes pouvaient empiéter sur le détail. Après : règle CSS terminale commune de 64 px, interligne 1.05 et hauteur minimale correspondant à deux lignes; le détail commence après la zone de titre. Étiquettes colorées et puces étaient déjà présentes et restent inchangées.
+- Vérification ciblée `node --test tests/mgmtEcranLendemain.test.js` : 7/7. Le guide temporaire de capture demandé n’est pas accessible par les permissions de cette session; aucune nouvelle capture/cmp ou mesure computed-style n’est revendiquée. Les mesures antérieures de gros blocs et alertes variables de mouvements restent non certifiées corrigées.
+- Fichiers modifiés : `ui-cadre.css` (contenance des titres), `index.html` (version cache via `_bump.js`), cette fiche (résultats honnêtes). Pas de test nouveau, aucune donnée, navigation, mécanique, sauvegarde ni migration modifiée.
+- Écart restant : capture comparative prescrite non réalisée ici; les constats de capture précédents (gros blocs du lendemain au-dessus de 18 % et possibles débordements variables de suite) demeurent ouverts. Questions pour Anthony : aucune.
+
 ### Reprise titres et repères — 25/10/2026
 
 - Branche et commits contrôlés : `fid-lendemain`; les implémentations déjà commitées des deux écrans restent inchangées. Les changements locaux préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.

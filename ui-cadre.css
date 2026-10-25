@@ -2082,6 +2082,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move strong{grid-column:2;grid-row:1/3;justify-self:end;text-align:right;}
 .ld66-suite .ld3-move em{grid-column:3;grid-row:1/3;justify-self:end;text-align:right;}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;}
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT] — Monde lot 66 T1 ====
+   Les noms occupent la hauteur de leurs deux lignes avant que le détail
+   commence; la règle vient après les anciennes surcharges de capture. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.ld66-moments .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_RESERRÉES] — Monde lot 66 T1 ==== */
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,112px) minmax(0,112px);column-gap:8px}
 .ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{font-size:22px;line-height:1.05;overflow-wrap:anywhere;word-break:break-word}
@@ -2434,4 +2440,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE66_T1_ECHELLE_NOMS_MOMENTS_COHERENTE] — Monde lot 66 T1 ==== */
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.82;letter-spacing:-.025em}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:68px;line-height:.82;letter-spacing:-.02em}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT_FINAL] — Monde lot 66 T1 ====
+   Gagne explicitement sur les anciennes surcharges de taille tout en
+   réservant deux lignes complètes avant le détail de chaque carte. */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal;letter-spacing:normal}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1}
 /* ==== [FIN ANCRE] ==== */
