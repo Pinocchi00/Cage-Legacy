@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise finale — capture suite et tests — 25/10/2026
+
+- État initial : branche `fid-lendemain`, code de la tranche déjà commité; modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` laissées hors périmètre.
+- Lu le guide `shoot` et capturé séparément `lendemainSuite` à 1920×1080. Avant correction : zéro chevauchement et texte sous 22 px, mais les cellules de mouvements débordaient. Ajustement CSS des cellules internes pour borner les colonnes et autoriser la césure. Après capture : toujours zéro chevauchement et texte sous 22 px, gros blocs 17,9 %, mais le contenu variable continue de signaler quatre débordements (« Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen »). L’essai ne corrige donc pas ces débordements; cmp est régénérée par l’outil.
+- Capture `lendemain` exécutée avant cet ajustement : zéro chevauchement, zéro texte sous 22 px, aucun débordement, mais gros blocs 22,8 % (cible de reprise ≤18 % non atteinte). Noms CSS fixés à 80 px et 64 px; pas de nouvelle mesure JavaScript de computed-style.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9). `mgmtLot54T1.test.js` et `mgmtSoireeShow.test.js` n’ont pas rendu de résultat avant la limite de 120 s de l’outil; leur passage n’est pas revendiqué dans cette reprise.
+- Fichiers : `ui-cadre.css` (contenance des cellules mouvements), `index.html` (version cache CSS), cette fiche (résultats). Pas de données, sauvegarde ou mécanique modifiée; aucune migration ni test ajouté. Écarts à la fiche : le ratio gros blocs renforcé du lendemain et les débordements de la suite restent non résolus. Aucune inspection visuelle manuelle des PNG revendiquée. Questions pour Anthony : aucune.
+
 ### Reprise échelle et captures — 25/10/2026
 
 - Branche `fid-lendemain`; `git log --oneline -12` et `git status` vérifiés. Le code fonctionnel des deux écrans est déjà commité; changements locaux des agents OpenCode, `opencode.json` et `sw.js` laissés hors périmètre.
