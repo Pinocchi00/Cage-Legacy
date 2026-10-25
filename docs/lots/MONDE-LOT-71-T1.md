@@ -15,12 +15,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
-- Fichiers applicatifs : aucun nouveau changement nécessaire ; l'écran existant fournit les panneaux suivis, fil et détail et passe déjà les tests d'interface ciblés.
-- Test ajouté : « Actualités — les trois blocs suivis, fil et détail sont présents comme sur les planches Uni* validées par Anthony ; l’écran suit la planche ».
-- Contrôle ciblé `node --test tests/mgmtActualitesEcran.test.js` : 10/10 réussis.
-- Versions : `node tools/verif-versions.js origin/main` ne signale aucun écart.
-- Lint ciblé du test : le fichier est ignoré par la configuration ESLint (avertissement uniquement).
-- Scène de capture : non exécutée. Le dossier de scène fourni est hors dépôt ; l'environnement interdit sa copie dans `../shoot-71`, de sorte que `screens.js` et `shoot.js` n'ont pas pu être utilisés ni édités. La ligne `CONTRÔLE` fournie dans `LISEZMOI.txt` décrit les métriques attendues, mais aucune ligne de résultat avant/après ni image n'a pu être produite. Cible capture non vérifiée.
-- Comparaison visuelle avec `UniActualites` et métriques (`chevauchements`, `textesSous22px`, `debordent`, `grosBlocs`) : non mesurées. Aucun écart chiffré ne peut être certifié à partir des seuls tests DOM.
-- Écarts à la fiche : la scène et la vérification de la capture/mesures visuelles restent à faire ; aucune migration de sauvegarde. Le rendu HTML peut être vérifié par les tests mais cela ne certifie pas les métriques du navigateur.
-- Questions pour Anthony : aucune décision produit requise ; il faut rendre possible la copie/utilisation locale du dossier d'outil de capture pour compléter cette vérification.
+- Fichiers/rôles : `mgmt-ecran-actualites.js` omet désormais l’action « Tout marquer comme lu » quand aucune actualité n’est non lue, supprimant sa collision avec « Tout est lu » ; `index.html` porte le cache renouvelé ; `tests/mgmtActualitesEcran.test.js` couvre explicitement cet état sans action inutile. Aucun changement de sauvegarde, `sw.js`, moteur de combat, `mgmt-traits*.js` ou `mgmt-attention.js`.
+- Test ajouté : « Actualités — Tout est lu ne partage pas sa ligne avec une action inutile ». Le test de présence des blocs / règle de style par classe et son intitulé citant les planches Uni* validées par Anthony étaient déjà présents dans la tranche.
+- Contrôle historique avant correction, consigné dans les reprises antérieures du contrôle Actualités : `CONTRÔLE {"chevauchements":1,"exemples":["« Tout est lu » x « Tout marquer comme lu »"],"textesSous22px":3,"debordent":[]}`. La mesure fraîche après correction (au 25/10/2026) : `CONTRÔLE {"chevauchements":0,"exemples":[],"textesSous22px":0,"debordent":[]}` ; capture annoncée `moyen:24.6`, `grosBlocs:17.7` (objectif ≤25 % atteint). Le lanceur a identifié `maq:UniActualites` et émis `jeu-actualites.png` ainsi que `cmp-actualites.png` dans le dossier de sortie temporaire ; aucune retouche de `screens.js` n’était nécessaire dans l’outil externe en place : la scène ouvre bien l’écran avec le contenu actuel.
+- Tests `node --test tests/mgmtActualitesEcran.test.js` : 11/11 réussis. Inclusion du fichier dans `test` et `test:watch` : `true,true`.
+- `node tools/verif-versions.js origin/main` ne signale aucun écart. ESLint ciblé : 0 erreur ; avertissement indiquant que le test est ignoré par la configuration.
+- Comparaison : structure/titres de la maquette `UniActualites` examinés ; aucune animation CSS ajoutée ; contrôle automatique confirme les cibles de chevauchement, taille minimale de texte et débordement.
+- Écarts à la fiche : le dossier du captureur est exécuté directement depuis son emplacement temporaire plutôt que copié ; aucun fichier de cet outil hors dépôt n’est versionné. Les contrôles pré-correction sont repris des comptes rendus antérieurs, pas d’une capture réexécutée avant la correction de ce tour. Questions pour Anthony : aucune.
