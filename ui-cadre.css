@@ -978,6 +978,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so-cpt{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.69}
 .mf-so-dr{display:flex;align-items:center;gap:16px;min-width:0;flex:1;justify-content:flex-end}
 .mf-so-entete .mf-entete-g{flex:none}
+.mf-so-entete .mf-so-chip:not(.org) span{font-size:22px;letter-spacing:.02em;white-space:nowrap;overflow:visible;text-overflow:clip}
 .mf-so-chip.org{flex:none}
 .mf-so-chip:not(.org){min-width:0;flex:0 1 auto}
 .mf-so-chip:not(.org) span{min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -1055,8 +1056,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so-lt{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
 .mf-so-lg.on .mf-so-lt,.mf-so-lg.on .mf-so-ln span{color:rgba(13,11,11,.72)}
 .mf-so-cat{border:2px solid currentColor;padding:3px 8px}
-.mf-so-ln{display:flex;align-items:baseline;gap:10px;white-space:nowrap}
-.mf-so-ln b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:.85}
+.so3-carte-combat .mf-so-nb{width:44px}
+.so3-carte-combat .mf-so-li{gap:8px}
+.so3-carte-combat .mf-so-lt{gap:10px;min-width:0}
+.so3-carte-combat .mf-so-lt>span:first-child{min-width:0}
+.so3-carte-combat .mf-so-cat{flex:none}
+.mf-so-ln{display:flex;align-items:center;gap:10px;min-width:0}
+.mf-so-ln b{min-width:0;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.82;display:flex;flex-direction:column;overflow-wrap:anywhere}
+.mf-so-ln b span{display:block;white-space:nowrap}
+.mf-so-ln b span+span{font-size:.62em}
 .mf-so-ln span{font-size:22px;line-height:1;color:var(--mf-texte2)}
 .mf-so-pied{margin-top:auto;display:flex;justify-content:flex-end;align-items:flex-end}
 .mf-so-leila{margin-top:auto}
@@ -1141,14 +1149,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-entete .mf-so-org{font-family:var(--mf-titre);font-size:56px;font-weight:800;line-height:.8;color:#E9E6E1}
 .so3-entete .mf-so-n b{font-family:var(--mf-titre);font-size:56px;font-weight:800;line-height:.8}
 .so3-entete .mf-so-n span{font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
-.so3-carte-combat{grid-template-columns:54px 190px minmax(0,1fr) auto;gap:16px;padding:0 14px}
+.so3-carte-combat{display:grid;grid-template-columns:54px 190px minmax(0,1fr) auto;gap:16px;padding:0 14px}
 .so3-carte-combat .mf-so-nb{font-family:var(--mf-titre);font-size:30px;line-height:1;color:rgba(233,230,225,.74)}
 .so3-carte-infos{min-width:0;display:flex;flex-direction:column;gap:5px}
 .so3-carte-infos .mf-so-lt{display:flex;flex-direction:column;gap:5px}
 .so3-carte-infos .mf-so-lt span,.so3-carte-infos .mf-so-cat{font-size:22px;line-height:1;color:rgba(233,230,225,.74);white-space:nowrap}
-.so3-carte-noms{min-width:0;white-space:nowrap;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:1;color:rgba(233,230,225,.74)}
-.so3-carte-noms b{font:inherit}
-.so3-carte-noms span{font:inherit;color:rgba(233,230,225,.74)}
+.so3-carte-noms{min-width:0;white-space:normal;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:1;color:rgba(233,230,225,.74)}
+.so3-carte-noms b{min-width:0;font:inherit;white-space:normal;overflow-wrap:anywhere}
+.so3-carte-noms b span{display:block;white-space:normal;overflow-wrap:anywhere}
+.so3-carte-noms>span{font:inherit;color:rgba(233,230,225,.74)}
 .so3-carte-combat.on .mf-so-nb,.so3-carte-combat.on .so3-carte-noms{color:#E9E6E1}
 .so3-carte-combat.on .so3-carte-infos .mf-so-lt span:first-child{color:#F0B220}
 .so3-vue{height:42px;max-width:190px;padding:0 12px;border:0;background:#252121;color:rgba(233,230,225,.74);clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;cursor:pointer}
@@ -1232,13 +1241,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-corps{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px}
 .so3-carte{min-height:0;display:flex;flex-direction:column}
 .so3-carte h2,.so3-prochain-panneau h2{margin:0;padding:10px 14px;border-bottom:2px solid rgba(233,230,225,.38);font-family:var(--mf-titre);font-size:34px}
-.so3-ligne{flex:1;min-height:0;display:grid;grid-template-columns:42px 168px minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid rgba(233,230,225,.16)}
+.so3-ligne{flex:1;min-height:0;display:grid;grid-template-columns:42px 190px minmax(0,1fr) auto;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid rgba(233,230,225,.16)}
 .so3-ligne.courant{background:rgba(240,178,32,.08);outline:2px solid #F0B220}
 .so3-ligne.fait{opacity:.75}
 .so3-rang{font-family:var(--mf-titre);font-size:30px}
 .so3-categorie{display:flex;flex-direction:column;font-size:22px;white-space:nowrap}
 .so3-categorie small{font-size:22px;color:rgba(233,230,225,.74)}
-.so3-noms{font-family:var(--mf-titre);font-size:30px;white-space:nowrap}
+.so3-noms{min-width:0;font-family:var(--mf-titre);font-size:30px;white-space:normal;overflow-wrap:anywhere}
 .so3-carte-vues{display:flex;gap:4px}
 .so3-vue{height:42px;padding:0 10px;font-size:22px}
 .so3-vue.choisi{background:#E9E6E1;color:#0D0B0B}
@@ -3023,6 +3032,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
    Décision : les planches Uni* validées par Anthony priment ; le patronyme
    reprend les 230 px exacts de la planche UniDiscours. ==== */
 .di3-nom{font-size:230px}
+.di3-nom[style*="--di3-nom-size"]{font-size:var(--di3-nom-size)}
 /* ==== [FIN ANCRE] ==== */
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
   .di3-lignes{position:absolute;left:110px;top:560px;width:1180px;display:flex;gap:26px;align-items:flex-start;margin:0;border:0;padding:0;font-size:44px;line-height:1.18;font-weight:600;font-style:normal}
