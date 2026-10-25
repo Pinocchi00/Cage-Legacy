@@ -35,6 +35,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise de contrôle — 25/10/2026
+
+- Branche `fid-lendemain` confirmée; `git log --oneline -12` montre les livraisons précédentes déjà commitées. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et restent intactes.
+- Non-régression exécutée dans cette reprise : `node --test tests/mgmtEcranLendemain.test.js` (7/7), `node --test tests/mgmtLot48T1.test.js` (9/9), `node --test tests/mgmtLot54T1.test.js` (30/30); `node tools/verif-versions.js origin/main` ne signale aucun écart.
+- Le guide de capture extérieur `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` n'est pas accessible dans l'environnement de cette reprise; aucune nouvelle capture, mesure computed-style ou inspection des `cmp-*.png` n'est donc revendiquée. Les dernières mesures déjà consignées restent: lendemain `grosBlocs=22,8%` (au-dessus de l'objectif renforcé 18%), suite avec quatre débordements variables de mouvements; chevauchements et texte inférieur à 22 px nuls. Ces écarts visuels ne sont pas déclarés corrigés.
+- Fichier modifié : cette fiche (résultats de contrôle). Aucun changement de code, données, navigation, sauvegarde ou migration. Pas de nouveau test. Questions pour Anthony : aucune.
+
 ### Reprise après capture — 25/10/2026
 
 - Historique et statut vérifiés sur `fid-lendemain`; les précédents commits de la tranche sont présents. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` hors périmètre laissées intactes.
