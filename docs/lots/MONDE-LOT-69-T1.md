@@ -257,6 +257,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts toujours mesurés : choc supérieur à 20% de gros blocs, chevauchement du bilan, absence de scène dédiée arrivée et d'inspection visuelle des comparatifs. Ces critères ne sont pas déclarés terminés ; aucune modification CSS à l'aveugle n'a été tentée.
 - Compte rendu à jour ; aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise 25/10/2026 — capture choc et vérifications de livraison
+- Branche confirmée `fid-choc`, HEAD initial `0ff2c672`. L'historique contient déjà les changements fonctionnels du choc à trois paires, son traitement sur le chemin de soirée normal, le parcours d'offre et les ajustements du discours ; aucun changement applicatif en attente au début de cette reprise. Les modifications utilisateur dans `.opencode/agents/` et `opencode.json` sont exclues.
+- Capture demandée exécutée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : l'écran se rend, aucun chevauchement, texte sous 22 px ou débordement ; mesure `grosBlocs=25.9%`, supérieure à l'objectif ≤20%. Je ne prétends donc pas que l'objectif de densité de la maquette soit atteint. L'image comparative n'a pas été ouverte ici.
+- Vérifications relancées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 19 fichiers comparés) et `node_modules/.bin/eslint .` passent. Aucun changement de code ou de sauvegarde dans cette reprise ; aucune migration ni version cache à incrémenter.
+- Écarts encore non démontrés : seuil de gros blocs choc, capture dédiée d'arrivée et comparatifs visuels ouverts. Les captures précédentes ont aussi signalé un chevauchement du bilan ; cette reprise ne l'a pas mesuré de nouveau ni corrigé. Le test fonctionnel existant couvre les trois affrontements et le parcours de tranche, mais ne remplace pas ces validations visuelles.
+- Fichiers modifiés dans cette reprise : cette fiche uniquement, pour consigner le résultat exact. Tests ajoutés : aucun ; test ciblé existant exécuté. Questions pour Anthony : aucune nouvelle question.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
