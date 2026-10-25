@@ -166,6 +166,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10 — contrôle ciblé de l’état livré
+- Branche `fid-choc` confirmée ; les commits récents contiennent déjà les changements applicatifs de la tranche. Aucun fichier applicatif non commité n’a été repris. Les changements utilisateur de `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors du commit de tranche.
+- Vérifications exécutées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 20 fichiers examinés) et `node_modules/.bin/eslint .` (succès).
+- La lecture de `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` a été refusée par les permissions externes actives. Aucune nouvelle capture, ouverture de comparatif ou mesure visuelle n’est revendiquée. Les derniers écarts consignés restent : densité choc au-dessus de 20 %, chevauchement bilan rapporté, et absence de capture dédiée d’arrivée. Le test ciblé établit la couverture fonctionnelle déjà présente, pas la conformité visuelle.
+- Cette reprise ne modifie aucun code, test ou version cache ; aucune migration de sauvegarde. Seule cette fiche est actualisée pour tracer les vérifications. Aucun `TOUT_EST_FINI` n’est revendiqué puisque les écarts visuels restent mesurés/non établis.
+- Questions pour Anthony : aucune nouvelle question.
+
 ### Reprise 64 — reproduction du choc
 - Branche confirmée : `fid-choc`. Le HEAD de départ est `609cb5f8` ; aucun fichier applicatif de la tranche n'était en attente. Les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent exclus.
 - La commande de capture demandée a été exécutée directement : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Résultat : scène affichée (pas de page blanche), 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, donc objectif ≤20% non atteint.
