@@ -1992,6 +1992,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-title{font-size:26px;padding:2px 0;gap:12px}
 .ch3-title .ch3-vs{width:30px;height:30px;font-size:22px}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TITRE_PLANCHE] — Monde lot 69 T1 ====
+   La hiérarchie du bandeau suit UniChoc : nom d'affiche 46 px et VS octogonal 54 px. ==== */
+.ch3-title{font-size:46px}
+.ch3-title .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TRIPLE_AFFICHE] — Monde lot 69 T1 ==== */
 .ch3-fight{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr));gap:8px}
 .ch3-fight>.ch3-paire{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);align-items:center;gap:12px;min-height:0;border-bottom:1px solid rgba(233,230,225,.2)}

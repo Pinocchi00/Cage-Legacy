@@ -218,6 +218,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Test : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Capture `choc` relancée par l'outil indiqué : page présente, chevauchements=0, textes sous 22 px=0, débordements=[], mais `grosBlocs=26.2%` (cible ≤20% toujours manquée).
 - Audit versions : `node tools/verif-versions.js origin/main` passe (19 fichiers examinés). `node_modules/.bin/eslint .` et `git diff --check` passent. Aucun cache JS/CSS modifié, aucune migration.
 - Écarts persistants : le seuil de densité choc n'est pas atteint ; l'arrivée dédiée et la preuve de comparaison visuelle complète ne sont pas apportées par cette reprise. Les trois affiches et la programmation sont couvertes par l'état existant/tests, pas modifiées ici. Images de comparaison non ouvertes.
+
+### Reprise 4 — correction du bandeau choc
+- Capture choc reproduite avec la scène externe : rendu présent, aucun chevauchement, aucun texte sous 22 px et aucun débordement ; `grosBlocs=26.2%` (seuil ≤20% toujours non atteint). L'image comparative n'a pas été ouverte visuellement.
+- `ui-cadre.css` rétablit la taille du nom du bandeau et du VS octogonal aux dimensions de la planche UniChoc (46 px / 54 px). Version incrémentée avec `node tools/_bump.js ui-cadre.css`.
+- Vérification : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Fichiers de cette reprise : `ui-cadre.css` (hiérarchie typographique du bandeau), `index.html` (`?v=`), cette fiche. Tests ajoutés : aucun. Migration : aucune.
+- Écarts restants constatés dans les reprises précédentes : densité choc au-delà de la cible, chevauchement du bilan non corrigé, absence de scène d'arrivée dédiée/capture visuelle. Je n'affirme pas l'achèvement de ces critères.
 - Fichiers utilisateur hors tranche (`.opencode/agents/*`, `opencode.json`) préservés et exclus du commit. Aucune autre question pour Anthony.
 
 ### Reprise 63 — recapture et audit ciblé
