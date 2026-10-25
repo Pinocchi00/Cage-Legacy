@@ -15,6 +15,14 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 ## Compte rendu
 
+### Reprise 33 — tentative de croissance
+
+- Branche vérifiée : `polissage`, HEAD initial `0d82e18b`. Aucun fichier suivi de la tranche n'était non commité ; les changements étrangers `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
+- Modification effectuée : `ui-cadre.css` permet désormais à la tuile de catégorie Croissance de s'étendre avec son texte plutôt que de le couper par `overflow:hidden`; la règle de texte reste à 24 px et enveloppable. Version CSS bumpée dans `index.html`.
+- Vérification ciblée : `node --test tests/mgmtLot56T1.test.js` passe (11/11). Ligne `CONTRÔLE` après : non disponible, la lecture du `LISEZMOI.txt` externe est bloquée par les permissions de cette session. Mesures avant disponibles : Croissance `0/3/[27 combattants…, 29 combattants…, Poids coq féminin, 21 combattants…]`; cette modification n'est donc pas déclarée visuellement conforme. Aucun effet favorable n'est revendiqué.
+- Les autres dernières valeurs connues restent Accueil `6/0/[]`, Carnet `135/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`, Ton poste `5/0/[Jean-Michel Delatour, IL ATTEND DE VOIR, « Je veux voir la suite. »]`; Bilan et Actualités historiques `0/0/[]`. Contrôles avant/après de cette reprise pour ces écrans : non exécutés. Cette tranche demeure inachevée.
+- Pas de test de chevauchement statique ajouté : ces défauts dépendent des rectangles rendus et le contrôle prescrit n'est pas accessible ici. Aucun changement de sauvegarde, aucun écran prohibé touché. Écart à la fiche : résultat visuel requis et commits finaux non atteints ; questions pour Anthony : aucune.
+
 ### Reprise 32 — nouvelles mesures et essais ciblés
 
 - Branche `polissage`, HEAD de départ `0b135c7f`. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers ; ils ne sont pas inclus.
