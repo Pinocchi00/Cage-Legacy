@@ -2102,6 +2102,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-detail-body{flex:1 1 auto;min-height:0;max-height:68%;overflow-x:hidden;overflow-y:auto}
 .mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 .mgmt-ac-detail-body .mgmt-ac-stat{min-width:0}
+/* ==== [ANCRE: ACTUALITES-TEXTE-BORNE] — Monde lot 71 T1 ==== */
+.mgmt-ac-type{min-width:0;max-width:132px;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.mgmt-ac-copy,.mgmt-ac-detail-body{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-all}
+.mgmt-ac-copy b,.mgmt-ac-copy small,.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
 .mgmt-ac-detail-body .mgmt-ac-stat>span,.mgmt-ac-detail-body .mgmt-ac-stat>b{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 .mgmt-ac-actions,.mgmt-ac-actions button{min-width:0;max-width:100%;box-sizing:border-box}
 .mgmt-ac-actions button.principale{padding-left:16px;padding-right:16px;overflow:visible}
