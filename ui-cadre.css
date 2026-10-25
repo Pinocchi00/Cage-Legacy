@@ -1207,7 +1207,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-rang{font-family:var(--mf-titre);font-size:30px}
 .so3-categorie{display:flex;flex-direction:column;font-size:22px;white-space:nowrap}
 .so3-categorie small{font-size:22px;color:rgba(233,230,225,.74)}
-.so3-noms{font-family:var(--mf-titre);font-size:30px;white-space:nowrap}
+.so3-noms{min-width:0;font-family:var(--mf-titre);font-size:30px;white-space:normal;overflow-wrap:anywhere}
 .so3-carte-vues{display:flex;gap:4px}
 .so3-vue{height:42px;padding:0 10px;font-size:22px}
 .so3-vue.choisi{background:#E9E6E1;color:#0D0B0B}
