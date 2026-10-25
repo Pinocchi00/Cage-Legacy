@@ -220,6 +220,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts persistants : le seuil de densité choc n'est pas atteint ; l'arrivée dédiée et la preuve de comparaison visuelle complète ne sont pas apportées par cette reprise. Les trois affiches et la programmation sont couvertes par l'état existant/tests, pas modifiées ici. Images de comparaison non ouvertes.
 - Fichiers utilisateur hors tranche (`.opencode/agents/*`, `opencode.json`) préservés et exclus du commit. Aucune autre question pour Anthony.
 
+### Reprise 63 — recapture et audit ciblé
+- État de départ : branche `fid-choc`, HEAD `3ffcfd6c`. Aucun fichier fonctionnel de la tranche n'était en attente ; les changements sous `.opencode/agents/` et `opencode.json` restent hors périmètre.
+- Captures relancées depuis l'outil externe : `choc` est affiché (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.2%`, cible ≤20% non atteinte ; `discours` mesure `grosBlocs=18.1%`, sans anomalie ; `bilan` mesure `grosBlocs=12.9%`, avec le chevauchement déjà observé « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). L'image `cmp` n'est pas accessible à la lecture visuelle depuis cet environnement. Pas de capture dédiée arrivée ajoutée.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` passe (19 fichiers) ; `node_modules/.bin/eslint .` et `git diff --check` passent.
+- Aucun code applicatif ou test modifié dans cette reprise ; aucun changement de sauvegarde/cache. Le test existant couvre le parcours offre → changement → arrivée → rechargement → soirée/lendemain ainsi que les trois paires de choc sur le chemin de résolution normal.
+- Écarts toujours mesurés : choc supérieur à 20% de gros blocs, chevauchement du bilan, absence de scène dédiée arrivée et d'inspection visuelle des comparatifs. Ces critères ne sont pas déclarés terminés ; aucune modification CSS à l'aveugle n'a été tentée.
+- Compte rendu à jour ; aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
