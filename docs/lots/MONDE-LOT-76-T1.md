@@ -16,3 +16,12 @@ Au-dessus : l'en-tête commun (plaque `ORGANISATION`, libellé « SPLIT · 4e DE
 Les données existent dans `m.poste` (`mgmtPoste*`) : la **réputation**, le **verdict du patron**, la **chronologie des événements** (cherche `mgmtPosteHistorique`, `mgmtPosteEvenements`…), les **objectifs**. **Ne crée aucune règle de jeu.** Ce que les tests anciens exigent reste dans le HTML (le bloc « LE CHOC DES ORGANISATIONS » et son bouton « Ouvrir le choc », les liens vers le bilan, etc.) : **place-le sans chevauchement** (ex. dans le panneau « LES OFFRES » du panneau 1 ; le bouton devient un petit bouton dans ce panneau, texte ≥ 22 px). **Lis `tests/mgmtLot48T1.test.js`, `mgmtLot57T1`, `mgmtLot58T1`, `mgmtPoste*` avant de commencer.**
 
 Écrans à contrôler : `tonposte,tonposteLong,bilan,bilanLong`.
+
+## Compte rendu
+
+- `mgmt-ecran-poste.js` : écran `tonposte` redistribué en trois colonnes, contrat/réputation, avis du patron, historique disponible, objectifs avec jauges ; choc et offres conservés dans la zone offres. `bilan` laissé intact.
+- `ui-cadre.css` : mise en page de trois colonnes et styles dédiés de la nouvelle structure ; versions des deux fichiers montées avec `_bump.js`.
+- Tests ajoutés : aucun. Tests existants exécutés : « Monde lot 48 T1 — … » (9 tests), « Monde lot 58 T1 — … » (19 tests) et `mgmtLot69T1.test.js` (4 tests), tous verts ; lint réussi ; `node tools/verif-versions.js origin/main` réussi.
+- Migration de sauvegarde : aucune.
+- Écarts : les données historiques présentes sont affichées sans créer de nouvelles règles ; l’étiquette du rendez-vous reste générique (« JUILLET · MI-SAISON ») et les sous-détails d’événement utilisent seulement les champs déjà enregistrés. La note externe `COMMUN-3E-TOUR.md` n’était pas accessible dans l’environnement. Les modifications préexistantes des fichiers `.opencode/` et `opencode.json` n’ont pas été touchées.
+- Questions pour Anthony : aucune.

@@ -421,6 +421,39 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-dossiers .mf-dos-ligne{position:relative;padding:7px 12px 7px 42px;min-height:42px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-dossiers .mf-dos-ligne:before{content:"";position:absolute;left:14px;top:calc(50% - 8px);width:16px;height:16px;background:var(--mf-jaune);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT76_T1_TROIS_COLONNES] — Monde lot 76 T1 ==== */
+.po2-contrat{min-width:0}
+.po2-patron{min-width:0}
+.po2-objectifs{min-width:0}
+.po2-grid-trois{grid-template-columns:1fr 1.35fr 1.1fr;gap:18px}
+.po2-grid-trois>.po2-card{display:flex;flex-direction:column;gap:12px;padding:18px;overflow:auto}
+.po2-grid-trois>.po2-card h2{font-size:40px;line-height:.85;padding-bottom:12px;border-bottom:6px solid #E23A2B;margin:0}
+.po2-grid-trois>.po2-card h3{font-size:26px;margin:10px 0 0}
+.po2-contrat-ligne{display:flex;align-items:baseline;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(233,230,225,.16);padding:10px 0}
+.po2-contrat-ligne span,.po2-prochain span{font-size:22px;color:rgba(233,230,225,.74)}
+.po2-contrat-ligne strong{font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif;text-align:right}
+.po2-jaune,.po2-verdict{color:#F0B220}
+.po2-offres-bas{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.po2-nom-patron{font-size:22px!important;font-weight:600;letter-spacing:.04em;margin:0!important}
+.po2-verdict{font:800 60px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.po2-citation{font-style:italic;margin:0!important}
+.po2-historique{display:flex;flex-direction:column}
+.po2-evenement{display:grid;grid-template-columns:110px 24px minmax(0,1fr);align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(233,230,225,.16)}
+.po2-evenement-date,.po2-evenement small{font-size:22px;color:rgba(233,230,225,.74)}
+.po2-evenement-fleche{font-size:22px;color:#F0B220}
+.po2-evenement>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.po2-evenement strong{font-size:24px;font-weight:500;overflow-wrap:anywhere}
+.po2-prochain{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.po2-prochain strong{font:800 28px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+.po2-objectif{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-bottom:1px solid rgba(233,230,225,.16)}
+.po2-objectif-entete{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.po2-objectif-entete span,.po2-soiree-cibles p{font-size:24px}
+.po2-objectif-entete strong{font:800 24px 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220;text-align:right}
+.po2-jauge{height:8px;background:#252121}
+.po2-jauge i{display:block;height:8px;background:#F0B220}
+.po2-soiree-cibles{display:flex;flex-direction:column;gap:8px}
+.po2-soiree-cibles p{margin:0}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
 .mo67-tabs{grid-column:1/-1;display:flex;gap:12px;min-width:0;border-bottom:2px solid rgba(233,230,225,.38);padding:0 0 12px}
 .mo67-tab{min-height:54px;padding:8px 20px;background:#121010;color:#E9E6E1;border:2px solid rgba(233,230,225,.38);font:600 24px/1 'Saira Condensed','Arial Narrow',sans-serif;cursor:pointer}
