@@ -1018,3 +1018,10 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Tentative de correction du titre bilan (line-height 1.15) suivie d'une capture : métrique de chevauchement inchangée. La règle CSS sans effet a été retirée ; aucun correctif visuel n'est revendiqué. Le bump temporaire du cache a également été annulé.
 - `node --test tests/mgmtLot69T1.test.js` passe 4/4. Les instructions de capture externes n'ont pu être lues sous les permissions actives ; les images comparatives n'ont pas été ouvertes visuellement et aucune arrivée dédiée n'a été capturée.
 - Aucun code/test/cache/sauvegarde fonctionnel modifié. Écarts non résolus : gros blocs du choc, chevauchement bilan, preuve visuelle comparative et scène arrivée dédiée. Pas de `TOUT_EST_FINI`.
+
+### Reprise 25/10/2026 — contrôles de livraison ciblés
+- Branche confirmée `fid-choc`, HEAD initial `287c4dff`. Les modifications utilisateur préexistantes sous `.opencode/agents/`, `opencode.json`, `index.html`, `ui-cadre.css` et `sw.js` sont préservées ; aucun fichier applicatif de tranche non commité au départ.
+- Captures exécutées via `shoot.js` : choc `grosBlocs=26.1%` avec aucun chevauchement, texte sous 22 px ni débordement ; discours `grosBlocs=16.6%` sans défaut géométrique ; bilan `grosBlocs=12.9%`, mais chevauchement 265×22 entre « REMERCIÉ » et « Il manque 3 combats en carte`.
+- Une nouvelle tentative CSS d'espacement du bilan a été mesurée, sans effet sur le résultat de capture ; elle a été retirée avec son bump temporaire. Aucun correctif non démontré n'est conservé.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (19 fichiers examinés) ; `node_modules/.bin/eslint .` passe. Pas de migration ni de test supplémentaire.
+- Fichier de cette reprise : cette fiche uniquement. Les images `cmp-*.png` n'ont pas été ouvertes pour inspection comparative et aucune scène arrivée dédiée n'a été produite. Écarts restants : choc au-dessus de 20% de gros blocs, chevauchement bilan, comparaison visuelle et capture dédiée de l'arrivée. Aucune conformité visuelle totale n'est revendiquée.
