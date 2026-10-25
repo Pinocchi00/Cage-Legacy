@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise ciblée — 25/10/2026
+
+- Vérifiés branche, historique et statut : les écrans étaient déjà commités; seuls les réglages locaux de contenance ont été touchés ici. Modifications préexistantes des agents, `opencode.json` et `sw.js` laissées intactes.
+- Ajustement des cellules de mouvements dans `ui-cadre.css` : colonnes bornées et césure renforcée. Version CSS montée dans `index.html` avec `_bump.js`.
+- Captures 1920×1080 après modification : `lendemain` reste à `grosBlocs=22,8 %`, avec zéro chevauchement, zéro texte sous 22 px et aucun débordement. `lendemainSuite` reste à `grosBlocs=17,9 %`, zéro chevauchement/texte trop petit, mais le contrôle détecte encore « Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen ». La modification n'a pas résolu les débordements; critère de reprise renforcé ≤18 % non atteint.
+- Tests verts : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9). Audit versions et ESLint passent. Les compte-rendus précédents documentent les autres contrôles; aucun test de contenu ni de navigation n'a été modifié ici.
+- Avant/après : changement CSS ciblé mais mesures du comparateur inchangées. Aucune donnée, mécanique, sauvegarde ou migration touchée. Écart restant : contenance variable de la suite et ratio gros blocs du lendemain. Aucun test ajouté. Questions pour Anthony : aucune.
+
 ### Reprise 25/10 — capture finale — 25/10/2026
 
 - Branche `fid-lendemain` confirmée. `git log --oneline -12` et `git status` vérifiés : les commits de code de la tranche sont déjà présents; les seules modifications non commitées (`.opencode/agents/*`, `opencode.json`, `sw.js`) ne relèvent pas de cette tranche et ont été laissées intactes.

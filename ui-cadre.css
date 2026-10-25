@@ -2051,8 +2051,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-change .mgmt-ld-item{overflow:hidden}
 .ld66-change .mgmt-ld-title,.ld66-change .mgmt-ld-detail{font-size:22px;line-height:1.1;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
-.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;grid-template-rows:auto auto;gap:6px 12px;align-items:center}
-.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(100px,120px) minmax(100px,130px);grid-template-rows:auto auto;gap:6px 12px;align-items:center}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .ld66-suite .ld3-move b{grid-column:1;grid-row:1}
 .ld66-suite .ld3-move span{grid-column:1;grid-row:2}
 .ld66-suite .ld3-move strong{grid-column:2;grid-row:1 / span 2;justify-self:end}
