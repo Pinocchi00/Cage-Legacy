@@ -3173,3 +3173,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld74-entete>strong{box-sizing:border-box;display:flex;align-items:center;gap:10px;min-height:64px;padding:0 16px;border:2px solid rgba(233,230,225,.38);font:800 32px/.9 var(--mgmt-font-display);white-space:nowrap}
 .ld74-entete>strong>b{font:800 48px/.8 var(--mgmt-font-display);color:#E23A2B}
 .mf-ac-liens-complementaires{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* ==== [ANCRE: MONDE74_T1_CASCADE_FLUIDE_CARTES_LONGUES] — Monde lot 74 T1 ====
+   Une carte haute augmente la rangée entière ; les panneaux restent lisibles
+   et deviennent défilables dans l'espace restant. */
+.mf-contenu.ld66-screen .ld66-moments{height:auto;min-height:285px;max-height:none;flex:0 0 auto;overflow:visible;align-items:stretch}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{height:auto;min-height:285px;max-height:none;flex:0 0 auto;overflow:visible}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{font-size:24px;line-height:1.1}
+.mf-contenu.ld66-screen .ld66-lower{height:auto;flex:1 1 0;min-height:0;overflow:hidden}
+.mf-contenu.ld66-screen .ld66-lower>section{min-height:0;overflow:auto;overscroll-behavior:contain}
+/* ==== [FIN ANCRE] ==== */
