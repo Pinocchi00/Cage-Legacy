@@ -19,9 +19,9 @@ Les données existent dans `m.poste` (`mgmtPoste*`) : la **réputation**, le **v
 
 ## Compte rendu
 
-- `mgmt-ecran-poste.js` : écran `tonposte` redistribué en trois colonnes, contrat/réputation, avis du patron, historique disponible, objectifs avec jauges ; choc et offres conservés dans la zone offres. `bilan` laissé intact.
-- `ui-cadre.css` : mise en page de trois colonnes et styles dédiés de la nouvelle structure ; versions des deux fichiers montées avec `_bump.js`.
+- `mgmt-ecran-poste.js` : plaque et libellé communs adaptés à l’organisation, descriptif du matchmaker, nom de patron lu depuis l’organisation lorsqu’il existe ; `bilan` laissé intact.
+- `ui-cadre.css` : panneaux étirés sur la hauteur utile, actions conservées dans le flux et verdict prioritaire à 60 px ; versions montées avec `_bump.js`.
 - Tests ajoutés : aucun. Tests existants exécutés : « Monde lot 48 T1 — … » (9 tests), « Monde lot 58 T1 — … » (19 tests) et `mgmtLot69T1.test.js` (4 tests), tous verts ; lint réussi ; `node tools/verif-versions.js origin/main` réussi.
 - Migration de sauvegarde : aucune.
-- Écarts : les données historiques présentes sont affichées sans créer de nouvelles règles ; l’étiquette du rendez-vous reste générique (« JUILLET · MI-SAISON ») et les sous-détails d’événement utilisent seulement les champs déjà enregistrés. La note externe `COMMUN-3E-TOUR.md` n’était pas accessible dans l’environnement. Les modifications préexistantes des fichiers `.opencode/` et `opencode.json` n’ont pas été touchées.
+- Écarts : les données historiques présentes sont affichées sans créer de nouvelles règles ; l’étiquette du rendez-vous reste générique (« JUILLET · MI-SAISON ») et les sous-détails utilisent seulement les champs enregistrés. Quand l’organisation ne fournit pas de patron, le nom de l’organisation reste le substitut. La note externe `COMMUN-3E-TOUR.md` n’était pas accessible. Les modifications préexistantes des fichiers `.opencode/`, `opencode.json`, `index.html`, `sw.js` et `ui-cadre.css` non liées n’ont pas été incluses au-delà des styles de cette tranche.
 - Questions pour Anthony : aucune.
