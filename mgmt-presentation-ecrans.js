@@ -225,6 +225,9 @@ function mgmtPresentationLignes(m,v){
     if(p&&p.lignes.length) p.tete=['Adversaire commun',mgmtNomParId(m,d.ids[0]).name,mgmtNomParId(m,d.ids[1]).name];
     else if(p) p.tete=null;
     if(d.histoire.length===0) p.notes='Premier combat entre eux.';
+    /* ==== [ANCRE: MONDE_LOT21_AVANT_COMBAT_NOMS] — Monde lot 65 T1 ==== */
+    /* Les deux participants restent consultables depuis l’avant-combat, même sans historique commun. */
+    if(v.mode==='soiree') for(const id of v.ids) nom(id);
   }
   return {d,noms,panneaux:panneaux.filter(p=>p.lignes.length||p.notes)};
 }
@@ -304,7 +307,7 @@ function mgmtPresentationHtml(m,vue){
   const rgOrg=f=>{ if(solo||!f||typeof mgmtLendemainRangs!=='function') return '';
     const r=mgmtLendemainRangs(m,f.id); const n=r?(vue.mode==='soiree'?(r.avant||r.apres):r.apres):null;
     return n?`<em class="mf-pr-rg">N°${esc(n)}</em>`:''; };
-  const affiche=(f,cote)=>`<div class="mf-pr-nom ${cote}"><span class="mf-pr-l1" style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${cote==='b'?rgOrg(f):''}${esc(mfNet(f.first||''))}${cote==='a'?rgOrg(f):''}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${esc(mfNet(f.last||f.name))}</b></div>`;
+   const affiche=(f,cote)=>{const k=vue.noms.indexOf(f.id),nomHtml=!solo&&vue.mode==='soiree'&&k>=0?`<button type="button" class="mf-pr-lien" onclick="MGMT_PRESENTATION_UI.pile.at(-1).nom=${k};CL.mgmtPresentationNomOuvrir()">${esc(mfNet(f.last||f.name))}</button>`:esc(mfNet(f.last||f.name));return `<div class="mf-pr-nom ${cote}"><span class="mf-pr-l1" style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${cote==='b'?rgOrg(f):''}${esc(mfNet(f.first||''))}${cote==='a'?rgOrg(f):''}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${nomHtml}</b></div>`;};
   const rang=base.rang.findIndex(x=>x.id===a.id);
   /* Cartouche fidèle à la planche : rang chez l'organisation, rang mondial (mgmtFicheSituation)
      et combats restants au contrat (mgmtContratRestants), avec la catégorie en précision. */

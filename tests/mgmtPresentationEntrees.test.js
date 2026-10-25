@@ -35,6 +35,15 @@ test('Monde lot 3 T5 — cinq entrées et retour exact',()=>{
     assert.equal(w.eval(`JSON.stringify([G.mgmt,MGMT_CART,MGMT_PRELIMS,MGMT_SOIREE.index,MGMT_SU_PR,MGMT_ACCUEIL])`),avant);
   }
 });
+test('Monde lot 65 T1 — Avant-combat reste accessible aux deux états de soirée historique',()=>{
+  const w=passe();
+  for(const index of [0,1]){
+    w.eval(`MGMT_SOIREE.index=${index};CL.go('mgmt_soiree')`);
+    const bouton=[...w.document.querySelectorAll('#app button')].find(b=>(b.querySelector('.mf-bouton-t')||b).textContent.trim()==='Avant-combat');
+    assert.ok(bouton,`Avant-combat absent à l'index ${index}`);
+    assert.match(bouton.outerHTML,/CL\.mgmtSoAvant\(\)/);
+  }
+});
 test('Monde lot 3 T5 — soirée sans doublon ni fuite du résultat',()=>{
   const w=passe();w.eval(`CL.go('mgmt_soiree');CL.mgmtSoAvant()`);
   assert.equal(w.eval('G.screen'),'mgmt_soiree_avant');
