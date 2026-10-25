@@ -1416,6 +1416,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .oc75-note{margin-top:auto!important;color:var(--mgmt-secondary)}
 .oc75-legacy{max-height:140px;overflow-y:auto;color:#E9E6E1;font:600 22px/1.2 var(--mgmt-font-body)}
 .oc75-legacy summary{cursor:pointer}
+/* ==== [ANCRE: MONDE75_T1_CROISSANCE_DEFILEMENT] — Monde lot 75 T1 ==== */
+.mf-contenu.oc75{overflow-y:auto;overscroll-behavior:contain}
+.oc75-layout{flex:none;height:calc(100% - 84px);min-height:680px}
+.oc75-legacy{flex:none;margin-top:24px}
+.mf-cadre:has(.mf-contenu.oc75) .mf-touches,.mf-ecran:has(.mf-contenu.oc75) .mf-touches{font-size:22px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
@@ -2851,6 +2857,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3{grid-template-columns:minmax(0,1.45fr) minmax(360px,.8fr);}
 .gu3-entete,.gu3-ligne{grid-template-columns:56px minmax(0,1fr) minmax(90px,100px) minmax(88px,100px) minmax(100px,120px) minmax(80px,96px) minmax(68px,78px);}
 .gu3-entete>span{min-width:0;white-space:normal;line-height:1.05;}
+/* ==== [ANCRE: MONDE75_T1_GUERRE_ENTETE_COMPACT] — Monde lot 75 T1 ==== */
+.gu3-entete{font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-size:22px;letter-spacing:0;}
+.gu3-entete>span{overflow-wrap:anywhere;text-align:center;}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
