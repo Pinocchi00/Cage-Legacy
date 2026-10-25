@@ -2777,6 +2777,23 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale ul{margin:0;padding-left:28px;display:flex;flex-direction:column;gap:16px}
 .gu3-rivale>strong{font-size:22px}.gu3-rivale small{font-size:22px;opacity:.76;margin-top:auto}
 .gu3-mouvement{border-top:2px solid rgba(233,230,225,.16);padding-top:12px}
+/* ==== [ANCRE: MONDE74_T1_SUITE_COLONNES_SANS_DEBORDEMENT] — Monde lot 74 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,110px);column-gap:8px;row-gap:6px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.ld66-suite .ld3-move>b{font-size:24px;line-height:1.05}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{font-size:22px;line-height:1.05}
+.ld66-suite .ld3-move>strong{text-align:right}
+.ld66-suite .ld3-move>em{text-align:right}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE74_T1_LENDEMAIN_PANNEAUX_BORNES] — Monde lot 74 T1 ==== */
+.ld66-screen .ld66-moments{height:310px;min-height:310px;flex:none;overflow:hidden}
+.ld66-screen .ld66-moments .ld3-moment{height:310px;min-height:0;overflow:hidden}
+.ld66-screen .ld66-moments .ld3-names{font-size:clamp(32px,3.3vw,64px);line-height:1;min-height:0;max-height:2em;overflow:hidden;flex:none}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:clamp(32px,3.3vw,64px)}
+.ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.1;max-height:2.2em;overflow:hidden;flex:none;margin-top:auto}
+.ld66-screen .ld66-lower{height:calc(100% - 326px);flex:none;min-height:0;overflow:hidden}
+.ld66-screen .ld66-lower>section{overflow:auto;overscroll-behavior:contain}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE57_T1_MAQUETTE_GRILLE] — Monde lot 57 T1 ==== */
 .gu3{grid-template-rows:auto minmax(0,1fr);align-content:stretch}
 /* ==== [ANCRE: MONDE66_T1_ECHELLE_CARTES_MOMENTS] — Monde lot 66 T1 ==== */
