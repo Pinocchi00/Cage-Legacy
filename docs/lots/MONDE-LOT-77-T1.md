@@ -11,4 +11,16 @@ Fichiers : `mgmt-ecran-soiree.js`, `mgmt-soiree-cadre.js`, `mgmt-presentation-ec
 - **`discoursLong`** : `Papadopoulos-Karageorgia…` (`di3-nom`) plus large que l'écran (le nom en 230 px est trop grand pour 27 lettres) : **taille du nom calculée selon sa longueur** (≤ 9 lettres 230 px ; ≤ 14 → 170 px ; ≤ 20 → 120 px ; sinon 84 px, césure au tiret autorisée).
 Ne touche pas au reste de ces écrans (structure déjà proche de la planche).
 
-Écrans à contrôler : `soiree,soireeLong,soireeOuverture,soireeOuvertureLong,soireeFin,soireeFinLong,discours,discoursLong`.
+ Écrans à contrôler : `soiree,soireeLong,soireeOuverture,soireeOuvertureLong,soireeFin,soireeFinLong,discours,discoursLong`.
+
+## Compte rendu
+
+- `mgmt-soiree-cadre.js` : noms de combattants sur deux lignes et tailles adaptées à la longueur dans l'affiche d'ouverture.
+- `mgmt-ecran-discours.js` : taille du patronyme adaptée (230/170/120/84 px) et césure possible pour les noms longs.
+- `ui-cadre.css` : colonne catégorie portée à 190 px, rang resserré et ligne de salle conservée sur une ligne à 22 px ; adaptations de l'affiche.
+- `index.html` : versions cache montées pour les deux scripts et la feuille CSS.
+- `tests/mgmtMondeLot77T1.test.js` : test « Monde lot 77 T1 — les noms longs de soirée et de discours restent adaptables ».
+- Sauvegarde : aucune modification ; `MGMT_SAVE_VERSION` inchangé.
+- Écarts : le chemin `C:/Users/antho/AppData/Local/Temp/p1/COMMUN-3E-TOUR.md` est inaccessible dans l'environnement d'outil ; j'ai appliqué les règles prioritaires présentes dans la demande. Les écrans `soiree`, `soireeLong`, `soireeOuverture`, `soireeOuvertureLong`, `soireeFin`, `soireeFinLong`, `discours`, `discoursLong` restent à contrôler visuellement par le superviseur.
+- Tests : le test de tranche et `mgmtSoireeShow.test.js` passent. Le test lent `mgmtSoireeShow.test.js` a dépassé le délai initial de 120 s, puis a réussi en relance avec un délai adapté.
+- Questions pour Anthony : aucune.

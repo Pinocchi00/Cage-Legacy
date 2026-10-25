@@ -164,9 +164,11 @@ function mgmtSoOuvertureHtml(m,prog){
   const pre=prog.filter(p=>p.slot==='prelim'), main=prog.filter(p=>p.slot==='main');
   const salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
   const haut=n=>Math.max(44,Math.min(88,Math.floor((560-(n-1)*8)/Math.max(1,n))));
-   const ligne=(p,rang,on,h)=>{const vue=mgmtVueDuCombat(m,p.i), labels={complet:'COMPLET',forts:'TEMPS FORTS',resultat:'RÉSULTAT'};
-      return `<div class="mf-so-lg${on?' on':''} so3-carte-combat" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li so3-carte-infos"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div></div>`
-        +`<div class="mf-so-ln so3-carte-noms"><b>${esc(soLast(p.a))}</b><span>contre</span><b>${esc(soLast(p.b))}</b></div>`
+    const ligne=(p,rang,on,h)=>{const vue=mgmtVueDuCombat(m,p.i), labels={complet:'COMPLET',forts:'TEMPS FORTS',resultat:'RÉSULTAT'};
+      const taille=side=>{const n=`${side.first||''}${side.last||side.name||''}`.replace(/[^\p{L}]/gu,'').length;return n<=14?72:n<=22?56:44;};
+      const nom=side=>`<b style="font-size:${taille(side)}px"><span>${esc(side.first||'')}</span><span>${esc(side.last||side.name||'')}</span></b>`;
+       return `<div class="mf-so-lg${on?' on':''} so3-carte-combat" style="height:${h}px"><b class="mf-so-nb">${esc(rang)}</b><div class="mf-so-li so3-carte-infos"><div class="mf-so-lt"><span>${esc(p.etiquette)}</span><span class="mf-so-cat">${esc(soCat(p.div).replace(/^POIDS /,''))}</span></div></div>`
+         +`<div class="mf-so-ln so3-carte-noms">${nom(p.a)}<span>contre</span>${nom(p.b)}</div>`
             +`<button type="button" class="so3-vue" aria-label="Vue du combat ${esc(rang)} : ${labels[vue]}" aria-valuetext="${labels[vue]}" title="Changer la vue avec V" onclick="CL.mgmtSoVueSuivante(${p.i})">${labels[vue]}</button></div>`;
    };
   const hp=haut(pre.length), hm=haut(main.length);
