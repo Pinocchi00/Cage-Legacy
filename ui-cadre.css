@@ -2199,7 +2199,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-entete{display:flex;align-items:center;gap:18px}
 .di3-contexte{font-size:26px;line-height:1}
 .di3-identite{display:flex;flex-direction:column;gap:8px}
-.di3-prenoms{font:800 56px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
+ .di3-prenoms{font:800 48px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
 .di3-nom{font:800 clamp(88px,12vw,230px)/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase;margin:0;max-width:1180px;white-space:nowrap}
 /* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_NOM_PLANCHE] — Monde lot 69 T1 ====
@@ -2208,10 +2208,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-nom{font-size:230px}
 /* ==== [FIN ANCRE] ==== */
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
-.di3-lignes{position:absolute;left:110px;top:560px;width:1180px;display:flex;gap:26px;align-items:flex-start;margin:0;border:0;padding:0;font-size:44px;line-height:1.18;font-weight:600;font-style:normal}
+ .di3-lignes{position:absolute;left:110px;top:560px;width:1180px;display:flex;gap:26px;align-items:flex-start;margin:0;border:0;padding:0;font-size:30px;line-height:1.18;font-weight:600;font-style:normal}
 .di3-guillemet{font:800 200px/.7 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}
 .di3-lignes p{margin:18px 0 0;font-style:normal}
-.di3-micro{position:absolute;left:312px;top:835px;font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
+ .di3-micro{position:absolute;left:312px;top:835px;font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-lignes p{margin:18px 0 0}
 .di3-interpelle{font-size:28px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-suite{position:absolute;right:90px;bottom:22px;font:inherit;font-size:22px;min-height:48px;padding:0 16px;background:transparent;color:#F0B220;border:1px solid #F0B220;cursor:pointer}
