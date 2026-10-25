@@ -3179,8 +3179,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE74_T1_CASCADE_FLUIDE_CARTES_LONGUES] — Monde lot 74 T1 ====
    Une carte haute augmente la rangée entière ; les panneaux restent lisibles
    et deviennent défilables dans l'espace restant. */
-.mf-contenu.ld66-screen .ld66-moments{height:auto;min-height:285px;max-height:none;flex:0 0 auto;overflow:visible;align-items:stretch}
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment{height:auto;min-height:285px;max-height:none;flex:0 0 auto;overflow:visible}
+.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px;max-height:285px;flex:0 0 auto;overflow-x:hidden;overflow-y:auto;align-items:stretch}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{height:auto;min-height:285px;max-height:none;flex:0 0 auto;overflow:visible;padding:12px 16px;gap:4px}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{font-size:24px;line-height:1.1}
 .mf-contenu.ld66-screen .ld66-lower{height:auto;flex:1 1 0;min-height:0;overflow:hidden}
 .mf-contenu.ld66-screen .ld66-lower>section{min-height:0;overflow:auto;overscroll-behavior:contain}
