@@ -206,6 +206,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers de cette reprise : `ui-cadre.css` (densité des cartes choc), `index.html` (version cache), cette fiche (mesures). Tests ajoutés : aucun. Migration de sauvegarde : aucune.
 - Écarts toujours ouverts : le choc dépasse le seuil de densité de 5,5 points ; aucune nouvelle capture arrivée ni capture bilan post-correction n'a été faite ici ; parcours complet et majorité sont déjà couverts par les tests présents. Les changements utilisateurs `.opencode/agents/*` et `opencode.json` restent hors périmètre.
 
+### Reprise 62 — recontrôle après reprise
+- État initial : branche `fid-choc`, HEAD `e956d100`. Aucun fichier de la tranche n'était modifié ; les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent intacts et exclus.
+- Capture `choc` rejouée avec la scène externe fournie : l'écran n'est pas blanc et le contrôle donne 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, cible ≤20% non atteinte. Je n'ai pas modifié les dimensions des panneaux à l'aveugle : la mesure seule ne permet pas de choisir une correction fidèle à la planche.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test existant couvre le choc à trois paires jusqu'aux résultats du chemin normal, l'arrivée et le parcours offre/soirée/lendemain. Audit de versions et lint complet relancés pour cette livraison.
+- Aucun fichier applicatif nouveau ni migration de sauvegarde. Les écarts visuels encore non levés sont le seuil de gros blocs du choc, la capture dédiée arrivée et la mesure de chevauchement du bilan rapportée précédemment ; aucune ouverture visuelle des comparatifs n'est revendiquée.
+- Fichiers de cette reprise : cette fiche seulement (mesure, tests et limites). Tests ajoutés : aucun. Questions pour Anthony : aucune ; les critères visuels non satisfaits sont consignés comme tels.
+
 ### Reprise — garde contre un roster adverse invalide
 - Fichiers modifiés : `mgmt-ecran-poste.js` rend le contrôle de présence d'une paire sûr même si le roster adverse manque ou est malformé ; l'écran conserve son repli vers l'Accueil au lieu de planter. `tests/mgmtLot69T1.test.js` vérifie explicitement ce cas. Cette reprise corrige aussi l'indentation du bloc touché.
 - Test : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Capture `choc` relancée par l'outil indiqué : page présente, chevauchements=0, textes sous 22 px=0, débordements=[], mais `grosBlocs=26.2%` (cible ≤20% toujours manquée).
