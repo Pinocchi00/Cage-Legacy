@@ -3157,13 +3157,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MONDE74_T1_CASCADE_ECRANS_LENDEMAIN] — Monde lot 74 T1 ====
-   Dimensions terminales : cartes bornées, titres en deux lignes au plus et
-   panneaux du bas défilables sans empiéter sur le bloc suivant. */
-.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none;overflow:hidden}
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment{min-height:0;overflow:hidden;gap:8px}
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:44px;line-height:1.02;min-height:0;max-height:2.04em;overflow:hidden}
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:48px;line-height:1.02;max-height:2.04em}
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{font-size:22px;line-height:1.05;margin-top:0;max-height:2.1em;overflow:hidden}
+   Les cartes gardent leur contenu intégral et défilent comme un groupe si
+   deux lignes de noms longs réclament davantage de hauteur. */
+.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none;overflow-x:hidden;overflow-y:auto;align-items:stretch}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{min-height:260px;height:auto;flex:0 0 auto;overflow:visible;gap:8px}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:44px;line-height:1.02;min-height:0;max-height:none;height:auto;overflow:visible;flex:none;overflow-wrap:anywhere}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:48px;line-height:1.02;max-height:none}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{font-size:22px;line-height:1.05;margin-top:0;max-height:none;height:auto;overflow:visible;flex:none;overflow-wrap:anywhere}
 .mf-contenu.ld66-screen .ld66-lower>section{overflow:auto;overscroll-behavior:contain}
 .mf-contenu.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.8fr);column-gap:10px}
 .mf-contenu.ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
