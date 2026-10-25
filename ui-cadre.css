@@ -1110,7 +1110,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-entete .mf-so-org{font-family:var(--mf-titre);font-size:56px;font-weight:800;line-height:.8;color:#E9E6E1}
 .so3-entete .mf-so-n b{font-family:var(--mf-titre);font-size:56px;font-weight:800;line-height:.8}
 .so3-entete .mf-so-n span{font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
-.so3-carte-combat{grid-template-columns:54px 190px minmax(0,1fr) auto;gap:16px;padding:0 14px}
+.so3-carte-combat{display:grid;grid-template-columns:54px 190px minmax(0,1fr) auto;gap:16px;padding:0 14px}
 .so3-carte-combat .mf-so-nb{font-family:var(--mf-titre);font-size:30px;line-height:1;color:rgba(233,230,225,.74)}
 .so3-carte-infos{min-width:0;display:flex;flex-direction:column;gap:5px}
 .so3-carte-infos .mf-so-lt{display:flex;flex-direction:column;gap:5px}
