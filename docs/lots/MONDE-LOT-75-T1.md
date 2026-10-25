@@ -21,8 +21,8 @@ Les données viennent de `mgmtPaliers*`, `m.croissance`, `mgmtOrgMoneyHtml` : **
 
 ## Compte rendu
 
-- Modifié : `mgmt-guerre-ecran.js` (libellé de l'en-tête et colonne d'évolution, commit précédent) ; `ui-cadre.css` (noms de lignes sans rognage, retour à la ligne) ; `index.html` (version CSS montée).
-- Tests ajoutés : aucun. Test ciblé exécuté : `node --test tests/mgmtOrganisations.test.js` (9/9 verts).
+- Modifié dans les commits précédents : `mgmt-guerre-ecran.js`, `ui-cadre.css`, `index.html` (ajustement des noms, libellé de l'en-tête et colonne ▲/▼). Dans ce commit : `mgmt-screens.js` (retire `mgmt_organisation` de l'enveloppe `mgmtWithNav`, comme demandé pour éviter le double cadre) et `index.html` (version montée).
+- Tests ajoutés : aucun. Test ciblé exécuté : `node --test tests/mgmtOrganisations.test.js` (9/9 verts). Audit : `node tools/verif-versions.js origin/main` sans écart.
 - Migration de sauvegarde : aucune.
-- Écarts à la fiche / travail restant : cette tranche reste inachevée. Seule l'adaptation anti-coupure des noms de la guerre a été faite dans ce tour ; le tableau ne reprend pas encore toute la maquette. L'écran `croissance` n'a pas été porté. Les quatre scènes `guerre,guerreLong,croissance,croissanceLong` n'ont pas été capturées et les lignes CONTRÔLE ne sont donc pas disponibles. Vérification `node tools/verif-versions.js origin/main` sans écart ; seul le test ciblé ci-dessus a été lancé.
+- Écarts à la fiche / travail restant : tranche encore incomplète. Le retrait de l'enveloppe est fait, mais `scr_mgmt_organisation` n'a pas encore été porté dans `mfEcran` ni redessiné selon UniCroissance ; les blocs effectif/finances ne sont pas encore réorganisés. Le tableau de guerre et le panneau rival ne reprennent pas encore l'intégralité d'UniGuerre. Les quatre scènes `guerre,guerreLong,croissance,croissanceLong` n'ont pas été capturées ; aucune ligne CONTRÔLE disponible. Décision de fidélité : appliquer la maquette validée plutôt que conserver le double cadre historique. Les fichiers de configuration de l'environnement et `sw.js` déjà modifiés dans le répertoire de travail sont étrangers à cette tranche et laissés hors commit.
 - Questions pour Anthony : aucune.
