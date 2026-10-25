@@ -2266,7 +2266,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-scene>.po2-grid{width:100%;height:0;flex:1 1 0;min-height:0;grid-template-rows:minmax(0,1fr);overflow:hidden}
 .po2-scene>.po2-grid>.po2-card{min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;contain:strict}
 /* ==== [ANCRE: MONDE70_T1_CARNET_LISTES_COMPACTES] — Monde lot 70 T1 ==== */
-.ce3-carnet-ecran .ce3-carnet>article{display:block;overflow-x:hidden;overflow-y:auto;contain:strict}
+.ce3-carnet-ecran .ce3-carnet>article{display:block;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;contain:layout paint;overscroll-behavior:contain}
 .ce3-carnet-ecran .ce3-carnet>article h2{font-size:26px;line-height:1.08;margin:0 0 8px}
 .ce3-carnet-ecran .ce3-carnet>article>p{font-size:22px;line-height:1.12;margin:0;padding:5px 0;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE70_T1_POSTE_COLONNE_RESSERREE] — Monde lot 70 T1 ==== */
