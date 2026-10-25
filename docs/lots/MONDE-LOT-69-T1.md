@@ -23,6 +23,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — reproduction bilan et contrôles ciblés
+- Branche `fid-choc`, HEAD initial `392ee9f2`; le test dédié est déjà présent dans les commits antérieurs. Les modifications utilisateur `.opencode/agents/*`, `opencode.json` et changements de fins de ligne de `index.html`, `ui-cadre.css`, `sw.js` restent hors commit.
+- Captures lancées avec le shoot fourni : choc `grosBlocs=26.1%`, sans chevauchement, texte trop petit ni débordement ; discours `grosBlocs=16.6%`, mêmes contrôles géométriques verts ; bilan `grosBlocs=12.9%`, mais chevauchement toujours mesuré entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22 px). Une tentative d'augmentation de l'interligne/marge du titre du bilan n'a pas changé la mesure ; le CSS et son incrément de version ont été retirés plutôt que de conserver une correction inefficace.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4). `node tools/verif-versions.js origin/main` passe (20 fichiers examinés). Je n'ai pas ouvert les comparatifs `cmp-*.png` ; aucune capture d'arrivée dédiée n'a été réalisée dans cette reprise.
+- Fichiers modifiés dans cette reprise : cette fiche uniquement, pour consigner les résultats. Aucun test ajouté, aucune migration ni modification fonctionnelle conservée.
+- Écarts restant : gros blocs choc au-dessus du seuil ≤20 %, chevauchement du bilan, contrôle visuel comparatif et capture arrivée non établis. Les tests ciblés sont verts, mais les critères visuels de la fiche ne sont pas tous atteints ; `TOUT_EST_FINI` n'est pas revendiqué.
+
 ### Reprise 25/10/2026 — reprise 6, vérification de livraison
 - Branche `fid-choc` confirmée. `git log --oneline -12` montre le commit de livraison déjà présent (`3907539b`) et les précédents commits de la tranche ; aucun changement fonctionnel de tranche en attente. Les modifications locales dans `.opencode/agents/` et `opencode.json` sont préservées. `index.html` et `ui-cadre.css` ne présentent pas de différence de contenu sous `git diff --ignore-all-space`; `sw.js` contient une version de cache locale `b311` et reste explicitement hors commit.
 - Captures relancées avec `shoot.js` : choc visible et sans anomalies géométriques (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.1%` (cible ≤20% non atteinte) ; discours sans anomalie géométrique, `grosBlocs=16.6%` ; bilan `grosBlocs=12.9%`, mais chevauchement persistant de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ». Ces comparatifs n'ont pas été ouverts visuellement et aucune scène dédiée d'arrivée n'a été capturée.
