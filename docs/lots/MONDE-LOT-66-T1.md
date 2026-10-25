@@ -1,5 +1,6 @@
 # Monde lot 66 T1 — fidélité aux maquettes : le lendemain en deux écrans
 
+
 Branche : `fid-lendemain` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). **Les maquettes (`docs/planches-uniques/Uni*.dc.html`) sont validées par Anthony : l'écran du jeu doit leur ressembler.** Lis d'abord `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` : un outil capture ton écran à 1920×1080 et le compare à la maquette (`cmp-<écran>.png` : jeu à gauche, maquette à droite). **Utilise-le après chaque étape.**
 
 Écrans de ta tranche : `lendemain` (maquette `UniLendemain`) et `lendemainSuite` (maquette `UniLendemainSuite`). Fichiers : `mgmt-lendemain-cadre.js`, `mgmt-ecran-lendemain.js`, `mgmt-histoires*.js`, `ui-cadre.css`. Le compte rendu du lot 54 est en bas de `docs/lots/MONDE-LOT-54-T1.md`.
@@ -17,6 +18,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 **[ ] 6.** `?v=`, versions, lint ; commit final `Monde lot 66 T1 : le lendemain fidèle aux planches` ; compte rendu honnête (avant/après) ; `TOUT_EST_FINI`.
 
 ## Compte rendu
+
+### Reprise capture — 25/10/2026
+
+- Branche `fid-lendemain`; les commits précédents du lot sont déjà présents. Changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` exclus et laissés intacts.
+- Après lecture du guide, captures 1920×1080: lendemain `chevauchements=0`, `textesSous22px=0`, aucun débordement, mais `grosBlocs=22,8%` (objectif de reprise ≤18% non atteint). Suite: 0 chevauchement, 0 texte sous 22px, `grosBlocs=17,7%`; quatre débordements variables dans les mouvements (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »).
+- Remise à l’échelle CSS des noms des trois cartes: 108px pour la première et 64px pour les deux autres; règle finale explicitement ancrée. `index.html` versionné avec `_bump.js`.
+- Test `node --test tests/mgmtEcranLendemain.test.js`: 7/7. `node tools/verif-versions.js origin/main`: aucun écart. Les captures ne confirment pas le seuil renforcé pour le lendemain ni la fin des débordements de la suite; conformité visuelle complète non revendiquée. Pas de données ou de sauvegarde modifiées.
+- Fichiers: `ui-cadre.css` (échelle des trois noms), `index.html` (cache CSS), cette fiche (compte rendu). Aucun nouveau test/migration. Questions pour Anthony: aucune.
 
 ### Reprise 10 — taille du nom principal — 24/10/2026
 
