@@ -2,6 +2,13 @@
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôle du rendu choc
+- Branche `fid-choc` confirmée ; les commits applicatifs précédents sont présents. Les modifications préexistantes sous `.opencode/agents/`, `opencode.json` et `sw.js` restent hors périmètre.
+- Reproduction du shoot `choc` : la proposition reçue valide s'affiche, avec `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=26.2%` (objectif ≤20% non atteint).
+- Lecture de la règle CSS et du markup UniChoc : la maquette demande les proportions bandeau 110 px, noms 70 px et médaillon 90 px ; le CSS courant porte ces valeurs. L'ajustement antérieur documenté à ces valeurs causait des chevauchements ; je n'ai pas réintroduit ce rendu en ignorant le contrôle géométrique. Le comparatif PNG n'a pas pu être ouvert via l'outil de lecture dans cette session et le guide externe est refusé par la politique d'accès.
+- Aucun changement fonctionnel/CSS ni migration. Les quatre tests existants et leur logique de parcours restent déjà commités ; cette reprise ne les altère pas. Le critère visuel de densité demeure ouvert et `TOUT_EST_FINI` n'est pas revendiqué.
+- Questions pour Anthony : aucune nouvelle question ; écart visuel explicitement signalé.
+
 ### Reprise 25/10/2026 — contrôle après reprise 8
 - Branche `fid-choc` confirmée. `git log --oneline -12` montre que le code et tests de la tranche sont déjà commités (HEAD initial `c54ac8d7`) ; aucun changement fonctionnel non commité. Les modifications de `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et n'ont pas été ajoutées.
 - Reproduction de la scène de choc avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : page rendue avec proposition valide, zéro chevauchement, zéro texte sous 22 px, zéro débordement ; `grosBlocs=26.2%`, donc cible ≤20% toujours manquée. Le guide `LISEZMOI.txt` et les images comparatives restent inaccessibles à la lecture dans cet environnement ; aucun examen visuel du `cmp-*.png` revendiqué.
