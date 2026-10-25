@@ -1886,7 +1886,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_GROUPES] — Monde lot 70 T1 ==== */
 .mf-stage:has(.mf-ac) .mf-touche-g{gap:20px}
 .mf-stage:has(.mf-ac) .mf-touche-g button{gap:20px}
-.mf-ac-aide{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:22px;line-height:1;color:var(--mf-texte2);flex:none}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_AIDE_UNIQUE] — Monde lot 70 T1 ==== */
+.mf-ac-aide{display:none}
 /* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_GROUPEES] — Monde lot 70 T1 ==== */
 .mf-ac-aide{flex-wrap:nowrap;justify-content:space-between;gap:14px;min-width:0}
 .mf-ac-aide-groupe{display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}

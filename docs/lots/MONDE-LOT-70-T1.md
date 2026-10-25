@@ -98,6 +98,13 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 ## Compte rendu
 
+### Reprise 34 — retirer les raccourcis redondants de l'aide Accueil
+
+- Branche `polissage`; `git log --oneline -12` confirme les étapes précédentes déjà commitées. Le statut initial ne contenait que des modifications étrangères dans `.opencode/agents/*`, `opencode.json` et `sw.js`; elles restent hors tranche.
+- Contrôles frais avant : Accueil `6/0/[]`; après suppression de la rangée d'aide interne redondante (les touches sont déjà dans le cadre), Accueil `1/0/[]`. Collision restante : « Palier de croissance · presse » avec le lien « Ton poste ». Carnet frais `135/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`. Valeurs dans l'ordre chevauchements/textesSous22px/débordements.
+- Modifiés : `ui-cadre.css` (suppression d'une aide redondante qui recouvrait la barre basse) et `index.html` (`?v=` bump). `node --test tests/mgmtAccueil.test.js` passe 21/21; `node tools/verif-versions.js origin/main` ne signale aucun écart.
+- État honnête : l'Accueil est amélioré mais reste à un chevauchement; le carnet en a 135. Ton poste, Bilan, Croissance et Actualités n'ont pas été recapturés dans cette reprise. Aucun critère de zéro global n'est atteint, aucun test de géométrie supplémentaire n'est ajouté, aucune migration de sauvegarde. Écrans prohibés et fichiers étrangers laissés intacts. La tranche reste inachevée.
+
 ### Reprise 31 — mesures fraîches et état des corrections
 
 - Branche : `polissage`. `git log --oneline -12` montre les commits antérieurs de reprise ; aucun fichier suivi de la tranche n'était non commité. Les modifications étrangères déjà présentes dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont laissées intactes et hors commit.
