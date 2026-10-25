@@ -35,6 +35,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 25/10 — correction après capture
+
+- Captures réelles séparées via `shoot.js` à 1920×1080 avant/après. Avant, `lendemain` donnait 3 chevauchements, 0 texte sous 22 px et `grosBlocs=21,8%`; `lendemainSuite` donnait 0 chevauchement, 0 texte trop petit, `grosBlocs=17,6%`, mais 4 libellés de mouvements débordants.
+- Ajout d'une règle de contenance dans `ui-cadre.css` : dimension des cartes conservée à 285 px, détails/métadonnées en 22 px, zone inférieure bornée. Cache CSS bumpé dans `index.html`.
+- Après : captures `lendemain` encore 3 chevauchements (détails de combats contre en-têtes inférieurs), zéro texte sous 22 px, aucun débordement, gros blocs 22,1%. La suite reste à 0 chevauchement/texte trop petit et conserve les 4 débordements « Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split ». Correction tentée mais critère visuel toujours en échec; ne pas revendiquer la fin de la tranche.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` vert (7/7). Aucun changement de données, sauvegarde, navigation ou mécanique; pas de migration. Fichiers modifiés de cette reprise : `ui-cadre.css` (contenance), `index.html` (cache). La suite de tests/lint/verif et le commit restent à faire.
+
 ### Reprise 25/10 — captures actuelles
 
 - Vérifications initiales : branche `fid-lendemain`; les commits précédents incluent les écrans et styles. Les modifications locales des agents OpenCode, `opencode.json` et `sw.js` sont étrangères à cette tranche et restent intactes.

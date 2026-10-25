@@ -2228,6 +2228,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-screen .ld66-numbers .ld66-number{align-items:flex-end}
 .ld66-screen .ld66-numbers .ld66-number strong{font-size:32px;text-align:right}
 .ld66-suite .ld3-suite{height:856px;max-height:calc(100vh - 224px);overflow:hidden}
+/* ==== [ANCRE: MONDE66_T1_CONTENIR_TITRES_LONGS] — Monde lot 66 T1 ====
+   Une à deux lignes au format maquette, sans superposition aux informations
+   qui suivent ni aux trois colonnes de chiffres. */
+.mf-contenu.ld66-screen{height:856px;top:128px;overflow:visible}
+.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
+.ld66-screen .ld66-moments .ld3-moment{height:285px;min-height:285px;box-sizing:border-box;gap:6px;padding:16px 22px}
+.ld66-screen .ld66-moments .ld3-names,.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.ld66-screen .ld66-moments .ld3-meta{font-size:22px;line-height:1;flex:none}
+.ld66-screen .ld66-moments .ld3-detail{font-size:22px;line-height:1.05;flex:none;margin-top:auto}
+.ld66-screen .ld66-lower{height:calc(100% - 301px);flex:none;min-height:0;overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_NOM_SURPRISE_GRAND] — Monde lot 66 T1 ==== */
 .ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
