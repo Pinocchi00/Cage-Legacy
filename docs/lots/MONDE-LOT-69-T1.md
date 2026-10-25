@@ -2,6 +2,12 @@
 
 ## Compte rendu
 
+### Reprise — raccord exact du bandeau choc
+- Branche `fid-choc` confirmée. Le HEAD contenait déjà les changements de tranche ; le statut initial ne présentait que des modifications utilisateur hors lot (`.opencode/agents/*`, `opencode.json`, `sw.js`), non ajoutées.
+- `ui-cadre.css` : les deux moitiés du bandeau choc se rejoignent maintenant exactement à 50 %, le médaillon VS les séparant comme sur UniChoc. `index.html` mis à jour avec `node tools/_bump.js ui-cadre.css`. Test structurel ajouté dans `tests/mgmtLot69T1.test.js`, avec mention explicite de la décision de primauté des planches validées.
+- Vérification ciblée : `node --test tests/mgmtLot69T1.test.js` passe (4/4). La capture `LISEZMOI.txt` et son image comparative n'ont pu être utilisées dans cette session en raison de la restriction d'accès externe ; l'efficacité visuelle de ce raccord, le seuil `grosBlocs ≤20%`, le chevauchement du bilan antérieurement rapporté et la capture d'arrivée dédiée restent à vérifier. Je ne déclare pas ces objectifs visuels atteints sur la seule base du test structurel.
+- Pas de migration ni de modification de données métier. Modifications de cette reprise : CSS du bandeau, son `?v=`, test ciblé, présent compte rendu. Les changements utilisateur hors tranche restent non commités.
+
 ### Reprise 25/10 — identité de la matchmaker sur le choc
 - `mgmt-ecran-poste.js` affiche désormais, dans la colonne de proposition, le nom et la phrase signature du matchmaker de l'organisation adverse en reprenant `MGMT_MATCHMAKERS` (données existantes, `relu:false`) au lieu d'une citation de remplissage inventée dans l'écran. `ui-cadre.css` donne à son nom une règle dédiée, au moins 22 px. `index.html` a reçu les bumps `?v=` de ces deux ressources.
 - `tests/mgmtLot69T1.test.js` vérifie que l'écran utilise bien le nom et la phrase de la matchmaker effectivement associée au partenaire.

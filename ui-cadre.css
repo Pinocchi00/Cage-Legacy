@@ -2043,6 +2043,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-title{font-size:70px;gap:24px;padding:8px 0}
 .ch3-title .ch3-vs{width:90px;height:90px;font-size:36px}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DEMI_BANDEAU] — Monde lot 69 T1 ====
+   Les deux aplats se rejoignent au centre ; le médaillon VS les sépare. ==== */
+.ch3-title{background:linear-gradient(90deg,#E9E6E1 0 50%,#E23A2B 50% 100%)}
 /* ==== [ANCRE: MONDE_LOT69_T1_CHOC_NOMS_PLANCHE] — Monde lot 69 T1 ====
    La décision d'Anthony du 24/10 : les maquettes Uni* validées font foi; les
    noms d'affiche reprennent les 46 px explicites de UniChoc. ==== */
