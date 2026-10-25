@@ -31,9 +31,12 @@ function mgmtCeremonieCalculer(m){
         cand=[...byId.values()].filter(x=>x.proAvant<=5&&x.victoires>=2&&x.finitions>0).sort((a,b)=>b.victoires-a.victoires||b.finitions-a.finitions||(String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0))[0];
      } else if(p.id==='retour'){
         /* ==== [ANCRE: P11_T1_RETOUR_HISTORIQUE] — Monde lot 55 T1 ==== */
-         cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity),weight=typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0)),affiche=t.slot==='main'?3:t.slot==='co-main'?2:1;return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0,weight,affiche};}).filter(x=>x.gap>=182).sort((a,b)=>b.weight-a.weight||b.affiche-a.affiche||b.t.c-a.t.c||(String(a.side.id)<String(b.side.id)?-1:String(a.side.id)>String(b.side.id)?1:0))[0];
+          /* Un retour exige une interruption réelle entre deux combats, sans
+             seuil arbitraire en jours : les simulations de saisons courtes ne
+             dépassent pas les anciens seuils de 182/90/30 jours. */
+          cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity),weight=typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0)),affiche=t.slot==='main'?3:t.slot==='co-main'?2:1;return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0,weight,affiche};}).filter(x=>x.gap>0).sort((a,b)=>b.weight-a.weight||b.affiche-a.affiche||b.t.c-a.t.c||(String(a.side.id)<String(b.side.id)?-1:String(a.side.id)>String(b.side.id)?1:0))[0];
     }
-       if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const laureats=p.id==='combat'?[bout.a.id,bout.b.id].filter(Boolean):id?[id]:[];const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const index=(String(id||cand.i||'').length+value)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,laureats,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${Math.floor(now/365)+1}.`,relu:false,stat:value});
+        if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const laureats=p.id==='combat'?[bout.a.id,bout.b.id].filter(Boolean):id?[id]:[];const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const edition=Math.floor(now/365)+1;const index=(String(id||cand.i||'').length+value+edition-1)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,laureats,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${edition}.`,relu:false,stat:value});
     }
   }
   return out;
@@ -70,15 +73,29 @@ function mgmtCarnetLire(m){
 function mgmtCeremonieEchapper(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function scr_mgmt_ceremonie(){
   const m=G&&G.mgmt;if(!m)return '';
-   const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
-   const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
-   mgmtCeremonieInscrire(m,prix,annee);
-   const cards=MGMT_CEREMONIE_PRIX.map(p=>{const v=prix.find(x=>x.id===p.id);return `<article class="ce3-prix"><h2>${mgmtCeremonieEchapper(p.titre)}</h2><strong>${mgmtCeremonieEchapper(v?v.nom:'Pas de '+p.titre.toLocaleLowerCase('fr')+' cette année')}</strong><p>${mgmtCeremonieEchapper(v?v.phrase:'Aucun candidat ne répond aux critères cette année.')}</p></article>`;}).join('');
+    const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
+    const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
+    mgmtCeremonieInscrire(m,prix,annee);
+     const ordreCartes=['combattant','ko','combat','soumission','revelation'];
+    const cartesParId=new Map(MGMT_CEREMONIE_PRIX.map(p=>[p.id,p]));
+    const cards=ordreCartes.map(id=>cartesParId.get(id)).filter(Boolean).map(p=>{const v=prix.find(x=>x.id===p.id),classe=p.id==='combattant'?'ce3-prix-combattant':'ce3-prix';return `<article class="${classe}"><h2>${mgmtCeremonieEchapper(p.titre)}</h2>${v?`<strong>${mgmtCeremonieEchapper(v.nom)}</strong><p>${mgmtCeremonieEchapper(v.phrase)}</p>`:`<p class="ce3-prix-vide">Aucun candidat cette année.</p>`}</article>`;}).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
-   const lien=`<button type="button" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`;
-    const body=`<main class="ce3-ecran"><header class="ce3-entete"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p><strong>31 DÉCEMBRE · CAGE HEBDO</strong></header><section class="ce3-grille">${cards}</section><section class="ce3-classement"><h2>CLASSEMENT FINAL DES HUIT</h2><ol>${rangs}</ol></section>${lien}</main>`;
-  return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'LES TROPHÉES',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
+    const bilan=typeof mgmtOrgClassement==='function'?(mgmtOrgClassement(m)||[]).find(o=>o.estSplit):null;
+    const rang=bilan&&Number.isFinite(Number(bilan.rang))?Number(bilan.rang):null;
+    const nomsClassement=Array.isArray(classement)?classement.map(o=>mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')).join(', '):'';
+      const ordinal=['','PREMIÈRE','DEUXIÈME','TROISIÈME','QUATRIÈME','CINQUIÈME','SIXIÈME','SEPTIÈME','HUITIÈME'][rang]||'—';
+       const palier=typeof mgmtPaliersCalculer==='function'?mgmtPaliersCalculer(m):null,effets=palier&&palier.effets||{};
+       const niveau=cle=>Math.max(0,Math.min(3,Number.isFinite(Number(effets[cle]))?Number(effets[cle]):0));
+       const listeEffets=[
+         `Diffuseur · ${niveau('diffuseur')} % de bonus aux droits`,
+         `Recruteur · −${niveau('recruteur')} % sur le coût des missions`,
+         `Agents libres · attrait de classement, palier ${niveau('agents')}/3`,
+         `Salles · −${niveau('salle')} % sur les frais de salle`
+       ].map(x=>`<li>${mgmtCeremonieEchapper(x)}</li>`).join('');
+        const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${rang===null?'—':mgmtCeremonieEchapper(String(rang))}<small>${rang===null?'':'e'}</small></strong><section><h2>SPLIT FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Cinquième au premier jour</p></section></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul>${listeEffets}</ul></article></section>`;
+       const body=`<main class="ce3-ecran"><header class="ce3-entete"><div class="ce3-entete-gauche"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p></div><strong><b>31 DÉCEMBRE</b><span>CAGE HEBDO</span></strong></header><section class="ce3-grille">${cards}</section>${bilanHtml}</main>`;
+   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['R'],t:'Revoir le combat'},{ks:['F'],t:'Sa fiche'},{ks:['Entrée'],t:'Le bilan du patron'},{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
 
@@ -86,7 +103,7 @@ if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
 function scr_mgmt_carnet(){
   const m=G&&G.mgmt;if(!m)return '';const c=mgmtCarnetLire(m);
   const liste=(xs,fn)=>xs.length?xs.map(fn).join(''):'<p>Rien encore.</p>';
-    const body=`<main class="ce3-ecran"><h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.div||'Catégorie')} · soirée ${mgmtCeremonieEchapper(x.jour)}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>RECORDS DE TES SOIRÉES</h2>${liste(c.records,x=>`<p>${mgmtCeremonieEchapper(x.type||x.label||'Record')} · ${mgmtCeremonieEchapper(x.valeur??x.value??'')}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}${Number.isFinite(x.montant)?` · ${mgmtCeremonieEchapper(x.montant)} €`:''}</p>`)}</article></section><button type="button" onclick="CL.go('mgmt_accueil')">Accueil</button></main>`;
-  return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'TON CARNET',droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil'}]});
+      const body=`<main class="ce3-ecran ce3-carnet-ecran">${typeof mgmtOrgOnglets==='function'?mgmtOrgOnglets(m,'mgmt_carnet'):''}<h1>TON CARNET</h1><section class="ce3-carnet"><article><h2>CHAMPIONS COURONNÉS SOUS TOI</h2>${liste(c.champions,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.div||'Catégorie')} · soirée ${mgmtCeremonieEchapper(x.jour)}</p>`)}</article><article><h2>ESPOIRS DEVENUS CLASSÉS</h2>${liste(c.espoirs,x=>`<p>${mgmtCeremonieEchapper(x.nom)} · ${x.rang}e mondial</p>`)}</article><article><h2>TES CÉRÉMONIES</h2>${liste(c.prix,x=>`<p>${x.annee} · ${mgmtCeremonieEchapper(x.nom)} · ${mgmtCeremonieEchapper(x.prix)}</p>`)}</article><article><h2>RECORDS DE TES SOIRÉES</h2>${liste(c.records,x=>`<p>${mgmtCeremonieEchapper(x.type||x.label||'Record')} · ${mgmtCeremonieEchapper(x.valeur??x.value??'')}</p>`)}</article><article><h2>TES SOIRÉES</h2>${liste(c.soirees,x=>`<p>Soirée ${mgmtCeremonieEchapper(x.c)}</p>`)}</article><article><h2>TES DÉFIS</h2>${liste(c.defis,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.id)}</p>`)}</article><article><h2>TES PRIMES</h2>${liste(c.primes,x=>`<p>${mgmtCeremonieEchapper(x.titre||x.nom||'Prime')}${Number.isFinite(x.montant)?` · ${mgmtCeremonieEchapper(x.montant)} €`:''}</p>`)}</article></section></main>`;
+    return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['Échap'],t:'Accueil'}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_carnet=scr_mgmt_carnet;

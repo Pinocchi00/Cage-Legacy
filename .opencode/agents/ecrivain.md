@@ -1,7 +1,7 @@
 ﻿---
 description: Ã‰crit les textes visibles par le joueur (fiches d'identitÃ©, raisons de LeÃ¯la, prÃ©sentations, pronostics, Ã©vÃ©nements), en franÃ§ais, marquÃ©s relu:false, selon la commande donnÃ©e.
 mode: subagent
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 steps: 20
 permission:
   bash: deny
