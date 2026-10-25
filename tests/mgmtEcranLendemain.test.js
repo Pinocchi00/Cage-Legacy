@@ -66,8 +66,10 @@ test('MGMT T4 — planches Uni* validées par Anthony ; l’écran rend les mome
   for(const bloc of ['LA SURPRISE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES']) assert.ok(html.includes(bloc),'bloc de la planche présent : '+bloc);
    const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(name=>/^ld66-|^ld3-moment$|^ld3-label$|^ld3-meta$|^ld3-names$|^ld3-detail$|^mgmt-ld-link$/.test(name)))];
   const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
-  assert.ok(classes.length>0,'les blocs de la planche portent leurs classes de composant');
-  assert.deepEqual(classes.filter(name=>!new RegExp('\\.'+name+'(?:\\W|$)').test(css)),[],'chaque classe de l’écran a une règle CSS');
+   assert.ok(classes.length>0,'les blocs de la planche portent leurs classes de composant');
+   assert.deepEqual(classes.filter(name=>!new RegExp('\\.'+name+'(?:\\W|$)').test(css)),[],'chaque classe de l’écran a une règle CSS');
+   const nomsMoment=css.match(/\.mf-contenu\.ld66-screen \.ld66-moments \.ld3-names\s*\{[^}]*font-size:\s*(\d+)px/i);
+   assert.ok(nomsMoment&&Number(nomsMoment[1])>=64,'les noms des moments restent en très grand, au moins 64 px');
   assert.ok(!TRAVAIL_RE.test(html),'aucun texte de travail');
   /* Les résultats : chaque combat porte « bat » (ou un match nul), une
      méthode, un bouton REVOIR ; un lien vers toute la soirée. */
