@@ -35,6 +35,16 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise de contrôle — 25/10/2026
+
+- Vérifiés les derniers commits et la branche `fid-lendemain`; aucun fichier de code de la tranche n'était en attente au départ. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
+- Lu le guide capture et relancé les captures séparément à 1920×1080. `lendemain` : 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=22,8%` (`moyen=28,9%`). `lendemainSuite` : 0 chevauchement, 0 texte sous 22 px, mais quatre débordements variables dans les mouvements (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »), `grosBlocs=17,6%` (`moyen=23,1%`). Les comparatifs sont générés sous `C:/Users/antho/AppData/Local/Temp/shots/`.
+- Tentative ciblée en CSS : la largeur de contenu à partir de 1800 px correspond désormais aux 1564 px de la planche plutôt qu'aux 1740 px d'une règle précédente; la recapture n'a pas changé les scores. Les défauts des captures ne sont donc pas résolus. La carte principale conserve sa règle de 108 px, les deux autres sont à 64 px ou plus; l'objectif renforcé `grosBlocs≤18%` du lendemain n'est pas atteint.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot54T1.test.js` (30), `mgmtLot48T1.test.js` (9) et `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Fichiers modifiés : `ui-cadre.css` (largeur alignée sur la planche à 1920 px), `index.html` (cache CSS), cette fiche (résultats). Aucune donnée, sauvegarde, navigation ou mécanique modifiée; pas de migration ni de nouveau test. Aucun fichier temporaire de capture ajouté au dépôt.
+- Écarts : ratio du lendemain au-dessus de la cible renforcée et alertes de débordement de la suite persistantes. Les mesures JavaScript de computed-style des noms n'ont pas été effectuées; leurs règles CSS sont néanmoins déclarées ≥64 px.
+- Questions pour Anthony : aucune.
+
 ### Reprise échelle finale — 25/10/2026
 
 - Corrigé les règles finales de `ui-cadre.css` qui annulaient elles-mêmes les tailles voulues : première carte à 108 px, deux suivantes à 64 px; rangée des trois moments remise à 285 px. La suite conserve ses trois colonnes et ses cellules de mouvements récupèrent leur troisième colonne (organisation), avec retours à la ligne pour éviter les noms/rangs débordants.
