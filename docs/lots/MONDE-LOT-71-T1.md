@@ -12,3 +12,15 @@ La capture automatique de l'écran `actualites` **retombe sur l'écran titre** :
 **[ ] 4.** `?v=` de chaque `.js`/`.css` modifié (`node tools/_bump.js <fichier>`, `node tools/verif-versions.js origin/main`), **jamais `sw.js`**, lint ; commit final `Monde lot 71 T1 : Actualités fidèle à la planche` ; compte rendu honnête avec les lignes `CONTRÔLE` avant/après ; `TOUT_EST_FINI`.
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
+
+## Compte rendu
+
+- Fichiers applicatifs : aucun nouveau changement nécessaire ; l'écran existant fournit les panneaux suivis, fil et détail et passe déjà les tests d'interface ciblés.
+- Test ajouté : « Actualités — les trois blocs suivis, fil et détail sont présents comme sur les planches Uni* validées par Anthony ; l’écran suit la planche ».
+- Contrôle ciblé `node --test tests/mgmtActualitesEcran.test.js` : 10/10 réussis.
+- Versions : `node tools/verif-versions.js origin/main` ne signale aucun écart.
+- Lint ciblé du test : le fichier est ignoré par la configuration ESLint (avertissement uniquement).
+- Scène de capture : non exécutée ; `screens.js`, `shoot.js` et le dossier de scène ne sont pas présents dans ce dépôt et l’accès au dossier temporaire indiqué a été refusé par l’environnement. Les lignes `CONTRÔLE` avant/après sont donc indisponibles ; cible capture non vérifiée.
+- Comparaison visuelle avec `UniActualites` et métriques (`chevauchements`, `textesSous22px`, `debordent`, `grosBlocs`) : non mesurées. Aucun écart chiffré ne peut être certifié à partir des seuls tests DOM.
+- Écarts à la fiche : la scène et la vérification de la capture/mesures visuelles restent à faire ; aucune migration de sauvegarde.
+- Questions pour Anthony : aucune ; l'accès à l'outil de capture devra être rétabli pour produire le contrôle exigé.
