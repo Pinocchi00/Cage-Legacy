@@ -2059,6 +2059,86 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_GESTES] — Monde lot 33 T2b ==== */
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-actions{margin-top:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:30px;margin-left:26px}.mgmt-ac-actions button{gap:14px}.mgmt-ac-actions button.principale{background:#F0B220}.mgmt-ac-actions button kbd{flex:none}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE71_T1_ACTUALITES_REPRISE] — Monde lot 71 T1 ==== */
+.mgmt-ac-feedhead{position:static;justify-content:space-between;min-height:38px}.mgmt-ac-feedhead>span{position:static;flex:none}
+.mgmt-ac-follow .mgmt-ac-unread-count{border-radius:50%;clip-path:none;min-width:30px;padding:0}
+.mgmt-ac-detail-panel .mf-p3{overflow:hidden;gap:14px;padding-bottom:90px}
+.mgmt-ac-cols{bottom:110px}
+.mgmt-ac-detail-body{min-height:0;max-height:68%;overflow:auto;flex:1;overscroll-behavior:contain}
+.mgmt-ac-detail-body h2{font-size:38px;line-height:.9}
+.mgmt-ac-detail-body p{font-size:22px;line-height:1.2;margin:12px 0 18px;max-height:144px;overflow:auto}
+.mgmt-ac-detail-body .mgmt-ac-stat{margin-top:0;min-height:42px;height:auto}
+.mgmt-ac-detail-body .mgmt-ac-stat+.mgmt-ac-stat{margin-top:0}
+.mgmt-ac-item .mgmt-ac-copy{width:auto;max-width:none;min-width:0;flex:1}
+.mgmt-ac-item{overflow:hidden}
+.mgmt-ac-type{width:110px;font-size:22px;white-space:normal;overflow-wrap:anywhere;flex:none}
+.mgmt-ac-copy b,.mgmt-ac-copy small{overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0}
+.mgmt-ac-copy b{font-size:22px;line-height:1.05}
+.mgmt-ac-detail-body p{max-width:100%;overflow-wrap:anywhere;white-space:normal;min-width:0;max-height:144px}
+.mgmt-ac-detail-panel .mf-p3>.mgmt-ac-actions{flex:none;margin:auto 0 0;gap:12px}
+.mgmt-ac-actions button{box-sizing:border-box;min-width:0;padding:0 16px;overflow:visible}
+.mgmt-ac-actions button.principale{width:100%;height:56px;justify-content:center;padding:0 16px;background:#F0B220;white-space:normal;text-align:center}
+.mgmt-ac-secondary{display:flex;align-items:center;gap:12px}
+.mgmt-ac-secondary button{flex:1;height:44px;padding:0 10px;font-size:22px;white-space:nowrap}
+.mgmt-ac-secondary button kbd{width:32px;height:36px;font-size:22px}
+/* ==== [ANCRE: ACTUALITES_DEBORDEMENTS] — Monde lot 71 T1 ==== */
+.mgmt-ac-type{width:132px;min-width:132px;overflow-wrap:anywhere;flex:none}
+.mgmt-ac-item{min-width:0;overflow:visible}
+.mgmt-ac-copy b,.mgmt-ac-copy small{max-width:100%;overflow-wrap:anywhere;white-space:normal;display:block;overflow:visible;-webkit-line-clamp:unset}
+.mgmt-ac-detail-body h2{max-width:100%;overflow-wrap:anywhere;white-space:normal;display:block;overflow:visible}
+/* ==== [ANCRE: LOT71_ACTUALITES_DEBORDEMENTS] — Monde lot 71 T1 ==== */
+.mgmt-ac-item{height:auto;min-height:94px;overflow:visible}
+.mgmt-ac-copy{overflow:hidden}
+.mgmt-ac-copy b,.mgmt-ac-copy small{overflow-wrap:anywhere;word-break:normal}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{overflow-wrap:anywhere;word-break:normal;white-space:normal}
+/* ==== [ANCRE: ACTUALITES_CONTENU_BORNE] — Monde lot 71 T1 ==== */
+.mgmt-ac-item,.mgmt-ac-item *,.mgmt-ac-detail-body,.mgmt-ac-detail-body *{min-width:0;max-width:100%;box-sizing:border-box}
+.mgmt-ac-type,.mgmt-ac-copy b,.mgmt-ac-copy small,.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{overflow-wrap:anywhere;white-space:normal}
+/* ==== [ANCRE: ACTUALITES_CONTENU_PANNEAUX] — Monde lot 71 T1 ==== */
+.mgmt-ac-feed-panel .mf-p3,.mgmt-ac-detail-panel .mf-p3{width:100%;box-sizing:border-box}
+.mgmt-ac-feed-panel .mgmt-ac-item{width:100%;box-sizing:border-box;align-items:flex-start}
+.mgmt-ac-feed-panel .mgmt-ac-type{width:132px;min-width:0;flex:0 1 132px;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy{width:0;max-width:100%;min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy b,.mgmt-ac-feed-panel .mgmt-ac-copy small{width:100%;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.mgmt-ac-detail-body{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{width:100%;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.mgmt-ac-detail-body .mgmt-ac-stat{width:100%;gap:8px}
+.mgmt-ac-detail-body .mgmt-ac-stat>span,.mgmt-ac-detail-body .mgmt-ac-stat>b{min-width:0;max-width:60%;overflow-wrap:anywhere;white-space:normal}
+/* ==== [ANCRE: ACTUALITES_DEBORDEMENTS] — Monde lot 71 T1 ==== */
+.mgmt-ac-feed-panel .mgmt-ac-item{display:flex;align-items:flex-start;gap:16px;min-width:0;width:100%;box-sizing:border-box}
+.mgmt-ac-feed-panel .mgmt-ac-type{display:block;flex:0 0 132px;width:132px;min-width:132px;max-width:132px;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-feed-panel .mgmt-ac-copy{display:flex;flex:1 1 0;width:0;min-width:0;max-width:100%;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy b,.mgmt-ac-feed-panel .mgmt-ac-copy small{display:block;width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-detail-body{display:flex;flex-direction:column;flex:0 1 auto;width:100%;min-width:0;max-width:100%;max-height:none;overflow:visible}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{display:block;width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-actions{width:100%;min-width:0;max-width:100%;flex:none}
+.mgmt-ac-actions button{min-width:0;max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
+.mgmt-ac-actions button.principale{width:100%;padding:0 16px}
+/* ==== [ANCRE: ACTUALITES_TEXTE_SANS_DEBORDEMENT] — Monde lot 71 T1 ==== */
+.mgmt-ac-feed-panel .mf-p3{overflow-x:hidden;overflow-y:auto}
+.mgmt-ac-feed-panel .mgmt-ac-item{height:auto;min-height:94px;overflow:visible}
+.mgmt-ac-feed-panel .mgmt-ac-type{flex:0 0 132px;width:132px;min-width:132px;max-width:132px;white-space:normal;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy{flex:1 1 0;width:auto;min-width:0;max-width:100%;overflow:visible}
+.mgmt-ac-feed-panel .mgmt-ac-copy b,.mgmt-ac-feed-panel .mgmt-ac-copy small{display:block;width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-detail-panel .mf-p3{overflow:hidden;min-width:0}
+.mgmt-ac-detail-body{flex:1 1 auto;min-height:0;max-height:68%;overflow-x:hidden;overflow-y:auto}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-detail-body .mgmt-ac-stat{min-width:0}
+/* ==== [ANCRE: ACTUALITES-TEXTE-BORNE] — Monde lot 71 T1 ==== */
+.mgmt-ac-type{min-width:0;max-width:132px;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.mgmt-ac-copy,.mgmt-ac-detail-body{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-all}
+.mgmt-ac-copy b,.mgmt-ac-copy small,.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.mgmt-ac-detail-body .mgmt-ac-stat>span,.mgmt-ac-detail-body .mgmt-ac-stat>b{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.mgmt-ac-actions,.mgmt-ac-actions button{min-width:0;max-width:100%;box-sizing:border-box}
+.mgmt-ac-actions button.principale{padding-left:16px;padding-right:16px;overflow:visible}
+/* ==== [ANCRE: LOT71_ACTUALITES_TEXTE_DIMENSIONNE] — Monde lot 71 T1 ==== */
+.mgmt-ac-feed-panel .mgmt-ac-item{height:auto;min-height:94px;align-items:flex-start}
+.mgmt-ac-feed-panel .mgmt-ac-type{flex:0 0 110px;width:110px;min-width:110px;max-width:110px;font-size:22px;line-height:1;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy{flex:1 1 0;width:auto;min-width:0;max-width:100%;align-self:stretch}
+.mgmt-ac-feed-panel .mgmt-ac-copy b,.mgmt-ac-feed-panel .mgmt-ac-copy small{height:auto;min-height:0;max-height:none;line-height:1.1;overflow:visible;overflow-wrap:anywhere;word-break:normal}
+.mgmt-ac-detail-body{flex:1 1 auto;min-height:0;max-height:none;overflow:visible}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{height:auto;min-height:0;max-height:none;line-height:1.15;overflow:visible;overflow-wrap:anywhere;word-break:normal}
+.mgmt-ac-detail-body h2{font-size:30px}
 /* ==== [ANCRE: POSTE_ECRAN_STYLE] — Monde lot 48 T1 ==== */
 .po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:824px}
 /* ==== [ANCRE: MONDE70_T1_POSTE_SCROLL] — Monde lot 70 T1 ==== */
@@ -2079,23 +2159,145 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-card h3{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:24px 0 8px}
 .po2-card p,.po2-bilan p{font-size:24px;line-height:1.2;margin:12px 0}
 .po2-offre{border-top:2px solid rgba(233,230,225,.16);padding:8px 0 16px}
+/* ==== [ANCRE: MONDE_LOT69_T1_OFFRE_LAYOUT] — Monde lot 69 T1 ==== */
+.po2-offre{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.po2-offre>p{max-width:100%;overflow-wrap:anywhere}
+.po2-offre>p.po2-raison{margin:0;padding:4px 0 4px 14px;border-left:3px solid #F0B220;line-height:1.1}
+.po2-offre>.po2-action{margin:6px 8px 0 0}
+.po2-bilan h1{line-height:.82;white-space:normal;overflow-wrap:anywhere}
+.po2-bilan>p{max-width:100%;overflow-wrap:anywhere}
+/* ==== [FIN ANCRE] ==== */
 .po2-card strong{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .po2-bilan{width:min(900px,90%);margin:20px auto;font-size:24px}
 .po2-bilan h1{font-size:88px;line-height:.9;color:#F0B220;margin-bottom:24px}
 .po2-bilan .po2-citation{font-style:italic}
+/* ==== [ANCRE: MONDE_LOT69_T1_BILAN_TITRE_AERE] — Monde lot 69 T1 ====
+   Le verdict garde sa grande taille sans empiéter sur la première ligne du bilan. ==== */
+.po2-bilan{display:flex;flex-direction:column;gap:24px}
+.po2-bilan h1{line-height:.95;margin:0}
+.po2-bilan>p{margin:0}
 .po2-action{background:#F0B220;color:#0D0B0B;font:800 34px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+/* ==== [ANCRE: MONDE_LOT69_T1_BILAN_TITRE_ESPACE] — Monde lot 69 T1 ====
+   Sépare le verdict du premier indicateur par le flux, sans agrandir la boîte
+   du titre vers le contenu qui suit. ==== */
+.po2-bilan h1{font-size:72px;line-height:.9;padding-bottom:20px;margin-bottom:8px;border-bottom:2px solid rgba(233,230,225,.16)}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_STYLE] — Monde lot 58 T1 ==== */
-.ch3-screen{position:absolute;left:300px;top:20px;width:1564px;height:1010px;box-sizing:border-box;padding:0;background:#0D0B0B;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif;display:flex;flex-direction:column;gap:20px}
+.ch3-screen{position:absolute;left:300px;top:20px;width:1564px;height:1010px;box-sizing:border-box;padding:0;background:#0D0B0B;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-rows:64px 82px minmax(0,1fr);gap:20px}
+.ch3-head,.ch3-title{grid-column:1/-1}
+.ch3-brand,.ch3-deadline{display:flex;align-items:center;gap:18px}
+.ch3-deadline{gap:16px}.ch3-deadline b{font:800 40px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;border:2px solid rgba(233,230,225,.38);padding:12px 18px}
 .ch3-head{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px}
 .ch3-head h1{font:800 56px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0;border:2px solid rgba(233,230,225,.38);padding:8px 18px}
 .ch3-head strong,.ch3-head span{font-size:22px;white-space:nowrap}
-.ch3-fight{flex:1;min-height:0;display:grid;grid-template-columns:1fr 170px 1fr;align-items:center;gap:16px;padding:0 20px;background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.ch3-title{display:flex;align-items:center;justify-content:center;gap:24px;margin:0;padding:12px 0;font:800 46px 'Saira Extra Condensed','Arial Narrow',sans-serif;line-height:1;background:linear-gradient(90deg,#E9E6E1 0 49.5%,#E23A2B 50.5% 100%);color:#0D0B0B}
+.ch3-title .ch3-split{color:#0D0B0B}.ch3-title .ch3-adverse{color:#0D0B0B}.ch3-title .ch3-vs{display:flex;width:54px;height:54px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:28px}
+.ch3-fight{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr));align-items:center;gap:16px;padding:0 20px;background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.ch3-fight>.ch3-side,.ch3-fight>.ch3-category{grid-row:1/-1}
 .ch3-side{display:flex;flex-direction:column;gap:12px;align-items:flex-end}.ch3-side b{font:800 46px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif}.ch3-side span{font-size:22px;color:rgba(233,230,225,.74)}
 .ch3-opponent{align-items:flex-start}.ch3-category{text-align:center;font-size:22px;font-weight:600;line-height:1.25;color:#F0B220}
-.ch3-terms{background:#121010;border:2px solid rgba(233,230,225,.5);padding:24px;display:flex;flex-direction:column;gap:10px}.ch3-terms h2{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0}.ch3-terms p,.ch3-status{font-size:24px;line-height:1.2;margin:6px 0}
+.ch3-terms{min-height:0;overflow:auto;background:#121010;border:2px solid rgba(233,230,225,.5);padding:15px;display:flex;flex-direction:column;gap:10px}.ch3-terms h2{font:800 36px 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0}.ch3-terms p,.ch3-status{font-size:24px;line-height:1.2;margin:6px 0}
 .ch3-detail{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:8px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px}.ch3-detail span{color:rgba(233,230,225,.74)}.ch3-detail b{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;text-align:right}
+/* ==== [ANCRE: MONDE_LOT69_T1_CITATION_CHOC] — Monde lot 69 T1 ==== */
+.ch3-terms .ch3-quote{font-size:24px;line-height:1.2;font-style:italic;margin:6px 0;color:rgba(233,230,225,.92)}
+/* ==== [ANCRE: MONDE_LOT69_T1_MATCHMAKER_CHOC] — Monde lot 69 T1 ==== */
+.ch3-terms .ch3-matchmaker{font:600 22px/1 'Saira Condensed','Arial Narrow',sans-serif;letter-spacing:.04em;color:rgba(233,230,225,.74);margin:0}
+.ch3-terms .ch3-condition{font-size:26px;font-weight:800;line-height:1.1;color:#F0B220;letter-spacing:.04em;margin:10px 0}
 .ch3-actions{display:flex;gap:12px}.ch3-button,.ch3-back{font:800 32px 'Saira Extra Condensed','Arial Narrow',sans-serif;padding:12px 22px;background:#F0B220;color:#0D0B0B;border:0;cursor:pointer}.ch3-back{align-self:flex-start;background:#252121;color:#E9E6E1;font-size:24px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ACTIONS] — Monde lot 69 T1 ==== */
+.ch3-button.ch3-counter{background:#252121;color:#E9E6E1;border:2px solid rgba(233,230,225,.5)}
+.ch3-button.ch3-refuse{background:#E23A2B;color:#0D0B0B}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_COMPACT] — Monde lot 69 T1 ==== */
+.ch3-screen{grid-template-rows:54px 68px minmax(0,1fr);gap:14px}
+.ch3-head{min-height:54px}
+.ch3-head h1{font-size:48px;padding:6px 14px}
+.ch3-title{font-size:40px;padding:8px 0}
+.ch3-title .ch3-vs{width:46px;height:46px;font-size:24px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_COMPACT2] — Monde lot 69 T1 ==== */
+.ch3-screen{grid-template-rows:44px 56px minmax(0,1fr);gap:10px}
+.ch3-head{min-height:44px}
+.ch3-head h1{font-size:40px;padding:4px 12px}
+.ch3-title{font-size:32px;padding:4px 0;gap:16px}
+.ch3-title .ch3-vs{width:38px;height:38px;font-size:22px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_COMPACT3] — Monde lot 69 T1 ==== */
+.ch3-screen{grid-template-rows:36px 44px minmax(0,1fr);gap:8px}
+.ch3-head{min-height:36px}
+.ch3-head h1{font-size:32px;padding:2px 10px}
+.ch3-title{font-size:26px;padding:2px 0;gap:12px}
+.ch3-title .ch3-vs{width:30px;height:30px;font-size:22px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TITRE_PLANCHE] — Monde lot 69 T1 ====
+   La hiérarchie du bandeau suit UniChoc : nom d'affiche 46 px et VS octogonal 54 px. ==== */
+.ch3-title{font-size:46px}
+.ch3-title .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TRIPLE_AFFICHE] — Monde lot 69 T1 ==== */
+.ch3-fight{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr));gap:8px}
+.ch3-fight>.ch3-paire{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);align-items:center;gap:12px;min-height:0;border-bottom:1px solid rgba(233,230,225,.2)}
+.ch3-fight>.ch3-paire:last-child{border-bottom:0}
+.ch3-paire .ch3-side{gap:6px}
+.ch3-paire .ch3-side b{font-size:32px}
+.ch3-paire .ch3-category{display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px}
+.ch3-paire .ch3-category .ch3-vs{display:flex;width:34px;height:34px;align-items:center;justify-content:center;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:22px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DIMENSIONS_PLANCHE] — Monde lot 69 T1 ====
+   Les trois rangées reprennent les dimensions lisibles de la planche UniChoc. ==== */
+.ch3-paire .ch3-side b{font-size:46px}
+.ch3-paire .ch3-category .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ENTETE_UNIQUE] — Monde lot 69 T1 ====
+   mfEcran porte déjà le titre et l'échéance de la planche. Le contenu commence
+   dessous : pas de second bandeau superposé aux pièces communes. ==== */
+.ch3-screen{top:128px;height:856px;grid-template-rows:56px minmax(0,1fr);gap:14px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_AFFICHES_SEPAREES] — Monde lot 69 T1 ====
+   Chaque affrontement constitue son propre bloc, comme les trois rangées de la planche. ==== */
+.ch3-fight{background:none;padding:0}
+.ch3-fight>.ch3-paire{background:#1B1818;padding:0 20px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);border:0}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DENSITE] — Monde lot 69 T1 ====
+   La grille n'étire pas les trois cartes au-delà de la hauteur réellement utile. ==== */
+.ch3-fight>.ch3-paire{padding-inline:14px}
+.ch3-paire .ch3-side b{font-size:26px}
+.ch3-paire .ch3-side{gap:4px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_AFFICHE_TITRE] — Monde lot 69 T1 ====
+   Le libellé de la section d'affiches est visible, pas seulement annoncé aux lecteurs d'écran. ==== */
+.ch3-fight{grid-template-rows:28px repeat(3,minmax(0,1fr))}
+.ch3-fight-heading{grid-column:1/-1;margin:0;padding:4px 14px;background:#121010;color:#E9E6E1;font:800 22px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;letter-spacing:.06em}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_FIDELITE_AFFICHE] — Monde lot 69 T1 ====
+   Les noms et médaillons reprennent les tailles explicites de la planche UniChoc. ==== */
+.ch3-screen{grid-template-rows:64px minmax(0,1fr)}
+.ch3-title{font-size:46px;gap:24px;padding:8px 0}
+.ch3-title .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_BANDEAU_PLANCHE] — Monde lot 69 T1 ====
+   Bandeau partagé agrandi conformément à la composition validée de UniChoc. ==== */
+.ch3-screen{grid-template-rows:110px minmax(0,1fr)}
+.ch3-title{font-size:70px;gap:24px;padding:8px 0}
+.ch3-title .ch3-vs{width:90px;height:90px;font-size:36px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DEMI_BANDEAU] — Monde lot 69 T1 ====
+   Les deux aplats se rejoignent au centre ; le médaillon VS les sépare. ==== */
+.ch3-title{background:linear-gradient(90deg,#E9E6E1 0 50%,#E23A2B 50% 100%)}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_DEMI_TITRES] — Monde lot 69 T1 ====
+   Chaque nom occupe sa moitié du bandeau, le VS reste centré sur la jonction. ==== */
+.ch3-title .ch3-split,.ch3-title .ch3-adverse{display:flex;flex:1;align-items:center;min-width:0}
+.ch3-title .ch3-split{justify-content:flex-end;padding-right:12px}
+.ch3-title .ch3-adverse{justify-content:flex-start;padding-left:12px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_TEXTE_DEMI_BANDEAU] — Monde lot 69 T1 ====
+   Contraste explicite des deux noms sur les aplats validés de UniChoc. ==== */
+.ch3-title .ch3-split{color:#0D0B0B}
+.ch3-title .ch3-adverse{color:#E9E6E1}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_NOMS_PLANCHE] — Monde lot 69 T1 ====
+   La décision d'Anthony du 24/10 : les maquettes Uni* validées font foi; les
+   noms d'affiche reprennent les 46 px explicites de UniChoc. ==== */
+.ch3-paire .ch3-side b{font-size:46px}
+.ch3-paire .ch3-category .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ACTIONS_PLANCHE] — Monde lot 69 T1 ====
+   Action principale pleine largeur, décisions secondaires groupées comme sur UniChoc. ==== */
+.ch3-actions{display:flex;flex-direction:column;gap:12px}
+.ch3-actions>.ch3-button{width:100%;min-height:68px;display:flex;align-items:center;justify-content:space-between;text-align:left}
+.ch3-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ch3-secondary-actions>.ch3-button{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;font-size:24px}
+.ch3-actions kbd{font:800 22px 'Saira Extra Condensed','Arial Narrow',sans-serif;border:2px solid currentColor;padding:3px 8px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
@@ -2310,12 +2512,44 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet-liste>p{box-sizing:border-box;max-width:100%;margin:0;padding:5px 0;overflow-wrap:anywhere;line-height:1.12}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
-.di3-scene{min-height:calc(100vh - 180px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:72px 110px;gap:24px;background:#0D0B0B;color:#E9E6E1}
+.di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;background:#0D0B0B;color:#E9E6E1}
+ .di3-principal{position:absolute;left:110px;top:110px;width:1180px;display:flex;flex-direction:column;gap:26px}
+ .di3-cote{position:absolute;right:90px;top:150px;width:430px;display:flex;flex-direction:column;gap:18px}
+ .di3-panneau{box-sizing:border-box;padding:18px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);display:flex;flex-direction:column;gap:14px}
+ .di3-panneau h2{font-size:22px;line-height:1;color:#F0B220;margin:0}
+  .di3-panneau>strong{font:800 50px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:normal}
+ .di3-panneau p,.di3-reaction span{font-size:24px;line-height:1.1;margin:0}
+ .di3-reaction{display:flex;gap:12px;align-items:baseline}
+ .di3-reaction b{font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;width:130px;flex:none}
+ .di3-resultat{display:flex;gap:18px;align-items:baseline}
+  .di3-resultat strong{font:800 48px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;color:rgba(233,230,225,.74)}
+ .di3-resultat span{font-size:24px}
+.di3-entete{display:flex;align-items:center;gap:18px}
+.di3-contexte{font-size:26px;line-height:1}
+.di3-identite{display:flex;flex-direction:column;gap:8px}
+  .di3-prenoms{font:800 56px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
-.di3-nom{font-size:88px;line-height:.9;font-weight:800;margin:0;max-width:1180px;overflow-wrap:anywhere}
+.di3-nom{font:800 clamp(88px,12vw,230px)/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase;margin:0;max-width:1180px;white-space:nowrap}
+/* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_NOM_PLANCHE] — Monde lot 69 T1 ====
+   Décision : les planches Uni* validées par Anthony priment ; le patronyme
+   reprend les 230 px exacts de la planche UniDiscours. ==== */
+.di3-nom{font-size:230px}
+/* ==== [FIN ANCRE] ==== */
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
-.di3-lignes{display:flex;flex-direction:column;gap:12px;max-width:1180px;font-size:30px;line-height:1.2}
-.di3-lignes p{margin:0}
+  .di3-lignes{position:absolute;left:110px;top:560px;width:1180px;display:flex;gap:26px;align-items:flex-start;margin:0;border:0;padding:0;font-size:44px;line-height:1.18;font-weight:600;font-style:normal}
+.di3-guillemet{font:800 200px/.7 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}
+.di3-lignes p{margin:18px 0 0;font-style:normal}
+ .di3-micro{position:absolute;left:312px;top:835px;font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
+.di3-lignes p{margin:18px 0 0}
 .di3-interpelle{font-size:28px;line-height:1;color:rgba(233,230,225,.74)}
-.di3-suite{font:inherit;font-size:28px;min-height:64px;padding:0 28px;background:#E23A2B;color:#0D0B0B;border:0;cursor:pointer}
+.di3-suite{position:absolute;right:90px;bottom:22px;font:inherit;font-size:22px;min-height:48px;padding:0 16px;background:transparent;color:#F0B220;border:1px solid #F0B220;cursor:pointer}
+.di3-scene~.mf-touches{position:absolute;left:80px;bottom:22px;display:flex;gap:28px;font-size:24px}
+.di3-scene~.mf-touches .mf-touche{font-size:24px}
+/* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_PLANCHE_DETAIL] — Monde lot 69 T1 ====
+   La planche validée place l'étiquette rouge en texte blanc et garde la
+   citation en paragraphe, avec une typographie de grande scène. ==== */
+.di3-cartouche{box-sizing:border-box;height:46px;padding:0 16px;display:flex;align-items:center;color:#fff;font-size:30px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.di3-resultat strong{font-size:48px}
+ .di3-lignes{font-size:44px;line-height:1.18}
+.di3-lignes p{font-style:normal}
 /* ==== [FIN ANCRE] ==== */
