@@ -2,6 +2,13 @@
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôle de livraison
+- Branche `fid-choc` confirmée. Le log montre les commits applicatifs de la tranche déjà présents ; les seules modifications non commitées au départ (`.opencode/agents/*`, `opencode.json`, `sw.js`) sont hors tranche et restent exclues.
+- Reproduction réelle de la scène `choc` avec l'outil du dossier temporaire : proposition reçue affichée, `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=26.2%`. La cible ≤20% n'est donc pas atteinte. Le comparatif PNG n'a pas pu être ouvert dans cette interface ; aucune conformité visuelle pixel n'est prétendue.
+- Vérifications ciblées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 20 fichiers examinés), `node_modules/.bin/eslint .` (succès). Le test existant couvre le parcours offre/changement/arrivée/sauvegarde-rechargement/soirée/lendemain et le choc à trois paires.
+- Aucun code métier ou cache n'a été modifié dans cette reprise ; aucune migration. Fichier ajouté au commit : cette fiche, compte rendu seulement. Le bilan chevauchant, la capture dédiée d'arrivée et l'inspection comparative restent des écarts signalés précédemment ; ils ne sont pas déclarés résolus.
+- Question pour Anthony : aucune nouvelle question.
+
 ### Reprise 25/10/2026 — contrôle du rendu choc
 - Branche `fid-choc` confirmée ; les commits applicatifs précédents sont présents. Les modifications préexistantes sous `.opencode/agents/`, `opencode.json` et `sw.js` restent hors périmètre.
 - Reproduction du shoot `choc` : la proposition reçue valide s'affiche, avec `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=26.2%` (objectif ≤20% non atteint).
