@@ -17,6 +17,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — captures relancées
+- Reproduction de `choc` avec `shoot.js` : proposition valide affichée, chevauchements=0, textes sous 22 px=0, débordements=[], `grosBlocs=26.1%` (seuil ≤20% toujours dépassé).
+- Capture `discours` : aucun problème géométrique, `grosBlocs=16.6%`.
+- Capture `bilan` : `grosBlocs=12.9%`, mais chevauchement persistant de 265×22 entre « REMERCIÉ » et « Il manque 3 combats en carte ».
+- Pas de modification fonctionnelle : les essais précédents de retouche CSS n’avaient pas corrigé les métriques ; aucune capture d’arrivée dédiée n’a été créée. Les fichiers comparatifs n’ont pas été ouverts visuellement. Le test ciblé et les audits restent à relancer avant livraison.
+- Les modifications préexistantes de `.opencode/agents/*` et `opencode.json` restent hors tranche.
+
 ### Reprise 25/10/2026 — contrôles reproductibles
 - Branche confirmée `fid-choc`, HEAD initial `504b36f7`. Le statut ne montre aucun fichier fonctionnel de tranche à reprendre ; les modifications sous `.opencode/agents/` et `opencode.json` sont restées intactes.
 - Le test complet ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4. Il vérifie l'offre → changement → arrivée → sauvegarde/rechargement identique → soirée/lendemain, ainsi que le choc à trois paires rendu/programmé/joué et les blocs du discours/offre.
