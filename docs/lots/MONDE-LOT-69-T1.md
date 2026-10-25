@@ -23,6 +23,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôle de livraison
+- Branche `fid-choc` confirmée. Le log montre déjà le commit de livraison et les changements fonctionnels de cette tranche sont commités ; `tests/mgmtLot69T1.test.js` passe 4/4, couvrant offre/changement/arrivée/rechargement/soirée-lendemain ainsi que les trois paires du choc.
+- Audit `node tools/verif-versions.js origin/main` passe (19 fichiers examinés) et `node_modules/.bin/eslint .` passe. `git diff --check` passe.
+- L'état contient des modifications locales préexistantes sous `.opencode/agents/`, `opencode.json`, `index.html`, `ui-cadre.css` et `sw.js`. Sans différence de contenu visible via `git diff --ignore-all-space` pour les fichiers de cache, il s'agit de changements de fins de ligne ; je ne les ajoute pas, conformément à la règle de livraison. `sw.js` reste hors commit.
+- Aucun fichier applicatif ou test de la tranche n'a été modifié dans cette reprise ; aucune migration de sauvegarde. Écarts visuels connus des contrôles précédents : densité de gros blocs du choc au-dessus de 20 %, chevauchement bilan rapporté, et absence de comparatif ouvert/scène dédiée d'arrivée. Aucun résultat de capture nouveau n'est revendiqué.
+- Questions pour Anthony : aucune nouvelle question. La tranche n'est pas déclarée visuellement intégralement conforme.
+
 ### Reprise 25/10/2026 — recontrôle et tentative bilan
 - État de départ : branche `fid-choc`, HEAD `b6360b17`. Aucun fichier de tranche en attente ; les modifications préexistantes `.opencode/agents/*` et `opencode.json` sont hors périmètre et conservées.
 - Captures exécutées avec l'outil fourni : `choc` s'affiche (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.1%`; `discours` est à 16.6%, sans anomalies géométriques ; `bilan` est à 12.9% mais reproduit le chevauchement du titre « REMERCIÉ » et de « Il manque 3 combats en carte » (265×22).
