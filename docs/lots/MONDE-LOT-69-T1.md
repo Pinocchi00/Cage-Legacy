@@ -487,6 +487,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de migration. Les modifications utilisateur de `.opencode/agents/` et `opencode.json` restent exclues ; `sw.js` restauré depuis `origin/main` conformément à la règle d'hygiène.
 - Écart restant : cet ajustement ne crée pas les deux affrontements absents du modèle métier, ne fournit pas de nouvelles captures ni mesures, et ne complète pas le parcours contractuel strict. Aucune fidélité visuelle globale ni achèvement de la tranche n'est revendiqué.
 
+### Reprise du contrôle choc — 25 octobre
+- Réexécution de la scène demandée avec `shoot.js` : l'écran choc s'affiche et le contrôle rapporte zéro chevauchement, zéro texte sous 22 px et aucun débordement, mais `grosBlocs=26.2%` (objectif ≤20% toujours manqué). Les captures complémentaires d'arrivée/bilan et l'ouverture visuelle des comparatifs ne sont pas réalisées dans cette reprise.
+- Ajustement du raccourci Échap : le libellé de barre indique maintenant « Répondre plus tard · 14 jours », comme demandé par la maquette. `tests/mgmtLot69T1.test.js` vérifie exactement ce libellé. Le parcours existant continue à couvrir trois paires, leur programmation et leur résultat normal, ainsi que l'offre/changement/arrivée/soirée/lendemain.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` et `git diff --check` passent. Pas de migration de sauvegarde.
+- Fichiers modifiés : `mgmt-ecran-poste.js` (libellé du raccourci), `index.html` (version JS), `tests/mgmtLot69T1.test.js` (assertion du libellé), cette fiche. `sw.js` restauré depuis `origin/main` et exclu.
+- Écarts non résolus : dépassement du seuil de densité du choc; chevauchement du bilan rapporté précédemment; pas de capture dédiée d'arrivée ni de comparaison visuelle ouverte. Ces critères ne sont pas déclarés achevés.
+
 ### Reprise 51
 - `tests/mgmtLot69T1.test.js` ajoute une assertion de structure de l’écran d’arrivée en plus des contrôles du nom de la nouvelle organisation et de l’absence de l’ancienne.
 - Vérification : `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; `node tools/verif-versions.js origin/main` passe (16 fichiers examinés).
