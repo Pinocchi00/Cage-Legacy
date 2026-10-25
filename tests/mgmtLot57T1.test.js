@@ -287,7 +287,8 @@ test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette 
   try{
     const result=JSON.parse(w.eval(`(()=>{const html=scr_mgmt_guerre();return JSON.stringify({html,lignes:(html.match(/class="gu3-ligne/g)||[]).length});})()`));
     assert.equal(result.lignes,8);
-    for(const titre of ['RANG','ORGANISATION','POP.','SALLE','NOTORIÉTÉ','PUISSANCE','ÉVOLUTION']) assert.ok(result.html.includes(titre),`colonne absente: ${titre}`);
+    /* Décision : planches Uni* validées par Anthony ; l’écran suit la planche */
+    for(const titre of ['RANG','ORGANISATION','POPULARITÉ','SALLE','NOTORIÉTÉ','PUISSANCE','▲/▼']) assert.ok(result.html.includes(titre),`colonne absente: ${titre}`);
     assert.match(result.html,/juste devant\s*:/i);
     assert.match(result.html,/juste derrière\s*:/i);
      // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
