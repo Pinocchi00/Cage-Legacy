@@ -1,5 +1,13 @@
 # Monde lot 66 T1 — fidélité aux maquettes : le lendemain en deux écrans
 
+### Reprise finale — captures et contrôles — 25/10/2026
+
+- Branche `fid-lendemain`; les écrans et leurs tests de structure sont déjà livrés dans les commits antérieurs. Ajustement CSS de contenance : largeur maximale des écrans fixée à 1564 px comme la planche; version `ui-cadre.css` montée dans `index.html`.
+- Captures 1920×1080 relancées séparément via `shoot.js`. `lendemain` : chevauchements 0, textes sous 22 px 0, débordements aucun, `grosBlocs=22,8 %` (`moyen=28,9 %`). `lendemainSuite` : chevauchements 0, textes sous 22 px 0, `grosBlocs=17,6 %` (`moyen=23,1 %`), débordements de la ligne mouvements signalés pour « Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split ». Le réglage de largeur n'a pas changé les mesures observées.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30). `mgmtSoireeShow.test.js` dépasse 120 s sans résultat final. `node tools/verif-versions.js origin/main` et ESLint passent.
+- Écart restant à la fiche/reprise : l'objectif visuel renforcé `grosBlocs ≤18 %` du lendemain et les débordements variables de la suite persistent. Pas de changement de données, mécanique ou sauvegarde; aucune migration. Les captures comparatives sont régénérées par l'outil dans `C:/Users/antho/AppData/Local/Temp/shots/`; aucune inspection visuelle manuelle des PNG revendiquée.
+- Fichiers de cette reprise : `ui-cadre.css` (largeur maximale), `index.html` (version du cache), cette fiche (résultats). Aucun test nouveau. Questions pour Anthony : aucune.
+
 ### Reprise — ajustement mouvements et vérification — 25/10/2026
 
 - L’état fonctionnel des deux écrans est déjà dans les commits au sommet; branche `fid-lendemain` confirmée. Modifications `.opencode/agents/*`, `opencode.json` et `sw.js` exclues et laissées intactes.
