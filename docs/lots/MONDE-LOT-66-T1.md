@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise échelle finale — 25/10/2026
+
+- Corrigé les règles finales de `ui-cadre.css` qui annulaient elles-mêmes les tailles voulues : première carte à 108 px, deux suivantes à 64 px; rangée des trois moments remise à 285 px. La suite conserve ses trois colonnes et ses cellules de mouvements récupèrent leur troisième colonne (organisation), avec retours à la ligne pour éviter les noms/rangs débordants.
+- Cache de `ui-cadre.css` incrémenté par `node tools/_bump.js ui-cadre.css`.
+- Tests ciblés : `mgmtEcranLendemain.test.js` 7/7, `mgmtLot54T1.test.js` 30/30, `mgmtLot48T1.test.js` 9/9. `mgmtSoireeShow.test.js` a dépassé le délai disponible de 120 s (aucun résultat final). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- La capture graphique n'a pas pu être exécutée dans cette reprise : le guide et l'outil sont dans un répertoire temporaire extérieur inaccessible à cette session. Le CSS rétablit les tailles explicitement requises, mais le ratio `grosBlocs` et les alertes mesurées de la suite ne sont donc pas certifiés après ce changement. Le précédent compte rendu enregistrait 22,8 % pour le lendemain et quatre alertes de débordement sur les mouvements.
+- Fichiers modifiés pour cette reprise : `ui-cadre.css` (dimensions/colonnes), `index.html` (version cache), cette fiche (bilan). Aucune donnée, sauvegarde, mécanique ou migration modifiée. Écart visuel de capture encore non vérifié; questions pour Anthony : aucune.
+
 ### Reprise capture finale — 25/10/2026
 
 - Historique revu (`9cfb014c` et commits précédents) : l’implémentation des écrans et leurs tests sont déjà commités. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` ne sont pas à cette tranche et restent intacts.
