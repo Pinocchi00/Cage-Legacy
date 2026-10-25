@@ -229,7 +229,7 @@ function mgmtAccueilPasse(m,c){
   const rows=anciens.map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
     +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('')+actuRows.map(x=>`<button type="button" class="mf-ac-ev" onclick="CL.mgmtAccueilActu('${escJsAttr(x.cle)}')"><i class="mf-oct mf-ac-oct"></i><div class="mf-ac-evt"><div class="mf-ac-evp"><b>${esc(x.nom)}</b> · ${esc(x.titre)}</div><div class="mf-ac-rs">${esc(x.texte)}</div></div><span class="mf-ac-menu">ACTUALITÉS</span></button>`).join('');
-  const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
+  const touches=c.passe.length?`<div class="mf-ac-aide"><span class="mf-ac-aide-groupe">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir</span></span><span class="mf-ac-aide-groupe">${mfTouche('Entrée')}<span>Ouvrir la fiche</span></span></div>`:'';
   /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
   const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-famille="passe" onclick="CL.go('mgmt_effectif')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`:'';
   return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(mgmtActuNonLues(m)?`<span class="mf-ac-rs">${mgmtActuNonLues(m)} non lues</span>`:'')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
