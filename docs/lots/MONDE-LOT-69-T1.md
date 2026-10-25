@@ -272,6 +272,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts encore non démontrés : seuil de gros blocs choc, capture dédiée d'arrivée et comparatifs visuels ouverts. Les captures précédentes ont aussi signalé un chevauchement du bilan ; cette reprise ne l'a pas mesuré de nouveau ni corrigé. Le test fonctionnel existant couvre les trois affrontements et le parcours de tranche, mais ne remplace pas ces validations visuelles.
 - Fichiers modifiés dans cette reprise : cette fiche uniquement, pour consigner le résultat exact. Tests ajoutés : aucun ; test ciblé existant exécuté. Questions pour Anthony : aucune nouvelle question.
 
+### Reprise 25/10/2026 — recontrôle de la scène choc
+- Branche confirmée `fid-choc`, HEAD initial `63e9b540`; aucun fichier fonctionnel de la tranche non commité. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` ne sont pas concernées.
+- Capture exécutée avec la commande prescrite sur la scène choc valide. L'écran apparaît, avec 0 chevauchement, 0 texte sous 22 px et aucun débordement ; `grosBlocs=26.1%`, donc le critère ≤20% reste non atteint. L'image comparative n'a pas pu être ouverte visuellement dans cette interface.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Aucun changement de production ni test nouveau dans cette reprise. Le test existant couvre le parcours documenté, les trois paires et leur résolution normale ; le présent compte rendu est la seule modification.
+- Écarts toujours ouverts et non présentés comme terminés : seuil de densité du choc, capture dédiée de l'arrivée, vérification visuelle comparative et chevauchement du bilan signalé dans les mesures précédentes. Pas de migration de sauvegarde ni de changement de cache.
+
 ### Reprise 25
 - Fichiers modifiés : `ui-cadre.css` ajoute des règles de retour à la ligne et d'espacement pour les raisons/actions d'offre et le grand titre du bilan, en réponse au chevauchement constaté dans la reprise précédente ; `index.html` reçoit le nouveau `?v=`.
 - Tests : `node --test tests/mgmtLot69T1.test.js` passe (3/3) ; `node tools/verif-versions.js origin/main` passe (17 fichiers examinés).
