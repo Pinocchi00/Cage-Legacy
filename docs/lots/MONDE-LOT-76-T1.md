@@ -31,3 +31,9 @@ Les données existent dans `m.poste` (`mgmtPoste*`) : la **réputation**, le **v
 - `index.html` : version de `mgmt-ecran-poste.js` montée avec `_bump.js`.
 - Tests : `mgmtLot48T1.test.js` (9/9) réussi après cette modification ; `mgmtLot57T1.test.js` a été lancé mais dépassé le délai de 120 s de l’outil, bien que son exécution antérieure dans cette reprise ait terminé avec 33/33 ; `mgmtLot58T1.test.js` a lui aussi dépassé le délai de 120 s lors du second lancement (il avait auparavant terminé avec 19/19). `node tools/verif-versions.js origin/main` et ESLint réussis.
 - La lecture de `C:/Users/antho/AppData/Local/Temp/p1/COMMUN-3E-TOUR.md` a été refusée par la permission d’accès à ce chemin externe ; aucune consigne STOP de cette ressource n’a donc pu être vérifiée. Les changements locaux préexistants `.opencode/`, `opencode.json` et `sw.js` restent hors de ce commit.
+
+### Reprise 7 — 25/10
+- `ui-cadre.css` : le panneau trois-colonnes occupe désormais la zone utile jusqu’à 144 px au-dessus de la barre ; les offres et le prochain rendez-vous sont ancrés en bas par le flux flex. Renforcement ciblé de la règle du verdict 60 px, actions non absolues, titres d’événement 24 px et valeurs d’objectifs 24 px avec jauge fine.
+- `index.html` : version de `ui-cadre.css` montée par `node tools/_bump.js`.
+- Tests ciblés : `mgmtLot48T1.test.js` 9/9, `mgmtLot57T1.test.js` 33/33 et `mgmtLot58T1.test.js` 19/19. `node tools/verif-versions.js origin/main` et ESLint réussis. Le contrôle rapide des versions est passé ; le check complet n’a pas été lancé conformément à la consigne de reprise.
+- Pas de test nouveau, pas de migration. Aucun relevé de capture actualisé pendant cette reprise : le seuil mesuré `grosBlocs ≤ 15` de tonposte reste à confirmer, l’ancienne mesure était 18.0. Le nom du patron demeure celui fourni par `mgmtPostePatron` (champ disponible dans les données). La lecture du fichier COMMUN demandé reste empêchée par les permissions d’accès externe.

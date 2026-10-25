@@ -2898,8 +2898,21 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-width:0;min-height:0;max-height:100%;overflow:auto;contain:layout paint;overscroll-behavior:contain}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE70_T1_POSTE_COLONNE_RESSERREE] — Monde lot 70 T1 ==== */
-.po2-scene{top:112px;bottom:240px;height:auto;max-height:none;overflow:hidden}
+.po2-scene{top:112px;bottom:144px;height:auto;max-height:none;overflow:hidden}
 .po2-scene>.po2-grid>.po2-card{overflow-y:auto;contain:layout paint}
+/* ==== [ANCRE: MONDE_LOT76_T1_POSTE_FLUX_FINAL] — Monde lot 76 T1 ====
+   La grille utilise toute la zone sous les onglets ; les actions restent dans
+   leur colonne et les deux pieds sont repoussés sans positionnement absolu. ==== */
+.po2-scene>.po2-grid.po2-grid-trois{align-items:stretch}
+.po2-scene>.po2-grid.po2-grid-trois>.po2-card{height:100%;min-height:0}
+.po2-scene>.po2-grid.po2-grid-trois>.po2-contrat>.po2-offres-bas{margin-top:auto}
+.po2-scene>.po2-grid.po2-grid-trois>.po2-patron>.po2-prochain{margin-top:auto}
+.po2-scene>.po2-grid.po2-grid-trois .po2-action{position:static;align-self:flex-start;max-width:100%;font-size:22px;white-space:normal}
+.po2-scene>.po2-grid.po2-grid-trois .po2-verdict{font-size:60px;line-height:.85}
+.po2-scene>.po2-grid.po2-grid-trois .po2-evenement strong{font-size:24px;line-height:1.05}
+.po2-scene>.po2-grid.po2-grid-trois .po2-objectif-entete{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.po2-scene>.po2-grid.po2-grid-trois .po2-objectif-entete strong{font-size:24px;white-space:nowrap}
+.po2-scene>.po2-grid.po2-grid-trois .po2-jauge{height:4px;min-height:4px}
 /* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_ENVELOPPE] — Monde lot 70 T1 ==== */
 .mf-ancien .mgmt-org-sub{box-sizing:border-box;min-width:0;max-width:100%;font-size:24px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}
 .mf-ancien .mgmt-org-nm{font-size:24px;line-height:1.05;white-space:normal;overflow-wrap:anywhere}
