@@ -253,6 +253,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - `tests/mgmtLot69T1.test.js` renforce le contrôle du bloc offres : les quatre raisons doivent être distinctes et les principales raisons affichées présentes dans le bilan. `node --test tests/mgmtLot69T1.test.js` passe (3/3). Le test est explicitement inclus dans `test` et `test:watch`.
 - Audit `node tools/verif-versions.js origin/main` passe ; `node_modules/.bin/eslint .` passe. Aucun fichier JS/CSS et aucune sauvegarde modifiés.
 - Il n'existe pas de dossier `shoot` dans le dépôt de travail. Le guide externe de capture n'a pas pu être ouvert à cause de la restriction d'accès ; aucune nouvelle capture ni mesure n'est revendiquée.
+
+### Reprise 65 — nouvelle mesure du bilan
+- État de départ : branche `fid-choc`, HEAD `f76edb36`; les changements utilisateurs sous `.opencode/agents/` et `opencode.json` sont restés hors périmètre.
+- Reproductions : `choc` s'affiche (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.1%` (>20%). `discours` : 0 anomalie géométrique, `grosBlocs=18.1%`.
+- Pour le chevauchement du bilan, j'ai ajouté un espacement sous le titre et bumpé `ui-cadre.css`; la nouvelle capture rapporte toujours exactement le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). Cette tentative n'a donc pas corrigé l'anomalie.
+- Test `node --test tests/mgmtLot69T1.test.js` : 4/4. `node tools/verif-versions.js origin/main` : aucun écart. ESLint complet : aucune erreur.
+- Fichiers modifiés : `ui-cadre.css` (tentative d'espacement), `index.html` (`?v=` associé), cette fiche. Aucun test ajouté, aucune migration. Écarts restants : densité choc, chevauchement bilan, absence de capture dédiée arrivée et de validation visuelle ouverte des comparatifs. Aucun achèvement global revendiqué.
 - Cases encore non démontrées : le choc reste mono-combat dans le modèle, les comparaisons visuelles et seuils après correction ne sont pas établis, et le parcours ne réalise pas le rechargement strictement identique demandé. Le test actuel couvre changement, arrivée, soirée, lendemain et sérialisation intermédiaire, mais pas tout le scénario de fin de contrat.
 - Aucun changement de sauvegarde. Écart à la fiche : tranche toujours incomplète ; aucun `TOUT_EST_FINI` revendiqué.
 

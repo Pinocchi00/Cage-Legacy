@@ -1947,6 +1947,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-bilan h1{line-height:.95;margin:0}
 .po2-bilan>p{margin:0}
 .po2-action{background:#F0B220;color:#0D0B0B;font:800 34px 'Saira Extra Condensed','Arial Narrow',sans-serif}
+/* ==== [ANCRE: MONDE_LOT69_T1_BILAN_TITRE_ESPACE] — Monde lot 69 T1 ==== */
+.po2-bilan h1{padding-bottom:24px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_STYLE] — Monde lot 58 T1 ==== */
 .ch3-screen{position:absolute;left:300px;top:20px;width:1564px;height:1010px;box-sizing:border-box;padding:0;background:#0D0B0B;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-rows:64px 82px minmax(0,1fr);gap:20px}
