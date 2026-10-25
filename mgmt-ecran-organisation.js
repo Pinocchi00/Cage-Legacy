@@ -131,6 +131,6 @@ function scr_mgmt_organisation(){
       const prochaineMarche=prochaine?prochaine.nom.toUpperCase():'LE SOMMET';
       const nextHtml=prochaine?`<h3>${esc(prochaineMarche)}</h3><p>${esc(prochaine.texte)}</p><div class="oc75-metrics"><p><span>Popularité</span><b>${esc(calcul.popularite)} / ${esc(prochaine.popularite)}</b></p><p><span>Rang des huit</span><b>${esc(calcul.rang)}e / ${esc(prochaine.rang)}e</b></p><p><span>Salles pleines de suite</span><b>—</b></p></div><p class="oc75-note">La prochaine marche dépend des résultats de Split.</p>`:`<h3>LE SOMMET</h3><p>${esc(calcul.paliers[calcul.paliers.length-1].texte)}</p>`;
       const html=`<main class="mf-contenu oc75">${mgmtOrgOnglets(m,'mgmt_organisation')}<div class="oc75-pop">Popularité ${esc(calcul.popularite)} ▲</div><section class="oc75-layout"><div class="oc75-panel">${paliers}</div><aside class="oc75-next"><h2>LA PROCHAINE MARCHE</h2>${nextHtml}</aside></section><details class="oc75-legacy"><summary>L'organisation — effectif et finances</summary>${legacy}</details></main>`;
-      return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'Organisation',libelle:`SPLIT · ${calcul.rang}e DES HUIT`,droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
+       return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'Organisation',libelle:`SPLIT · ${calcul.rang}e DES HUIT`,droite:`${mgmtOrgNom(m)} Fight Night`,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
 }
 /* ==== [FIN ANCRE] ==== */

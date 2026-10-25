@@ -48,6 +48,7 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   win.eval(`setSeed(77); mgmtEntrerAvantH4(); CL.go('mgmt_organisation');`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes("L'organisation"), 'l’écran de l’organisation est rendu');
+  assert.ok(html.includes('mf-tete-boite soir')&&html.includes('mf-entete-d soiree'), 'l’en-tête reprend la date, le lieu et la prochaine soirée');
   /* Ce qui n'existe pas n'apparaît pas : aucun texte de la maquette 08 hors
      l'effectif et les finances (§1, §3 T7). */
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
