@@ -401,6 +401,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Les reprises précédentes et les tests couvrent les trois paires, le booking/soirée normale du choc, l'offre/changement/arrivée/soirée/lendemain, ainsi que l'inscription du test aux scripts `test` et `test:watch`. Cette vérification ne transforme pas les cases visuelles restantes en succès : seuil de gros blocs du choc manqué, chevauchement du bilan persistant, arrivée non capturée.
 - Écart à la fiche : les objectifs visuels complets et la capture d'arrivée ne sont toujours pas atteints. Aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise 25/10/2026 — contrôles reproductibles de fin de session
+- Branche `fid-choc` confirmée, HEAD initial `e63e8f06`. Le travail fonctionnel de la tranche est déjà commité ; seuls `.opencode/agents/*`, `opencode.json` et `sw.js` étaient modifiés au départ et restent hors lot.
+- Le guide de shoot a été lu. Scènes isolées : choc, écran visible, 0 chevauchement/texte sous 22 px/débordement et `grosBlocs=26.2%` (seuil ≤20% manqué) ; discours, mêmes contrôles à zéro, `grosBlocs=16.6%` ; bilan, `grosBlocs=12.9%` avec le chevauchement « REMERCIÉ » / « Il manque 3 combats en carte » (265×22). Les comparatifs PNG n'ont pas été inspectés visuellement ; aucune capture dédiée d'arrivée dans ce passage.
+- Tentative de correction du chevauchement : augmenter `line-height` du titre et retirer son padding inférieur n'a pas changé la mesure. La règle CSS expérimentale et son incrément `?v=` ont été annulés ; aucun changement CSS/index ne subsiste.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4), couvrant les parcours fonctionnels et l'intégration du test aux commandes standard/watch. `node tools/verif-versions.js origin/main` passe (20 fichiers examinés) et `node_modules/.bin/eslint .` passe.
+- Aucun fichier applicatif, test, package ou cache modifié dans cette reprise ; aucune migration de sauvegarde. Les défauts visuels mesurés et l'absence de capture arrivée/comparaison visuelle restent des écarts à la fiche ; aucune conformité complète ni `TOUT_EST_FINI` n'est revendiqué.
+
 ### Reprise 59 — championnes adverses sur les affiches
 - `scr_mgmt_choc` cherchait à tort chaque combattante adverse dans le roster Split. Les identifiants adverses sont maintenant résolus dans le roster de l'organisation invitée, de sorte que les trois cartes montrent les noms réellement enregistrés plutôt que le libellé de repli.
 - Le test existant `Monde lot 69 T1 — les écrans choc et discours exposent les blocs validés par les planches Uni*` vérifie désormais la présence du vrai nom adverse pour chacune des paires.
