@@ -18,3 +18,11 @@ Les données viennent de `mgmtPaliers*`, `m.croissance`, `mgmtOrgMoneyHtml` : **
 **En-tête commun** des 4 onglets : plaque `ORGANISATION`, libellé « SPLIT · 4e DES HUIT », droite = date + lieu + « SPLIT FIGHT NIGHT n », comme les planches ; onglets dans le contenu, pas dans la barre latérale. Le carnet (déjà fait, ne le touche pas) a déjà ce modèle : copie son approche.
 
 Écrans à contrôler : `guerre,guerreLong,croissance,croissanceLong`.
+
+## Compte rendu
+
+- Modifié : `mgmt-guerre-ecran.js` (libellé de l'en-tête désormais « SPLIT · rang DES HUIT » et colonne d'évolution renommée « ▲/▼ ») ; `index.html` (version de cache du script montée).
+- Tests ajoutés : aucun. Test ciblé exécuté : `node --test tests/mgmtOrganisations.test.js` (9/9 verts).
+- Migration de sauvegarde : aucune.
+- Écarts à la fiche / travail restant : cette tranche n'est pas achevée. L'interface `croissance` n'a pas été portée sur la planche ; `guerre` conserve le tableau et ses styles incomplets. Les scènes `guerre,guerreLong,croissance,croissanceLong` n'ont pas été capturées, donc aucune ligne CONTRÔLE avant/après ne peut être rapportée. Vérification `node tools/verif-versions.js origin/main` sans écart. Le repli d'exécution local n'a permis que le changement partiel ci-dessus.
+- Questions pour Anthony : aucune ; continuer la fidélisation sur les deux écrans et relever les quatre lignes CONTRÔLE.
