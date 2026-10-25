@@ -2108,8 +2108,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px}
 /* ==== [ANCRE: MONDE66_T1_ECHELLE_ECRAN_1920] — Monde lot 66 T1 ==== */
 @media (min-width:1800px){
-  .ld66-screen{max-width:1740px}
-  .ld66-suite .ld3-suite{max-width:1740px}
+  .ld66-screen{max-width:1564px}
+  .ld66-suite .ld3-suite{max-width:1564px}
 }
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{box-sizing:border-box;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 .ld66-suite .ld3-move strong{font-size:22px;line-height:1.1}

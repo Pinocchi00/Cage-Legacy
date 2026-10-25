@@ -35,6 +35,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise échelle et captures — 25/10/2026
+
+- Branche `fid-lendemain`; `git log --oneline -12` et `git status` vérifiés. Le code fonctionnel des deux écrans est déjà commité; changements locaux des agents OpenCode, `opencode.json` et `sw.js` laissés hors périmètre.
+- Corrigé la surcharge responsive `@media (min-width:1800px)` dans `ui-cadre.css` : elle forçait une largeur de 1740 px contraire à la largeur 1564 px de la planche. Cache CSS monté par `node tools/_bump.js ui-cadre.css`.
+- Captures demandées exécutées individuellement après le correctif : `lendemain` contrôle 0 chevauchement, 0 texte <22 px, aucun débordement, `grosBlocs=22,8 %` (`moyen=28,9 %`); `lendemainSuite` contrôle 0 chevauchement, 0 texte <22 px, mais les débordements de mouvements (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split ») restent, `grosBlocs=17,6 %` (`moyen=23,1 %`). Le réglage de largeur n'a pas changé les mesures constatées. Captures comparatives régénérées dans le répertoire temporaire de `shoot`.
+- Taille calculée des noms non extraite par JavaScript durant cette reprise; CSS final de première carte est 108 px, les deux cartes suivantes 64 px. Aucun changement données, sauvegarde, navigation ou mécanique. Aucun test ajouté/migration.
+- Tests verts : `mgmtEcranLendemain.test.js` 7/7, `mgmtLendemainDemo.test.js` 7/7, `mgmtLot48T1.test.js` 9/9, `mgmtLot54T1.test.js` interrompu par délai 120 s après les contrôles initiaux, `mgmtSoireeShow.test.js` interrompu par le même délai. Critère de capture renforcé ≤18 % pour lendemain et débordements de la suite restent des écarts non résolus; conformité complète non revendiquée.
+- Avant/après : la géométrie responsive est alignée sur 1564 px au lieu de 1740 px; pas d'amélioration mesurée par l'outil. Questions pour Anthony : aucune.
+
 ### Reprise 10 — captures et non-régression — 25/10/2026
 
 - État vérifié : branche `fid-lendemain`, HEAD initial `395ca095`; aucun fichier de code ou test de la tranche n'était non commité. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et restent intacts.
