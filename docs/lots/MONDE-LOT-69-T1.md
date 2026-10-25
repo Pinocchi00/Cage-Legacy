@@ -235,6 +235,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Écarts restant : mesure choc au-dessus du seuil ; absence de capture dédiée arrivée ; comparatifs non ouverts. Aucune nouvelle mesure de discours ou bilan effectuée dans cette reprise. Ces critères visuels ne sont pas déclarés satisfaits.
 - Fichiers de cette reprise : cette fiche seulement (mesure, tests et limites). Tests ajoutés : aucun. Questions pour Anthony : aucune ; les critères visuels non satisfaits sont consignés comme tels.
 
+### Reprise — médaillon des affiches choc
+- Reprise sur la branche `fid-choc`, HEAD initial `4fa0c10f`. Les modifications utilisateur sous `.opencode/agents/` et `opencode.json` sont restées hors du staging.
+- Le comparatif UniChoc donne un médaillon central de 54×54 px, avec le C à 28 px. `ui-cadre.css` avait une règle finale à 38×38/22 px qui contredisait la taille précise de la planche; elle est alignée sur celle-ci. Le test de style a été adapté avec la décision de primauté des planches validées.
+- Capture choc rejouée : l'écran s'affiche; contrôles automatiques 0 chevauchement, 0 texte sous 22 px, aucun débordement. `grosBlocs=26.1%`, toujours supérieur à l'objectif ≤20%; ce critère reste non atteint. L'image n'a pas été ouverte visuellement. Le contrôle externe de capture n'a pas vérifié discours, arrivée ou bilan dans cette reprise.
+- Fichiers modifiés : `ui-cadre.css` (taille du médaillon C), `index.html` (version cache), `tests/mgmtLot69T1.test.js` (assertion dimension et justification), cette fiche (mesures et limites). Test ajouté : aucun; assertion adaptée dans « Monde lot 69 T1 — les écrans choc et discours exposent les blocs validés par les planches Uni* ». Migration : aucune.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent. Le script bump a aussi modifié `sw.js`; le fichier généré a été restauré et n'est pas inclus.
+- Écarts qui demeurent : cible de densité du choc manquée; capture/validation dédiée arrivée et comparaison visuelle des écrans non réalisées. Les autres limites déjà consignées dans les reprises antérieures demeurent.
+
 ### Reprise — garde contre un roster adverse invalide
 - Fichiers modifiés : `mgmt-ecran-poste.js` rend le contrôle de présence d'une paire sûr même si le roster adverse manque ou est malformé ; l'écran conserve son repli vers l'Accueil au lieu de planter. `tests/mgmtLot69T1.test.js` vérifie explicitement ce cas. Cette reprise corrige aussi l'indentation du bloc touché.
 - Test : `node --test tests/mgmtLot69T1.test.js` passe 4/4. Capture `choc` relancée par l'outil indiqué : page présente, chevauchements=0, textes sous 22 px=0, débordements=[], mais `grosBlocs=26.2%` (cible ≤20% toujours manquée).

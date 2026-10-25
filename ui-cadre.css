@@ -2037,7 +2037,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
    La décision d'Anthony du 24/10 : les maquettes Uni* validées font foi; les
    noms d'affiche reprennent les 46 px explicites de UniChoc. ==== */
 .ch3-paire .ch3-side b{font-size:46px}
-.ch3-paire .ch3-category .ch3-vs{width:38px;height:38px;font-size:22px}
+.ch3-paire .ch3-category .ch3-vs{width:54px;height:54px;font-size:28px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
