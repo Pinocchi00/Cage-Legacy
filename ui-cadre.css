@@ -2262,7 +2262,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article h2{font-size:26px;line-height:1.08;margin:0 0 8px}
 .ce3-carnet-ecran .ce3-carnet>article>p{font-size:22px;line-height:1.12;margin:0;padding:5px 0;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE70_T1_POSTE_COLONNE_RESSERREE] — Monde lot 70 T1 ==== */
-.po2-scene{top:112px;bottom:124px;height:auto;max-height:none;overflow:hidden}
+.po2-scene{top:112px;bottom:184px;height:auto;max-height:none;overflow:hidden}
 .po2-scene>.po2-grid>.po2-card{overflow-y:auto;contain:layout paint}
 /* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_ENVELOPPE] — Monde lot 70 T1 ==== */
 .mf-ancien .mgmt-org-sub{box-sizing:border-box;min-width:0;max-width:100%;font-size:24px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}
