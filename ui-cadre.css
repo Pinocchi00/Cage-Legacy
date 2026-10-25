@@ -2715,6 +2715,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move>.ld66-move-identity,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
 .ld66-suite .ld3-move>.ld66-move-identity>b{font-size:30px;line-height:1;overflow-wrap:anywhere}
 .ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{font-size:22px;line-height:1.1;white-space:normal}
+/* ==== [ANCRE: MONDE74_T1_DETAILS_ENTIERS] — Monde lot 74 T1 ====
+   Lignes variables plutôt que rognées : les moments grandissent avec leur
+   contenu et la partie basse reste consultable dans son propre défilement. */
+.ld66-screen .ld66-moments{height:auto;min-height:360px;align-items:stretch;overflow:visible}
+.ld66-screen .ld66-moments .ld3-moment{height:auto;min-height:360px;overflow:visible;align-self:stretch}
+.ld66-screen .ld66-moments .ld3-names,
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{max-height:none;overflow:visible;flex:none;overflow-wrap:anywhere;word-break:normal}
+.ld66-screen .ld66-moments .ld3-detail{max-height:none;height:auto;overflow:visible;flex:none;overflow-wrap:anywhere;word-break:normal}
+.ld66-screen .ld66-lower>section{overflow:auto;overscroll-behavior:contain}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_REPRISE_NOMS_MOMENTS_VERROUILLES] — Monde lot 66 T1 ==== */
 .mf-contenu.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
