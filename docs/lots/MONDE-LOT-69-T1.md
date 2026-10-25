@@ -74,6 +74,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 64 — reproduction du choc
+- Branche confirmée : `fid-choc`. Le HEAD de départ est `609cb5f8` ; aucun fichier applicatif de la tranche n'était en attente. Les changements utilisateur sous `.opencode/agents/` et `opencode.json` restent exclus.
+- La commande de capture demandée a été exécutée directement : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Résultat : scène affichée (pas de page blanche), 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, donc objectif ≤20% non atteint.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le code/test déjà commité couvre la structure des trois paires et leur traitement dans le chemin normal, ainsi que le parcours d'offre et arrivée ; cette exécution ne constitue pas une nouvelle preuve visuelle ni une capture dédiée à l'arrivée.
+- Fichiers modifiés dans cette reprise : cette fiche uniquement, pour rapporter la reproduction et son résultat. Aucun test ajouté, aucune migration et aucun cache modifié.
+- Écarts qui restent ouverts : densité choc supérieure à 20%, comparatifs non ouverts visuellement, scène dédiée d'arrivée non produite ; les mesures du bilan et du discours doivent être reproduites après les dernières modifications. Je ne déclare pas la tranche achevée.
+
 - Fichiers modifiés dans cette reprise : aucun fichier fonctionnel. La tentative de renforcer `tests/mgmtLot69T1.test.js` avec un rechargement strict après soirée a échoué, car `mgmtParseAndValidate(mgmtSerialiser(m))` renvoie `null` dans ce scénario ; l'assertion a été retirée plutôt que d'affirmer un résultat faux.
 - Tests : `node --test tests/mgmtLot69T1.test.js` avait passé 2/2 avant cette tentative ; le même test a ensuite échoué sur l'assertion stricte ajoutée puis retirée. Les commandes `test` et `test:watch` déclenchent déjà ce fichier via leurs hooks `pretest` et `pretest:watch` ; les commandes dédiées existent aussi.
 - Pas de migration de sauvegarde. Pas de nouvelle capture/comparaison : l'accès à `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusé par la politique d'accès à l'externe ; aucun `cmp-*.png` n'est revendiqué.
