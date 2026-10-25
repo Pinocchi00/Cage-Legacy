@@ -1878,6 +1878,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: ACCUEIL_NOMS_ENTIERS] — Monde lot 12 T2 ==== */
 .mf-ac .mf-ac-nom{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%}
 .mf-ac-menu{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;border:2px solid var(--mf-sep);padding:5px 8px}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_ESPACEES] — Monde lot 70 T1 ==== */
+.mf-stage:has(.mf-ac) .mf-touches{gap:42px}
 .mf-ac-aide{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:22px;line-height:1;color:var(--mf-texte2);flex:none}
 .mf-ac-jaune{flex:none;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
 .mf-ac-jl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em}
