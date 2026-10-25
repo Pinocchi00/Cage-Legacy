@@ -90,6 +90,11 @@ function mgmtOrgMoneyHtml(m){
 }
 
 /* ==== [ANCRE: MGMT_LOT56_T1_CROISSANCE] — Monde lot 56 T1 ==== */
+/* ==== [ANCRE: MONDE67_T1_ONGLETS_ORG] — Monde lot 67 T1 ==== */
+function mgmtOrgOnglets(m,courant){
+  const onglets=[['mgmt_guerre','LE CLASSEMENT DES HUIT'],['mgmt_organisation','LA CROISSANCE'],['mgmt_poste','TON POSTE'],['mgmt_carnet','TON CARNET']];
+  return `<nav class="mo67-tabs" aria-label="Organisation">${onglets.map(([id,titre])=>`<button type="button" class="mo67-tab" aria-current="${id===courant?'page':'false'}" onclick="CL.go('${id}')" onkeydown="if(event.key==='ArrowDown'||event.key==='ArrowUp'||event.key==='Tab'){event.preventDefault();const a=[...this.parentElement.querySelectorAll('button')],i=a.indexOf(this),d=event.key==='ArrowUp'||event.shiftKey?-1:1;a[(i+d+a.length)%a.length].focus()}else if(event.key==='Escape'){CL.go('mgmt_accueil')}">${esc(titre)}</button>`).join('')}</nav>`;
+}
 function mgmtPaliersHtml(m){
   const c=mgmtPaliersCalculer(m), avance=c.paliers.map(p=>`<span class="cr3-step cr3-done"><b>${esc(p.nom)}</b><small>${esc(p.texte)}</small></span>`).join('');
   const n=c.next;
@@ -118,10 +123,10 @@ function scr_mgmt_organisation(){
   const hommes=rows.filter(r=>r.div.gender!=='F');
   const groupes=mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.hommes,hommes)
     +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
-   return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
+    return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
      +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_carte')">${esc(MGMT_ORG_LABELS.back)}</button>`
-     +`<div class="mgmt-cols mgmt-org-cols">`
+      +mgmtOrgOnglets(m,'mgmt_organisation')+`<div class="mgmt-cols mgmt-org-cols">`
      +mfPanneau(`<section class="mgmt-org-main">`
      +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`

@@ -1,7 +1,7 @@
 "use strict";
 /* ==== [ANCRE: P3_T2_ACTUALITES] — Monde lot 33 T2 ==== */
 const MGMT_ACTU_SOURCES=[];
-const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE',choc:'CHOC DES ORGANISATIONS'};
+const MGMT_ACTU_LIBELLES={resultat:'RÉSULTAT',blessure:'BLESSURE',contrat:'CONTRAT',trait:'TRAIT',surnom:'SURNOM',record:'RECORD',rumeur:'RUMEUR',classement:'CLASSEMENT',espoir:'ESPOIR',rivale:'RIVALE',choc:'CHOC DES ORGANISATIONS',apres:'APRÈS LA SOIRÉE'};
 function mgmtActuSourceAjouter(src){
   if(!src||typeof src.type!=='string'||typeof src.lire!=='function'||MGMT_ACTU_SOURCES.some(x=>x.type===src.type)) return false;
   MGMT_ACTU_SOURCES.push(src); return true;
@@ -25,6 +25,11 @@ function mgmtActuNom(m,id){const f=mgmtFighterById(m,id)||mgmtExteriorCombattant
 mgmtActuSourceAjouter({type:'resultat',lire(m,ids,depuis){const out=[];const historiques=[...(m.hist||[]).map((t,i)=>({t,i})),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>(o.hist||[]).map((t,i)=>({t,i}))):[])];const vus=new Set();for(const {t,i} of historiques){if(!t||!Number.isSafeInteger(t.c)||t.c<depuis||!t.a||!t.b)continue;for(const id of ids){const moi=t.a.id===id?t.a:t.b.id===id?t.b:null;if(moi){const uniq=t.c+'|'+i+'|'+id;if(vus.has(uniq))continue;vus.add(uniq);out.push({type:'resultat',c:t.c,id,adv:(moi===t.a?t.b:t.a).id,donnees:{combat:t,index:i}});}}}return out;} });
 /* ==== [ANCRE: P7_T4_DISCOURS_ACTUALITES] — Monde lot 50 T1 ==== */
 mgmtActuSourceAjouter({type:'discours',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='discours'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis&&x.interpelle).map(x=>({type:'discours',c:x.c,id:x.a,adv:x.interpelle,donnees:x}));}});
+/* ==== [ANCRE: P8_T3_APRES_ACTUALITES] — Monde lot 63 T1 ==== */
+mgmtActuSourceAjouter({type:'apres',lire(m,ids,depuis){
+  if(typeof mgmtApresCalculer!=='function'||!Number.isSafeInteger(m&&m.lastEvent&&m.lastEvent.cycle)||m.lastEvent.cycle<depuis)return [];
+  return mgmtApresCalculer(m).filter(l=>l&&typeof l.texte==='string').map((l,i)=>({type:'apres',c:m.lastEvent.cycle,id:(m.lastEvent.touched||[])[i]&&m.lastEvent.touched[i].id||ids[0],donnees:l})).filter(x=>ids.includes(x.id));
+}});
 mgmtActuSourceAjouter({type:'blessure',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&x.k==='injury'&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'blessure',c:x.c,id:x.a,donnees:x}));}});
 mgmtActuSourceAjouter({type:'contrat',lire(m,ids,depuis){return (m.facts||[]).filter(x=>x&&['fin_contrat','libere','contrat'].includes(x.k)&&ids.includes(x.a)&&Number.isSafeInteger(x.c)&&x.c>=depuis).map(x=>({type:'contrat',c:x.c,id:x.a,donnees:x,sous:x.k}));}});
 /* ==== [ANCRE: P5_T4_SOURCE_ACTUALITE_RECRUTEUR] — Monde lot 60 T1 ==== */
@@ -50,7 +55,8 @@ function mgmtActualites(m,opts){
       if(x.type==='choc'){const org=mgmtOrgParId(d.orgId);banque=['Une proposition de choc des organisations est en discussion'];vars={};detail=d.propose?'Split propose une soirée commune à '+(org?org.nom:d.orgId)+', champion contre champion.':(org?org.nom:d.orgId)+' propose une soirée commune contre Split, champion contre champion.';}
       else if(x.type==='resultat'){const t=d.combat||{},win=t.winner==='D'?'draw':((t.winner==='A'?t.a&&t.a.id:t.b&&t.b.id)===x.id?'win':'loss'),fam=t.family==='ko'?'ko':t.family==='sub'?'sub':t.family==='dec'?'dec':'stop'; banque=MGMT_ACTU_RESULTATS[win][win==='draw'?'draw':fam]; vars={n:moi.n,p:moi.p,a,r:t.round||1};detail='Soirée '+(t.event||t.soiree||m.eventsPlayed||1)+', '+(t.slot==='main'?'principal':'préliminaire')+' de la carte.'; if(t.title_fight){const champ=t.champion===x.id||t.title_holder===x.id;detail+=' '+(win==='draw'?'Une ceinture était en jeu.':win==='win'?(champ?'Il gardait sa ceinture.':'Il devient champion.'):'Il perd sa ceinture.');}}
        else if(x.type==='recruteur_signe'){banque=MGMT_ACTU_RECRUTEUR_SIGNE;vars={n:moi.n};detail='Repéré lors du retour du recruteur, il a choisi de signer avec une autre organisation.';}
-       else if(x.type==='discours'){banque=['{n} s’adresse à {cible} après sa victoire'];vars={n:moi.n,cible:a};detail='Après sa victoire, il remercie son équipe et parle de la suite.';}
+        else if(x.type==='discours'){banque=['{n} s’adresse à {cible} après sa victoire'];vars={n:moi.n,cible:a};detail='Après sa victoire, il remercie son équipe et parle de la suite.';}
+       else if(x.type==='apres'){banque=[d.texte||''];vars={};detail='Une suite de la soirée.';}
     else if(x.type==='blessure'){banque=MGMT_ACTU_BLESSURES;vars={n:moi.n,p:moi.p,b:typeof d.nom==='string'?d.nom:''};detail='Il ne combattra pas tant qu’il n’est pas rétabli.';}
       else if(x.type==='surnom'){const type=d.t,info=MGMT_SURNOMS_GAGNES[type];if(!info)continue;const medias=Array.isArray(MGMT_MEDIAS)?MGMT_MEDIAS:[],media=medias.length?medias[Math.floor(mgmtIdentiteStream(x.id,'presse-surnom',m)()*medias.length)]:null;banque=info.voix;vars={n:moi.n,surnom:d.nom,raison:info.raison};detail='Donné par '+(media?media.nom:'la presse')+' après '+info.raison+'.';}
       else if(x.type==='espoir'){banque=[''];vars={};detail='';}

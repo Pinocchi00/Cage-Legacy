@@ -1,7 +1,7 @@
 ﻿---
 description: Lance la vÃ©rification rapide (ou complÃ¨te si on le lui demande) et l'audit des versions de cache, et ne rend que les Ã©checs. Ã€ appeler avant chaque relecture et chaque commit.
 mode: subagent
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 steps: 12
 permission:
   edit: deny

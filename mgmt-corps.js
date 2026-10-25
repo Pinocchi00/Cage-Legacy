@@ -767,6 +767,7 @@ function mgmtRunEvent(m){
   mgmtMondeApresSoiree(m,premier);
   /* Poids de la sauvegarde (1,9 Mo, sacré ; `main` y est collé à 21 octets) : les six ans de passé de chaque organisation n'écrivent pas de mémoire. */
   if((m.memoire!==undefined||typeof mgmtMemoireSoiree==='function')&&!(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m.passe&&m.passe.enCours===true)) mgmtMemoireSoiree(m);
+  if(typeof mgmtFinAnneeVerifier==='function') mgmtFinAnneeVerifier(m);
   if(recette!==finance.recette)finance.recette=recette;
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   /* ==== [ANCRE: P11_T2_DEFIS_FIN_SOIREE] — Monde lot 46 T1 ==== */
@@ -797,3 +798,21 @@ function mgmtRunEvent(m){
 function mgmtHorsPasse(m){
   return !(typeof MGMT_PREDECESSEUR_EN_COURS!=='undefined'&&MGMT_PREDECESSEUR_EN_COURS===true)&&!(m&&m.passe&&m.passe.enCours===true);
 }
+
+/* ==== [ANCRE: P11_T1_DECLENCHEUR_FIN_ANNEE] — Monde lot 62 T1 ==== */
+/** Exécute les effets annuels à la première soirée jouée de l'année suivante. */
+function mgmtFinAnneeVerifier(m){
+  if(!m||!mgmtHorsPasse(m)||!Array.isArray(m.hist)||!m.hist.length||typeof mgmtJourDate!=='function')return false;
+  const idx=m.hist.length-1,jour=typeof mgmtAgendaJour==='function'?mgmtAgendaJour(m,(m.eventsPlayed||0)):null;
+  if(!Number.isFinite(jour))return false;
+  const annee=new Date(mgmtJourDate(jour).ts).getUTCFullYear();
+  const precedent=idx>0?m.hist[idx-1]:null;
+  const jourPrecedent=precedent&&typeof mgmtAgendaJour==='function'?mgmtAgendaJour(m,(m.eventsPlayed||0)-1):null;
+  const anneePrecedente=Number.isFinite(jourPrecedent)?new Date(mgmtJourDate(jourPrecedent).ts).getUTCFullYear():annee;
+  if(annee<=anneePrecedente||m.guerre&&m.guerre.anneeTraitee===annee)return false;
+  const prix=typeof mgmtCeremonieCalculer==='function'?mgmtCeremonieCalculer(m):[];
+  if(typeof mgmtCeremonieInscrire==='function')mgmtCeremonieInscrire(m,prix,anneePrecedente);
+  if(typeof mgmtGuerreFinAnnee==='function')mgmtGuerreFinAnnee(m,anneePrecedente);
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */

@@ -1,7 +1,7 @@
 ﻿---
 description: EnchaÃ®ne seul une liste de tranches du brief Monde (fiche, code, relecture, commit) en appelant les autres agents, et s'arrÃªte au premier problÃ¨me. Ne code jamais lui-mÃªme.
 mode: primary
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 permission:
   edit: deny
   bash:
