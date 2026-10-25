@@ -1390,6 +1390,33 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .cr3-track b,.mf-ancien .cr3-track span{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .mf-ancien .cr3-track b{white-space:normal;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE75_T1_CROISSANCE_PLANCHES] — Monde lot 75 T1 ==== */
+.oc75{display:flex;flex-direction:column;gap:12px;min-height:0}
+.oc75-pop{align-self:flex-end;color:#E9E6E1;font:600 24px/1 var(--mgmt-font-body)}
+.oc75-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(360px,.85fr);gap:18px;min-height:0;flex:1}
+.oc75-panel,.oc75-next{box-sizing:border-box;min-width:0;background:#121010;padding:18px;box-shadow:inset 0 0 0 2px var(--mf-bord)}
+.oc75-panel{display:flex;flex-direction:column;justify-content:space-around;gap:4px}
+.oc75-growth{display:flex;flex-direction:column;flex:1;justify-content:space-around;min-height:0}
+.oc75-track{display:grid;grid-template-columns:230px minmax(0,1fr);align-items:center;gap:18px;padding:10px 6px;border-bottom:2px solid rgba(233,230,225,.16)}
+.oc75-track-title{display:flex;flex-direction:column;gap:8px}
+.oc75-track-title b{font:800 36px/.9 var(--mgmt-font-display);color:#E9E6E1}
+.oc75-track-title span{font:600 22px/1.1 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.oc75-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.oc75-step{position:relative;display:flex;min-width:0;flex-direction:column;align-items:center;gap:8px;color:#E9E6E1;font:600 22px/1.05 var(--mgmt-font-body);text-align:center}
+.oc75-step:before{position:absolute;z-index:0;content:"";height:4px;left:0;right:0;top:25px;background:rgba(233,230,225,.38)}
+.oc75-step i{z-index:1;display:flex;width:50px;height:50px;align-items:center;justify-content:center;border-radius:50%;background:#666;color:#0D0B0B;font:800 28px/1 var(--mgmt-font-body);font-style:normal}
+.oc75-step.done i{background:#E9E6E1}.oc75-step.active i{background:#F0B220}
+.oc75-step b{font:800 25px/1 var(--mgmt-font-display);overflow-wrap:anywhere}
+.oc75-step span{color:var(--mgmt-secondary);overflow-wrap:anywhere}
+.oc75-next{display:flex;flex-direction:column;gap:15px;color:#E9E6E1;font:600 24px/1.2 var(--mgmt-font-body)}
+.oc75-next h2{margin:0;color:#F0B220;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em}
+.oc75-next h3{margin:0;font:800 48px/.9 var(--mgmt-font-display);overflow-wrap:anywhere}
+.oc75-next p{margin:0}.oc75-metrics p{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.oc75-metrics span{color:var(--mgmt-secondary)}.oc75-metrics b{font:800 30px/1 var(--mgmt-font-display)}
+.oc75-note{margin-top:auto!important;color:var(--mgmt-secondary)}
+.oc75-legacy{max-height:140px;overflow-y:auto;color:#E9E6E1;font:600 22px/1.2 var(--mgmt-font-body)}
+.oc75-legacy summary{cursor:pointer}
+/* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
 .mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}

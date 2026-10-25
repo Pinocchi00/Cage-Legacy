@@ -53,21 +53,20 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
   /* Brief du 06/10/2026, lot 4 : la barre des sections du cadre porte un « Contrats » ; ce que le test garde,
      c'est que l'écran de l'organisation lui-même (le contenu ancien) n'a ni onglet Contrats ni Diffuseur. */
-  const ancien=win.document.querySelector('.mf-ancien').innerHTML;
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche */
+  const ancien=win.document.querySelector('.oc75').innerHTML;
   assert.ok(!ancien.includes('Contrats')&&!ancien.includes('Diffuseur'), 'aucun onglet Contrats ni Diffuseur');
   assert.ok(!html.includes('Delatour')&&!html.includes('PATRON')&&!html.includes('OBJECTIFS'), 'ni patron ni objectifs de saison');
   /* Navigation permanente : Semaine, Classements (T6 : l'écran existe,
      docs/LOT-4-LA-PEAU-DU-JEU.md §3 T6, réécrit sur la décision T6) et
      Organisation, aucune entrée morte. */
-  assert.equal(win.document.querySelectorAll('.mgmt-nav').length, 1, 'la barre de navigation est présente');
-  const navs = [...win.document.querySelectorAll('.mgmt-nav button')].map(b=>b.textContent);
-  /* Lot 5 H8 : le vestiaire rejoint la navigation (maquette 11). */
-  assert.deepEqual(navs, ['Accueil','Effectif','Recrutement','Classements','Organisation'], 'les entrées de navigation suivent les écrans livrés (décision du 12/10/2026 : l’Accueil est la première section (lot 7) : « Semaine » devient « Accueil »)');
-  /* L'entrée courante (aria-current) se distingue : ici l'Organisation. */
-  const courant = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche */
+  const navs=[...win.document.querySelectorAll('.mo67-tabs button')].map(b=>b.textContent);
+  assert.deepEqual(navs,['LE CLASSEMENT DES HUIT','LA CROISSANCE','TON POSTE','TON CARNET'],'les quatre onglets organisation sont présents');
+  const courant = win.document.querySelectorAll('.mo67-tabs button[aria-current="page"]');
   assert.equal(courant.length, 1, 'une seule entrée courante');
-  assert.equal(courant[0].textContent, 'Organisation', 'l’écran courant est signalé');
-  assert.ok(courant[0].classList.contains('cur'), 'l’entrée courante porte sa classe visuelle');
+  assert.equal(courant[0].textContent, 'LA CROISSANCE', 'l’écran courant est signalé');
+  assert.ok(courant[0].classList.contains('mo67-tab'), 'l’entrée courante porte sa classe visuelle');
   /* L'effectif et les finances sont lisibles (charte R1, R3). */
   assert.ok(html.includes('Trésorerie'), 'la trésorerie est lisible');
   assert.ok(win.document.getElementById('app').textContent.includes(win.eval('mgmtEuros(G.mgmt.treasury)')), 'la valeur de la trésorerie est telle qu’elle existe');

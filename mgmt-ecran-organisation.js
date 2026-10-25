@@ -96,20 +96,15 @@ function mgmtOrgOnglets(m,courant){
   return `<nav class="mo67-tabs" aria-label="Organisation">${onglets.map(([id,titre])=>`<button type="button" class="mo67-tab" aria-current="${id===courant?'page':'false'}" onclick="CL.go('${id}')" onkeydown="if(event.key==='ArrowDown'||event.key==='ArrowUp'||event.key==='Tab'){event.preventDefault();const a=[...this.parentElement.querySelectorAll('button')],i=a.indexOf(this),d=event.key==='ArrowUp'||event.shiftKey?-1:1;a[(i+d+a.length)%a.length].focus()}else if(event.key==='Escape'){CL.go('mgmt_accueil')}">${esc(titre)}</button>`).join('')}</nav>`;
 }
 function mgmtPaliersHtml(m){
-  const c=mgmtPaliersCalculer(m), avance=c.paliers.map(p=>`<span class="cr3-step cr3-done"><b>${esc(p.nom)}</b><small>${esc(p.texte)}</small></span>`).join('');
-  const n=c.next;
-  const niveaux=n?{salle:n.salle,diffuseur:n.diffuseur,recruteur:n.recruteur,agents:n.agents}:c.effets;
-  const lignes=[
-    ['LES SALLES',`Salle accessible jusqu’à ${esc(mgmtPopPlafond(c.popularite))} spectateurs · palier ${esc(niveaux.salle)}/3`],
-    ['LE DIFFUSEUR',`Palier ${esc(niveaux.diffuseur)}/3 · progression liée au rang de fin d’année`],
-    ['LE RECRUTEUR',`Palier ${esc(niveaux.recruteur)}/3 · remise additive jusqu’à 3 %`],
-    ['LES AGENTS LIBRES',`Attrait de classement · palier ${esc(niveaux.agents)}/3`]
+  const c=mgmtPaliersCalculer(m), n=c.next, levels=n?{salle:n.salle,diffuseur:n.diffuseur,recruteur:n.recruteur,agents:n.agents}:c.effets;
+  const definitions=[
+    ['LES SALLES','La plus grande que Split sait remplir',['GYMNASE','PALAIS','DÔME','ARÉNA'],['1 500 places','4 000 places','9 000 places','16 000 places'],levels.salle],
+    ['LE DIFFUSEUR','Suit le rang de fin d’année',['RÉGIONAL','NATIONAL','EUROPÉEN','MONDIAL'],['Lyon et sa région','Toute la France','Toute l’Europe','Le monde'],levels.diffuseur],
+    ['LE RECRUTEUR','Suit le budget de l’organisation',['LA FRANCE','L’EUROPE','LE MONDE','LE MONDE'],['1 mission','1 mission','1 mission','2 missions'],levels.recruteur],
+    ['LES AGENTS LIBRES','Ils choisissent les mieux classées',['LES OUBLIÉS','LES BONS','LES TRÈS BONS','LES MEILLEURS'],['Personne n’en veut','À leur portée','Très recherchés','Les meilleurs'],levels.agents]
   ];
-  const pistes=lignes.map(([titre,detail])=>`<div class="cr3-track"><b>${titre}</b><span>${detail}</span></div>`).join('');
-  return `<section class="cr3-growth"><header class="cr3-title"><b>LA CROISSANCE</b><span>${esc(mgmtOrgNom(m).toUpperCase())} · ${esc(c.rang)}e DES HUIT</span></header>`
-    +`<div class="cr3-bar"><span class="cr3-step cr3-done"><b>Popularité</b><small>${esc(c.popularite)} / 100</small></span>${avance}`
-    +`${n?`<span class="cr3-step cr3-next"><b>${esc(n.nom)}</b><small>${esc(n.texte)} · Popularité ${esc(n.popularite)} et rang ${esc(n.rang)} ou mieux</small></span>`:'<span class="cr3-step cr3-next"><b>Le sommet atteint</b><small>Split est première des huit.</small></span>'}</div>`
-    +`<div class="cr3-effects">${pistes}</div></section>`;
+  const pistes=definitions.map(([title,detail,names,notes,level])=>`<section class="oc75-track"><div class="oc75-track-title"><b>${esc(title)}</b><span>${esc(detail)}</span></div><div class="oc75-steps">${names.map((name,i)=>{const done=i<level, active=i===level;return `<div class="oc75-step ${done?'done':active?'active':'future'}"><i>${done?'✓':active?'':' '}</i><b>${esc(name)}</b><span>${esc(notes[i])}</span></div>`;}).join('')}</div></section>`).join('');
+  return `<section class="oc75-growth">${pistes}</section>`;
 }
 
 function scr_mgmt_organisation(){
@@ -133,8 +128,9 @@ function scr_mgmt_organisation(){
        +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
          +mgmtOrgMoneyHtml(m)+`<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p');
      const calcul=mgmtPaliersCalculer(m), prochaine=calcul.next;
-     const nextHtml=prochaine?`<h3>${esc(prochaine.nom.toUpperCase())}</h3><p>${esc(prochaine.texte)}</p><p>Popularité ${esc(calcul.popularite)} / ${esc(prochaine.popularite)} · Rang huit ${esc(calcul.rang)}e / ${esc(prochaine.rang)}e</p>`:`<h3>LE SOMMET</h3><p>${esc(calcul.paliers[calcul.paliers.length-1].texte)}</p>`;
-     const html=`<main class="mf-contenu oc75">${mgmtOrgOnglets(m,'mgmt_organisation')}<section class="oc75-layout"><div class="oc75-panel"><h1>LA CROISSANCE</h1>${paliers}</div><aside class="oc75-next"><h2>LA PROCHAINE MARCHE</h2>${nextHtml}<p>Salles pleines de suite —</p></aside></section><details class="oc75-legacy"><summary>Effectif et finances</summary>${legacy}</details></main>`;
-     return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'Organisation',libelle:`SPLIT · ${mgmtPaliersCalculer(m).rang}e DES HUIT`,droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
+      const prochaineMarche=prochaine?prochaine.nom.toUpperCase():'LE SOMMET';
+      const nextHtml=prochaine?`<h3>${esc(prochaineMarche)}</h3><p>${esc(prochaine.texte)}</p><div class="oc75-metrics"><p><span>Popularité</span><b>${esc(calcul.popularite)} / ${esc(prochaine.popularite)}</b></p><p><span>Rang des huit</span><b>${esc(calcul.rang)}e / ${esc(prochaine.rang)}e</b></p><p><span>Salles pleines de suite</span><b>—</b></p></div><p class="oc75-note">La prochaine marche dépend des résultats de Split.</p>`:`<h3>LE SOMMET</h3><p>${esc(calcul.paliers[calcul.paliers.length-1].texte)}</p>`;
+      const html=`<main class="mf-contenu oc75">${mgmtOrgOnglets(m,'mgmt_organisation')}<div class="oc75-pop">Popularité ${esc(calcul.popularite)} ▲</div><section class="oc75-layout"><div class="oc75-panel">${paliers}</div><aside class="oc75-next"><h2>LA PROCHAINE MARCHE</h2>${nextHtml}</aside></section><details class="oc75-legacy"><summary>L'organisation — effectif et finances</summary>${legacy}</details></main>`;
+      return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'Organisation',libelle:`SPLIT · ${calcul.rang}e DES HUIT`,droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
 }
 /* ==== [FIN ANCRE] ==== */
