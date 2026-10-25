@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise actuelle — hauteur des moments et captures — 25/10/2026
+
+- Branche `fid-lendemain`; commits antérieurs consultés. Pas de changements de code de tranche en attente au départ; modifications locales des agents, `opencode.json` et `sw.js` laissées hors périmètre.
+- Réglage CSS à 285 px pour la rangée des trois cartes larges, cohérent avec la hauteur demandée par la maquette; cache `ui-cadre.css` bumpé.
+- Tests `node --test tests/mgmtEcranLendemain.test.js`: 7/7. Captures séparées à 1920×1080: lendemain 0 chevauchement, 0 texte <22px, aucun débordement, `grosBlocs=22,8%`; suite 0 chevauchement, 0 texte <22px, mais quatre débordements variables (« Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen »), `grosBlocs=17,9%`.
+- Le seuil de capture renforcé ≤18% du lendemain n'est pas atteint, et les alertes de débordement de la suite persistent; ces critères ne sont pas déclarés satisfaits. `node tools/verif-versions.js origin/main` ne signale aucun écart. Pas de changement de données, mécanique ni sauvegarde; aucune migration.
+- Fichiers de cette reprise: `ui-cadre.css` (hauteur des cartes), `index.html` (version cache), cette fiche (mesures honnêtes). Aucun test nouveau. Questions pour Anthony: aucune.
+
 ### Reprise finale — capture suite et tests — 25/10/2026
 
 - État initial : branche `fid-lendemain`, code de la tranche déjà commité; modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` laissées hors périmètre.
