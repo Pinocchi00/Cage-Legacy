@@ -2,6 +2,12 @@
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôle après reprise 8
+- Branche `fid-choc` confirmée. `git log --oneline -12` montre que le code et tests de la tranche sont déjà commités (HEAD initial `c54ac8d7`) ; aucun changement fonctionnel non commité. Les modifications de `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et n'ont pas été ajoutées.
+- Reproduction de la scène de choc avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : page rendue avec proposition valide, zéro chevauchement, zéro texte sous 22 px, zéro débordement ; `grosBlocs=26.2%`, donc cible ≤20% toujours manquée. Le guide `LISEZMOI.txt` et les images comparatives restent inaccessibles à la lecture dans cet environnement ; aucun examen visuel du `cmp-*.png` revendiqué.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4), y compris parcours offre/changement/arrivée/rechargement/soirée/lendemain, choc multi-paires et blocs d'écran. `node tools/verif-versions.js origin/main` passe (20 fichiers examinés).
+- Fichiers de cette reprise : fiche de tranche seulement. Aucun test nouveau, aucune migration, aucun changement de code/cache. La capture confirme une page visible mais ne satisfait pas l'objectif de densité ; les problèmes antérieurement mesurés du bilan et l'absence de capture d'arrivée dédiée ne sont pas considérés résolus. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise 25/10 — contrôles de capture et tests
 - État Git : branche `fid-choc`, HEAD `a81ec435`. Aucun fichier applicatif ou test de la tranche n'était en attente ; les changements présents dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et n'ont pas été ajoutés.
 - Les tests `node --test tests/mgmtLot69T1.test.js` passent (4/4). Le scénario couvre offre, changement, arrivée, sauvegarde/rechargement, soirée et lendemain ; le test choc couvre les trois paires, leur programmation/résolution normale, majorités, écrans et invalidités.
