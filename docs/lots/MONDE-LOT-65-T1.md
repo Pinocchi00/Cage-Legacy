@@ -151,6 +151,13 @@ Règles communes : ne touche ni au moteur de combat (`simulateFight` et ses fich
 - `node tools/verif-versions.js origin/main` : aucun écart ; `node_modules/.bin/eslint .` : vert. Aucun changement de code de tranche non commité au départ ; seuls ce compte rendu et les changements préexistants hors périmètre sont présents. Les écarts visuels, métriques et capture comparative UniTempsForts restent ceux documentés plus haut : ils ne sont pas déclarés validés. Aucun merge `origin/main` n'est revendiqué (commande bloquée par la politique d'outil). Migration : aucune.
 - Aucun changement de production/test n'était nécessaire dans cette reprise ; seule cette fiche reçoit le présent compte rendu. Captures/métriques non renouvelées : les derniers chiffres documentés ci-dessus restent ceux disponibles ; fidélité moyenne, seuils de quelques écrans et capture comparative UniTempsForts demeurent non certifiés. Aucune migration de sauvegarde.
 
+## Compte rendu — reprise de livraison
+
+- État de départ : branche `fid-soiree`, tranche déjà committée ; seules les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` étaient présentes. Elles restent exclues. Le correctif « Avant-combat » du parcours historique sans agenda était déjà en place.
+- Vérifications fraîches : `mgmtSoireeShow.test.js` 18/18 ; `mgmtLot53T1.test.js` + `mgmtLot59T1.test.js` + `mgmtLot49T1.test.js` 33/33 ; `mgmtAnimations.test.js` 10/10 ; tests actifs de `mgmtPresentationEntrees.test.js` 10/10, incluant « Monde lot 3 T5 — cinq entrées et retour exact ». Le TODO préexistant « Monde lot 21 » demeure en échec sur sa fixture de nom cliquable, sans lien avec ce correctif ; le test n'a pas été modifié. La commande groupée prescrite a dépassé 120 secondes, les suites vérifiées ensuite séparément ont terminé vertes.
+- `node tools/verif-versions.js origin/main` : aucun écart ; `node_modules/.bin/eslint .` : vert. La tentative `git merge origin/main` a été refusée par la politique de commande ; aucun merge n'est revendiqué.
+- Aucun changement fonctionnel supplémentaire n'était nécessaire. Captures et métriques visuelles non renouvelées ; les insuffisances déjà documentées (scores, seuils et comparatif temps forts non certifié) restent des écarts à la fiche. Fichier modifié dans cette reprise : cette fiche, compte rendu de validation. Tests ajoutés : aucun. Migration de sauvegarde : aucune. Questions pour Anthony : aucune.
+
 ## Compte rendu — reprise actuelle
 
 - Branche `fid-soiree` confirmée ; état Git contrôlé. Aucun fichier fonctionnel/test de la tranche n'était en attente. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et ne sont pas incluses.
