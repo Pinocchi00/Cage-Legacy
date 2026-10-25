@@ -17,6 +17,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 65 — taille du nom du discours
+- Référence d'exécution : branche `fid-choc`, HEAD initial `868229ef`. Les changements préexistants sous `.opencode/agents/` et `opencode.json` restent hors tranche.
+- `ui-cadre.css` fixe le nom principal de `UniDiscours` à 120 px au lieu de l'échelle qui pouvait atteindre 230 px ; cela suit la demande de la reprise (nom ≈120 px) et laisse davantage de place à la citation. Le test structurel cite explicitement la décision de primauté des planches validées.
+- Mesure capture discours : chevauchements=0, textes sous 22 px=0, débordements=[], grosBlocs=16.6%. Capture choc rejouée avant le changement : page visible, chevauchements=0, textes sous 22 px=0, débordements=[], grosBlocs=25.9%, encore au-dessus de la cible 20%. Images comparatives non ouvertes visuellement.
+- Fichiers : `ui-cadre.css` (taille du nom), `index.html` (`?v=`), `tests/mgmtLot69T1.test.js` (assertion de taille et décision), cette fiche. Tests ajoutés : aucun nouveau test autonome ; assertion mise à jour dans le test de tranche. Migration : aucune.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` passent.
+- Écarts restant : mesure choc ≤20% non atteinte ; contrôle du chevauchement de bilan rapporté précédemment non reproduit/corrigé dans cette reprise ; pas de scène de capture arrivée créée ni de cmp arrivé inspecté. Les cases visuelles restantes ne sont donc pas présentées comme terminées.
+
 ### Reprise 24/10 — fidélité des trois affiches choc
 - État initial : branche `fid-choc`, HEAD `be2ec36c`. Aucun fichier de tranche modifié ; les changements utilisateurs sous `.opencode/agents/` et `opencode.json` sont restés hors périmètre.
 - La capture externe demandée pour `choc` a été reproduite avec une proposition valide : l'écran n'est pas blanc. Contrôle : 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, au-dessus de la cible ≤20%.

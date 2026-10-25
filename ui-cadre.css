@@ -2161,6 +2161,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-prenoms{font:800 56px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
 .di3-nom{font:800 clamp(88px,12vw,230px)/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase;margin:0;max-width:1180px;white-space:nowrap}
+/* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_NOM_PLANCHE] — Monde lot 69 T1 ====
+   La planche UniDiscours place le nom autour de 120 px : le viewport ne doit
+   pas le faire grossir jusqu'à 230 px et écraser la citation. ==== */
+.di3-nom{font-size:120px}
+/* ==== [FIN ANCRE] ==== */
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-lignes{display:flex;flex-direction:column;gap:12px;max-width:1180px;margin:0;border-left:4px solid #F0B220;padding:8px 0 8px 24px;font-size:30px;line-height:1.2;font-style:italic}
 .di3-lignes p{margin:0}
