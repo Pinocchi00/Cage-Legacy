@@ -1421,6 +1421,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .oc75-layout{flex:none;height:calc(100% - 84px);min-height:680px}
 .oc75-legacy{flex:none;margin-top:24px}
 .mf-cadre:has(.mf-contenu.oc75) .mf-touches,.mf-ecran:has(.mf-contenu.oc75) .mf-touches{font-size:22px}
+/* ==== [ANCRE: MONDE75_T1_CROISSANCE_TAILLE_MIN] — Monde lot 75 T1 ==== */
+.oc75-legacy,.oc75-legacy *{font-size:max(22px,1em)}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
