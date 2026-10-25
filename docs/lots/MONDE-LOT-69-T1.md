@@ -2,6 +2,13 @@
 
 ## Compte rendu
 
+### Reprise 25/10 — contrôles de capture et tests
+- État Git : branche `fid-choc`, HEAD `a81ec435`. Aucun fichier applicatif ou test de la tranche n'était en attente ; les changements présents dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et n'ont pas été ajoutés.
+- Les tests `node --test tests/mgmtLot69T1.test.js` passent (4/4). Le scénario couvre offre, changement, arrivée, sauvegarde/rechargement, soirée et lendemain ; le test choc couvre les trois paires, leur programmation/résolution normale, majorités, écrans et invalidités.
+- Captures rejouées : choc `grosBlocs=26.2%` (au-dessus de 20%), sans chevauchement, texte sous 22 px ni débordement ; discours `grosBlocs=16.6%`, sans anomalie géométrique ; bilan `grosBlocs=12.9%`, mais chevauchement toujours signalé entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22 px). Le comparatif image n'a pas été inspecté visuellement ; aucune scène d'arrivée dédiée n'a été capturée dans cette reprise.
+- Une tentative CSS pour espacer le titre du bilan n'a pas modifié les mesures, elle a été retirée ; aucun bump CSS n'est conservé. Il n'y a donc aucun changement applicatif, test ajouté, migration ou changement de cache dans cette reprise.
+- Écarts non résolus : seuil des gros blocs choc, chevauchement bilan, inspection des images comparatives et capture dédiée d'arrivée. Les limites sont rapportées honnêtement ; aucune conformité visuelle complète n'est revendiquée.
+
 ### Reprise — raccord exact du bandeau choc
 - Branche `fid-choc` confirmée. Le HEAD contenait déjà les changements de tranche ; le statut initial ne présentait que des modifications utilisateur hors lot (`.opencode/agents/*`, `opencode.json`, `sw.js`), non ajoutées.
 - `ui-cadre.css` : les deux moitiés du bandeau choc se rejoignent maintenant exactement à 50 %, le médaillon VS les séparant comme sur UniChoc. `index.html` mis à jour avec `node tools/_bump.js ui-cadre.css`. Test structurel ajouté dans `tests/mgmtLot69T1.test.js`, avec mention explicite de la décision de primauté des planches validées.
