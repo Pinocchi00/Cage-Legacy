@@ -1,5 +1,13 @@
 # Monde lot 66 T1 — fidélité aux maquettes : le lendemain en deux écrans
 
+### Reprise — ajustement mouvements et vérification — 25/10/2026
+
+- L’état fonctionnel des deux écrans est déjà dans les commits au sommet; branche `fid-lendemain` confirmée. Modifications `.opencode/agents/*`, `opencode.json` et `sw.js` exclues et laissées intactes.
+- Ajustement CSS terminal de la suite : rééquilibrage des trois cellules de mouvements pour donner plus de place aux rangs et à l’organisation, sans remplacer le modèle en trois colonnes. `index.html` versionné via `node tools/_bump.js ui-cadre.css`.
+- Captures exécutées séparément à 1920×1080. Après ajustement, `lendemainSuite` : chevauchements 0, textes <22 px 0, gros blocs 17,6 %, mais quatre alertes de débordement variables persistent (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). `lendemain` : chevauchements 0, textes <22 px 0 et aucun débordement, mais gros blocs 22,8 %; la cible de reprise ≤18 % n’est donc pas satisfaite. Images cmp régénérées par l’outil; aucune inspection manuelle des pixels revendiquée.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). `node tools/verif-versions.js origin/main` et ESLint passent.
+- Fichiers de cette reprise : `ui-cadre.css` (largeurs des cellules de mouvements), `index.html` (cache CSS), cette fiche (résultats). Aucun test ajouté, aucune donnée, navigation, sauvegarde ou mécanique modifiée; pas de migration. Avant/après : meilleure répartition visée mais le comparateur conserve les mêmes alertes de la suite; aucun progrès du ratio lendemain n’est mesuré. Écarts visuels explicites ci-dessus; questions pour Anthony : aucune.
+
 
 Branche : `fid-lendemain` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). **Les maquettes (`docs/planches-uniques/Uni*.dc.html`) sont validées par Anthony : l'écran du jeu doit leur ressembler.** Lis d'abord `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` : un outil capture ton écran à 1920×1080 et le compare à la maquette (`cmp-<écran>.png` : jeu à gauche, maquette à droite). **Utilise-le après chaque étape.**
 
