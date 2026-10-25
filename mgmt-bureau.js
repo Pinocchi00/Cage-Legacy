@@ -307,8 +307,9 @@ function mgmtFighterById(m,id){
      Le champion invité reste dans le roster de son organisation. Le résolveur
      commun permet au combat de soirée de le retrouver sans le copier dans Split. ==== */
   const choc=m.choc;
-  if(choc&&choc.etat==='programme'&&choc.b===id&&m.orgs&&m.orgs[choc.orgId]&&Array.isArray(m.orgs[choc.orgId].roster)){
-    return m.orgs[choc.orgId].roster.find(o=>o&&o.id===id)||null;
+   if(choc&&choc.etat==='programme'&&m.orgs&&m.orgs[choc.orgId]&&Array.isArray(m.orgs[choc.orgId].roster)){
+     const paires=Array.isArray(choc.paires)?choc.paires:[{a:choc.a,b:choc.b}];
+     if(paires.some(p=>p&&p.b===id))return m.orgs[choc.orgId].roster.find(o=>o&&o.id===id)||null;
   }
   return null;
 }

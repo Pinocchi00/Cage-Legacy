@@ -1,0 +1,191 @@
+"use strict";
+/* ==== [ANCRE: TEST_MONDE_LOT69_T1] — Monde lot 69 T1 ==== */
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {newGameWindow}=require('./helpers/loadGame');
+const jouerSoirees=require('./helpers/jouerSoirees');
+
+test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lendemain avec sauvegarde intermédiaire',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6901);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);mgmtOffresCreer(m);m.poste.fin=mgmtCalAujourdhui(m);m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');const cible=Object.keys(m.orgs)[0];m.offres=[{orgId:cible,poste:'ENTRAÎNEUR',salaire:4321,texte:'Proposition de recrutement.',raisons:['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction'],relu:false,refuse:false}];window.confirm=()=>true;window.__lot69Partie=m;G.mgmt=m;`);
+    assert.equal(w.eval(`mgmtCalAujourdhui(G.mgmt)>=G.mgmt.poste.fin`),true,'le parcours commence bien à la fin effective du contrat');
+    const bilan=w.eval(`mgmtPosteBilan(G.mgmt)`);
+    assert.equal(bilan.issue,'prolonge-augmente','la fin de contrat calcule un bilan favorable avant les offres');
+    assert.match(w.eval(`scr_mgmt_poste_bilan()`),/PROLONGÉ/,'le bilan favorable est affiché avant le choix d’offre');
+    const renduOffre=w.eval(`mgmtPosteRendu(G.mgmt)`);
+    for(const raison of ['Effectif expérimenté','Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(renduOffre.includes(raison),`raison d'offre absente: ${raison}`);
+     const ancien=w.eval(`mgmtOrgNom(G.mgmt)`);
+      const serialized=w.eval(`(()=>{const m=G.mgmt,ok=mgmtOffreAccepter(m,0);G.mgmt=m;return ok?'OK:'+mgmtSerialiser(m):'NON'})()`);
+    assert.notEqual(serialized,'NON');
+    assert.equal(w.eval(`G.screen`),'mgmt_arrivee');
+    const org=w.eval(`mgmtPredecesseurOrgId(G.mgmt)`);
+    assert.equal(org,'garden-of-blood');
+     const arrivee=w.eval(`(()=>{const m=G.mgmt;return {org:mgmtOrgNom(m),html:scr_mgmt_arrivee()}})()`);
+       assert.ok(arrivee.org);
+       assert.ok(arrivee.html.includes(arrivee.org),'l’écran d’arrivée doit afficher la nouvelle organisation');
+       assert.notEqual(arrivee.org,ancien,'l’arrivée ne doit pas conserver l’organisation quittée dans l’en-tête');
+       assert.ok(!arrivee.html.includes(ancien),'aucun bloc d’arrivée ne doit réafficher l’ancienne organisation');
+       assert.ok(arrivee.html.includes(`${arrivee.org} Fight Night`),'le libellé latéral doit suivre la nouvelle organisation');
+       assert.match(arrivee.html,/class="ar-bande"[\s\S]*class="ar-tuiles"/,'l’arrivée conserve le bandeau de la nouvelle organisation et ses tuiles de contrat');
+       assert.ok(arrivee.html.includes('mgmt-arrivee') || arrivee.html.includes('ar-'),'l’arrivée conserve sa structure d’écran dédiée');
+     const identiteNouvelle=w.eval(`(()=>{const m=G.mgmt;return {nom:m.org,roster:Array.isArray(m.roster)&&m.roster.length>0}})()`);
+     assert.equal(identiteNouvelle.nom,arrivee.org,'le contrat doit être rattaché à la nouvelle organisation');
+     assert.equal(identiteNouvelle.roster,true,'l’effectif du nouvel employeur doit être visible dans la partie');
+     const saved=serialized.slice(3);
+     const reload=w.eval(`(()=>{const x=mgmtParseAndValidate(${JSON.stringify(saved)}),raw=JSON.parse(${JSON.stringify(saved)});return {valid:!!x,identique:!!x&&mgmtSerialiser(x)===${JSON.stringify(saved)},validation:validateMgmt(raw),monde:mgmtMondeVivantValide(raw)}})()`);
+     assert.equal(reload.valid,true,`la sauvegarde intermédiaire peut être rechargée et validée: ${JSON.stringify(reload)}`);
+     assert.equal(reload.identique,true,'le rechargement conserve exactement la sauvegarde intermédiaire');
+     assert.equal(w.eval(`mgmtSerialiser(G.mgmt)`),saved);
+    w.eval(`G.screen='mgmt_accueil';`);
+    assert.equal(jouerSoirees(w,1),1);
+     const lendemain=w.eval(`(()=>{const m=G.mgmt;return {valid:validateMgmt(m),org:mgmtPredecesseurOrgId(m),played:m.eventsPlayed,loaded:!!mgmtParseAndValidate(mgmtSerialiser(m))}})()`);
+     assert.equal(lendemain.valid,true,'la partie reste valide après la soirée de la nouvelle organisation');
+     assert.equal(lendemain.loaded,true,'la sauvegarde se recharge encore après le lendemain');
+     assert.equal(lendemain.org,'garden-of-blood');
+    assert.ok(lendemain.played>0);
+  }finally{w.close();}
+});
+
+test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs validés par les planches Uni*',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6902);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);G.mgmt=m;`);
+    w.eval(`(()=>{const orgId=Object.keys(G.mgmt.orgs).find(id=>id!=='garden-of-blood'),org=G.mgmt.orgs[orgId],paires=mgmtChocPaires(G.mgmt,orgId),a=paires[0]&&mgmtFighterById(G.mgmt,paires[0].a)||G.mgmt.roster[0],b=paires[0]&&org.roster.find(f=>f.id===paires[0].b)||org.roster[0];G.mgmt.choc={orgId,div:paires[0]&&paires[0].div||'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:a.id,b:b.id,...(paires.length?{paires}:{})}})()`);
+       assert.equal(w.eval(`mgmtChocValide(G.mgmt.choc)`),true);
+       assert.ok(w.eval(`SCREENS.mgmt_choc().length>0`),'la scène de capture choc valide doit produire du HTML avant toute navigation');
+      const orgId=w.eval(`G.mgmt.choc.orgId`);
+     const propositions=w.eval(`G.mgmt.choc.paires?G.mgmt.choc.paires.length:0`);
+      assert.equal(propositions,3,'les trois divisions communes de champions produisent chacune une affiche');
+      const paires=JSON.parse(JSON.stringify(w.eval(`G.mgmt.choc.paires`)));
+      assert.equal(w.eval(`(()=>{const c=JSON.parse(JSON.stringify(G.mgmt.choc));c.paires[1].a=c.paires[0].a;return mgmtChocValide(c)})()`),false,'un champion ne peut pas être engagé dans plusieurs paires du même choc');
+      assert.equal(w.eval(`(()=>{const c=JSON.parse(JSON.stringify(G.mgmt.choc));c.a=c.paires[1].a;return mgmtChocValide(c)})()`),false,'les identifiants historiques du choc doivent désigner sa première affiche');
+      const affiche=w.eval(`(()=>{const c=G.mgmt.choc,o=G.mgmt.orgs[c.orgId],locaux=mgmtChampionIds(G.mgmt),visiteurs=mgmtChampionIds({roster:o.roster,facts:o.facts||[],hist:o.hist||[]});return (c.paires||[]).map(p=>({p,local:locaux.has(p.a),visiteur:visiteurs.has(p.b)}))})()`);
+       assert.ok(affiche.every(x=>x.local&&x.visiteur),'chaque affiche réellement créée oppose des champions présents des deux organisations');
+       assert.equal(new Set(affiche.flatMap(x=>[x.p.a,x.p.b])).size,affiche.length*2,'aucun combattant ne figure dans plusieurs affiches');
+       const rosterSecours=w.eval(`(()=>{const org=G.mgmt.orgs[G.mgmt.choc.orgId],copie=JSON.stringify(org.roster);org.roster=null;G.screen='mgmt_choc';const html=scr_mgmt_choc();org.roster=JSON.parse(copie);return {screen:G.screen,html}})()`);
+       assert.equal(rosterSecours.screen,'mgmt_accueil','un roster adverse malformé renvoie vers l’accueil au lieu de faire planter l’écran');
+       assert.ok(rosterSecours.html.length>0,'le repli sur l’accueil reste rendu si le roster adverse manque');
+       w.eval(`G.mgmt.choc=null;G.mgmt.chocAnnee=-1;`);
+      const propositionReelle=w.eval(`(()=>{const m=G.mgmt;return {ok:mgmtChocProposer(m,${JSON.stringify(orgId)}),choc:m.choc,valide:mgmtChocValide(m.choc)}})()`);
+      assert.equal(propositionReelle.ok,true,'la voie de proposition existante doit construire une proposition de choc exploitable');
+      assert.equal(propositionReelle.valide,true,'la proposition réelle doit respecter le format que consomme l’écran');
+      w.eval(`G.mgmt.choc.etat='recu';G.screen='mgmt_choc';`);
+      const renduProposition=w.eval(`SCREENS.mgmt_choc()`);
+      assert.ok(renduProposition.length>0,'une proposition valide issue de mgmtChocProposer ne doit pas laisser l’écran choc vide');
+      assert.match(renduProposition,/ch3-screen/);
+      w.eval(`CL.go('mgmt_choc')`);
+      const pageChoc=w.eval(`document.getElementById('app').innerHTML`);
+      assert.match(pageChoc,/CHAMPIONNE CONTRE CHAMPIONNE/,'la navigation réelle vers mgmt_choc doit monter le contenu de la proposition dans la page');
+      w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};`);
+      w.eval(`G.screen='mgmt_choc';`);
+    const choc=w.eval(`scr_mgmt_choc()`);
+        for(const texte of ['SPLIT','CHAMPIONNE CONTRE CHAMPIONNE','ch3-fight-heading','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+        const matchmaker=JSON.parse(w.eval(`JSON.stringify(MGMT_MATCHMAKERS[${JSON.stringify(orgId)}])`));
+        assert.ok(choc.includes(matchmaker.nom), 'la colonne de proposition identifie la matchmaker adverse');
+        assert.ok(choc.includes(matchmaker.phrase), 'la citation provient du texte de signature existant de la matchmaker');
+       assert.doesNotMatch(choc,/RETOUR AU POSTE/,'les commandes secondaires ne doivent pas ajouter un bouton absent de la planche UniChoc');
+      assert.match(choc,/<span class="mf-k">Échap<\/span><span>Répondre plus tard · 14 jours<\/span>/,'la barre du bas reprend le délai de réponse indiqué par la planche');
+     assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
+     assert.match(choc,/<span class="mf-k">R<\/span><span>Refuser<\/span>/,'le raccourci de refus doit être visible dans la barre de commandes');
+     assert.match(choc,/<span class="mf-k or">Entrée<\/span><span>Accepter<\/span>/);
+     assert.match(choc,/ch3-vs/);
+     assert.match(choc,/Fiche/);
+       const triple=w.eval(`scr_mgmt_choc()`);
+       assert.equal((triple.match(/class="ch3-paire"/g)||[]).length,3,'le choc rend les trois affiches présentes dans sa proposition');
+         for(const paire of paires){
+           const nomAdverse=w.eval(`G.mgmt.orgs[${JSON.stringify(orgId)}].roster.find(f=>f.id===${JSON.stringify(paire.b)}).name`);
+           assert.ok(triple.includes(nomAdverse),`l’affiche doit afficher la championne adverse réelle: ${nomAdverse}`);
+         }
+        assert.match(triple,/<span class="ch3-vs">C<\/span><strong>[^<]+<\/strong>/,'chaque affiche reprend le médaillon C et le nom de division de la planche');
+        w.eval(`G.mgmt.choc.paires=G.mgmt.choc.paires.slice(0,1);G.screen='mgmt_choc';`);
+        assert.match(w.eval(`scr_mgmt_choc()`),/SI SPLIT GAGNE 1 SUR 1 · PASSE 2e/,'la règle de majorité reflète les paires réellement disputées quand le choc n’en comporte qu’une');
+        w.eval(`G.mgmt.choc.paires=${JSON.stringify(paires)};G.screen='mgmt_choc';`);
+       w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
+       assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.mgmt.choc.paires[1].div='division-incoherente';G.screen='mgmt_choc';scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une paire qui associe des combattants de divisions différentes revient à l’accueil');
+       w.eval(`delete G.mgmt.choc.paires`);
+      assert.equal(w.eval(`mgmtChocValide({orgId:'unknown',div:'PAILLE F',jour:0,annee:1,etat:'recu'})`),false);
+        const retourAccueil=w.eval(`G.mgmt.choc=null;G.screen='mgmt_choc';scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','un choc invalide renvoie vers l’accueil au lieu de rendre une page vide');
+        assert.ok(retourAccueil.length>0,'le rendu de secours ne retourne pas une page vide pendant la redirection vers l’accueil');
+        w.eval(`G.screen='mgmt_choc';G.mgmt.choc=null;CL.go('mgmt_choc')`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','la navigation vers un choc absent revient à l’accueil');
+        assert.ok(w.eval(`document.getElementById('app').innerHTML.trim().length>0`),'le chemin de navigation réel vers un choc absent doit afficher l’accueil plutôt qu’une page blanche');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:'PAILLE F',jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',a:'combattant-absent',b:${JSON.stringify(paires[0].b)}};G.screen='mgmt_choc';`);
+        const referenceAbsente=w.eval(`scr_mgmt_choc()`);
+        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition reçue dont le champion principal manque ne laisse pas l’écran choc blanc');
+        assert.ok(referenceAbsente.length>0,'un choc reçu mal formé retourne le rendu de secours de l’accueil');
+        w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};G.screen='mgmt_choc'`);
+     assert.match(w.eval(`SCREENS.mgmt_choc()`),/CL\.mgmtFiche\(/,'la touche Fiche du choc ouvre la fiche du champion local');
+     const programmation=w.eval(`(()=>{const m=G.mgmt,ok=mgmtChocRepondre(m,true);return {ok,etat:m.choc.etat,jour:m.choc.jour,agenda:m.cal.prochaines.some(s=>s.jour===m.choc.jour)}})()`);
+      assert.equal(programmation.ok,true,'accepter une proposition de choc doit réussir');
+      assert.equal(programmation.etat,'programme','le choc accepté doit être programmé');
+      assert.equal(programmation.agenda,true,'la date du choc accepté doit être dans l’agenda');
+        w.eval(`G.screen='mgmt_accueil';CL.go('mgmt_choc')`);
+        const ecranAccepte=w.eval(`document.getElementById('app').innerHTML`);
+        assert.ok(ecranAccepte.trim().length>0,'le choc accepté/programmé reste rendu lorsqu’on y revient depuis l’Accueil');
+        assert.match(ecranAccepte,/CHAMPIONNE CONTRE CHAMPIONNE/,'le choc programmé conserve son écran exploitable');
+       assert.ok(w.eval(`G.mgmt.roster.some(f=>f.id===G.mgmt.choc.a)`),'le champion Split de la proposition reste associé au choc programmé');
+       assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
+         const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,paires=c.paires;m.cal.prochaines[0].jour=c.jour;m.card.main=paires.map(p=>({a:p.a,b:p.b,cycle:m.cycle,slot:'main'}));m.card.prelims=[];m.card.sizeMain=paires.length;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m),combats=event&&paires.map(p=>event.fights.find(f=>(f.a===p.a&&f.b===p.b)||(f.a===p.b&&f.b===p.a))),traces=paires.map(p=>m.hist.find(h=>h.a&&h.b&&((h.a.id===p.a&&h.b.id===p.b)||(h.a.id===p.b&&h.b.id===p.a))));return {event:!!event,combats:combats&&combats.every(Boolean),traces:traces.every(Boolean),etat:c.etat,resultat:c.resultat,victoires:c.victoires,prestige:m.orgs[c.orgId].chocPrestige||0}})()`);
+        assert.equal(chocJoue.event,true,'la soirée programmée doit passer par le résolveur normal');
+        assert.equal(chocJoue.combats,true,'les trois paires programmées figurent sur la carte principale');
+        assert.equal(chocJoue.traces,true,'les trois résultats rejoignent l’historique normal de la soirée');
+        assert.equal(chocJoue.etat,'termine');
+        assert.ok(['victoire','defaite'].includes(chocJoue.resultat),'le résultat du choc doit être enregistré');
+         assert.equal(w.eval(`G.mgmt.choc.pairesJouees`),3,'les trois affiches jouées sont comptées dans le score final');
+         assert.ok(w.eval(`G.mgmt.choc.victoires>=0&&G.mgmt.choc.victoires<=3`),'le score de victoires sur trois est conservé pour déterminer la majorité');
+         assert.equal(chocJoue.prestige,chocJoue.victoires>=2?1:0,'le prestige augmente exactement lorsque Split gagne la majorité des trois affrontements');
+      w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'surprise',interpelle:G.mgmt.roster[1].id,lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
+      const discours=w.eval(`scr_mgmt_discours()`);
+      for(const texte of ['di3-cartouche','LA SURPRISE DE LA SOIRÉE','di3-nom','di3-lignes','Une citation de contrôle.','S’ADRESSE À ·','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
+      const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+       const classesEcran=[...new Set([...`${choc} ${discours}`.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/).filter(c=>/^(?:ch3|di3)-/.test(c))))];
+       for(const classe of classesEcran) assert.ok(css.includes(`.${classe}`),`la classe visible ${classe} doit avoir une règle CSS dédiée`);
+       for(const selecteur of ['.ch3-title','.ch3-split','.ch3-adverse','.ch3-vs','.ch3-fight','.ch3-quote','.ch3-detail','.ch3-condition','.ch3-actions','.di3-scene','.di3-nom','.di3-lignes','.di3-suite']) assert.ok(css.includes(selecteur),`style de maquette absent: ${selecteur}`);
+      assert.match(css,/\.ch3-screen\{[^}]*display:grid;grid-template-columns:minmax\(0,1\.15fr\) minmax\(0,\.85fr\)/,'le choc dispose une colonne d’affiches et un panneau d’offre côte à côte');
+      assert.match(css,/\.ch3-head,\.ch3-title\{grid-column:1\/-1\}/,'en-tête et bandeau traversent les deux colonnes de la maquette');
+      assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT\][\s\S]*?\.ch3-screen\{grid-template-rows:54px 68px minmax\(0,1fr\);gap:14px\}/,'la géométrie compacte limite la surface occupée par le bandeau choc');
+      assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT2\][\s\S]*?\.ch3-screen\{grid-template-rows:44px 56px minmax\(0,1fr\);gap:10px\}/,'la seconde compaction réduit encore la hauteur des blocs d’en-tête');
+      assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_COMPACT3\][\s\S]*?\.ch3-screen\{grid-template-rows:36px 44px minmax\(0,1fr\);gap:8px\}/,'la troisième compaction garde l’affiche dominante sans réduire les textes sous le minimum lisible');
+       assert.match(css,/\.ch3-fight\{background:none;padding:0\}[\s\S]*?\.ch3-fight>\.ch3-paire\{background:#1B1818/,'les trois affiches sont trois blocs distincts comme sur la planche');
+        assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_DIMENSIONS_PLANCHE\][\s\S]*?\.ch3-paire \.ch3-side b\{font-size:46px\}/,'décision du 24/10 : les maquettes Uni* validées par Anthony priment, les noms reprennent 46 px');
+        assert.match(css,/\.ch3-paire \.ch3-category \.ch3-vs\{width:54px;height:54px;font-size:28px\}/,'décision du 24/10 : les planches Uni* validées par Anthony priment, le médaillon suit les 54 px de UniChoc');
+      assert.match(css,/\.ch3-title[^\{]*\{[^}]*linear-gradient\(90deg,#E9E6E1[^}]*#E23A2B/s,'le bandeau choc conserve les deux couleurs de la planche');
+        assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_DEMI_BANDEAU\][\s\S]*?\.ch3-title\{background:linear-gradient\(90deg,#E9E6E1 0 50%,#E23A2B 50% 100%\)\}/,'décision de fidélité aux planches validées : le bandeau partage exactement ses deux moitiés');
+         assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_BANDEAU_PLANCHE\][\s\S]*?\.ch3-screen\{grid-template-rows:110px minmax\(0,1fr\)\}[\s\S]*?\.ch3-title\{font-size:70px;gap:24px;padding:8px 0\}[\s\S]*?\.ch3-title \.ch3-vs\{width:90px;height:90px;font-size:36px\}/,'décision du 25/10 : le bandeau suit les dimensions mesurées de la planche UniChoc');
+        /* Décision : les planches Uni* validées par Anthony priment ; chaque nom est centré dans sa moitié et le médaillon occupe la jonction. */
+        assert.match(css,/\.ch3-title \.ch3-split,\.ch3-title \.ch3-adverse\{display:flex;flex:1;align-items:center;min-width:0\}/,'les noms sont distribués de part et d’autre du VS selon UniChoc');
+        assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
+       assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');
+       assert.match(css,/\.ch3-button\.ch3-refuse\{[^}]*background:#E23A2B/s,'refuser est identifié par le rouge de la charte');
+        /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, nom de famille à 230 px. */
+        assert.match(css,/\.di3-nom\{font-size:230px\}/,'le nom du discours reprend les 230 px de UniDiscours');
+      assert.doesNotMatch(css,/\.ch3-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'aucune animation CSS ne doit être ajoutée au choc');
+      assert.doesNotMatch(css,/\.(?:ch3|di3)-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'les écrans choc et discours restent sans animation CSS conformément à la décision du 07/10');
+  }finally{w.close();}
+});
+
+test('Monde lot 69 T1 — les raisons d’offre restent échappées dans le bilan du poste',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(6903);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);m.offres=[{orgId:Object.keys(m.orgs)[0],poste:'ENTRAÎNEUR',salaire:4321,texte:'Offre de contrôle',raisons:['<img src=x onerror=alert(1)>','Résultats récents','Projet sportif','Confiance de la direction'],refuse:false}];G.mgmt=m;`);
+     const rendu=w.eval('mgmtPosteRendu(G.mgmt)');
+     assert.equal((rendu.match(/class="po2-raison"/g)||[]).length,4,'les quatre raisons sont isolées comme liste dans l’offre');
+    assert.ok(rendu.includes('&lt;img src=x onerror=alert(1)&gt;'));
+    assert.ok(!rendu.includes('<img src=x onerror=alert(1)>'));
+    assert.equal(w.eval('G.mgmt.offres[0].raisons.length'),4,'une offre du bilan présente exactement quatre raisons');
+    assert.equal(w.eval('new Set(G.mgmt.offres[0].raisons).size'),4,'les quatre raisons d’offre doivent rester distinctes');
+     for(const raison of ['Résultats récents','Projet sportif','Confiance de la direction']) assert.ok(rendu.includes(raison),`raison absente du bilan: ${raison}`);
+      const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+      assert.match(css,/\.po2-offre>p\.po2-raison\{[^}]*border-left:3px solid #F0B220/,'les raisons sont séparées visuellement du texte de l’offre');
+  }finally{w.close();}
+});
+
+test('Monde lot 69 T1 — le parcours de tranche est inclus aux suites standard et watch',()=>{
+  const packageJson=require('../package.json');
+  assert.match(packageJson.scripts.test,/tests\/mgmtLot69T1\.test\.js/);
+  assert.match(packageJson.scripts['test:watch'],/tests\/mgmtLot69T1\.test\.js/);
+});

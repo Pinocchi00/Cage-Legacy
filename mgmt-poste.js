@@ -148,8 +148,25 @@ function mgmtChocAnnee(m){
   const jour=m&&m.cal&&Number.isSafeInteger(m.cal.jour)?m.cal.jour:0;
   return typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():0;
 }
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_PAIRES] — Monde lot 69 T1 ====
+   Les affiches restent limitées aux catégories où les deux organisations ont
+   un champion réel ; leur ordre suit le roster local, de façon déterministe. */
+function mgmtChocPaires(m,orgId){
+  const org=m&&m.orgs&&m.orgs[orgId],ids=mgmtChampionIds(m||{}),adverses=mgmtChampionIds(org||{});
+  const prises=new Set(),paires=[];
+  for(const a of m&&m.roster||[]){
+    if(!a||!ids.has(a.id)||prises.has(a.div))continue;
+    const b=(org&&org.roster||[]).find(f=>f&&f.div===a.div&&adverses.has(f.id));
+    if(!b)continue;
+    prises.add(a.div);paires.push({div:a.div,a:a.id,b:b.id});
+    if(paires.length===3)break;
+  }
+  return paires;
+}
 function mgmtChocValide(choc){
-  return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee)&&(!Object.hasOwn(choc,'resultat')||['victoire','defaite'].includes(choc.resultat))&&(!Object.hasOwn(choc,'a')||typeof choc.a==='string')&&(!Object.hasOwn(choc,'b')||typeof choc.b==='string');
+  const paires=choc&&choc.paires;
+  const pairesValides=!Object.hasOwn(choc||{},'paires')||Array.isArray(paires)&&paires.length>0&&paires.length<=3&&new Set(paires.map(p=>p&&p.div)).size===paires.length&&new Set(paires.flatMap(p=>p?[p.a,p.b]:[])).size===paires.length*2&&paires.every(p=>p&&typeof p.div==='string'&&typeof p.a==='string'&&typeof p.b==='string'&&p.a!==p.b)&&paires[0].a===choc.a&&paires[0].b===choc.b&&paires[0].div===choc.div;
+  return !!choc&&typeof choc==='object'&&!Array.isArray(choc)&&typeof choc.orgId==='string'&&!!mgmtOrgParId(choc.orgId)&&typeof choc.div==='string'&&Number.isSafeInteger(choc.jour)&&choc.jour>=0&&['recu','propose','accepte','refuse','programme','termine'].includes(choc.etat)&&Number.isInteger(choc.annee)&&(!Object.hasOwn(choc,'resultat')||['victoire','defaite'].includes(choc.resultat))&&(!Object.hasOwn(choc,'victoires')||Number.isSafeInteger(choc.victoires)&&choc.victoires>=0)&&(!Object.hasOwn(choc,'pairesJouees')||Number.isSafeInteger(choc.pairesJouees)&&choc.pairesJouees>=1&&choc.pairesJouees<=3)&&(!Object.hasOwn(choc,'a')||typeof choc.a==='string')&&(!Object.hasOwn(choc,'b')||typeof choc.b==='string')&&pairesValides;
 }
 function mgmtChocProposition(m){
   if(!m||!m.mondeVivant||m.choc&&mgmtChocValide(m.choc)&&m.choc.annee===mgmtChocAnnee(m))return null;
@@ -157,7 +174,7 @@ function mgmtChocProposition(m){
   const meilleure=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,rank:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.rank>=0).sort((a,b)=>a.rank-b.rank)[0];
   if(!meilleure)return null;
   const partenaires=MGMT_ORGANISATIONS.filter(o=>o.id!==active&&m.orgs&&m.orgs[o.id]).map(o=>({o,r:(rangs.find(x=>x.id===o.id)||{}).rang||8})).filter(x=>{
-    const c=(m.orgs[x.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[x.o.id].roster||[]}).has(f.id));
+    const c=(m.orgs[x.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds(m.orgs[x.o.id]).has(f.id));
     return !!c;
   }).sort((a,b)=>a.r-b.r);
   if(!partenaires.length)return null;
@@ -166,9 +183,11 @@ function mgmtChocProposition(m){
   if(!stream)return null;
   const candidat=partenaires.find(({r})=>stream()<MGMT_CHOC_PROPOSITION_PAR_RANG[Math.max(0,Math.min(7,r-1))]);
   if(!candidat)return null;
-   const adverse=(m.orgs[candidat.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds({roster:m.orgs[candidat.o.id].roster||[]}).has(f.id));
+   const adverse=(m.orgs[candidat.o.id].roster||[]).find(f=>f&&f.div===meilleure.f.div&&mgmtChampionIds(m.orgs[candidat.o.id]).has(f.id));
    if(!adverse)return null;
-   m.choc={orgId:candidat.o.id,div:meilleure.f.div,jour:typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0,annee,etat:'recu',a:meilleure.f.id,b:adverse.id};
+   const paires=mgmtChocPaires(m,candidat.o.id);
+   const premiere=paires[0];
+   m.choc={orgId:candidat.o.id,div:premiere?premiere.div:meilleure.f.div,jour:typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0,annee,etat:'recu',a:premiere?premiere.a:meilleure.f.id,b:premiere?premiere.b:adverse.id,...(paires.length?{paires}: {})};
   return m.choc;
 }
 function mgmtChocRepondre(m,accepte){
@@ -187,10 +206,12 @@ function mgmtChocProposer(m,orgId){
   const champion=(m.roster||[]).filter(f=>mgmtChampionIds(m).has(f.id)).map(f=>({f,r:(mgmtDivisionRanking(m,f.div,'world')||[]).findIndex(x=>x.id===f.id)})).filter(x=>x.r>=0).sort((a,b)=>a.r-b.r)[0];
   const org=MGMT_ORGANISATIONS.find(o=>o.id===orgId&&o.id!==active&&m.orgs&&m.orgs[o.id]);
   if(!champion||!org)return false;
-  const adversaire=(m.orgs[org.id].roster||[]).find(f=>f&&f.div===champion.f.div&&mgmtChampionIds({roster:m.orgs[org.id].roster||[]}).has(f.id));
+  const adversaire=(m.orgs[org.id].roster||[]).find(f=>f&&f.div===champion.f.div&&mgmtChampionIds(m.orgs[org.id]).has(f.id));
   if(!adversaire)return false;
   const annee=mgmtChocAnnee(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
-  m.choc={orgId:org.id,div:champion.f.div,jour,annee,etat:mgmtChocTirageAcceptation(m,org.id)?'accepte':'refuse',propose:true,a:champion.f.id,b:adversaire.id};
+   const paires=mgmtChocPaires(m,org.id);
+   const premiere=paires[0];
+   m.choc={orgId:org.id,div:premiere?premiere.div:champion.f.div,jour,annee,etat:mgmtChocTirageAcceptation(m,org.id)?'accepte':'refuse',propose:true,a:premiere?premiere.a:champion.f.id,b:premiere?premiere.b:adversaire.id,...(paires.length?{paires}: {})};
   if(m.choc.etat==='accepte'){
     for(let j=jour+42;j<=jour+70;j++)if(mgmtAgendaPoser(m,j,'petite').ok){m.choc.jour=j;m.choc.etat='programme';return true;}
     m.choc.etat='refuse';
