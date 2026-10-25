@@ -2269,6 +2269,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article{display:block;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;contain:layout paint;overscroll-behavior:contain}
 .ce3-carnet-ecran .ce3-carnet>article h2{font-size:26px;line-height:1.08;margin:0 0 8px}
 .ce3-carnet-ecran .ce3-carnet>article>p{font-size:22px;line-height:1.12;margin:0;padding:5px 0;overflow-wrap:anywhere}
+/* ==== [ANCRE: MONDE70_T1_CARNET_FLUX_VERTICAL] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran{position:absolute;inset:108px 56px 132px 300px;width:auto;height:auto;max-height:none;display:flex;flex-direction:column;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet{display:grid;box-sizing:border-box;width:100%;height:0;flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:12px;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-width:0;min-height:0;max-height:100%;overflow:auto;contain:layout paint}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE70_T1_POSTE_COLONNE_RESSERREE] — Monde lot 70 T1 ==== */
 .po2-scene{top:112px;bottom:184px;height:auto;max-height:none;overflow:hidden}
 .po2-scene>.po2-grid>.po2-card{overflow-y:auto;contain:layout paint}
