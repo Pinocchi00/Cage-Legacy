@@ -2933,6 +2933,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet-faits .ce3-carnet-liste>p{box-sizing:border-box;min-height:48px;max-width:100%;margin:0;padding:6px 0;display:flex;align-items:center;gap:12px;overflow-wrap:anywhere}
 .ce3-carnet-ecran .ce3-carnet-faits .ce3-carnet-espoirs-titre{margin:10px 0 6px!important}
 .ce3-carnet-ecran .ce3-carnet-defis-panel>.ce3-carnet-defis{box-sizing:border-box;min-height:0;height:100%;max-height:100%;overflow:auto;overscroll-behavior:contain;contain:strict}
+.ce3-carnet-ecran .ce3-carnet-faits-contenu{box-sizing:border-box;min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;contain:layout paint}
+.ce3-carnet-ecran .ce3-carnet-faits-contenu>.ce3-carnet-liste{height:auto;min-height:0;max-height:none;overflow:visible;contain:none}
+.ce3-carnet-ecran .ce3-carnet-faits-contenu>.ce3-carnet-espoirs-titre{margin:10px 0 6px;}
+.ce3-carnet-ecran .ce3-carnet-faits-contenu>.ce3-carnet-liste>p{box-sizing:border-box;min-height:48px;max-width:100%;margin:0;padding:6px 0;display:flex;align-items:center;gap:12px;overflow-wrap:anywhere}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;background:#0D0B0B;color:#E9E6E1}
