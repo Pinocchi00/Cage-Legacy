@@ -19,6 +19,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise capture finale — 25/10/2026
+
+- Historique revu (`9cfb014c` et commits précédents) : l’implémentation des écrans et leurs tests sont déjà commités. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` ne sont pas à cette tranche et restent intacts.
+- Capture lue dans le guide et relancée à 1920×1080. `lendemain` : aucun chevauchement, texte sous 22 px ou débordement, mais `grosBlocs=22,8%` (moyen 28,9%). `lendemainSuite` : aucun chevauchement ni texte sous 22 px, `grosBlocs=17,7%`, mais quatre débordements variables de la colonne mouvements (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). Les comparaisons `cmp-lendemain.png` et `cmp-lendemainSuite.png` ont été générées par l’outil dans son dossier temporaire.
+- Tentative mesurée : ramené le nom principal de 108 à 80 px (les trois noms restent ≥64 px); la capture demeure à 22,8 %, sans améliorer le seuil. L’essai ne résout pas les défauts de contenance de la suite. Le compte rendu conserve ces écarts plutôt que de prétendre la fidélité visuelle complète.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30). `mgmtSoireeShow.test.js` a dépassé deux fois le délai de 120 secondes sans résultat final. `node tools/verif-versions.js origin/main` passe; ESLint passe sans sortie.
+- Fichiers modifiés dans cette reprise : `ui-cadre.css` (essai d’échelle de la surprise), `index.html` (version de cache), cette fiche. Aucun test nouveau, aucune migration, aucune donnée ou mécanique modifiée.
+- Écarts encore ouverts : gros blocs du lendemain au-dessus de l’objectif de reprise ≤18 % et débordements de mouvements dans la suite; le critère de capture complète n’est pas satisfait. Questions pour Anthony : aucune.
+
 ### Reprise finale 25/10/2026
 
 - Branche `fid-lendemain` confirmée. Historique `git log --oneline -12` : le lot est déjà commité; changements locaux aux agents OpenCode, `opencode.json` et `sw.js` restent hors tranche et intacts.
