@@ -314,7 +314,8 @@ function mfEntetePastilles(t){
 
 /** Un écran du cadre : le fond cendré, l'en-tête, la barre, le contenu, les touches.
  *  opts : {barre:'jeu'|'demarrage'|'aucune', courant, grise, m, plaque, libelle, droite, droiteHtml, touches, fond:'cendre'|'teinte', couleur, contenuBrut}
- *  `droiteHtml` (Monde lot 19 T14) : une droite déjà en HTML (des plaques), pour les écrans du Duo ; `droite` reste du texte échappé. */
+ *  `droiteHtml` (Monde lot 19 T14) : une droite déjà en HTML (des plaques), pour les écrans du Duo ; `droite` reste du texte échappé.
+ *  `prise:false` supprime le rappel global quand l'écran porte déjà ses propres actions. */
 function mfEcran(contenu,opts={}){
   const o=Object.assign({barre:'jeu',courant:null,grise:false,m:null,plaque:'',libelle:'',droite:'',touches:null,couleur:''},opts);
   /* ==== [ANCRE: MONDE70_T1_MASQUER_PROCHAINE_ETAPE] — Monde lot 70 T1 ==== */
@@ -329,7 +330,7 @@ function mfEcran(contenu,opts={}){
     :mfBarreHtml({mode:o.barre,courant:o.courant,grise:o.grise,m:o.m}));
   return `<div class="mf-ecran${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond"></div>`
     +(o.couleur?`<div class="mf-teinte" style="--mf-couleur:${esc(o.couleur)}"></div>`:'')
-    +entete+contenu+barre+(o.touches?mfTouchesHtml(o.touches):'')+(afficherPrise&&o.barre==='jeu'&&typeof mfPriseHtml==='function'?mfPriseHtml(o.m,G&&G.screen,o.grise):'')+`</div></div>`;
+    +entete+contenu+barre+(o.touches?mfTouchesHtml(o.touches):'')+(afficherPrise&&o.barre==='jeu'&&o.prise!==false&&typeof mfPriseHtml==='function'?mfPriseHtml(o.m,G&&G.screen,o.grise):'')+`</div></div>`;
 }
 
 /** Un écran ancien, dans son habillage actuel, posé dans le cadre sous la barre des sections. */

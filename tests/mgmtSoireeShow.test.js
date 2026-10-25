@@ -47,7 +47,8 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   assert.equal(win.eval(`document.querySelectorAll('.mf-so-lg').length`),9,'les neuf combats de la carte');
   touche(win,'Enter');
   assert.ok(maj(win).includes('REGARDER LE COMBAT')); assert.ok(maj(win).includes('PASSER')); assert.ok(maj(win).includes('AVANT-COMBAT'));
-  assert.equal(win.eval(`document.querySelectorAll('.mf-so-tag').length`),9,'les neuf pastilles');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.equal(win.eval(`document.querySelectorAll('.so3-ligne').length`),9,'les neuf lignes de la carte en cours');
   /* ==== [ANCRE: TEST_MGMT_PRESENTATION_SOIREE_RUBRIQUES] — Monde lot 3 T5 ==== */
   touche(win,'f'); assert.equal(win.eval(`G.screen`),'mgmt_soiree_avant'); assert.ok(maj(win).includes('CE QUI LE REND UNIQUE'));
   assert.ok(maj(win).includes('CE QUE CHACUN IMPOSE')); assert.ok(maj(win).includes('LEUR HISTOIRE')); assert.ok(maj(win).includes('LES PRONOSTICS'));
@@ -57,8 +58,12 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   for(let i=0;i<8;i++) touche(win,'p');
   assert.equal(win.eval(`MGMT_SOIREE.index`),8); assert.ok(maj(win).includes('COMBAT PRINCIPAL'),'l\'attente du principal');
   touche(win,'p'); assert.equal(win.eval(`MGMT_SOIREE.index`),9);
-  /* Décision du brief du 22/10, P7 (écrans) : la fin de soirée est celle de la planche UniSoireeFin, dont le bouton mène « Voir le lendemain ». */
-  assert.ok(maj(win).includes('VOIR LE LENDEMAIN')); assert.ok(texte(win).includes('Les sections sont rouvertes')); assert.ok(maj(win).includes('JOUÉ'));
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.ok(maj(win).includes('LE LENDEMAIN')); assert.ok(texte(win).includes('LA SOIRÉE'));
+  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-prime').length`),2);
+  assert.equal(win.eval(`document.querySelectorAll('.mf-so-bande').length`),0);
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche et ne répète pas son titre dans le contenu. */
+  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-titre').length`),0);
 });
 
 test('Pendant la soirée, aucune section de la barre ne s\'ouvre ; elles se rouvrent à la fin', () => {
