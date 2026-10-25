@@ -115,7 +115,7 @@ function mgmtAccueilContenu(m){
   }
   /* Et ailleurs ? Le classement mondial d'une catégorie qui tourne avec les semaines, puis la presse. */
   const ailleurs=[];
-  for(const f of (m.croissanceActus||[]).slice(-5)) if(f&&typeof f.texte==='string') ailleurs.push({parts:[mgmtAccueilT(f.texte)],detail:'Palier de croissance · presse'});
+  for(const f of (m.croissanceActus||[]).slice(-5)) if(f&&typeof f.texte==='string') ailleurs.push({parts:[mgmtAccueilT(f.texte)]});
   const divs=allDivisions();
   if(divs.length){
     const div=divs[(m.cycle||0)%divs.length];
@@ -229,7 +229,7 @@ function mgmtAccueilPasse(m,c){
   const rows=anciens.map((r,i)=>`<div class="mf-ac-ev${i===MGMT_ACCUEIL.cur?' sel':''}"><i class="mf-oct mf-ac-oct"></i>`
     +`<div class="mf-ac-evt"><div class="mf-ac-evp">${mgmtAccueilParts(m,r.parts)}</div><div class="mf-ac-rs">${esc(r.detail)}</div></div>`
     +(r.menu?`<span class="mf-ac-menu">${esc(r.menu.toUpperCase())}</span>`:'')+`</div>`).join('')+actuRows.map(x=>`<button type="button" class="mf-ac-ev" onclick="CL.mgmtAccueilActu('${escJsAttr(x.cle)}')"><i class="mf-oct mf-ac-oct"></i><div class="mf-ac-evt"><div class="mf-ac-evp"><b>${esc(x.nom)}</b> · ${esc(x.titre)}</div><div class="mf-ac-rs">${esc(x.texte)}</div></div><span class="mf-ac-menu">ACTUALITÉS</span></button>`).join('');
-  const touches=c.passe.length?`<div class="mf-ac-aide">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir · </span>${mfTouche('Entrée')}<span>Ouvrir la fiche</span></div>`:'';
+  const touches=c.passe.length?`<div class="mf-ac-aide"><span class="mf-ac-aide-groupe">${mfTouche('↑')}${mfTouche('↓')}<span>Choisir</span></span><span class="mf-ac-aide-groupe">${mfTouche('Entrée')}<span>Ouvrir la fiche</span></span></div>`:'';
   /* ==== [ANCRE: ACCUEIL_PASSE_SUITE_REPRISE] — Monde lot 12 T2 ==== */
   const suite=c.passe.length>MGMT_ACCUEIL_MAX_PASSE?`<button type="button" class="mf-ac-lien" data-famille="passe" onclick="CL.go('mgmt_effectif')">${esc(MGMT_ACCUEIL_TEXTES.voirTout.texte)}</button>`:'';
   return mfPanneau(mgmtAccueilTitre('CE QUI S’EST PASSÉ','Cette semaine')+(mgmtActuNonLues(m)?`<span class="mf-ac-rs">${mgmtActuNonLues(m)} non lues</span>`:'')+rows+suite+touches,'normal','mf-ac-p mf-ac-c5');
@@ -257,7 +257,7 @@ function mgmtAccueilSaison(m,c){
    const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
    const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
-  return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
+    return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
 }
 /** La première arrivée : l'héritage (organisation, dernière soirée, champions, promesses). */
 function mgmtAccueilHeritage(m,c){
@@ -292,15 +292,22 @@ function scr_mgmt_accueil(){
   }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
   const retourRecruteur=m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0];
   const karim=retourRecruteur?mfPanneau(`<p class="mf-ac-rs">Karim est rentré${retourRecruteur.bredouille?' bredouille':''} · <button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button></p>`,'normal','mf-ac-p'):'';
-   const posteLien=m.poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'';
    const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
    const ceremonieVisible=Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0;
      const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?`<div class="mf-ac-semaine"><b>LA SEMAINE DU COMBAT</b><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button></div>` : '';
     /* ==== [ANCRE: P10_T4_RANG_FINAL_ACCUEIL] — Monde lot 57 T1 ==== */
     const guerre=m.guerre&&Number.isInteger(m.guerre.rangFinal)?mfPanneau(`<h2 class="mf-ac-titre">LE CLASSEMENT DES HUIT</h2><p>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit.</p><button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`,'normal','mf-ac-p'):'';
-    const bilanLien=`${ceremonieVisible?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button>`:''}${bilanVisible?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''}`;
   const espoirsDansAttente=espoirHtml;
-   const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>${guerre}${posteLien}${bilanLien}`;
+    /* ==== [ANCRE: ACCUEIL_LIENS_COMPLEMENTAIRES] — Réparation PR 259 ==== */
+    const liensAccueil=[
+      m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'',
+      guerre?`<button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`:'',
+      ceremonieVisible?`<button type="button" onclick="CL.go('mgmt_ceremonie')">Revoir la cérémonie</button>`:'',
+      bilanVisible?`<button type="button" onclick="CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''
+    ].filter(Boolean).join('');
+    const rangFinal=guerre?`<span>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit</span>`:'';
+    const rangeeLiens=liensAccueil||rangFinal?`<div class="mf-ac-liens-complementaires">${rangFinal}${liensAccueil}</div>`:'';
+    const corps=`${karim}${rangeeLiens}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

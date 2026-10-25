@@ -1352,11 +1352,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mf-sem-p .mgmt-org-main,.mf-ancien .mf-sem-p .mgmt-org-aside{height:100%;overflow-y:auto;padding:22px 24px 26px;box-sizing:border-box}
 .mf-ancien .mgmt-org-sum{font:600 24px/1.2 var(--mgmt-font-body);color:var(--mgmt-secondary);margin:0 0 18px}
 .mf-ancien .mgmt-org-hd{font:800 34px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1;margin:14px 0 10px}
-.mf-ancien .mgmt-org-eff{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mf-ancien .mgmt-org-eff{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .mf-ancien .mgmt-org-cat{padding:12px 16px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-ancien .mgmt-org-cat.thin{box-shadow:inset 4px 0 0 var(--mf-jaune)}
 .mf-ancien .mgmt-org-nm{font:800 30px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1}
-.mf-ancien .mgmt-org-sub{font:600 22px/1.2 var(--mgmt-font-body);color:var(--mgmt-secondary);margin-top:4px}
+.mf-ancien .mgmt-org-sub{font:600 24px/1.15 var(--mgmt-font-body);color:var(--mgmt-secondary);margin-top:4px;overflow-wrap:anywhere}
 .mf-ancien .mgmt-org-money{display:flex;flex-direction:column;gap:6px;margin:0 0 18px}
 .mf-ancien .mgmt-org-pill{display:inline-flex;align-self:flex-start;height:32px;padding:0 12px;align-items:center;background:#E9E6E1;color:#0D0B0B;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase}
 .mf-ancien .mgmt-org-val{font:800 64px/.8 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);color:#E9E6E1}
@@ -1382,6 +1382,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .cr3-title span{min-width:0;overflow-wrap:anywhere}
 .cr3-step small{font-size:24px;line-height:1.16;white-space:normal;overflow-wrap:anywhere}
 .cr3-track span{font-size:24px;line-height:1.16;white-space:normal;overflow-wrap:anywhere}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_ET_DEBORDEMENT] — Monde lot 70 T1 ==== */
+.mf-ancien .cr3-step small,.mf-ancien .cr3-track span{font-size:24px;line-height:1.16;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.mf-ancien .cr3-effects{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
+.mf-ancien .cr3-track{box-sizing:border-box;min-width:0;overflow-wrap:anywhere}
+.mf-ancien .cr3-track b,.mf-ancien .cr3-track span{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.mf-ancien .cr3-track b{white-space:normal;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
@@ -1881,6 +1888,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac .mf-ac-cols{min-height:0;flex:1 1 0;overflow:hidden;max-height:100%}
 .mf-ac .mf-ac-cols>.mf-ac-p{min-height:0;overflow:auto}
 .mf-ac .mf-ac-cols>.mf-ac-saison{overflow:hidden}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_RACCOURCIS] — Monde lot 70 T1 ==== */
+.mf-ac-raccourcis{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;max-height:96px;overflow:auto}
+.mf-ac-raccourcis .po2-lien{font-size:22px;line-height:1;padding:6px 10px}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_RACCOURCIS_BORNEE] — Monde lot 70 T1 ==== */
+.mf-ac-saison>.mf-p2>.mf-p3{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.mf-ac-saison>.mf-p2>.mf-p3>.mf-ac-raccourcis{flex:none;max-height:72px;margin-top:auto;overflow-y:auto}
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_COLONNES_BORNEES] — Monde lot 64 T1 ==== */
 .mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2,.mf-ac .mf-ac-cols>.mf-ac-p>.mf-p2>.mf-p3{min-height:0;max-height:100%;box-sizing:border-box}
 .mf-ac .mf-ac-cols>.mf-ac-p{flex-basis:0}
@@ -1927,7 +1940,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: ACCUEIL_NOMS_ENTIERS] — Monde lot 12 T2 ==== */
 .mf-ac .mf-ac-nom{white-space:normal;overflow:visible;overflow-wrap:anywhere;max-width:100%}
 .mf-ac-menu{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;border:2px solid var(--mf-sep);padding:5px 8px}
-.mf-ac-aide{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:22px;line-height:1;color:var(--mf-texte2);flex:none}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_ESPACEES] — Monde lot 70 T1 ==== */
+.mf-stage:has(.mf-ac) .mf-touches{gap:42px}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_GROUPES] — Monde lot 70 T1 ==== */
+.mf-stage:has(.mf-ac) .mf-touche-g{gap:20px}
+.mf-stage:has(.mf-ac) .mf-touche-g button{gap:20px}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_AIDE_UNIQUE] — Monde lot 70 T1 ==== */
+.mf-ac-aide{display:none}
+/* ==== [ANCRE: MONDE70_T1_ACCUEIL_TOUCHES_GROUPEES] — Monde lot 70 T1 ==== */
+.mf-ac-aide{flex-wrap:nowrap;justify-content:space-between;gap:14px;min-width:0}
+.mf-ac-aide-groupe{display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0}
 .mf-ac-jaune{flex:none;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
 .mf-ac-jl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em}
 .mf-ac-jt{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.85}
@@ -2083,7 +2105,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-item{align-items:flex-start;gap:16px;padding:14px 16px;background:#1B1818}.mgmt-ac-item.choisi{background:#E9E6E1;color:#0D0B0B}.mgmt-ac-type{width:132px;flex:none;font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}.mgmt-ac-item.choisi .mgmt-ac-type{color:#B32A1E}.mgmt-ac-copy{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.mgmt-ac-copy b{font-size:26px;line-height:1.05;font-weight:600}.mgmt-ac-copy small{line-height:1.1}.mgmt-ac-detail{gap:18px}.mgmt-ac-detail h2{font-size:48px;line-height:.9}.mgmt-ac-detail p{font-size:24px;line-height:1.2}.mgmt-ac-stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:2px solid rgba(233,230,225,.16);font-size:24px;color:rgba(233,230,225,.74)}.mgmt-ac-stat b{font:800 30px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#E9E6E1;text-align:right}
 /* ==== [ANCRE: MONDE33_T2B_ECARTS_PLANCHE] — Monde lot 33 T2b ==== */
 .mgmt-ac-follow-panel .mf-p3{gap:0}.mgmt-ac-follow-panel .mgmt-ac-filters{justify-content:flex-start;gap:8px;margin-top:32px}.mgmt-ac-follow-group{margin:72px 0 0 12px;font:600 22px/1 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74);text-transform:uppercase}.mgmt-ac-follow-group+.mgmt-ac-follow{margin-top:16px}.mgmt-ac-follow{padding-left:28px}.mgmt-ac-follow>span:first-child{margin-left:0}.mgmt-ac-follow .mgmt-ac-unread-count{margin-left:auto;width:30px;height:30px;padding:0;background:#F0B220;color:#0D0B0B;font:800 22px/30px 'Saira Extra Condensed',sans-serif;text-align:center}
-.mgmt-ac-feedhead{position:relative}.mgmt-ac-feedhead>span{position:absolute;right:0;top:0;font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}.mgmt-ac-feedhead>button{margin-left:auto;font:500 22px 'Saira Condensed',sans-serif}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:0}.mgmt-ac-group{font-weight:600}.mgmt-ac-item{gap:16px}.mgmt-ac-copy{gap:11px}.mgmt-ac-stat{min-height:52px;padding:0 0 8px;box-sizing:border-box}
+.mgmt-ac-feedhead{position:relative;padding-right:180px;min-height:36px;box-sizing:border-box}.mgmt-ac-feedhead>span{position:absolute;right:0;top:0;font:600 22px 'Saira Condensed',sans-serif;color:rgba(233,230,225,.74)}.mgmt-ac-feedhead>button{margin-left:auto;font:500 22px 'Saira Condensed',sans-serif}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:0}.mgmt-ac-group{font-weight:600}.mgmt-ac-item{gap:16px}.mgmt-ac-copy{gap:11px}.mgmt-ac-stat{min-height:52px;padding:0 0 8px;box-sizing:border-box}
 /* ==== [ANCRE: MONDE64_T1_ACTUALITES_ETAT_VIDE] — Monde lot 64 T1 ==== */
 .mgmt-ac-empty{font-size:24px;line-height:1.2;color:rgba(233,230,225,.74);margin:12px 0}
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-detail>.mgmt-ac-actions{margin-top:auto;display:flex;flex-direction:column;gap:30px}.mgmt-ac-actions button{height:38px;display:flex;align-items:center;gap:14px;border:0;background:transparent;color:#E9E6E1;text-align:left;font:800 28px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}.mgmt-ac-actions button kbd{width:32px;height:38px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border:2px solid rgba(233,230,225,.6);font:400 24px 'Saira Condensed',sans-serif;text-transform:none}.mgmt-ac-actions button.principale{color:#0D0B0B}.mgmt-ac-actions button.principale kbd{background:#F0B220;border-color:#F0B220}.mgmt-ac-stat+.mgmt-ac-stat{margin-top:0}.mgmt-ac-follow-panel .mf-p3>.mgmt-ac-filters{margin-bottom:0}.mgmt-ac-feed-panel .mf-p3{gap:0}.mgmt-ac-feedhead{min-height:32px}.mgmt-ac-feedhead+.mgmt-ac-group{margin-top:32px}.mgmt-ac-item{min-height:94px;padding:14px 16px}.mgmt-ac-type{width:132px}.mgmt-ac-copy{max-width:427px}
@@ -2177,7 +2199,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{height:auto;min-height:0;max-height:none;line-height:1.15;overflow:visible;overflow-wrap:anywhere;word-break:normal}
 .mgmt-ac-detail-body h2{font-size:30px}
 /* ==== [ANCRE: POSTE_ECRAN_STYLE] — Monde lot 48 T1 ==== */
-.po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:856px}
+.po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:824px}
+/* ==== [ANCRE: MONDE70_T1_POSTE_SCROLL] — Monde lot 70 T1 ==== */
+.po2-scene{box-sizing:border-box;max-height:calc(100% - 224px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.po2-scene>.po2-grid{min-height:0}
+/* ==== [ANCRE: MONDE70_T1_POSTE_PANNEAUX_BORNES] — Monde lot 70 T1 ==== */
+.po2-scene{display:flex;flex-direction:column;min-height:0}
+.po2-scene>.po2-grid{flex:1;min-height:0;grid-template-rows:minmax(0,1fr)}
+/* ==== [ANCRE: MONDE70_T1_POSTE_ZONE_UTILE] — Monde lot 70 T1 ==== */
+.po2-scene{height:auto;bottom:144px;max-height:none}
+.po2-grid>.po2-card{min-height:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .po2-lien,.po2-action,.po2-tab{font:600 24px 'Saira Condensed','Arial Narrow',sans-serif;color:#E9E6E1;background:#252121;border:2px solid rgba(233,230,225,.38);padding:12px 18px;cursor:pointer}
 .po2-tabs{display:flex;gap:12px;margin:0 0 18px}
 .po2-tab[aria-selected="true"]{color:#0D0B0B;background:#F0B220}
@@ -2803,6 +2834,48 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article>p{flex:none;min-width:0;margin:0;padding:8px 0;border-bottom:1px solid rgba(233,230,225,.16);line-height:1.2;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE67_T1_CARNET_LIGNES_ISOLEES] — Monde lot 67 T1 ==== */
 .ce3-carnet-ecran .ce3-carnet>article>p{display:block;white-space:normal;word-break:break-word;contain:none;max-width:100%}
+/* ==== [ANCRE: MONDE70_T1_CARNET_SCROLL_INTERNE] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet{width:100%;min-width:0;min-height:0;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{min-width:0;max-width:100%;min-height:0;overflow-x:hidden;overflow-y:auto;contain:layout paint}
+.ce3-carnet-ecran .ce3-carnet>article h2,.ce3-carnet-ecran .ce3-carnet>article>p{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE70_T1_CARNET_GRILLE_BORNEE] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran{box-sizing:border-box;height:824px;max-height:calc(100% - 224px);min-height:0}
+.ce3-carnet-ecran .ce3-carnet{display:grid;flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-flow:row;gap:14px;min-height:0}
+.ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-height:0;max-height:100%;overflow:auto}
+/* ==== [ANCRE: MONDE70_T1_CARNET_PANNEAUX_ISOLES] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet{height:0;flex:1 1 0;grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);align-content:stretch;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{position:relative;min-height:0;max-height:none;overflow-x:hidden;overflow-y:auto;contain:strict}
+/* ==== [ANCRE: MONDE70_T1_POSTE_ZONE_BORNEE] — Monde lot 70 T1 ==== */
+.po2-scene{box-sizing:border-box;display:flex;flex-direction:column;height:auto;min-height:0;bottom:144px;max-height:none;overflow:hidden}
+.po2-scene>.po2-grid{width:100%;height:0;flex:1 1 0;min-height:0;grid-template-rows:minmax(0,1fr);overflow:hidden}
+.po2-scene>.po2-grid>.po2-card{min-height:0;max-height:100%;overflow-x:hidden;overflow-y:auto;contain:strict}
+/* ==== [ANCRE: MONDE70_T1_CARNET_LISTES_COMPACTES] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet>article{display:block;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;contain:layout paint;overscroll-behavior:contain}
+.ce3-carnet-ecran .ce3-carnet>article h2{font-size:26px;line-height:1.08;margin:0 0 8px}
+.ce3-carnet-ecran .ce3-carnet>article>p{font-size:22px;line-height:1.12;margin:0;padding:5px 0;overflow-wrap:anywhere}
+/* ==== [ANCRE: MONDE70_T1_CARNET_FLUX_VERTICAL] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran{position:absolute;inset:108px 56px 132px 300px;width:auto;height:auto;max-height:none;display:flex;flex-direction:column;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet{display:grid;box-sizing:border-box;width:100%;height:0;flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:12px;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-width:0;min-height:0;max-height:100%;overflow:auto;contain:layout paint;overscroll-behavior:contain}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE70_T1_POSTE_COLONNE_RESSERREE] — Monde lot 70 T1 ==== */
+.po2-scene{top:112px;bottom:240px;height:auto;max-height:none;overflow:hidden}
+.po2-scene>.po2-grid>.po2-card{overflow-y:auto;contain:layout paint}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_ENVELOPPE] — Monde lot 70 T1 ==== */
+.mf-ancien .mgmt-org-sub{box-sizing:border-box;min-width:0;max-width:100%;font-size:24px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}
+.mf-ancien .mgmt-org-nm{font-size:24px;line-height:1.05;white-space:normal;overflow-wrap:anywhere}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_EFFECTIF_LISIBLE] — Monde lot 70 T1 ==== */
+.mf-ancien .mgmt-org-cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);min-width:0;overflow:hidden}
+.mf-ancien .mgmt-org-main,.mf-ancien .mgmt-org-aside{min-width:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+.mf-ancien .mgmt-org-cat{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+.mf-ancien .mgmt-org-nm,.mf-ancien .mgmt-org-sub{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-size:24px!important;line-height:1.12;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_CATEGORIES_BORNEES] — Monde lot 70 T1 ==== */
+.mf-ancien .mgmt-org-eff{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
+.mf-ancien .mgmt-org-cat{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+.mf-ancien .mgmt-org-cat .mgmt-org-nm,.mf-ancien .mgmt-org-cat .mgmt-org-sub{white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_MINIMUM] — Monde lot 70 T1 ==== */
+ .mgmt-org .mgmt-org-cat{height:auto;min-height:0;overflow:visible}
+ .mgmt-org .mgmt-org-cat .mgmt-org-nm,.mgmt-org .mgmt-org-cat .mgmt-org-sub{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-size:24px!important;line-height:1.12!important;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
@@ -2811,6 +2884,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-contenu.ld66-screen .ld66-moments .ld3-names,
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
 .mf-contenu.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05;flex:none;margin-top:auto}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE70_T1_CARNET_QUATRE_RANGEES] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet{grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);grid-auto-flow:row;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet>article{min-height:0;max-height:none;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+/* ==== [ANCRE: LOT70_T1_CARNET_LISTES_BORNEES] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran .ce3-carnet>article{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.ce3-carnet-ecran .ce3-carnet-liste{flex:1 1 0;min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.ce3-carnet-ecran .ce3-carnet-liste>p{box-sizing:border-box;max-width:100%;margin:0;padding:5px 0;overflow-wrap:anywhere;line-height:1.12}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;background:#0D0B0B;color:#E9E6E1}
@@ -3007,3 +3089,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{min-height:0;max-height:none;height:auto;flex:0 0 auto;line-height:1.05}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{margin-top:auto;flex:0 0 auto}
 /* ==== [FIN ANCRE] ==== */
+
+.mf-ac-liens-complementaires{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
