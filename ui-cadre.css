@@ -2287,6 +2287,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(180px,1fr) 120px 120px 130px 120px 90px;gap:12px;padding:0 16px}
 .gu3-entete{min-height:48px;letter-spacing:.04em}
 .gu3-ligne{min-height:82px}
+/* ==== [ANCRE: MONDE66_T1_CONTENANCE_FINALE_MOMENTS] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{flex:none;margin-top:auto;font-size:30px;line-height:1.05}
+/* ==== [FIN ANCRE] ==== */
 .gu3-ligne.gu3-split{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_CONTENANCE_FINALE_MOMENTS] — Monde lot 66 T1 ====
