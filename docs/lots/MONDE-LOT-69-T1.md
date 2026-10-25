@@ -17,6 +17,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôle ciblé final
+- Branche confirmée `fid-choc`, HEAD initial `e9e554a3`. Aucun fichier de code/test/package de la tranche n'était modifié ; les changements utilisateur `.opencode/agents/*` et `opencode.json` sont laissés hors tranche.
+- La reproduction directe du shoot pour `choc` a bien rendu la page : `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=26.1%`. Le seuil ≤20% demeure manqué. Je n'ai pas ouvert l'image comparative, et cette exécution ne prouve donc pas une conformité pixel à pixel.
+- Vérifications effectuées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 19 fichiers examinés) et `node_modules/.bin/eslint .` (succès). Aucun fichier applicatif n'a été modifié pendant cette reprise ; aucun `?v=` ni migration à appliquer.
+- Le test de tranche déjà commité couvre l'offre/changement/arrivée/rechargement/soirée/lendemain, les trois paires du choc et leurs résultats, le discours, l'échappement des raisons d'offre et leur présence dans `test`/`test:watch`.
+- Écarts non résolus de la fiche : cible de gros blocs du choc non atteinte ; la capture bilan antérieure signalait un chevauchement non corrigé ; aucun contrôle visuel comparatif ni scène dédiée d'arrivée n'est établi dans cette reprise. Le discours n'a pas été recapturé maintenant. Aucune retouche CSS sans preuve n'a été conservée et aucune case visuelle n'est déclarée satisfaite sur la seule base d'un test structurel.
+- Commit requis par la consigne de reprise : cette mise à jour de compte rendu uniquement. La tranche n'est pas déclarée terminée.
+
 ### Reprise 25/10/2026 — captures relancées
 - Reproduction de `choc` avec `shoot.js` : proposition valide affichée, chevauchements=0, textes sous 22 px=0, débordements=[], `grosBlocs=26.1%` (seuil ≤20% toujours dépassé).
 - Capture `discours` : aucun problème géométrique, `grosBlocs=16.6%`.
