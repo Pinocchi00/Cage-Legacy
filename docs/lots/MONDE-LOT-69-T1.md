@@ -174,6 +174,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Aucun code, test ou cache modifié dans cette reprise ; aucune migration. Le bilan antérieurement capturé signalait un chevauchement, et l'arrivée dédiée ainsi que l'ouverture des comparatifs n'ont pas été établies dans cette reprise. Je ne déclare donc pas toutes les cases visuelles satisfaites et ne revendique pas `TOUT_EST_FINI`.
 - Questions pour Anthony : aucune nouvelle question.
 
+### Reprise 25/10/2026 — contrôles ciblés après reprise 8
+- Branche `fid-choc` confirmée (`fid-choc`) ; le HEAD de départ est `91ad7d19`. Les fichiers modifiés dans `.opencode/agents/`, `opencode.json` et `sw.js` sont hors tranche et restent exclus.
+- Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe (4/4). L'audit `node tools/verif-versions.js origin/main` ne relève aucun écart ; `node_modules/.bin/eslint .` passe.
+- Le code et le parcours testés sont déjà commités. Aucune modification métier, de test ou de cache dans cette reprise ; aucune migration.
+- Les limites des captures récentes restent ouvertes : `grosBlocs` du choc au-dessus de 20 %, chevauchement bilan rapporté antérieurement, et comparatifs visuels / scène d'arrivée dédiée non attestés dans cette reprise. Ces critères ne sont pas déclarés satisfaits sur la seule base des tests automatisés. Aucun `TOUT_EST_FINI` revendiqué.
+
 ### Reprise — contrôles visuels complémentaires
 - Branche `fid-choc`, HEAD de départ `f565f75a`. Les changements présents sous `.opencode/agents/` et `opencode.json` sont restés hors tranche.
 - Captures effectivement lancées : `choc` (proposition reçue valide) donne 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` ; `discours` donne 0 anomalie géométrique et `grosBlocs=16.6%` ; `bilan` donne `grosBlocs=12.9%` mais conserve un chevauchement de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ».
