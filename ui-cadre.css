@@ -2457,6 +2457,6 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT_FINAL] — Monde lot 66 T1 ====
    Gagne explicitement sur les anciennes surcharges de taille tout en
    réservant deux lignes complètes avant le détail de chaque carte. */
-.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal;letter-spacing:normal}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal;letter-spacing:normal;text-transform:uppercase}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1}
 /* ==== [FIN ANCRE] ==== */

@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise finale — contenir les titres des moments — 25/10/2026
+
+- Branche `fid-lendemain`; HEAD initial `4365172a`. L’historique confirme que les écrans, leur navigation et les tests étaient déjà livrés. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à cette tranche et restent intacts.
+- Ajustement final de `ui-cadre.css` : maintien des titres à 64 px, interligne contenant deux lignes, capitales explicites; le descriptif reste après la zone du titre. Version CSS incrémentée par `node tools/_bump.js ui-cadre.css`.
+- Tests verts : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9), `mgmtLot54T1.test.js` (30/30) et `mgmtSoireeShow.test.js` (18/18, relancé isolément). `node tools/verif-versions.js origin/main`, ESLint et `git diff --check` passent. Le lancement groupé avait dépassé 300 s, mais ces contrôles ont ensuite été exécutés séparément.
+- Capture/comparatif non relancé dans cette reprise; les dernières mesures consignées plus haut restent les seules disponibles (lendemain à 22,8 % gros blocs, suite avec alertes de débordement de libellés). Le ratio renforcé ≤18 % et la contenance variable de la suite ne sont donc pas certifiés résolus. Avant/après : la zone des titres ne peut plus réduire l’interligne ni empiéter sur le descriptif; aucune mesure visuelle après changement n’est revendiquée.
+- Fichiers modifiés : `ui-cadre.css` (capitales et contenance des noms), `index.html` (version de cache), cette fiche (résultats). Aucun test nouveau, aucune modification de données, navigation, mécanique ou sauvegarde; pas de migration. Questions pour Anthony : aucune.
+
 ### Reprise finale — correction de cascade — 25/10/2026
 
 - Branche `fid-lendemain`; les commits précédents comprennent déjà les deux écrans, les tests et les captures historiques. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à cette tranche et restent intactes.
