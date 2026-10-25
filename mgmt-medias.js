@@ -218,7 +218,6 @@ function mgmtMediasLignes(m){
 /** Le bloc « Ce qu'en dit la presse » du lendemain. */
 function mgmtMediasLendemainHtml(m){
   const l=mgmtMediasLendemain(m);
-  if(!l.length) return '';
   return `<div class="mgmt-ld-presse"><h3 class="mgmt-ld-hd">Ce qu’en dit la presse</h3>`
     +l.map(x=>`<p class="mgmt-ld-parole"><span>${esc(x.nom)}</span> ${esc(x.texte)}</p>`).join('')+`</div>`;
 }
