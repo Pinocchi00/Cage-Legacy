@@ -23,6 +23,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — état vérifié
+- Branche `fid-choc`, HEAD `aa713e15`; le log contient les commits de la tranche. Aucun fichier de tranche n'est modifié localement. Les modifications de `.opencode/agents/`, `opencode.json` et `sw.js` sont préexistantes et hors périmètre ; elles restent intactes.
+- Test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4 réussis. `node tools/verif-versions.js origin/main` : aucun écart (20 fichiers). `node_modules/.bin/eslint .` passe.
+- Aucun fichier JS/CSS/test à livrer dans cette reprise, aucune migration ni nouvelle capture. Les écarts de capture consignés précédemment (densité choc, chevauchement bilan, comparatif visuel et capture dédiée arrivée) ne sont pas réputés corrigés par ces vérifications structurelles.
+
 ### Reprise 25/10 — reproduction de la scène choc
 - Branche confirmée : `fid-choc`. Le log montre les commits de la tranche déjà présents ; les modifications hors tranche sous `.opencode/agents/`, `opencode.json` et `sw.js` sont conservées sans ajout.
 - Reproduction effectuée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : l'écran de proposition reçue s'affiche ; chevauchements=0, textes sous 22 px=0, aucun débordement, `grosBlocs=25.8%` (cible ≤20% non atteinte). Je ne revendique pas le critère de densité. Le comparatif image n'a pas été ouvert visuellement.
