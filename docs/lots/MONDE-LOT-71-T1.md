@@ -20,7 +20,7 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Contrôle ciblé `node --test tests/mgmtActualitesEcran.test.js` : 10/10 réussis.
 - Versions : `node tools/verif-versions.js origin/main` ne signale aucun écart.
 - Lint ciblé du test : le fichier est ignoré par la configuration ESLint (avertissement uniquement).
-- Scène de capture : non exécutée ; `screens.js`, `shoot.js` et le dossier de scène ne sont pas présents dans ce dépôt et l’accès au dossier temporaire indiqué a été refusé par l’environnement. Les lignes `CONTRÔLE` avant/après sont donc indisponibles ; cible capture non vérifiée.
+- Scène de capture : non exécutée. Le dossier de scène fourni est hors dépôt ; l'environnement interdit sa copie dans `../shoot-71`, de sorte que `screens.js` et `shoot.js` n'ont pas pu être utilisés ni édités. La ligne `CONTRÔLE` fournie dans `LISEZMOI.txt` décrit les métriques attendues, mais aucune ligne de résultat avant/après ni image n'a pu être produite. Cible capture non vérifiée.
 - Comparaison visuelle avec `UniActualites` et métriques (`chevauchements`, `textesSous22px`, `debordent`, `grosBlocs`) : non mesurées. Aucun écart chiffré ne peut être certifié à partir des seuls tests DOM.
-- Écarts à la fiche : la scène et la vérification de la capture/mesures visuelles restent à faire ; aucune migration de sauvegarde.
-- Questions pour Anthony : aucune ; l'accès à l'outil de capture devra être rétabli pour produire le contrôle exigé.
+- Écarts à la fiche : la scène et la vérification de la capture/mesures visuelles restent à faire ; aucune migration de sauvegarde. Le rendu HTML peut être vérifié par les tests mais cela ne certifie pas les métriques du navigateur.
+- Questions pour Anthony : aucune décision produit requise ; il faut rendre possible la copie/utilisation locale du dossier d'outil de capture pour compléter cette vérification.
