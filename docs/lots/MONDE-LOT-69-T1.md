@@ -2,6 +2,12 @@
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — dernière reproduction
+- Branche `fid-choc` confirmée ; `git log --oneline -12` montre les commits de tranche déjà présents. Les seules modifications de travail sont `.opencode/agents/*`, `opencode.json` et `sw.js`, hors tranche ; elles restent intactes.
+- La commande de capture prescrite a bien été relancée sur `choc` avec une proposition valide. Contrôle : aucun chevauchement, texte sous 22 px ou débordement ; `grosBlocs=26.2%`, donc le seuil ≤20% reste non atteint. Le comparatif PNG n'a pas été ouvert visuellement dans cette interface.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4), `node tools/verif-versions.js origin/main` ne trouve aucun écart et `node_modules/.bin/eslint .` passe. Aucun code, test ou cache applicatif nouveau ; aucune migration.
+- Les critères visuels globaux ne sont pas tous démontrés/résolus : densité choc, chevauchement bilan consigné antérieurement, capture dédiée d'arrivée et examen des comparatifs. Le test fonctionnel de parcours et les écrans déjà commités n'ont pas été modifiés. Pas de question nouvelle pour Anthony.
+
 ### Reprise 25/10/2026 — contrôle de livraison
 - Branche `fid-choc` confirmée. Le log montre les commits applicatifs de la tranche déjà présents ; les seules modifications non commitées au départ (`.opencode/agents/*`, `opencode.json`, `sw.js`) sont hors tranche et restent exclues.
 - Reproduction réelle de la scène `choc` avec l'outil du dossier temporaire : proposition reçue affichée, `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, `grosBlocs=26.2%`. La cible ≤20% n'est donc pas atteinte. Le comparatif PNG n'a pas pu être ouvert dans cette interface ; aucune conformité visuelle pixel n'est prétendue.
