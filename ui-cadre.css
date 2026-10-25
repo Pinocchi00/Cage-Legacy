@@ -2041,6 +2041,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-paire .ch3-side b{font-size:46px}
 .ch3-paire .ch3-category .ch3-vs{width:54px;height:54px;font-size:28px}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_ACTIONS_PLANCHE] — Monde lot 69 T1 ====
+   Action principale pleine largeur, décisions secondaires groupées comme sur UniChoc. ==== */
+.ch3-actions{display:flex;flex-direction:column;gap:12px}
+.ch3-actions>.ch3-button{width:100%;min-height:68px;display:flex;align-items:center;justify-content:space-between;text-align:left}
+.ch3-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ch3-secondary-actions>.ch3-button{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;font-size:24px}
+.ch3-actions kbd{font:800 22px 'Saira Extra Condensed','Arial Narrow',sans-serif;border:2px solid currentColor;padding:3px 8px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P6_T2_STYLE_SEMAINE] — Monde lot 41 T2 ==== */
 .se-ecran{display:flex;flex-direction:column;gap:18px;min-height:0;font-size:22px}
 .se-frise{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
