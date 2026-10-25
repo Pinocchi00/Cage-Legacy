@@ -17,6 +17,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — contrôles reproductibles
+- Branche confirmée `fid-choc`, HEAD initial `504b36f7`. Le statut ne montre aucun fichier fonctionnel de tranche à reprendre ; les modifications sous `.opencode/agents/` et `opencode.json` sont restées intactes.
+- Le test complet ciblé `node --test tests/mgmtLot69T1.test.js` passe 4/4. Il vérifie l'offre → changement → arrivée → sauvegarde/rechargement identique → soirée/lendemain, ainsi que le choc à trois paires rendu/programmé/joué et les blocs du discours/offre.
+- Captures externes réellement exécutées à 1920×1080 : `choc` s'affiche correctement, 0 chevauchement/texte trop petit/débordement mais `grosBlocs=26.1%`; `discours` 0 anomalie géométrique, `grosBlocs=16.6%`; `bilan` `grosBlocs=12.9%` et chevauchement persistant de 265×22 entre « REMERCIÉ » et « Il manque 3 combats en carte ». Les comparatifs `cmp-*.png` n'ont pas été ouverts visuellement, et aucune scène dédiée arrivée n'a été capturée.
+- `node tools/verif-versions.js origin/main` passe (19 fichiers comparés). Pas de changement JS/CSS/cache ni de migration cette reprise. Je n'ai pas appliqué de retouche CSS spéculative : les mesures attestent que choc et bilan restent hors des critères visuels demandés, et l'arrivée n'a pas de preuve capture.
+- Écart non résolu : choc >20% de gros blocs, chevauchement du bilan et absence de capture arrivée/inspection visuelle. Les autres cases fonctionnelles et le test sont couverts par le code déjà commité. Pas de question ouverte nouvelle.
+
 ### Reprise 25/10/2026 — état courant
 - Branche confirmée `fid-choc`. HEAD initial `94aea0cf`; l'historique récent contient déjà le parcours offre/changement/arrivée, le rendu du choc à trois paires, sa résolution normale, les ajustements du discours et les tests de tranche. Les seules modifications du répertoire de travail sont les changements utilisateur `.opencode/agents/*` et `opencode.json`; ils restent hors périmètre et ne seront pas commités.
 - `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test vérifie notamment l'aller-retour strict de la sauvegarde intermédiaire, l'arrivée dans la nouvelle organisation, les trois paires programmées sur la soirée normale et leurs résultats, les raisons d'offre échappées et l'inclusion du test dans `test` et `test:watch`.
