@@ -2072,6 +2072,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: ACTUALITES_CONTENU_BORNE] — Monde lot 71 T1 ==== */
 .mgmt-ac-item,.mgmt-ac-item *,.mgmt-ac-detail-body,.mgmt-ac-detail-body *{min-width:0;max-width:100%;box-sizing:border-box}
 .mgmt-ac-type,.mgmt-ac-copy b,.mgmt-ac-copy small,.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{overflow-wrap:anywhere;white-space:normal}
+/* ==== [ANCRE: ACTUALITES_CONTENU_PANNEAUX] — Monde lot 71 T1 ==== */
+.mgmt-ac-feed-panel .mf-p3,.mgmt-ac-detail-panel .mf-p3{width:100%;box-sizing:border-box}
+.mgmt-ac-feed-panel .mgmt-ac-item{width:100%;box-sizing:border-box;align-items:flex-start}
+.mgmt-ac-feed-panel .mgmt-ac-type{width:132px;min-width:0;flex:0 1 132px;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy{width:0;max-width:100%;min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
+.mgmt-ac-feed-panel .mgmt-ac-copy b,.mgmt-ac-feed-panel .mgmt-ac-copy small{width:100%;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.mgmt-ac-detail-body{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto}
+.mgmt-ac-detail-body h2,.mgmt-ac-detail-body p{width:100%;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+.mgmt-ac-detail-body .mgmt-ac-stat{width:100%;gap:8px}
+.mgmt-ac-detail-body .mgmt-ac-stat>span,.mgmt-ac-detail-body .mgmt-ac-stat>b{min-width:0;max-width:60%;overflow-wrap:anywhere;white-space:normal}
 /* ==== [ANCRE: POSTE_ECRAN_STYLE] — Monde lot 48 T1 ==== */
 .po2-scene{position:absolute;left:300px;top:112px;width:1564px;height:856px}
 .po2-lien,.po2-action,.po2-tab{font:600 24px 'Saira Condensed','Arial Narrow',sans-serif;color:#E9E6E1;background:#252121;border:2px solid rgba(233,230,225,.38);padding:12px 18px;cursor:pointer}
