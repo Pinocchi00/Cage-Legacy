@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise de fidélité typographique — 25/10/2026
+
+- État initial revu (`fid-lendemain`, historique des 12 commits et status) : les écrans étaient déjà livrés. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et n'ont pas été touchées.
+- Avant : la cascade CSS finale imposait encore 108 px au nom de la première carte, ce qui faisait passer des noms sur plusieurs lignes en recouvrant le détail; les lignes de constats n'avaient pas de puce couleur explicite. Après : les trois noms ont une règle terminale commune de 64 px avec interligne 1.05, les champs méta/détail ne peuvent plus se comprimer, les étiquettes gardent leur pavé, et les constats portent leur puce jaune. `index.html` a été versionné pour `ui-cadre.css` via `node tools/_bump.js`.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7/7), `mgmtLendemainDemo.test.js` (7/7), `mgmtLot48T1.test.js` (9/9), `mgmtLot54T1.test.js` (30/30). `mgmtSoireeShow.test.js` a dépassé 300 secondes sans résultat final. `node tools/verif-versions.js origin/main`, `node_modules/.bin/eslint .` et `git diff --check` passent.
+- La capture prescrite et l'inspection des comparatifs ne sont pas relancées dans cette session : le chemin extérieur `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est bloqué par les permissions de l'environnement. Aucun résultat de capture, computed-style runtime ou conformité pixel n'est revendiqué. Les constats mesurés précédemment restent des écarts ouverts (grosBlocs au-dessus de la cible renforcée et alertes variables de débordement dans la suite); l'ajustement de cette reprise ne les certifie pas résolus.
+- Fichiers modifiés : `ui-cadre.css` (contenance des moments et puces des constats), `index.html` (version de cache), cette fiche (bilan). Tests ajoutés : aucun, les tests de structure/navigation existants passent. Aucune donnée, mécanique, sauvegarde ou migration modifiée. Questions pour Anthony : aucune.
+
 ### Reprise 10 — cascade typographique — 25/10/2026
 
 - Historique et branche vérifiés : `fid-lendemain`; commits fonctionnels précédents déjà présents. Changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` exclus et laissés intacts.
