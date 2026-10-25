@@ -2164,6 +2164,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
 .ld66-screen .ld66-moments .ld3-label{font-size:24px}
 .ld66-screen .ld66-moments .ld66-moment-head{flex:none}
+/* ==== [ANCRE: MONDE66_T1_TITRES_MOMENTS_SANS_COLLISION] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:0;height:auto;flex:none}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{flex:none;margin-top:auto;line-height:1.1}
 /* ==== [ANCRE: MONDE66_T1_REPRISE_TYPOS_ET_PUCES] — Monde lot 66 T1 ==== */
 .ld66-screen .ld66-moments .ld3-names,
 .ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;overflow-wrap:anywhere;word-break:normal}
