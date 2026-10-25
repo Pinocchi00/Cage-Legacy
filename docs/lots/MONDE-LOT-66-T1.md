@@ -19,6 +19,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise finale 25/10/2026
+
+- Branche `fid-lendemain` confirmée. Historique `git log --oneline -12` : le lot est déjà commité; changements locaux aux agents OpenCode, `opencode.json` et `sw.js` restent hors tranche et intacts.
+- Ajustement de fidélité dans `ui-cadre.css` : taille calculée du nom principal de la première carte fixée à 108 px, valeur explicite de `UniLendemain` (les deux autres noms gardent au moins 64 px); `index.html` versionné via `node tools/_bump.js ui-cadre.css`.
+- Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30). `mgmtSoireeShow.test.js` a atteint le délai maximal de 120 s à deux reprises sans résultat final. `node tools/verif-versions.js origin/main` passe sans écart.
+- Capture demandée non régénérée dans cette reprise : la lecture du chemin temporaire extérieur et l'accès à l'outil de capture ne sont pas disponibles dans cet environnement. Les mesures antérieures consignées ci-dessous ne constituent donc pas une validation après le changement 108 px; ni le seuil renforcé de 18 % ni les débordements variables de la suite ne sont certifiés résolus.
+- Fichiers tranche : `ui-cadre.css` (taille du nom principal), `index.html` (cache CSS), cette fiche (compte rendu). Aucun test ajouté, aucune donnée/sauvegarde/mécanique changée; pas de migration. Questions pour Anthony : aucune.
+
 ### Reprise capture — 25/10/2026
 
 - Branche `fid-lendemain`; les commits précédents du lot sont déjà présents. Changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` exclus et laissés intacts.
