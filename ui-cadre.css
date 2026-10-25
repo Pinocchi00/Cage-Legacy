@@ -2725,6 +2725,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-screen .ld66-moments .ld3-detail{max-height:none;height:auto;overflow:visible;flex:none;overflow-wrap:anywhere;word-break:normal}
 .ld66-screen .ld66-lower>section{overflow:auto;overscroll-behavior:contain}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE74_T1_NOMS_LONGS_SANS_CHEVAUCHEMENT] — Monde lot 74 T1 ==== */
+.ld66-screen .ld66-lower .mgmt-ld-title{min-width:0;max-width:100%;font-size:22px;line-height:1.1;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_REPRISE_NOMS_MOMENTS_VERROUILLES] — Monde lot 66 T1 ==== */
 .mf-contenu.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
