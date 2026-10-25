@@ -2676,6 +2676,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE74_T1_LENDEMAIN_CONTENUS_BORNES] — Monde lot 74 T1 ==== */
+.ld66-screen .ld66-moments .ld3-moment{min-height:0;height:285px;overflow:hidden}
+.ld66-screen .ld66-moments .ld3-names,
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:clamp(38px,3.2vw,64px);line-height:1;min-height:0;height:auto;max-height:2em;overflow:hidden;flex:none;overflow-wrap:anywhere}
+.ld66-screen .ld66-moments .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1;max-height:2.2em;overflow:hidden}
+.ld66-screen .ld66-moments .ld3-label{min-height:40px;padding:0 14px;font-size:26px}
+.ld66-screen .ld66-lower>section{overflow:auto;overscroll-behavior:contain}
+.ld66-screen .ld66-change .mgmt-ld-item,.ld66-screen .ld66-press .ld3-press{min-width:0;overflow-wrap:anywhere}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(120px,1fr) minmax(110px,130px);gap:8px;overflow:visible}
+.ld66-suite .ld3-move>.ld66-move-identity,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move>.ld66-move-identity>b{font-size:30px;line-height:1;overflow-wrap:anywhere}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{font-size:22px;line-height:1.1;white-space:normal}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE66_T1_REPRISE_NOMS_MOMENTS_VERROUILLES] — Monde lot 66 T1 ==== */
 .mf-contenu.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
