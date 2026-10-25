@@ -50,9 +50,10 @@ test('Monde lot 58 T1 — une proposition refusee reste facultative et ne signe 
   assert.deepEqual(r,{changed:true,active:true,valid:true,refused:true});
 });
 
+/* Décision citée : planches Uni* validées par Anthony ; l'écran du choc suit UniChoc et n'affiche plus de paire dont les combattants n'existent pas (lot 69). La donnée de test désigne donc de vrais combattants. */
 test('Monde lot 58 T1 — écran du choc présente la confrontation et ses décisions',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const o=MGMT_ORGANISATIONS.find(x=>x.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[x.id]);m.choc={orgId:o.id,div:'H-heavy',jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:'screen-local',b:'screen-adverse'};G.mgmt=m;return {html:scr_mgmt_choc(),screen:typeof SCREENS.mgmt_choc}})())`));
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});m.mondeVivant=true;const o=MGMT_ORGANISATIONS.find(x=>x.id!==mgmtPredecesseurOrgId(m)&&m.orgs&&m.orgs[x.id]);let paire=null;for(const x of MGMT_ORGANISATIONS){if(x.id===mgmtPredecesseurOrgId(m)||!m.orgs||!m.orgs[x.id])continue;for(const f of m.roster){const g=(m.orgs[x.id].roster||[]).find(y=>y.div===f.div);if(g){paire={o:x,a:f,b:g};break;}}if(paire)break;}m.choc={orgId:paire.o.id,div:paire.a.div,jour:42,annee:mgmtChocAnnee(m),etat:'recu',a:paire.a.id,b:paire.b.id};G.mgmt=m;return {html:scr_mgmt_choc(),screen:typeof SCREENS.mgmt_choc}})())`));
   assert.equal(r.screen,'function');
   for(const phrase of ['LE CHOC DES ORGANISATIONS','PROPOSITION REÇUE','ACCEPTER','REFUSER'])assert.ok(r.html.includes(phrase));
 });
