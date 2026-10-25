@@ -1176,3 +1176,9 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Essai de mise en flux du titre de bilan (hauteur minimale + interligne) : les métriques sont restées rigoureusement identiques ; changement retiré et version de cache non conservée, plutôt que de prétendre une correction.
 - Vérifications : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` et `git diff --check` réussis.
 - Fichiers de cette reprise : cette fiche uniquement, pour tracer le contrôle. Pas de test additionnel, changement CSS/JS, cache ni migration. Les critères visuels choc ≤20%, bilan sans chevauchement, cmp inspectés et arrivée capturée restent non établis ; aucune conformité totale n'est revendiquée.
+
+### Reprise 25/10/2026 — contrôle de la reprise 9
+- Branche `fid-choc` confirmée ; `git log --oneline -12` indique que les changements de tranche sont déjà commités. Modifications utilisateur `.opencode/agents/*`, `opencode.json` et `sw.js` laissées intactes.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4). La capture `bilan` est reproduite : chevauchement toujours présent entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22), grosBlocs 12.9 %. Deux essais d'interligne/taille du titre n'ont rien changé et ont été retirés ; aucune correction non prouvée conservée.
+- Le guide externe ne peut pas être lu dans cette session. Capture bilan effectivement lancée ; pas de capture choc/discours/arrivée nouvelle ni d'ouverture visuelle des cmp. Le test, la vérification de versions et ESLint restent à exécuter avant livraison.
+- Aucun changement applicatif/test/cache ou migration conservé. L'écart de chevauchement bilan et les écarts visuels précédemment constatés demeurent ouverts ; la tranche n'est pas déclarée finie.
