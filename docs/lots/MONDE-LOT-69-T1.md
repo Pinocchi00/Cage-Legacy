@@ -365,6 +365,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Pas de guide de capture accessible avec l'outil autorisé dans cette reprise, aucune capture nouvelle ni mesure. La logique du choc reste mono-affiche et n'implémente pas le 2-sur-3 de la planche.
 - Pas de changement de sauvegarde ni de version de cache. Écart à la fiche : les critères d'affiches triples, de parcours complet, de scène d'arrivée et de conformité visuelle mesurée ne sont pas établis ; aucune case n'est faussement déclarée terminée.
 
+### Reprise 6 — vérification de l'état commité
+- Branche `fid-choc`, HEAD initial `c0956346`; aucun fichier de code/test de la tranche n'était non commité. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` sont préservées et exclues.
+- Rejoué les captures `choc`, `discours` et `bilan` avec le `shoot.js` fourni : choc affiché, 0 chevauchement, 0 texte sous 22 px, aucun débordement, `grosBlocs=26.2%` (cible ≤20% non atteinte) ; discours sans anomalie géométrique, `grosBlocs=18.1%` ; bilan, 1 chevauchement (« REMERCIÉ » / « Il manque 3 combats en carte », 265×22), `grosBlocs=12.9%`. La scène `arrival` n'est pas reconnue par l'outil (`écran inconnu arrival`). Les images `cmp` ne sont pas inspectées visuellement ici.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. `node tools/verif-versions.js origin/main` ne signale aucun écart (19 fichiers examinés) et `node_modules/.bin/eslint .` passe. Les tests confirment les trois paires et le parcours de soirée du choc, ainsi que le parcours offre/changement/arrivée/soirée/lendemain couvert par l'état existant.
+- Aucun code fonctionnel modifié dans cette reprise, aucune migration. Écarts à la fiche encore mesurés : densité du choc, chevauchement du bilan, absence de capture arrivée dédiée et contrôle visuel comparatif. Le parcours de test existant ne remplace pas une preuve visuelle et la scène arrival n'a pas pu être ajoutée via le pilote fourni. Aucun achèvement global revendiqué.
+
 ### Reprise 42
 - `mgmt-ecran-poste.js` branche maintenant le raccourci R de la barre du choc sur le refus existant (`mgmtChocRepondre(..., false)`), avec sauvegarde et rafraîchissement comme les autres décisions. `index.html` versionné avec `node tools/_bump.js mgmt-ecran-poste.js`.
 - `tests/mgmtLot69T1.test.js` vérifie que la commande « R Refuser » est effectivement exposée dans l'écran choc.
