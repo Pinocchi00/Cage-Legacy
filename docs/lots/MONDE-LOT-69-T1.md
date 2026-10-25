@@ -218,6 +218,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Capture `choc` rejouée avec la scène externe fournie : l'écran n'est pas blanc et le contrôle donne 0 chevauchement, 0 texte sous 22 px, aucun débordement ; `grosBlocs=26.2%`, cible ≤20% non atteinte. Je n'ai pas modifié les dimensions des panneaux à l'aveugle : la mesure seule ne permet pas de choisir une correction fidèle à la planche.
 - `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test existant couvre le choc à trois paires jusqu'aux résultats du chemin normal, l'arrivée et le parcours offre/soirée/lendemain. Audit de versions et lint complet relancés pour cette livraison.
 - Aucun fichier applicatif nouveau ni migration de sauvegarde. Les écarts visuels encore non levés sont le seuil de gros blocs du choc, la capture dédiée arrivée et la mesure de chevauchement du bilan rapportée précédemment ; aucune ouverture visuelle des comparatifs n'est revendiquée.
+
+### Reprise 63 — vérifications finales ciblées
+- État initial : branche `fid-choc`, HEAD `6ab2999a`. Aucun fichier de tranche en attente ; changements utilisateur `.opencode/agents/*` et `opencode.json` préservés et exclus.
+- Reproduction de capture de la scène `choc` : écran rendu, 0 chevauchement, 0 texte sous 22 px et aucun débordement. `grosBlocs=25.9%`, donc la cible ≤20% n'est toujours pas atteinte. L'image comparative n'a pas été ouverte ici ; aucune validation visuelle subjective n'est revendiquée.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` ne rapporte aucun écart ; `node_modules/.bin/eslint .` et `git diff --check` passent.
+- Aucun changement de code, test, cache ou sauvegarde dans cette reprise ; aucune migration. Le parcours de tests inclut l'offre, le changement, l'arrivée, la sauvegarde/recharge, une soirée et le lendemain ; les tests choc couvrent les trois paires, leur programmation et le résultat. Ils ne remplacent pas les contrôles visuels manquants.
+- Écarts restant : mesure choc au-dessus du seuil ; absence de capture dédiée arrivée ; comparatifs non ouverts. Aucune nouvelle mesure de discours ou bilan effectuée dans cette reprise. Ces critères visuels ne sont pas déclarés satisfaits.
 - Fichiers de cette reprise : cette fiche seulement (mesure, tests et limites). Tests ajoutés : aucun. Questions pour Anthony : aucune ; les critères visuels non satisfaits sont consignés comme tels.
 
 ### Reprise — garde contre un roster adverse invalide
