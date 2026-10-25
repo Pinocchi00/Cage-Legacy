@@ -180,6 +180,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Le code et le parcours testés sont déjà commités. Aucune modification métier, de test ou de cache dans cette reprise ; aucune migration.
 - Les limites des captures récentes restent ouvertes : `grosBlocs` du choc au-dessus de 20 %, chevauchement bilan rapporté antérieurement, et comparatifs visuels / scène d'arrivée dédiée non attestés dans cette reprise. Ces critères ne sont pas déclarés satisfaits sur la seule base des tests automatisés. Aucun `TOUT_EST_FINI` revendiqué.
 
+### Reprise 25/10/2026 — contraste du bandeau choc
+- Le contraste des noms du bandeau a été rendu explicite : texte Split noir sur la moitié claire, nom adverse clair sur la moitié rouge, conformément aux aplats UniChoc. Cache `ui-cadre.css` bumpé.
+- Test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4 réussis. Audit de versions exécuté avant ce dernier bump ; à relancer après livraison.
+- Fichiers concernés : `ui-cadre.css` (contraste des deux moitiés), `index.html` (`?v=`), cette fiche. Aucun test distinct ni migration de sauvegarde.
+- Les critères visuels globaux ne sont pas revendiqués terminés : la dernière mesure connue dépasse le seuil `grosBlocs ≤20%` pour le choc ; bilan avec chevauchement antérieurement signalé, comparatifs non inspectés visuellement et capture d'arrivée dédiée non établie.
+
 ### Reprise — contrôles visuels complémentaires
 - Branche `fid-choc`, HEAD de départ `f565f75a`. Les changements présents sous `.opencode/agents/` et `opencode.json` sont restés hors tranche.
 - Captures effectivement lancées : `choc` (proposition reçue valide) donne 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` ; `discours` donne 0 anomalie géométrique et `grosBlocs=16.6%` ; `bilan` donne `grosBlocs=12.9%` mais conserve un chevauchement de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ».
