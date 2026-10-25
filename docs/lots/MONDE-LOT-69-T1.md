@@ -17,6 +17,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — état courant
+- Branche confirmée `fid-choc`. HEAD initial `94aea0cf`; l'historique récent contient déjà le parcours offre/changement/arrivée, le rendu du choc à trois paires, sa résolution normale, les ajustements du discours et les tests de tranche. Les seules modifications du répertoire de travail sont les changements utilisateur `.opencode/agents/*` et `opencode.json`; ils restent hors périmètre et ne seront pas commités.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le test vérifie notamment l'aller-retour strict de la sauvegarde intermédiaire, l'arrivée dans la nouvelle organisation, les trois paires programmées sur la soirée normale et leurs résultats, les raisons d'offre échappées et l'inclusion du test dans `test` et `test:watch`.
+- La lecture du guide de capture externe est refusée par les permissions actives; je n'ai donc pas relancé `shoot.js`, n'ai produit aucune capture `cmp-*` et ne présente pas les mesures historiques comme résultat actuel. La dernière mesure consignée dans l'historique est choc `grosBlocs=26.1%` (au-dessus de 20%); le bilan a précédemment signalé un chevauchement. La scène arrivée dédiée et l'ouverture comparative des images restent aussi non établies.
+- Aucun code fonctionnel nouveau ni migration dans cette reprise. La fiche conserve un état honnête : les tests fonctionnels ciblés sont verts, mais les critères visuels mesurés/non capturés ne permettent pas de déclarer toutes les cases finies.
+
 ### Reprise — contrôles visuels complémentaires
 - Branche `fid-choc`, HEAD de départ `f565f75a`. Les changements présents sous `.opencode/agents/` et `opencode.json` sont restés hors tranche.
 - Captures effectivement lancées : `choc` (proposition reçue valide) donne 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` ; `discours` donne 0 anomalie géométrique et `grosBlocs=16.6%` ; `bilan` donne `grosBlocs=12.9%` mais conserve un chevauchement de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ».
