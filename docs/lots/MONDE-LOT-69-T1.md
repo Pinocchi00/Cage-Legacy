@@ -23,6 +23,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — reprise 6, vérification de livraison
+- Branche `fid-choc` confirmée. `git log --oneline -12` montre le commit de livraison déjà présent (`3907539b`) et les précédents commits de la tranche ; aucun changement fonctionnel de tranche en attente. Les modifications locales dans `.opencode/agents/` et `opencode.json` sont préservées. `index.html` et `ui-cadre.css` ne présentent pas de différence de contenu sous `git diff --ignore-all-space`; `sw.js` contient une version de cache locale `b311` et reste explicitement hors commit.
+- Captures relancées avec `shoot.js` : choc visible et sans anomalies géométriques (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.1%` (cible ≤20% non atteinte) ; discours sans anomalie géométrique, `grosBlocs=16.6%` ; bilan `grosBlocs=12.9%`, mais chevauchement persistant de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ». Ces comparatifs n'ont pas été ouverts visuellement et aucune scène dédiée d'arrivée n'a été capturée.
+- Vérifications exécutées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 20 fichiers examinés), `node_modules/.bin/eslint .` (succès). Le test couvre le parcours offre → changement → arrivée → sauvegarde/rechargement → soirée/lendemain, les trois paires du choc et leur résultat normal.
+- Fichiers fonctionnels modifiés dans cette reprise : aucun. Aucun test ajouté ni migration de sauvegarde. L'historique existant inclut déjà le code, les tests et les commits de tranche ; ce passage n'a aucun changement de tranche fonctionnel à ajouter au commit.
+- Écarts qui empêchent d'affirmer `TOUT_EST_FINI` : objectif de densité choc non atteint, chevauchement du bilan encore mesuré, absence de contrôle visuel des comparatifs et de capture dédiée d'arrivée. Le code CSS actuel a déjà fait l'objet de plusieurs essais de compaction/espacement sans effet mesurable ; je n'ajoute pas de modification spéculative ni ne masque ces écarts.
+
 ### Reprise 25/10/2026 — contrôle de livraison
 - Branche `fid-choc` confirmée. Le log montre déjà le commit de livraison et les changements fonctionnels de cette tranche sont commités ; `tests/mgmtLot69T1.test.js` passe 4/4, couvrant offre/changement/arrivée/rechargement/soirée-lendemain ainsi que les trois paires du choc.
 - Audit `node tools/verif-versions.js origin/main` passe (19 fichiers examinés) et `node_modules/.bin/eslint .` passe. `git diff --check` passe.
