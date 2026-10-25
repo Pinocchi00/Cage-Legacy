@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise après capture — 25/10/2026
+
+- Historique et statut vérifiés sur `fid-lendemain`; les précédents commits de la tranche sont présents. Modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` hors périmètre laissées intactes.
+- À la suite du contrôle comparatif, ajustement des colonnes inférieures du lendemain pour donner davantage d'espace à la une, avec titres de blocs à 40 px, titre de presse à 42 px et valeurs à 32 px. `index.html` versionné avec `node tools/_bump.js ui-cadre.css`.
+- Captures 1920×1080 après l'ajustement : `lendemain`, chevauchements 0, textes sous 22 px 0, débordements 0, `grosBlocs=22,8 %` et moyen 28,9 % (aucun progrès du ratio). `lendemainSuite`, chevauchements 0, textes sous 22 px 0, `grosBlocs=17,9 %`, mais débordements persistants « Poids léger », « chez Split », « Jonas Bühler », « Poids mi-moyen ».
+- Tests exécutés : `node --test tests/mgmtEcranLendemain.test.js` (7/7). Navigation, données et sauvegarde inchangées; aucune migration. Avant/après : échelle CSS renforcée dans la partie inférieure, mais le comparateur ne relève pas d'amélioration du ratio et les débordements de contenu variables de la suite restent ouverts. Les objectifs visuels ne sont donc pas certifiés entièrement atteints.
+- Fichiers modifiés : `ui-cadre.css` (échelle/répartition des blocs inférieurs), `index.html` (version de cache), cette fiche (résultats). Aucun nouveau test. Questions pour Anthony : aucune.
+
 ### Reprise ciblée — 25/10/2026
 
 - Vérifiés branche, historique et statut : les écrans étaient déjà commités; seuls les réglages locaux de contenance ont été touchés ici. Modifications préexistantes des agents, `opencode.json` et `sw.js` laissées intactes.

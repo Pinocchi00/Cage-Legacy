@@ -1993,6 +1993,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-number b{font:600 22px/1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
 .ld66-number strong{font:800 30px/1 var(--mgmt-font-display);color:#E9E6E1}
 .ld66-number span{font:500 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_BLOCS_INFERIEURS] — Monde lot 66 T1 ====
+   Répartition de la planche validée : laisser la une respirer et donner aux
+   chiffres leur colonne dédiée, sans réduire les corps lisibles sous 22 px. */
+.ld66-lower{grid-template-columns:1.2fr 1.12fr .88fr;gap:16px}
+.ld66-lower h2{font-size:40px;line-height:.92}
+.ld66-press .mgmt-ld-item:first-of-type{font-size:42px;line-height:.98;font-family:var(--mgmt-font-display);font-weight:800}
+.ld66-number strong{font-size:32px}
 .ld66-suite .ld3-suite{height:calc(100vh - 210px);margin:0 auto}
 /* ==== [ANCRE: MONDE66_T1_CAPTURE_FIXES] — Monde lot 66 T1 ==== */
 .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
