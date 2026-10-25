@@ -1,5 +1,14 @@
 # Monde lot 69 T1 — fidélité aux maquettes : le choc des organisations, l'arrivée dans une nouvelle organisation, le discours ; et le parcours complet « offre → changement → première soirée »
 
+## Compte rendu
+
+### Reprise 25/10/2026 — vérification après les commits de reprise
+- Branche `fid-choc` confirmée. Les commits `f21bff66`, `aa713e15`, `dc49a88e` et `481cdfc0` portent déjà les corrections précédentes ; aucun fichier de la tranche n'est modifié localement.
+- Modifications locales conservées hors tranche : `.opencode/agents/*.md`, `opencode.json` et `sw.js`. Aucun de ces fichiers n'est inclus.
+- L'accès au guide sous `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` est refusé par la politique de l'environnement. Je n'ai donc pas relancé les captures ou ouvert les comparatifs ; je ne revendique pas les critères visuels non mesurés. Les dernières métriques archivées signalent toujours `grosBlocs` du choc >20 % et le chevauchement du bilan ; pas de capture d'arrivée.
+- À relancer : tests ciblés `tests/mgmtLot69T1.test.js`, audit versions et ESLint. Aucun changement de code, test ou sauvegarde dans cette reprise ; aucune migration.
+- Écarts restants selon les mesures consignées : conformité visuelle du choc et du bilan, comparaison visuelle des écrans, capture dédiée d'arrivée. Aucune `TOUT_EST_FINI` revendiquée.
+
 Branche : `fid-choc` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). **Les maquettes (`docs/planches-uniques/Uni*.dc.html`) sont validées par Anthony : l'écran du jeu doit leur ressembler.** Lis d'abord `C:/Users/antho/AppData/Local/Temp/p1/shoot/LISEZMOI.txt` : l'outil capture ton écran à 1920×1080 et le compare à la maquette (`cmp-<écran>.png` : jeu à gauche, maquette à droite). **Utilise-le après chaque étape et OUVRE l'image si tu sais lire une image ; sinon lis le balisage HTML de la maquette et compare structure, textes, tailles, couleurs.**
 
 Écrans de ta tranche : `choc` (`UniChoc`), `discours` (`UniDiscours`), l'**écran de confirmation + d'arrivée** après acceptation d'une offre (le lot 61 a réutilisé l'arrivée existante : `UniArriveeContrat` et `UniArriveeEspoirs` en donnent la forme), `bilan` (`UniBilanPatron` : le bloc des offres). **Ils n'ont pas tous de scène de capture** : copie le dossier `shoot` dans le tien et ajoute les scènes (le choc : fabrique une proposition `m.choc` valide avec les fonctions de `mgmt-choc*.js` ou `mgmt-poste*.js` — lis-les ; l'arrivée : après `mgmtOrgChanger`).
