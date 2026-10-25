@@ -2538,6 +2538,17 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{word-break:break-word;white-space:normal}
 .ld66-suite .ld3-move b,.ld66-suite .ld3-move strong{font-size:22px;line-height:1.05}
 .ld66-lower .mgmt-ld-item{min-width:0}
+/* ==== [ANCRE: MONDE74_T1_TITRES_NON_TRONQUES] — Monde lot 74 T1 ====
+   La carte suit la hauteur réelle des titres et détails longs. */
+.ld66-moments{height:auto;min-height:285px;flex:none;overflow:visible;align-items:stretch}
+.ld66-moments .ld3-moment{height:auto;min-height:285px;overflow:visible}
+.ld66-moments .ld3-names{font-size:64px;line-height:1;min-height:0;overflow:visible;overflow-wrap:anywhere;word-break:normal}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1}
+.ld66-moments .ld3-detail{margin-top:0;line-height:1.15;overflow:visible;overflow-wrap:anywhere}
+.ld66-lower>section{overflow:auto}
+.ld74-entete{display:flex;align-items:center;gap:16px;color:rgba(233,230,225,.74);font:600 24px/1 var(--mgmt-font-body);white-space:nowrap}
+.ld74-entete strong{height:64px;box-sizing:border-box;padding:0 18px;border:2px solid rgba(233,230,225,.38);display:flex;align-items:center;gap:8px;color:#E9E6E1;font:800 40px/.9 var(--mgmt-font-display)}
+.ld74-entete strong b{color:#E23A2B;font:inherit}
 /* ==== [ANCRE: MONDE66_T1_ECHELLE_MOMENTS] — Monde lot 66 T1 ==== */
 .ld66-screen{height:calc(100vh - 180px);gap:16px}
 .ld66-moments{height:255px;min-height:255px;flex:none;grid-template-columns:1.45fr 1fr 1fr}
@@ -2556,6 +2567,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 .ld66-change .mgmt-ld-item{overflow:hidden}
+/* ==== [ANCRE: MONDE74_T1_CASCADE_FINALE] — Monde lot 74 T1 ====
+   Neutralise les plafonds historiques qui coupaient la dernière ligne. */
+.ld66-moments{height:auto;min-height:285px;overflow:visible}
+.ld66-moments .ld3-moment{height:auto;min-height:285px;overflow:visible}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{line-height:1.05;min-height:0;overflow:visible}
+.ld66-moments .ld3-detail{font-size:22px;line-height:1.15;flex:none;overflow:visible;overflow-wrap:anywhere}
 .ld66-change .mgmt-ld-title,.ld66-change .mgmt-ld-detail{font-size:22px;line-height:1.1;overflow-wrap:anywhere}
 /* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
 .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(100px,120px) minmax(100px,130px);grid-template-rows:auto auto;gap:6px 12px;align-items:center}
