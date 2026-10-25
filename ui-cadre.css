@@ -2267,6 +2267,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_ENVELOPPE] — Monde lot 70 T1 ==== */
 .mf-ancien .mgmt-org-sub{box-sizing:border-box;min-width:0;max-width:100%;font-size:24px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}
 .mf-ancien .mgmt-org-nm{font-size:24px;line-height:1.05;white-space:normal;overflow-wrap:anywhere}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_EFFECTIF_LISIBLE] — Monde lot 70 T1 ==== */
+.mf-ancien .mgmt-org-cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);min-width:0;overflow:hidden}
+.mf-ancien .mgmt-org-main,.mf-ancien .mgmt-org-aside{min-width:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+.mf-ancien .mgmt-org-cat{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+.mf-ancien .mgmt-org-nm,.mf-ancien .mgmt-org-sub{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-size:24px!important;line-height:1.12;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
