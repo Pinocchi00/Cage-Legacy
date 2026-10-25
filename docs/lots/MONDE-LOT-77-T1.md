@@ -1,0 +1,33 @@
+# Monde lot 77 T1 — la soirée, l'ouverture, la fin de soirée et le discours : plus aucune coupure, même avec des noms de 27 lettres
+
+Branche : `fid-soiree2` (la branche courante de ce dossier ; commits ICI ; le superviseur fusionne). **Lis d'abord `C:/Users/antho/AppData/Local/Temp/p1/COMMUN-3E-TOUR.md`.** Dossier de travail pour l'outil : `C:/Users/antho/Documents/cage-legacy-p77`.
+
+## Écrans : `soiree`, `soireeOuverture`, `soireeFin`, `discours` (+ leurs variantes `…Long`)
+Fichiers : `mgmt-ecran-soiree.js`, `mgmt-soiree-cadre.js`, `mgmt-presentation-ecrans.js`, `mgmt-ecran-discours.js` (classes `di3-*`).
+
+### Constat sur main (25/10) (audit avec le détecteur strict)
+- **`soiree`** : 7 textes coupés : `FORUM DE MONTPELLIER` (SPAN de l'en-tête, `coupé(propre)`), `PRÉLIM 2 POIDS PAILLE FÉMININ` (`so3-categorie`, plus large que sa boîte : « PRÉLIM 2 » et « POIDS PAILLE FÉMININ » se touchent), `POIDS PAILLE FÉMININ` (SMALL) ; mêmes défauts sur `soireeLong` (9). → colonne de catégorie plus large (la planche : « PRÉLIM 1 » 22 px au-dessus, « POIDS MI-LOURD » 22 px dessous, colonne de ~190 px), nom de salle de l'en-tête sur une ligne **sans coupure** (l'élément s'élargit, ou la taille descend jusqu'à 22 px).
+- **`soireeOuverture` et `soireeFin`** : « FORUM DE MONTPELLIER » (SPAN) `coupé(propre)` dans l'en-tête. **`soireeOuvertureLong` : 19 chevauchements** (« 1 » `mf-so-nb` sur « MI-LOURD » `mf-so-cat`, et les noms « PAPADOPOULOS-KARAGEORGIA… » coupés dans l'affiche d'ouverture) : l'affiche de combat doit **s'adapter** (taille du nom calculée selon sa longueur : ≤ 14 lettres 72 px, ≤ 22 → 56 px, sinon 44 px ; retour à la ligne entre prénom et nom ; jamais sous 40 px).
+- **`discoursLong`** : `Papadopoulos-Karageorgia…` (`di3-nom`) plus large que l'écran (le nom en 230 px est trop grand pour 27 lettres) : **taille du nom calculée selon sa longueur** (≤ 9 lettres 230 px ; ≤ 14 → 170 px ; ≤ 20 → 120 px ; sinon 84 px, césure au tiret autorisée).
+Ne touche pas au reste de ces écrans (structure déjà proche de la planche).
+
+ Écrans à contrôler : `soiree,soireeLong,soireeOuverture,soireeOuvertureLong,soireeFin,soireeFinLong,discours,discoursLong`.
+
+## Compte rendu
+
+- `mgmt-soiree-cadre.js` : noms de combattants sur deux lignes et tailles adaptées à la longueur dans l'affiche d'ouverture.
+- `mgmt-ecran-discours.js` : taille du patronyme adaptée (230/170/120/84 px) et césure possible pour les noms longs.
+- `ui-cadre.css` : colonne catégorie portée à 190 px, rang resserré et ligne de salle conservée sur une ligne à 22 px ; adaptations de l'affiche.
+- `index.html` : versions cache montées pour les deux scripts et la feuille CSS.
+- `tests/mgmtMondeLot77T1.test.js` : test « Monde lot 77 T1 — les noms longs de soirée et de discours restent adaptables ».
+- Sauvegarde : aucune modification ; `MGMT_SAVE_VERSION` inchangé.
+- Écarts : le chemin `C:/Users/antho/AppData/Local/Temp/p1/COMMUN-3E-TOUR.md` est inaccessible dans l'environnement d'outil ; j'ai appliqué les règles prioritaires présentes dans la demande. Les écrans `soiree`, `soireeLong`, `soireeOuverture`, `soireeOuvertureLong`, `soireeFin`, `soireeFinLong`, `discours`, `discoursLong` restent à contrôler visuellement par le superviseur.
+- Tests : le test de tranche et `mgmtSoireeShow.test.js` passent. Le test lent `mgmtSoireeShow.test.js` a dépassé le délai initial de 120 s, puis a réussi en relance avec un délai adapté.
+- Reprise : `node --test tests/mgmtMondeLot77T1.test.js` (1/1), `node --test tests/mgmtSoireeShow.test.js` (18/18, 214 s), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` (OK). Le contrôle a révélé que le nouveau test n’était pas référencé dans les scripts génériques `test` et `test:watch` malgré ses alias dédiés ; les deux scripts génériques ont été corrigés et le contrôle d’inclusion retourne maintenant `true`/`true`.
+- Questions pour Anthony : aucune.
+- Captures strictes (25/10, outil `shoot.js`) après les commits initiaux : `soiree` cible atteinte (`chevauchements=0`, `textesSous22px=0`, aucun débordement) ; `soireeOuverture`, `soireeFin`, `discours` idem. `soireeLong` signalait deux débordements des noms; `soireeOuvertureLong` signalait 23 chevauchements et 14 débordements. `soireeFinLong`, `discoursLong` sans défauts. Le deuxième contrôle couvre les variantes et montre ces échecs restants; le délai du premier contrôle a interrompu la capture après `soiree`.
+- Correctif complémentaire : `.so3-noms` autorise désormais le retour à la ligne et la césure de noms très longs dans le tableau; test ciblé et audit des versions verts. Les captures du détecteur doivent être relancées après ce correctif : l'ouverture Long reste à corriger/valider, la tranche n'est donc pas entièrement conforme aux cibles strictes.
+- CONTRÔLE avant correctif complémentaire : soiree `0/0/[]`; soireeLong `0/0/[2 débordements]`; ouverture `0/0/[]`; ouvertureLong `23 chevauchements, 0 sous 22 px, 14 débordements`; fin `0/0/[]`; finLong `0/0/[]`; discours `0/0/[]`; discoursLong `0/0/[]`. Captures après correctif non exécutées.
+- Reprise 4 : le contrôle du CSS a révélé que `.so3-carte-combat` définissait des colonnes de grille mais héritait de `display:flex`, rendant ces colonnes inopérantes. La carte d'ouverture utilise maintenant effectivement CSS Grid; le test tranche vérifie ce point. Test ciblé et audit des versions verts. Le détecteur visuel après changement reste à exécuter par le superviseur.
+- Reprise 5 : `node --test tests/mgmtMondeLot77T1.test.js` (1/1), `node --test tests/mgmtSoireeShow.test.js` (18/18), `node tools/verif-versions.js origin/main` (aucun écart), `node_modules/.bin/eslint .` (OK) et inclusion dans `test`/`test:watch` (`true`/`true`). Le document COMMUN-3E-TOUR demandé n'a pas pu être lu : l'accès au chemin externe a été refusé par l'environnement d'outil. Aucun changement supplémentaire de code requis selon l'état Git; les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` ne relèvent pas de la tranche et ne sont pas ajoutées.
+- Reprise 6 : après activation de Grid, le CSS des noms de l'affiche d'ouverture empêchait encore explicitement le retour à la ligne (`white-space:nowrap` sur les noms et les prénoms/noms). Il est remplacé par une mise en ligne souple/césure autorisée, en conservant le bloc prénom puis patronyme ; les assertions du test de tranche couvrent ce retour à la ligne. `node --test tests/mgmtMondeLot77T1.test.js`, `node tools/verif-versions.js origin/main`, ESLint et l'inclusion dans `test`/`test:watch` ont été vérifiés. La capture visuelle du détecteur strict n'est pas disponible dans ce dossier (aucun `shoot.js` trouvé) ; le contrôle géométrique restant est à confirmer par le superviseur.
