@@ -2217,4 +2217,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-suite{position:absolute;right:90px;bottom:22px;font:inherit;font-size:22px;min-height:48px;padding:0 16px;background:transparent;color:#F0B220;border:1px solid #F0B220;cursor:pointer}
 .di3-scene~.mf-touches{position:absolute;left:80px;bottom:22px;display:flex;gap:28px;font-size:24px}
 .di3-scene~.mf-touches .mf-touche{font-size:24px}
+/* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_PLANCHE_DETAIL] — Monde lot 69 T1 ====
+   La planche validée place l'étiquette rouge en texte blanc et garde la
+   citation en paragraphe, avec une typographie de grande scène. ==== */
+.di3-cartouche{box-sizing:border-box;height:46px;padding:0 16px;display:flex;align-items:center;color:#fff;font-size:30px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.di3-resultat strong{font-size:48px}
+.di3-lignes{font-size:30px;line-height:1.18}
+.di3-lignes p{font-style:normal}
 /* ==== [FIN ANCRE] ==== */
