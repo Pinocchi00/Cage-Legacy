@@ -263,6 +263,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 Règles communes : **additif** pour les données ; ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 4 — nouvelles captures et dernier essai — 25/10/2026
+
+- Branche `fid-lendemain` confirmée; les changements non liés des agents, de `opencode.json` et de `sw.js` restent exclus. L’implémentation des deux écrans et des tests demeure déjà dans l’historique.
+- Guide `shoot` lu et captures faites après cette reprise à 1920×1080. `lendemain` : aucun chevauchement, texte <22 px ou débordement détecté, mais `grosBlocs=22,8 %` (cible de reprise ≤18 % non atteinte). `lendemainSuite` : aucun chevauchement ni texte <22 px, `grosBlocs=17,9 %`, mais quatre débordements encore présents dans les mouvements (« Poids léger », « Jonas Bühler », « Poids mi-moyen », « 6ᵉ → 11ᵉ »). Les images cmp ont été régénérées par l’outil.
+- Essai CSS terminal dans `ui-cadre.css` : répartition plus généreuse aux cellules d’identité avec retour/coupure des libellés; cache CSS bumpé dans `index.html`. Cela ne corrige pas les quatre alertes de mouvements et ne modifie pas le ratio du lendemain. Les noms restent ≥64 px (surprise 108 px) et les cartes gardent 285 px.
+- Test ciblé `node --test tests/mgmtEcranLendemain.test.js` : 7/7 verts. Pas de données, mécanique, navigation ni sauvegarde modifiées.
+- Avant/après : seule la contrainte des cellules de mouvements a été tentée; elle n’a pas résolu les alertes variables. Écarts persistants : cible de reprise ≤18 % sur le lendemain et débordements sur la suite. Aucune conformité visuelle complète n’est revendiquée; `TOUT_EST_FINI` n’est donc pas certifié. Questions pour Anthony : aucune.
+
 ### Reprise 4 — contrôles après dernier commit — 24/10/2026
 
 - Branche `fid-lendemain` confirmée. HEAD `3fcb7df3`; les derniers commits de tranche sont déjà présents et aucun fichier de tranche n'est modifié à l'ouverture. Modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre et non touchées.

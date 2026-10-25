@@ -2371,4 +2371,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE66_T1_FIDELITE_NOM_SURPRISE] — Monde lot 66 T1 ==== */
 .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8;letter-spacing:-.025em}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_CONTENANCE_FINALE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.7fr) minmax(0,.55fr);column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{text-align:right;justify-self:stretch}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
