@@ -2,6 +2,13 @@
 
 ## Compte rendu
 
+### Reprise 25/10 — identité de la matchmaker sur le choc
+- `mgmt-ecran-poste.js` affiche désormais, dans la colonne de proposition, le nom et la phrase signature du matchmaker de l'organisation adverse en reprenant `MGMT_MATCHMAKERS` (données existantes, `relu:false`) au lieu d'une citation de remplissage inventée dans l'écran. `ui-cadre.css` donne à son nom une règle dédiée, au moins 22 px. `index.html` a reçu les bumps `?v=` de ces deux ressources.
+- `tests/mgmtLot69T1.test.js` vérifie que l'écran utilise bien le nom et la phrase de la matchmaker effectivement associée au partenaire.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent ; `git diff --check` passe.
+- Capture choc rejouée : page visible, zéro chevauchement/texte sous 22 px/débordement, mais `grosBlocs=26.2%` (cible ≤20% manquée). Je n'ai pas pu ouvrir le comparatif `cmp-*.png` dans ce contexte ; pas de preuve visuelle comparative ni de capture arrivée dédiée. Le chevauchement du bilan consigné précédemment reste non corrigé/non revalidé. Aucune retouche spéculative de densité et aucune migration de sauvegarde.
+- Fichiers concernés : `mgmt-ecran-poste.js` (attribution de la proposition), `ui-cadre.css` (style du nom de matchmaker), `index.html` (versions), `tests/mgmtLot69T1.test.js` (assertions d'attribution), cette fiche (compte rendu). Aucune question nouvelle pour Anthony.
+
 ### Reprise 25/10/2026 — vérification après les commits de reprise
 - Branche `fid-choc` confirmée. Les commits `f21bff66`, `aa713e15`, `dc49a88e` et `481cdfc0` portent déjà les corrections précédentes ; aucun fichier de la tranche n'est modifié localement.
 - Modifications locales conservées hors tranche : `.opencode/agents/*.md`, `opencode.json` et `sw.js`. Aucun de ces fichiers n'est inclus.
