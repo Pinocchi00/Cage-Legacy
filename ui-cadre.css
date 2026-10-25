@@ -2284,6 +2284,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mgmt-org-eff{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
 .mf-ancien .mgmt-org-cat{box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
 .mf-ancien .mgmt-org-cat .mgmt-org-nm,.mf-ancien .mgmt-org-cat .mgmt-org-sub{white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE70_T1_CROISSANCE_TEXTE_MINIMUM] — Monde lot 70 T1 ==== */
+.mgmt-org .mgmt-org-cat .mgmt-org-nm,.mgmt-org .mgmt-org-cat .mgmt-org-sub{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;font-size:24px!important;line-height:1.12!important;white-space:normal;overflow-wrap:anywhere;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */

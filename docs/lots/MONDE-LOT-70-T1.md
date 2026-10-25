@@ -80,6 +80,14 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 - Reprise 10 : capture fraîche Accueil `7/0/[]`, exemples persistants touches/libellés et « Landon Schultz mène le class » / « Ton poste ». Carnet seul : `140/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`. Les contrôles des autres écrans n'ont pas pu être relancés dans ce tour.
 - Essai CSS Carnet remplaçant `contain:strict` par containment layout/paint avec scroll interne renforcé ; aucun changement de capture (`140/0` et quatre débordements). Test `node --test tests/mgmtLot55T1.test.js` : 49/49 verts ; `node tools/_bump.js ui-cadre.css` a actualisé `?v=`. L'essai reste insuffisant : aucune conformité visuelle revendiquée. Pas de migration.
+
+### Reprise 28 — croissance
+
+- Branche vérifiée : `polissage`. Les changements étrangers préexistants dans `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors commit.
+- Ligne `CONTRÔLE` fraîche avant : Croissance `0/3/[27 combattants, 1 dans l… ; 29 combattants, 1 dans l… ; Poids coq féminin ; 21 combattants, 2 dans l…]` (ordre chevauchements/textesSous22px/débordements). Après deux essais de règles CSS plus spécifiques sur `.mgmt-org-cat .mgmt-org-nm` et `.mgmt-org-cat .mgmt-org-sub`, résultat strictement identique. Le problème n'est donc pas résolu et la case Croissance reste ouverte.
+- Modifié : `ui-cadre.css` (règle d'essai ciblée avec ancre de la tranche) ; `index.html` (cache CSS bumpé). Test `node --test tests/mgmtLot56T1.test.js` : 11/11 verts. Pas de changement de sauvegarde.
+- Autres lignes capturées pendant cette reprise : Carnet `140/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`. La capture groupée a expiré après ce seul écran ; aucune mesure fraîche de l'Accueil, Ton poste, Bilan ou Actualités n'est rapportée. Les valeurs post-correction précédentes du carnet n'ont pas atteint zéro ; Bilan et Actualités restent historiquement mesurés à `0/0/[]` seulement.
+- État honnête : cette reprise n'atteint pas les objectifs visuels et n'ajoute pas de test de géométrie. Les commits précédents couvrent les autres corrections tentées, mais les historiques de mesures du carnet, de l'Accueil et de Ton poste indiquent encore des défauts. Aucun `TOUT_EST_FINI` revendiqué.
 - Fichiers de ce pas : `ui-cadre.css` (essai de confinement du carnet), `index.html` (cache CSS), cette fiche (mesures et écart). Le reste des cases demeure non terminé selon les relevés antérieurs ; aucune question pour Anthony.
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`. **Ne touche pas aux écrans de la soirée, de la fin de soirée, du lendemain, du choc, du discours ni de l'arrivée** : d'autres lots y travaillent en ce moment.
