@@ -58,6 +58,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — reproduction réelle des captures
+- Branche `fid-choc` confirmée ; HEAD de départ `08a7e99e`. Les changements locaux sous `.opencode/agents/`, `opencode.json` et `sw.js` restent hors tranche et ne sont pas inclus.
+- Lecture effective de `LISEZMOI.txt` via le shell : la commande demandée pour le shoot a été suivie. Captures successives à 1920×1080 : choc affiche la proposition (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.2%` (>20%) ; discours sans anomalie géométrique, `grosBlocs=16.6%` ; bilan `grosBlocs=12.9%`, mais le contrôle reproduit un chevauchement de 265×22 entre « REMERCIÉ » et « Il manque 3 combats en carte ».
+- Aucun CSS spéculatif n'a été conservé : les notes de reprises précédentes documentent plusieurs essais sans changement de la métrique du bilan ou de densité choc. Le critère visuel n'est donc pas atteint. Les PNG `cmp-*` n'ont pas pu être ouverts dans cette interface et aucune capture dédiée de l'arrivée n'a été exécutée.
+- `node --test tests/mgmtLot69T1.test.js` passe (4/4) ; le scénario couvre offre, changement, arrivée, rechargement, soirée/lendemain et choc multi-paires. `node tools/verif-versions.js origin/main` passe (20 fichiers). Les scripts `test` et `test:watch` référencent le test de tranche. Aucun changement de données ni migration.
+- Fichiers modifiés dans cette reprise : cette fiche uniquement (compte rendu des trois captures). Les écarts visuels ci-dessus restent ouverts ; ne pas annoncer `TOUT_EST_FINI` sur la base des seuls tests structurels.
+
 ### Reprise 25/10/2026 — état vérifié
 - Branche `fid-choc`, HEAD `aa713e15`; le log contient les commits de la tranche. Aucun fichier de tranche n'est modifié localement. Les modifications de `.opencode/agents/`, `opencode.json` et `sw.js` sont préexistantes et hors périmètre ; elles restent intactes.
 - Test ciblé `node --test tests/mgmtLot69T1.test.js` : 4/4 réussis. `node tools/verif-versions.js origin/main` : aucun écart (20 fichiers). `node_modules/.bin/eslint .` passe.
