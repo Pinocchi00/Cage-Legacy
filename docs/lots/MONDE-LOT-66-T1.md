@@ -35,6 +35,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise finale 25/10/2026 — rééquilibrage suite
+
+- Code déjà livré confirmé par `git log --oneline -12`; cette reprise ne refait pas les deux écrans. Réglage terminal de la grille des mouvements : répartition fluide en trois cellules (identité / rang / organisation) et césure moins agressive des libellés, plutôt que les cellules fixes de 96 px qui avaient conduit aux débordements signalés. `ui-cadre.css` versionné dans `index.html` avec `node tools/_bump.js ui-cadre.css`.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30), `mgmtSoireeShow.test.js` (18). Audit `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` sans écart.
+- Avant/après : la suite conserve son modèle en trois colonnes et ses contenus explicites; la dernière règle CSS redonne une largeur proportionnelle aux champs de classement et d'organisation. Le guide/outil temporaire de capture n'est pas accessible depuis cette reprise, donc pas de nouvelle capture ni de nouvelle mesure runtime revendiquée. Les captures précédemment consignées détectaient des débordements de mouvements; cette correction CSS n'est pas déclarée visuellement certifiée. Le lendemain conserve les noms CSS à 80/64 px (≥64 px) et les cartes de 285 px; le ratio renforcé ≤18 % reste non certifié et était précédemment mesuré au-dessus de la cible.
+- Pas de changement de données, navigation, moteur, sauvegarde ou migration. Pas de nouveau test. Questions pour Anthony : aucune. Les changements locaux préexistants dans `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et laissés intacts.
+
 ### Reprise de contrôle — 25/10/2026
 
 - Branche `fid-lendemain` confirmée; `git log --oneline -12` montre les livraisons précédentes déjà commitées. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et restent intactes.
