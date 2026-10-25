@@ -17,6 +17,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise — contrôles visuels complémentaires
+- Branche `fid-choc`, HEAD de départ `f565f75a`. Les changements présents sous `.opencode/agents/` et `opencode.json` sont restés hors tranche.
+- Captures effectivement lancées : `choc` (proposition reçue valide) donne 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` ; `discours` donne 0 anomalie géométrique et `grosBlocs=16.6%` ; `bilan` donne `grosBlocs=12.9%` mais conserve un chevauchement de 265×22 px entre « REMERCIÉ » et « Il manque 3 combats en carte ».
+- J'ai tenté une réduction de hauteur des cartes du choc et une séparation accrue du titre de bilan ; les mesures après capture sont inchangées. Ces règles non concluantes ont été retirées, et aucun faux correctif visuel n'est conservé. Les images comparatives n'ont pas été ouvertes visuellement ; aucune scène d'arrivée dédiée n'a été capturée.
+- Fichiers fonctionnels conservés : aucun changement source nouveau. `tests/mgmtLot69T1.test.js` a été relancé : 4/4 réussis ; le scénario couvre le parcours d'offre, rechargement, arrivée, soirée/lendemain et les trois affiches du choc. Audit `node tools/verif-versions.js origin/main` réussi. Aucun changement de sauvegarde.
+- Écarts non résolus : choc au-dessus de 20% de gros blocs, chevauchement du bilan, arrivée sans capture dédiée/validation visuelle. La tranche ne peut pas être déclarée entièrement terminée.
+
 ### Reprise 65 — taille du nom du discours
 - Référence d'exécution : branche `fid-choc`, HEAD initial `868229ef`. Les changements préexistants sous `.opencode/agents/` et `opencode.json` restent hors tranche.
 - `ui-cadre.css` fixe le nom principal de `UniDiscours` à 120 px au lieu de l'échelle qui pouvait atteindre 230 px ; cela suit la demande de la reprise (nom ≈120 px) et laisse davantage de place à la citation. Le test structurel cite explicitement la décision de primauté des planches validées.
