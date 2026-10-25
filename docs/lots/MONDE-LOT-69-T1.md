@@ -23,6 +23,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — inspection choc et essai de proportion
+- Branche `fid-choc` confirmée. Les commits précédents contiennent déjà le code fonctionnel et les tests de parcours/multi-paires ; il n'y avait aucun changement fonctionnel local à récupérer. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
+- Rejoué le shoot `choc` : écran affiché, `chevauchements=0`, `textesSous22px=0`, aucun débordement, `grosBlocs=26.1%` (cible ≤20% non atteinte). Un essai de proportion plus large pour les affiches a donné 26.6% ; règle retirée comme inefficace. Le CSS et son `?v=` sont restés inchangés.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4, incluant arrivée, sauvegarde/rechargement, soirée/lendemain et choc trois paires.
+- Aucun JS/CSS/test applicatif modifié, aucune migration. Écarts toujours ouverts : densité choc, chevauchement bilan précédemment mesuré, capture dédiée arrivée et inspection visuelle des comparatifs. La capture a fourni des métriques, pas une inspection visuelle de l'image. Aucun écart n'est déclaré résolu par cet essai.
+- Compte rendu : cette mise à jour de fiche seulement.
+
 ### Reprise 25/10/2026 — reproduction bilan et contrôles ciblés
 - Branche `fid-choc`, HEAD initial `392ee9f2`; le test dédié est déjà présent dans les commits antérieurs. Les modifications utilisateur `.opencode/agents/*`, `opencode.json` et changements de fins de ligne de `index.html`, `ui-cadre.css`, `sw.js` restent hors commit.
 - Captures lancées avec le shoot fourni : choc `grosBlocs=26.1%`, sans chevauchement, texte trop petit ni débordement ; discours `grosBlocs=16.6%`, mêmes contrôles géométriques verts ; bilan `grosBlocs=12.9%`, mais chevauchement toujours mesuré entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22 px). Une tentative d'augmentation de l'interligne/marge du titre du bilan n'a pas changé la mesure ; le CSS et son incrément de version ont été retirés plutôt que de conserver une correction inefficace.
