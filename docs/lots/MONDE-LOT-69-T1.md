@@ -839,3 +839,11 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Les planches UniChoc et UniDiscours ont été lues en HTML. Les images `cmp-*` générées par l'outil n'ont pas été ouvertes ici ; aucune comparaison visuelle manuelle ni capture dédiée de l'arrivée n'est revendiquée. Aucune correction CSS à l'aveugle n'a été conservée : les rapports antérieurs montrent que les tentatives d'espacement du bilan ne changeaient pas la mesure.
 - Vérifications ciblées et audit de versions à relancer avant livraison. Aucun changement de code ni de sauvegarde dans cette reprise ; aucune migration.
 - Écarts toujours ouverts : densité choc, chevauchement bilan, scène/capture d'arrivée et inspection visuelle comparative. Les tests existants couvrent déjà les trois paires, leur programmation/résolution et le parcours d'offre jusqu'au lendemain ; cela ne remplace pas les objectifs visuels non atteints.
+
+### Reprise 25/10 — validation finale de reprise
+- État initial : branche `fid-choc`, HEAD `9c35fb8d`; les seuls changements Git non committés sont les fichiers utilisateur sous `.opencode/agents/` et `opencode.json`, laissés hors de la tranche.
+- Rejoué le scénario choc demandé : `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc`. Le rendu est présent ; contrôle automatique : aucun chevauchement, aucun texte sous 22 px, aucun débordement. `grosBlocs=26.2%`, au-dessus de la cible ≤20%.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Aucun changement fonctionnel additionnel : l'état déjà committé couvre le choc à trois paires et son chemin de soirée, ainsi que le parcours offre/changement/arrivée/soirée/lendemain. La capture choc établit le rendu visible, pas la conformité de densité. Le bilan conserve le chevauchement précédemment mesuré ; aucune capture dédiée d'arrivée ni inspection visuelle des images comparatives n'est revendiquée.
+- Fichier modifié dans cette reprise : cette fiche (résultat des contrôles). Tests ajoutés : aucun. Migration : aucune. Pas de cache JS/CSS à incrémenter.
+- Écarts persistants, non déclarés achevés : cible de gros blocs du choc, chevauchement bilan à revalider/corriger, scène arrivée et comparaison visuelle des captures. Aucun `TOUT_EST_FINI` revendiqué.
