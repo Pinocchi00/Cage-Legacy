@@ -35,6 +35,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 10 — cascade typographique — 25/10/2026
+
+- Historique et branche vérifiés : `fid-lendemain`; commits fonctionnels précédents déjà présents. Changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` exclus et laissés intacts.
+- Avant : plusieurs règles terminales contradictoires réglaient les deux noms secondaires à 64 px et le premier à 108 px. Après : règle CSS explicite finale cohérente avec la dimension observée dans la planche, nom principal 80 px et noms secondaires 68 px; chaque nom reste ≥64 px. Cache CSS bumpé par `node tools/_bump.js ui-cadre.css`.
+- `node --test tests/mgmtEcranLendemain.test.js` passe (7/7). Le guide de capture est inaccessible dans l'espace extérieur autorisé de cette session; capture/comparatif et mesure computed-style via la page non réalisés ici. Les derniers relevés consignés sont 22,8 % gros blocs pour lendemain et des alertes de contenu de mouvements dans suite; ces objectifs restent non certifiés, aucun progrès de capture n'est revendiqué.
+- Aucun changement de données, navigation, mécanique ou sauvegarde; pas de migration ni de nouveau test. Fichiers touchés : `ui-cadre.css` (cascade des noms), `index.html` (cache), cette fiche (résultats). Questions pour Anthony : aucune.
+
 ### Reprise finale 25/10/2026 — rééquilibrage suite
 
 - Code déjà livré confirmé par `git log --oneline -12`; cette reprise ne refait pas les deux écrans. Réglage terminal de la grille des mouvements : répartition fluide en trois cellules (identité / rang / organisation) et césure moins agressive des libellés, plutôt que les cellules fixes de 96 px qui avaient conduit aux débordements signalés. `ui-cadre.css` versionné dans `index.html` avec `node tools/_bump.js ui-cadre.css`.
