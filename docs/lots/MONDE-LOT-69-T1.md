@@ -23,6 +23,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10 — reproduction de la scène choc
+- Branche confirmée : `fid-choc`. Le log montre les commits de la tranche déjà présents ; les modifications hors tranche sous `.opencode/agents/`, `opencode.json` et `sw.js` sont conservées sans ajout.
+- Reproduction effectuée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : l'écran de proposition reçue s'affiche ; chevauchements=0, textes sous 22 px=0, aucun débordement, `grosBlocs=25.8%` (cible ≤20% non atteinte). Je ne revendique pas le critère de densité. Le comparatif image n'a pas été ouvert visuellement.
+- `node --test tests/mgmtLot69T1.test.js` passe 4/4. Le parcours testé et la logique multi-paires existants n'ont pas été modifiés. `node tools/verif-versions.js origin/main` passe (20 fichiers examinés) et `git diff --check` passe.
+- Aucun changement JS/CSS/test ni migration dans cette reprise ; aucune correction visuelle spéculative n'est conservée. Les écarts connus restent la densité du choc, le chevauchement du bilan précédemment mesuré et l'absence d'une capture dédiée d'arrivée/inspection visuelle des comparatifs. Cette entrée est le seul changement de tranche de la reprise.
+
 ### Reprise 25/10/2026 — inspection choc et essai de proportion
 - Branche `fid-choc` confirmée. Les commits précédents contiennent déjà le code fonctionnel et les tests de parcours/multi-paires ; il n'y avait aucun changement fonctionnel local à récupérer. Les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
 - Rejoué le shoot `choc` : écran affiché, `chevauchements=0`, `textesSous22px=0`, aucun débordement, `grosBlocs=26.1%` (cible ≤20% non atteinte). Un essai de proportion plus large pour les affiches a donné 26.6% ; règle retirée comme inefficace. Le CSS et son `?v=` sont restés inchangés.
