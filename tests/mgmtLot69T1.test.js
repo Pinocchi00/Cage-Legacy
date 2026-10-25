@@ -161,8 +161,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
        assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');
        assert.match(css,/\.ch3-button\.ch3-refuse\{[^}]*background:#E23A2B/s,'refuser est identifié par le rouge de la charte');
-       /* Décision : la planche UniDiscours validée par Anthony prime ; nom autour de 120 px au viewport de capture. */
-       assert.match(css,/\.di3-nom\{font-size:120px\}/,'le nom du discours reprend la taille approximative de 120 px de la planche');
+        /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche, nom de famille à 230 px. */
+        assert.match(css,/\.di3-nom\{font-size:230px\}/,'le nom du discours reprend les 230 px de UniDiscours');
       assert.doesNotMatch(css,/\.ch3-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'aucune animation CSS ne doit être ajoutée au choc');
       assert.doesNotMatch(css,/\.(?:ch3|di3)-[\w-]+[^\{]*\{[^}]*animation\s*:/s,'les écrans choc et discours restent sans animation CSS conformément à la décision du 07/10');
   }finally{w.close();}
