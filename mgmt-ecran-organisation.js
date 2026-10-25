@@ -123,17 +123,18 @@ function scr_mgmt_organisation(){
   const hommes=rows.filter(r=>r.div.gender!=='F');
   const groupes=mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.hommes,hommes)
     +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
-    return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
-     +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
-     +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_carte')">${esc(MGMT_ORG_LABELS.back)}</button>`
-      +mgmtOrgOnglets(m,'mgmt_organisation')+`<div class="mgmt-cols mgmt-org-cols">`
-     +mfPanneau(`<section class="mgmt-org-main">`
-     +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
+     const paliers=mgmtPaliersHtml(m);
+     const legacy=mfPanneau(`<section class="mgmt-org-main">`
+      +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
       +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
-     +groupes+`</section>`,'normal','mf-sem-p')
+      +groupes+`</section>`,'normal','mf-sem-p')
       /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
-      +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-        +mgmtOrgMoneyHtml(m)+mgmtPaliersHtml(m)+`<button type="button" onclick="CL.go('mgmt_guerre')">Le classement des huit</button>${m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
+       +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
+         +mgmtOrgMoneyHtml(m)+`<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p');
+     const calcul=mgmtPaliersCalculer(m), prochaine=calcul.next;
+     const nextHtml=prochaine?`<h3>${esc(prochaine.nom.toUpperCase())}</h3><p>${esc(prochaine.texte)}</p><p>Popularité ${esc(calcul.popularite)} / ${esc(prochaine.popularite)} · Rang huit ${esc(calcul.rang)}e / ${esc(prochaine.rang)}e</p>`:`<h3>LE SOMMET</h3><p>${esc(calcul.paliers[calcul.paliers.length-1].texte)}</p>`;
+     const html=`<main class="mf-contenu oc75">${mgmtOrgOnglets(m,'mgmt_organisation')}<section class="oc75-layout"><div class="oc75-panel"><h1>LA CROISSANCE</h1>${paliers}</div><aside class="oc75-next"><h2>LA PROCHAINE MARCHE</h2>${nextHtml}<p>Salles pleines de suite —</p></aside></section><details class="oc75-legacy"><summary>Effectif et finances</summary>${legacy}</details></main>`;
+     return mfEcran(html,{barre:'jeu',courant:'accueil',m,plaque:'Organisation',libelle:`SPLIT · ${mgmtPaliersCalculer(m).rang}e DES HUIT`,droite:mgmtOrgNom(m),touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
 }
 /* ==== [FIN ANCRE] ==== */
