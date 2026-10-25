@@ -15,6 +15,14 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 ## Compte rendu
 
+### Reprise 36 — mesures et tentative carnet
+
+- Branche vérifiée : `polissage`. `git log --oneline -12` consulté. Au départ, aucun fichier suivi de la tranche n'était modifié ; les changements étrangers `.opencode/agents/*`, `opencode.json` et `sw.js` sont laissés hors tranche.
+- Contrôles de capture exécutés avec `shoot.js` : Accueil `0/0/[]`; Carnet avant et après l'essai CSS `135/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`; Ton poste `5/0/[Jean-Michel Delatour, IL ATTEND DE VOIR, « Je veux voir la suite. »]`; Croissance `0/3/[27 combattants…, 29 combattants…, Poids coq féminin, 21 combattants…]`; Bilan `0/0/[]`; Actualités `3/0/[RÉSULTAT, Connor n’a pas besoin de…, Soirée 3…]`. Triplets : chevauchements/textesSous22px/débordements. Actualités a aussi débordements `RÉSULTAT`, `Connor n’a pas besoin de`, `Soirée 3…`.
+- Code : essai dans `ui-cadre.css` pour imposer quatre rangées au carnet (inspiré de ses sept articles), avec son `?v=` rafraîchi dans `index.html`. Le test `node --test tests/mgmtLot55T1.test.js` passe (49/49), mais le contrôle après est inchangé : cet essai n'a pas résolu le défaut. Il est conservé comme essai non concluant. Les suites `tests/mgmtLot56T1.test.js` (11/11) et `tests/mgmtActualitesEcran.test.js` (9/9) passent également.
+- Pas de nouvelle suite de test ni de migration. L'essai n'atteint aucun changement mesuré du Carnet. Aucune prétention de conformité n'est faite : Carnet, Ton poste, Croissance et Actualités restent non conformes; Bilan/Accueil sont à zéro dans les captures de cette reprise. Les cases/commits par écran et le commit final restent à effectuer. Aucun écran interdit n'a été touché.
+- Questions pour Anthony : aucune. Écart au critère demandé : le zéro global n'est pas atteint; Actualités, Ton poste et Croissance demandent encore une correction effective. La structure CSS du Carnet semble être contournée par la capture (mesure rigoureusement identique après cache bump) ; vérifier le DOM/style effectivement chargé avant nouvel essai.
+
 ### Reprise 35 — Accueil, suppression du détail redondant
 
 - Branche `polissage`; historique consulté, aucun fichier de tranche suivi non commité au départ. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
