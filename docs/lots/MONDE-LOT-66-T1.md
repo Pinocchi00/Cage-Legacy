@@ -35,6 +35,13 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 25/10 — captures actuelles
+
+- Vérifications initiales : branche `fid-lendemain`; les commits précédents incluent les écrans et styles. Les modifications locales des agents OpenCode, `opencode.json` et `sw.js` sont étrangères à cette tranche et restent intactes.
+- Guide `shoot` lu et captures réellement lancées séparément à 1920×1080. `lendemain` : contrôle détecte trois chevauchements entre les titres de noms et les détails, `textesSous22px=0`, aucun débordement, `grosBlocs=22,5%` (`moyen=28,9%`). `lendemainSuite` : zéro chevauchement et zéro texte sous 22 px, mais débordements de mouvements « Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »; `grosBlocs=17,6%` (`moyen=23,1%`). Les fichiers comparatifs sont générés sous le répertoire temporaire de shoot.
+- Les cartes des trois moments et l'écran suite sont bien en place, mais les alertes concrètes ci-dessus prouvent que les objectifs de capture ne sont pas atteints. Le CSS final déclaré empêche des textes de moins de 22 px, mais n'empêche pas actuellement les chevauchements mesurés des titres. Nulle conformité visuelle complète n'est revendiquée.
+- Aucun changement de code de tranche non commité au départ; les fichiers de tranche figurent déjà dans les commits antérieurs. Aucun test ni mécanique/sauvegarde modifié dans cette reprise. Question pour Anthony : la cible renforcée de gros blocs à 18 % et le contrôle zéro chevauchement restent à corriger.
+
 ### Reprise finale — contenir les titres des moments — 25/10/2026
 
 - Branche `fid-lendemain`; HEAD initial `4365172a`. L’historique confirme que les écrans, leur navigation et les tests étaient déjà livrés. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangers à cette tranche et restent intacts.
