@@ -1,7 +1,7 @@
 ﻿---
 description: Relit le diff d'une tranche contre sa fiche et les rÃ¨gles du dÃ©pÃ´t, et rend ACCEPTÃ‰ ou Ã€ REPRENDRE avec une liste numÃ©rotÃ©e. Ne modifie rien.
 mode: subagent
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 steps: 30
 permission:
   edit: deny

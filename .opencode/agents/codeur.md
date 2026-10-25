@@ -1,7 +1,7 @@
 ﻿---
 description: Code une tranche du brief Â« Un monde qui a vÃ©cu Â» Ã  partir de sa fiche (docs/lots/MONDE-LOT-N-TK.md), la teste, la fait vÃ©rifier et relire, puis la commite.
 mode: all
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 permission:
   task:
     "*": deny

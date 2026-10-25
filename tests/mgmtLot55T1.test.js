@@ -58,7 +58,7 @@ test('Lot 55 T1 — rendu échappé et toutes les classes ce3 ont une règle',()
   const c=charger();
   const js=source;
   assert.match(js,/mgmtCeremonieEchapper\(x\.nom\)/);
-  const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8')+fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
   const classes=[...new Set([...js.matchAll(/class="(ce3-[^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)))];
   for(const name of classes)assert.match(html,new RegExp('\\.'+name+'(?:[^,{]*)\\{'),`règle CSS manquante: ${name}`);
   assert.equal(c.mgmtCeremonieEchapper('<script>'), '&lt;script&gt;');
@@ -228,7 +228,8 @@ test('Lot 55 T1 — les formulations de cérémonie ne se répètent pas sur cin
       phrases.add(prix.phrase);
     }
   }
-  assert.equal(phrases.size,200);
+  /* Décision du lot 62 (brief du 22/10, P11 T1) : le retour de l’année exige une interruption réelle entre deux combats, sans seuil fixe ; il est donc décerné aussi dans cette simulation : cinq prix par année, 250 phrases distinctes. */
+  assert.equal(phrases.size,250);
 });
 test('Lot 55 T1 — une partie générée valide le champ facultatif des prix à la sauvegarde',()=>{
   const w=newGameWindow({runMain:true});
@@ -328,13 +329,13 @@ test('Lot 55 T1 — toute classe réellement rendue par les écrans ce3 possède
   c.CL={go:()=>{}};
   const html=c.scr_mgmt_ceremonie()+c.scr_mgmt_carnet();
   const classes=new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)));
-  const css=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8')+fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
   for(const classe of classes){
     const selecteur=new RegExp(`\\.${classe}(?![\\w-])`);
     assert.ok([...css.matchAll(/([^{}]+)\{/g)].some(x=>selecteur.test(x[1])),`aucune règle pour .${classe}`);
   }
 });
-test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve les six prix',()=>{
+test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; la cérémonie suit la planche et affiche les cinq prix représentés',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
   c.mgmtOrgNom=()=> 'Organisation';
@@ -344,11 +345,11 @@ test('Lot 55 T1 — la cérémonie échappe les noms du classement et conserve l
   const rendu=c.scr_mgmt_ceremonie();
   assert.ok(rendu.includes('&lt;svg onload=alert(1)&gt;'));
   assert.ok(!rendu.includes('<svg onload'));
-  for(const prix of ['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','SOUMISSION DE L’ANNÉE','COMBAT DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE','RETOUR DE L’ANNÉE']){
+  for(const prix of ['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','SOUMISSION DE L’ANNÉE','COMBAT DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE']){
     assert.ok(rendu.includes(prix),`prix absent : ${prix}`);
   }
 });
-test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',()=>{
+test('Lot 55 T1 — décision : planches Uni* validées par Anthony ; les cinq cartes vides restent lisibles sans lauréat',()=>{
   const c=charger();
   c.G={mgmt:{roster:[],hist:[],facts:[]}};
   c.mgmtOrgNom=()=> 'Organisation';
@@ -356,8 +357,46 @@ test('Lot 55 T1 — la cérémonie annonce honnêtement les prix sans candidat',
   c.mfEcran=contenu=>contenu;
   c.CL={go:()=>{}};
   const rendu=c.scr_mgmt_ceremonie();
-  assert.equal((rendu.match(/Pas de /g)||[]).length,6);
-  assert.match(rendu,/Aucun candidat ne répond aux critères cette année\./);
+  assert.equal((rendu.match(/Aucun lauréat/g)||[]).length,0);
+  assert.equal((rendu.match(/Aucun candidat cette année\./g)||[]).length,5);
+  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,5);
+});
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; une cérémonie avec lauréats remplit les cinq cartes visibles sans bouton retour',()=>{
+  const c=charger();
+  const combat=(jour,id,nom,opposant,family)=>({c:jour,a:{id,name:nom,W:0,L:0,D:0},b:{id:`${id}-${jour}`,name:opposant},winner:'A',family,round:1,slot:'main'});
+  const m={hist:[
+    {c:10,a:{id:'retour',name:'Retour'},b:{id:'avant',name:'Avant'},winner:'A',family:'decision'},
+    combat(100,'heros','Héros','Adversaire 1','ko'),
+    combat(200,'heros','Héros','Adversaire 2','sub'),
+    combat(250,'retour','Retour','Adversaire 3','ko'),
+    combat(300,'heros','Héros','Adversaire 4','ko')
+  ],roster:[],facts:[]};
+  c.mgmtHistoirePoidsCombat=()=>5;
+  c.G={mgmt:m};
+  c.mgmtOrgNom=()=> 'Split';
+  c.mgmtOrgClassement=()=>[{id:'split',nom:'Split',rang:3,estSplit:true}];
+  c.mgmtPaliersCalculer=()=>({effets:{diffuseur:2,recruteur:1,agents:2,salle:1}});
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  assert.equal((rendu.match(/<article class="ce3-prix(?:-combattant)?"/g)||[]).length,5,'décision : planches Uni* validées par Anthony ; l’écran suit la planche avec cinq cartes de prix');
+  assert.equal((rendu.match(/ce3-prix-vide/g)||[]).length,0,'aucune carte visible ne reste vide');
+  for(const texte of ['LES TROPHÉES 2027','CHOISIS PAR LA PRESSE','31 DÉCEMBRE','CAGE HEBDO','COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','COMBAT DE L’ANNÉE','SOUMISSION DE L’ANNÉE','RÉVÉLATION','TROISIÈME DES HUIT','CE QUE ÇA CHANGE EN 2028']) assert.ok(rendu.includes(texte),`bloc cérémonie manquant : ${texte}`);
+  assert.doesNotMatch(rendu,/class="ce3-retour"/,'décision : planches Uni* validées par Anthony ; le bilan du patron s’ouvre par Entrée, sans bouton d’en-tête');
+  assert.doesNotMatch(rendu.match(/<header[^>]*>[\s\S]*?<\/header>/)?.[0]||'',/RETOUR/);
+  for(const effet of ['Diffuseur · 2 % de bonus aux droits','Recruteur · −1 % sur le coût des missions','Agents libres · attrait de classement, palier 2/3','Salles · −1 % sur les frais de salle']) assert.ok(rendu.includes(effet),`effet manquant : ${effet}`);
+});
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; l’en-tête cérémonie réserve sa place au titre, à la presse et à la date',()=>{
+  const c=charger();
+  c.G={mgmt:{roster:[],hist:[],facts:[]}};
+  c.mgmtOrgClassement=()=>[];
+  c.mfEcran=contenu=>contenu;
+  const rendu=c.scr_mgmt_ceremonie();
+  const entete=rendu.match(/<header class="ce3-entete">([\s\S]*?)<\/header>/)?.[1]||'';
+  assert.match(entete,/<h1>LES TROPHÉES 2027<\/h1>/);
+  assert.match(entete,/<p>CHOISIS PAR LA PRESSE<\/p>/);
+  assert.match(entete,/<b>31 DÉCEMBRE<\/b><span>CAGE HEBDO<\/span>/);
+  assert.doesNotMatch(entete,/<button|RETOUR|LE BILAN DU PATRON/);
 });
 test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation',()=>{
   const c=charger();
@@ -374,6 +413,17 @@ test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation
   assert.equal(options.barre,'jeu');
   assert.equal(options.courant,'accueil');
   assert.equal(options.m,c.G.mgmt);
+});
+
+test('Monde lot 67 T1 — les quatre vues Organisation exposent les onglets communs',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const html=w.eval(`(()=>{const m=G.mgmt;mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(G.mgmt,{soirees:3});return ['mgmt_guerre','mgmt_organisation','mgmt_poste','mgmt_carnet'].map(id=>{CL.go(id);return document.body.innerHTML;}).join(' ');})()`);
+    for(const label of ['LE CLASSEMENT DES HUIT','LA CROISSANCE','TON POSTE','TON CARNET']) assert.ok(html.includes(label),`onglet absent: ${label}`);
+    assert.match(html,/ArrowDown/);
+    assert.match(html,/ArrowUp/);
+    assert.match(html,/Escape/);
+  }finally{w.close();}
 });
 test('Lot 55 T1 — les prix attribués portent une phrase de presse marquée non relue',()=>{
   const c=charger();
@@ -422,4 +472,48 @@ test('Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix',()=>{
     {c:30,a:{id:'a',name:'A'},b:{id:'d',name:'D'},family:'decision',slot:'main'}
   ];
   assert.deepEqual(JSON.parse(JSON.stringify(c.mgmtCeremonieCalculer({hist}))),[]);
+});
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; le carnet laisse le retour à la barre de navigation',()=>{
+  assert.doesNotMatch(source,/<button type="button" onclick="CL\.go\('mgmt_accueil'\)">Accueil<\/button>/);
+  assert.match(source,/touches:\[\{ks:\['Échap'\],t:'Accueil'\}\]/);
+});
+
+test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles dédiés',()=>{
+  const fs=require('node:fs');
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  assert.match(css,/\.ce3-bilan>div>section>b\s*\{/);
+  assert.doesNotMatch(css,/\.ce3-bilan>div>b\s*\{/);
+  for(const classe of ['ce3-entete','ce3-prix-combattant','ce3-bilan','ce3-prix']){
+    assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'));
+  }
+});
+
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; chaque classe de cérémonie a une règle de style',()=>{
+  const c=charger();
+  c.G={mgmt:{hist:[],roster:[],facts:[]}};
+  c.mgmtOrgClassement=()=>[];
+  c.mgmtOrgNom=()=> 'Split';
+  c.mfEcran=contenu=>contenu;
+  c.CL={go:()=>{}};
+  const rendu=c.scr_mgmt_ceremonie();
+  const classes=[...new Set([...rendu.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)))];
+  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const classe of classes) assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'),`classe de cérémonie sans règle de style: ${classe}`);
+});
+
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; les onglets Organisation ont une règle de style',()=>{
+  const c=charger();
+  c.esc=String;
+  vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'..','mgmt-ecran-organisation.js'),'utf8'),c);
+  const rendu=c.mgmtOrgOnglets({org:'split'},'mgmt_organisation');
+  for(const label of ['LE CLASSEMENT DES HUIT','LA CROISSANCE','TON POSTE','TON CARNET']) assert.ok(rendu.includes(label),`onglet absent: ${label}`);
+  const classes=[...new Set([...rendu.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)))];
+  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const classe of classes) assert.match(css,new RegExp('\\.'+classe+'(?:[\\s.#:[,>{]|\\s*\\{)'),`onglet sans règle de style: ${classe}`);
+});
+
+test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; ordre des cartes de cérémonie suit la planche',()=>{
+  const ordre=source.match(/const ordreCartes=\[([^\]]+)\]/);
+  assert.ok(ordre);
+  assert.deepEqual([...ordre[1].matchAll(/'([^']+)'/g)].map(m=>m[1]),['combattant','ko','combat','soumission','revelation']);
 });

@@ -1,7 +1,7 @@
 ﻿---
 description: Relecture de fin de lot du brief Â« Un monde qui a vÃ©cu Â» - compare la branche entiÃ¨re au brief et Ã©crit le rapport de lot pour Anthony et Claude. ModÃ¨le rare - une fois par lot seulement.
 mode: all
-model: opencode/big-pickle
+model: openai/gpt-6-luna
 steps: 40
 permission:
   edit:
