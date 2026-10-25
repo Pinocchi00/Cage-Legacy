@@ -35,6 +35,14 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise 10 — captures et non-régression — 25/10/2026
+
+- État vérifié : branche `fid-lendemain`, HEAD initial `395ca095`; aucun fichier de code ou test de la tranche n'était non commité. Les changements locaux `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et restent intacts.
+- Lu le guide `shoot` et exécuté séparément ses captures prescrites à 1920×1080. `lendemain` : zéro chevauchement, zéro texte sous 22 px, aucun débordement, mais `grosBlocs=22,8 %` (`moyen=28,9 %`), au-dessus de la cible renforcée de 18 %. `lendemainSuite` : zéro chevauchement, zéro texte sous 22 px, `grosBlocs=17,6 %` (`moyen=23,1 %`), mais quatre débordements détectés dans les mouvements (« Elijah Sanders », « Poids léger », « 6ᵉ → 5ᵉ », « chez Split »). Les PNG comparatifs ont été régénérés dans le dossier temporaire de l'outil; la lecture directe des images n'est pas revendiquée.
+- Le code et les tests de composition/navigation étaient déjà dans l'historique, aucun fichier de code n'a été retouché dans cette reprise faute de correction visuelle vérifiée. Tests verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot54T1.test.js` (30), `mgmtLot48T1.test.js` (9). `mgmtSoireeShow.test.js` a dépassé le délai de 120 s sans résultat final. `node tools/verif-versions.js origin/main` et ESLint passent.
+- Avant/après : les écrans recomposés restent fonctionnels et la suite respecte sa structure en trois colonnes; aucune amélioration visuelle mesurée depuis le précédent état consigné. L'objectif de gros blocs du lendemain et les alertes de contenance de la suite demeurent non résolus. Pas de changement de données, de mécanique, de sauvegarde ou de migration.
+- Fichier de cette reprise : cette fiche (résultats actualisés). Aucun test ajouté. Pas de changement `?v=` nécessaire. Écart à la fiche : critère de capture renforcé non atteint; questions pour Anthony : aucune.
+
 ### Reprise de contrôle — 25/10/2026
 
 - Vérifiés les derniers commits et la branche `fid-lendemain`; aucun fichier de code de la tranche n'était en attente au départ. Les modifications préexistantes `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors tranche.
