@@ -2049,10 +2049,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mgmt-ac-detail-body .mgmt-ac-stat+.mgmt-ac-stat{margin-top:0}
 .mgmt-ac-item .mgmt-ac-copy{width:auto;max-width:none;min-width:0;flex:1}
 .mgmt-ac-item{overflow:hidden}
-.mgmt-ac-type{width:110px;font-size:22px;white-space:normal;overflow-wrap:anywhere}
-.mgmt-ac-copy b,.mgmt-ac-copy small{overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.mgmt-ac-type{width:110px;font-size:22px;white-space:normal;overflow-wrap:anywhere;flex:none}
+.mgmt-ac-copy b,.mgmt-ac-copy small{overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0}
 .mgmt-ac-copy b{font-size:22px;line-height:1.05}
-.mgmt-ac-detail-body p{max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.mgmt-ac-detail-body p{max-width:100%;overflow-wrap:anywhere;white-space:normal;min-width:0;max-height:144px}
 .mgmt-ac-detail-panel .mf-p3>.mgmt-ac-actions{flex:none;margin:auto 0 0;gap:12px}
 .mgmt-ac-actions button{box-sizing:border-box;min-width:0;padding:0 16px;overflow:visible}
 .mgmt-ac-actions button.principale{width:100%;height:56px;justify-content:center;padding:0 16px;background:#F0B220;white-space:normal;text-align:center}
