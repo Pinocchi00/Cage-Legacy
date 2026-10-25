@@ -14,12 +14,14 @@ function neuve(n){
 test('3.1 — Le libellé « Combat principal » du lendemain désigne le dernier combat de la carte principale, « Co-principal » l’avant-dernier', () => {
   const win=neuve();
   win.eval(`CL.go('mgmt_lendemain')`);
-  const items=win.eval(`[...document.querySelectorAll('.mgmt-ld-results .mgmt-ld-item')].map(x=>({slot:(x.querySelector('.mgmt-ld-slot')||{}).textContent||'',titre:x.querySelector('.mgmt-ld-title').textContent}))`);
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit UniLendemain (classes ld3-*) */
+  const cartes=win.eval(`(()=>{const zone=document.createElement('div');zone.innerHTML=mgmtLendemainSuiteHtml(G.mgmt);return [...zone.querySelectorAll('.ld3-suite-results .mgmt-ld-item')].map(x=>x.querySelector('.mgmt-ld-slot')?.textContent||'');})()`);
   const idx=win.eval(`(function(){ const m=G.mgmt, e=m.lastEvent; const mains=[]; e.fights.forEach((f,i)=>{ const t=mgmtSoireeTrace(m,i); if(t&&t.slot==='main') mains.push(i); }); return mains; })()`);
   assert.ok(idx.length>=2);
-  assert.equal(items[idx[idx.length-1]].slot,'Combat principal','le dernier combat joué de la carte principale');
-  assert.equal(items[idx[idx.length-2]].slot,'Co-principal');   /* brief démo, lot 9 T4 : « Co-principal », comme partout dans le jeu */
-  for(const k of idx.slice(0,-2)) assert.equal(items[k].slot,'','les autres n’ont pas de libellé');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit UniLendemain (classes ld3-*). */
+  assert.equal(cartes[idx[idx.length-1]],'Combat principal','le dernier combat joué de la carte principale');
+  assert.equal(cartes[idx[idx.length-2]],'Co-principal');
+  for(const k of idx.slice(0,-2)) assert.equal(cartes[k]||'','', 'les autres n’ont pas de libellé fort');
 });
 
 test('3.2 — La presse du lendemain parle d’abord du combat principal, puis du résultat le plus marquant', () => {

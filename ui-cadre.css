@@ -2444,6 +2444,307 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld3-suite-results .mgmt-ld-sub,.ld3-suite-results .mgmt-ld-rangs{font-size:22px;line-height:1.15}
 .ld3-suite-back{margin-top:10px}
 @media(max-width:1100px){.ld3-moments{grid-template-columns:1fr}.ld3-suite{height:auto;min-height:0;grid-template-columns:1fr;grid-template-rows:auto}.ld3-suite-press,.ld3-suite-moves,.ld3-suite-results{grid-column:1}}
+/* ==== [ANCRE: MONDE66_T1_LENDEMAIN_PLANCHES] — Monde lot 66 T1 ==== */
+.ld66-screen{height:calc(100vh - 180px);max-width:1564px;margin:0 auto;display:flex;flex-direction:column;gap:16px;padding-top:12px;box-sizing:border-box;color:#E9E6E1}
+.ld66-moments{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;min-height:300px;flex:.70}
+.ld66-moments .ld3-moment{margin:0;min-height:0;padding:24px 26px;gap:14px}
+.ld66-moments .ld3-label{font-size:26px}
+.ld66-moments .ld3-meta{font-size:26px}
+.ld66-moments .ld3-names{font-size:64px;line-height:.8;white-space:normal;overflow-wrap:anywhere}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1}
+.ld66-moments .mgmt-ld-link{font-size:24px;min-height:44px}
+.ld66-lower{display:grid;grid-template-columns:1.25fr 1fr .9fr;gap:16px;flex:1.18;min-height:0}
+.ld66-lower>section{box-sizing:border-box;min-width:0;min-height:0;padding:16px;background:#121010;border:2px solid rgba(233,230,225,.5);overflow:hidden}
+.ld66-lower h2{margin:0 0 14px;font:800 36px/.9 var(--mgmt-font-display);color:#E9E6E1}
+.ld66-change,.ld66-press{font:500 24px/1.15 var(--mgmt-font-body)}
+.ld66-change .mgmt-ld-item{padding:9px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.ld66-press .ld3-press{margin:0;padding:0;border:0}
+.ld66-press .mgmt-ld-item,.ld66-press p{font-size:24px;line-height:1.2}
+.ld66-numbers{display:flex;flex-direction:column;gap:12px}
+.ld66-number{display:flex;flex-direction:column;gap:5px;padding:8px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.ld66-number b{font:600 22px/1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+.ld66-number strong{font:800 30px/1 var(--mgmt-font-display);color:#E9E6E1}
+.ld66-number span{font:500 22px/1.1 var(--mgmt-font-body);color:rgba(233,230,225,.74)}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_BLOCS_INFERIEURS] — Monde lot 66 T1 ====
+   Répartition de la planche validée : laisser la une respirer et donner aux
+   chiffres leur colonne dédiée, sans réduire les corps lisibles sous 22 px. */
+.ld66-lower{grid-template-columns:1.2fr 1.12fr .88fr;gap:16px}
+.ld66-lower h2{font-size:40px;line-height:.92}
+.ld66-press .mgmt-ld-item:first-of-type{font-size:42px;line-height:.98;font-family:var(--mgmt-font-display);font-weight:800}
+.ld66-number strong{font-size:32px}
+.ld66-suite .ld3-suite{height:calc(100vh - 210px);margin:0 auto}
+/* ==== [ANCRE: MONDE66_T1_CAPTURE_FIXES] — Monde lot 66 T1 ==== */
+.ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.ld66-moments .mgmt-ld-link{position:relative;z-index:1;margin-top:auto;padding:8px 0}
+.ld66-lower{position:relative;z-index:0}
+.ld66-screen{padding-bottom:8px}
+.ld66-suite .ld3-suite-back{display:none}
+/* Contrôle de capture lot 66 : taille minimale de lecture, détails contenus dans leurs colonnes. */
+.ld66-screen .mgmt-ld-detail,.ld66-screen .mgmt-ld-sub,.ld66-screen .mgmt-ld-rangs{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.ld66-screen .mgmt-ld-link{font:600 22px/1.1 var(--mgmt-font-body);min-height:44px;padding:8px 0}
+.ld66-suite .mgmt-ld-title{font-size:28px;line-height:1.05}
+.ld66-suite .mgmt-ld-sub,.ld66-suite .mgmt-ld-rangs,.ld66-suite .ld3-move span{font-size:22px;line-height:1.15}
+.ld66-suite .ld3-suite-press,.ld66-suite .ld3-suite-moves,.ld66-suite .ld3-suite-results{overflow-wrap:anywhere}
+ .ld66-screen{height:760px;gap:12px}
+ .ld66-moments{height:285px;min-height:0;flex:none;grid-template-rows:minmax(0,1fr)}
+ .ld66-moments .ld3-names{font-size:64px;line-height:.8;overflow-wrap:anywhere}
+ .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8}
+.ld66-moments .ld3-detail{line-height:1.1}
+.ld66-moments .ld3-moment{padding:12px 16px;gap:6px}
+.ld66-moments .ld3-label,.ld66-moments .ld3-meta{font-size:22px;line-height:1}
+ .ld66-moments .ld3-names{font-size:64px;line-height:.8;overflow-wrap:anywhere}
+ .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8;overflow-wrap:anywhere}
+.ld66-moments .ld3-detail{font-size:22px;line-height:1.05;overflow-wrap:anywhere}
+.ld66-moment-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.ld66-moment-head .ld3-label{min-width:0}
+.ld66-rewatch{flex:none;min-width:44px;min-height:44px;padding:4px 10px;border:2px solid #E9E6E1;background:#121010;color:#E9E6E1;font:600 24px/1 var(--mgmt-font-body);cursor:pointer}
+ .ld66-lower{flex:1;grid-template-columns:1.25fr 1fr .9fr;min-height:0}
+/* ==== [ANCRE: MONDE66_T1_TITRES_CONTENUS_ET_PUCES] — Monde lot 66 T1 ====
+   Conserver les titres lisibles sans empiéter sur le détail et reprendre les
+   repères colorés de la planche pour les catégories et les changements. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;overflow-wrap:anywhere}
+.ld66-moments .ld3-label{display:inline-flex;align-items:center;align-self:flex-start;min-height:32px;padding:4px 12px;background:#E23A2B;color:#fff;box-sizing:border-box}
+.ld66-moments .ld3-moment:nth-child(2) .ld3-label{background:#F0B220;color:#0D0B0B}
+.ld66-moments .ld3-moment:nth-child(3) .ld3-label{background:#F0B220;color:#0D0B0B}
+.ld66-change .mgmt-ld-item{position:relative;padding-left:24px}
+.ld66-change .mgmt-ld-item::before{content:"";position:absolute;left:4px;top:18px;width:10px;height:10px;background:#F0B220;border-radius:50%}
+.ld66-change,.ld66-press,.ld66-numbers{min-height:0;overflow-wrap:anywhere}
+.ld66-change .mgmt-ld-item{min-height:0}
+.ld66-suite .ld3-suite{height:760px;min-height:0}
+.ld66-suite .ld3-move span,.ld66-suite .ld3-move em{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.ld66-suite .ld3-move b{font-size:30px;line-height:.95;overflow-wrap:anywhere}
+.ld66-suite .ld3-move strong{font-size:30px;line-height:1;white-space:normal}
+.ld66-suite .mgmt-ld-slot{font-size:22px;line-height:1.1}
+.ld66-suite .mgmt-ld-title{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.ld66-suite .mgmt-ld-item{min-width:0;overflow-wrap:anywhere}
+ .ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(116px,auto) minmax(82px,108px);grid-template-rows:auto;gap:6px;overflow-wrap:anywhere}
+ .ld66-suite .ld3-move b{grid-column:1;grid-row:1;white-space:normal}
+ .ld66-suite .ld3-move span{grid-column:1;grid-row:2;white-space:normal}
+ .ld66-suite .ld3-move strong{grid-column:2;grid-row:1/3;white-space:normal}
+ .ld66-suite .ld3-move em{grid-column:3;grid-row:1/3;text-align:right;white-space:normal}
+.ld66-suite .ld3-move *{min-width:0;overflow-wrap:anywhere}
+.ld66-suite :is(span,em,small,p,button){font-size:22px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{word-break:break-word;white-space:normal}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move strong{font-size:22px;line-height:1.05}
+.ld66-lower .mgmt-ld-item{min-width:0}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_MOMENTS] — Monde lot 66 T1 ==== */
+.ld66-screen{height:calc(100vh - 180px);gap:16px}
+.ld66-moments{height:255px;min-height:255px;flex:none;grid-template-columns:1.45fr 1fr 1fr}
+.ld66-moments .ld3-moment{padding:24px 26px;gap:14px}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;overflow-wrap:anywhere}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
+ .ld66-moments .ld3-label,.ld66-moments .ld3-meta{font-size:26px}
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT] — Monde lot 66 T1 ====
+   La cascade terminale doit préserver une hauteur de titre contenant deux
+   lignes avant d'afficher le pronostic et le contexte. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;white-space:normal;overflow-wrap:anywhere}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1.05;flex:none}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);gap:6px 8px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+.ld66-change .mgmt-ld-item{overflow:hidden}
+.ld66-change .mgmt-ld-title,.ld66-change .mgmt-ld-detail{font-size:22px;line-height:1.1;overflow-wrap:anywhere}
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(100px,120px) minmax(100px,130px);grid-template-rows:auto auto;gap:6px 12px;align-items:center}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.ld66-suite .ld3-move b{grid-column:1;grid-row:1}
+.ld66-suite .ld3-move span{grid-column:1;grid-row:2}
+.ld66-suite .ld3-move strong{grid-column:2;grid-row:1 / span 2;justify-self:end}
+.ld66-suite .ld3-move em{grid-column:3;grid-row:1 / span 2;text-align:right}
+.ld66-suite .ld3-move strong{justify-self:end;text-align:right;}
+.ld66-suite .ld3-move em{justify-self:end;}
+/* ==== [ANCRE: MONDE66_T1_MOUVEMENTS_COLONNE_SURE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,112px) minmax(0,112px);grid-template-rows:auto;gap:8px;align-content:center;}
+.ld66-suite .ld3-move b{grid-column:1;grid-row:1;}
+.ld66-suite .ld3-move span{grid-column:1;grid-row:2;}
+.ld66-suite .ld3-move strong{grid-column:2;grid-row:1/3;justify-self:end;text-align:right;}
+.ld66-suite .ld3-move em{grid-column:3;grid-row:1/3;justify-self:end;text-align:right;}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal;}
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT] — Monde lot 66 T1 ====
+   Les noms occupent la hauteur de leurs deux lignes avant que le détail
+   commence; la règle vient après les anciennes surcharges de capture. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.ld66-moments .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_RESERRÉES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,112px) minmax(0,112px);column-gap:8px}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{font-size:22px;line-height:1.05;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [ANCRE: MONDE66_SUITE_MOUVEMENTS_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:12px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{text-align:right;justify-self:stretch}
+/* ==== [ANCRE: MONDE66_T1_SUITE_LIBELLES_MOUVEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{width:auto;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{justify-self:end;text-align:right}
+/* ==== [ANCRE: MONDE66_T1_SUITE_LIBELLES_BORNEES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);column-gap:12px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [ANCRE: LD66_ECHELLE_CARTES_FINALE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.82;text-transform:uppercase}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{justify-self:end;text-align:right}
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_RETOUR_LIGNE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{width:100%;grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [ANCRE: MONDE66_T1_MOUVEMENTS_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{word-break:break-all}
+/* ==== [ANCRE: MONDE66_T1_MOUVEMENT_SANS_DEBORDEMENT] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-suite-moves{min-width:0}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:12px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{justify-self:end;text-align:right}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_MOUVEMENT_CONTENUES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{box-sizing:border-box;grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);gap:8px;overflow:hidden}
+.ld66-suite .ld3-move>div:first-child{min-width:0;max-width:100%;overflow:hidden}
+/* ==== [ANCRE: MONDE66_T1_MAQUETTE_HAUTEUR_CARTES] — Monde lot 66 T1 ==== */
+@media (min-width:1101px){
+ .ld66-moments{height:285px;min-height:285px}
+}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_REELLEMENT_CONTRAINTES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,96px) minmax(0,96px);column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{text-align:right;justify-self:stretch}
+/* ==== [ANCRE: MONDE66_T1_NOMS_MOMENTS_REPRISE] — Monde lot 66 T1 ==== */
+.ld66-moments{height:285px;min-height:285px}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;white-space:normal;overflow-wrap:anywhere;text-transform:uppercase}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_ECRAN_1920] — Monde lot 66 T1 ==== */
+@media (min-width:1800px){
+  .ld66-screen{max-width:1564px}
+  .ld66-suite .ld3-suite{max-width:1564px}
+}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{box-sizing:border-box;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move strong{font-size:22px;line-height:1.1}
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_CALIBREES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,96px) minmax(0,96px);column-gap:6px;}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word;}
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_CALIBREES_FIN] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_TEXTE_NON_CLIPPE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{overflow:visible}
+.ld66-suite .ld3-move>div:first-child{overflow:visible}
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_CELLULES_LISIBLES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;width:auto;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+.ld66-suite .ld3-move b{font-size:22px;line-height:1.05}
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{font-size:22px;line-height:1.1}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_COLONNES_MAQUETTE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:8px}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span{grid-column:1}
+.ld66-suite .ld3-move strong{grid-column:2;grid-row:1 / span 2}
+.ld66-suite .ld3-move em{grid-column:3;grid-row:1 / span 2}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_BORNEES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{width:100%;min-width:0;box-sizing:border-box}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-all;white-space:normal}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_ECHELLE_FINAL] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen{height:856px;top:128px;gap:16px;overflow:hidden}
+.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none;grid-template-columns:1.45fr 1fr 1fr}
+.ld66-screen .ld66-moments .ld3-moment{min-width:0;padding:16px 26px;gap:6px;overflow:hidden}
+.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.8;overflow-wrap:anywhere;word-break:normal}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.ld66-screen .ld66-moments .ld3-label{font-size:24px}
+.ld66-screen .ld66-moments .ld66-moment-head{flex:none}
+/* ==== [ANCRE: MONDE66_T1_TITRES_MOMENTS_SANS_COLLISION] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:0;height:auto;flex:none}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{flex:none;margin-top:auto;line-height:1.1}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_TYPOS_ET_PUCES] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-names,
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;overflow-wrap:anywhere;word-break:normal}
+.ld66-screen .ld66-moments .ld3-detail{flex:none;line-height:1.15}
+.ld66-screen .ld66-moments .ld3-meta{flex:none;line-height:1.05}
+.ld66-screen .ld66-moments .ld66-moment-head .ld3-label{height:40px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center}
+.ld66-screen .ld66-change .mgmt-ld-item{position:relative;padding-left:28px}
+.ld66-screen .ld66-change .mgmt-ld-item::before{content:"";position:absolute;left:2px;top:17px;width:14px;height:14px;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ld66-screen .ld66-change .mgmt-ld-title{font-weight:700}
+/* ==== [FIN ANCRE] ==== */
+.ld66-screen .ld66-lower{flex:1;min-height:0;grid-template-columns:1.25fr 1fr .9fr;overflow:hidden}
+.ld66-screen .ld66-lower>section{min-width:0;min-height:0;overflow:hidden}
+.ld66-screen .ld66-lower .ld66-number strong{font-size:32px}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.ld66-suite .ld3-move>.ld66-move-identity>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_SUITE_LIBELLES_CONTENUS] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_NOMS_MOMENTS_VERROUILLES] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_ECHELLE_CARTES] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-names,
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase;overflow-wrap:anywhere}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05;font-weight:800}
+.ld66-screen .ld66-moments .ld3-meta{font-size:26px}
+.ld66-screen .ld66-moments .ld3-moment{min-height:285px}
+.ld66-screen .ld66-change .mgmt-ld-item{padding:10px 0}
+.ld66-screen .ld66-change .mgmt-ld-title{font-size:24px;line-height:1.1}
+.ld66-screen .ld66-press .mgmt-ld-title{font-size:44px;line-height:.95}
+/* ==== [ANCRE: MONDE66_T1_NOMS_MAQUETTE_108] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8}
+/* ==== [ANCRE: MONDE66_T1_LARGEUR_PLANCHE_1920] — Monde lot 66 T1 ==== */
+@media (min-width:1800px){
+  .mf-contenu.ld66-screen{max-width:1564px}
+  .ld66-suite .ld3-suite{max-width:1564px}
+}
+.ld66-screen .ld66-press .mgmt-ld-detail{font-size:24px;line-height:1.15}
+.ld66-screen .ld66-numbers .ld66-number{align-items:flex-end}
+.ld66-screen .ld66-numbers .ld66-number strong{font-size:32px;text-align:right}
+.ld66-suite .ld3-suite{height:856px;max-height:calc(100vh - 224px);overflow:hidden}
+/* ==== [ANCRE: MONDE66_T1_CONTENIR_TITRES_LONGS] — Monde lot 66 T1 ====
+   Une à deux lignes au format maquette, sans superposition aux informations
+   qui suivent ni aux trois colonnes de chiffres. */
+.mf-contenu.ld66-screen{height:856px;top:128px;overflow:visible}
+.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
+.ld66-screen .ld66-moments .ld3-moment{height:285px;min-height:285px;box-sizing:border-box;gap:6px;padding:16px 22px}
+.ld66-screen .ld66-moments .ld3-names,.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.ld66-screen .ld66-moments .ld3-meta{font-size:22px;line-height:1;flex:none}
+.ld66-screen .ld66-moments .ld3-detail{font-size:22px;line-height:1.05;flex:none;margin-top:auto}
+.ld66-screen .ld66-lower{height:calc(100% - 301px);flex:none;min-height:0;overflow:hidden}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_NOM_SURPRISE_GRAND] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_ECHELLE_ET_ENTETE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen{height:856px;top:128px;gap:12px}
+.ld66-screen .ld66-moments{height:285px;min-height:285px}
+.ld66-screen .ld66-moments .ld3-names{font-size:68px;line-height:.82;letter-spacing:-.02em}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
+.ld66-screen .ld66-moments .ld66-rewatch{font-size:24px}
+.ld66-screen .ld66-lower{gap:12px}
+.ld66-screen .ld66-change,.ld66-screen .ld66-press,.ld66-screen .ld66-numbers{padding:12px}
+.ld66-screen .ld66-press .mgmt-ld-title{font-size:44px;line-height:.95}
+.ld66-suite .ld3-suite{height:856px;max-height:calc(100vh - 224px)}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_DEUX_CELLULES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);column-gap:12px;row-gap:6px}
+.ld66-suite .ld3-move>.ld66-move-identity{grid-column:1;grid-row:1 / span 2}
+.ld66-suite .ld3-move>strong{grid-column:2;grid-row:1}
+.ld66-suite .ld3-move>em{grid-column:2;grid-row:2}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_RETOUR_TROIS_COLONNES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{grid-column:1;grid-row:1 / span 2}
+.ld66-suite .ld3-move>strong{grid-column:2;grid-row:1 / span 2;font-size:22px;line-height:1.05}
+.ld66-suite .ld3-move>em{grid-column:3;grid-row:1 / span 2;font-size:22px;line-height:1.05}
+.ld66-suite .ld3-move>.ld66-move-identity>b{font-size:30px;line-height:.95}
+.ld66-suite .ld3-move>.ld66-move-identity>span{font-size:22px;line-height:1.05}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE57_T1_STYLES] — Monde lot 57 T1 ==== */
 .gu3{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(360px,.8fr);gap:24px;padding:24px;height:100%;box-sizing:border-box;overflow:auto}
@@ -2464,6 +2765,17 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-rivale>strong{font-size:22px}.gu3-rivale small{font-size:22px;opacity:.76;margin-top:auto}
 .gu3-mouvement{border-top:2px solid rgba(233,230,225,.16);padding-top:12px}
 /* ==== [ANCRE: MONDE57_T1_MAQUETTE_GRILLE] — Monde lot 57 T1 ==== */
+.gu3{grid-template-rows:auto minmax(0,1fr);align-content:stretch}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_CARTES_MOMENTS] — Monde lot 66 T1 ==== */
+.ld66-moments{height:285px;min-height:285px}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:.82;overflow-wrap:anywhere}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+/* ==== [ANCRE: MONDE66_T1_NOMS_MOMENTS_CAPITALES] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-names{font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
+/* ==== [FIN ANCRE] ==== */
+.gu3-table{grid-column:1;grid-row:2;min-height:0;overflow:auto}
+.gu3-rivale{grid-column:2;grid-row:2;min-height:0;box-sizing:border-box}
+.gu3-entete,.gu3-ligne{grid-template-columns:64px minmax(180px,1fr) 120px 120px 130px 120px 90px;gap:12px;padding:0 16px}
 .gu3{grid-template-rows:auto auto minmax(0,1fr);align-content:stretch}
 .gu3>.mo67-tabs{grid-column:1/-1;grid-row:2;min-width:0}
 .gu3-table{grid-column:1;grid-row:3;min-height:0;overflow:auto}
@@ -2471,6 +2783,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-entete,.gu3-ligne{grid-template-columns:56px minmax(180px,1fr) minmax(72px,90px) minmax(92px,110px) minmax(112px,130px) minmax(92px,110px) minmax(78px,90px);gap:10px;padding:0 12px}
 .gu3-entete{min-height:48px;letter-spacing:.04em}
 .gu3-ligne{min-height:82px}
+/* ==== [ANCRE: MONDE66_T1_CONTENANCE_FINALE_MOMENTS] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{flex:none;margin-top:auto;font-size:30px;line-height:1.05}
+/* ==== [FIN ANCRE] ==== */
 .gu3-ligne.gu3-split{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 /* ==== [ANCRE: MONDE67_T1_EVOLUTION_CLASSEMENT] — Monde lot 67 T1 ==== */
 .gu3-ligne .gu3-evolution{font-size:26px;text-align:right;white-space:nowrap}
@@ -2560,6 +2879,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_CONTENANCE_FINALE_MOMENTS] — Monde lot 66 T1 ====
+   Neutralise les anciennes surcharges tardives: titres hauts, détails en dessous. */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05;flex:none;margin-top:auto}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE70_T1_CARNET_QUATRE_RANGEES] — Monde lot 70 T1 ==== */
@@ -2611,6 +2935,159 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-resultat strong{font-size:48px}
  .di3-lignes{font-size:44px;line-height:1.18}
 .di3-lignes p{font-style:normal}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_RESPONSIVE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-suite-moves{min-width:0;overflow:visible}
+.ld66-suite .ld3-move{box-sizing:border-box;width:100%;min-width:0;overflow:visible;grid-template-columns:minmax(0,1fr) minmax(0,104px) minmax(0,112px);gap:8px}
+.ld66-suite .ld3-move>div:first-child{min-width:0;max-width:100%;overflow:visible}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal;white-space:normal}
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_WRAP_ACTIF] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,120px) minmax(0,130px);grid-template-rows:auto auto;align-items:center}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span{grid-column:1;justify-self:stretch;text-align:left}
+.ld66-suite .ld3-move strong{grid-column:2;grid-row:1 / span 2;justify-self:stretch;text-align:right}
+.ld66-suite .ld3-move em{grid-column:3;grid-row:1 / span 2;justify-self:stretch;text-align:right}
+.ld66-suite .ld3-move b,.ld66-suite .ld3-move span,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{display:block;min-width:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_ECHELLE_MAQUETTE] — Monde lot 66 T1 ==== */
+ .mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8;letter-spacing:-.025em}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:80px;line-height:.82;letter-spacing:-.02em}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{padding:24px 26px;gap:14px}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1}
+.mf-contenu.ld66-screen .ld66-lower .ld66-press .mgmt-ld-title{font-size:44px;line-height:.9}
+.mf-contenu.ld66-screen .ld66-lower .ld66-number strong{font-size:32px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_IDENTITE_MOUVEMENT_CONTENUE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld66-move-identity{display:flex;flex-direction:column;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.ld66-suite .ld66-move-identity>b,.ld66-suite .ld66-move-identity>span{display:block;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_MOUVEMENT_IDENTITE_COLONNE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld66-move-identity{display:flex;min-width:0;max-width:100%;flex-direction:column;gap:6px;overflow-wrap:anywhere}
+.ld66-suite .ld66-move-identity b,.ld66-suite .ld66-move-identity span{display:block;min-width:0;max-width:100%;grid-column:auto;grid-row:auto;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE66_T1_IDENTITE_MOUVEMENT_MOTS_LONGS] — Monde lot 66 T1 ==== */
+.ld66-suite .ld66-move-identity b,.ld66-suite .ld66-move-identity span{word-break:break-all}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_CARTE_MAQUETTE] — Monde lot 66 T1 ==== */
+.ld66-screen{height:780px;gap:16px}
+.ld66-moments{height:285px;min-height:285px;flex:none}
+.ld66-moments .ld3-moment{padding:24px 26px;gap:14px}
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names{font-size:68px;line-height:.82;overflow-wrap:anywhere;word-break:normal}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
+.ld66-lower{flex:1;grid-template-columns:1.25fr 1fr .9fr;gap:16px}
+.ld66-lower h2{font-size:36px;line-height:.9}
+.ld66-number strong{font-size:32px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_CAPTURE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-suite-moves{min-width:0}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,104px) minmax(0,104px);gap:8px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_SUITE_TEXTES_BORNES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.68fr);grid-template-rows:minmax(0,auto) minmax(0,auto);align-items:center;overflow:hidden}
+.ld66-suite .ld3-move>.ld66-move-identity{grid-column:1;grid-row:1 / span 2;min-width:0;width:100%;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>strong{grid-column:2;grid-row:1 / span 2;min-width:0;width:100%;font-size:22px;line-height:1.05;text-align:right;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>em{grid-column:3;grid-row:1 / span 2;min-width:0;width:100%;font-size:22px;line-height:1.05;text-align:right;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [FIN ANCRE] ==== */
+.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{font-size:22px;line-height:1.1;text-align:right}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_COLONNES_FLUIDES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.68fr);column-gap:8px}
+.ld66-suite .ld3-move>div:first-child,.ld66-suite .ld3-move strong,.ld66-suite .ld3-move em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [ANCRE: MONDE66_T1_SUITE_GRILLE_CONTENUE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{display:grid;width:100%;min-width:0;box-sizing:border-box;grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.68fr)}
+.ld66-suite .ld3-move>*{min-width:0;width:100%;max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.ld66-suite .ld3-move>div:first-child{display:flex;flex-direction:column}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_CARTE_MOMENT_CONTENUE] — Monde lot 66 T1 ==== */
+.ld66-moments .ld3-moment{box-sizing:border-box;padding:16px 20px;gap:8px;overflow:hidden}
+.ld66-moments .ld3-names{font-size:68px;line-height:.8}
+.ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-moments .ld3-detail{font-size:24px;line-height:1.05}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_CHEVAUCHEMENTS] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-change .mgmt-ld-item{padding:6px 0;line-height:1.05}
+.ld66-screen .ld66-change .mgmt-ld-title,.ld66-screen .ld66-change .mgmt-ld-detail{line-height:1.05}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.78fr) minmax(0,.68fr);column-gap:8px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [ANCRE: MONDE66_T1_SUITE_RETOUR_LIGNE_IDENTITE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move>.ld66-move-identity,.ld66-suite .ld3-move>.ld66-move-identity>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_LARGEUR_CONTENU_MAQUETTE] — Monde lot 66 T1 ==== */
+.ld66-screen,.ld66-suite .ld3-suite{max-width:1564px}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENT_IDENTITE_PRIORITAIRE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.4fr) minmax(0,.65fr) minmax(0,.55fr);column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_CARTES_MOMENTS_GRILLE_INTERNE] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments .ld3-moment{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;align-content:stretch;gap:6px;padding:16px 20px}
+.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.ld66-screen .ld66-moments .ld3-moment:not(:first-child) .ld3-names{font-size:64px}
+.ld66-screen .ld66-moments .ld3-detail{font-size:24px;line-height:1.05;align-self:end}
+.ld66-screen .ld66-lower{min-height:0}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_FINALE_CARTE] — Monde lot 66 T1 ==== */
+.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
+/* ==== [ANCRE: MONDE66_T1_SUITE_COLONNE_MOUVEMENTS_BORNEE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-suite-moves{min-height:0;overflow:auto}
+/* ==== [ANCRE: MONDE66_T1_REPRISE_6_NOMS_MOMENTS_MAQUETTE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:.82;font-family:var(--mgmt-font-display,'Arial Narrow',sans-serif);font-weight:800;text-transform:uppercase}
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) 120px 130px;grid-template-rows:auto;column-gap:8px}
+.ld66-suite .ld3-move>*{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_CARTES_MOMENTS_TERMINALE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{min-height:0;overflow:hidden}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:68px}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_FLUIDES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.72fr) minmax(0,.72fr);column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_REPRISE_FIDELITE_ECHELLE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments{height:285px;min-height:285px;flex:none}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{min-width:0;min-height:0;overflow:hidden}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.8}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:.82}
+.mf-contenu.ld66-screen .ld66-lower{min-height:0;grid-template-columns:1.25fr 1fr .9fr}
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+/* ==== [ANCRE: MONDE66_T1_FIDELITE_NOM_SURPRISE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:108px;line-height:.8;letter-spacing:-.025em}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_CONTENANCE_FINALE] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1fr) minmax(0,.7fr) minmax(0,.55fr);column-gap:8px}
+.ld66-suite .ld3-move>.ld66-move-identity{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{text-align:right;justify-self:stretch}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_SUITE_MOUVEMENTS_LARGEURS_LISIBLES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.8fr);column-gap:12px;align-items:center}
+.ld66-suite .ld3-move>.ld66-move-identity>b,.ld66-suite .ld3-move>.ld66-move-identity>span{overflow-wrap:normal;word-break:normal;hyphens:auto}
+.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE66_T1_SUITE_CELLULES_ETROITES] — Monde lot 66 T1 ==== */
+.ld66-suite .ld3-move{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr) minmax(0,.8fr);column-gap:12px;}
+.ld66-suite .ld3-move>b,.ld66-suite .ld3-move>span,.ld66-suite .ld3-move>strong,.ld66-suite .ld3-move>em{box-sizing:border-box;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal;}
+/* ==== [ANCRE: MONDE66_T1_ECHELLE_NOMS_MOMENTS_COHERENTE] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:80px;line-height:.82;letter-spacing:-.025em}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(2) .ld3-names,.mf-contenu.ld66-screen .ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:68px;line-height:.82;letter-spacing:-.02em}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_TITRES_SANS_RECOUVREMENT_FINAL] — Monde lot 66 T1 ====
+   Gagne explicitement sur les anciennes surcharges de taille tout en
+   réservant deux lignes complètes avant le détail de chaque carte. */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere;word-break:normal;letter-spacing:normal;text-transform:uppercase}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{margin-top:0;flex:none;font-size:24px;line-height:1.1}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_MOMENTS_FLUX_SANS_CHEVAUCHEMENT] — Monde lot 66 T1 ==== */
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment{display:flex;flex-direction:column;justify-content:flex-start;gap:8px;overflow:visible}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-names{min-height:0;max-height:none;height:auto;flex:0 0 auto;line-height:1.05}
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment .ld3-detail{margin-top:auto;flex:0 0 auto}
 /* ==== [FIN ANCRE] ==== */
 
 .mf-ac-liens-complementaires{display:flex;flex-wrap:wrap;gap:8px;align-items:center}

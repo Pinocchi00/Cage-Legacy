@@ -251,15 +251,19 @@ test('Monde lot 54 T1 — l’après ne répète pas une formulation pour un com
   }finally{w.close();}
 });
 
-test('Monde lot 54 T1 — le cadre du lendemain intègre les trois moments et le récit',()=>{
+test('Monde lot 54 T1 — planches Uni* validées par Anthony ; l’écran suit la planche',()=>{
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
     jouerSoirees(w,1);
     const html=w.eval(`scr_mgmt_lendemain_cadre()`);
-    assert.match(html,/LES TROIS MOMENTS/);
+    assert.match(html,/CE QUE ÇA CHANGE POUR TOI/);
     assert.match(html,/ld3-moment/);
-    assert.match(html,/TOUS LES RÉSULTATS/);
+    assert.match(html,/LA SURPRISE/);
+    assert.match(html,/LA FINITION/);
+    assert.match(html,/LA GUERRE/);
+    assert.match(html,/LES CHIFFRES/);
+    assert.match(html,/CAGE HEBDO · LA UNE/);
   }finally{w.close();}
 });
 
@@ -322,13 +326,13 @@ test('Monde lot 54 T1 — les moments reprennent la hiérarchie typographique de
   assert.match(css,/\.ld3-moments\s+\.ld3-moment:nth-child\(3\)\s+\.ld3-names[^}]*font-size:\s*64px/s);
 });
 
-test('Monde lot 54 T1 — la navigation ouvre le second écran puis revient aux moments',()=>{
+test('Monde lot 54 T1 — planches Uni* validées par Anthony ; la navigation passe à la suite',()=>{
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
     jouerSoirees(w,1);
     const r=w.eval(`(()=>{CL.go('mgmt_lendemain');const premier=document.getElementById('app').innerHTML;CL.mgmtLendemainSuite();const suite=G.screen;const html=document.getElementById('app').innerHTML;CL.go('mgmt_lendemain');return {premier,suite,html,retour:G.screen};})()`);
-    assert.match(r.premier,/Lire la suite du lendemain/);
+    assert.match(r.premier,/CL\.mgmtLendemainSuite\(\)/);
     assert.equal(r.suite,'mgmt_lendemain_suite');
     assert.match(r.html,/LE LENDEMAIN · LA SUITE/);
     assert.match(r.html,/LES MOUVEMENTS/);
@@ -354,32 +358,30 @@ test('Monde lot 54 T1 — la suite conserve ses trois colonnes de planche et tou
   }finally{w.close();}
 });
 
-test('Monde lot 54 T1 — le premier écran respecte l’ordre narratif P8 T2',()=>{
+test('Monde lot 54 T1 — planches Uni* validées par Anthony ; ordre narratif de la planche',()=>{
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
     jouerSoirees(w,1);
     const html=w.eval(`scr_mgmt_lendemain_cadre()`);
-    const sections=['LES TROIS MOMENTS','PERFORMANCE DE LA SOIRÉE','À LA UNE','LES CHIFFRES','TOUS LES RÉSULTATS'];
+    const sections=['LA SURPRISE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES'];
     const positions=sections.map(label=>html.indexOf(label));
     assert.ok(positions.every(p=>p>=0),`sections manquantes: ${positions}`);
     assert.deepEqual(positions,[...positions].sort((a,b)=>a-b),`ordre réel: ${positions}`);
   }finally{w.close();}
 });
 
-test('Monde lot 54 T1 — le premier écran montre les blocs de suite et les objectifs présents',()=>{
+test('Monde lot 54 T1 — planches Uni* validées par Anthony ; l’écran garde les blocs prévus',()=>{
   const w=newGameWindow({runMain:true});
   try{
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
     jouerSoirees(w,1);
     const html=w.eval(`(()=>{const m=G.mgmt;mgmtPosteInit(m);m.poste.obj=[{t:'popularite',cible:40,e:'tenu',v:42}];return scr_mgmt_lendemain_cadre();})()`);
-    for(const text of ['LES TROIS MOMENTS','PERFORMANCE DE LA SOIRÉE','CE QUI CHANGE','À LA UNE','LES CHIFFRES','MOUVEMENTS DE CLASSEMENT','TOUS LES RÉSULTATS','Popularité','ATTEINT · 42 / 40']){
+    for(const text of ['LA SURPRISE','LA FINITION','LA GUERRE','CE QUE ÇA CHANGE POUR TOI','CAGE HEBDO · LA UNE','LES CHIFFRES']){
       assert.ok(html.includes(text),`le premier écran du lendemain expose ${text}`);
     }
-    assert.ok(html.indexOf('CE QUI CHANGE')<html.indexOf('À LA UNE'));
-    assert.ok(html.indexOf('À LA UNE')<html.indexOf('LES CHIFFRES'));
-    assert.ok(html.indexOf('LES CHIFFRES')<html.indexOf('MOUVEMENTS DE CLASSEMENT'));
-    assert.ok(html.indexOf('MOUVEMENTS DE CLASSEMENT')<html.indexOf('TOUS LES RÉSULTATS'));
+    assert.ok(html.indexOf('CE QUE ÇA CHANGE POUR TOI')<html.indexOf('CAGE HEBDO · LA UNE'));
+    assert.ok(html.indexOf('CAGE HEBDO · LA UNE')<html.indexOf('LES CHIFFRES'));
   }finally{w.close();}
 });
 

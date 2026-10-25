@@ -144,9 +144,10 @@ function mgmtLendemainResultatsHtml(m){
   const nMain=e.fights.filter((x,k)=>{ const tk=mgmtSoireeTrace(m,k); return tk&&tk.slot==='main'; }).length;
   for(let i=0;i<e.fights.length;i++){
     const f=e.fights[i];
-    if(!f||typeof f.a!=='string'||typeof f.b!=='string') continue;
+    if(!f||typeof f.a==='number'||typeof f.b==='number') continue;
     const t=mgmtSoireeTrace(m,i);
-    const frA=mgmtFighterById(m,f.a), frB=mgmtFighterById(m,f.b);
+    const idA=typeof f.a==='string'?f.a:f.a&&f.a.id, idB=typeof f.b==='string'?f.b:f.b&&f.b.id;
+    const frA=mgmtFighterById(m,idA), frB=mgmtFighterById(m,idB);
     const na=t?t.a.name:(frA?frA.name:'?');
     const nb=t?t.b.name:(frB?frB.name:'?');
     const titre=f.winner==='A'
@@ -169,7 +170,7 @@ function mgmtLendemainResultatsHtml(m){
       +(slot?`<span class="mgmt-ld-slot${slot===MGMT_LD_LABELS.coMain?' gold':''}">${esc(slot)}</span>`:'')
       +`<div class="mgmt-ld-title">${titre}</div>`
       +(meth?`<div class="mgmt-ld-sub">${esc(meth)}</div>`:'')
-      +(()=>{const g=[mgmtLendemainRangTexte(m,f.a,t?t.a.last||t.a.name:'?'),mgmtLendemainRangTexte(m,f.b,t?t.b.last||t.b.name:'?')].filter(Boolean);return g.length?`<div class="mgmt-ld-rangs">${g.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:'';})()
+       +(()=>{const g=[mgmtLendemainRangTexte(m,idA,t?t.a.last||t.a.name:'?'),mgmtLendemainRangTexte(m,idB,t?t.b.last||t.b.name:'?')].filter(Boolean);return g.length?`<div class="mgmt-ld-rangs">${g.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:'';})()
       +(t?`<button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${i})">${esc(MGMT_LD_LABELS.revoir)}</button>`:'')
       +`</div>`;
   }
@@ -186,9 +187,11 @@ function mgmtLendemainMomentsHtml(m){
   add('LA SURPRISE',s=>s.type==='surprise');
   add('LA FINITION',(_s,t)=>t&&(['ko','sub','stop'].includes(t.family)||/ko|soumission|arrêt/i.test(mgmtLendemainMethode(t))));
   add('LA GUERRE',(_s,t)=>t&&Number(t.rounds)>=5&&Number.isFinite(Number(t.rounds)));
+  const mains=hist.map((t,i)=>t&&t.c===m.lastEvent?.cycle&&t.slot==='main'?i:-1).filter(i=>i>=0);
   return picks.map(({label,s})=>{const t=hist[s.c];if(!t)return '';const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
     const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
-     return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-meta">${esc(t.slot==='main'?'Combat principal':'Préliminaire')} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+      const rang=mains.indexOf(s.c),place=t.slot==='main'?(rang===mains.length-1?'Combat principal':rang===mains.length-2?'Co-principal':'Carte principale · '+(rang+1)+'e combat'):'Préliminaire';
+      return `<article class="ld3-moment"><div class="ld66-moment-head"><div class="ld3-label">${esc(label)}</div><button class="ld66-rewatch" aria-label="Revoir ${esc(title)}" onclick="CL.mgmtLendemainRevoir(${s.c})">R</button></div><div class="ld3-meta">${esc(place)} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div></article>`;
   }).join('');
 }
 /* ==== [FIN ANCRE] ==== */
@@ -210,7 +213,8 @@ function mgmtLendemainMouvementsHtml(m){
     if(!rangs||rangs.avant===rangs.apres) continue;
     const nom=fighter.name||fighter.last||'Combattant';
     const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,fighter.div);
-    lignes.push(`<div class="ld3-move"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong><em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
+    /* ==== [ANCRE: MONDE66_T1_MOUVEMENT_COLONNE_IDENTITE] — Monde lot 66 T1 ==== */
+    lignes.push(`<div class="ld3-move"><div class="ld66-move-identity"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span></div><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong><em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
   }
   /* ==== [ANCRE: P8_T3_MOUVEMENTS_AUTRES_ORGS] — Monde lot 63 T1 ==== */
   const guerre=m.guerre&&Array.isArray(m.guerre.ev)?m.guerre.ev:[];
@@ -238,7 +242,12 @@ function mgmtLendemainMouvementsHtml(m){
 /** Complète les trois catégories sans dupliquer de combat lorsque la soirée
  *  n'en contient pas un de chaque type. */
 function mgmtLendemainMomentsCompletsHtml(m){
-  const html=mgmtLendemainMomentsHtml(m);
+  let html=mgmtLendemainMomentsHtml(m);
+  /* ==== [ANCRE: MONDE66_T1_HIERARCHIE_MOMENTS] — Monde lot 66 T1 ==== */
+  const labels=['LA SURPRISE','LA FINITION','LA GUERRE'];
+  let index=0;
+  html=html.replace(/(<article class="ld3-moment">[\s\S]*?<div class="ld3-label">)[^<]*(<\/div>)/g,(article,avant,apres)=>avant+(labels[index++]||'LE MOMENT')+apres);
+  /* ==== [FIN ANCRE] ==== */
   if((html.match(/class="ld3-moment"/g)||[]).length>=3) return html;
   const stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
   const hist=Array.isArray(m.hist)?m.hist:[], seen=new Set();
@@ -538,14 +547,14 @@ function scr_mgmt_lendemain(){
        +mgmtLendemainMomentsCompletsHtml(m)
       +mgmtLendemainPrimesHtml(m)
       +mgmtLendemainDiscoursHtml(m)
-      +mgmtLendemainAttentionHtml(m)
-      +mgmtLendemainPresseHtml(m)
+       +mgmtLendemainAttentionHtml(m)
+       +mgmtLendemainPresseHtml(m)
       +mgmtLendemainChiffresHtml(m)
-      +mgmtLendemainResultatsHtml(m)
+       +mgmtLendemainResultatsHtml(m)
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
       +`</div>`,'normal','mf-sem-p')+`</section>`
     +`<section class="mgmt-ld-pane">`+mfPanneau(`<div class="mf-sem-in">`
-      +(typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):'')
+       +(typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):`<div class="mgmt-ld-presse"><h3 class="mgmt-ld-hd">Ce qu’en dit la presse</h3></div>`)
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.changes)}</h3>`
       +mgmtLendemainConstatsHtml(m)
       +(typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'')

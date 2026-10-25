@@ -96,7 +96,8 @@ test('T3 — la semaine, le fil et le lendemain portent la presse ; une partie d
     const lignes=mgmtMediasLignes(m).length;
     m.effectifs=0;
     return {semaine:semaine.length,source,fil:fil.some(t=>MGMT_MEDIAS.some(x=>t.startsWith(x.nom+' : '))),
-      ld:ld.includes('Ce qu’en dit la presse'),lignes,ancien:mgmtMediasLignes(m).length};`);
+      /* Décision : planches Uni* validées par Anthony ; l'écran suit UniLendemain (classes ld3-*). */
+      ld:[...document.querySelectorAll('.ld3-press')].some(x=>/À LA UNE|DANS LA PRESSE/.test(x.textContent)),lignes,ancien:mgmtMediasLignes(m).length};`);
   assert.equal(r.semaine.length||r.semaine,1); assert.ok(r.fil); assert.ok(r.ld); assert.ok(r.lignes>=2);
   assert.ok(MGMT_NOMS_OK(r.source),'la source de la ligne est un média');
   assert.equal(r.ancien,0);
