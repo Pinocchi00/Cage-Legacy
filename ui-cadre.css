@@ -2035,6 +2035,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ch3-screen{grid-template-rows:64px minmax(0,1fr)}
 .ch3-title{font-size:46px;gap:24px;padding:8px 0}
 .ch3-title .ch3-vs{width:54px;height:54px;font-size:28px}
+/* ==== [ANCRE: MONDE_LOT69_T1_CHOC_BANDEAU_PLANCHE] — Monde lot 69 T1 ====
+   Bandeau partagé agrandi conformément à la composition validée de UniChoc. ==== */
+.ch3-screen{grid-template-rows:110px minmax(0,1fr)}
+.ch3-title{font-size:70px;gap:24px;padding:8px 0}
+.ch3-title .ch3-vs{width:90px;height:90px;font-size:36px}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT69_T1_CHOC_NOMS_PLANCHE] — Monde lot 69 T1 ====
    La décision d'Anthony du 24/10 : les maquettes Uni* validées font foi; les
    noms d'affiche reprennent les 46 px explicites de UniChoc. ==== */

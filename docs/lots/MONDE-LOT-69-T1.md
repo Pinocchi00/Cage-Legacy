@@ -173,6 +173,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10 — bandeau choc agrandi
+- Fichiers : `ui-cadre.css` agrandit le bandeau partagé du choc à 110 px, les noms des organisations à 70 px et le médaillon VS à 90 px selon le constat de maquette ; `index.html` incrémente le `?v=` ; cette fiche consigne le contrôle.
+- Test : `node --test tests/mgmtLot69T1.test.js` (4/4) ; versionnement `node tools/verif-versions.js origin/main` et ESLint complet passent.
+- Aucune migration. Les données métier et les autres écrans n'ont pas été modifiés.
+- Écart : la capture externe / comparaison image et les métriques après retouche n'ont pas été établies dans cette session ; le seuil ≤20 % de gros blocs et les anomalies bilan précédemment mesurées ne sont donc pas déclarés résolus. Le parcours et les écrans n'ont pas de nouvelle validation visuelle.
+
 ### Reprise 25/10 — bilan réessayé
 - Branche `fid-choc`, HEAD de départ `8cb4cabb`. Les modifications utilisateur sous `.opencode/agents/`, `opencode.json` et les changements de fins de ligne des fichiers existants restent hors tranche.
 - Captures rejouées : choc visible, zéro chevauchement/texte sous 22 px/débordement, mais gros blocs à 26.1 % (objectif ≤20 % non atteint) ; discours à 16.6 % sans anomalie géométrique ; bilan à 12.9 % mais chevauchement toujours présent entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22).
