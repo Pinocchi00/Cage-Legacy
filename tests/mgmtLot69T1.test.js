@@ -61,9 +61,12 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.equal(w.eval(`(()=>{const c=JSON.parse(JSON.stringify(G.mgmt.choc));c.paires[1].a=c.paires[0].a;return mgmtChocValide(c)})()`),false,'un champion ne peut pas être engagé dans plusieurs paires du même choc');
       assert.equal(w.eval(`(()=>{const c=JSON.parse(JSON.stringify(G.mgmt.choc));c.a=c.paires[1].a;return mgmtChocValide(c)})()`),false,'les identifiants historiques du choc doivent désigner sa première affiche');
       const affiche=w.eval(`(()=>{const c=G.mgmt.choc,o=G.mgmt.orgs[c.orgId],locaux=mgmtChampionIds(G.mgmt),visiteurs=mgmtChampionIds({roster:o.roster,facts:o.facts||[],hist:o.hist||[]});return (c.paires||[]).map(p=>({p,local:locaux.has(p.a),visiteur:visiteurs.has(p.b)}))})()`);
-      assert.ok(affiche.every(x=>x.local&&x.visiteur),'chaque affiche réellement créée oppose des champions présents des deux organisations');
-      assert.equal(new Set(affiche.flatMap(x=>[x.p.a,x.p.b])).size,affiche.length*2,'aucun combattant ne figure dans plusieurs affiches');
-      w.eval(`G.mgmt.choc=null;G.mgmt.chocAnnee=-1;`);
+       assert.ok(affiche.every(x=>x.local&&x.visiteur),'chaque affiche réellement créée oppose des champions présents des deux organisations');
+       assert.equal(new Set(affiche.flatMap(x=>[x.p.a,x.p.b])).size,affiche.length*2,'aucun combattant ne figure dans plusieurs affiches');
+       const rosterSecours=w.eval(`(()=>{const org=G.mgmt.orgs[G.mgmt.choc.orgId],copie=JSON.stringify(org.roster);org.roster=null;G.screen='mgmt_choc';const html=scr_mgmt_choc();org.roster=JSON.parse(copie);return {screen:G.screen,html}})()`);
+       assert.equal(rosterSecours.screen,'mgmt_accueil','un roster adverse malformé renvoie vers l’accueil au lieu de faire planter l’écran');
+       assert.ok(rosterSecours.html.length>0,'le repli sur l’accueil reste rendu si le roster adverse manque');
+       w.eval(`G.mgmt.choc=null;G.mgmt.chocAnnee=-1;`);
       const propositionReelle=w.eval(`(()=>{const m=G.mgmt;return {ok:mgmtChocProposer(m,${JSON.stringify(orgId)}),choc:m.choc,valide:mgmtChocValide(m.choc)}})()`);
       assert.equal(propositionReelle.ok,true,'la voie de proposition existante doit construire une proposition de choc exploitable');
       assert.equal(propositionReelle.valide,true,'la proposition réelle doit respecter le format que consomme l’écran');

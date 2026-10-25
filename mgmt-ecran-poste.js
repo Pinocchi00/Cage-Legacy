@@ -34,7 +34,7 @@ function scr_mgmt_choc(){
  const m=G&&G.mgmt,c=m&&m.choc,adversaire=c&&m.orgs&&m.orgs[c.orgId];
  const pairesEcran=c&&Array.isArray(c.paires)&&c.paires.length?c.paires:[c&&{div:c.div,a:c.a,b:c.b}];
   const referencesValides=!!m&&!!c&&typeof c.a==='string'&&typeof c.b==='string'&&!!mgmtFighterById(m,c.a)&&!!(adversaire&&Array.isArray(adversaire.roster)&&adversaire.roster.some(f=>f&&f.id===c.b))&&pairesEcran.length>0&&pairesEcran.every(p=>{
-    const local=p&&mgmtFighterById(m,p.a),invite=p&&adversaire.roster.find(f=>f&&f.id===p.b);
+     const local=p&&mgmtFighterById(m,p.a),invite=p&&adversaire&&Array.isArray(adversaire.roster)?adversaire.roster.find(f=>f&&f.id===p.b):null;
     return !!p&&typeof p.a==='string'&&typeof p.b==='string'&&!!local&&!!invite&&local.div===p.div&&invite.div===p.div;
   });
   if(!m||!mgmtChocValide(c)||!referencesValides){if(typeof CL!=='undefined'&&CL.go)CL.go('mgmt_accueil');return typeof scr_mgmt_accueil==='function'?scr_mgmt_accueil():'';}
