@@ -2026,7 +2026,16 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ld66-moment-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .ld66-moment-head .ld3-label{min-width:0}
 .ld66-rewatch{flex:none;min-width:44px;min-height:44px;padding:4px 10px;border:2px solid #E9E6E1;background:#121010;color:#E9E6E1;font:600 24px/1 var(--mgmt-font-body);cursor:pointer}
-.ld66-lower{flex:1;grid-template-columns:1.25fr 1fr .9fr;min-height:0}
+ .ld66-lower{flex:1;grid-template-columns:1.25fr 1fr .9fr;min-height:0}
+/* ==== [ANCRE: MONDE66_T1_TITRES_CONTENUS_ET_PUCES] — Monde lot 66 T1 ====
+   Conserver les titres lisibles sans empiéter sur le détail et reprendre les
+   repères colorés de la planche pour les catégories et les changements. */
+.ld66-moments .ld3-names,.ld66-moments .ld3-moment:first-child .ld3-names,.ld66-moments .ld3-moment:nth-child(2) .ld3-names,.ld66-moments .ld3-moment:nth-child(3) .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;overflow-wrap:anywhere}
+.ld66-moments .ld3-label{display:inline-flex;align-items:center;align-self:flex-start;min-height:32px;padding:4px 12px;background:#E23A2B;color:#fff;box-sizing:border-box}
+.ld66-moments .ld3-moment:nth-child(2) .ld3-label{background:#F0B220;color:#0D0B0B}
+.ld66-moments .ld3-moment:nth-child(3) .ld3-label{background:#F0B220;color:#0D0B0B}
+.ld66-change .mgmt-ld-item{position:relative;padding-left:24px}
+.ld66-change .mgmt-ld-item::before{content:"";position:absolute;left:4px;top:18px;width:10px;height:10px;background:#F0B220;border-radius:50%}
 .ld66-change,.ld66-press,.ld66-numbers{min-height:0;overflow-wrap:anywhere}
 .ld66-change .mgmt-ld-item{min-height:0}
 .ld66-suite .ld3-suite{height:760px;min-height:0}

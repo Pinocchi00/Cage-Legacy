@@ -35,6 +35,15 @@ Les données existent déjà : le poids d'une histoire (`mgmt-histoires*.js`), l
 
 ## Compte rendu
 
+### Reprise titres et repères — 25/10/2026
+
+- Branche et commits contrôlés : `fid-lendemain`; les implémentations déjà commitées des deux écrans restent inchangées. Les changements locaux préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors périmètre.
+- Correction apportée : override terminal dans `ui-cadre.css` fixe les noms des trois moments à 64 px, avec hauteur réservée de deux lignes et interligne 1.05 (au lieu d'un override à 108 px et interligne .8 qui pouvait recouvrir le détail). Les étiquettes ont un pavé rouge/jaune et la liste des changements reçoit ses puces jaunes. `index.html` a été versionné avec `_bump.js`.
+- Tests ciblés verts : `mgmtEcranLendemain.test.js` (7), `mgmtLendemainDemo.test.js` (7), `mgmtLot48T1.test.js` (9), `mgmtLot54T1.test.js` (30). `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent.
+- Le dossier temporaire `shoot` ne peut pas être lu par cette session et aucun `shoot.js` n'est présent dans le dépôt : aucune nouvelle capture `cmp-*` ni mesure computed-style n'est revendiquée. Les derniers chiffres précédemment consignés (lendemain 22,8 % gros blocs; alertes variables de mouvements suite) ne sont pas invalidés par le changement de CSS. La capture comparative, le test lent `mgmtSoireeShow` et l'objectif renforcé de capture restent non certifiés dans cette reprise.
+- Fichiers modifiés : `ui-cadre.css` (contenance des titres et repères colorés), `index.html` (cache CSS), cette fiche (résultats). Aucun test nouveau, aucune donnée, mécanique, sauvegarde ou migration.
+- Écarts à la fiche : capture/mesures visuelles non vérifiées ici; le seuil renforcé et les débordements variables de la suite restent rapportés comme ouverts. Questions pour Anthony : aucune.
+
 ### Reprise de fidélité typographique — 25/10/2026
 
 - État initial revu (`fid-lendemain`, historique des 12 commits et status) : les écrans étaient déjà livrés. Les modifications locales `.opencode/agents/*`, `opencode.json` et `sw.js` sont étrangères à la tranche et n'ont pas été touchées.
