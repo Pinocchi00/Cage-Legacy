@@ -298,7 +298,16 @@ function scr_mgmt_accueil(){
     /* ==== [ANCRE: P10_T4_RANG_FINAL_ACCUEIL] — Monde lot 57 T1 ==== */
     const guerre=m.guerre&&Number.isInteger(m.guerre.rangFinal)?mfPanneau(`<h2 class="mf-ac-titre">LE CLASSEMENT DES HUIT</h2><p>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit.</p><button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`,'normal','mf-ac-p'):'';
   const espoirsDansAttente=espoirHtml;
-    const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
+    /* ==== [ANCRE: ACCUEIL_LIENS_COMPLEMENTAIRES] — Réparation PR 259 ==== */
+    const liensAccueil=[
+      m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'',
+      guerre?`<button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`:'',
+      ceremonieVisible?`<button type="button" onclick="CL.go('mgmt_ceremonie')">Revoir la cérémonie</button>`:'',
+      bilanVisible?`<button type="button" onclick="CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''
+    ].filter(Boolean).join('');
+    const rangFinal=guerre?`<span>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit</span>`:'';
+    const rangeeLiens=liensAccueil||rangFinal?`<div class="mf-ac-liens-complementaires">${rangFinal}${liensAccueil}</div>`:'';
+    const corps=`${karim}${rangeeLiens}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
