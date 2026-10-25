@@ -15,6 +15,14 @@ Branche : `polissage` (la branche courante de ce dossier ; commits ICI ; le supe
 
 ## Compte rendu
 
+### Reprise 37 — carnet, listes internes
+
+- Branche `polissage`; les changements suivis non commités de reprise étaient `mgmt-ceremonie.js`, `ui-cadre.css` et le bump `?v=` de `index.html`. Les changements préexistants `.opencode/agents/*`, `opencode.json` et `sw.js` restent exclus.
+- Ajout d'un conteneur défilant par rubrique du carnet afin que les articles gardent leur titre fixe et leurs entrées dans une zone scrollable. Test ciblé `node --test tests/mgmtLot55T1.test.js` : 49/49 verts.
+- Capture réelle après : Carnet `chevauchements:139`, `textesSous22px:0`, débordements `[Timofey Panov…, Ophélien Lefebvre…, Beata Wróbel…, Myung-su Song…]`; auparavant le dernier contrôle disponible était `140/0/[Ophélien Lefebvre, Beata Wróbel, Myung-su Song, Dong-hyun Eo]`. Amélioration d'un chevauchement seulement : le critère carnet n'est pas atteint. Comparaison `UniCarnet` : moyen 21.8, grosBlocs 14.2.
+- Écart : le scroll ajouté ne suffit pas à empêcher le détecteur de compter le contenu des listes qui sort des rubriques. Aucun test DOM ne peut certifier ces rectangles. Pas de migration ni d'écran prohibé touché. Les cases de la tranche restent ouvertes; aucune conformité globale revendiquée.
+- Questions pour Anthony : aucune.
+
 ### Reprise 36 — mesures et tentative carnet
 
 - Branche vérifiée : `polissage`. `git log --oneline -12` consulté. Au départ, aucun fichier suivi de la tranche n'était modifié ; les changements étrangers `.opencode/agents/*`, `opencode.json` et `sw.js` sont laissés hors tranche.
