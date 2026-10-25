@@ -2289,6 +2289,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu3-ligne{min-height:82px}
 .gu3-ligne.gu3-split{clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE66_T1_CONTENANCE_FINALE_MOMENTS] — Monde lot 66 T1 ====
+   Neutralise les anciennes surcharges tardives: titres hauts, détails en dessous. */
+.mf-contenu.ld66-screen .ld66-moments .ld3-names,
+.mf-contenu.ld66-screen .ld66-moments .ld3-moment:first-child .ld3-names{font-size:64px;line-height:1.05;min-height:2.1em;height:auto;flex:none;overflow-wrap:anywhere}
+.mf-contenu.ld66-screen .ld66-moments .ld3-detail{font-size:30px;line-height:1.05;flex:none;margin-top:auto}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
 .di3-scene{min-height:calc(100vh - 180px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:72px 110px;gap:24px;background:#0D0B0B;color:#E9E6E1}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
