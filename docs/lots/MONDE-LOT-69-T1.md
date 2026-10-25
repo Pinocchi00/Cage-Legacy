@@ -15,6 +15,12 @@ Branche : `fid-choc` (la branche courante de ce dossier ; commits ICI ; le super
 
 Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni à `mgmt-attention.js`.
 
+### Reprise 25/10/2026 — capture choc rejouée
+- Branche `fid-choc`, HEAD initial `96076c6e`. Les seules modifications applicatives visibles au départ (`index.html`, `ui-cadre.css`) sont déjà présentes en commits antérieurs selon l'historique ; les modifications `.opencode/agents/*`, `opencode.json` et `sw.js` sont hors tranche et conservées sans ajout.
+- Capture rejouée avec `node C:/Users/antho/AppData/Local/Temp/p1/shoot/shoot.js C:/Users/antho/Documents/cage-legacy-p69 choc` : l'écran s'affiche avec la proposition reçue, `chevauchements=0`, `textesSous22px=0`, `debordent=[]`, mais `grosBlocs=26.1%`, toujours au-dessus de l'objectif ≤20%.
+- Je n'ai pas ouvert le comparatif image. Aucun changement CSS spéculatif n'est conservé, car la métrique ne donne pas à elle seule une piste démontrée et les anciens essais d'ajustement n'avaient pas changé le résultat.
+- Test ciblé et audits à relancer avant commit de ce compte rendu. Écarts non résolus : seuil de densité choc, correction/contrôle du chevauchement bilan rapporté précédemment, capture dédiée d'arrivée et inspection visuelle comparative. Aucun changement fonctionnel ou migration de sauvegarde dans cette reprise.
+
 ## Compte rendu
 
 ### Reprise 25/10/2026 — recontrôle et tentative bilan
