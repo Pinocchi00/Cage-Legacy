@@ -14,5 +14,7 @@ test('Monde lot 77 T1 — les noms longs de soirée et de discours restent adapt
   assert.match(css,/grid-template-columns:42px 190px minmax\(0,1fr\) auto/);
   assert.match(css,/\.so3-carte-combat\{display:grid;grid-template-columns:54px 190px minmax\(0,1fr\) auto/);
   assert.match(css,/\.so3-carte-combat \.mf-so-nb\{width:44px\}/);
+  assert.match(css,/\.so3-carte-noms\{[^}]*white-space:normal/);
+  assert.match(css,/\.so3-carte-noms b span\{display:block;white-space:normal;overflow-wrap:anywhere\}/);
   assert.match(css,/\.mf-so-entete \.mf-so-chip:not\(\.org\) span\{[^}]*white-space:nowrap/);
 });

@@ -1115,9 +1115,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .so3-carte-infos{min-width:0;display:flex;flex-direction:column;gap:5px}
 .so3-carte-infos .mf-so-lt{display:flex;flex-direction:column;gap:5px}
 .so3-carte-infos .mf-so-lt span,.so3-carte-infos .mf-so-cat{font-size:22px;line-height:1;color:rgba(233,230,225,.74);white-space:nowrap}
-.so3-carte-noms{min-width:0;white-space:nowrap;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:1;color:rgba(233,230,225,.74)}
-.so3-carte-noms b{font:inherit}
-.so3-carte-noms span{font:inherit;color:rgba(233,230,225,.74)}
+.so3-carte-noms{min-width:0;white-space:normal;font-family:var(--mf-titre);font-size:32px;font-weight:800;line-height:1;color:rgba(233,230,225,.74)}
+.so3-carte-noms b{min-width:0;font:inherit;white-space:normal;overflow-wrap:anywhere}
+.so3-carte-noms b span{display:block;white-space:normal;overflow-wrap:anywhere}
+.so3-carte-noms>span{font:inherit;color:rgba(233,230,225,.74)}
 .so3-carte-combat.on .mf-so-nb,.so3-carte-combat.on .so3-carte-noms{color:#E9E6E1}
 .so3-carte-combat.on .so3-carte-infos .mf-so-lt span:first-child{color:#F0B220}
 .so3-vue{height:42px;max-width:190px;padding:0 12px;border:0;background:#252121;color:rgba(233,230,225,.74);clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;cursor:pointer}
