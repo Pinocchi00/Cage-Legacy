@@ -257,8 +257,7 @@ function mgmtAccueilSaison(m,c){
    const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
    const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
-   const raccourcis=poste||m.guerre||m.poste?`<nav class="mf-ac-raccourcis" aria-label="Raccourcis de saison">${poste?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}${m.guerre&&Number.isInteger(m.guerre.rangFinal)?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_guerre')">Le classement des huit</button>`:''}${Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0?`<button type="button" class="po2-lien" onclick="CL.go('mgmt_ceremonie')">La cérémonie de l’année</button>`:''}${m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu?`<button type="button" class="po2-lien" onclick="mgmtPosteBilanLu=true;CL.go('mgmt_poste_bilan')">Le bilan du patron</button>`:''}</nav>`:'';
-   return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:'')+raccourcis,'normal','mf-ac-p mf-ac-saison');
+    return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
 }
 /** La première arrivée : l'héritage (organisation, dernière soirée, champions, promesses). */
 function mgmtAccueilHeritage(m,c){
