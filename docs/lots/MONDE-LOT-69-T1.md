@@ -434,6 +434,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 - Fichiers modifiés conservés : cette fiche uniquement pour le compte rendu. Aucune migration. Le changement généré de `sw.js` par le shoot a été restauré depuis `origin/main`; les modifications utilisateur sous `.opencode/agents/` et `opencode.json` restent hors tranche.
 - Écarts non résolus : seuil des gros blocs choc, chevauchement du bilan, captures/comparaisons dédiées de l'arrivée, ainsi que toute comparaison visuelle manuelle des images. Aucun achèvement global n'est revendiqué.
 
+### Reprise 25 octobre — commandes de l'écran choc
+- Retiré le bouton « RETOUR AU POSTE » du panneau du choc : il n'existe pas sur la planche UniChoc, et la navigation Échap est déjà proposée dans la barre de commandes. Le test structurel vérifie cette absence.
+- Fichiers modifiés : `mgmt-ecran-poste.js` (suppression du bouton hors maquette), `index.html` (`?v=`), `tests/mgmtLot69T1.test.js` (assertion de fidélité), cette fiche.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` passe 4/4 ; `node tools/verif-versions.js origin/main` et `node_modules/.bin/eslint .` passent. La capture choc après la modification affiche l'écran sans chevauchement, texte trop petit ni débordement ; `grosBlocs=25.9%`, donc cible ≤20% non atteinte.
+- Écarts non résolus : mesure de densité du choc hors cible, capture dédiée de l'arrivée et ouverture visuelle des comparatifs non effectuées ; les critères déjà couverts par les tests n'attestent pas ces objectifs visuels. Pas de migration. Modifications utilisateur hors tranche préservées.
+
 ### Reprise 44
 - État contrôlé : branche `fid-choc`, HEAD `cfb74364`; les seules modifications initiales étaient les configurations utilisateur sous `.opencode/agents/` et `opencode.json`, laissées intactes.
 - Le test ciblé `node --test tests/mgmtLot69T1.test.js` passe (4/4), notamment le passage du choc par `mgmtRunEvent` et la conservation du résultat, l'arrivée après changement, et l'inclusion dans les commandes agrégées.

@@ -80,7 +80,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};`);
       w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
-      for(const texte of ['SPLIT','CHAMPIONNE CONTRE CHAMPIONNE','ch3-fight-heading','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+       for(const texte of ['SPLIT','CHAMPIONNE CONTRE CHAMPIONNE','ch3-fight-heading','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+       assert.doesNotMatch(choc,/RETOUR AU POSTE/,'les commandes secondaires ne doivent pas ajouter un bouton absent de la planche UniChoc');
       assert.match(choc,/<span class="mf-k">Échap<\/span><span>Répondre plus tard · 14 jours<\/span>/,'la barre du bas reprend le délai de réponse indiqué par la planche');
      assert.match(choc,/<span class="mf-k">P<\/span><span>Contre-proposer<\/span>/);
      assert.match(choc,/<span class="mf-k">R<\/span><span>Refuser<\/span>/,'le raccourci de refus doit être visible dans la barre de commandes');
