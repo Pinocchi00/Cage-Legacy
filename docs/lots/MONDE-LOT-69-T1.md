@@ -166,6 +166,13 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10 — bilan réessayé
+- Branche `fid-choc`, HEAD de départ `8cb4cabb`. Les modifications utilisateur sous `.opencode/agents/`, `opencode.json` et les changements de fins de ligne des fichiers existants restent hors tranche.
+- Captures rejouées : choc visible, zéro chevauchement/texte sous 22 px/débordement, mais gros blocs à 26.1 % (objectif ≤20 % non atteint) ; discours à 16.6 % sans anomalie géométrique ; bilan à 12.9 % mais chevauchement toujours présent entre « REMERCIÉ » et « Il manque 3 combats en carte » (265×22).
+- Essai local : hausse de `line-height` du titre du bilan de .9 à 1.2, suivi d'une capture ; aucun changement mesuré. L'essai CSS a été retiré, aucun bump de cache n'est retenu. Le bilan reste non corrigé.
+- Vérifications : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart) et `node_modules/.bin/eslint .` passent. La capture confirme les métriques, mais les comparatifs n'ont pas été ouverts visuellement et aucune scène d'arrivée n'a été capturée.
+- Aucun changement applicatif ou test conservé, aucune migration. Écarts restant : densité du choc au-dessus de la cible, chevauchement bilan, arrivée non capturée et comparaison visuelle non établie. Aucun achèvement global revendiqué.
+
 ### Reprise 25/10 — contrôle ciblé de l’état livré
 - Branche `fid-choc` confirmée ; les commits récents contiennent déjà les changements applicatifs de la tranche. Aucun fichier applicatif non commité n’a été repris. Les changements utilisateur de `.opencode/agents/*`, `opencode.json` et `sw.js` restent hors du commit de tranche.
 - Vérifications exécutées : `node --test tests/mgmtLot69T1.test.js` (4/4), `node tools/verif-versions.js origin/main` (aucun écart, 20 fichiers examinés) et `node_modules/.bin/eslint .` (succès).
