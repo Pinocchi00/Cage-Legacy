@@ -17,6 +17,14 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10/2026 — recontrôle et tentative bilan
+- État de départ : branche `fid-choc`, HEAD `b6360b17`. Aucun fichier de tranche en attente ; les modifications préexistantes `.opencode/agents/*` et `opencode.json` sont hors périmètre et conservées.
+- Captures exécutées avec l'outil fourni : `choc` s'affiche (0 chevauchement, 0 texte sous 22 px, aucun débordement), mais `grosBlocs=26.1%`; `discours` est à 16.6%, sans anomalies géométriques ; `bilan` est à 12.9% mais reproduit le chevauchement du titre « REMERCIÉ » et de « Il manque 3 combats en carte » (265×22).
+- J'ai essayé d'accroître le flux après le titre du bilan en CSS puis relancé la capture : le contrôle est resté rigoureusement identique. Cette modification sans effet a été retirée, et son bump de cache n'est pas conservé. Aucun écart visuel n'est donc faussement annoncé corrigé.
+- Tests ciblés : `node --test tests/mgmtLot69T1.test.js` passe (4/4). Pas de changement fonctionnel ni migration. Les comparatifs n'ont pas été ouverts visuellement et aucune scène d'arrivée dédiée n'a été capturée dans ce passage.
+- Écarts encore mesurés/non établis : choc dépasse le seuil de gros blocs ≤20%; chevauchement du bilan persistant; arrivée sans capture dédiée; inspection visuelle des `cmp-*.png` non faite. Les cases fonctionnelles déjà couvertes par le test et l'historique demeurent en place, sans les revendiquer comme preuve visuelle.
+- Fichiers de cette reprise : cette fiche uniquement (compte rendu). Aucun fichier JS/CSS/cache ni sauvegarde modifié.
+
 ### Reprise 25/10/2026 — correction de débordement du bilan
 - État initial : branche `fid-choc`, HEAD `13399168`. Les modifications utilisateur `.opencode/agents/*` et `opencode.json` sont restées hors tranche.
 - Reproductions `shoot.js` : choc visible, 0 chevauchement, 0 texte sous 22 px, aucun débordement, mais `grosBlocs=26.1%` (>20%). Discours : mêmes contrôles géométriques verts, `grosBlocs=16.6%`. Bilan : 1 chevauchement entre « REMERCIÉ » et « Il manque 3 combats en carte ».
