@@ -438,13 +438,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-nom-patron{font-size:22px!important;font-weight:600;letter-spacing:.04em;margin:0!important}
 .po2-verdict{font:800 60px/.85 'Saira Extra Condensed','Arial Narrow',sans-serif}
 .po2-grid-trois .po2-patron .po2-verdict{font-size:60px;line-height:.85}
-.po2-grid-trois .po2-action{position:static;font-size:22px;min-height:34px;padding:5px 10px;white-space:normal}
+.po2-grid-trois .po2-action{position:static;font-size:22px;min-height:34px;padding:5px 10px;white-space:normal;max-width:100%;align-self:flex-start}
 .po2-grid-trois .po2-objectif-entete strong{white-space:nowrap}
 .po2-citation{font-style:italic;margin:0!important}
 .po2-historique{display:flex;flex-direction:column}
 .po2-evenement{display:grid;grid-template-columns:110px 24px minmax(0,1fr);align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(233,230,225,.16)}
 .po2-evenement-date,.po2-evenement small{font-size:22px;color:rgba(233,230,225,.74)}
 .po2-evenement-fleche{font-size:22px;color:#F0B220}
+.po2-evenement-fleche.po2-evenement-positif{color:#55C878}
+.po2-evenement-fleche.po2-evenement-negatif{color:#E23A2B}
 .po2-evenement>div{display:flex;flex-direction:column;gap:4px;min-width:0}
 .po2-evenement strong{font-size:24px;font-weight:500;overflow-wrap:anywhere}
 .po2-prochain{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -452,7 +454,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-objectif{display:flex;flex-direction:column;gap:8px;padding:10px 0;border-bottom:1px solid rgba(233,230,225,.16)}
 .po2-objectif-entete{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .po2-objectif-entete span,.po2-soiree-cibles p{font-size:24px}
-.po2-objectif-entete strong{font:800 24px 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220;text-align:right}
+.po2-objectif-entete strong{font:800 24px 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220;text-align:right;white-space:normal}
 .po2-jauge{height:8px;background:#252121}
 .po2-jauge i{display:block;height:8px;background:#F0B220}
 .po2-soiree-cibles{display:flex;flex-direction:column;gap:8px}
