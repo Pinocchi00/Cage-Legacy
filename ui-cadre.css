@@ -2244,6 +2244,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet{width:100%;min-width:0;min-height:0;overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet>article{min-width:0;max-width:100%;min-height:0;overflow-x:hidden;overflow-y:auto;contain:layout paint}
 .ce3-carnet-ecran .ce3-carnet>article h2,.ce3-carnet-ecran .ce3-carnet>article>p{max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:normal}
+/* ==== [ANCRE: MONDE70_T1_CARNET_GRILLE_BORNEE] — Monde lot 70 T1 ==== */
+.ce3-carnet-ecran{box-sizing:border-box;height:824px;max-height:calc(100% - 224px);min-height:0}
+.ce3-carnet-ecran .ce3-carnet{display:grid;flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));grid-auto-flow:row;gap:14px;min-height:0}
+.ce3-carnet-ecran .ce3-carnet>article{box-sizing:border-box;min-height:0;max-height:100%;overflow:auto}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
