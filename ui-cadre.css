@@ -2553,3 +2553,5 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
  .di3-lignes{font-size:44px;line-height:1.18}
 .di3-lignes p{font-style:normal}
 /* ==== [FIN ANCRE] ==== */
+
+.mf-ac-liens-complementaires{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
