@@ -155,8 +155,10 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         assert.match(css,/\.ch3-paire \.ch3-category \.ch3-vs\{width:54px;height:54px;font-size:28px\}/,'décision du 24/10 : les planches Uni* validées par Anthony priment, le médaillon suit les 54 px de UniChoc');
       assert.match(css,/\.ch3-title[^\{]*\{[^}]*linear-gradient\(90deg,#E9E6E1[^}]*#E23A2B/s,'le bandeau choc conserve les deux couleurs de la planche');
         assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_DEMI_BANDEAU\][\s\S]*?\.ch3-title\{background:linear-gradient\(90deg,#E9E6E1 0 50%,#E23A2B 50% 100%\)\}/,'décision de fidélité aux planches validées : le bandeau partage exactement ses deux moitiés');
-        assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_BANDEAU_PLANCHE\][\s\S]*?\.ch3-screen\{grid-template-rows:110px minmax\(0,1fr\)\}[\s\S]*?\.ch3-title\{font-size:70px;gap:24px;padding:8px 0\}[\s\S]*?\.ch3-title \.ch3-vs\{width:90px;height:90px;font-size:36px\}/,'décision du 25/10 : le bandeau suit les dimensions mesurées de la planche UniChoc');
-       assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
+         assert.match(css,/\/\* ==== \[ANCRE: MONDE_LOT69_T1_CHOC_BANDEAU_PLANCHE\][\s\S]*?\.ch3-screen\{grid-template-rows:110px minmax\(0,1fr\)\}[\s\S]*?\.ch3-title\{font-size:70px;gap:24px;padding:8px 0\}[\s\S]*?\.ch3-title \.ch3-vs\{width:90px;height:90px;font-size:36px\}/,'décision du 25/10 : le bandeau suit les dimensions mesurées de la planche UniChoc');
+        /* Décision : les planches Uni* validées par Anthony priment ; chaque nom est centré dans sa moitié et le médaillon occupe la jonction. */
+        assert.match(css,/\.ch3-title \.ch3-split,\.ch3-title \.ch3-adverse\{display:flex;flex:1;align-items:center;min-width:0\}/,'les noms sont distribués de part et d’autre du VS selon UniChoc');
+        assert.match(css,/\.ch3-title \.ch3-vs[^\{]*\{[^}]*#F0B220/s,'le VS du choc reste jaune');
        assert.match(css,/\.ch3-button\.ch3-counter\{[^}]*background:#252121[^}]*color:#E9E6E1/s,'contre-proposer se distingue de l’acceptation jaune');
        assert.match(css,/\.ch3-button\.ch3-refuse\{[^}]*background:#E23A2B/s,'refuser est identifié par le rouge de la charte');
        /* Décision : la planche UniDiscours validée par Anthony prime ; nom autour de 120 px au viewport de capture. */

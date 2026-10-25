@@ -252,6 +252,12 @@ Règles communes : ne touche ni au moteur de combat, ni à `mgmt-traits*.js`, ni
 
 ## Compte rendu
 
+### Reprise 25/10 — titres du bandeau choc répartis par demi-bandeau
+- `ui-cadre.css` : les noms Split et adverse occupent chacun leur moitié du bandeau, alignés vers la jonction du VS ; dimensions 110/70/90 px et couleurs de la planche restent inchangées. `index.html` reçoit le bump de `ui-cadre.css`.
+- `tests/mgmtLot69T1.test.js` : assertion de structure CSS ajoutée, avec décision explicite que les planches Uni* validées par Anthony priment.
+- Vérifications : test ciblé 4/4, `node tools/verif-versions.js origin/main` sans écart, `node_modules/.bin/eslint .` et `git diff --check` réussis.
+- Aucune migration. Écarts visuels encore ouverts : captures historiques choc `grosBlocs` >20%, bilan avec chevauchement rapporté, capture dédiée arrivée et inspection comparative des PNG. Ce changement d'alignement n'est pas présenté comme preuve que ces métriques sont corrigées.
+
 ### Reprise 25/10 — bandeau choc agrandi
 - Fichiers : `ui-cadre.css` agrandit le bandeau partagé du choc à 110 px, les noms des organisations à 70 px et le médaillon VS à 90 px selon le constat de maquette ; `index.html` incrémente le `?v=` ; cette fiche consigne le contrôle.
 - Test : `node --test tests/mgmtLot69T1.test.js` (4/4) ; versionnement `node tools/verif-versions.js origin/main` et ESLint complet passent.
