@@ -492,6 +492,13 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:3px 0}
 .po2-grid-trois .po2-contrat .po2-offres-bas{overflow:visible;min-height:0;max-height:none}
 .po2-grid-trois .po2-contrat .po2-choc-panel{flex:none}
+/* ==== [ANCRE: MONDE_LOT84_T1_CONTRAT_BARRE_TOUCHES] — Monde lot 84 T1 ==== */
+.po2-grid.po2-grid-trois>.po2-panel.po2-contrat .mf-p3{padding:8px}
+.po2-grid-trois .po2-contrat .po2-card{gap:6px}
+.po2-grid-trois .po2-contrat .po2-titre{gap:5px}
+.po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:2px 0}
+.po2-grid-trois .po2-contrat .po2-offres-bas{gap:3px}
+.po2-grid-trois .po2-contrat .po2-choc .po2-action{min-height:32px;padding:2px 8px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
