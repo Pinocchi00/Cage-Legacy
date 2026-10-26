@@ -47,28 +47,16 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   const win = newGameWindow();
   win.eval(`setSeed(77); mgmtEntrerAvantH4(); CL.go('mgmt_organisation');`);
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes("L'organisation"), 'l’écran de l’organisation est rendu');
-  /* Ce qui n'existe pas n'apparaît pas : aucun texte de la maquette 08 hors
-     l'effectif et les finances (§1, §3 T7). */
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */
+  assert.ok(html.includes('ORGANISATION'), 'la plaque de l’écran de croissance est rendue');
+  /* Aucun texte de travail ni texte de patron ou d'objectifs ne subsiste. */
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
-  /* Brief du 06/10/2026, lot 4 : la barre des sections du cadre porte un « Contrats » ; ce que le test garde,
-     c'est que l'écran de l'organisation lui-même (le contenu ancien) n'a ni onglet Contrats ni Diffuseur. */
-  const ancien=win.document.querySelector('.mf-ancien').innerHTML;
-  assert.ok(!ancien.includes('Contrats')&&!ancien.includes('Diffuseur'), 'aucun onglet Contrats ni Diffuseur');
   assert.ok(!html.includes('Delatour')&&!html.includes('PATRON')&&!html.includes('OBJECTIFS'), 'ni patron ni objectifs de saison');
-  /* Navigation permanente : Semaine, Classements (T6 : l'écran existe,
-     docs/LOT-4-LA-PEAU-DU-JEU.md §3 T6, réécrit sur la décision T6) et
-     Organisation, aucune entrée morte. */
-  assert.equal(win.document.querySelectorAll('.mgmt-nav').length, 1, 'la barre de navigation est présente');
-  const navs = [...win.document.querySelectorAll('.mgmt-nav button')].map(b=>b.textContent);
-  /* Lot 5 H8 : le vestiaire rejoint la navigation (maquette 11). */
-  assert.deepEqual(navs, ['Accueil','Effectif','Recrutement','Classements','Organisation'], 'les entrées de navigation suivent les écrans livrés (décision du 12/10/2026 : l’Accueil est la première section (lot 7) : « Semaine » devient « Accueil »)');
-  /* L'entrée courante (aria-current) se distingue : ici l'Organisation. */
-  const courant = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
-  assert.equal(courant.length, 1, 'une seule entrée courante');
-  assert.equal(courant[0].textContent, 'Organisation', 'l’écran courant est signalé');
-  assert.ok(courant[0].classList.contains('cur'), 'l’entrée courante porte sa classe visuelle');
-  /* L'effectif et les finances sont lisibles (charte R1, R3). */
+  const onglets=[...win.document.querySelectorAll('.mo67-tab')];
+  assert.deepEqual(onglets.map(b=>b.textContent), ['LE CLASSEMENT DES HUIT','LA CROISSANCE','TON POSTE','TON CARNET']);
+  assert.equal(onglets.filter(b=>b.getAttribute('aria-current')==='page').length,1);
+  assert.equal(onglets.find(b=>b.getAttribute('aria-current')==='page').textContent,'LA CROISSANCE');
+  /* La trésorerie et l'effectif historiques restent lisibles sous le panneau. */
   assert.ok(html.includes('Trésorerie'), 'la trésorerie est lisible');
   assert.ok(win.document.getElementById('app').textContent.includes(win.eval('mgmtEuros(G.mgmt.treasury)')), 'la valeur de la trésorerie est telle qu’elle existe');
   assert.ok(html.includes("L'effectif"), 'l’effectif par catégorie est présent');
