@@ -3470,3 +3470,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-contenu.ld66-suite.ld79-screen .mgmt-ld-title{font:800 28px/1.05 var(--mf-titre);overflow-wrap:anywhere}
 .mf-contenu.ld66-suite.ld79-screen .mgmt-ld-detail,.mf-contenu.ld66-suite.ld79-screen .mgmt-ld-sub,.mf-contenu.ld66-suite.ld79-screen .mgmt-ld-rangs{font:500 22px/1.1 var(--mf-texte);overflow-wrap:anywhere}
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: FID79_COULEURS_MOUVEMENTS] — Fidélité lendemain, lot 79 ==== */
+.mf-contenu.ld66-suite.ld79-screen .ld3-move>strong.ld79-rank{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:#E9E6E1}
+.mf-contenu.ld66-suite.ld79-screen .ld3-move>strong.ld79-rank.descend{color:#E23A2B}
+.mf-contenu.ld66-suite.ld79-screen .ld79-rank>svg{flex:none;width:22px;height:22px}
+.mf-contenu.ld66-suite.ld79-screen .ld3-move>strong.ld79-rank>.ld79-rank-text{font:inherit;color:inherit;grid-area:auto;min-width:0;width:auto;max-width:100%;text-align:right;overflow-wrap:anywhere;word-break:normal}
+/* ==== [FIN ANCRE] ==== */

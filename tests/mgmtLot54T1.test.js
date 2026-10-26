@@ -399,8 +399,28 @@ test('Monde lot 54 T1 — les mouvements de classement exposent les rangs avant 
     assert.match(html,/class="ld3-move"/);
     assert.match(html,/→/);
     assert.match(html,/chez /);
+    assert.match(html,/class="ld79-rank (?:monte|descend)"/,'les mouvements réels portent leur sens');
     assert.match(css,/\.ld3-move\s*\{/);
     assert.match(css,/\.ld3-move\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\)\s+120px\s+130px/s);
+  }finally{w.close();}
+});
+
+test('Fidélité 79 — les flèches distinguent montée, descente, entrée et sortie du classement',()=>{
+  const w=newGameWindow();
+  try{
+    for(const [avant,apres,sens,libelle] of [[3,1,'monte','Montée'],[1,3,'descend','Descente'],[null,4,'monte','Montée'],[4,null,'descend','Descente']]){
+      const html=w.eval(`mgmtLendemainMouvementRangHtml(${JSON.stringify({avant,apres})},'lw')`);
+      const element=w.document.createElement('div');
+      element.innerHTML=html;
+      const rang=element.querySelector('strong');
+      assert.ok(rang.classList.contains(sens),`${avant} → ${apres} : un rang plus petit est une montée`);
+      assert.ok(rang.getAttribute('aria-label').startsWith(libelle),'le sens reste explicite sans la couleur');
+      assert.ok(rang.querySelector('svg[aria-hidden="true"] path'),'le triangle de la planche est présent');
+      assert.match(rang.textContent,/→/,'les deux rangs restent lisibles');
+      if(avant===null||apres===null) assert.match(rang.textContent,/HORS CLASSEMENT/);
+    }
+    assert.equal(w.eval(`mgmtLendemainMouvementRangHtml({avant:3,apres:3},'lw')`),'','pas de flèche de mouvement pour un rang inchangé');
+    assert.equal(w.eval(`mgmtLendemainMouvementRangHtml({avant:null,apres:null},'lw')`),'');
   }finally{w.close();}
 });
 
