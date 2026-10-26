@@ -17,3 +17,47 @@ test('Actualités — le rendu reste inférieur à 200 ms sur une partie de six 
 /* Les planches Uni* sont validées par Anthony (brief du 22/10) ; l'écran suit la planche. */
 test('Actualités — chaque classe du balisage de la planche possède une règle de style',()=>{const w=game(),html=w.document.querySelector('.mf-actu').innerHTML,css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');const classes=[...new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/)).filter(c=>c.startsWith('mgmt-ac-')))];for(const nom of classes)assert.match(css,new RegExp(`\\.${nom}(?:[\\s.,:{>+~#\\[]|$)`),`classe ${nom} stylée`);});
 test('Actualités — les trois blocs suivis, fil et détail sont présents comme sur les planches Uni* validées par Anthony ; l’écran suit la planche',()=>{const w=game(),root=w.document.querySelector('.mf-actu');assert.ok(root.querySelector('.mgmt-ac-follow-panel'));assert.ok(root.querySelector('.mgmt-ac-feed-panel'));assert.ok(root.querySelector('.mgmt-ac-detail-panel'));assert.ok(root.querySelector('.mgmt-ac-follow'));assert.ok(root.querySelector('.mgmt-ac-feedhead'));assert.ok(root.querySelector('.mgmt-ac-detail-body'));assert.ok(root.querySelector('.mgmt-ac-actions .principale'));assert.equal(root.querySelector('.mgmt-ac-feedhead button'),null);});
+
+test('Fidélité 83 — titres, cadres, filtres et sélection correspondent à la planche',()=>{
+  const w=game();
+  try{
+    const root=w.document.querySelector('.ac83');
+    assert.equal(root.querySelectorAll('.mgmt-ac-pane>.mf-panneau>.mf-p2>.mf-p3').length,3);
+    assert.equal(root.querySelectorAll('.ac83-trait').length,2);
+    assert.equal(root.querySelector('.mgmt-ac-followhead>span').textContent,'3');
+    assert.equal(root.querySelectorAll('.mgmt-ac-follow.choisi').length,1);
+    assert.equal(root.querySelector('.mgmt-ac-filters button.actif').textContent,'Tous');
+    root.querySelector('.mgmt-ac-filters button:last-child').click();
+    assert.equal(w.document.querySelector('.mgmt-ac-filters button.actif').textContent,'Non lus');
+    assert.equal(w.document.querySelector('.mgmt-ac-filters button.actif').getAttribute('aria-pressed'),'true');
+    assert.equal(w.document.querySelector('.mf-prise'),null);
+  }finally{w.close();}
+});
+
+test('Fidélité 83 — une nouvelle sans combattant garde son détail sans proposer un combat',()=>{
+  const w=game();
+  try{
+    w.eval(`G.mgmt.croissanceActus=[{palier:'test',texte:'Nouvelle de croissance',c:G.mgmt.cycle}];MGMT_ACTUALITES_UI.cle=mgmtActualites(G.mgmt).find(x=>x.type==='croissance').cle;CL.go('mgmt_actualites');`);
+    assert.match(w.document.querySelector('.mgmt-ac-detail-body').textContent,/NOUVELLE DE CROISSANCE/);
+    assert.equal(w.document.querySelector('.mgmt-ac-actions .principale'),null);
+  }finally{w.close();}
+});
+
+test('Fidélité 83 — les espoirs choisis précèdent les autres suivis, quel que soit leur rôle de carrière',()=>{
+  const w=game();
+  try{
+    const id=w.eval(`(()=>{const m=G.mgmt;const id=m.suivis[2];m.espoirs=[id];const f=mgmtFighterById(m,id);f.age=35;f.W=20;f.L=5;CL.go('mgmt_actualites');return id;})()`);
+    const groupes=[...w.document.querySelectorAll('.mgmt-ac-follow-group')];
+    assert.deepEqual(groupes.map(x=>x.textContent),['Tes espoirs','Tes suivis']);
+    assert.ok(groupes[0].nextElementSibling.getAttribute('onclick').includes(id));
+  }finally{w.close();}
+});
+
+test('Fidélité 83 — les touches annoncées déclenchent les actions du détail',()=>{
+  const w=game();
+  try{
+    const expected=w.eval(`mgmtActualites(G.mgmt).find(x=>x.cle===MGMT_ACTUALITES_UI.cle).id`);
+    const actions=JSON.parse(w.eval(`(()=>{window.__actions=[];CL.mgmtFicheCarte=()=>__actions.push('carte');CL.mgmtFiche=id=>__actions.push(id);CL.go=screen=>__actions.push(screen);for(const key of ['Enter','F','P'])keysHandle({key,preventDefault(){}});return JSON.stringify(__actions);})()`));
+    assert.deepEqual(actions,['carte',expected,'mgmt_contrats']);
+  }finally{w.close();}
+});
