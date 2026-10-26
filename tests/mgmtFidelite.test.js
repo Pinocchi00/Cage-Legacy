@@ -72,7 +72,8 @@ test('Les écrans sans planche propre sont dessinés en panneaux du cadre, avec 
   let r=lire('mgmt_bureau'); assert.equal(r.plaque,'Le monde autour de Split'); assert.equal(r.panneaux,3);
   /* Brief démo, lot 6 T3 : le lendemain est recomposé en panneaux du cadre (mgmt-lendemain-cadre.js), il n'est plus un écran ancien. */
   r=lire('mgmt_lendemain'); assert.equal(r.plaque,'Le lendemain'); assert.equal(r.panneaux,0);
-  r=lire('mgmt_organisation'); assert.equal(r.plaque,'Organisation'); assert.equal(r.panneaux,2);
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */
+  r=lire('mgmt_organisation'); assert.equal(r.plaque,'ORGANISATION'); assert.equal(r.panneaux,0);
   r=lire('mgmt_vestiaire'); assert.equal(r.plaque,'Le vestiaire');
   /* Les jetons de l'ancien habillage (prune, jaune doré) sont ceux du cadre (la feuille ne se calcule pas sous jsdom : on lit sa source). */
   const css=require('fs').readFileSync(require('path').join(__dirname,'..','ui-cadre.css'),'utf8');

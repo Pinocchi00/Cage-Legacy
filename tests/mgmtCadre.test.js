@@ -109,7 +109,8 @@ test('Écrans anciens — posés dans le cadre sous la barre, avec leur navigati
   const win=newGameWindow({runMain:true});
   const r=result(win,`${NEUVE}
     const out={};
-    for(const e of ['mgmt_bureau','mgmt_vestiaire','mgmt_recrutement','mgmt_organisation']){
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */
+    for(const e of ['mgmt_bureau','mgmt_vestiaire','mgmt_recrutement']){
       G.screen=e; const h=SCREENS[e](); out[e]=[h.includes('class="mf-ecran'),h.includes('class="mf-ancien"'),h.includes('class="mgmt-nav"'),h.includes('mf-barre')]; }
     return out;`);
   for(const [e,v] of Object.entries(r)) assert.deepEqual(v,[true,true,true,true],e);

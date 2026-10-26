@@ -225,7 +225,8 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
 
   /* Organisation : pas de nom affiché, mais la navigation répond. */
   win.eval(`CL.go('mgmt_organisation'); render();`);
-  const semaine = [...win.document.querySelectorAll('.mgmt-nav button')].find(x => x.textContent === 'Accueil');   /* décision du 12/10/2026 : l’Accueil est la première section (lot 7) : « Semaine » devient « Accueil » */
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */
+  const semaine = [...win.document.querySelectorAll('.mf-barre-item')].find(x => x.textContent.trim() === 'Accueil');
   semaine.click();
   assert.equal(win.eval(`G.screen`), 'mgmt_accueil', 'la navigation répond');
   noErr(win, 'organisation');
