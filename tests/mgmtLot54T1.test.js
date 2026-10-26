@@ -273,9 +273,11 @@ test('Monde lot 54 T1 — la suite du lendemain expose presse, mouvements et car
     w.eval(`setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
     jouerSoirees(w,1);
     const html=w.eval(`mgmtLendemainSuiteHtml(G.mgmt)`);
-    assert.match(html,/LE LENDEMAIN · LA SUITE/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+       L'en-tête commun porte la suite, les trois panneaux portent leurs titres. */
     assert.match(html,/aria-label="Le lendemain, la suite"/);
-    assert.match(html,/CAGE HEBDO/);
+    assert.match(html,/LA PRESSE/);
+    assert.match(html,/class="ld3-press"/,'les articles restent dans le panneau de presse');
     assert.match(html,/LES MOUVEMENTS/);
      assert.match(html,/TOUS LES RÉSULTATS/);
      assert.match(html,/class="ld3-suite-results"/);
@@ -334,7 +336,9 @@ test('Monde lot 54 T1 — planches Uni* validées par Anthony ; la navigation pa
     const r=w.eval(`(()=>{CL.go('mgmt_lendemain');const premier=document.getElementById('app').innerHTML;CL.mgmtLendemainSuite();const suite=G.screen;const html=document.getElementById('app').innerHTML;CL.go('mgmt_lendemain');return {premier,suite,html,retour:G.screen};})()`);
     assert.match(r.premier,/CL\.mgmtLendemainSuite\(\)/);
     assert.equal(r.suite,'mgmt_lendemain_suite');
-    assert.match(r.html,/LE LENDEMAIN · LA SUITE/);
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+    assert.match(r.html,/class="mf-plaque">Le lendemain/);
+    assert.match(r.html,/class="mf-entete-lib">La suite/);
     assert.match(r.html,/LES MOUVEMENTS/);
     assert.equal(r.retour,'mgmt_lendemain');
   }finally{w.close();}

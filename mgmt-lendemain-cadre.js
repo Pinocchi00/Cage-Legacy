@@ -51,23 +51,32 @@ function mgmtLendemainCaseHtml(titre,v,lignes){
     +`<div class="mf-fin-ls">${lignes.map(x=>`<div>${esc(x)}</div>`).join('')}</div></div>`,'normal','mf-fin-p');
 }
 
+/* ==== [ANCRE: FID79_TITRES_CADRES] — Fidélité lendemain, lot 79 ==== */
+function mgmtLendemainTitreHtml(titre){
+  return `<div class="ld79-heading"><h2>${esc(titre)}</h2><i class="ld79-trait" aria-hidden="true"></i></div>`;
+}
+function mgmtLendemainEnteteHtml(m){
+  const jour=typeof mgmtSoireeJour==='function'?mgmtSoireeJour(m,m.eventsPlayed):null;
+  const date=Number.isSafeInteger(jour)&&typeof mgmtJourDate==='function'?mgmtJourDate(jour):null;
+  const dateTexte=date?`${['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][new Date(date.ts).getUTCDay()]} ${date.jour} ${date.mois.toLocaleLowerCase('fr')}`:'';
+  return `<div class="ld74-entete"><span>${esc(dateTexte)}</span><strong>${esc(mgmtOrgNom(m))} FIGHT NIGHT <b>${esc(m.eventsPlayed+1)}</b></strong></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 function scr_mgmt_lendemain_cadre(){
   const m=G&&G.mgmt, e=m&&m.lastEvent;
   if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
   const c=mgmtLendemainCases(m);
   const nom=mgmtOrgNom(m);
-  const jour=typeof mgmtSoireeJour==='function'?mgmtSoireeJour(m,m.eventsPlayed):null;
-  const date=Number.isSafeInteger(jour)&&typeof mgmtJourDate==='function'?mgmtJourDate(jour):null;
-  const dateTexte=date?`${['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'][new Date(date.ts).getUTCDay()]} ${date.jour} ${date.mois[0]+date.mois.slice(1).toLowerCase()}`:'';
-  const enteteDroite=`<div class="ld74-entete"><span>${esc(dateTexte)}</span><strong>${esc(nom)} FIGHT NIGHT <b>${esc(m.eventsPlayed+1)}</b></strong></div>`;
+  const enteteDroite=mgmtLendemainEnteteHtml(m);
   const moments=typeof mgmtLendemainMomentsCompletsHtml==='function'?mgmtLendemainMomentsCompletsHtml(m):'';
-  const publicHtml=c&&c.public?`<div class="ld66-number"><b>PUBLIC</b><strong>${esc(c.public.score)} / 100</strong></div>`:'';
-  const chiffres=c?`<section class="ld66-numbers"><h2>LES CHIFFRES</h2><div class="ld66-number"><b>LA SALLE</b><strong>${esc(c.salle.v)}</strong><span>${c.salle.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>L’ARGENT</b><strong>${esc(c.argent.v)}</strong><span>${c.argent.l.map(esc).join(' · ')}</span></div><div class="ld66-number"><b>POPULARITÉ</b><strong>${esc(c.pop.v)}</strong><span>${c.pop.l.map(esc).join(' · ')}</span></div>${publicHtml}</section>`:'';
+  const publicHtml=c&&c.public?`<div class="ld66-number"><b>Le public</b><strong>${esc(c.public.score)} / 100</strong></div>`:'';
+  const chiffres=c?mfPanneau(`${mgmtLendemainTitreHtml('LES CHIFFRES')}<div class="ld79-scroll"><div class="ld66-number"><b>La salle</b><strong>${esc(c.salle.v)} / ${esc(e.finance.capacite||'—')}</strong></div><div class="ld66-number"><b>L’argent</b><strong>${esc(c.argent.v)}</strong></div><div class="ld66-number"><b>La popularité</b><strong>${esc(c.pop.v)}</strong></div>${publicHtml}<button class="ld79-suite-link" onclick="CL.mgmtLendemainSuite()">${mfTouche('↓')}<span>La presse, les mouvements, tous les résultats</span></button><details class="ld79-finance"><summary>Les détails</summary>${c.salle.l.concat(c.argent.l,c.pop.l).filter(x=>x.trim()).map(x=>`<p>${esc(x)}</p>`).join('')}</details></div>`,'normal','ld66-numbers ld79-panel'):'';
   const change=mgmtLendemainConstatsHtml(m)||'<p>Rien à signaler.</p>';
   const presse=typeof mgmtLendemainPresseHtml==='function'?mgmtLendemainPresseHtml(m):'';
   const chapeau=typeof mgmtLendemainDiscoursHtml==='function'?mgmtLendemainDiscoursHtml(m):'';
-  return mfEcran(`<main class="mf-contenu ld66-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower"><section class="ld66-change"><h2>CE QUE ÇA CHANGE POUR TOI</h2>${change}</section><section class="ld66-press"><h2>CAGE HEBDO · LA UNE</h2>${presse}${chapeau}</section>${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droiteHtml:enteteDroite,
-    touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓','Tab'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
+  return mfEcran(`<main class="mf-contenu ld66-screen ld79-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower">${mfPanneau(`${mgmtLendemainTitreHtml('CE QUE ÇA CHANGE POUR TOI')}<div class="ld79-scroll">${change}</div>`,'normal','ld66-change ld79-panel')}${mfPanneau(`<h2>CAGE HEBDO · LA UNE</h2><div class="ld79-scroll">${presse}${chapeau}</div>`,'normal','ld66-press ld79-panel')}${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',prise:false,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droiteHtml:enteteDroite,
+    touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} Fight Night ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain=scr_mgmt_lendemain_cadre;
 
@@ -77,15 +86,21 @@ function scr_mgmt_lendemain_suite(){
   const m=G&&G.mgmt, e=m&&m.lastEvent;
   if(!m||!e||!Array.isArray(e.fights)||e.fights.length===0) return scr_mgmt_bureau();
   const nom=mgmtOrgNom(m);
-  const retour=`<button class="ld3-suite-back" type="button" onclick="CL.go('mgmt_lendemain')">Retour aux trois moments</button>`;
-  return mfEcran(`<main class="mf-contenu ld66-suite"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}${retour}</div></main>`,{
-    barre:'jeu',courant:'resultats',grise:true,m,plaque:'Le lendemain',libelle:'La suite',droite:`${nom} Fight Night ${m.eventsPlayed+1}`,
-    touches:[{ks:['↑'],t:'Les trois moments',onclick:"CL.go('mgmt_lendemain')"},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
+  return mfEcran(`<main class="mf-contenu ld66-suite ld79-screen"><div class="ld3-suite-screen">${mgmtLendemainSuiteHtml(m)}</div></main>`,{
+    barre:'jeu',courant:'resultats',prise:false,m,plaque:'Le lendemain',libelle:'La suite',droiteHtml:mgmtLendemainEnteteHtml(m),
+    touches:[{ks:['↑'],t:'Les trois moments',onclick:"CL.go('mgmt_lendemain')"},{ks:['Tab'],t:'Bloc suivant',onclick:"CL.mgmtLendemainBlocSuivant()"},{ks:['Entrée'],t:`Préparer ${nom} ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
 }
 SCREENS.mgmt_lendemain_suite=scr_mgmt_lendemain_suite;
 /* ==== [FIN ANCRE] ==== */
 
 Object.assign(CL,{
+  mgmtLendemainBlocSuivant(){
+    const blocs=[...document.querySelectorAll('.ld79-screen .ld79-scroll')];
+    if(!blocs.length) return;
+    const i=blocs.findIndex(b=>b.contains(document.activeElement)||b===document.activeElement);
+    const bloc=blocs[(i+1)%blocs.length];
+    bloc.tabIndex=0; bloc.focus();
+  },
   mgmtLendemainSuite(){ if(G&&G.mgmt) CL.go('mgmt_lendemain_suite'); },
   mgmtLendemainRevoirSelectionne(){
     const m=G&&G.mgmt;
@@ -117,7 +132,7 @@ keysRegister('mgmt_lendemain',{
 });
 keysRegister('mgmt_lendemain_suite',{
   ArrowUp(){ CL.go('mgmt_lendemain'); },
-  Tab(){ CL.go('mgmt_lendemain'); },
+  Tab(){ CL.mgmtLendemainBlocSuivant(); },
   Enter(){ CL.mgmtLendemainNext(); },
   Escape(){},
 });

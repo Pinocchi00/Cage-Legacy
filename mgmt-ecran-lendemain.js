@@ -188,12 +188,29 @@ function mgmtLendemainMomentsHtml(m){
   add('LA FINITION',(_s,t)=>t&&(['ko','sub','stop'].includes(t.family)||/ko|soumission|arrêt/i.test(mgmtLendemainMethode(t))));
   add('LA GUERRE',(_s,t)=>t&&Number(t.rounds)>=5&&Number.isFinite(Number(t.rounds)));
   const mains=hist.map((t,i)=>t&&t.c===m.lastEvent?.cycle&&t.slot==='main'?i:-1).filter(i=>i>=0);
-  return picks.map(({label,s})=>{const t=hist[s.c];if(!t)return '';const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
-     const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
-        const titleSize=title.length<=18?64:(title.length<=26?52:36);
-      const rang=mains.indexOf(s.c),place=t.slot==='main'?(rang===mains.length-1?'Combat principal':rang===mains.length-2?'Co-principal':'Carte principale · '+(rang+1)+'e combat'):'Préliminaire';
-       return `<article class="ld3-moment"><div class="ld66-moment-head"><div class="ld3-label">${esc(label)}</div><button class="ld66-rewatch" aria-label="Revoir ${esc(title)}" onclick="CL.mgmtLendemainRevoir(${s.c})">R</button></div><div class="ld3-meta">${esc(place)} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names" style="font-size:${titleSize}px">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div></article>`;
-  }).join('');
+  return picks.map(({label,s},index)=>mgmtLendemainMomentHtml(m,hist[s.c],s.c,label,index,mains)).join('');
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: FID79_MOMENT_PLANCHE] — Fidélité lendemain, lot 79 ==== */
+/** Deux lignes de noms à l'échelle de la planche ; le résultat et le détail
+ * restent ceux de la trace. Aucune réplique ni résultat ne sont inventés. */
+function mgmtLendemainMomentHtml(m,t,combat,label,index,mains){
+  if(!t||!t.a||!t.b) return '';
+  const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
+  const gagne=t.winner==='A'||t.winner==='B';
+  const nom=x=>mfNet(x.last||x.name||'');
+  const ligneA=nom(a)+(gagne?' BAT':' CONTRE'), ligneB=nom(b);
+  const largeur=(1564-32)*(index===0?1.45:1)/3.45-56, maximum=index===0?108:64;
+  const corps=Math.min(mfCorps(ligneA,largeur,maximum,44),mfCorps(ligneB,largeur,maximum,44));
+  const rang=mains.indexOf(combat),place=t.slot==='main'?(rang===mains.length-1?'Combat principal':rang===mains.length-2?'Co-principal':'Carte principale · '+(rang+1)+'e combat'):'Préliminaire';
+  const titre=`${a.name||a.last}${gagne?' bat ':' contre '}${b.name||b.last}`;
+  const methode=mgmtLendemainMethode(t), parties=methode.split(/, /);
+  return `<article class="ld3-moment"><div class="ld66-moment-head"><div class="ld3-label">${esc(label)}</div><button class="ld66-rewatch" aria-label="Revoir ${esc(titre)}" onclick="CL.mgmtLendemainRevoir(${combat})">R</button></div>`
+    +`<div class="ld3-meta">${esc(place)} · ${esc(mgmtDivisionLabel(t.div))}</div>`
+    +`<div class="ld3-names" style="--ld79-corps:${corps}px"><span>${esc(ligneA)}</span><span>${esc(ligneB)}</span></div>`
+    +`<div class="ld3-detail">${esc(parties.shift())}</div>`
+    +(parties.length?`<div class="ld79-description">${esc(parties.join(', '))}</div>`:'')+`</article>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -247,7 +264,7 @@ function mgmtLendemainMomentsCompletsHtml(m){
   /* ==== [ANCRE: MONDE66_T1_HIERARCHIE_MOMENTS] — Monde lot 66 T1 ==== */
   const labels=['LA SURPRISE','LA FINITION','LA GUERRE'];
   let index=0;
-  html=html.replace(/(<article class="ld3-moment">[\s\S]*?<div class="ld3-label">)[^<]*(<\/div>)/g,(article,avant,apres)=>avant+(labels[index++]||'LE MOMENT')+apres);
+  html=html.replace(/(<div class="ld3-label">)[^<]*(<\/div>)/g,(article,avant,apres)=>avant+(labels[index++]||'LE MOMENT')+apres);
   /* ==== [FIN ANCRE] ==== */
   if((html.match(/class="ld3-moment"/g)||[]).length>=3) return html;
   const stories=typeof mgmtHistoiresSoiree==='function'?mgmtHistoiresSoiree(m,m.eventsPlayed):[];
@@ -259,10 +276,11 @@ function mgmtLendemainMomentsCompletsHtml(m){
     seen.add(s.c); picks.push(s);
     if(seen.size>=3) break;
   }
-  const rest=picks.map(s=>{const t=hist[s.c],a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
-    const title=t.winner==='A'||t.winner==='B'?`${a.name||a.last} bat ${b.name||b.last}`:`${t.a.name||t.a.last} contre ${t.b.name||t.b.last}`;
+  const mains=hist.map((t,i)=>t&&t.c===m.lastEvent?.cycle&&t.slot==='main'?i:-1).filter(i=>i>=0);
+  const rest=picks.map((s,i)=>{const t=hist[s.c];
     const label=s.type==='surprise'?'LA SURPRISE':(['ko','sub','stop'].includes(t.family)||/ko|soumission|arrêt/i.test(mgmtLendemainMethode(t))?'LA FINITION':Number.isFinite(Number(t.rounds))&&Number(t.rounds)>=5?'LA GUERRE':'LE COMBAT');
-     return `<article class="ld3-moment"><div class="ld3-label">${esc(label)}</div><div class="ld3-meta">${esc(t.slot==='main'?'Combat principal':'Préliminaire')} · ${esc(mgmtDivisionLabel(t.div))}</div><div class="ld3-names">${esc(title)}</div><div class="ld3-detail">${esc(mgmtLendemainMethode(t))}</div><button class="mgmt-ld-link" onclick="CL.mgmtLendemainRevoir(${s.c})">Revoir</button></article>`;
+     const position=seen.size-picks.length+i;
+     return mgmtLendemainMomentHtml(m,t,s.c,labels[position]||label,position,mains);
   }).join('');
   return html+rest;
 }
@@ -275,10 +293,10 @@ function mgmtLendemainSuiteHtml(m){
   const presse=mgmtLendemainPresseHtml(m);
   const resultats=mgmtLendemainResultatsHtml(m);
   const mouvements=mgmtLendemainMouvementsHtml(m)+mgmtLendemainConstatsHtml(m);
-  return `<section class="ld3-suite" aria-label="Le lendemain, la suite"><h2 class="ld3-suite-title">LE LENDEMAIN · LA SUITE</h2>`
-    +`<div class="ld3-suite-press"><h3 class="ld3-suite-heading">CAGE HEBDO</h3>${presse}</div>`
-    +`<div class="ld3-suite-moves"><h3 class="ld3-suite-heading">LES MOUVEMENTS</h3>${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div>`
-    +`<div class="ld3-suite-results"><h3 class="ld3-suite-heading">TOUS LES RÉSULTATS</h3>${resultats}</div></section>`;
+  return `<section class="ld3-suite" aria-label="Le lendemain, la suite">`
+    +mfPanneau(`<div class="ld3-suite-press">${mgmtLendemainTitreHtml('LA PRESSE')}<div class="ld79-scroll">${presse}</div></div>`,'normal','ld79-panel')
+    +mfPanneau(`<div class="ld3-suite-moves">${mgmtLendemainTitreHtml('LES MOUVEMENTS')}<div class="ld79-scroll">${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div></div>`,'normal','ld79-panel')
+    +mfPanneau(`<div class="ld3-suite-results">${mgmtLendemainTitreHtml('TOUS LES RÉSULTATS')}<div class="ld79-scroll">${resultats}</div></div>`,'normal','ld79-panel')+`</section>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -524,6 +542,7 @@ function mgmtLendemainConstatsHtml(m){
     out.push({gold:false,titre,detail});
   }
   return out.map(c=>`<div class="mgmt-ld-item">`
+    +`<i class="ld79-oct" aria-hidden="true"></i>`
     +`<div class="mgmt-ld-title${c.gold?' gold':''}">${c.titre}</div>`
     +(c.detail?`<p class="mgmt-ld-detail">${c.detail}</p>`:'')
     +`</div>`).join('');
