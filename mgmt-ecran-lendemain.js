@@ -215,6 +215,18 @@ function mgmtLendemainMomentHtml(m,t,combat,label,index,mains){
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MONDE54_T1_MOUVEMENTS_ORGANISATION] — Monde lot 54 T1 ==== */
+/* ==== [ANCRE: FID79_SENS_MOUVEMENT] — Fidélité lendemain, lot 79 :
+   UniLendemainSuite, triangle et rang ivoire à la montée, rouges à la descente. ==== */
+function mgmtLendemainMouvementRangHtml(rangs,div){
+  if(!rangs||rangs.avant===rangs.apres) return '';
+  const monte=rangs.apres!==null&&(rangs.avant===null||rangs.apres<rangs.avant);
+  const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,div);
+  const texte=`${rang(rangs.avant)} → ${rang(rangs.apres)}`;
+  const corps=mfCorps(texte,76,30,22);
+  const fleche=monte?'M11 3l8 12H3z':'M11 19L3 7h16z';
+  return `<strong class="ld79-rank ${monte?'monte':'descend'}" aria-label="${esc((monte?'Montée':'Descente')+' : '+texte)}"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="${fleche}" fill="currentColor"></path></svg><span class="ld79-rank-text" style="font-size:${corps}px">${esc(texte)}</span></strong>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /** Mouvements de classement des participants, y compris ceux qui restent dans
  *  le top 15 : la comparaison utilise le rang organisationnel avant/après. */
 function mgmtLendemainMouvementsHtml(m){
@@ -230,9 +242,8 @@ function mgmtLendemainMouvementsHtml(m){
     const rangs=mgmtLendemainRangs(m,id);
     if(!rangs||rangs.avant===rangs.apres) continue;
     const nom=fighter.name||fighter.last||'Combattant';
-    const rang=x=>x===null?'HORS CLASSEMENT':mgmtRankLabel(x,fighter.div);
     /* ==== [ANCRE: MONDE66_T1_MOUVEMENT_COLONNE_IDENTITE] — Monde lot 66 T1 ==== */
-    lignes.push(`<div class="ld3-move"><div class="ld66-move-identity"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span></div><strong>${esc(rang(rangs.avant))} → ${esc(rang(rangs.apres))}</strong><em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
+    lignes.push(`<div class="ld3-move"><div class="ld66-move-identity"><b>${esc(nom)}</b><span>${esc(mgmtDivisionLabel(fighter.div))}</span></div>${mgmtLendemainMouvementRangHtml(rangs,fighter.div)}<em>chez ${esc(mgmtOrgNom(m))}</em></div>`);
   }
   /* ==== [ANCRE: P8_T3_MOUVEMENTS_AUTRES_ORGS] — Monde lot 63 T1 ==== */
   const guerre=m.guerre&&Array.isArray(m.guerre.ev)?m.guerre.ev:[];
