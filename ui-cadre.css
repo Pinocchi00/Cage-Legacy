@@ -460,6 +460,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-soiree-cibles{display:flex;flex-direction:column;gap:8px}
 .po2-soiree-cibles p{margin:0}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT84_T1_CADRES_POSTE] — Monde lot 84 T1 ==== */
+.po2-grid.po2-grid-trois>.po2-panel{display:flex;min-width:0;min-height:0;height:100%;overflow:hidden}
+.po2-grid-trois>.po2-panel .mf-p2{display:flex;flex:1;min-width:0;min-height:0}
+.po2-grid-trois>.po2-panel .mf-p3{display:flex;flex:1;min-width:0;min-height:0;padding:18px}
+.po2-grid-trois .po2-panel .po2-card{box-sizing:border-box;display:flex;flex:1;min-width:0;min-height:0;flex-direction:column;gap:12px;padding:0;overflow:auto;border:0;background:transparent}
+.po2-grid-trois .po2-titre{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:0 0 6px}
+.po2-grid-trois .po2-titre h2{font:800 44px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;margin:0;padding:0;border:0}
+.po2-grid-trois .po2-trait{width:56px;height:8px;flex:none;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.po2-grid-trois .po2-evenement{grid-template-columns:16px 110px 24px minmax(0,1fr)}
+.po2-grid-trois .po2-pastille{display:inline-block;width:16px;height:16px;flex:none;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.po2-grid-trois .po2-soiree-cibles p{display:flex;align-items:center;gap:10px}
+.po2-grid-trois .po2-action{border:2px solid rgba(233,230,225,.38);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
 .mo67-tabs{grid-column:1/-1;display:flex;gap:12px;min-width:0;border-bottom:2px solid rgba(233,230,225,.38);padding:0 0 12px}
 .mo67-tab{min-height:54px;padding:8px 20px;background:#121010;color:#E9E6E1;border:2px solid rgba(233,230,225,.38);font:600 24px/1 'Saira Condensed','Arial Narrow',sans-serif;cursor:pointer}

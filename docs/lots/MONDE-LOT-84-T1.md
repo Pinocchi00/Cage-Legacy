@@ -15,3 +15,11 @@ Avant de coder : `node --test tests/mgmtLot48T1.test.js tests/mgmtLot57T1.test.j
 1. `cadres.sh … tonposte UniTonPoste` : **plus aucun « il en MANQUE » pour les octogones et les traits rouges ; panneaux à coins coupés : jeu ≥ 10** (la planche en compte 13 car elle empile 3 couches) ; aucun « CADRES OUBLIÉS ».
 2. `bash …/audit.sh C:/Users/antho/Documents/cage-legacy-p84 tonposte,bilan` : les 4 lignes restent à `0 0 0` ; `moyen` ne monte pas (départ tonposte ≈ 25,3).
 3. Tests ci-dessus verts ; `npx eslint .` ; `_bump` + `verif-versions` « aucun écart » ; jamais `sw.js`. Aucune PR.
+
+## Compte rendu
+- `mgmt-ecran-poste.js` : les trois colonnes sont désormais enveloppées dans `mfPanneau`; chaque titre reçoit le trait rouge, l'historique et les cibles de soirée leurs pastilles octogonales.
+- `ui-cadre.css` : styles du triple cadre et de ses contenus; suppression visuelle du fond, de la bordure et du padding doublés des anciennes cartes. Les boutons « LE CHOC DES ORGANISATIONS » gardent un contour ivoire biseauté.
+- Vérification : les tests ciblés Monde lot 48 T1 ont passé (9/9) lors de la dernière exécution. L'exécution groupée demandée a atteint son délai de 300 s après les tests des lots 48 et 57 (ceux-ci passés); lots 58, 69 et accessibilité pas encore confirmés ensemble. Un premier essai du test lot 48 a échoué uniquement sur le seuil de temps (243 ms); la relance a passé.
+- `node tools/verif-versions.js origin/main` : aucun écart. `_bump` exécuté pour le JS et le CSS; aucun changement conservé dans `sw.js`.
+- Écarts / critères non vérifiés : accès refusé à l'outil au fichier commun hors dépôt et aux scripts externes `cadres.sh`, `audit.sh`, ainsi qu'au chemin de planche extérieur. Par conséquent les comptes d'éléments de cadre, les lignes d'audit et `npx eslint .` ne sont pas encore vérifiés. Le fond cendré a été conservé; aucun nouveau texte de jeu n'a été ajouté.
+- Questions pour Anthony : aucune; la validation visuelle externe et eslint restent à effectuer par le superviseur.
