@@ -478,7 +478,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-choc{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
 .po2-choc h3{margin:0!important;font-size:24px!important}
 .po2-choc p{margin:0!important;font-size:22px!important}
-.po2-grid-trois .po2-contrat .po2-offres-bas{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.po2-grid-trois .po2-contrat .po2-offres-bas{flex:0 0 auto;min-height:0;overflow:visible;overscroll-behavior:contain;scrollbar-width:thin}
 .po2-grid-trois .po2-contrat .po2-offre{min-width:0;overflow-wrap:anywhere}
 .po2-grid-trois .po2-contrat .po2-offre p{overflow-wrap:anywhere}
 .po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:6px 0}
@@ -490,7 +490,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-grid-trois .po2-contrat .po2-titre{gap:7px;margin-bottom:0}
 .po2-grid-trois .po2-contrat .po2-titre h2{font-size:40px;line-height:.8}
 .po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:3px 0}
-.po2-grid-trois .po2-contrat .po2-offres-bas{overflow-y:auto;min-height:0;max-height:100%;}
+.po2-grid-trois .po2-contrat .po2-offres-bas{overflow:visible;min-height:0;max-height:none}
 .po2-grid-trois .po2-contrat .po2-choc-panel{flex:none}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
