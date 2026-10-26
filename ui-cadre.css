@@ -1438,6 +1438,50 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .cr3-track b,.mf-ancien .cr3-track span{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .mf-ancien .cr3-track b{white-space:normal;word-break:normal}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT81_T1_CROISSANCE_PLANCHE] — Monde lot 81 T1 ==== */
+.cr3-screen{display:flex;flex-direction:column;gap:16px;min-height:0}
+.cr3-navrow{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.cr3-navrow .mo67-tabs{flex:1;min-width:0}
+.cr3-navrow .mo67-tab{height:56px;font:800 32px/1 var(--mf-titre);padding:0 24px}
+.cr3-popularity{display:flex;align-items:center;gap:12px;white-space:nowrap;color:#E9E6E1;font:500 24px/1 var(--mf-texte)}
+.cr3-popularity b{font:800 40px/.8 var(--mf-titre)}
+.cr3-popularity i{font:800 26px/1 var(--mf-titre);font-style:normal;color:#F0B220}
+.cr3-layout{flex:1;min-height:0;display:flex;gap:16px}
+.cr3-panel,.cr3-next-panel{min-width:0;background:#121010}
+.cr3-panel{flex:1.9;padding:15px}
+.cr3-next-panel{flex:1;padding:15px;display:flex;flex-direction:column;gap:16px}
+.cr3-axes{height:100%;display:flex;flex-direction:column}
+.cr3-axis{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr);align-items:center;gap:20px;padding:0 8px;border-bottom:2px solid rgba(233,230,225,.16)}
+.cr3-axis:last-child{border-bottom:0}
+.cr3-intro{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cr3-intro b{font:800 40px/.8 var(--mf-titre);color:#E9E6E1}
+.cr3-intro span{font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.cr3-stages{position:relative;display:flex;justify-content:space-between;align-items:flex-start;min-width:0}
+.cr3-line,.cr3-progress{position:absolute;left:30px;top:27px;height:4px;z-index:0;background:rgba(233,230,225,.38)}
+.cr3-line{right:30px}
+.cr3-progress{background:#F0B220}
+.cr3-stage{position:relative;width:24%;min-width:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.cr3-stage:first-of-type{align-items:flex-start;text-align:left}
+.cr3-stage:last-child{align-items:flex-end;text-align:right}
+.cr3-marker{z-index:1;width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center;background:#E9E6E1;color:#0D0B0B;font:800 28px/1 var(--mf-titre);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.cr3-current .cr3-marker{background:#F0B220}
+.cr3-future .cr3-marker{background:rgba(233,230,225,.38);color:rgba(233,230,225,.38)}
+.cr3-stage b{font:800 28px/1 var(--mf-titre);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
+.cr3-current b{color:#F0B220}
+.cr3-stage small{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
+.cr3-next-label{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;color:#F0B220}
+.cr3-next-name{font:800 64px/.85 var(--mf-titre);color:#E9E6E1;overflow-wrap:anywhere}
+.cr3-next-text{margin:0;font:500 24px/1.2 var(--mf-texte);color:#E9E6E1}
+.cr3-metrics{display:flex;flex-direction:column}
+.cr3-metrics>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.cr3-metrics span{font:500 24px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.cr3-metrics b{font:800 32px/1 var(--mf-titre);color:#E9E6E1;white-space:nowrap}
+.cr3-note{margin:auto 0 0;font:500 22px/1.15 var(--mf-texte);color:rgba(233,230,225,.74)}
+.cr3-condition{font:500 22px/1.15 var(--mf-texte);color:rgba(233,230,225,.74)}
+.cr3-legacy{flex:none;max-height:100px;overflow-y:auto}
+.cr3-legacy h3{font:800 30px/1 var(--mf-titre)}
+.cr3-legacy a,.cr3-legacy button{font:500 22px/1.2 var(--mf-texte)}
+/* ==== [FIN ANCRE] ==== */
 /* Le vestiaire */
 .mf-ancien .mgmt-vestiaire{padding:0}
 .mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}

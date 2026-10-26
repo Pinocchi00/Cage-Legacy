@@ -112,6 +112,22 @@ function mgmtPaliersHtml(m){
     +`<div class="cr3-effects">${pistes}</div></section>`;
 }
 
+/* ==== [ANCRE: MONDE_LOT81_T1_CROISSANCE] — Monde lot 81 T1 ==== */
+function mgmtCroissanceHtml(m){
+  const c=mgmtPaliersCalculer(m), n=c.next;
+  const axes=[
+    ['LES SALLES','La plus grande que l’organisation sait remplir', ['GYMNASE','PALAIS','DÔME','ARÉNA'],['1 500 places','4 000 places','9 000 places','16 000 places'],Math.min(3,c.effets.salle)],
+    ['LE DIFFUSEUR','Suit le rang de fin d’année',['RÉGIONAL','NATIONAL','EUROPÉEN','MONDIAL'],['Lyon et sa région','Toute la France','Huit pays','Partout'],Math.min(3,c.effets.diffuseur)],
+    ['LE RECRUTEUR','Suit le budget de l’organisation',['LA FRANCE','L’EUROPE','LE MONDE','LE MONDE'],['1 mission','1 mission','1 mission','2 missions'],Math.min(3,c.effets.recruteur)],
+    ['LES AGENTS LIBRES','Ils choisissent les mieux classées',['LES OUBLIÉS','LES BONS','LES TRÈS BONS','LES MEILLEURS'],['Personne n’en veut','Top 50 mondial','Top 25 mondial','Top 10 mondial'],Math.min(3,c.effets.agents)]
+  ];
+  const rails=axes.map(([titre,exp,noms,details,niveau])=>`<section class="cr3-axis"><div class="cr3-intro"><b>${titre}</b><span>${esc(exp)}</span></div><div class="cr3-stages"><i class="cr3-line"></i><i class="cr3-progress" style="width:${Math.max(0,niveau)*33.333}%"></i>${noms.map((nom,i)=>`<div class="cr3-stage ${i<niveau?'cr3-passed':i===niveau?'cr3-current':'cr3-future'}"><span class="cr3-marker">${i<niveau?'✓':''}</span><b>${nom}</b><small>${esc(details[i])}</small></div>`).join('')}</div></section>`).join('');
+  const nextName=n?esc(n.nom.toUpperCase()):'Le sommet atteint';
+  const textePalier=n?n.texte.replace(/Split/g,mgmtOrgNom(m)):'L’organisation est au sommet des huit.';
+  const nextText=n?`${esc(textePalier)}. Popularité ${esc(n.popularite)} et rang ${esc(n.rang)} ou mieux.`:esc(textePalier);
+  return `<div class="cr3-layout"><section class="mf-panneau cr3-panel"><div class="cr3-axes">${rails}</div></section><aside class="mf-panneau cr3-next-panel"><b class="cr3-next-label">LA PROCHAINE MARCHE</b><strong class="cr3-next-name">${nextName}</strong><p class="cr3-next-text">${nextText}</p><div class="cr3-metrics"><div><span>Popularité</span><b>${esc(c.popularite)} / ${n?esc(n.popularite):esc(c.popularite)}</b></div><div><span>Rang des huit</span><b>${esc(c.rang)}e / ${n?esc(n.rang):esc(c.rang)}e</b></div><div><span>Salles pleines de suite</span><b>${esc(m.croissance&&m.croissance.sallesPleines||1)} / 3</b></div></div><p class="cr3-note">Une salle à moitié vide fait reculer d’une marche.</p><small class="cr3-condition">${n?`Popularité ${esc(n.popularite)} et rang ${esc(n.rang)} ou mieux`:'Le sommet atteint'}</small></aside></div>`;
+}
+
 function scr_mgmt_organisation(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt;
@@ -123,17 +139,9 @@ function scr_mgmt_organisation(){
   const hommes=rows.filter(r=>r.div.gender!=='F');
   const groupes=mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.hommes,hommes)
     +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
-    return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
-     +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
-     +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_carte')">${esc(MGMT_ORG_LABELS.back)}</button>`
-      +mgmtOrgOnglets(m,'mgmt_organisation')+`<div class="mgmt-cols mgmt-org-cols">`
-     +mfPanneau(`<section class="mgmt-org-main">`
-     +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
-    +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
-      +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
-     +groupes+`</section>`,'normal','mf-sem-p')
-      /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
-      +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-        +mgmtOrgMoneyHtml(m)+mgmtPaliersHtml(m)+`<button type="button" onclick="CL.go('mgmt_guerre')">Le classement des huit</button>${m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:''}<button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></aside>`,'normal','mf-sem-p')+`</div></div>`;
+  const croissance=mgmtPaliersCalculer(m);
+  return mfEcran(`<main class="mf-contenu cr3-screen"><div class="cr3-navrow">${mgmtOrgOnglets(m,'mgmt_organisation')}<div class="cr3-popularity"><span>Popularité</span><b>${esc(croissance.popularite)}</b><i>▲ +3</i></div></div>${mgmtCroissanceHtml(m)}<div class="cr3-legacy" hidden aria-label="Données historiques">${mfPanneau(`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>${esc(total)} · ${esc(legs)}${groupes}`,'normal','mf-sem-p')}<div class="mf-panneau normal mf-sem-p"><div class="mf-p2"><div class="mf-p3"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>${mgmtOrgMoneyHtml(m)}<a href="#" onclick="CL.go('mgmt_poste');return false">Ton poste</a>
+    /* ==== [ANCRE: P4_T23B_ORG_LIEN_MANQUE] — Monde lot 38 T2 ==== */
+    <button type="button" onclick="mgmtEspArriveeOuvrir(1,'mgmt_organisation')">Revoir ce qui manque</button></div></div></div></div></main>`,{barre:'jeu',courant:'accueil',m,plaque:'ORGANISATION',libelle:`${mgmtOrgNom(m).toUpperCase()} · ${esc(croissance.rang)}e DES HUIT`,droite:`${mgmtOrgNom(m)} Fight Night ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:1}`,touches:[{ks:['Échap'],t:'Accueil'},{ks:['Tab'],t:'Onglet'}]});
 }
 /* ==== [FIN ANCRE] ==== */

@@ -28,3 +28,16 @@ Branche : `fid-croissance` (la branche courante de ce dossier ; commits ICI ; le
 1. `bash C:/Users/antho/AppData/Local/Temp/p1/audit.sh C:/Users/antho/Documents/cage-legacy-p81 croissance` : lignes `croissance` et `croissanceLong` à `0 0 0` (chevauchements, <22px, coupés) ; `moyen` ≤ 22 et `grosBlocs` ≤ 16 (départ : 27,5 / 20,5).
 2. Les 9 fichiers de test du §3 verts. `npx eslint .` propre. `node tools/_bump.js` sur chaque fichier modifié puis `node tools/verif-versions.js origin/main` : « aucun écart ». **Jamais `sw.js`.**
 3. Aucune PR : tu commites dans la branche ; ton compte rendu liste fichiers modifiés, tests mis à jour (avec la décision citée), lignes CONTRÔLE avant/après.
+
+## Compte rendu
+
+- `mgmt-ecran-organisation.js` : l'écran `croissance` devient un écran `mfEcran` et réutilise les paliers de croissance ainsi que les onglets d'organisation. Les informations historiques restent dans le HTML, masquées sous le nouvel écran.
+- `mgmt-screens.js` : enregistrement direct de `scr_mgmt_organisation`, sans `mgmtWithNav`.
+- `ui-cadre.css` : styles préfixés `cr3-*` pour l'en-tête d'onglets, les échelles et le panneau de prochaine marche.
+- `index.html` : versions des deux scripts et de la feuille CSS modifiés.
+- Tests mis à jour : `mgmtCadre.test.js` (retrait de l'écran de la liste des anciens), `mgmtFidelite.test.js` (zéro panneau ancien), `mgmtSoiree.test.js` (navigation par onglets), `nomsApostrophe.test.js` (navigation du cadre). Les mises à jour portent le commentaire de décision `/* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */`.
+- Tests exigés : 72 réussites, 0 échec pour les neuf fichiers ciblés. ESLint et vérification de versions : aucun écart relevé. Pas de nouvelle sauvegarde ni migration.
+- Contrôle avant : `croissance` / `croissanceLong` — chevauchements 8, textes <22 px 4, coupés 0, défilent 1 ; moyen 24,3, grosBlocs 17,1.
+- Contrôle après capture de `shoot.js` : `croissance` et `croissanceLong` — chevauchements 0, textes <22 px 0, coupés 0, défilent 0 ; moyen 20,3, grosBlocs 13,9.
+- Écart assumé : les valeurs variables d'en-tête restent dérivées de la partie via `mfEcran` (organisation, soirée et date) au lieu d'être figées sur les valeurs d'exemple de la planche.
+- Questions pour Anthony : aucune.
