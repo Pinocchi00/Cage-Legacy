@@ -1441,18 +1441,22 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE_LOT81_T1_CROISSANCE_PLANCHE] — Monde lot 81 T1 ==== */
 .cr3-screen{display:flex;flex-direction:column;gap:16px;min-height:0}
 .cr3-navrow{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.cr3-navrow .mo67-tabs{flex:1;min-width:0}
-.cr3-navrow .mo67-tab{height:56px;font:800 32px/1 var(--mf-titre);padding:0 24px}
+/* ==== [ANCRE: CROISSANCE_CONTOURS_UNI] — Monde lot 81 T1 ==== */
+.cr3-navrow .mo67-tabs{flex:1;min-width:0;gap:8px;border:0;padding:0}
+.cr3-navrow .mo67-tab{height:56px;font:800 32px/1 var(--mf-titre);padding:0 24px;border:0;background:#272424;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.cr3-navrow .mo67-tab[aria-current="page"]{background:#E9E6E1;color:#0D0B0B}
 .cr3-popularity{display:flex;align-items:center;gap:12px;white-space:nowrap;color:#E9E6E1;font:500 24px/1 var(--mf-texte)}
 .cr3-popularity b{font:800 40px/.8 var(--mf-titre)}
 .cr3-popularity i{font:800 26px/1 var(--mf-titre);font-style:normal;color:#F0B220}
 .cr3-layout{flex:1;min-height:0;display:flex;gap:16px}
-.cr3-panel,.cr3-next-panel{min-width:0;background:#121010}
-.cr3-panel{flex:1.9;padding:15px}
-.cr3-next-panel{flex:1;padding:15px;display:flex;flex-direction:column;gap:16px}
+.cr3-panel,.cr3-next-panel{min-width:0}
+.cr3-panel{flex:1.9}
+.cr3-next-panel{flex:1}
+.cr3-panel>.mf-p2>.mf-p3{padding:15px}
+.cr3-next-panel>.mf-p2>.mf-p3{padding:15px;gap:16px}
 .cr3-axes{height:100%;display:flex;flex-direction:column}
 .cr3-axis{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr);align-items:center;gap:20px;padding:0 8px;border-bottom:2px solid rgba(233,230,225,.16)}
-.cr3-axis:last-child{border-bottom:0}
+.cr3-axis:last-child{border-bottom:2px solid rgba(233,230,225,.16)}
 .cr3-intro{display:flex;flex-direction:column;gap:10px;min-width:0}
 .cr3-intro b{font:800 40px/.8 var(--mf-titre);color:#E9E6E1}
 .cr3-intro span{font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
@@ -1463,9 +1467,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .cr3-stage{position:relative;width:24%;min-width:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
 .cr3-stage:first-of-type{align-items:flex-start;text-align:left}
 .cr3-stage:last-child{align-items:flex-end;text-align:right}
-.cr3-marker{z-index:1;width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center;border:3px solid #E9E6E1;border-radius:50%;background:#E9E6E1;color:#0D0B0B;font:800 28px/1 var(--mf-titre)}
+.cr3-marker,.cr3-marker-inner{clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.cr3-marker{z-index:1;width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center;background:#E9E6E1;color:#0D0B0B;font:800 28px/1 var(--mf-titre)}
+.cr3-marker-inner{width:52px;height:52px;background:#0D0B0B}
 .cr3-current .cr3-marker{background:#F0B220}
-.cr3-future .cr3-marker{background:transparent;border-color:rgba(233,230,225,.62);color:transparent}
+.cr3-future .cr3-marker{background:rgba(233,230,225,.38);color:transparent}
 .cr3-stage b{font:800 28px/1 var(--mf-titre);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
 .cr3-current b{color:#F0B220}
 .cr3-stage small{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
