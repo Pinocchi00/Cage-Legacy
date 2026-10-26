@@ -59,7 +59,8 @@ test('MGMT T4 — planches Uni* validées par Anthony ; l’écran rend les mome
      aucun jour en date (le calendrier du mode ne dérive pas d'une date). */
   assert.equal(win.eval('G.mgmt.eventsPlayed'),1,'une seule soirée jouée');
   assert.ok(html.includes('Le lendemain de Split 1'),'l’en-tête porte la soirée jouée');
-  assert.ok(html.includes('Préparer Split 2'),'le bouton prépare la soirée suivante');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.ok(html.includes('Préparer Split Fight Night 2'),'le bouton prépare la soirée suivante');
    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
    assert.match(html,/\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\s+\d+\s+\p{L}+/iu,
      'le jour et la date de la soirée suivante sont dans l’en-tête');
@@ -227,11 +228,14 @@ test('MGMT T4 — nom hostile dans la trace : échappé, jamais injecté', () =>
   win.eval(`(function(){
     const m=G.mgmt;
     m.hist[0].b.name='<img src=x onerror=alert(1)>';
+    /* Décision : planches Uni* validées par Anthony ; les titres affichent
+       le nom de famille en capitales, lui aussi soumis au nom hostile. */
+    m.hist[0].b.last=m.hist[0].b.name;
     G.screen='mgmt_lendemain'; render();
   })()`);
   const doc=win.document.getElementById('app');
   assert.equal(doc.querySelector('img,svg[onload]'),null,'aucun élément hostile ne s\'injecte');
-  assert.ok(doc.innerHTML.includes('&lt;img'),'le nom s\'échappe');
+  assert.match(doc.innerHTML,/&lt;img/i,'le nom s\'échappe, y compris en capitales');
 });
 
 test('MGMT T4 — sans soirée en mémoire, l\'écran rend la main à la semaine', () => {
@@ -240,4 +244,33 @@ test('MGMT T4 — sans soirée en mémoire, l\'écran rend la main à la semaine
   win.eval(`G.screen='mgmt_lendemain'; render();`);
   const html=win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('La semaine')||html.includes('Le monde autour de Split'),'le fallback de sécurité reste le bureau'); /* décision d'Anthony du 17/10/2026 : sans affaire ouverte, la semaine porte le titre du monde */
+});
+
+test('Fidélité 79 — les cadres restent complets et les blocs de la suite accessibles au clavier', () => {
+  const win=newGameWindow();
+  try{
+    freshMgmt(win,507);
+    assert.ok(joueSoiree(win));
+    win.eval(`G.screen='mgmt_lendemain';render();`);
+    const app=win.document.getElementById('app');
+    assert.equal(app.querySelectorAll('.ld66-lower>.mf-panneau>.mf-p2>.mf-p3').length,3);
+    assert.equal(app.querySelectorAll('.ld79-trait').length,2);
+    assert.equal(app.querySelectorAll('.ld66-rewatch').length,3);
+    assert.equal(app.querySelectorAll('.mf-barre-item[disabled]').length,0);
+    assert.equal(app.querySelector('.mf-prise'),null);
+    const noms=app.querySelectorAll('.ld3-names');
+    assert.equal(noms.length,3);
+    for(const nom of noms){
+      const corps=parseFloat(nom.style.getPropertyValue('--ld79-corps'));
+      assert.ok(corps>=44&&corps<=108,'le corps s’adapte à la largeur de chaque carte');
+    }
+    win.eval(`CL.mgmtLendemainSuite();`);
+    assert.equal(app.querySelectorAll('.ld3-suite>.mf-panneau>.mf-p2>.mf-p3').length,3);
+    const blocs=app.querySelectorAll('.ld79-scroll');
+    assert.equal(blocs.length,3);
+    for(let i=0;i<4;i++){
+      win.eval(`CL.mgmtLendemainBlocSuivant();`);
+      assert.equal(win.document.activeElement,blocs[i%3],'Tab parcourt les trois colonnes sans quitter la suite');
+    }
+  }finally{win.close();}
 });
