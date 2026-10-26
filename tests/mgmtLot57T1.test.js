@@ -278,7 +278,7 @@ test('Monde lot 57 T1 — la ligne de classement sépare les combattants du top 
   try{
     const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const html=scr_mgmt_guerre();const split=mgmtGuerreClassement(m).find(x=>x.estSplit);const top=mgmtGuerrePuissanceTop15(m)[split.id]||0;return JSON.stringify({html,top,p:split.niveaux.puissance});})()`));
     assert.match(r.html,new RegExp(`${r.top} du top 15`));
-    assert.match(r.html,new RegExp(`<span>${r.p}</span>`));
+    assert.match(r.html,new RegExp(`<span role="cell">${r.p}</span>`));
   }finally{w.close();}
 });
 
@@ -292,6 +292,41 @@ test('Monde lot 57 T1 — le tableau présente les sept colonnes de la maquette 
     assert.match(result.html,/juste derrière\s*:/i);
      // Décision : planches Uni* validées par Anthony ; l’écran suit la planche avec un libellé plus court pour tenir dans la colonne.
       assert.match(result.html,/Rang inchangé/);
+  }finally{w.close();}
+});
+
+test('Fidélité lot 82 — cadres, noms longs et chiffres restent reliés aux huit organisations',()=>{
+  const w=partie();
+  try{
+    const resultat=JSON.parse(w.eval(`(()=>{
+      const original=mgmtOrgParId, nom='W'.repeat(27);
+      mgmtOrgParId=id=>{const o=original(id);return o?Object.assign({},o,{nom}):o;};
+      try{
+        const m=G.mgmt,avant=JSON.stringify(m),rows=mgmtGuerreClassement(m);
+        const e=document.createElement('div');e.innerHTML=scr_mgmt_guerre();
+        const cellules=[...e.querySelectorAll('.gu3-ligne')].map((r,i)=>({
+          nom:r.querySelector('strong').textContent,
+          salle:r.children[3].textContent,
+          attendu:rows[i].niveaux.stade.toLocaleString('fr-FR')
+        }));
+        const inchange=avant===JSON.stringify(m);
+        m.eventsPlayed=0;const vide=document.createElement('div');vide.innerHTML=scr_mgmt_guerre();
+        return JSON.stringify({cellules,nom,panneaux:e.querySelectorAll('.mf-panneau').length,
+          onglets:e.querySelectorAll('.mo67-tab').length,titre:e.querySelectorAll('h1').length,
+          colonnes:[...e.querySelectorAll('[role="columnheader"]')].map(c=>c.textContent||c.getAttribute('aria-label')),
+          mentionZero:vide.querySelector('.gu82-titre').textContent.includes('APRÈS LA SOIRÉE'),
+          entites:e.textContent.includes('&nbsp;'),inchange});
+      }finally{mgmtOrgParId=original;}
+    })()`));
+    assert.equal(resultat.cellules.length,8);
+    for(const cellule of resultat.cellules){assert.equal(cellule.nom,resultat.nom);assert.equal(cellule.salle,cellule.attendu);}
+    assert.equal(resultat.panneaux,2);
+    assert.equal(resultat.onglets,4);
+    assert.equal(resultat.titre,1);
+    assert.deepEqual(resultat.colonnes,['RANG','ORGANISATION','POPULARITÉ','SALLE','NOTORIÉTÉ','PUISSANCE','ÉVOLUTION']);
+    assert.equal(resultat.mentionZero,false);
+    assert.equal(resultat.entites,false);
+    assert.equal(resultat.inchange,true);
   }finally{w.close();}
 });
 
