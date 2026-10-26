@@ -478,6 +478,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-choc{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
 .po2-choc h3{margin:0!important;font-size:24px!important}
 .po2-choc p{margin:0!important;font-size:22px!important}
+.po2-grid-trois .po2-contrat .po2-offres-bas{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.po2-grid-trois .po2-contrat .po2-offre{min-width:0;overflow-wrap:anywhere}
+.po2-grid-trois .po2-contrat .po2-offre p{overflow-wrap:anywhere}
+.po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:6px 0}
+.po2-grid-trois .po2-contrat .po2-offres-bas{gap:5px}
+.po2-grid-trois .po2-contrat .po2-offres-bas>h3{margin-top:4px}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
 .mo67-tabs{grid-column:1/-1;display:flex;gap:12px;min-width:0;border-bottom:2px solid rgba(233,230,225,.38);padding:0 0 12px}
