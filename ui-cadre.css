@@ -472,6 +472,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-grid-trois .po2-pastille{display:inline-block;width:16px;height:16px;flex:none;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .po2-grid-trois .po2-soiree-cibles p{display:flex;align-items:center;gap:10px}
 .po2-grid-trois .po2-action{border:2px solid rgba(233,230,225,.38);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.po2-choc-panel{flex:none;min-width:0;align-self:stretch}
+.po2-choc-panel .mf-p2{display:flex;flex:1;min-width:0}
+.po2-choc-panel .mf-p3{display:flex;flex:1;min-width:0;padding:10px}
+.po2-choc{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+.po2-choc h3{margin:0!important;font-size:24px!important}
+.po2-choc p{margin:0!important;font-size:22px!important}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE67_T1_ORGANISATION] — Monde lot 67 T1 ==== */
 .mo67-tabs{grid-column:1/-1;display:flex;gap:12px;min-width:0;border-bottom:2px solid rgba(233,230,225,.38);padding:0 0 12px}
