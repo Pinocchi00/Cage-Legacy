@@ -1463,9 +1463,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .cr3-stage{position:relative;width:24%;min-width:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
 .cr3-stage:first-of-type{align-items:flex-start;text-align:left}
 .cr3-stage:last-child{align-items:flex-end;text-align:right}
-.cr3-marker{z-index:1;width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center;background:#E9E6E1;color:#0D0B0B;font:800 28px/1 var(--mf-titre);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.cr3-marker{z-index:1;width:58px;height:58px;flex:none;display:flex;align-items:center;justify-content:center;border:3px solid #E9E6E1;border-radius:50%;background:#E9E6E1;color:#0D0B0B;font:800 28px/1 var(--mf-titre)}
 .cr3-current .cr3-marker{background:#F0B220}
-.cr3-future .cr3-marker{background:rgba(233,230,225,.38);color:rgba(233,230,225,.38)}
+.cr3-future .cr3-marker{background:transparent;border-color:rgba(233,230,225,.62);color:transparent}
 .cr3-stage b{font:800 28px/1 var(--mf-titre);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
 .cr3-current b{color:#F0B220}
 .cr3-stage small{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);overflow-wrap:anywhere}

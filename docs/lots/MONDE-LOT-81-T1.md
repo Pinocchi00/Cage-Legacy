@@ -34,10 +34,11 @@ Branche : `fid-croissance` (la branche courante de ce dossier ; commits ICI ; le
 - `mgmt-ecran-organisation.js` : l'écran `croissance` devient un écran `mfEcran` et réutilise les paliers de croissance ainsi que les onglets d'organisation. Les informations historiques restent dans le HTML, masquées sous le nouvel écran.
 - `mgmt-screens.js` : enregistrement direct de `scr_mgmt_organisation`, sans `mgmtWithNav`.
 - `ui-cadre.css` : styles préfixés `cr3-*` pour l'en-tête d'onglets, les échelles et le panneau de prochaine marche.
+- Ajustement de reprise : les marqueurs des échelles sont maintenant ronds comme la planche ; les marches futures sont vides et cerclées (et non des octogones gris pleins). `index.html` a reçu une nouvelle version CSS par `_bump.js`.
 - `index.html` : versions des deux scripts et de la feuille CSS modifiés.
 - Tests mis à jour : `mgmtCadre.test.js` (retrait de l'écran de la liste des anciens), `mgmtFidelite.test.js` (zéro panneau ancien), `mgmtSoiree.test.js` (navigation par onglets), `nomsApostrophe.test.js` (navigation du cadre). Les mises à jour portent le commentaire de décision `/* Décision : planches Uni* validées par Anthony ; l'écran suit UniCroissance */`.
 - Tests exigés : 72 réussites, 0 échec pour les neuf fichiers ciblés. ESLint et vérification de versions : aucun écart relevé. Pas de nouvelle sauvegarde ni migration.
 - Contrôle avant : `croissance` / `croissanceLong` — chevauchements 8, textes <22 px 4, coupés 0, défilent 1 ; moyen 24,3, grosBlocs 17,1.
-- Contrôle après capture de `shoot.js` : `croissance` et `croissanceLong` — chevauchements 0, textes <22 px 0, coupés 0, défilent 0 ; moyen 20,3, grosBlocs 13,9.
+- Contrôle après capture de `shoot.js` : `croissance` et `croissanceLong` — chevauchements 0, textes <22 px 0, coupés 0, défilent 0 ; moyen 19,9, grosBlocs 13,1 (audit relancé après le rendu rond).
 - Écart assumé : les valeurs variables d'en-tête restent dérivées de la partie via `mfEcran` (organisation, soirée et date) au lieu d'être figées sur les valeurs d'exemple de la planche.
 - Questions pour Anthony : aucune.
