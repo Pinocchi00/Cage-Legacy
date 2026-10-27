@@ -35,7 +35,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .mf-entete-g{display:flex;align-items:center;gap:24px;min-width:0;flex:0 1 auto}
 .mf-plaque{height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.69;text-transform:uppercase}
-.mf-entete-lib{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;white-space:normal;min-width:0;text-transform:uppercase}
+.mf-entete-lib{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;white-space:normal;min-width:0;text-transform:uppercase;overflow-wrap:anywhere}
 .mf-ecran:has(.mf-me,.mf-re) .mf-entete-lib{white-space:nowrap;flex:none}
 .mf-entete-n{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.69;white-space:nowrap}
 .mf-tuiles{display:flex;gap:6px}
@@ -3641,8 +3641,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-fid85 .ce3-carnet-stats{display:flex;align-items:center;gap:0;height:130px;flex:none;padding:0 12px;background:#121010;border:2px solid rgba(233,230,225,.38);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px)}
 .ce3-carnet-fid85 .ce3-carnet-stat{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;padding:0 18px;text-align:left;background:none;border:0;border-left:2px solid rgba(233,230,225,.16)}
 .ce3-carnet-fid85 .ce3-carnet-stat:first-child{border-left:0}
-.ce3-carnet-fid85 .ce3-carnet-stat strong{font:800 72px/.8 var(--mf-titre);color:#E9E6E1}
-.ce3-carnet-fid85 .ce3-carnet-stat span{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.ce3-carnet-fid85 .ce3-carnet-stat strong{font:800 56px/.8 var(--mf-titre);color:#E9E6E1}
+.ce3-carnet-fid85 .ce3-carnet-stat span{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
 .ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-deux-panneaux{display:flex;flex:1;gap:16px;height:auto;min-height:0;overflow:visible}
 .ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-panel{display:flex;padding:2px;border:0;max-height:none;contain:none;overflow:visible;background:rgba(233,230,225,.5)}
 .ce3-carnet-fid85 .ce3-carnet-faits{flex:1.1}

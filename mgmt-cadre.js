@@ -284,7 +284,8 @@ function mfNomSoireeGabarit(nom,base){
 /** Le nom de la soirée en HTML selon son gabarit. */
 function mfNomSoireeHtml(nom,base,cls){
   const g=mfNomSoireeGabarit(nom,base);
-  return `<span class="mf-nom-soiree ${cls||''}" style="font-size:${g.px}px">${g.lignes.map(l=>`<span class="l">${esc(l)}</span>`).join('')}</span>`;
+  const px=Math.min(g.px,...g.lignes.map(l=>mfCorps(l,400,g.px,22)));
+  return `<span class="mf-nom-soiree ${cls||''}" style="font-size:${px}px">${g.lignes.map(l=>`<span class="l">${esc(l)}</span>`).join('')}</span>`;
 }
 /* ==== [FIN ANCRE] ====*/
 function mfEnteteSoiree(m){
