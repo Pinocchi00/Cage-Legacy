@@ -215,7 +215,7 @@ function mfAfficheMise(nom1,nom2){
   const a1=Math.max(mfAvance(n1),0.3), a2=Math.max(mfAvance(n2),0.3), aL=Math.max(a1,a2), aS=Math.min(a1,a2);
   const r1=x=>Math.round(x*10)/10;
   const H=1044, G=20, VS=0.781, BOX=0.653, CX=1234, TOP=18, BOT=1062;
-  const fsE=Math.min(300,H/aL), need=(VS+BOX)*fsE+2*G;
+  const fsE=Math.min(300,H/aL), need=VS*fsE+Math.max(BOX*fsE,1.68*Math.max(22,.28*fsE)+28)+2*G;
   const room1=H-a1*fsE>=need, room2=H-a2*fsE>=need;
   let mode, fs;
   if(room1||room2){ mode=(room1&&room2)?'P':(room1?'E1':'E2'); fs=fsE; }
@@ -224,8 +224,8 @@ function mfAfficheMise(nom1,nom2){
     if(fsT>fsS){ mode='T'; fs=fsT; } else { mode='S'; fs=fsS; }
   }
   fs=Math.floor(fs);
-  const th=0.69*fs;
-  let xA, xB, vsFs=fs, vsLeft, vsTop, boxLeft, boxTop, boxW=th, boxFs=0.28*fs, boxH=BOX*fs;
+  const th=Math.max(80,0.69*fs);
+  let xA, xB, vsFs=fs, vsLeft, vsTop, boxLeft, boxTop, boxW=th, boxFs=Math.max(22,0.28*fs), boxH=Math.max(BOX*fs,1.68*boxFs+28);
   if(mode==='T'){
     const c=Math.min(110,434-2*th-32,th);
     xA=CX-(2*th+c+32)/2; const xC=xA+th+16; xB=xC+c+16;
@@ -406,7 +406,11 @@ let MF_ACCUEIL={i:0};
 const MF_MENU=[
   {id:'management',t:'Management',sous:'Matchmaker',action:'CL.mgmtParties()',fn:()=>CL.mgmtParties(),classe:'title-management'},
   {id:'duo',t:'Duo',sous:'À deux sur ce PC',action:'CL.mgmtDuoParties()',fn:()=>CL.mgmtDuoParties(),classe:'title-duo'},
-  {id:'options',t:'Options',bas:true,action:'CL.mgmtOptions()',fn:()=>CL.mgmtOptions()},
+  /* Décision d’Anthony du27/10/2026 : montrer ces trois modes à venir, sans action ; le menu reste à gauche et les affiches à droite. */
+  {id:'histoire',t:'Mode histoire',grise:true,avenir:true},
+  {id:'patron',t:'Patron',sous:'Crée ou dirige ton organisation',grise:true,avenir:true},
+  {id:'salle',t:'Dirigeant de salle',sous:'Tes combattants dans toutes les organisations',grise:true,avenir:true},
+  {id:'options',t:'Options',sous:'L’affichage, le son, les touches',bas:true,action:'CL.mgmtOptions()',fn:()=>CL.mgmtOptions()},
   {id:'quitter',t:'Quitter',bas:true,grise:true},
 ];
 
@@ -440,7 +444,7 @@ function mfAfficheDonnees(m){
 }
 
 function mfFicheAccueilHtml(f,cote,recFs){
-  return `<div class="mf-fiche ${cote}"><div class="mf-fiche-haut"><div class="mf-fiche-nom"><div>${esc(f.prenom)}</div><div>${esc(f.nom)}</div></div>`
+  return `<div class="mf-fiche ${cote}"><div class="mf-fiche-haut"><div class="mf-fiche-nom"><div style="font-size:${mfCorps(f.prenom,318,28,22)}px">${esc(f.prenom)}</div><div style="font-size:${mfCorps(f.nom,318,28,22)}px">${esc(f.nom)}</div></div>`
     +`<div class="mf-fiche-rec" style="font-size:${recFs}px">${esc(f.rec)}</div></div>`
     +`<div class="mf-fiche-lignes"><div>${esc(f.ligneA)}</div><div>${esc(f.ligneB)}</div></div>`
     +`<div class="mf-fiche-forme">${f.forme.map(mfMarque).join('')}</div></div>`;
@@ -462,7 +466,7 @@ function mfAfficheHtml(m){
     +`<div class="mf-nom bas" style="left:${L.xB}px;bottom:18px;font-size:${L.fs}px">${esc(L.n2)}</div>`
     +`<div class="mf-soiree"><div>${esc(d.org.toUpperCase())} FIGHT</div><div><span>NIGHT</span><b>${esc(d.n)}</b></div></div>`
     +mfFicheAccueilHtml(d.a,'g',recFs)+mfFicheAccueilHtml(d.b,'d',recFs)
-    +(d.autres.length?`<div class="mf-aussi"><div class="mf-aussi-t">AUSSI À L’AFFICHE</div>${d.autres.map(x=>`<div class="mf-aussi-l">${esc(x)}</div>`).join('')}</div>`:'')
+    +(d.autres.length?`<div class="mf-aussi"><div class="mf-aussi-t">AUSSI À L’AFFICHE</div>${d.autres.map(x=>`<div class="mf-aussi-l" style="font-size:${mfCorps(mfNet(x),318,30,22)}px">${esc(x)}</div>`).join('')}</div>`:'')
     +(d.date?`<div class="mf-date${d.lieu.length>14?' long':''}"><b>${esc(d.date)}</b><span>${esc(d.lieu)}</span></div>`:'')
     +`</div>`;
 }
@@ -477,9 +481,10 @@ function mfTitre(){
   const bouton=(x,i)=>{
     const on=i===MF_ACCUEIL.i&&!x.grise;
     const cls=[x.premier?'premier':'',on?'on':'',x.grise?'grise':'',x.classe||''].filter(Boolean).join(' ');
-    return x.grise
-      ?`<button type="button" class="${cls}" disabled aria-disabled="true">${esc(x.t)}</button>`
-      :`<button type="button" class="${cls}"${on?' aria-current="true"':''} onclick="${x.action}"><span>${esc(x.t)}</span>${x.sous?`<small>${esc(x.sous)}</small>`:''}</button>`;
+    const label=`<span class="mf-menu-texte"><strong style="font-size:${mfCorps(mfNet(x.t),x.avenir?325:420,58,40)}px">${esc(x.t)}</strong>${x.sous?`<small>${esc(x.sous)}</small>`:''}</span>`;
+    const statut=x.avenir?'<span class="mf-menu-statut">À VENIR</span>':on?'<span class="mf-menu-pastille" aria-hidden="true"></span>':'';
+    const attributs=x.grise?' disabled aria-disabled="true"':`${on?' aria-current="true"':''} onclick="${x.action}"`;
+    return `<button type="button" class="${cls}"${attributs}>${label}${statut}</button>`;
   };
   const haut=mfMenu().map((x,i)=>x.bas?'':bouton(Object.assign({premier:i===0},x),i)).join('');
   const bas=mfMenu().map((x,i)=>x.bas?bouton(x,i):'').join('');

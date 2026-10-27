@@ -128,7 +128,22 @@ test('Accueil — sans soirée prévue : le titre et le menu sur le fond cendré
   for(const a of ['CL.mgmtParties()']) assert.ok(html.includes(a),a);
   for(const a of ["CL.go('intro')",'CL.duelEnter()',"CL.go('hof')","CL.go('ach')"]) assert.ok(!html.includes(a),'plus de lien : '+a);
   assert.equal((html.match(/mf-menu[^"]*"[^>]*>(?:(?!<\/nav>)[\s\S])*?class="[^"]*\bon\b/g)||[]).length>=0,true);
-  assert.equal((html.match(/class="[^"]*\bon\b[^"]*"/g)||[]).length,1,'une seule entrée jaune : l’action principale');
+  assert.equal((html.match(/class="[^"]*\bon\b[^"]*"/g)||[]).length,1,'une seule entrée sélectionnée : l’action principale');
+});
+
+/* Décision d’Anthony du27/10/2026 : trois modes À venir, menu à gauche et affiches de soirée conservées à droite. */
+test('Menu — les trois modes à venir sont visibles et ne créent aucune action jouable',()=>{
+  const win=newGameWindow({runMain:true});
+  try{
+    const r=result(win,`G.screen='title';render();
+      const futurs=[...document.querySelectorAll('.mf-menu button')].filter(b=>b.querySelector('.mf-menu-statut'));
+      const choix=futurs.map(b=>({texte:b.querySelector('strong').textContent,disabled:b.disabled,onclick:b.getAttribute('onclick')}));
+      futurs.forEach(b=>b.click());return {choix,screen:G.screen,actions:mfMenu().filter(x=>!x.grise).map(x=>x.id)};`);
+    assert.deepEqual(r.choix.map(x=>x.texte),['Mode histoire','Patron','Dirigeant de salle']);
+    assert.ok(r.choix.every(x=>x.disabled&&x.onclick===null));
+    assert.equal(r.screen,'title');
+    assert.deepEqual(r.actions,['management','duo','options']);
+  }finally{win.close();}
 });
 
 test('Accueil — avec une soirée : l’affiche porte le combat principal, les noms échappés, la forme, ce qui est aussi à l’affiche', () => {
