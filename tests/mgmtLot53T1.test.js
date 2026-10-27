@@ -184,6 +184,32 @@ test('Monde lot 53 T1 — la fin de soirée expose la salle finale et le lendema
   }finally{w.close();}
 });
 
+test('Fidélité soirée — deux performances dans le même combat gardent leurs bénéficiaires et montants',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(5311);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
+    jouerSoirees(w,1);
+    const r=w.eval(`(()=>{
+      const m=G.mgmt,p=mgmtSoireeProgramme(m),cs=p[0],pf=p[1],indices=new Set(p.map(x=>x.h));
+      for(const x of p)delete m.hist[x.h].pr;
+      m.hist[cs.h].pr='cs';m.hist[pf.h].pr='pf';
+      m.facts=m.facts.filter(f=>!(f.k==='prime'&&indices.has(f.fight)));
+      for(const a of [cs.a.id,cs.b.id])m.facts.push({c:m.lastEvent.cycle,k:'prime',fight:cs.h,type:'cs',a,m:1});
+      m.facts.push({c:m.lastEvent.cycle,k:'prime',fight:pf.h,type:'pf',a:pf.a.id,m:2},{c:m.lastEvent.cycle,k:'prime',fight:pf.h,type:'pf',a:pf.b.id,m:3});
+      m.lastEvent.finance.primes=7;
+      const avant=JSON.stringify(m),cartes=mgmtSoPrimesCartes(m,p),html=mgmtSoFinHtml(m,p),racine=document.createElement('div');racine.innerHTML=html;
+      return {html,ids:cartes.filter(x=>x.type==='pf').map(x=>x.id),attendus:[pf.a.id,pf.b.id],noms:[...racine.querySelectorAll('.so3-fin-prime.performance strong')].map(x=>x.textContent),nomsAttendus:[pf.a,pf.b].map(x=>mfNet(x.last||x.name)),montants:cartes.map(x=>x.montant),euros:[mgmtEuros(2),mgmtEuros(3)],ancien:mgmtSoPrimesCartes({...m,facts:[]},p).length,identique:JSON.stringify(m)===avant};
+    })()`);
+    assert.deepEqual(Array.from(r.ids),Array.from(r.attendus));
+    assert.deepEqual(Array.from(r.noms),Array.from(r.nomsAttendus),'chaque carte nomme son vrai bénéficiaire, pas deux fois le gagnant');
+    assert.deepEqual(Array.from(r.montants),[1,2,3]);
+    assert.equal((r.html.match(/class="so3-fin-prime performance"/g)||[]).length,2);
+    for(const montant of r.euros)assert.ok(r.html.includes(montant));
+    assert.equal(r.ancien,2,'une ancienne trace sans faits typés reste affichable');
+    assert.equal(r.identique,true,'afficher les primes ne modifie ni la partie ni les paiements');
+  }finally{w.close();}
+});
+
 test('Monde lot 53 T1 — toutes les classes so3 des écrans ont une règle de style',()=>{
   const w=newGameWindow({runMain:true});
   try{
@@ -303,9 +329,10 @@ test('Monde lot 53 T1 — le sélecteur expose son état de vue choisi',()=>{
     w.eval(`setSeed(5321);const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;mgmtRetraitProb=()=>0;CL.mgmtEnter(1);`);
     jouerSoirees(w,1);
     const result=w.eval(`(()=>{const p=mgmtSoireeProgramme(G.mgmt);mgmtVueCombatChoisir(p[0].i,'forts');return mgmtSoOuvertureHtml(G.mgmt,p);})()`);
-    assert.match(result,/aria-label="Vue du combat 1 : TEMPS FORTS" aria-valuetext="TEMPS FORTS"/);
+    /* Décision d’Anthony du 27/10/2026 : liste commune à l’ouverture ; trois boutons nommés par combat, état aria-pressed. */
+    assert.match(result,/aria-label="Vue du combat 1 : TEMPS FORTS" aria-pressed="true"/);
     const defaultView=w.eval(`(()=>{mgmtVueCombatChoisir(mgmtSoireeProgramme(G.mgmt)[1].i,'complet');return mgmtSoOuvertureHtml(G.mgmt,mgmtSoireeProgramme(G.mgmt));})()`);
-    assert.match(defaultView,/aria-label="Vue du combat 2 : COMPLET" aria-valuetext="COMPLET"/);
+    assert.match(defaultView,/aria-label="Vue du combat 2 : COMPLET" aria-pressed="true"/);
   }finally{w.close();}
 });
 
@@ -358,9 +385,11 @@ test('Monde lot 53 T1 — le rendu d’ouverture de soirée conserve les neuf co
     const result=w.eval(`(()=>{G.screen='mgmt_soiree';render();return document.getElementById('app').innerHTML;})()`);
     assert.equal((result.match(/class="mf-so-lg/g)||[]).length,9);
      assert.match(result,/SOIRÉE/);
-      assert.match(result,/<span>0 \/ 9 · COMBATS<\/span>/);
+    /* Décision d’Anthony du 27/10/2026 : l’ouverture suit UniSoiree, sans l’ancien bandeau rouge. */
+    assert.match(result,/<b class="mf-so-cpt">0 \/ 9<\/b>/);
     assert.match(result,/Commencer la soirée/);
-    assert.equal((result.match(/class="so3-vue"/g)||[]).length,9);
+    assert.equal((result.match(/class="so3-vue(?: choisi)?"/g)||[]).length,27);
+    assert.equal((result.match(/aria-pressed="true"/g)||[]).length,10,'une vue choisie par combat et une dans le panneau latéral');
     assert.match(result,/aria-label="Vue du combat 1 :/);
   }finally{w.close();}
 });

@@ -60,7 +60,10 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   touche(win,'p'); assert.equal(win.eval(`MGMT_SOIREE.index`),9);
   /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
   assert.ok(maj(win).includes('LE LENDEMAIN')); assert.ok(texte(win).includes('LA SOIRÉE'));
-  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-prime').length`),2);
+  /* Décision : UniSoireeFin et reprise d’Anthony du 27/10/2026 ; les deux PF déjà payées gardent chacune leur carte, même dans un seul combat. */
+  assert.equal(win.eval(`document.querySelectorAll('.so3-fin-prime').length`),3);
+  const primes=res(win,`const m=G.mgmt,p=mgmtSoireeProgramme(m);return mgmtSoPrimesCartes(m,p).filter(x=>x.type==='pf').map(x=>x.id);`);
+  assert.equal(new Set(primes).size,2,'les deux bénéficiaires distincts sont conservés');
   assert.equal(win.eval(`document.querySelectorAll('.mf-so-bande').length`),0);
   /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche et ne répète pas son titre dans le contenu. */
   assert.equal(win.eval(`document.querySelectorAll('.so3-fin-titre').length`),0);
