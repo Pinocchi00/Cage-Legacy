@@ -5,7 +5,13 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const {newGameWindow}=require('./helpers/loadGame');
 const source=fs.readFileSync(require('node:path').join(__dirname,'..','mgmt-ceremonie.js'),'utf8');
-function charger(){const c={mgmtCalAujourdhui:()=>365,mgmtHistoirePoidsCombat:()=>0};vm.createContext(c);vm.runInContext(source,c);return c;}
+const cadre=fs.readFileSync(require('node:path').join(__dirname,'..','mgmt-cadre.js'),'utf8');
+const echappement=fs.readFileSync(require('node:path').join(__dirname,'..','state','state-core.js'),'utf8').split(/\r?\n/).find(l=>l.startsWith('const esc='));
+function charger(){
+  // Le carnet utilise les véritables pièces du cadre, y compris leur échappement.
+  const c={mgmtCalAujourdhui:()=>365,mgmtHistoirePoidsCombat:()=>0,SCREENS:{},CL:{},keysRegister(){},scr_title(){}};
+  vm.createContext(c);vm.runInContext(echappement,c);vm.runInContext(cadre,c);vm.runInContext(source,c);return c;
+}
 test('Lot 55 T1 — calcul et lecture du carnet ne tirent aucun hasard',()=>{
   assert.doesNotMatch(source,/\b(?:Math\.random|rnd)\s*\(/);
 });
@@ -188,6 +194,46 @@ test('Lot 55 T1 — le carnet conserve une forme vide complète sans partie',()=
   assert.deepEqual(JSON.parse(JSON.stringify(c.mgmtCarnetLire(null))),{
     champions:[],espoirs:[],prix:[],records:[],defis:[],primes:[],soirees:[]
   });
+});
+
+test('Fidélité lot 85 — le carnet lit les succès enregistrés, garde ses archives et ne modifie rien',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`(()=>{
+      const m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;
+      const host='<img src=x onerror=alert(1)>';
+      m.hist.slice(0,4).forEach((t,i)=>{t.winner='A';t.a.name=i===0?host:'W'.repeat(27);m.facts.push({k:'title_fight',fight:i,div:t.a.div});});
+      m.defis={ok:{[MGMT_DEFIS[0].id]:{s:2}}};
+      const avant=JSON.stringify(m),seed=SEED,carnet=mgmtCarnetLire(m);
+      const e=document.createElement('div');e.innerHTML=scr_mgmt_carnet();
+      const archive=e.querySelector('details');archive.open=true;
+      const tab=new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true});e.querySelector('.mo67-tab').dispatchEvent(tab);
+      return JSON.stringify({
+        cartes:e.querySelectorAll('.ce3-carnet-defi').length,catalogue:MGMT_DEFIS.length,
+        reussis:e.querySelectorAll('.ce3-carnet-reussi').length,
+        stats:[...e.querySelectorAll('.ce3-carnet-stat strong')].map(x=>x.textContent),
+        soirees:m.eventsPlayed,combats:m.hist.length,
+        panneaux:e.querySelectorAll('.mf-panneau').length,traits:e.querySelectorAll('.ce3-carnet-trait').length,
+        visibles:e.querySelectorAll('.ce3-carnet-champions .ce3-carnet-medaille').length,
+        champions:carnet.champions.length,archive:archive.textContent,
+        compte:e.querySelector('.ce3-carnet-compteur').textContent,
+        injection:!!e.querySelector('img'),inchange:avant===JSON.stringify(m),hasard:seed===SEED,
+        defilement:e.querySelector('.ce3-carnet-defis')!==null,tabBloque:tab.defaultPrevented
+      });
+    })()`));
+    assert.equal(r.cartes,r.catalogue);
+    assert.equal(r.reussis,1);
+    assert.equal(r.compte,`1 SUR ${r.catalogue}`);
+    assert.equal(r.stats[0],String(r.soirees));
+    assert.equal(r.stats[1],String(r.combats));
+    assert.equal(r.panneaux,2);assert.equal(r.traits,2);
+    assert.equal(r.visibles,Math.min(3,r.champions));
+    assert.ok(r.archive.includes('<img src=x onerror=alert(1)>'));
+    assert.ok(r.archive.includes('W'.repeat(27)));
+    assert.equal(r.injection,false);assert.equal(r.inchange,true);assert.equal(r.hasard,true);
+    assert.equal(r.defilement,true);
+    assert.equal(r.tabBloque,false);
+  }finally{w.close();}
 });
 test('Lot 55 T1 — chaque prix possède trois formulations distinctes et spécifiques',()=>{
   const blocs=[...source.matchAll(/\{id:'(combattant|ko|soumission|combat|revelation|retour)'[^\n]*phrases:\[([^\]]+)\]/g)];
@@ -411,7 +457,8 @@ test('Lot 55 T1 — les écrans utilisent mfEcran avec les options de navigation
   assert.equal(options.m,c.G.mgmt);
   c.scr_mgmt_carnet();
   assert.equal(options.barre,'jeu');
-  assert.equal(options.courant,'accueil');
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  assert.equal(options.courant,'organisation');
   assert.equal(options.m,c.G.mgmt);
 });
 
@@ -475,7 +522,13 @@ test('Lot 55 T1 — un relevé sans issue ne peut attribuer aucun prix',()=>{
 });
 test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; le carnet laisse le retour à la barre de navigation',()=>{
   assert.doesNotMatch(source,/<button type="button" onclick="CL\.go\('mgmt_accueil'\)">Accueil<\/button>/);
-  assert.match(source,/touches:\[\{ks:\['Échap'\],t:'Accueil'\}\]/);
+  /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche. */
+  const c=charger();c.G={mgmt:{roster:[],hist:[],facts:[]}};c.mgmtOrgNom=()=> 'Split';
+  let options;c.mfEcran=(_html,o)=>{options=o;return '';};c.scr_mgmt_carnet();
+  assert.deepEqual(Array.from(options.touches[0].ks),['Échap']);
+  assert.equal(options.touches[0].t,'Accueil');
+  assert.equal(options.touches[0].onclick,"CL.go('mgmt_accueil')");
+  assert.deepEqual(Array.from(options.touches,x=>x.t),['Accueil','Onglet','Choisir','Ouvrir']);
 });
 
 test('Monde lot 67 T1 — le rang et les effets de cérémonie ont des styles dédiés',()=>{

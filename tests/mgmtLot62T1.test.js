@@ -40,7 +40,10 @@ test('Monde lot 62 T1 — trois années réelles déclenchent les cérémonies e
 test('Monde lot 62 T1 — le carnet vide présente honnêtement ses rubriques',()=>{
   const w=newGameWindow({runMain:true});
   try{
-    const empty=w.eval("(()=>{const m=mgmtPasseGenerer('split',{soirees:3});m.hist=[];m.facts=[];m.roster.forEach(f=>delete f.prixAnnee);G.mgmt=m;return {prix:mgmtCarnetLire(m).prix.length,ecran:scr_mgmt_carnet()}})()");
+    /* Décision : planches Uni* validées par Anthony ; l'écran suit la planche.
+       Le carnet lit maintenant les succès persistants : une partie réellement vide
+       doit aussi vider ses défis, indépendants des traces de combat. */
+    const empty=w.eval("(()=>{const m=mgmtPasseGenerer('split',{soirees:3});m.hist=[];m.facts=[];delete m.defis;m.roster.forEach(f=>delete f.prixAnnee);G.mgmt=m;return {prix:mgmtCarnetLire(m).prix.length,ecran:scr_mgmt_carnet()}})()");
     assert.equal(empty.prix,0);
     assert.equal((empty.ecran.match(/Rien encore\./g)||[]).length,7,'chaque rubrique vide du carnet annonce explicitement son absence de contenu');
   }

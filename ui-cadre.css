@@ -3618,3 +3618,67 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .gu82 .gu82-note summary{cursor:pointer}
 .gu82 .gu3-mouvement{border:0;padding:0}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FID85_CARNET_CADRES] — Fidélité carnet, lot 85 ==== */
+.mf-ecran:has(.ce3-carnet-fid85) .mf-barre-logo{height:128px;flex:none}
+.mf-ecran:has(.ce3-carnet-fid85) .mf-barre-item{height:59px;font-size:30px}
+.mf-ecran:has(.ce3-carnet-fid85) .mf-barre-bas .mf-barre-item{height:60px}
+.mf-ecran:has(.ce3-carnet-fid85) .mf-entete-g{gap:18px}
+.ce3-carnet-entete{display:flex;align-items:center;gap:16px}
+.ce3-carnet-entete>span{font:500 24px/1 var(--mf-texte)}
+.ce3-carnet-date,.ce3-carnet-soiree{display:flex;align-items:center;gap:16px;height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;color:#E9E6E1}
+.ce3-carnet-date>b{font:800 40px/.69 var(--mf-titre)}
+.ce3-carnet-date>span{font:600 24px/1 var(--mf-texte);letter-spacing:.06em}
+.ce3-carnet-soiree{gap:14px}
+.ce3-carnet-soiree>b{font:800 56px/.69 var(--mf-titre)}
+.ce3-carnet-soiree>b:last-child{color:#E23A2B}
+.ce3-carnet-soiree .mf-nom-soiree{display:flex;flex-direction:column;line-height:.9;white-space:nowrap}
+.ce3-carnet-ecran.ce3-carnet-fid85{inset:128px 56px auto 300px;height:856px;max-height:none;padding:0;gap:16px;overflow:visible;background:none;font:500 24px/1 var(--mf-texte)}
+.ce3-carnet-fid85 .ce3-carnet-onglets{display:flex;align-items:center;justify-content:space-between;gap:20px;height:56px;flex:none}
+.ce3-carnet-fid85 .ce3-carnet-onglets>p{font:500 24px/1 var(--mf-texte);color:rgba(233,230,225,.74);margin:0}
+.ce3-carnet-fid85 .mo67-tabs{display:flex;gap:8px;flex:none;padding:0;margin:0;border:0}
+.ce3-carnet-fid85 .mo67-tab{height:56px;padding:0 24px;border:0;background:#252121;color:#E9E6E1;font:800 32px/56px var(--mf-titre);white-space:nowrap;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.ce3-carnet-fid85 .mo67-tab[aria-current="page"]{background:#E9E6E1;color:#0D0B0B}
+.ce3-carnet-fid85 .ce3-carnet-stats{display:flex;align-items:center;gap:0;height:130px;flex:none;padding:0 12px;background:#121010;border:2px solid rgba(233,230,225,.38);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px)}
+.ce3-carnet-fid85 .ce3-carnet-stat{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;padding:0 18px;text-align:left;background:none;border:0;border-left:2px solid rgba(233,230,225,.16)}
+.ce3-carnet-fid85 .ce3-carnet-stat:first-child{border-left:0}
+.ce3-carnet-fid85 .ce3-carnet-stat strong{font:800 72px/.8 var(--mf-titre);color:#E9E6E1}
+.ce3-carnet-fid85 .ce3-carnet-stat span{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-deux-panneaux{display:flex;flex:1;gap:16px;height:auto;min-height:0;overflow:visible}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-panel{display:flex;padding:2px;border:0;max-height:none;contain:none;overflow:visible;background:rgba(233,230,225,.5)}
+.ce3-carnet-fid85 .ce3-carnet-faits{flex:1.1}
+.ce3-carnet-fid85 .ce3-carnet-defis-panel{flex:1.45}
+.ce3-carnet-fid85 .mf-p2,.ce3-carnet-fid85 .mf-p3{min-height:0}
+.ce3-carnet-fid85 .mf-p3{padding:15px;gap:12px;overflow:hidden}
+.ce3-carnet-fid85 .ce3-carnet-titre{display:flex;flex-direction:column;gap:12px;flex:none;min-width:0}
+.ce3-carnet-fid85 .ce3-carnet-titre>h2{font:800 44px/.75 var(--mf-titre);color:#E9E6E1;margin:0}
+.ce3-carnet-fid85 .ce3-carnet-trait{display:block;flex:none;width:56px;height:8px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.ce3-carnet-fid85 .ce3-carnet-entete-panel{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex:none}
+.ce3-carnet-fid85 .ce3-carnet-compteur{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font:600 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);letter-spacing:.04em}
+.ce3-carnet-fid85 .ce3-carnet-compteur small{font:500 22px/1 var(--mf-texte);letter-spacing:0}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-faits-contenu{display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow-y:auto;contain:none}
+.ce3-carnet-fid85 .ce3-carnet-champions{min-height:0;flex:none;overflow:visible}
+.ce3-carnet-fid85 .ce3-carnet-espoirs{min-height:0;flex:none}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-liste{height:auto;max-height:none;min-height:0;overflow:visible;contain:none;flex:none}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-liste>p{display:flex;align-items:center;gap:16px;margin:0;padding:12px 0;min-height:0;height:auto;border-bottom:2px solid rgba(233,230,225,.16);font:500 24px/1.1 var(--mf-texte);overflow-wrap:anywhere}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-faits-contenu>.ce3-carnet-espoirs-titre{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;color:rgba(233,230,225,.74);margin:0!important;flex:none}
+.ce3-carnet-fid85 .ce3-carnet-identite{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.ce3-carnet-fid85 .ce3-carnet-identite>strong{font:800 34px/1 var(--mf-titre);overflow-wrap:anywhere}
+.ce3-carnet-fid85 .ce3-carnet-identite>small{font:500 22px/1 var(--mf-texte);color:rgba(233,230,225,.74)}
+.ce3-carnet-fid85 .ce3-carnet-contre{width:140px;flex:none;font:500 22px/1 var(--mf-texte);text-align:right;color:rgba(233,230,225,.74);overflow-wrap:anywhere}
+.ce3-carnet-fid85 .ce3-carnet-medaille{width:46px;height:46px;font:800 26px/1 var(--mf-titre)}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-espoirs .ce3-carnet-liste>p{padding:0;gap:12px;border:0;margin:0 0 10px}
+.ce3-carnet-fid85 .ce3-carnet-espoirs strong{font:800 30px/1 var(--mf-titre);max-width:250px;overflow-wrap:anywhere}
+.ce3-carnet-fid85 .ce3-carnet-pastille{display:block;flex:none;width:16px;height:16px;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-historique{display:block;flex:none;height:auto;max-height:none;contain:none;overflow:visible;margin-top:auto;padding-top:10px;border-top:2px solid rgba(233,230,225,.16)}
+.ce3-carnet-fid85 .ce3-carnet-historique summary{font:600 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74);cursor:pointer;overflow-wrap:anywhere}
+.ce3-carnet-fid85 .ce3-carnet-historique h2{font:600 22px/1.1 var(--mf-texte);margin:14px 0 6px;color:rgba(233,230,225,.74)}
+.ce3-carnet-ecran.ce3-carnet-fid85 .ce3-carnet-defis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(167px,max-content);align-content:start;gap:10px;flex:1;min-height:0;height:auto;max-height:none;overflow-y:auto;overscroll-behavior:contain;contain:none}
+.ce3-carnet-fid85 .ce3-carnet-defi{padding:14px 16px;gap:10px;border:2px solid rgba(233,230,225,.16);background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.ce3-carnet-fid85 .ce3-carnet-defi-titre{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
+.ce3-carnet-fid85 .ce3-carnet-defi p{font:500 24px/1.1 var(--mf-texte);margin:0;overflow-wrap:anywhere}
+.ce3-carnet-fid85 .ce3-carnet-defi.ce3-carnet-reussi{border-color:#F0B220;background:rgba(240,178,32,.08)}
+.ce3-carnet-fid85 .ce3-carnet-defi>b{font:800 24px/1 var(--mf-titre);color:#F0B220;margin:0}
+.ce3-carnet-fid85 .ce3-carnet-coche{display:flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ce3-carnet-fid85 .ce3-carnet-progression{height:8px;width:100%;background:#252121;flex:none}
+.ce3-carnet-fid85 .ce3-carnet-progression span{height:8px;background:#E9E6E1}
+/* ==== [FIN ANCRE] ==== */
