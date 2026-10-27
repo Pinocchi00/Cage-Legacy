@@ -64,10 +64,12 @@ const MF_SECTIONS=[
   {id:'calendrier',libelle:'Calendrier',ecran:'mgmt_calendrier'},
   {id:'resultats',libelle:'Résultats',ecran:'mgmt_resultats'},
   {id:'finances',libelle:'Finances',ecran:'mgmt_finances'},
+  /* Demande d’Anthony du27/10/2026 : Organisation dans la barre commune, avec ses quatre onglets existants. */
+  {id:'organisation',libelle:'Organisation',ecran:'mgmt_guerre'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
 const MF_ECRAN_SECTION={mgmt_accueil:'accueil',mgmt_actualites:'actualites',mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
-  mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats',mgmt_ceintures:'ceintures',mgmt_camps:'camps',mgmt_presse:'presse',mgmt_resultats:'resultats'};
+  mgmt_recrutement:'contrats',mgmt_organisation:'organisation',mgmt_guerre:'organisation',mgmt_poste:'organisation',mgmt_poste_bilan:'organisation',mgmt_carnet:'organisation',mgmt_choc:'organisation',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats',mgmt_ceintures:'ceintures',mgmt_camps:'camps',mgmt_presse:'presse',mgmt_resultats:'resultats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
 function mfSectionCourante(screen){
@@ -87,7 +89,7 @@ function mfAttentes(m){
   return out;
 }
 
-/** La barre. mode 'jeu' : les treize sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
+/** La barre. mode 'jeu' : les quatorze sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
  *  `grise` : toute la barre est grisée (le soir). */
 function mfBarreHtml({mode='jeu',courant=null,grise=false,m=null}={}){
   const attend=mfAttentes(m);

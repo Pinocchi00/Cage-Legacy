@@ -132,7 +132,7 @@ function scr_mgmt_carnet(){
   const date=mfSoireeInfos(m);
   const entete=`<div class="ce3-carnet-entete">${date.dans?`<span>${e(date.dans)}</span>`:''}${date.date?`<div class="ce3-carnet-date"><b>${e(date.date)}</b>${date.lieu?`<span>${e(date.lieu)}</span>`:''}</div>`:''}<div class="ce3-carnet-soiree"><b>${mfNomSoireeHtml(mgmtOrgNom(m)+' Fight Night',56,'')}</b><b>${e((m.eventsPlayed||0)+1)}</b></div></div>`;
   const ecran=mfEcran(body,{barre:'jeu',courant:'organisation',m,prise:false,plaque:'Organisation',libelle:'TON CARNET',droiteHtml:entete,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Onglet'},{ks:['↑','↓'],t:'Choisir'},{ks:['Entrée'],t:'Ouvrir',jaune:true}]});
-  return ecran.replace('<div class="mf-barre-bas">','<button type="button" class="mf-barre-item cur" data-section="organisation" aria-current="page" onclick="CL.go(\'mgmt_carnet\')"><span>Organisation</span></button><div class="mf-barre-bas">');
+  return ecran;
   /* ==== [FIN ANCRE] ==== */
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_carnet=scr_mgmt_carnet;

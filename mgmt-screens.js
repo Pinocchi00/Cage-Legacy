@@ -1,5 +1,4 @@
 "use strict";
-/* global scr_mgmt_poste_bilan */
 /* CAGE LEGACY — mgmt-screens.js (contrôleur et clavier communs)
    ============================================================================
    LOT 1 MODE MANAGEMENT — composants partagés et actions du joueur. Rendu HTML
@@ -289,7 +288,8 @@ keysRegister('mgmt_organisation',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+1)%MGMT_POSTE_ONGLETS.length;render();},ShiftTab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)-1+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();}});
-keysRegister('mgmt_poste_bilan',{Escape(){CL.go('mgmt_accueil');},Enter(){const b=mgmtPosteBilan(G.mgmt);if(b&&b.issue!=='renvoi'){mgmtPosteRenouveler(G.mgmt,b.issue);CL.go('mgmt_poste');}else CL.go('mgmt_accueil');}});
+/* Décision : planches Uni* validées par Anthony ; souris et clavier suivent les mêmes choix de fin de saison. */
+keysRegister('mgmt_poste_bilan',{Escape(){CL.go('mgmt_accueil');},Enter(){mgmtPosteBilanContinuer();},k(){mgmtPosteBilanRencontrer();},K(){mgmtPosteBilanRencontrer();},Tab(){CL.go('mgmt_resultats');}});
 /* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements
    au clavier — échap ramène à la semaine, comme à la souris. Aucune
    exclusive : le bouton de la navigation fait le même chemin. ==== */

@@ -51,8 +51,7 @@ function scr_mgmt_guerre(){
   const date=mfSoireeInfos(m);
   const entete=`<div class="gu82-entete">${date.dans?`<span>${esc(date.dans)}</span>`:''}${date.date?`<div class="gu82-date"><b>${esc(date.date)}</b>${date.lieu?`<span>${esc(date.lieu)}</span>`:''}</div>`:''}<div class="gu82-soiree"><b>${mfNomSoireeHtml(mgmtOrgNom(m)+' Fight Night',56,'')}</b><b>${esc((m.eventsPlayed||0)+1)}</b></div></div>`;
   const ecran=mfEcran(html,{barre:'jeu',courant:'organisation',m,prise:false,plaque:'Organisation',libelle:`${mgmtOrgNom(m)} · ${split?split.rang:'—'}e DES HUIT`,droiteHtml:entete,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Onglet'},{ks:['↑','↓'],t:'Choisir'},{ks:['Entrée'],t:'Ouvrir',jaune:true}]});
-  // Entrée locale à cet écran : les treize sections communes restent inchangées.
-  return ecran.replace('<div class="mf-barre-bas">','<button type="button" class="mf-barre-item cur" data-section="organisation" aria-current="page" onclick="CL.go(\'mgmt_guerre\')"><span>Organisation</span></button><div class="mf-barre-bas">');
+  return ecran;
   /* ==== [FIN ANCRE] ==== */
 }
 SCREENS.mgmt_guerre=scr_mgmt_guerre;
