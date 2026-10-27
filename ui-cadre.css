@@ -3682,3 +3682,30 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-fid85 .ce3-carnet-progression{height:8px;width:100%;background:#252121;flex:none}
 .ce3-carnet-fid85 .ce3-carnet-progression span{height:8px;background:#E9E6E1}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FID86_SOIREE_CADRES] — Fidélité soirée, lot 86.
+   Les fonds encadrés restent en arrière-plan pour conserver les boîtes des noms. */
+.mf-so .so3-carte,.mf-so .so3-prochain-panneau,.mf-so .so3-fin-soiree,.so3-ouverture .mf-so-col{position:relative;isolation:isolate}
+.mf-so .so3-prochain-panneau,.mf-so .so3-fin-soiree{background:none;border-color:transparent}
+.mf-so .mf-so-cadre{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.mf-so .mf-so-cadre>.mf-p2,.mf-so .mf-so-cadre>.mf-p2>.mf-p3{min-height:0}
+.mf-so .mf-so-cadre>.mf-p2>.mf-p3{padding:0;gap:0}
+.mf-so .so3-prochain-panneau>.mf-so-cadre,.mf-so .so3-fin-soiree>.mf-so-cadre{inset:-2px}
+.so3-ouverture .mf-so-col>.mf-so-cadre{inset:-7px}
+.mf-so .so3-carte>h2,.mf-so .so3-fin-soiree>h2{position:relative}
+.mf-so .so3-trait{position:absolute;left:14px;bottom:4px;display:block;width:56px;height:8px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-so .so3-fin-soiree>h2 .so3-trait{left:0;bottom:-10px}
+.mf-so .so3-ligne.courant{outline:0;box-shadow:inset 0 0 0 2px #F0B220}
+.mf-so .so3-bandeau{background:#121010;clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px)}
+.mf-so .so3-ambiance-pastilles{display:flex;align-items:center;gap:6px;min-width:0}
+.mf-so .so3-ambiance-pastilles>i{display:block;width:30px;height:30px;min-width:6px;flex:0 1 30px;background:#252121;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-so .so3-ambiance-pastilles>i.on{background:#F0B220}
+.mf-so .so3-rang,.mf-so .so3-carte-combat .mf-so-nb{display:flex;align-items:center;justify-content:center;height:42px;background:#0D0B0B;color:#E9E6E1;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-so .so3-ligne.courant .so3-rang,.mf-so .so3-carte-combat.on .mf-so-nb{background:#F0B220;color:#0D0B0B}
+.mf-so-entete .mf-so-pip{background:#252121;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-so-entete .mf-so-pip.on{background:#E9E6E1}
+.mf-so .so3-fin-prime{position:relative;isolation:isolate;background:none;--so86-fond:#252121;--so86-contour:rgba(233,230,225,.5);--so86-medaille:rgba(233,230,225,.10)}
+.mf-so .so3-fin-prime.combat{background:none;--so86-fond:#E9E6E1;--so86-contour:#E9E6E1;--so86-medaille:rgba(13,11,11,.10)}
+.mf-so .so3-fin-fond{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:var(--so86-fond);box-shadow:inset 0 0 0 2px var(--so86-contour);clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)}
+.mf-so .so3-fin-medaille{position:absolute;right:-70px;bottom:-70px;width:300px;height:300px;display:flex;align-items:center;justify-content:center;background:var(--so86-medaille);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-so .so3-fin-medaille>i{display:block;flex:none;width:276px;height:276px;background:var(--so86-fond);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+/* ==== [FIN ANCRE] ==== */

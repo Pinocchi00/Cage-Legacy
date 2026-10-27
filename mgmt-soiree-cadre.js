@@ -162,6 +162,9 @@ function mgmtSoLeila(m,prog){
 
 function mgmtSoOuvertureHtml(m,prog){
   const pre=prog.filter(p=>p.slot==='prelim'), main=prog.filter(p=>p.slot==='main');
+  /* ==== [ANCRE: FID86_CADRES_OUVERTURE] — Fidélité soirée, lot 86 ==== */
+  const cadre=mfPanneau('','normal','mf-so-cadre','aria-hidden="true"');
+  /* ==== [FIN ANCRE] ==== */
   const salle=mgmtSoireeSalle(m,0).nom, num=m.eventsPlayed||1;
   const haut=n=>Math.max(44,Math.min(88,Math.floor((560-(n-1)*8)/Math.max(1,n))));
     const ligne=(p,rang,on,h)=>{const vue=mgmtVueDuCombat(m,p.i), labels={complet:'COMPLET',forts:'TEMPS FORTS',resultat:'RÉSULTAT'};
@@ -172,10 +175,10 @@ function mgmtSoOuvertureHtml(m,prog){
             +`<button type="button" class="so3-vue" aria-label="Vue du combat ${esc(rang)} : ${labels[vue]}" aria-valuetext="${labels[vue]}" title="Changer la vue avec V" onclick="CL.mgmtSoVueSuivante(${p.i})">${labels[vue]}</button></div>`;
    };
   const hp=haut(pre.length), hm=haut(main.length);
-  const gauche=`<div class="mf-so-col"><div class="mf-so-ct"><div><div class="mf-so-ti">PRÉLIMINAIRES</div><i class="mf-so-bar"></i></div><span>La carte de Leïla</span></div>`
+  const gauche=`<div class="mf-so-col">${cadre}<div class="mf-so-ct"><div><div class="mf-so-ti">PRÉLIMINAIRES</div><i class="mf-so-bar"></i></div><span>La carte de Leïla</span></div>`
     +`<div class="mf-so-ls">${pre.map((p,k)=>ligne(p,k+1,k===0,hp)).join('')}</div>`
     +`<div class="mf-so-leila">${mfVoix('Leïla',mgmtSoLeila(m,prog))}</div></div>`;
-  const droite=`<div class="mf-so-col"><div class="mf-so-ct"><div><div class="mf-so-ti">CARTE PRINCIPALE</div><i class="mf-so-bar"></i></div><span>Ta carte</span></div>`
+  const droite=`<div class="mf-so-col">${cadre}<div class="mf-so-ct"><div><div class="mf-so-ti">CARTE PRINCIPALE</div><i class="mf-so-bar"></i></div><span>Ta carte</span></div>`
     +`<div class="mf-so-ls">${main.map((p,k)=>ligne(p,main.length-k,false,hm)).join('')}</div>`
     +`<div class="mf-so-pied">${mfBouton('Commencer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoCommencer()'})}</div></div>`;
    const corps=`<div class="mf-so-ban2 so3-entete"><div><div class="mf-so-s2">CE SOIR${salle?' · '+esc(mfNet(salle)):''}</div><div class="mf-so-org">${esc(mfNet(mgmtOrgNom(m)))} FIGHT NIGHT</div></div>`
@@ -186,6 +189,9 @@ function mgmtSoOuvertureHtml(m,prog){
 /** L'entre-deux et l'attente du principal : un seul écran, celui du combat qui vient. */
 function mgmtSoEntreHtml(m,prog,index,focus){
   /* ==== [ANCRE: MGMT_LOT65_T1_TABLEAU_SOIREE] — Monde lot 65 T1 : vue fidèle à UniSoiree. ==== */
+  /* ==== [ANCRE: FID86_CADRES_ENTRE_COMBATS] — Fidélité soirée, lot 86 ==== */
+  const cadre=mfPanneau('','normal','mf-so-cadre','aria-hidden="true"');
+  /* ==== [FIN ANCRE] ==== */
   const salle=mgmtSoireeSalle(m,focus), taux=Math.round(salle.part*100), finance=m.lastEvent.finance||{};
   const places=Math.round((finance.capacite||salle.capacite)*salle.part);
   const ambiance=Math.max(1,Math.min(5,Math.round(taux/20)));
@@ -198,8 +204,8 @@ function mgmtSoEntreHtml(m,prog,index,focus){
     return `<div class="so3-ligne${courant?' courant':''}${fait?' fait':''}"><b class="so3-rang">${k+1}</b><span class="so3-categorie">${esc(p.etiquette)}<small>${esc(soCat(p.div))}</small></span><strong class="so3-noms">${esc(gauche)}</strong>${boutons}</div>`;
   }).join('');
   const p=prog[focus], a=p&&p.a, b=p&&p.b, leila=mgmtSoLeila(m,prog), vue=p?mgmtVueDuCombat(m,p.i):'forts';
-   const prochain=p?`<aside class="so3-prochain so3-prochain-panneau"><h2>LE PROCHAIN · ${esc(p.etiquette)}</h2><div class="so3-prochain-noms"><b>${esc(soFirst(a))} ${esc(soLast(a))}</b><span>CONTRE</span><b>${esc(soFirst(b))} ${esc(soLast(b))}</b></div>${mfVoix('Leïla',leila)}<div class="so3-prochain-vue"><span>TU LE REGARDES EN</span><b>${vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT'}</b></div>${mfBouton('Regarder',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</aside>`:'';
-  return `<div class="so3-tableau"><section class="so3-bandeau"><div><b>LA SALLE</b><strong>${esc(places)} / ${esc(finance.capacite||salle.capacite)}</strong></div><div><b>L'AMBIANCE</b><strong>${'● '.repeat(ambiance)}${'○ '.repeat(5-ambiance)}</strong></div><span>Ça monte</span><div><b>LA RECETTE</b><strong>${esc(mgmtEuros(Number(finance.recette)||0))}</strong></div></section><div class="so3-corps"><section class="so3-carte"><h2>LA CARTE</h2>${rows}</section>${prochain}</div></div>`;
+   const prochain=p?`<aside class="so3-prochain so3-prochain-panneau">${cadre}<h2>LE PROCHAIN · ${esc(p.etiquette)}</h2><div class="so3-prochain-noms"><b>${esc(soFirst(a))} ${esc(soLast(a))}</b><span>CONTRE</span><b>${esc(soFirst(b))} ${esc(soLast(b))}</b></div>${mfVoix('Leïla',leila)}<div class="so3-prochain-vue"><span>TU LE REGARDES EN</span><b>${vue==='complet'?'COMPLET':vue==='forts'?'TEMPS FORTS':'RÉSULTAT'}</b></div>${mfBouton('Regarder',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</aside>`:'';
+  return `<div class="so3-tableau"><section class="so3-bandeau"><div><b>LA SALLE</b><strong>${esc(places)} / ${esc(finance.capacite||salle.capacite)}</strong></div><div><b>L'AMBIANCE</b><strong class="so3-ambiance-pastilles" role="img" aria-label="Ambiance : ${esc(ambiance)} sur 5">${Array.from({length:10},(_,i)=>`<i class="${i<ambiance*2?'on':''}"></i>`).join('')}</strong></div><span>Ça monte</span><div><b>LA RECETTE</b><strong>${esc(mgmtEuros(Number(finance.recette)||0))}</strong></div></section><div class="so3-corps"><section class="so3-carte">${cadre}<h2>LA CARTE<i class="so3-trait" aria-hidden="true"></i></h2>${rows}</section>${prochain}</div></div>`;
 }
 
 /* ==== [ANCRE: MGMT_SOIREE_ENTETE_FIN] — Monde lot 65 T1 ==== */
@@ -274,13 +280,13 @@ function mgmtSoFinHtml(m,prog){
     const total=Number(m.lastEvent.finance&&m.lastEvent.finance.primes)||0;
     const prime=Number.isFinite(fait&&fait.m)?fait.m:Math.floor(total/4);
     const affichageNoms=t.pr==='cs'?noms.split(' · ').map(n=>`<span>${esc(mfNet(n))}</span>`).join(''):esc(mfNet(noms));
-    return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${affichageNoms}</strong><b>${esc(mgmtEuros(prime))}${t.pr==='cs'?' CHACUN':''}</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
+    return `<article class="so3-fin-prime${t.pr==='cs'?' combat':' performance'}"><div class="so3-fin-fond" aria-hidden="true"><div class="so3-fin-medaille"><i></i></div></div><div class="so3-fin-label">${t.pr==='cs'?'COMBAT':'PERFORMANCE'} DE LA SOIRÉE</div><strong>${affichageNoms}</strong><b>${esc(mgmtEuros(prime))}${t.pr==='cs'?' CHACUN':''}</b><span>${esc(detail?detail.methode:'Combat terminé')}${detail?' · '+esc(mgmtRoundTexte(detail)):''}</span></article>`;
   });
   const finance=m.lastEvent.finance||{};
   const places=Number.isFinite(finance.capacite)&&finance.capacite>0?Math.round(finance.capacite*mgmtSoireeSalle(m,Math.max(0,prog.length-1)).part):0;
   const ambiance=Math.max(0,Math.min(10,Math.round(rempli/10)));
   const recette=Number(finance.recette)||0;
-  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes${cartes.length===2?' deux-cartes':''}">${cartes.join('')}</div><section class="so3-fin-soiree"><h2>LA SOIRÉE</h2><div class="so3-fin-salle"><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b><small>sur ${esc(finance.capacite||0)} places · record à ${esc(finance.record||'—')}</small></div><div class="so3-fin-ambiance"><span>L'AMBIANCE À LA FIN</span><b>${Array.from({length:10},(_,i)=>`<i class="${i<ambiance?'on':''}"></i>`).join('')}</b><small>${ambiance>=7?'Une grande soirée.':'La soirée est terminée.'}</small></div><div class="so3-fin-recette"><span>LA RECETTE</span><b>${recette<0?'−':'+'} ${esc(mgmtEuros(Math.abs(recette)))}</b><small>PRIMES PAYÉES</small></div></section><nav class="so3-fin-actions" aria-label="Actions de fin de soirée">${mfBouton('Tous les résultats',{touche:'R',onclick:'CL.go("mgmt_resultats")'})}${mfBouton('Le lendemain',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</nav></section>`;
+  return `<section class="so3-fin-recomposee" aria-label="Fin de soirée"><div class="so3-fin-cartes${cartes.length===2?' deux-cartes':''}">${cartes.join('')}</div><section class="so3-fin-soiree">${mfPanneau('','normal','mf-so-cadre','aria-hidden="true"')}<h2>LA SOIRÉE<i class="so3-trait" aria-hidden="true"></i></h2><div class="so3-fin-salle"><span>LA SALLE</span><b>${esc(places)} / ${esc(finance.capacite||0)}</b><small>sur ${esc(finance.capacite||0)} places · record à ${esc(finance.record||'—')}</small></div><div class="so3-fin-ambiance"><span>L'AMBIANCE À LA FIN</span><b>${Array.from({length:10},(_,i)=>`<i class="${i<ambiance?'on':''}"></i>`).join('')}</b><small>${ambiance>=7?'Une grande soirée.':'La soirée est terminée.'}</small></div><div class="so3-fin-recette"><span>LA RECETTE</span><b>${recette<0?'−':'+'} ${esc(mgmtEuros(Math.abs(recette)))}</b><small>PRIMES PAYÉES</small></div></section><nav class="so3-fin-actions" aria-label="Actions de fin de soirée">${mfBouton('Tous les résultats',{touche:'R',onclick:'CL.go("mgmt_resultats")'})}${mfBouton('Le lendemain',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}</nav></section>`;
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
