@@ -3817,3 +3817,25 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-bilan-rang{box-sizing:border-box;height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;display:flex;align-items:center;gap:var(--mf-ecart)}
 .po2-bilan-rang b{font:800 40px/.69 var(--mf-titre)}
 .po2-bilan-rang span{font-size:24px;line-height:1;font-weight:600;letter-spacing:.06em}
+/* ==== [ANCRE: FID_MENU_GAUCHE_AVENIR_CSS] — Menu et affiches conservés, 27/10/2026 ==== */
+.title-screen .mf-accueil-gauche{top:60px;max-height:936px;overflow-y:auto}
+.title-screen .mf-accueil-titre{font-size:100px;line-height:.8}
+.title-screen .mf-menu{margin-top:32px;gap:4px}
+.title-screen .mf-menu button,.title-screen .mf-menu-bas button{box-sizing:border-box;width:100%;height:auto;min-height:92px;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;gap:var(--mf-ecart);border-bottom:2px solid rgba(233,230,225,.16);line-height:1;white-space:normal;text-align:left}
+.title-screen .mf-menu-texte{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+.title-screen .mf-menu-texte strong{font-family:var(--mf-titre);font-weight:800;line-height:.8}
+.title-screen .mf-menu-texte small,.title-screen .mf-menu button.premier small{font:600 22px/1.1 var(--mf-texte);letter-spacing:.04em;white-space:normal}
+.title-screen .mf-menu button.on,.title-screen .mf-menu-bas button.on{background:#E9E6E1;color:#0D0B0B;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.title-screen .mf-menu button.grise,.title-screen .mf-menu-bas button.grise{opacity:1}
+.title-screen button.grise .mf-menu-texte{opacity:.55}
+.title-screen .mf-menu-statut{height:38px;padding:0 10px;border:2px solid #F0B220;color:#F0B220;display:flex;align-items:center;font:800 24px/1 var(--mf-titre);white-space:nowrap;flex:none}
+.title-screen .mf-menu-pastille{width:26px;height:26px;flex:none;background:#E23A2B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.title-screen .mf-menu-sep{margin-top:18px}
+.title-screen .mf-menu-bas{margin-top:12px;gap:4px}
+.title-screen .mf-accueil-touches{left:80px;top:1010px;height:48px}
+/* Une ligne horizontale tournée garde les mêmes lettres et positions, avec une boîte qui contient réellement le texte. */
+.title-screen .mf-nom,.title-screen .mf-vs{writing-mode:horizontal-tb;transform-origin:0 0;transform:translateX(.69em) rotate(90deg)}
+.title-screen .mf-nom.bas{transform-origin:0 100%;transform:translateX(.69em) rotate(-90deg)}
+.title-screen .mf-fiche-nom{width:318px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.title-screen .mf-aussi{box-sizing:border-box;max-height:144px;overflow-y:auto}
+.title-screen .mf-aussi-l{overflow-wrap:anywhere}
