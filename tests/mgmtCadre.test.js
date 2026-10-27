@@ -92,8 +92,9 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
     MGMT_FICHE={id:m.roster[0].id,retour:'mgmt_classements',cursor:0}; G.screen='mgmt_fiche'; render(); const fiche=items();
     G.screen='mgmt_soiree'; render(); const soir=items();
     return {carte,bureau,fiche,soir,sections:MF_SECTIONS.map(s=>s.id)};`);
-  assert.deepEqual(r.sections,['accueil','actualites','carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
-  assert.equal(r.carte.length,15,'treize sections, Options, Menu principal ('+"brief du 22/10, P3 T2b : une section Actualites de plus (12 -> 13)"+')');
+  /* Décision d’Anthony du27/10/2026 : ajouter Organisation à la barre commune. */
+  assert.deepEqual(r.sections,['accueil','actualites','carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances','organisation']);
+  assert.equal(r.carte.length,16,'quatorze sections, Options, Menu principal');
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
   assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),[],'plus aucune section n’est grisée sur la carte : Options est livrée au lot 12 (décision du brief : Options ne se grise que pendant la soirée, comme la barre entière)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
@@ -189,4 +190,25 @@ test('Mouvement — l’entrée ne se joue qu’à l’arrivée sur un écran, j
     CL.mgmtParties(); const autre=document.querySelector('.mf-ecran').classList.contains('mf-entree');
     return {premier,redessine,autre};`);
   assert.deepEqual(r,{premier:true,redessine:false,autre:true});
+});
+
+/* Décision d’Anthony du27/10/2026 : un menu Organisation permanent, sans les anciens doublons locaux. */
+test('Organisation — un seul accès commun et quatre onglets avec une seule section éclairée',()=>{
+  const win=newGameWindow({runMain:true});
+  try{
+    const r=result(win,`${NEUVE}
+      mgmtPosteInit(m);CL.go('mgmt_accueil');
+      const entree=document.querySelector('.mf-barre [data-section="organisation"]');
+      if(!entree)throw new Error('Accès Organisation absent de l’accueil');entree.click();
+      const premier=G.screen,sorties=[];
+      for(const screen of ['mgmt_guerre','mgmt_organisation','mgmt_poste','mgmt_carnet']){
+        const tab=[...document.querySelectorAll('.mo67-tab')].find(b=>b.getAttribute('onclick').includes(screen));
+        if(!tab)throw new Error('Onglet absent : '+screen);tab.click();
+        sorties.push({screen:G.screen,n:document.querySelectorAll('.mf-barre [data-section="organisation"]').length,courants:[...document.querySelectorAll('.mf-barre-item.cur')].map(b=>b.dataset.section),retour:mfSectionCourante(screen),onglets:document.querySelectorAll('.mo67-tab').length});
+      }
+      return {premier,sorties};`);
+    assert.equal(r.premier,'mgmt_guerre');
+    assert.deepEqual(r.sorties.map(x=>x.screen),['mgmt_guerre','mgmt_organisation','mgmt_poste','mgmt_carnet']);
+    for(const x of r.sorties){assert.equal(x.n,1,x.screen);assert.deepEqual(x.courants,['organisation'],x.screen);assert.equal(x.retour,'organisation');assert.equal(x.onglets,4);}
+  }finally{win.close();}
 });

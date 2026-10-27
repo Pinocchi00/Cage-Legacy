@@ -62,6 +62,33 @@ test('Monde lot 48 T1 — Tab et Maj+Tab changent l’onglet inscrit',()=>{
   assert.equal(r.keys,'function');assert.match(r.screen,/AUTRE/);
 });
 
+/* Décision : planche UniBilanPatron validée par Anthony ; les trois issues restent accessibles au clavier comme à la souris. */
+test('Bilan — bouton et Entrée produisent le même contrat, les mêmes offres et la même destination',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      const resultats=[];
+      for(const conf of [4,2,0]){
+        const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=conf;
+        m.poste.obj.forEach((o,i)=>o.e=conf===4||conf===2&&i<2?'tenu':'cours');
+        const issue=mgmtPosteBilan(m).issue,avant=JSON.stringify(m),sorties=[];
+        for(const clavier of [false,true]){
+          G.mgmt=JSON.parse(avant);G.screen='mgmt_poste_bilan';document.body.innerHTML=scr_mgmt_poste_bilan();
+          if(clavier)keysHandle({key:'Enter',preventDefault(){}});else document.querySelector('.po2-bilan-actions button').click();
+          sorties.push({screen:G.screen,poste:G.mgmt.poste,offres:G.mgmt.offres||null,valid:validateMgmt(G.mgmt)});
+        }
+        resultats.push({issue,identique:JSON.stringify(sorties[0])===JSON.stringify(sorties[1]),...sorties[0]});
+      }
+      return resultats;
+    })())`));
+    assert.deepEqual(r.map(x=>x.issue),['prolonge-augmente','prolonge-condition','renvoi']);
+    for(const x of r){assert.equal(x.identique,true,x.issue);assert.equal(x.valid,true,x.issue);assert.equal(x.screen,'mgmt_poste');}
+    assert.equal(r[0].poste.saison,2);assert.equal(r[0].poste.salaire,4000);
+    assert.equal(r[1].poste.saison,2);assert.equal(r[1].poste.salaire,3200);
+    assert.equal(r[2].poste.saison,1,'continuer après un renvoi ne renouvelle pas le contrat');
+  }finally{w.close();}
+});
+
 /* Relevé visuel du 23/10/2026 : la confiance 4 (la meilleure) affichait « Il n'y croit plus » parce que les niveaux des données vont du meilleur au pire et que l'indice était pris tel quel. */
 test('Monde lot 48 T1 — la confiance se lit dans le bon sens : 4 est « Il est ravi », 0 « Il n’y croit plus »',()=>{
   const w=newGameWindow({runMain:true});

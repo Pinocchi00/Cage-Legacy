@@ -18,7 +18,8 @@ test('T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise
   const r=res(w,`const premier=G.screen; CL.go('mgmt_accueil'); const ap=G.screen; const barre=[...document.querySelectorAll('.mf-barre-item[data-section]')].map(b=>b.dataset.section);
     const cur=document.querySelector('.mf-barre-item.cur'); G.mgmt=null; CL.mgmtEnter(1);
     return {premier,ap,reprise:G.screen,tete:barre.slice(0,2),n:MF_SECTIONS.length,cur:cur&&cur.dataset.section};`);
-  assert.deepEqual(r,{premier:'mgmt_arrivee',ap:'mgmt_accueil',reprise:'mgmt_accueil',tete:['accueil','actualites'],n:13,cur:'accueil'});
+  /* Décision d’Anthony du27/10/2026 : Organisation est la quatorzième section commune. */
+  assert.deepEqual(r,{premier:'mgmt_arrivee',ap:'mgmt_accueil',reprise:'mgmt_accueil',tete:['accueil','actualites'],n:14,cur:'accueil'});
 });
 
 test('T1 — une partie laissée en pleine soirée mène toujours à la soirée (avant l’Accueil)', () => {

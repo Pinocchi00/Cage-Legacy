@@ -34,7 +34,8 @@ test('Monde lot 58 T1 — les invitations conservent le poste et une formulation
 test('Monde lot 58 T1 — un bilan positif ouvre la voie aux approches avant le renouvellement',()=>{
   const w=newGameWindow({runMain:true});
   const n=JSON.parse(w.eval(`JSON.stringify((()=>{const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);m.poste.conf=4;m.poste.obj.forEach(o=>{o.e='tenu';});G.mgmt=m;const html=scr_mgmt_poste_bilan();const renouvellement=mgmtPosteRenouveler(m,mgmtPosteBilan(m).issue);return {html,renouvele:!!renouvellement}})())`));
-  assert.match(n.html,/mgmtOffresCreer\(G\.mgmt\);mgmtPosteRenouveler/);
+  /* Décision : planche UniBilanPatron validée par Anthony ; le bouton et Entrée partagent le parcours, testé sur les trois issues dans Lot48. */
+  assert.match(n.html,/onclick="mgmtPosteBilanContinuer\(\)"/);
   assert.equal(n.renouvele,true);
 });
 
@@ -144,4 +145,24 @@ test('Monde lot 58 T1 — le refus des offres laisse poursuivre puis renouveler 
   assert.equal(r.issue,'prolonge-augmente');
   assert.equal(r.poste,true);
   assert.equal(r.valid,true);
+});
+
+test('Bilan — les offres du monde vivant conservent leurs quatre raisons complètes au rechargement',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      setSeed(5827);const m=mgmtPasseGenerer('split',{soirees:3});mgmtMondeVivantGenerer(m,{soirees:3});mgmtPosteInit(m);
+      m.poste.conf=4;m.poste.obj.forEach(o=>o.e='tenu');G.mgmt=m;
+      const avant=JSON.stringify(m),html=scr_mgmt_poste_bilan(),sansMutation=avant===JSON.stringify(m);
+      const offres=mgmtOffresCreer(m),raisons=offres.map(o=>o.raisons),recharge=mgmtParseAndValidate(mgmtSerialiser(m));
+      const mauvais=JSON.parse(JSON.stringify(offres));mauvais[0].raisons[0]='x'.repeat(301);
+      return {sansMutation,html,n:offres.length,raisons,valid:validateMgmt(m),recharge:!!recharge,exact:!!recharge&&JSON.stringify(recharge.offres.map(o=>o.raisons))===JSON.stringify(raisons),tropLong:mgmtOffresValide(mauvais)};
+    })())`));
+    assert.ok(r.n>0,'de vraies approches doivent être générées');
+    assert.ok(r.raisons.flat().some(x=>x.length>120),'le cas qui perdait les offres est réellement couvert');
+    assert.ok(r.raisons.every(rs=>rs.length===4&&new Set(rs).size===4));
+    assert.equal(r.sansMutation,true,'ouvrir le bilan ne génère pas de choix dans la sauvegarde');
+    assert.equal(r.valid,true);assert.equal(r.recharge,true);assert.equal(r.exact,true);
+    assert.equal(r.tropLong,false,'la limite reste bornée');
+  }finally{w.close();}
 });

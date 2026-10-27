@@ -55,12 +55,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 /* La barre des sections : 260 px à gauche, toute la hauteur. */
 .mf-barre{position:absolute;left:0;top:0;width:260px;height:1080px;background:var(--mf-noir);border-right:2px solid var(--mf-bord);display:flex;flex-direction:column}
-.mf-barre-logo{height:128px;padding:0 22px;border-bottom:2px solid var(--mf-sep);display:flex;align-items:center}
+.mf-barre-logo{height:128px;flex:none;padding:0 22px;border-bottom:2px solid var(--mf-sep);display:flex;align-items:center}
 .mf-logo{display:inline-flex;align-items:center;gap:11px}
 .mf-logo-mots{display:flex;flex-direction:column;gap:3px;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.72;white-space:nowrap}
 .mf-logo-mots b{font-size:38.3px}
 .mf-logo-mots i{font-style:normal;font-size:26px}
-.mf-barre-item{width:100%;height:69px;padding:0 22px 0 28px;border-bottom:2px solid var(--mf-sep);display:flex;align-items:center;justify-content:space-between;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:32px;line-height:1;white-space:nowrap;color:var(--mf-blanc);text-transform:uppercase}
+.mf-barre-item{width:100%;height:59px;flex:none;padding:0 22px 0 28px;border-bottom:2px solid var(--mf-sep);display:flex;align-items:center;justify-content:space-between;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1;white-space:nowrap;color:var(--mf-blanc);text-transform:uppercase}
 .mf-barre-item.cur{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-barre-item.grise{opacity:.38}
 .mf-barre-bas{margin-top:auto;border-top:2px solid var(--mf-sep)}
@@ -3779,3 +3779,41 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so .so3-prochain-actions .mf-bouton:not(.jaune){height:48px}
 .mf-so .so3-fin-prime.combat>strong,.mf-so .so3-fin-prime.performance>strong{font-size:var(--so-fin-nom);line-height:.8}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FID_BILAN_PLANCHE_CSS] — Fidélité UniBilanPatron, 27/10/2026 ==== */
+.mf-contenu.po2-bilan{width:1564px;height:856px;margin:0;padding:0;background:none;border:0;display:flex;flex-direction:row;gap:16px;overflow:visible}
+.po2-bilan-verdict{flex:1.55;min-width:0;box-sizing:border-box;position:relative;background:#121010;border:2px solid rgba(233,230,225,.5);clip-path:polygon(22px 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%,0 22px);padding:32px 36px;display:flex;flex-direction:column;gap:22px}
+.po2-bilan-verdict::before{content:'';position:absolute;inset:0;pointer-events:none;background:url('images/accueil-octogones.jpg') -200px -400px/1728px 972px no-repeat;opacity:.18}
+.po2-bilan-tampon{position:absolute;right:40px;top:36px;transform:rotate(-6deg);border:6px solid #F0B220;padding:10px 22px;font:800 72px/.85 var(--mf-titre);color:#F0B220}
+.po2-bilan-entete{position:relative;display:flex;flex-direction:column;gap:12px}
+.po2-bilan .po2-bilan-entete p{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:rgba(233,230,225,.74);margin:0;width:fit-content;max-width:calc(100% - 330px)}
+.po2-bilan .po2-bilan-entete h1{font:800 120px/.75 var(--mf-titre);margin:0;padding:0;border:0;color:#E9E6E1;width:fit-content;max-width:calc(100% - 330px)}
+.po2-bilan-parole{position:relative;display:flex;gap:22px}
+.po2-bilan-parole>span{font:800 150px/.7 var(--mf-titre);color:#F0B220}
+.po2-bilan .po2-bilan-parole>p{font-size:34px;line-height:1.25;font-weight:600;padding-top:14px;margin:0;min-width:0}
+.po2-bilan-chiffres{position:relative;margin-top:auto;display:flex;gap:12px}
+.po2-bilan-chiffres .po2-bilan-fait{flex:1;min-width:0;box-sizing:border-box;background:rgba(13,11,11,.86);border:2px solid rgba(233,230,225,.38);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.po2-bilan-chiffres .po2-bilan-fait>span{font-size:22px;line-height:1;font-weight:600;letter-spacing:.04em;color:rgba(233,230,225,.74)}
+.po2-bilan-chiffres .po2-bilan-fait>strong{font:800 44px/.9 var(--mf-titre);overflow-wrap:anywhere}
+.po2-bilan-panel{flex:1;min-width:0;min-height:0}
+.po2-bilan-panel>.mf-p2>.mf-p3{padding:15px;display:flex;flex-direction:column;min-height:0}
+.po2-bilan-porte{display:flex;flex-direction:column;gap:16px;flex:1;min-height:0;min-width:0}
+.po2-bilan-legende{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:#E23A2B}
+.po2-bilan-offre{display:flex;flex-direction:column;gap:16px;min-height:0;min-width:0;overflow-y:auto}
+.po2-bilan-offre h2{font:800 60px/.85 var(--mf-titre);margin:0;overflow-wrap:anywhere}
+.po2-bilan .po2-bilan-situation{font-size:24px;line-height:1;color:rgba(233,230,225,.74);margin:0}
+.po2-bilan-conditions{display:flex;flex-direction:column}
+.po2-bilan-conditions .po2-bilan-fait{display:flex;justify-content:space-between;align-items:baseline;gap:var(--mf-ecart);padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.po2-bilan-conditions .po2-bilan-fait>span{font-size:24px;line-height:1;color:rgba(233,230,225,.74)}
+.po2-bilan-conditions .po2-bilan-fait>strong{font:800 32px/1 var(--mf-titre);text-align:right;overflow-wrap:anywhere}
+.po2-bilan .po2-bilan-proposition{font-size:24px;line-height:1.2;margin:0}
+.po2-bilan-raisons{font-size:22px;line-height:1.2}
+.po2-bilan-raisons summary{cursor:pointer;color:rgba(233,230,225,.74)}
+.po2-bilan .po2-bilan-raisons p{font-size:22px;line-height:1.2;margin:12px 0;overflow-wrap:anywhere}
+.po2-bilan-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.po2-bilan-actions .mf-bouton{height:auto;min-height:56px;padding:10px 22px;gap:var(--mf-ecart);flex:none;white-space:normal}
+.po2-bilan-actions .mf-bouton.jaune{min-height:64px}
+.po2-bilan-actions .mf-bouton-t{font-size:30px;line-height:1;white-space:normal;overflow-wrap:anywhere}
+.po2-bilan-actions .jaune .mf-bouton-t{font-size:34px}
+.po2-bilan-rang{box-sizing:border-box;height:64px;padding:0 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B;display:flex;align-items:center;gap:var(--mf-ecart)}
+.po2-bilan-rang b{font:800 40px/.69 var(--mf-titre)}
+.po2-bilan-rang span{font-size:24px;line-height:1;font-weight:600;letter-spacing:.06em}

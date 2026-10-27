@@ -80,7 +80,8 @@ function mgmtPosteBilan(m){
 /** Offres sont un complément facultatif : elles ne changent jamais l'organisation active. */
 function mgmtOffresValide(offres){
   if(!Array.isArray(offres)||offres.length>3)return false;
-  return offres.every(o=>o&&typeof o==='object'&&!Array.isArray(o)&&typeof o.orgId==='string'&&!!mgmtOrgParId(o.orgId)&&typeof o.poste==='string'&&o.poste.length<=80&&Number.isSafeInteger(o.salaire)&&o.salaire>=0&&typeof o.texte==='string'&&o.texte.length<=300&&o.relu===false&&typeof o.refuse==='boolean'&&Array.isArray(o.raisons)&&o.raisons.length===4&&o.raisons.every(x=>typeof x==='string'&&x.length<=120));
+  /* Les raisons générées par mgmtPosteRaisons dépassent120caractères (158 pour Fighting Pacific). Même borne courte que le texte d'offre, sans couper les textes existants. */
+  return offres.every(o=>o&&typeof o==='object'&&!Array.isArray(o)&&typeof o.orgId==='string'&&!!mgmtOrgParId(o.orgId)&&typeof o.poste==='string'&&o.poste.length<=80&&Number.isSafeInteger(o.salaire)&&o.salaire>=0&&typeof o.texte==='string'&&o.texte.length<=300&&o.relu===false&&typeof o.refuse==='boolean'&&Array.isArray(o.raisons)&&o.raisons.length===4&&o.raisons.every(x=>typeof x==='string'&&x.length<=300));
 }
 function mgmtOffresCreer(m){
   if(!m||m.mondeVivant!==true||!Array.isArray(MGMT_ORGANISATIONS)||!m.poste)return [];
