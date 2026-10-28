@@ -4,6 +4,23 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {newGameWindow}=require('./helpers/loadGame');
 
+test('Retours — trois colonnes, profils fermés et navigation vers le profil réellement ouvert',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  w.eval(`setSeed(7);const m=mgmtPasseGenerer('split',{soirees:3});m.treasury=100;m.graine='retour-t2';G.mgmt=m;
+    mgmtRecruteurEnvoyer(m,{dest:'france',cat:'H-light',style:'lutteur',sem:2});m.cal.jour+=14;mgmtRecruteurRetour(m);MGMT_RC_UI.profil=0;CL.go('mgmt_recruteur_retours');`);
+  assert.equal(w.document.querySelector('.rc-contract'),null);
+  w.eval('CL.rcReveal()');assert.ok(w.document.querySelector('.rc-list'));assert.ok(w.document.querySelector('.rc-open'));assert.ok(w.document.querySelector('.rc-contract'));
+  assert.equal(w.document.querySelector('.rc-open .rc-contract'),null);
+  w.eval(`keysHandle({key:'ArrowDown',preventDefault(){}})`);
+  assert.equal(w.eval('MGMT_RC_UI.profil'),1);assert.equal(w.eval('G.mgmt.recruteur.retours[0].lus'),1);assert.equal(w.document.querySelector('.rc-contract'),null);
+  w.eval(`CL.rcSigner=id=>window.preuveSigne=id;keysHandle({key:'Enter',preventDefault(){}})`);assert.equal(w.preuveSigne,undefined);
+  w.eval(`keysHandle({key:' ',preventDefault(){}});keysHandle({key:'Enter',preventDefault(){}})`);
+  assert.equal(w.preuveSigne,w.eval('G.mgmt.recruteur.retours[0].profils[1].id'));
+  w.eval('CL.rcProfil(-999)');assert.equal(w.eval('MGMT_RC_UI.profil'),0);
+ }finally{w.close();}
+});
+
 test('Recruteur — la mission affiche la date du calendrier et le prix réellement débité',()=>{
  const w=newGameWindow({runMain:true});
  try{
