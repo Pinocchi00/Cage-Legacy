@@ -3,6 +3,25 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
+
+test('Semaine fidèle — décision à gauche, résumé à droite, carte et fiche réellement accessibles',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  w.eval(`setSeed(7);CL.mgmtEnter(1);const m=G.mgmt,a=m.roster[0],b=m.roster[1];
+    m.semaine={n:1,ev:[{f:'poids',j:'vendredi',a:a.id,b:b.id,v:0,p:true}]};MGMT_SE_JOUR=4;CL.go('mgmt_semaine');
+    window.preuveFiche=a.id;window.preuvePenalite=mgmtEuros(Math.ceil(mgmtPurse(a,'main')*.2));`);
+  assert.equal(w.document.querySelectorAll('.se-frise .se-octo').length,6);
+  assert.ok(w.document.querySelector('.se-principal .se-choix'));
+  assert.ok(w.document.querySelector('.se-cote .se-bref-tete'));
+  assert.equal(w.document.querySelector('.se-principal .se-bref-tete'),null);
+  assert.ok(w.document.querySelector('.se-option').textContent.includes(w.preuvePenalite));
+  w.eval(`CL.mgmtFiche=id=>window.preuveOuvert=id;keysHandle({key:'F',preventDefault(){}})`);assert.equal(w.preuveOuvert,w.preuveFiche);
+  w.eval(`keysHandle({key:'C',preventDefault(){}})`);assert.equal(w.eval('G.screen'),'mgmt_carte');
+  w.eval(`G.mgmt.semaine.ev=[];G.mgmt.ville='<Ville>';MGMT_SE_JOUR=0;CL.go('mgmt_semaine')`);
+  assert.equal(w.document.querySelector('.se-titre').textContent,'Arrivée à <Ville>');
+  assert.equal(w.document.querySelector('.se-titre ville'),null);
+ }finally{w.close();}
+});
 test('P6 T2 — l’écran de semaine est enregistré et la frise compte six jours',()=>{const w=newGameWindow();try{const r=w.eval(`(()=>{const m={semaine:{n:1,ev:[{f:'poids',j:'vendredi',a:'x',b:'y',v:0,p:true}]},card:{main:[],prelims:[]}};G={mgmt:m};return {screen:typeof SCREENS.mgmt_semaine,days:(scr_mgmt_semaine().match(/class="se-jour/g)||[]).length};})()`);assert.equal(r.screen,'function');assert.equal(r.days,6);}finally{w.close();}});
 test('P6 T2 — les transitions clavier de jour bouclent sur les six jours',()=>{const w=newGameWindow();try{const r=w.eval(`(()=>{MGMT_SE_JOUR=0;CL.mgmtSemaineDeplacer(-1);const a=MGMT_SE_JOUR;CL.mgmtSemaineDeplacer(1);return [a,MGMT_SE_JOUR];})()`);assert.deepEqual(Array.from(r),[5,0]);}finally{w.close();}});
 test('P6 T2 — le texte injecté du combattant est échappé',()=>{const w=newGameWindow();try{const html=w.eval(`(()=>{const m={ville:'Lyon',salle:'Salle',semaine:{n:1,ev:[{f:'poids',j:'vendredi',a:'x',b:'y',v:0,p:true}]},card:{main:[],prelims:[]}};G={mgmt:m};return scr_mgmt_semaine();})()`);assert.ok(!html.includes('<img'));}finally{w.close();}});
