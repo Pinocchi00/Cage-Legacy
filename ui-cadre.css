@@ -48,6 +48,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-tete-boite span{font-weight:600;font-size:24px;line-height:1;letter-spacing:.06em}
 .mf-tete-boite.soir{gap:24px}
 .mf-tete-nom .mf-nom-soiree,.mf-cal-nom .mf-nom-soiree{display:flex;flex-direction:column;line-height:.9;white-space:nowrap}
+.mf-tete-nom .mf-nom-soiree{font-family:var(--mf-titre);font-weight:800;letter-spacing:inherit}
+.mf-tete-nom .mf-nom-soiree .l{font:inherit;letter-spacing:inherit}
 .mf-tete-boite.soir b.mf-tete-nom{font-size:inherit;line-height:.9}
 .mf-tete-boite.soir b{font-size:56px}
 .mf-tete-boite.soir b.n{color:var(--mf-rouge-vif)}
