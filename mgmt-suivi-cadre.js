@@ -587,7 +587,7 @@ function mgmtSuReDetailHtml(m,x,rang,revoyable,derniere){
     +`<div class="mf-re-l2">${esc(mgmtDivisionLabel(d.cat)+' · en '+d.rounds+' rounds')}</div>`
     +`<div class="mf-re-l2">${esc('Bilans avant le combat : '+mgmtSuBilan(d.gagnant)+' et '+mgmtSuBilan(d.perdant))}</div>`
     +(ch?`<div class="mf-re-sous haut">Ce que ça change</div>${ch}`:'')
-    +`<div class="mf-re-actions">${actions}</div>`;
+    +`<div class="mf-re-actions">${actions}${mgmtReleveCombat(m,m.hist[x.i])?mfBouton('Relevé du combat',{touche:'C',classe:'mf-re-act',onclick:'CL.mgmtSuReReleve()'}):''}</div>`;
 }
 /* ==== [ANCRE: MONDE_T5_RELEVE_RESULTATS] — Monde lot 36 T2 ==== */
 function mgmtSuReChiffresHtml(m,entree){
@@ -643,7 +643,8 @@ function scr_mgmt_resultats(){
     revoyable=!!cur&&!!cur.d&&mgmtCombatRevoyable(m.hist[cur.i]);
     fiche=!!cur&&!!cur.d&&!!mgmtFicheLigne(m,cur.d.gagnant.id);
      const det=cur?mgmtSuReDetailHtml(m,cur,rangs[cur.k]-1,revoyable,derniere):'';
-     const chiffres=cur?mgmtSuReChiffresHtml(m,m.hist[cur.i]):'';
+     const lecture=cur?mgmtSuReChiffresHtml(m,m.hist[cur.i]):'';
+     const chiffres=lecture?`<details class="mf-re-chiffres-resume"><summary>Statistiques rapides</summary>${lecture}</details>`:'';
     corps=`<div class="mf-re-m"><div class="mf-re-sdt"><div class="mf-re-sdt-h"><div class="mf-re-T">${esc(org+' Fight Night '+s.n)}</div><div class="mf-re-puce${joueur?' a-toi':''}">${esc(puce)}</div></div>${ligneTete?`<div class="mf-re-l1 t2">${esc(ligneTete)}</div>`:''}</div>${pan('mf-re-tab',tab)}</div>`
        +`<div class="mf-re-d">${pan('mf-re-det',det)}${chiffres}${jaune}</div>`;
     libelle=org+' Fight Night '+s.n+(dateLongue?' · '+dateLongue:'');
@@ -659,6 +660,40 @@ function scr_mgmt_resultats(){
 }
 /* ==== [FIN ANCRE] ====*/
 SCREENS.mgmt_resultats=scr_mgmt_resultats;
+
+/* ==== [ANCRE: FIDELITE_RELEVE_INDIVIDUEL_20261028] — Revue locale UniReleve ==== */
+/** Lecture seule : les coins suivent les noms du bandeau, même lorsque B gagne. */
+function mgmtSuReleveHtml(m,t,d,s){
+  const releve=mgmtReleveCombat(m,t), inverse=t.winner==='B', a=inverse?t.b:t.a, b=inverse?t.a:t.b;
+  const nom=f=>f.last||f.name||'', titre=texte=>`<div class="mf-rl-titre"><h2>${esc(texte)}</h2><i></i></div>`;
+  const temps=v=>Math.floor(v/60)+':'+String(v%60).padStart(2,'0');
+  const nomHtml=(f,cote)=>`<strong class="${cote}" style="font-size:${mfCorps(nom(f),440,112,22)}px">${esc(nom(f))}</strong>`;
+  const revoyable=mgmtCombatRevoyable(t);
+  const actions=revoyable?mfBouton('Temps forts',{touche:'T',onclick:'CL.mgmtSuReleveVoir(true)'})+mfBouton('Revoir le combat',{touche:'R',jaune:true,onclick:'CL.mgmtSuReleveVoir(false)'}):'';
+  const entete=`<header class="mf-rl-entete"><div class="mf-rl-verdict"><div class="mf-rl-noms">${nomHtml(a,'coin-a')}<span>${d.nul?'ET':'BAT'}</span>${nomHtml(b,d.nul?'':'coin-b')}</div><div class="mf-rl-meta"><b>${esc(mgmtSuMethodeFine(d))}</b><span>${esc(mgmtOrgNom(m)+' Fight Night '+s.n+' · '+mgmtDivisionLabel(d.cat))}</span></div></div><div class="mf-rl-actions">${actions}</div></header>`;
+  if(!releve)return entete+mfPanneau(titre('RELEVÉ INDISPONIBLE')+'<p>Les statistiques de ce combat ne sont pas conservées.</p>','normal','mf-rl-absent');
+  const gauche=inverse?releve.total.b:releve.total.a, droite=inverse?releve.total.a:releve.total.b;
+  const mesures=[['Coups significatifs',c=>c.sigTouches+' / '+c.sigTentes],['Précision',c=>c.precision==null?'—':Math.round(c.precision*100)+' %'],['Tête · corps · jambes',c=>c.tete+' · '+c.corps+' · '+c.jambes],['Amenées',c=>c.amenees+' / '+c.amTentees],['Contrôle',c=>temps(c.controle)],['Knockdowns',c=>c.kd],['Soumissions tentées',c=>c.sub]];
+  const totaux=`<div class="mf-rl-coins"><b>${esc(nom(a))}</b><b class="${d.nul?'':'coin-b'}">${esc(nom(b))}</b></div>`+mesures.map(([label,val])=>`<div class="mf-rl-total"><strong>${esc(val(gauche))}</strong><span>${esc(label)}</span><strong class="${d.nul?'':'coin-b'}">${esc(val(droite))}</strong></div>`).join('');
+  const max=Math.max(1,...releve.parRound.flatMap(q=>[q.a.sigTouches,q.b.sigTouches]));
+  const rounds=releve.parRound.map(q=>{
+    const l=inverse?q.b:q.a,r=inverse?q.a:q.b;
+    const barre=(c,f,cote)=>`<div class="mf-rl-col ${cote}"><div class="mf-rl-mesure"><b>${esc(c.sigTouches)}</b><i style="height:${Math.round(c.sigTouches/max*160)}px"></i></div><span>${esc(nom(f))}</span></div>`;
+    return `<section class="mf-rl-round"><div class="mf-rl-round-titre"><h3>ROUND ${q.r}</h3>${l.kd||r.kd?'<b>KNOCKDOWN</b>':''}</div><div class="mf-rl-barres">${barre(l,a,'coin-a')}${barre(r,b,d.nul?'':'coin-b')}</div><div class="mf-rl-detail"><span>Amenées</span><b>${esc(l.amenees+' / '+r.amenees)}</b><span>Contrôle</span><b>${esc(temps(l.controle)+' / '+temps(r.controle))}</b></div><div class="mf-rl-juges"><span>LES TROIS JUGES</span><div aria-label="Votes des juges non conservés"><b>—</b><b>—</b><b>—</b></div></div></section>`;
+  }).join('');
+  const note='<p class="mf-rl-note"><i></i><span>Votes des juges et moments clés non conservés.</span></p>';
+  return entete+`<div class="mf-rl-panneaux">${mfPanneau(titre('LE COMBAT EN CHIFFRES')+totaux,'normal','mf-rl-totaux')}${mfPanneau(`<div class="mf-rl-rounds-tete">${titre('ROUND PAR ROUND')}<span>COUPS SIGNIFICATIFS TOUCHÉS</span></div><div class="mf-rl-rounds">${rounds}</div>${note}`,'normal','mf-rl-par-round')}</div>`;
+}
+function scr_mgmt_releve(){
+  if(!G||!G.mgmt)return scr_mgmt_bureau();
+  const m=G.mgmt,c=CL.mgmtSuReCourant();if(!c||!c.x.d)return scr_mgmt_resultats();
+  const t=m.hist[c.x.i],revoyable=mgmtCombatRevoyable(t);
+  return mfEcran(`<main class="mf-contenu mf-rl">${mgmtSuReleveHtml(m,t,c.x.d,c.s)}</main>`,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:mgmtOrgNom(m)+' Fight Night '+c.s.n,droite:mgmtOrgNom(m)+' Fight Night '+((m.eventsPlayed||0)+1),touches:[
+    {ks:['Échap'],t:'Retour aux résultats',onclick:"CL.go('mgmt_resultats')"},{ks:['←','→'],t:'Autre combat'},
+    ...(revoyable?[{ks:['T'],t:'Temps forts',onclick:'CL.mgmtSuReleveVoir(true)'},{ks:['R'],t:'Revoir le combat',jaune:true,onclick:'CL.mgmtSuReleveVoir(false)'}]:[])]});
+}
+SCREENS.mgmt_releve=scr_mgmt_releve;
+/* ==== [FIN ANCRE] ==== */
 
 /* ---- Les gestes ------------------------------------------------------------------------------------------ */
 
@@ -769,6 +804,16 @@ Object.assign(CL,{
     const m=G.mgmt, s=mgmtSuReSoirees(m)[MGMT_SU_RE.s]; if(!s) return null;
     const x=mgmtSuResultatsListe(m,s)[MGMT_SU_RE.i]; return x?{s,x}:null;
   },
+  mgmtSuReReleve(){
+    const c=G&&G.mgmt&&CL.mgmtSuReCourant();if(!c||!c.x.d)return false;
+    CL.go('mgmt_releve');return true;
+  },
+  mgmtSuReleveVoir(forts=false){
+    const c=G&&G.mgmt&&CL.mgmtSuReCourant();if(!c||!c.x.d)return false;
+    const t=G.mgmt.hist[c.x.i];if(!mgmtCombatRevoyable(t))return false;
+    if(forts)return mgmtCombatOuvrir({trace:t,vue:'forts',retour:'mgmt_releve'});
+    return mgmtRevoirCombat(t,'mgmt_releve',null);
+  },
   /** Entrée : la prochaine chose à faire, celle que l'Accueil propose (le bloc jaune). */
   mgmtSuReProchaine(){
     const m=G&&G.mgmt; if(!m) return;
@@ -849,7 +894,14 @@ keysRegister('mgmt_resultats',{
   ArrowDown(){ CL.mgmtSuReDeplacer(1); },
   r(){ CL.mgmtSuReRevoir(); }, R(){ CL.mgmtSuReRevoir(); },
   f(){ CL.mgmtSuReFiche(); }, F(){ CL.mgmtSuReFiche(); },
+  c(){ CL.mgmtSuReReleve(); }, C(){ CL.mgmtSuReReleve(); },
   Enter(){ CL.mgmtSuReProchaine(); },
   Escape(){ CL.go('mgmt_accueil'); },
+});
+keysRegister('mgmt_releve',{
+  ArrowLeft(){CL.mgmtSuReDeplacer(-1);},ArrowRight(){CL.mgmtSuReDeplacer(1);},
+  t(){CL.mgmtSuReleveVoir(true);},T(){CL.mgmtSuReleveVoir(true);},
+  r(){CL.mgmtSuReleveVoir(false);},R(){CL.mgmtSuReleveVoir(false);},
+  Escape(){CL.go('mgmt_resultats');},
 });
 /* ==== [FIN ANCRE] ==== */
