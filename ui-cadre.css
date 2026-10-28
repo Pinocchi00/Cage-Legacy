@@ -1781,6 +1781,41 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-pcn{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;white-space:nowrap}
 .mf-fi-pcd{font-size:24px;line-height:1;white-space:nowrap}
 .mf-fi-pcb{display:flex}
+/* ==== [ANCRE: FIDELITE_APERCU_20261028] — Cartes et informations de UniFicheApercu ==== */
+.mf-fi-apercu .mf-fi-traits .mf-fi-p{padding:0;gap:10px;overflow-y:auto}
+.mf-fi-apercu .mf-fi-traits .mf-fi-ph{margin-bottom:10px;gap:12px}
+.mf-fi-apercu .mf-fi-pm{font-size:22px}
+.mf-fi-apercu .mf-fi-trait,.mf-fi-apercu .mf-fi-trait-cache{height:auto;min-height:0;padding:12px 16px;display:flex;align-items:center;gap:16px;flex:none;background:#252121;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.mf-fi-apercu .mf-fi-trait-cache{background:transparent;clip-path:none;border:2px dashed rgba(233,230,225,.38)}
+.mf-fi-apercu .mf-fi-trait-icone{width:44px;height:44px;background:#E9E6E1;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-size:34px}
+.mf-fi-apercu .mf-fi-trait-icone.faiblesse{background:#E23A2B}
+.mf-fi-apercu .mf-fi-trait-icone.inconnu i{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#0D0B0B;color:#E9E6E1;clip-path:inherit;font:800 30px/1 var(--mf-titre)}
+.mf-fi-apercu .mf-fi-trait-contenu{display:flex;flex-direction:column;gap:9px}
+.mf-fi-apercu .mf-fi-trait-entete{margin:0;gap:12px}
+.mf-fi-apercu .mf-fi-trait-titre{white-space:normal;overflow-wrap:anywhere;font:800 30px/.85 var(--mf-titre)}
+.mf-fi-apercu .mf-fi-trait-fait{white-space:normal;font:500 22px/1 var(--mf-texte)}
+.mf-fi-apercu .mf-fi-trait-phrase{margin:0;font:500 24px/1.05 var(--mf-texte)}
+.mf-fi-apercu .mf-fi-infos,.mf-fi-apercu .mf-fi-prochain{flex:none}
+.mf-fi-apercu .mf-fi-grille{padding:15px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.mf-fi-apercu .mf-fi-case{height:auto;min-height:58px;padding:0 12px;gap:7px}
+.mf-fi-apercu .mf-fi-case span{white-space:normal;overflow-wrap:anywhere}
+.mf-fi-apercu .mf-fi-case b{font-size:32px;letter-spacing:0;line-height:.9;white-space:normal;overflow-wrap:anywhere}
+.mf-fi-apercu .mf-fi-relation{flex:1;min-height:0}
+.mf-fi-apercu .mf-fi-relation>.mf-p2>.mf-p3{overflow-y:auto}
+.mf-fi-pensee{display:flex;flex-direction:column;gap:14px;padding:15px;min-width:0}
+.mf-fi-pensee-titre{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;color:rgba(233,230,225,.74)}
+.mf-fi-pensee>strong{font:800 50px/.8 var(--mf-titre);color:#F0B220;overflow-wrap:anywhere}
+.mf-fi-pensee>p{margin:0;font:500 24px/1.05 var(--mf-texte);overflow-wrap:anywhere}
+.mf-fi-souvenir{display:flex;gap:12px;align-items:center;font:500 24px/1 var(--mf-texte)}
+.mf-fi-souvenir>i{width:14px;height:14px;flex:none;background:#E9E6E1;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-fi-souvenir>span{flex:1;min-width:0}.mf-fi-souvenir>small{font-size:22px;color:rgba(233,230,225,.74)}
+.mf-fi-apercu .mf-fi-prochain>.mf-p2>.mf-p3{padding:15px;display:flex;flex-direction:row;align-items:center;gap:12px}
+.mf-fi-apercu .mf-fi-pc{min-width:0;flex:1;gap:10px}
+.mf-fi-apercu .mf-fi-pch,.mf-fi-apercu .mf-fi-pcd,.mf-fi-apercu .mf-fi-pcn{white-space:normal;overflow-wrap:anywhere}
+.mf-fi-apercu .mf-fi-pcb{flex:none}
+.mf-fi-apercu .mf-fi-prochain{margin-top:auto}
+.mf-fi-apercu>.mf-fi-col{overflow-y:auto}
+/* ==== [FIN ANCRE] ==== */
 .mf-fi-rows{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:9px 15px;min-height:0}
 .mf-fi-row{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:74px;flex:none;padding:0 18px;display:grid;grid-template-columns:196px minmax(0,1fr);align-items:center;column-gap:16px}
 .mf-fi-rl{display:flex;align-items:center;gap:10px}

@@ -134,25 +134,29 @@ function mgmtFicheApercuHtml(m,f,line){
   const phys=mgmtCombatProfile(f).phys||{}, prochain=mgmtEffectifProchain(m,f), inf=mfSoireeInfos(m);
   /* ==== [ANCRE: P2_T3_TRAITS_PANNEAU] — Monde lot 37 T1 ==== */
   const traits=mgmtTraitsFiche(m,f.id,m.cycle);
-  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone" aria-hidden="true">+</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
-  const cache=traits.caches?`<div class="mf-fi-trait-cache"><div class="mf-fi-trait-entete"><b>PAS ENCORE VU</b><span>caché</span></div><div>${esc(traits.indice||'')}</div></div>`:'';
+  const faiblesses=new Set(['menton-fele','fragile-apres-ko','s-eteint','sous-pression','hesite-apres-ko','serie-noire','ne-se-releve-pas','rouille']);
+  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone${faiblesses.has(t.id)?' faiblesse':''}" aria-hidden="true">${faiblesses.has(t.id)?'−':'+'}</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
+  const cache=traits.caches?`<div class="mf-fi-trait-cache"><span class="mf-fi-trait-icone inconnu" aria-hidden="true"><i>?</i></span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">PAS ENCORE VU</b><span class="mf-fi-trait-fait">caché</span></div><div class="mf-fi-trait-phrase">${esc(traits.indice||'')}</div></div></div>`:'';
   const distinction=mgmtFichePanneau('Ce qui le distingue',traits.vus.length+' TRAITS',traitsLignes+cache,'mf-fi-traits');
   const pense=mgmtMemoirePense(m,f.id);
-  const penseHtml=pense?`<div class="me-pensee"><b>Ce qu’il pense de toi</b><span>${esc(pense.phrase)}</span></div>`:'';
+  const souvenirs=m.memoire&&m.memoire[f.id]&&m.memoire[f.id].s||[];
+  const labels={'attente-longue':'Attente prolongée','combat-refuse':'Combat refusé',relegation:'Passage en préliminaires','pied-leve':'Combat accepté au pied levé',prime:'Prime accordée','titre-accorde':'Combat pour le titre accordé','titre-refuse':'Combat pour le titre refusé'}; /* Libellés factuels, relu:false. */
+  const faits=souvenirs.slice(-2).map(([type,cycle])=>labels[type]?`<div class="mf-fi-souvenir"><i aria-hidden="true"></i><span>${esc(labels[type])}</span><small>soirée ${esc(cycle)}</small></div>`:'').join('');
+  const penseHtml=pense?mfPanneau(`<div class="mf-fi-pensee"><div class="mf-fi-pensee-titre">CE QU’IL PENSE DE TOI</div><strong>${esc(pense.label.toUpperCase())}</strong><p>${esc(pense.phrase)}</p>${faits}</div>`,'normal','mf-fi-pan mf-fi-relation'):'';
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
   const depuis=f.ct&&Number.isFinite(f.ct.since)?(f.ct.since===0?'LE DÉBUT':'SOIRÉE '+f.ct.since):'—';
   const restant=f.libre?'LIBRE':(f.ct?mgmtContratRestants(f)+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—');
    const gagne=m.surnoms&&m.surnoms[f.id];
-   const cases=[['Âge',f.age+' ANS'],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE'],['Taille',taille],['Allonge',allonge],['Chez '+mgmtOrgNom(m)+' depuis',depuis],['Contrat restant',restant],...(gagne?[['Surnom','SOIRÉE '+gagne.s]]:[])];
-  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>${penseHtml}`,'normal','mf-fi-pan');
+   const cases=[['Âge',f.age+' ANS'],['Taille',taille],['Allonge',allonge],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHO.'],['Chez '+mgmtOrgNom(m),depuis],['Contrat',restant],['Mondial',mgmtFicheSituation(m,f,'world')],['Surnom',gagne?'SOIRÉE '+gagne.s:'—']];
+  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b style="font-size:${mfCorps(String(v),107,32,22)}px">${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan mf-fi-infos');
   const suite=prochain
-    ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
+    ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT · SOIRÉE ${esc((m.eventsPlayed||0)+1)}</span></div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
     :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
-  const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
+  const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
   void line;
-  return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
+  return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${penseHtml}${p4}</div></div>`;
 }
 
 /** Style : la cage et les lignes façon, force, faille, inconnu, allonge. */

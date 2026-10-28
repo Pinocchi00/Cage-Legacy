@@ -23,3 +23,18 @@ test('Fiche — ← → change de combattant dans la catégorie, Échap revient'
   assert.notEqual(a,b); touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_FICHE.id'),a);
   touche(win,'Escape'); assert.notEqual(win.eval('G.screen'),'mgmt_fiche');
 });
+
+test('Aperçu — huit informations réelles et un panneau séparé pour la relation et ses souvenirs',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  w.eval(`setSeed(7);CL.mgmtEnter(1);CL.go('mgmt_effectif');CL.mgmtEffectifOuvrir();
+    const m=G.mgmt,f=mgmtFighterById(m,MGMT_FICHE.id);mgmtMemoireAjouter(m,f.id,'prime');mgmtMemoireAjouter(m,f.id,'pied-leve');render();`);
+  assert.deepEqual([...w.document.querySelectorAll('.mf-fi-case>span')].map(x=>x.textContent),['Âge','Taille','Allonge','Garde','Chez Split','Contrat','Mondial','Surnom']);
+  assert.equal(w.document.querySelectorAll('.mf-fi-infos .mf-fi-case').length,8);
+  assert.equal(w.document.querySelector('.mf-fi-infos .mf-fi-pensee'),null);
+  assert.ok(w.document.querySelector('.mf-fi-relation .mf-fi-pensee>strong').textContent);
+  assert.deepEqual([...w.document.querySelectorAll('.mf-fi-souvenir>span')].map(x=>x.textContent),['Prime accordée','Combat accepté au pied levé']);
+  assert.ok(w.document.querySelector('.mf-fi-trait .mf-fi-trait-icone'));
+  w.eval(`delete G.mgmt.memoire;render()`);assert.equal(w.document.querySelector('.mf-fi-relation'),null);
+ }finally{w.close();}
+});
