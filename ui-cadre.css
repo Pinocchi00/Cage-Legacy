@@ -4115,3 +4115,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 /* Les voix condensées gardent leur paragraphe consultable sans la carte narrative. */
 .mf-pr details.mf-cc-prono{display:block;min-height:0;padding:0;background:transparent;clip-path:none}.mf-cc-prono .mf-pr-media{font:inherit;color:inherit;margin:0}
+/* Temps forts : composition de la planche, lecture image par image conservée. */
+.mf-tf-score{left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:1100px;min-width:640px;padding:0;gap:0}
+.mf-tf-score>.mf-tf-identite{display:flex;flex-direction:row;align-items:center;gap:14px;padding:0 22px;background:transparent;color:#E9E6E1;min-width:0;flex:1}
+.mf-tf-identite>strong{font:800 50px/.8 var(--mf-titre);text-transform:uppercase;overflow-wrap:anywhere;max-width:280px;min-width:0}
+.mf-tf-identite>span{font:500 24px/1 var(--mf-texte);color:rgba(233,230,225,.74);white-space:nowrap}
+.mf-tf-initiale{display:flex;justify-content:center;align-items:center;width:40px;height:40px;flex:none;font:800 24px/1 var(--mf-titre);font-style:normal;background:#E23A2B;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-tf-initiale.b{background:#E9E6E1}.mf-tf-corps{grid-template-columns:560px 1fr;gap:100px;align-items:start}.mf-tf-recit{padding:40px 0 0;overflow:visible}
+
+.mf-tf-score>.mf-tf-identite{flex:none}.mf-tf-identite>strong{flex:none}

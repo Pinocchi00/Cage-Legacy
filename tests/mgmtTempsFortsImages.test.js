@@ -14,6 +14,9 @@ test('Temps forts — images fixes sur action, avenir masqué, lecture pure et v
   const pur=JSON.parse(w.eval(`JSON.stringify((()=>{const C=MGMT_COMBAT,avant=JSON.stringify(G.mgmt),seed=SEED,lecture=JSON.stringify([C.d,C.real,C.tempsFortActif,C.mode]);mgmtReplayFight=()=>{throw new Error('Rendu ne doit pas rejouer');};render();mgmtCombatAvancer(120);return {partie:avant===JSON.stringify(G.mgmt)&&seed===SEED,image:lecture===JSON.stringify([C.d,C.real,C.tempsFortActif,C.mode])};})())`));
   assert.deepEqual(pur,{partie:true,image:true});
   w.eval(`keysHandle({key:'ArrowRight',preventDefault(){}})`);assert.equal(w.eval('MGMT_COMBAT.tempsFortActif'),1);
+  assert.equal(w.document.querySelectorAll('.mf-tf-score .mf-tf-initiale').length,2);
+  const lecture=JSON.parse(w.eval(`JSON.stringify((()=>{const C=MGMT_COMBAT,image=mgmtCombatImageLecture(C,C.tempsFortActif),original=areneMoment,temps=[];try{areneMoment=(S,t)=>{temps.push(t);return original(S,t);};mgmtCombatImagesHtml();return {dernier:Math.max(...temps),t:image.t,moment:image.moment.t};}finally{areneMoment=original;}})())`));
+  assert.ok(lecture.dernier<=lecture.t);assert.ok(lecture.t<=lecture.moment);
   assert.equal(w.document.querySelectorAll('.mf-tf-repere:disabled').length,caches.length-1);
   w.eval(`keysHandle({key:'ArrowLeft',preventDefault(){}})`);assert.equal(w.eval('MGMT_COMBAT.tempsFortActif'),0);
   w.eval(`keysHandle({key:'Enter',preventDefault(){}})`);assert.equal(w.eval('MGMT_COMBAT.tempsFortActif'),1);assert.equal(w.eval('MGMT_COMBAT.mode'),'fight');
