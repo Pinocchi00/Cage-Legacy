@@ -25,7 +25,7 @@ function mgmtMeilleursRendu(m){
   const F=MGMT_SU_CL,L=MGMT_MEILLEURS_LABELS,div=mgmtSuDiv(F),data=mgmtMeilleurs(m,{divId:div,portee:F.portee==='world'?'monde':'split'});
   const cards=L.categories.map(([id,label,unit])=>{
     const r=data.find(x=>x.id===id),rank=r?r.rang:[],first=rank[0],percent=['precis','defense','mur'].includes(id),value=v=>percent?String(Math.round(v*100)):id==='serie'?String(Math.round(v)):String(Number(v.toFixed(2))).replace('.',',');
-    const top=first?`<button class="mf-me-nom" onclick="CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toLocaleUpperCase('fr'))}</button>`:`<div class="mf-me-vide">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
+    const top=first?`<button class="mf-me-nom" style="font-size:${mfCorps(first.nom.toLocaleUpperCase('fr'),310,40,22)}px" onclick="CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toLocaleUpperCase('fr'))}</button>`:`<div class="mf-me-vide">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
     const rows=rank.slice(1,3).map((x,i)=>`<div><button onclick="CL.mgmtFiche('${escJsAttr(x.id)}')">${i+2}. ${esc(x.nom.trim().split(/\s+/).pop())}</button><span>${esc(value(x.valeur))}${percent?' %':''}</span></div>`).join('');
     return mfPanneau(`<h3>${esc(label)}</h3><div class="mf-me-valeur">${first?esc(value(first.valeur)):''}${first&&unit?`<small>${esc(unit)}</small>`:''}</div>${top}<div class="mf-me-rangs">${rows}</div>`,'normal','mf-me-carte');
   }).join('');
@@ -55,9 +55,9 @@ function mgmtRecordsRendu(m){
     const recordYear=mgmtLeaderAnnee(m,rec.soiree);
      return `<div class="mf-re-ligne${beaten?' nouveau':''}"><strong>${esc(format(id,rec.valeur))}${id==='plusJeuneChampion'?' <small>ANS</small>':''}</strong><div><div>${esc(L.recordLabels[id])}${beaten?' <span class="mf-re-nouveau">NOUVEAU</span>':''}</div><small><button type="button" onclick="CL.mgmtFiche('${escJsAttr(rec.combattant.id)}')">${esc(rec.combattant.nom)}</button> · Split Fight Night ${esc(rec.soiree)}${recordYear?`, ${esc(recordYear)}`:''}${id==='victoiresSuite'?' · en cours':''} ${before}</small></div></div>`;
   }).join('');return rows?mfPanneau(`<div class="mf-re-titre"><h2>${title}</h2><div class="mf-re-trait"></div></div>${rows}`,'normal','mf-re-groupe'):'';}).join('');
-  return `<main class="mf-contenu mf-re"><nav class="mf-leader-tabs mf-leader-tabs-records">${mgmtSuClOnglets().map(x=>`<button type="button" class="${x.on?'actif':''}" onclick="${x.onclick}">${esc(x.t)}</button>`).join('')}<div class="mf-re-intro">${year?`Tous les combats de Split depuis ${esc(year)}, toutes catégories`:''}</div></nav><div class="mf-re-groupes">${html||`<p>${esc(L.empty)}</p>`}</div></main>`;
+  return `<main class="mf-contenu mf-re mf-re-records"><nav class="mf-leader-tabs mf-leader-tabs-records">${mgmtSuClOnglets().map(x=>`<button type="button" class="${x.on?'actif':''}" onclick="${x.onclick}">${esc(x.t)}</button>`).join('')}<div class="mf-re-intro">${year?`Tous les combats de Split depuis ${esc(year)}, toutes catégories`:''}</div></nav><div class="mf-re-groupes">${html||`<p>${esc(L.empty)}</p>`}</div></main>`;
 }
 function scr_mgmt_records_cadre(){
   const m=G.mgmt,F=MGMT_SU_CL;
-  return mfEcran(mgmtRecordsRendu(m),{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:'HOMMES · POIDS LÉGER',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Onglet'},{ks:['V'],t:'Changer de vue',onclick:'CL.mgmtSuClVueSuivante()'}]});
+  return mfEcran(mgmtRecordsRendu(m),{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:'LE LIVRE DES RECORDS',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Onglet'},{ks:['V'],t:'Changer de vue',onclick:'CL.mgmtSuClVueSuivante()'}]});
 }

@@ -113,6 +113,7 @@ const MGMT_FICHE_CONTRAT_OCTO='M12.6 2.5h14.8l10.1 10.1v14.8L27.4 37.5H12.6L2.5 
 /** La bannière : le tunnel (rouge, jaune pour un champion), le nom, le palmarès, le rang. */
 function mgmtFicheBanniereHtml(m,f,champion){
   const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||''), sur=mgmtSurnomDe(m,f.id);
+  const prenomPx=mfCorps(prenom+(sur?' « '+mfNet(sur)+' »':''),1020,64,22);
   const rang=mgmtRangTexte(m,f);
   const forme=mgmtEffectifForme(m,f);
   const d=divById(f.div), cat=d?String(mgmtDivisionLabel(d)).toUpperCase().split(' '):[];
@@ -121,7 +122,7 @@ function mgmtFicheBanniereHtml(m,f,champion){
   const mondial=d&&d.gender==='F'?'mondiale':'mondial', situ=mgmtFicheSituation(m,f,'world');
   const monde=/^[0-9]/.test(situ)?situ+' '+mondial:mondial+' : '+situ.toLowerCase();
   return `<div class="mf-fb${champion?' or':''}" data-m="head"><i class="mf-fb-img" aria-hidden="true"></i>`
-    +`<div class="mf-fb-nom"><span class="p">${esc(prenom)}${sur?` <em class="s">« ${esc(mfNet(sur))} »</em>`:''}</span><span class="n" style="font-size:${mfCorps(nom,1000,200,90)}px">${esc(nom)}</span></div>`
+    +`<div class="mf-fb-nom"><span class="p" style="font-size:${prenomPx}px">${esc(prenom)}${sur?` <em class="s" style="font-size:${Math.min(36,prenomPx)}px">« ${esc(mfNet(sur))} »</em>`:''}</span><span class="n" style="font-size:${mfCorps(nom,1020,200,22)}px">${esc(nom)}</span></div>`
     +`<div class="mf-fb-pal"><div class="mf-fb-pg"><span class="mf-fb-pl">PALMARÈS</span><b>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</b><div class="mf-fb-forme">${forme.map(mfMarque).join('')}</div></div>`
     +`<div class="mf-fb-pd"><div class="mf-fb-rang${champion?' or':''}">${esc(rang)}</div><div class="mf-fb-cat">${cat.map(x=>`<div>${esc(x)}</div>`).join('')}</div><div class="mf-fb-monde">${esc(monde)}</div></div></div></div>`;
 }
