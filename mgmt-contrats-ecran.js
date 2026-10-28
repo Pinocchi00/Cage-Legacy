@@ -89,7 +89,7 @@ function scr_mgmt_contrats(){
   const liste=mfPanneau(`<div class="mf-eff-liste"><div class="mf-ct-entete">${entete.map(t=>`<div>${esc(t)}</div>`).join('')}</div>${rangees||'<div class="mf-eff-aucun">Personne dans cette catégorie.</div>'}`
     +`<div class="mf-eff-pied"><span>${esc(fen.length)} AFFICHÉS SUR ${esc(lignes.length)}</span><span>${F.mode==='contrats'?'SOUS CONTRAT':'SANS CONTRAT'}</span></div></div>`,'normal','mf-eff-panneau');
   const contenu=`<div class="mf-eff-barre">${sexe}<div class="mf-eff-trait"></div><div class="mf-eff-puces">${puces}</div></div><div class="mf-eff-corps">${liste}<div class="mf-eff-aside">${mgmtContratsOffreHtml(m,choisi)}</div></div>`;
-  return mfEcran(`<main class="mf-contenu mf-effectif">${contenu}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',
+  return mfEcran(`<main class="mf-contenu mf-effectif mf-contrats-nav">${typeof mgmtRcOnglets==='function'?mgmtRcOnglets('mgmt_contrats'):''}${contenu}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',
     onglets:[{t:'Sous contrat',on:F.mode==='contrats',onclick:"CL.mgmtContratsMode('contrats')"},{t:'Recrutement',on:F.mode!=='contrats',onclick:"CL.mgmtContratsMode('recrutement')"}],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['←','→'],t:'Combats'},{ks:['+','−'],t:'Bourse'},
       {ks:['R'],t:'Recrutement',onclick:'CL.mgmtContratsMode()'},{ks:['G'],t:'H ou F',onclick:'CL.mgmtContratsSexe()'},{ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtContratsCategorie(1)'},

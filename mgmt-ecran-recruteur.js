@@ -4,7 +4,7 @@ const MGMT_RC_UI={dest:1,cat:0,style:0,sem:3,profil:0};
 function mgmtRcOnglets(actif){
  const m=G&&G.mgmt,r=m&&m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0];
  const note=actif==='mgmt_recruteur_mission'&&m?'Une mission à la fois · caisse : '+mgmtEuros(m.treasury):actif==='mgmt_recruteur_retours'&&r&&Number.isSafeInteger(r.jour)?'Retour du '+mgmtJourDateTexte(r.jour):'';
- return `<nav class="rc-tabs">${[['LES LIBRES','mgmt_recrutement'],['ENVOYER LE RECRUTEUR','mgmt_recruteur_mission'],['SES RETOURS','mgmt_recruteur_retours']].map(([t,s])=>`<button class="rc-tab${actif===s?' rc-on':''}" onclick="CL.go('${s}')">${t}</button>`).join('')}${note?`<span class="rc-tab-note">${esc(note)}</span>`:''}</nav>`;
+ return `<nav class="rc-tabs rc-tabs-communs" aria-label="Contrats et recrutement">${[['LES CONTRATS','mgmt_contrats'],['LES LIBRES','mgmt_recrutement'],['ENVOYER LE RECRUTEUR','mgmt_recruteur_mission'],['SES RETOURS','mgmt_recruteur_retours']].map(([t,s])=>`<button class="rc-tab${actif===s?' rc-on':''}" aria-current="${actif===s?'page':'false'}" onclick="CL.go('${s}')">${t}</button>`).join('')}${note?`<span class="rc-tab-note">${esc(note)}</span>`:''}</nav>`;
 }
 function mgmtRcCadre(html,actif,touches){const m=G&&G.mgmt;return mfEcran(`<main class="mf-contenu rc-page">${mgmtRcOnglets(actif)}${html}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',libelle:'Recrutement',droite:mgmtOrgNom(m)+' Fight Night '+((m.eventsPlayed||0)+1),touches});}
 function mgmtRcTitre(titre){return `<div class="rc-heading"><h2 class="rc-title">${esc(titre)}</h2><i class="rc-redline" aria-hidden="true"></i></div>`;}
