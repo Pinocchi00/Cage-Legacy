@@ -33,6 +33,7 @@ test('Aperçu — huit informations réelles et un panneau séparé pour la rela
   assert.equal(w.document.querySelectorAll('.mf-fi-infos .mf-fi-case').length,8);
   assert.equal(w.document.querySelector('.mf-fi-infos .mf-fi-pensee'),null);
   assert.ok(w.document.querySelector('.mf-fi-relation .mf-fi-pensee>strong').textContent);
+  const detail=w.document.querySelector('.mf-fi-pensee details');assert.equal(detail.open,false);detail.open=true;assert.ok(detail.querySelector('p').textContent);detail.open=false;
   assert.deepEqual([...w.document.querySelectorAll('.mf-fi-souvenir>span')].map(x=>x.textContent),['Prime accordée','Combat accepté au pied levé']);
   assert.ok(w.document.querySelector('.mf-fi-trait .mf-fi-trait-icone'));
   w.eval(`delete G.mgmt.memoire;render()`);assert.equal(w.document.querySelector('.mf-fi-relation'),null);

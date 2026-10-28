@@ -142,7 +142,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const souvenirs=m.memoire&&m.memoire[f.id]&&m.memoire[f.id].s||[];
   const labels={'attente-longue':'Attente prolongée','combat-refuse':'Combat refusé',relegation:'Passage en préliminaires','pied-leve':'Combat accepté au pied levé',prime:'Prime accordée','titre-accorde':'Combat pour le titre accordé','titre-refuse':'Combat pour le titre refusé'}; /* Libellés factuels, relu:false. */
   const faits=souvenirs.slice(-2).map(([type,cycle])=>labels[type]?`<div class="mf-fi-souvenir"><i aria-hidden="true"></i><span>${esc(labels[type])}</span><small>soirée ${esc(cycle)}</small></div>`:'').join('');
-  const penseHtml=pense?mfPanneau(`<div class="mf-fi-pensee"><div class="mf-fi-pensee-titre">CE QU’IL PENSE DE TOI</div><strong>${esc(pense.label.toUpperCase())}</strong><p>${esc(pense.phrase)}</p>${faits}</div>`,'normal','mf-fi-pan mf-fi-relation'):'';
+  const penseHtml=pense?mfPanneau(`<div class="mf-fi-pensee"><details><summary class="mf-fi-pensee-titre">CE QU’IL PENSE DE TOI</summary><p>${esc(pense.phrase)}</p></details><strong>${esc(pense.label.toUpperCase())}</strong>${faits}</div>`,'normal','mf-fi-pan mf-fi-relation'):'';
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
@@ -153,7 +153,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b style="font-size:${mfCorps(String(v),107,32,22)}px">${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan mf-fi-infos');
   const suite=prochain
     ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT · SOIRÉE ${esc((m.eventsPlayed||0)+1)}</span></div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
-    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
+    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcd">AUCUN COMBAT PRÉVU</div></div>`;
   const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
   void line;
   return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${penseHtml}${p4}</div></div>`;
