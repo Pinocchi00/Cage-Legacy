@@ -11,9 +11,18 @@ test('Choc — contre-proposition des combats : brouillon annulable, adversaires
    window.autresCombats=()=>{const c=G.mgmt.choc,p=c.paires.map(p=>({...p})),autre=mgmtChocPairesDisponibles(G.mgmt,c.orgId).find(q=>!p.some(x=>x.div===q.div));if(!autre)throw new Error('Alternative absente');p[0]=autre;return p;};
    keysHandle({key:'P',preventDefault(){}});`);
   assert.ok(w.document.querySelector('.ch3-choix'));assert.equal(w.eval('JSON.stringify(G.mgmt)'),w.chocAvant);
+  /* Anthony : toutes les catégories, tiret puis champion actuel ; les duels impossibles restent grisés. */
+  const categories=JSON.parse(w.eval('JSON.stringify(allDivisions().map(d=>mgmtDivisionLabel(d.id)))'));
+  for(const menu of w.document.querySelectorAll('.ch3-choix-categories')){
+   const options=[...menu.querySelectorAll('button')];assert.equal(options.length,categories.length);
+   options.forEach((o,i)=>assert.ok(o.textContent.startsWith(categories[i]+' — ')));
+   assert.match(menu.querySelector('summary').textContent,/ — /);
+  }
+  w.eval(`keysHandle({key:'Enter',target:document.querySelector('.ch3-choix-categories summary'),preventDefault(){}})`);
+  assert.equal(w.document.querySelector('.ch3-choix-categories').open,true);assert.equal(w.eval('G.mgmt.choc.etat'),'recu');
   w.eval(`const choix=autresCombats();mgmtChocChoisirCombat(0,choix[0].div);`);
   assert.equal(w.eval('JSON.stringify(G.mgmt)'),w.chocAvant,'la prévisualisation ne modifie pas la sauvegarde');
-  const select=w.document.querySelector('select');assert.equal(w.eval(`keysHandle({key:'Enter',target:document.querySelector('select'),preventDefault(){throw new Error('Clavier natif intercepté');}})`),false);assert.ok(select);
+  w.eval(`document.body.append(document.createElement('select'))`);assert.equal(w.eval(`keysHandle({key:'Enter',target:document.querySelector('select'),preventDefault(){throw new Error('Clavier natif intercepté');}})`),false);
   w.eval(`keysHandle({key:'Escape',preventDefault(){}})`);assert.equal(w.document.querySelector('.ch3-choix'),null);assert.equal(w.eval('JSON.stringify(G.mgmt)'),w.chocAvant);
   const lecture=code=>JSON.parse(w.eval(`JSON.stringify((()=>{${code}})())`));
   for(const mutation of ["p[1]=p[0]","p[0]={...p[0],a:p[0].b}","p.pop()"]){

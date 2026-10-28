@@ -55,12 +55,20 @@ function mgmtChocChoixEnvoyer(){
 }
 function mgmtChocChoixHtml(m,c){
  const b=MGMT_CHOC_CHOIX;if(!b||b.source!==c||c.etat!=='recu')return '';
- const choix=mgmtChocPairesDisponibles(m,c.orgId);
- return `<section class="ch3-choix"><h2>CHOISIR LES COMBATS</h2><p>Garde ${b.paires.length} duel${b.paires.length>1?'s':''} de champions. Les ceintures restent dans leur organisation.</p>${b.paires.map((p,i)=>`<label><span>COMBAT ${i+1}</span><select aria-label="Combat ${i+1}" onchange="mgmtChocChoisirCombat(${i},this.value)">${choix.map(q=>{return `<option value="${esc(q.div)}"${p.div===q.div?' selected':''}>${esc(mgmtDivisionLabel(q.div))}</option>`;}).join('')}</select></label>`).join('')}${b.erreur?`<p role="status">${esc(b.erreur)}</p>`:''}<button class="ch3-button" onclick="mgmtChocChoixEnvoyer()"><span>ENVOYER LA CONTRE-PROPOSITION</span></button><button class="ch3-button" onclick="mgmtChocChoixAnnuler()"><span>ANNULER</span></button></section>`;
+ const choix=mgmtChocPairesDisponibles(m,c.orgId),champions=mgmtChampionIds(m);
+ const champs=b.paires.map((p,i)=>{
+  const actuel=mgmtFighterById(m,p.a),options=allDivisions().map(d=>{
+   const duel=choix.find(q=>q.div===d.id),local=(m.roster||[]).find(f=>f.div===d.id&&champions.has(f.id));
+   const libelle=mgmtDivisionLabel(d.id)+' — '+(local?local.name:'Aucun champion');
+   return `<button type="button"${duel?'':' disabled'}${duel?` onclick="mgmtChocChoisirCombat(${i},'${escJsAttr(d.id)}')"`:''} title="${duel?'Choisir ce combat':local?'Aucun champion adverse dans cette catégorie':'Aucun champion local dans cette catégorie'}" aria-pressed="${d.id===p.div}">${esc(libelle)}</button>`;
+  }).join('');
+  return `<fieldset class="ch3-choix-champ"><legend>COMBAT ${i+1}</legend><details class="ch3-choix-categories"><summary>${esc(mgmtDivisionLabel(p.div)+' — '+actuel.name)}</summary><div>${options}</div></details></fieldset>`;
+ }).join('');
+ return `<section class="ch3-choix"><h2>CHOISIR LES COMBATS</h2><p>Toutes les catégories et leurs champions actuels. Garde ${b.paires.length} duel${b.paires.length>1?'s':''} ; les catégories sans deux champions restent indisponibles.</p>${champs}${b.erreur?`<p role="status">${esc(b.erreur)}</p>`:''}<button class="ch3-button" onclick="mgmtChocChoixEnvoyer()"><span>ENVOYER LA CONTRE-PROPOSITION</span></button><button class="ch3-button" onclick="mgmtChocChoixAnnuler()"><span>ANNULER</span></button></section>`;
 }
 keysRegister('mgmt_choc',{
  p(){if(!MGMT_CHOC_CHOIX||MGMT_CHOC_CHOIX.source!==G.mgmt.choc)mgmtChocContreProposer(G.mgmt);},P(){KEYS.maps.mgmt_choc.p();},
- Enter(){if(MGMT_CHOC_CHOIX&&MGMT_CHOC_CHOIX.source===G.mgmt.choc&&G.mgmt.choc.etat==='recu')mgmtChocChoixEnvoyer();else if(mgmtChocRepondre(G.mgmt,true)){saveMgmt();render();}},
+ Enter(e){const cible=e&&e.target;if(cible&&cible.closest('.ch3-choix-categories')){if(cible.tagName==='SUMMARY'){cible.parentElement.open=!cible.parentElement.open;return;}const bouton=cible.closest('button');if(bouton){if(!bouton.disabled)bouton.click();return;}}if(MGMT_CHOC_CHOIX&&MGMT_CHOC_CHOIX.source===G.mgmt.choc&&G.mgmt.choc.etat==='recu')mgmtChocChoixEnvoyer();else if(mgmtChocRepondre(G.mgmt,true)){saveMgmt();render();}},
  Escape(){if(MGMT_CHOC_CHOIX&&MGMT_CHOC_CHOIX.source===G.mgmt.choc)mgmtChocChoixAnnuler();else CL.go('mgmt_poste');},
  r(){if((!MGMT_CHOC_CHOIX||MGMT_CHOC_CHOIX.source!==G.mgmt.choc)&&mgmtChocRepondre(G.mgmt,false)){saveMgmt();render();}},R(){KEYS.maps.mgmt_choc.r();},
  f(){const c=G.mgmt&&G.mgmt.choc;if(c&&(!MGMT_CHOC_CHOIX||MGMT_CHOC_CHOIX.source!==c))CL.mgmtFiche(c.a);},F(){KEYS.maps.mgmt_choc.f();},
