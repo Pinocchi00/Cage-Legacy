@@ -60,14 +60,40 @@ test('Arrivée — le vrai champion conserve son nom et son rang, et le top15 es
  }finally{w.close();}
 });
 
-test('Espoirs — un bilan22-14 sans relevé affiche36combats et22victoires, pas deux faux zéros',()=>{
+test('Espoirs — un bilan22-14 sans relevé conserve son bilan et deux mesures utiles, pas de faux compteur de combats',()=>{
  const w=newGameWindow();
  try{
   const r=result(w,`setSeed(9);CL.mgmtEnter(1);const m=G.mgmt,f=mgmtEspoirsCandidats(m).find(f=>m.roster.some(x=>x.id===f.id));
     f.W=22;f.L=14;f.D=0;m.hist=[];for(const o of Object.values(m.orgs||{}))o.hist=[];mgmtStatsInvalider(m);
     const avant=JSON.stringify(m),seed=SEED,x=mgmtEspoirsFabrique(m,[f.id])[0];return {x,pur:avant===JSON.stringify(m)&&seed===SEED};`);
-  assert.equal(r.x.fiche.bilan,'22-14');assert.deepEqual(r.x.fiche.chiffres,[{libelle:'Combats',valeur:'36'},{libelle:'Victoires',valeur:'22'}]);
+  // Décision d’Anthony du28/10 : les deux cases portent des statistiques
+  // intéressantes, le bilan reste près du nom ; pas de combats/victoires/défaites.
+  assert.equal(r.x.fiche.bilan,'22-14');assert.equal(r.x.fiche.chiffres.length,2);
+  assert.ok(r.x.fiche.chiffres.every(x=>!['Combats','Victoires','Défaites'].includes(x.libelle)&&!/^0(?:\D|$)/.test(x.valeur)));
   assert.match(r.x.fiche.phrase,/36 combats/);assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Espoirs — finitions et premiers rounds viennent des vrais résultats, pas du bilan global',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`const f={id:'a',name:'A',div:'H-light',age:24,W:22,L:14,D:0};
+    const t=(c,winner,family,round)=>({c,a:{id:'a'},b:{id:'b'},winner,family,round});
+    const m={roster:[f],hist:[t(1,'A','ko',1),t(2,'A','dec',3),t(3,'B','sub',2)],facts:[]};
+    const avant=JSON.stringify(m),seed=SEED,ids=_idCounter,chiffres=mgmtEspoirChiffres(m,f,'reponse',null);
+    return {chiffres,pur:avant===JSON.stringify(m)&&seed===SEED&&ids===_idCounter};`);
+  assert.deepEqual(r.chiffres.map(x=>[x.libelle,x.valeur]),[['Finitions connues','1 SUR 2'],['Au 1er round','1']]);
+  assert.ok(r.chiffres.every(x=>x.aide.includes('3 combats connus')));assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Espoirs — les issues du catalogue extérieur incluent les défaites et ne deviennent pas des finitions gagnées',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`const f={id:'a',name:'A',div:'H-light',age:24,W:22,L:14,D:0,trace:{fights:36,pro:{fin:{ko:10,sub:6,dec:20}}}},m={roster:[f],hist:[],facts:[]};
+    return mgmtEspoirChiffres(m,f,'libre',null);`);
+  assert.deepEqual(r.map(x=>[x.libelle,x.valeur]),[['Combats finis par KO','10 SUR 36'],['Par soumission','6 SUR 36']]);
+  assert.ok(r.every(x=>x.aide.includes('victoires et défaites')));
  }finally{w.close();}
 });
 
