@@ -1,10 +1,11 @@
 "use strict";
 /* ==== [ANCRE: P5_T2_RECRUTEUR_ECRANS] — Monde lot 42 T2 ==== */
 const MGMT_RC_UI={dest:1,cat:0,style:0,sem:3,profil:0};
+const MGMT_RC_ONGLETS=[['LES CONTRATS','mgmt_contrats'],['LES LIBRES','mgmt_recrutement'],['ENVOYER LE RECRUTEUR','mgmt_recruteur_mission'],['SES RETOURS','mgmt_recruteur_retours']];
 function mgmtRcOnglets(actif){
  const m=G&&G.mgmt,r=m&&m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0];
  const note=actif==='mgmt_recruteur_mission'&&m?'Une mission à la fois · caisse : '+mgmtEuros(m.treasury):actif==='mgmt_recruteur_retours'&&r&&Number.isSafeInteger(r.jour)?'Retour du '+mgmtJourDateTexte(r.jour):'';
- return `<nav class="rc-tabs rc-tabs-communs" aria-label="Contrats et recrutement">${[['LES CONTRATS','mgmt_contrats'],['LES LIBRES','mgmt_recrutement'],['ENVOYER LE RECRUTEUR','mgmt_recruteur_mission'],['SES RETOURS','mgmt_recruteur_retours']].map(([t,s])=>`<button class="rc-tab${actif===s?' rc-on':''}" aria-current="${actif===s?'page':'false'}" onclick="CL.go('${s}')">${t}</button>`).join('')}${note?`<span class="rc-tab-note">${esc(note)}</span>`:''}</nav>`;
+ return `<nav class="rc-tabs rc-tabs-communs" aria-label="Contrats et recrutement" onkeydown="CL.rcOngletTouche(event)">${MGMT_RC_ONGLETS.map(([t,s])=>`<button type="button" class="rc-tab${actif===s?' rc-on':''}" aria-current="${actif===s?'page':'false'}" onclick="CL.go('${s}')">${t}</button>`).join('')}${note?`<span class="rc-tab-note">${esc(note)}</span>`:''}</nav>`;
 }
 function mgmtRcCadre(html,actif,touches){const m=G&&G.mgmt;return mfEcran(`<main class="mf-contenu rc-page">${mgmtRcOnglets(actif)}${html}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',libelle:'Recrutement',droite:mgmtOrgNom(m)+' Fight Night '+((m.eventsPlayed||0)+1),touches});}
 function mgmtRcTitre(titre){return `<div class="rc-heading"><h2 class="rc-title">${esc(titre)}</h2><i class="rc-redline" aria-hidden="true"></i></div>`;}
@@ -54,6 +55,8 @@ function mgmtRcRetours(){
 }
 Object.assign(SCREENS,{mgmt_recruteur_mission:mgmtRcMission,mgmt_recruteur_retours:mgmtRcRetours});
 Object.assign(CL,{
+ rcOngletParcourir(delta){const i=MGMT_RC_ONGLETS.findIndex(([,s])=>s===G.screen);if(i<0)return;CL.go(MGMT_RC_ONGLETS[(i+delta+MGMT_RC_ONGLETS.length)%MGMT_RC_ONGLETS.length][1]);document.querySelector('.rc-tabs-communs [aria-current="page"]')?.focus();},
+ rcOngletTouche(e){if(e.defaultPrevented||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();e.stopPropagation();CL.rcOngletParcourir(e.key==='ArrowLeft'?-1:1);},
  rcDestination(i){MGMT_RC_UI.dest=(i+MGMT_RECRUTEUR.destinations.length)%MGMT_RECRUTEUR.destinations.length;MGMT_RC_UI.cat=0;render();},
  rcCategorie(i){MGMT_RC_UI.cat=i;render();},rcStyle(i){MGMT_RC_UI.style=i;render();},rcSem(i){MGMT_RC_UI.sem=i;render();},
  rcEnvoyer(){const d=MGMT_RECRUTEUR.destinations[MGMT_RC_UI.dest],cat=d.categories[MGMT_RC_UI.cat%d.categories.length],ok=mgmtRecruteurEnvoyer(G.mgmt,{dest:d.id,cat,style:['lutteur','frappeur','grappler','complet'][MGMT_RC_UI.style],sem:MGMT_RC_UI.sem});if(ok)render();},
@@ -63,6 +66,6 @@ Object.assign(CL,{
  rcSignerActif(){const r=G?.mgmt?.recruteur?.retours?.[0],p=r?.profils?.[MGMT_RC_UI.profil];if(p&&MGMT_RC_UI.profil<r.lus)this.rcSigner(p.id);},
  rcSuivreActif(){const r=G?.mgmt?.recruteur?.retours?.[0],p=r?.profils?.[MGMT_RC_UI.profil];if(p&&MGMT_RC_UI.profil<r.lus)this.rcSuivre(p.id);}
 });
-keysRegister('mgmt_recruteur_mission',{Escape(){CL.go('mgmt_accueil');},ArrowLeft(){CL.rcDestination(MGMT_RC_UI.dest-1);},ArrowUp(){CL.rcDestination(MGMT_RC_UI.dest-1);},ArrowRight(){CL.rcDestination(MGMT_RC_UI.dest+1);},ArrowDown(){CL.rcDestination(MGMT_RC_UI.dest+1);},Enter(){CL.rcEnvoyer();},Tab(e){CL.go(e&&e.shiftKey?'mgmt_recrutement':'mgmt_recruteur_retours');}});
-keysRegister('mgmt_recruteur_retours',{Escape(){CL.go('mgmt_accueil');},ArrowUp(){CL.rcProfil(MGMT_RC_UI.profil-1);},ArrowDown(){CL.rcProfil(MGMT_RC_UI.profil+1);},ArrowRight(){CL.rcReveal();},' '(){CL.rcReveal();},Enter(){CL.rcSignerActif();},s(){CL.rcSuivreActif();},S(){CL.rcSuivreActif();},Tab(e){CL.go(e&&e.shiftKey?'mgmt_recruteur_mission':'mgmt_recrutement');}});
-keysRegister('mgmt_recrutement',{Tab(e){CL.go(e&&e.shiftKey?'mgmt_recruteur_retours':'mgmt_recruteur_mission');}});
+keysRegister('mgmt_recruteur_mission',{Escape(){CL.go('mgmt_accueil');},ArrowLeft(){CL.rcDestination(MGMT_RC_UI.dest-1);},ArrowUp(){CL.rcDestination(MGMT_RC_UI.dest-1);},ArrowRight(){CL.rcDestination(MGMT_RC_UI.dest+1);},ArrowDown(){CL.rcDestination(MGMT_RC_UI.dest+1);},Enter(){CL.rcEnvoyer();},Tab(e){CL.rcOngletParcourir(e&&e.shiftKey?-1:1);}});
+keysRegister('mgmt_recruteur_retours',{Escape(){CL.go('mgmt_accueil');},ArrowUp(){CL.rcProfil(MGMT_RC_UI.profil-1);},ArrowDown(){CL.rcProfil(MGMT_RC_UI.profil+1);},ArrowRight(){CL.rcReveal();},' '(){CL.rcReveal();},Enter(){CL.rcSignerActif();},s(){CL.rcSuivreActif();},S(){CL.rcSuivreActif();},Tab(e){CL.rcOngletParcourir(e&&e.shiftKey?-1:1);}});
+keysRegister('mgmt_recrutement',{Tab(e){CL.rcOngletParcourir(e&&e.shiftKey?-1:1);}});

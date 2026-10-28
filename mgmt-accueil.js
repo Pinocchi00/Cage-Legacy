@@ -302,6 +302,7 @@ function scr_mgmt_accueil(){
   const espoirsDansAttente=espoirHtml;
     /* ==== [ANCRE: ACCUEIL_LIENS_COMPLEMENTAIRES] — Réparation PR 259 ==== */
     const liensAccueil=[
+      `<button type="button" onclick="CL.go('mgmt_bureau')">Les affaires</button>`,
       m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'',
       guerre?`<button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`:'',
       ceremonieVisible?`<button type="button" onclick="CL.go('mgmt_ceremonie')">Revoir la cérémonie</button>`:'',

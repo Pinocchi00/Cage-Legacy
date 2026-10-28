@@ -138,7 +138,7 @@ function scr_mgmt_effectif(){
     {barre:'jeu',courant:'effectif',m,plaque:'Effectif',libelle:`${lignes.length} ${d.gender==='F'?(lignes.length>1?'combattantes':'combattante'):(lignes.length>1?'combattants':'combattant')} en ${String(d.name).toLowerCase()}`,
       droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
       touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtEffectifSexe()'},
-        {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtEffectifCategorie(1)'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtEffectifOuvrir()'}]});
+        {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtEffectifCategorie(1)'},{ks:['V'],t:'Le vestiaire',onclick:"CL.go('mgmt_vestiaire')"},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtEffectifOuvrir()'}]});
 }
 SCREENS.mgmt_effectif=scr_mgmt_effectif;
 
@@ -166,6 +166,7 @@ Object.assign(CL,{
   },
 });
 keysRegister('mgmt_effectif',{
+  v(){CL.go('mgmt_vestiaire');},V(){CL.go('mgmt_vestiaire');},
   ArrowUp(){ CL.mgmtEffectifDeplacer(-1); },
   ArrowDown(){ CL.mgmtEffectifDeplacer(1); },
   g(){ CL.mgmtEffectifSexe(); },

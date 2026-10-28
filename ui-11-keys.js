@@ -33,6 +33,8 @@ function keysHandle(e){
   if(!e||e.defaultPrevented) return false;
   const t=e.target;
   if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return false;
+  // Les sous-menus de recrutement conservent Tab et l'activation native du bouton focalisé.
+  if(t&&t.closest?.('.rc-tabs-communs')&&['Tab','Enter',' '].includes(e.key))return false;
   if(e.ctrlKey||e.metaKey||e.altKey) return false;
   const map=(typeof G!=='undefined'&&G&&G.screen)?KEYS.maps[G.screen]:null;
   if(!map) return false;

@@ -297,10 +297,12 @@ keysRegister('mgmt_classements',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_vestiaire',{
+  v(){CL.go('mgmt_effectif');},V(){CL.go('mgmt_effectif');},
   Escape(){ CL.go('mgmt_accueil'); },
 });
 /* Lot 5 T5 : le recrutement au clavier — flèches pour la ligne, Entrée la fiche, R recrute, échap ramène. */
 keysRegister('mgmt_recrutement',{
+  Tab(e){CL.rcOngletParcourir(e&&e.shiftKey?-1:1);},
   Escape(){ CL.go('mgmt_accueil'); },
   ArrowDown(){ CL.mgmtRecrutementCurseur(1); },
   ArrowUp(){ CL.mgmtRecrutementCurseur(-1); },
