@@ -17,7 +17,9 @@
 .rc-dest-head{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
 .rc-page .rc-dest b{font:800 40px/.8 var(--mf-titre);overflow-wrap:anywhere;min-width:0}
 .rc-dots{display:flex;gap:4px;flex:none}
-.rc-dots i,.rc-odds>i{width:14px;height:14px;display:block;flex:none;background:#252121;border:1px solid rgba(233,230,225,.5);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.rc-dots i,.rc-odds>i{width:14px;height:14px;display:block;flex:none;background:#252121;border:0;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.rc-dots i.rc-dot-full{background:#E9E6E1}.rc-selected .rc-dots i.rc-dot-full{background:#F0B220}
+.rc-dest-meta{display:flex;justify-content:space-between;align-items:start;gap:10px}.rc-dest-meta>small:first-child{min-width:0}.rc-dest-meta>small:last-child{white-space:nowrap;flex:none}
 .rc-page .rc-dest span{font:500 24px/1 var(--mf-texte)}
 .rc-page .rc-dest small{font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74);overflow-wrap:anywhere}
 .rc-page .rc-dest.rc-selected{border:4px solid #F0B220;background:rgba(240,178,32,.07)}

@@ -4,6 +4,18 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {newGameWindow}=require('./helpers/loadGame');
 
+test('Recrutement — cases allégées et pastilles proportionnelles aux vraies chances de pépite',()=>{
+ const w=newGameWindow({runMain:true});try{
+  w.eval(`setSeed(7);CL.mgmtEnter(1);CL.go('mgmt_recruteur_mission')`);
+  const d=JSON.parse(w.eval('JSON.stringify(MGMT_RECRUTEUR.destinations)'));
+  const nodes=[...w.document.querySelectorAll('.rc-dest')];assert.equal(nodes.length,d.length);
+  const remplis=nodes.map((n,i)=>{assert.equal(n.children.length,3);assert.equal(n.querySelectorAll('.rc-dots i').length,3);assert.match(n.querySelector('.rc-dots').getAttribute('aria-label'),new RegExp('1 sur '+d[i].pepites));return n.querySelectorAll('.rc-dot-full').length;});
+  for(let a=0;a<d.length;a++)for(let b=0;b<d.length;b++)if(d[a].pepites<d[b].pepites)assert.ok(remplis[a]>=remplis[b]);
+  assert.equal(remplis[d.findIndex(x=>x.id==='pologne')],3);assert.equal(remplis[d.findIndex(x=>x.id==='japon')],1);
+  assert.match(w.document.querySelector('.rc-mission').textContent,/Chance de pépite1 SUR 40/);
+ }finally{w.close();}
+});
+
 test('Retours — trois colonnes, profils fermés et navigation vers le profil réellement ouvert',()=>{
  const w=newGameWindow({runMain:true});
  try{
