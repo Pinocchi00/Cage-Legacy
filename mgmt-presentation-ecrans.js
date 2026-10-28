@@ -383,7 +383,7 @@ function mgmtPresentationHtml(m,vue){
   vue.noms=contenu.noms.filter(id=>visibles.has(id)||vue.mode==='soiree'&&vue.ids.includes(id));vue.nom=Math.max(0,Math.min(vue.nom||0,vue.noms.length-1));vue.pages=1;vue.page=0;
   const panneau=(p,k)=>`<section class="mf-pr-panneau${p.titre==='LES PRONOSTICS'?' mf-pr-pronostics':''}"><div class="mf-pr-ph"><h2>${esc(p.titre)}</h2>${p.sous?`<span class="mf-pr-phs">${esc(p.sous)}</span>`:''}</div>`
     +(p.tete?`<div class="mf-pr-tab-tete">${p.tete.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:'')
-    +(k===0&&lignesRaison?`<p class="mf-pr-raison-mini">${lignesRaison.l1}</p>`:'')
+    +(k===0&&lignesRaison?`<p class="mf-pr-raison-mini" title="${lignesRaison.l2}">${lignesRaison.l1}</p>`:'')
     +(p.titre==='LES PRONOSTICS'?`<div class="mf-cc-pronos">${mgmtPresentationPronosticsHtml(m,p.lignes)}</div>`:`<div class="mf-pr-lignes">${p.lignes.map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div>`)
     +(p.notes?`<div class="mf-pr-foot">${esc(p.notes)}</div>`:'')+'</section>';
   const bas=resumes.slice(3);

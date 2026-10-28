@@ -227,7 +227,7 @@ test('Monde lot 6 T5 — la revanche ne désigne comme vainqueur que celui de la
 });
 
 /* ==== [ANCRE: MONDE_LOT6_TEST_PRESENTATION_RAISON] — Monde lot 6 : la raison en tête de la présentation ==== */
-test('Monde lot 6 — la présentation d’un combat de Leïla porte ses deux lignes de raison, sans texte sous 22 px',()=>{
+test('Monde lot 6 — la présentation conserve la raison et sa précision, sans texte sous 22 px',()=>{
   const r=JSON.parse(win.eval(`(()=>{
     const m={cycle:8,eventsPlayed:0,graine:'faits',org:'split',facts:[],hist:[],roster:[],card:{main:[],prelims:[]}};
     for(let i=0;i<30;i++) m.roster.push({id:i===0?'a':i===1?'b':'f'+i,name:'Sujet '+i,last:'Sujet '+i,ck:'FR',div:allDivisions()[0].id,age:20+i,W:10+i,L:0,D:0,lastCycle:0,ct:{since:0,n:4,f:0}});
@@ -237,8 +237,8 @@ test('Monde lot 6 — la présentation d’un combat de Leïla porte ses deux li
       nulle:rend({a:'a',b:'b',slot:'main',raison:null,origine:'leila'}),
       joueur:rend({a:'a',b:'b',slot:'main',raison,origine:'joueur'})});
   })()`));
-  assert.match(r.leila,/class="mf-pr-raison"><span>[^<]*7 mois[^<]*<\/span><span>[^<]+<\/span><\/div>/,'les deux lignes de la preuve, 7 mois cité');
-  assert.ok(r.leila.indexOf('mf-pr-raison')<r.leila.indexOf('mf-pr-rangee'),'la raison précède les panneaux');
+  // Anthony,28/10 : synthèse sur un écran ; la précision générique reste consultable au survol.
+  assert.match(r.leila,/class="mf-pr-raison-mini" title="[^"]+">[^<]*7 mois[^<]*<\/p>/,'raison factuelle visible et précision conservée');
   assert.doesNotMatch(r.nulle,/mf-pr-raison/,'raison nulle : rien');
   assert.doesNotMatch(r.joueur,/mf-pr-raison/,'origine joueur : rien');
   const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
