@@ -44,3 +44,19 @@ test('Relevé — porte C et retour Échap conservent le combat et la soirée ch
   assert.equal(w.eval('JSON.stringify([MGMT_SU_RE.s,MGMT_SU_RE.i])'),w.selectionReleve);
  }finally{w.close();}
 });
+
+test('Relevé — cartes originales orientées vers B, égalités et cadre or de la finition réelle',()=>{
+ const w=preparer();try{
+  const rendre=code=>{const p=w.document.createElement('div');p.innerHTML=w.eval(`(()=>{const {t,d,s}=scenarioReleve(3,'B');${code};return mgmtSuReleveHtml(G.mgmt,t,d,s);})()`);return p;};
+  const p=rendre(`t.s.j='p'+'jjj'.repeat(3)`);
+  assert.equal(p.querySelector('.mf-rl-scores').textContent,'30–27 · 30–27 · 30–27');
+  assert.ok([...p.querySelectorAll('.mf-rl-juges b')].every(b=>b.textContent==='10–9'&&b.classList.contains('choix-a')));
+  assert.match(p.querySelector('.mf-rl-juges b').title,/Bravo 10 — Alpha 9/);
+  const nul=rendre(`t.winner='D';d.nul=true;t.s.j='p'+'ooo'.repeat(3)`);
+  assert.equal(nul.querySelectorAll('.mf-rl-juges b.egal').length,9);
+  const fin=rendre(`t.family='sub';t.round=2;d.family='sub';t.s.r=t.s.r.slice(0,2)`);
+  assert.equal(fin.querySelectorAll('.mf-rl-round-or').length,1);
+  assert.match(fin.querySelector('.mf-rl-round-or h3').textContent,/ROUND 2/);
+  assert.match(fin.querySelector('.mf-rl-round-or .mf-rl-juges>div').getAttribute('aria-label'),/Round interrompu/);
+ }finally{w.close();}
+});

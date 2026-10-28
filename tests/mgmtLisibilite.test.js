@@ -39,7 +39,7 @@ test('Lisibilité — l\'en-tête met 24 px d\'espace entre ses éléments et pa
   assert.ok(win.eval(`document.querySelector('.mf-tete-nom .mf-nom-soiree')!==null`),'le nom de la soirée passe par le gabarit');
 });
 
-test('Résultats — une date et un combat principal par soirée ; une ligne par combat ; aucun rouge sur un résultat', () => {
+test('Résultats — une date et un combat principal par soirée ; une ligne par combat et les couleurs du relevé', () => {
   const win=neuve(7); jouer(win,3,{titre:true});
   win.eval(`MGMT_SU_RE={s:0,i:0}; CL.go('mgmt_resultats');`);
   /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — les soirées s'appellent « Fight Night N », la date est longue avec l'année. */
@@ -54,9 +54,10 @@ test('Résultats — une date et un combat principal par soirée ; une ligne par
   const html=win.eval(`document.querySelector('.mf-re-tab').innerHTML`);
   assert.ok(!/color:\s*(#B32A1E|#E23A2B|red)/i.test(html),'aucun style inline rouge sur un résultat');
   assert.ok(!/mf-su-ko|mf-su-h-titre/.test(html),'plus de DÉCISION géant');
-  /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — la planche dessine la pastille de ceinture et le trait des titres en rouge vif ; le rouge ne colore ni le vainqueur ni le perdant. */
+  /* Anthony,28/10 : les deux vues Résultats partagent la direction de UniReleve, adversaire en rouge. */
   const bloc=css().slice(css().indexOf('Monde lot 10 T3 : Résultats'));
-  assert.ok(!/\.mf-re-cb \.(g|b)\{[^}]*rouge/.test(bloc),'le rouge ne colore aucun résultat');
+  assert.match(bloc,/\.mf-re \.mf-re-perdant\{color:#E23A2B/);
+  assert.ok(win.eval(`[...document.querySelectorAll('.mf-re-cb')].filter(x=>x.textContent.includes('match nul')).every(x=>!x.querySelector('.mf-re-perdant'))`),'un nul ne crée pas de perdant rouge');
   assert.match(texte(win),/Revoir le combat/);
 });
 

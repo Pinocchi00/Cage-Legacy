@@ -568,8 +568,8 @@ function mgmtSuReLigneHtml(x,rang,sel){
     ?`<div class="mf-re-col"><div class="mf-re-l1">${esc(MGMT_SU_RE_TEXTES.illisible.texte)}</div></div>`
     :`<div class="mf-re-col"><div class="mf-re-l1">`+(d.nul
       ?`<span>${esc(d.gagnant.last||d.gagnant.name)}</span><span class="b"> et </span><span>${esc(d.perdant.last||d.perdant.name)}</span><span class="b"> : match nul</span>`
-      :`<span class="g">${esc(d.gagnant.last||d.gagnant.name)}</span><span class="b"> bat </span><span>${esc(d.perdant.last||d.perdant.name)}</span>`)
-      +`</div><div class="mf-re-l2">${d.titre?'<span class="mf-re-ceinture"><span class="mf-re-oct"></span>Ceinture</span><span>·</span>':''}<span>${esc(mgmtSuMethodeFamille(d)+' · '+mgmtDivisionLabel(d.cat))}</span></div></div>`;
+      :`<span class="g">${esc(d.gagnant.last||d.gagnant.name)}</span><span class="b"> bat </span><span class="mf-re-perdant">${esc(d.perdant.last||d.perdant.name)}</span>`)
+      +`</div><div class="mf-re-l2">${d.titre?'<span class="mf-re-ceinture"><span class="mf-re-oct"></span>Ceinture</span><span>·</span>':''}<span class="mf-re-methode${['ko','sub','stop'].includes(d.family)?' finition':''}">${esc(mgmtSuMethodeFamille(d))}</span><span>${esc(mgmtDivisionLabel(d.cat))}</span></div></div>`;
   return `<button type="button" class="mf-re-cb${sel?' sel':''}" aria-pressed="${sel}" onclick="CL.mgmtSuReChoisir(${x.k})"><div class="mf-re-n">${rang}</div>${corps}</button>`;
 }
 /** Le détail du combat choisi : place, noms, méthode, bilans, ce que ça change, boutons. */
@@ -578,12 +578,15 @@ function mgmtSuReDetailHtml(m,x,rang,revoyable,derniere){
   if(!d) return `<div class="mf-re-lab">${esc(place)}</div><div class="mf-re-vide-t">${esc(MGMT_SU_RE_TEXTES.illisible.texte)}</div>`;
   const ch=mgmtSuChangements(m,x,derniere).map(c=>`<div class="mf-re-chg"><i class="${c.t}"></i><span>${esc(c.texte)}</span></div>`).join('');
   const fiche=mgmtFicheLigne(m,d.gagnant.id);
-  const actions=(revoyable?mfBouton('Revoir le combat',{touche:'R',classe:'mf-re-act',onclick:'CL.mgmtSuReRevoir()'})
+  const actions=(revoyable?mfBouton('Revoir le combat',{touche:'R',jaune:true,classe:'mf-re-act',onclick:'CL.mgmtSuReRevoir()'})
       :`<div class="mf-re-l2 note">${esc(MGMT_SU_RE_TEXTES.passe.texte)}</div>`)
     +(fiche?mfBouton('Fiche de '+(d.gagnant.last||d.gagnant.name),{touche:'F',classe:'mf-re-act',onclick:'CL.mgmtSuReFiche()'}):'');
-  return `<div class="mf-re-lab">${esc(place)}</div><div class="mf-re-T mf-re-det-g">${esc(d.gagnant.name)}</div>`
-    +`<div class="mf-re-det-p">${esc(d.nul?'et '+d.perdant.name+' : match nul':'bat '+d.perdant.name)}</div>`
+  const cartes=['dec','draw'].includes(t.family)?mgmtReleveCartes(t.s):null;
+  const scores=cartes?cartes.map(p=>(t.winner==='B'?[p[1],p[0]]:p).join('–')).join(' · '):'';
+  return `<div class="mf-re-lab">${esc(place)}</div><div class="mf-re-T mf-re-det-g" style="font-size:${mfCorps(d.gagnant.name,360,52,22)}px">${esc(d.gagnant.name)}</div>`
+    +`<div class="mf-re-det-p"><span>${esc(d.nul?'et':'bat')}</span><b class="${d.nul?'':'mf-re-perdant'}" style="font-size:${mfCorps(d.perdant.name,360,40,22)}px">${esc(d.perdant.name)}</b>${d.nul?'<span> : match nul</span>':''}</div>`
     +`<div class="mf-re-l2 fort">${esc(mgmtSuMethodeFine(d)+(d.geste?' · '+d.geste:''))}</div>`
+    +(scores?`<div class="mf-re-cartes"><span>CARTES DES JUGES</span><b>${esc(scores)}</b></div>`:'')
     +`<div class="mf-re-l2">${esc(mgmtDivisionLabel(d.cat)+' · en '+d.rounds+' rounds')}</div>`
     +`<div class="mf-re-l2">${esc('Bilans avant le combat : '+mgmtSuBilan(d.gagnant)+' et '+mgmtSuBilan(d.perdant))}</div>`
     +(ch?`<div class="mf-re-sous haut">Ce que ça change</div>${ch}`:'')
@@ -670,7 +673,9 @@ function mgmtSuReleveHtml(m,t,d,s){
   const nomHtml=(f,cote)=>`<strong class="${cote}" style="font-size:${mfCorps(nom(f),440,112,22)}px">${esc(nom(f))}</strong>`;
   const revoyable=mgmtCombatRevoyable(t);
   const actions=revoyable?mfBouton('Temps forts',{touche:'T',onclick:'CL.mgmtSuReleveVoir(true)'})+mfBouton('Revoir le combat',{touche:'R',jaune:true,onclick:'CL.mgmtSuReleveVoir(false)'}):'';
-  const entete=`<header class="mf-rl-entete"><div class="mf-rl-verdict"><div class="mf-rl-noms">${nomHtml(a,'coin-a')}<span>${d.nul?'ET':'BAT'}</span>${nomHtml(b,d.nul?'':'coin-b')}</div><div class="mf-rl-meta"><b>${esc(mgmtSuMethodeFine(d))}</b><span>${esc(mgmtOrgNom(m)+' Fight Night '+s.n+' · '+mgmtDivisionLabel(d.cat))}</span></div></div><div class="mf-rl-actions">${actions}</div></header>`;
+  const orienter=paire=>inverse?[paire[1],paire[0]]:paire;
+  const cartes=['dec','draw'].includes(t.family)?mgmtReleveCartes(t.s):null,scores=cartes?cartes.map(x=>orienter(x).join('–')).join(' · '):'';
+  const entete=`<header class="mf-rl-entete"><div class="mf-rl-verdict"><div class="mf-rl-noms">${nomHtml(a,'coin-a')}<span>${d.nul?'ET':'BAT'}</span>${nomHtml(b,d.nul?'':'coin-b')}</div><div class="mf-rl-meta"><b>${esc(mgmtSuMethodeFine(d))}</b>${scores?`<span class="mf-rl-scores" aria-label="Cartes finales des trois juges, dans l’ordre des noms">${esc(scores)}</span>`:''}<span>${esc(mgmtOrgNom(m)+' Fight Night '+s.n+' · '+mgmtDivisionLabel(d.cat))}</span></div></div><div class="mf-rl-actions">${actions}</div></header>`;
   if(!releve)return entete+mfPanneau(titre('RELEVÉ INDISPONIBLE')+'<p>Les statistiques de ce combat ne sont pas conservées.</p>','normal','mf-rl-absent');
   const gauche=inverse?releve.total.b:releve.total.a, droite=inverse?releve.total.a:releve.total.b;
   const mesures=[['Coups significatifs',c=>c.sigTouches+' / '+c.sigTentes],['Précision',c=>c.precision==null?'—':Math.round(c.precision*100)+' %'],['Tête · corps · jambes',c=>c.tete+' · '+c.corps+' · '+c.jambes],['Amenées',c=>c.amenees+' / '+c.amTentees],['Contrôle',c=>temps(c.controle)],['Knockdowns',c=>c.kd],['Soumissions tentées',c=>c.sub]];
@@ -678,10 +683,12 @@ function mgmtSuReleveHtml(m,t,d,s){
   const max=Math.max(1,...releve.parRound.flatMap(q=>[q.a.sigTouches,q.b.sigTouches]));
   const rounds=releve.parRound.map(q=>{
     const l=inverse?q.b:q.a,r=inverse?q.a:q.b;
+    const finition=['ko','sub','stop'].includes(t.family)&&q.r===t.round;
+    const juges=q.juges?q.juges.map((paire,i)=>{const [x,y]=orienter(paire);return `<b class="${x===y?'egal':x>y?'choix-a':'choix-b'}" title="${esc('Juge '+(i+1)+' : '+nom(a)+' '+x+' — '+nom(b)+' '+y)}">${esc(x+'–'+y)}</b>`;}).join(''):'<b>—</b><b>—</b><b>—</b>';
     const barre=(c,f,cote)=>`<div class="mf-rl-col ${cote}"><div class="mf-rl-mesure"><b>${esc(c.sigTouches)}</b><i style="height:${Math.round(c.sigTouches/max*160)}px"></i></div><span>${esc(nom(f))}</span></div>`;
-    return `<section class="mf-rl-round"><div class="mf-rl-round-titre"><h3>ROUND ${q.r}</h3>${l.kd||r.kd?'<b>KNOCKDOWN</b>':''}</div><div class="mf-rl-barres">${barre(l,a,'coin-a')}${barre(r,b,d.nul?'':'coin-b')}</div><div class="mf-rl-detail"><span>Amenées</span><b>${esc(l.amenees+' / '+r.amenees)}</b><span>Contrôle</span><b>${esc(temps(l.controle)+' / '+temps(r.controle))}</b></div><div class="mf-rl-juges"><span>LES TROIS JUGES</span><div aria-label="Votes des juges non conservés"><b>—</b><b>—</b><b>—</b></div></div></section>`;
+    return `<section class="mf-rl-round${finition||l.kd||r.kd?' mf-rl-round-or':''}"><div class="mf-rl-round-corps"><div class="mf-rl-round-titre"><h3>ROUND ${q.r}</h3>${finition?`<b>${esc(MGMT_FAMILY_LABELS[t.family]||'FINITION')}</b>`:l.kd||r.kd?'<b>KNOCKDOWN</b>':''}</div><div class="mf-rl-barres">${barre(l,a,'coin-a')}${barre(r,b,d.nul?'':'coin-b')}</div><div class="mf-rl-detail"><span>Amenées</span><b>${esc(l.amenees+' / '+r.amenees)}</b><span>Contrôle</span><b>${esc(temps(l.controle)+' / '+temps(r.controle))}</b></div><div class="mf-rl-juges"><span>LES TROIS JUGES</span><div aria-label="${q.juges?'Votes sauvegardés des juges, dans l’ordre des noms':finition?'Round interrompu, aucun vote officiel':'Votes des juges non conservés'}">${juges}</div></div></div></section>`;
   }).join('');
-  const note='<p class="mf-rl-note"><i></i><span>Votes des juges et moments clés non conservés.</span></p>';
+  const note=`<p class="mf-rl-note"><i></i><span>${releve.juges?'Moments clés non conservés.':'Votes des juges et moments clés non conservés.'}</span></p>`;
   return entete+`<div class="mf-rl-panneaux">${mfPanneau(titre('LE COMBAT EN CHIFFRES')+totaux,'normal','mf-rl-totaux')}${mfPanneau(`<div class="mf-rl-rounds-tete">${titre('ROUND PAR ROUND')}<span>COUPS SIGNIFICATIFS TOUCHÉS</span></div><div class="mf-rl-rounds">${rounds}</div>${note}`,'normal','mf-rl-par-round')}</div>`;
 }
 function scr_mgmt_releve(){

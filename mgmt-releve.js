@@ -5,29 +5,56 @@ const MGMT_RELEVE_TOTAL=['headAtt','bodyAtt','legAtt','dist','distAtt','clinch',
 /* ==== [ANCRE: MONDE_LOT31_T2_RELEVE_REDUIT] — Monde lot 31 T2 ==== */
 const MGMT_RELEVE_REDUIT=['sig','sigAtt','total','totalAtt','head','body','leg','dist','clinch','ground','td','tdAtt','tdDef','subAtt','kd','ctrlSec','pwr'];
 function mgmtReleveEntier(x){ return Math.max(0,Math.round(Number.isFinite(x)?x:0)); }
+/* ==== [ANCRE: RELEVE_VOTES_ORIGINAUX_20261028] — Anthony : les choix réels des trois juges ==== */
+/** Une paire de scores 6..10 vaut (A-6)*5+(B-6), en base 36.
+ *  Préfixe p, puis trois paires par round : au plus seize caractères, sans perte.
+ *  Seulement des rounds achevés d'une décision : aucun vote déduit d'un ancien rejeu. */
+function mgmtReleveVotesValides(j,n){
+  return typeof j==='string'&&/^p[0-9a-o]{3,15}$/.test(j)&&(j.length-1)%3===0&&(n===undefined||j.length===n*3+1);
+}
+function mgmtReleveVotes(s){
+  if(!s||!mgmtReleveVotesValides(s.j))return null;
+  return Array.from({length:(s.j.length-1)/3},(_,i)=>Array.from(s.j.slice(1+i*3,4+i*3)).flatMap(x=>{const n=parseInt(x,36);return [6+Math.floor(n/5),6+n%5];}));
+}
+function mgmtReleveCartes(s){
+  if(!mgmtReleveValide(s))return null;
+  const votes=mgmtReleveVotes(s);
+  return votes?Array.from({length:3},(_,j)=>[0,1].map(c=>votes.reduce((s,r)=>s+r[j*2+c],0))):null;
+}
+function mgmtReleveVotesOriginaux(res,n){
+  if(!res||typeof res.method!=='string'||!/^(Décision|Nul)/.test(res.method)||!Array.isArray(res.roundStats)||res.roundStats.length!==n)return null;
+  const paires=x=>Array.isArray(x)&&x.length===2&&x.every(v=>Number.isSafeInteger(v)&&v>=6&&v<=10);
+  const lignes=Array.from(res.roundStats,(r,i)=>r&&r.r===i+1&&['j1','j2','j3'].every(k=>paires(r[k]))?['j1','j2','j3'].flatMap(k=>r[k]):null);
+  if(lignes.some(x=>!x)||!['j1','j2','j3'].every((k,i)=>Array.isArray(res.judges?.[k])&&res.judges[k].length===2&&res.judges[k].every((v,c)=>v===lignes.reduce((s,r)=>s+r[i*2+c],0))))return null;
+  return 'p'+lignes.map(r=>[0,2,4].map(i=>((r[i]-6)*5+r[i+1]-6).toString(36)).join('')).join('');
+}
+/* ==== [FIN ANCRE] ==== */
 function mgmtReleveDeResultat(res,rounds){
   const stats=res&&res.stats||{}, parRound=Array.isArray(res&&res.roundStats)?res.roundStats:[];
   const n=Math.max(1,Math.min(5,parRound.length|| (Number.isSafeInteger(res&&res.round)?res.round:rounds)));
   const r=Array.from({length:n},(_,i)=>['A','B'].flatMap(c=>MGMT_RELEVE_ROUND.map(k=>mgmtReleveEntier(parRound[i]&&parRound[i][(k==='ctrlSec'?'ctrlSec':k)+c]))));
   const e=['A','B'].map(c=>MGMT_RELEVE_TOTAL.map(k=>mgmtReleveEntier(stats[c]&&stats[c][({dist:'distStrikes',clinch:'clinchStrikes',ground:'groundStrikes'})[k]||k])));
   const d=Number.isFinite(res&&res.finishTime)?(n-1)*300+Math.round(res.finishTime):rounds*300;
-  return {d:Math.max(1,d),r,e};
+  const j=n===rounds?mgmtReleveVotesOriginaux(res,n):null;
+  return {d:Math.max(1,d),r,e,...(j?{j}:{})};
 }
 function mgmtReleveValide(s){
   try{
     if(!s||typeof s!=='object'||Array.isArray(s)||!Number.isSafeInteger(s.d)||s.d<1) return false;
-    const keys=Object.keys(s).sort().join(',');
+    if(Object.hasOwn(s,'j')&&!mgmtReleveVotesValides(s.j,Array.isArray(s.r)?s.r.length:undefined))return false;
+    const keys=Object.keys(s).filter(k=>k!=='j').sort().join(',');
     if(keys==='c,d') return Array.isArray(s.c)&&s.c.length===2&&s.c.every(x=>Array.isArray(x)&&x.length===17&&x.every(v=>Number.isSafeInteger(v)&&v>=0));
     return keys==='d,e,r'&&Array.isArray(s.r)&&s.r.length>=1&&s.r.length<=5&&s.r.every(x=>Array.isArray(x)&&x.length===28&&x.every(v=>Number.isSafeInteger(v)&&v>=0))&&Array.isArray(s.e)&&s.e.length===2&&s.e.every(x=>Array.isArray(x)&&x.length===12&&x.every(v=>Number.isSafeInteger(v)&&v>=0));
   }catch(_){return false;}
 }
 function mgmtReleveReduit(s){
   if(!mgmtReleveValide(s)) return null;
-  if(Array.isArray(s.c)) return {d:s.d,c:s.c.map(x=>x.slice())};
+  const votes=Object.hasOwn(s,'j')?{j:s.j}:{};
+  if(Array.isArray(s.c)) return {d:s.d,c:s.c.map(x=>x.slice()),...votes};
   return {d:s.d,c:['A','B'].map((_,coin)=>MGMT_RELEVE_REDUIT.map(k=>{
     const roundIndex=MGMT_RELEVE_ROUND.indexOf(k), totalIndex=({dist:3,clinch:5,ground:7})[k];
     return roundIndex>=0?s.r.reduce((sum,row)=>sum+row[coin*14+roundIndex],0):s.e[coin][totalIndex];
-  }))};
+  })),...votes};
 }
 function mgmtReleveCoin(s,cote){
   if(!mgmtReleveValide(s)||(cote!=='A'&&cote!=='B')) return null;

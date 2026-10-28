@@ -31,13 +31,15 @@ test('Monde lot 31 T2 — monde vivant réécrit tous ses relevés réduits',()=
 
 test('Monde lot 31 T2 — le poids de référence reste sous le plafond',()=>{
   const w=newGameWindow({runMain:true});
-  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);const m=mgmtPasseGenerer('split',{soirees:62});mgmtMondeVivantGenerer(m,{soirees:62});const n=m.hist.slice(0,m.passe.nHist).filter(t=>t.s).map(t=>JSON.stringify(t.s).length);G={theme:'dark',mgmt:m};saveMgmt();m.treasury+=1;const t0=performance.now();saveMgmt();const save=performance.now()-t0,t1=performance.now();loadMgmt();const load=performance.now()-t1;return {save,load,bytes:mgmtSerialiser(G.mgmt).length,stocke:mgmtSerialiserCompresse(G.mgmt).length,mean:n.reduce((a,b)=>a+b,0)/n.length};})())`));
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);const m=mgmtPasseGenerer('split',{soirees:62});mgmtMondeVivantGenerer(m,{soirees:62});const stats=m.hist.slice(0,m.passe.nHist).filter(t=>t.s).map(t=>{const base={...t.s};delete base.j;return {plein:JSON.stringify(t.s).length,base:JSON.stringify(base).length};}),n=stats.map(s=>s.plein);G={theme:'dark',mgmt:m};saveMgmt();m.treasury+=1;const t0=performance.now();saveMgmt();const save=performance.now()-t0,t1=performance.now();loadMgmt();const load=performance.now()-t1;return {save,load,bytes:mgmtSerialiser(G.mgmt).length,stocke:mgmtSerialiserCompresse(G.mgmt).length,mean:n.reduce((a,b)=>a+b,0)/n.length,baseMean:stats.reduce((s,x)=>s+x.base,0)/stats.length,maxVotes:Math.max(...stats.map(s=>s.plein-s.base))};})())`));
   console.log('Mesure partie neuve et relevé réduit:',JSON.stringify(r));
   /* Décision citée : brief du 22/10, tranche de compression de la sauvegarde (lot 52), acceptée par Anthony. Le plafond de 1 900 000 reste, mais il porte sur les octets STOCKÉS (compressés) ;
      le brut a son propre plafond, à 3 200 000, qui donne leur marge aux lots à venir. */
   assert.ok(r.stocke<=1900000);assert.ok(r.bytes<=3200000);assert.ok(r.stocke<=0.6*r.bytes);
   /* Lot 52 T1, la vitesse sur la partie neuve complète : mesuré à ~100 ms (sauvegarde après une action) et ~330 ms (chargement) ; seuils tolérants pour la CI. */
-  assert.ok(r.save<400,'sauvegarde '+r.save);assert.ok(r.load<800,'chargement '+r.load);assert.ok(r.mean<=110);
+  assert.ok(r.save<400,'sauvegarde '+r.save);assert.ok(r.load<800,'chargement '+r.load);
+  // Même plafond statistique ; les vrais votes ajoutés le28/10 ont leur propre budget borné.
+  assert.ok(r.baseMean<=110);assert.ok(r.maxVotes<=23);assert.ok(r.mean<=133);
 });
 
 test('Monde lot 31 T2 — une sauvegarde ancienne sans relevé reste chargeable et jouable',()=>{

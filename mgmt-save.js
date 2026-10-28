@@ -820,7 +820,13 @@ function mgmtRepair(m){
     /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
        des faits de titre, sans couper ni décaler leur combat par erreur. */
     const indices=new Map(),hist=[];
-    m.hist.forEach((x,i)=>{ if(x&&typeof x==='object'&&x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') delete x.pr; if(mgmtValidFightTrace(x)){ if(x.s!==undefined&&!mgmtReleveValide(x.s)) delete x.s; indices.set(i,hist.length); hist.push(x); } });
+    m.hist.forEach((x,i)=>{ if(x&&typeof x==='object'&&x.pr!==undefined&&x.pr!=='cs'&&x.pr!=='pf') delete x.pr; if(mgmtValidFightTrace(x)){
+      if(x.s!==undefined&&!mgmtReleveValide(x.s)){
+        const sansVotes={...x.s};delete sansVotes.j;
+        if(x.s&&Object.hasOwn(x.s,'j')&&mgmtReleveValide(sansVotes))x.s=sansVotes;else delete x.s;
+      }
+      indices.set(i,hist.length);hist.push(x);
+    } });
     m.hist=hist;
     m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
     /* Monde lot 44 T1 : le fait prime suit le combat, comme le fait de titre. */
