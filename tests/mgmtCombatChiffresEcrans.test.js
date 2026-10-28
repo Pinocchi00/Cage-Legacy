@@ -4,6 +4,38 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const creer=()=>{const w=newGameWindow({runMain:true});w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");return w;};
 
+test('Présentations — toutes les voix restent visibles dans l’histoire, même sur une autre page',()=>{
+ const w=creer();try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id&&f.div===a.div),v={mode:'combat',ids:[a.id,b.id],page:0,nom:0,vue:'histoire'},p=mgmtPresentationLignes(m,v).panneaux.find(p=>p.titre==='LES PRONOSTICS'),avant=JSON.stringify(m),seed=SEED,h0=mgmtPresentationHtml(m,v);v.page=200;const h1=mgmtPresentationHtml(m,v);return {h0,h1,voix:p.lignes,egal:MGMT_AVANT_TEXTES.zone.egal,pur:avant===JSON.stringify(m)&&seed===SEED};})())`));
+  assert.doesNotMatch(r.egal,/d[’']après ce que tu as vu/i);assert.ok(r.voix.length>0);
+  for(const html of [r.h0,r.h1]){
+   const p=w.document.createElement('div');p.innerHTML=html;const voix=[...p.querySelectorAll('.mf-pr-pronostics details')];assert.equal(voix.length,r.voix.length);
+   voix.forEach((n,i)=>{assert.equal(n.querySelector('summary>span').textContent,r.voix[i].media);assert.equal(n.querySelector('p').textContent,r.voix[i].texte);assert.equal(n.open,false);});
+  }
+  assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Présentations — avis publiés distincts des pronostics et grand bandeau des deux noms',()=>{
+ const w=creer();try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id&&f.div===a.div);m.fil=m.fil||[];m.fil.push({k:'public',c:m.cycle,a:a.id,t:'Avis déjà publié.'},{k:'public',c:m.cycle+1,a:a.id,t:'Avis futur interdit.'});const v={mode:'combat',ids:[a.id,b.id],page:0,nom:0,vue:'histoire'},avant=JSON.stringify(m),seed=SEED;return {html:mgmtPresentationHtml(m,v),pur:avant===JSON.stringify(m)&&seed===SEED};})())`));
+  const p=w.document.createElement('div');p.innerHTML=r.html;assert.ok(p.querySelector('.mf-cc-identites'));assert.equal(p.querySelectorAll('.mf-cc-identite').length,2);
+  assert.ok(p.textContent.includes('CE QUE LES GENS EN PENSENT'));assert.ok(p.textContent.includes('Avis déjà publié.'));assert.ok(!p.textContent.includes('Avis futur interdit.'));assert.ok(p.querySelector('.mf-pr-pronostics'));assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Présentations — deux sous-menus explicites, synthèse sans pages et noms sélectionnables réellement visibles',()=>{
+ const w=creer();try{
+  w.eval(`const a=G.mgmt.roster[0],b=G.mgmt.roster.find(f=>f.id!==a.id&&f.div===a.div);CL.mgmtPresentationOuvrir('combat',[a.id,b.id],{retour:'mgmt_carte'});`);
+  const choisir=vue=>[...w.document.querySelectorAll('.mf-entete button')].find(b=>b.getAttribute('onclick')===`CL.mgmtPresentationVueChoisir('${vue}')`);
+  assert.ok(choisir('histoire'));assert.ok(choisir('chiffres'));choisir('chiffres').click();assert.equal(w.eval('MGMT_PRESENTATION_UI.pile.at(-1).vue'),'chiffres');
+  choisir('chiffres').click();assert.equal(w.eval('MGMT_PRESENTATION_UI.pile.at(-1).vue'),'chiffres','cliquer l’onglet actif ne bascule pas ailleurs');
+  choisir('histoire').click();assert.equal(w.eval('MGMT_PRESENTATION_UI.pile.at(-1).pages'),1);assert.equal(w.eval('MGMT_PRESENTATION_UI.pile.at(-1).page'),0);
+  w.eval('CL.mgmtPresentationPage(1)');assert.equal(w.eval('MGMT_PRESENTATION_UI.pile.at(-1).page'),0);
+  const visibles=w.eval(`MGMT_PRESENTATION_UI.pile.at(-1).noms.every(id=>document.querySelector('.mf-pr').textContent.includes(mgmtNomParId(G.mgmt,id).name))`);assert.equal(visibles,true);
+ }finally{w.close();}
+});
+
 test('Chiffres fidèles — les deux panneaux reprennent les lectures et les pronostics sans inventer de pourcentages',()=>{
  const w=creer();
  try{

@@ -1656,8 +1656,25 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cc-prono-valeur{display:flex;align-items:baseline;gap:10px;color:rgba(233,230,225,.74);min-width:0;overflow-wrap:anywhere;text-align:right}
 .mf-cc-prono-valeur>b{font:800 34px/.8 var(--mf-titre);color:#E9E6E1;white-space:nowrap}
 .mf-cc-prono-valeur>i{font:500 22px/1 var(--mf-texte);font-style:normal}
+.mf-cc-prono summary>span:first-child{white-space:nowrap;flex:none}.mf-cc-prono-valeur{flex:1}.mf-cc-prono-nom{flex:1;min-width:0;overflow-wrap:anywhere}.mf-cc-prono-valeur>b,.mf-cc-prono-valeur>i{flex:none}
 .mf-cc-prono>p{font:500 24px/1.15 var(--mf-texte);margin:10px 0 0;overflow-wrap:anywhere}
 .mf-cc-prono:not([open])>p{display:none}
+.mf-pr-pronostics{overflow:auto}.mf-pr-pronostics .mf-cc-pronos{gap:12px}.mf-pr-pronostics summary>span:first-child{flex:none}
+.mf-pr:not(.mf-pr-chiffres) .mf-pr-panneau{overflow:auto}
+.mf-pr-raison{height:auto;min-height:56px;padding:4px 16px;line-height:1.25}.mf-pr-raison span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.mf-pr-tab-tete span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.2}
+.mf-pr-ta1{min-width:0;line-height:1.1}.mf-pr-ta1>.mf-pr-lien{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.mf-pr.duo:not(.mf-pr-chiffres)>.mf-pr-rangee.bas{height:244px}.mf-cc-nom>.mf-pr-lien{font:inherit;line-height:inherit;color:inherit;max-width:100%}
+.mf-pr{background:transparent}.mf-pr:not(.mf-pr-chiffres) .mf-pr-panneau{overflow:visible;padding:14px}
+.mf-pr-panneau .mf-pr-ph h2{font-size:36px}.mf-pr .mf-pr-lignes{gap:8px}.mf-pr .mf-pr-ligne{padding:6px 10px;font-size:24px;line-height:1.1;min-height:0}
+.mf-pr-raison-mini{margin:0 0 10px;padding:0 0 0 10px;border-left:3px solid #E9E6E1;font:500 22px/1.15 var(--mf-texte)}
+.mf-pr .mf-pr-tab-tete,.mf-pr .mf-pr-ligne.ta{grid-template-columns:1.6fr .7fr .7fr;gap:6px}.mf-pr .mf-pr-tac{gap:4px}.mf-pr .mf-pr-tac .mf-pr-marq{width:24px;height:24px;font-size:22px}
+.mf-pr-compact .mf-pr-vr>strong{font:800 22px/1 var(--mf-titre)}.mf-pr-compact .mf-pr-vr>span{font:500 24px/1.1 var(--mf-texte)}.mf-pr-compact .mf-pr-vr>small{font:500 22px/1.1 var(--mf-texte)}
+.mf-cc-analyse .mf-pr-compact .mf-pr-vr{display:grid;grid-template-columns:1fr 1.2fr;gap:2px 8px;align-items:center}.mf-cc-analyse .mf-pr-compact .mf-pr-vr>small{grid-column:1 / -1}
+.mf-cc-identites{background-size:1728px 972px;background-position:calc(50% - 250px) center}
+.mf-cc-duel{position:relative;align-self:stretch;display:block}.mf-cc-duel .mf-cc-vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.mf-cc-duel>span{position:absolute;left:50%;top:calc(50% + 62px);transform:translateX(-50%);width:220px;font-size:24px;line-height:1}
+.mf-pr-panneau:has(.mf-pr-ph h2){min-width:0}.mf-pr-panneau .mf-pr-ph{flex-wrap:wrap}.mf-pr-panneau .mf-pr-ph h2{white-space:normal;line-height:.9;max-width:100%;overflow-wrap:anywhere}
 /* ==== [FIN ANCRE] ==== */
 .mf-pr-chiffres .mf-cc-panneau{box-sizing:border-box;position:absolute;left:0;top:166px;width:100%;height:calc(48px + var(--mf-cc-lignes, 9) * 33px);padding:15px 25px;background:#121010;display:flex;flex-direction:column;justify-content:flex-start;gap:0}
 .mf-cc-ligne{display:grid;grid-template-columns:120px 1fr 380px 1fr 120px;align-items:center;gap:16px;height:33px;flex:none}
@@ -4095,3 +4112,6 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-re-chiffres-resume{font:500 24px/1.1 var(--mf-texte);flex:none}.mf-re-chiffres-resume:not([open])>.mf-re-chiffres{display:none}
 .mf-re-chiffres-resume .mf-re-chiffres{display:flex;flex-direction:column;max-height:none;overflow:visible}.mf-re-chiffres-resume .mf-cc-totaux,.mf-re-chiffres-resume .mf-cc-par-round{min-width:0}
 /* ==== [FIN ANCRE] ==== */
+
+/* Les voix condensées gardent leur paragraphe consultable sans la carte narrative. */
+.mf-pr details.mf-cc-prono{display:block;min-height:0;padding:0;background:transparent;clip-path:none}.mf-cc-prono .mf-pr-media{font:inherit;color:inherit;margin:0}

@@ -58,7 +58,7 @@ function mgmtPresentationAutre(delta){
 /** Choisit un nom historique, borné sans boucle. @param {number} delta */
 function mgmtPresentationNom(delta){
   const v=mgmtPresentationCadre();if(!v) return;
-  const noms=mgmtPresentationLignes(G.mgmt,v).noms;
+  const noms=v.noms||mgmtPresentationLignes(G.mgmt,v).noms;
   v.nom=Math.max(0,Math.min(noms.length-1,v.nom+delta));render();
 }
 /** Tourne les pages du même contenu, bornées sans boucle. @param {number} delta */
@@ -70,6 +70,10 @@ function mgmtPresentationPage(delta){
 function mgmtPresentationVueAlterner(){
   const v=mgmtPresentationCadre();if(!v||v.mode==='combattant')return;
   v.vue=v.vue==='chiffres'?'histoire':'chiffres';render();
+}
+function mgmtPresentationVueChoisir(vue){
+ const v=mgmtPresentationCadre();if(!v||v.mode==='combattant'||!['histoire','chiffres'].includes(vue))return;
+ v.vue=vue;v.page=0;render();
 }
 function mgmtPresentationFaceAFaceHtml(m,vue,a,b){
   const f=mgmtFaceAFace(m,vue.ids[0],vue.ids[1]);
@@ -88,14 +92,16 @@ function mgmtPresentationChiffresBanniere(m,v,a,b,tag){
   const surnom=mgmtSurnomDe(m,f.id),prenom=mfNet(f.first||'')+(surnom?' « '+mfNet(surnom)+' »':''),nom=mfNet(f.last||f.name);
   const rang=mgmtFicheSituation(m,f,'organization'),ville=mgmtIdentiteVille(f);
   const traits=mgmtTraitsFiche(m,f.id,v.h).vus.slice(0,2).map(t=>`<span class="mf-cc-trait${negatif.has(t.id)?' negatif':''}">${esc(t.nom)}</span>`).join('');
-  return `<div class="mf-cc-identite ${side}"><div class="mf-cc-prenom" style="font-size:${mfCorps(prenom,570,36,22)}px">${esc(prenom)}</div><b class="mf-cc-nom" style="font-size:${mfCorps(nom,570,110,22)}px">${esc(nom)}</b><div class="mf-cc-bilan"><strong>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</strong><span>${esc(rang)} · ${esc(f.age)} ans${ville?' · '+esc(ville):''}</span></div><div class="mf-cc-traits">${traits}</div></div>`;
+  const k=v.noms?.indexOf(f.id)??-1,nomHtml=v.mode==='soiree'&&k>=0?`<button type="button" class="mf-pr-lien" onclick="MGMT_PRESENTATION_UI.pile.at(-1).nom=${k};CL.mgmtPresentationNomOuvrir()">${esc(nom)}</button>`:esc(nom);
+  return `<div class="mf-cc-identite ${side}"><div class="mf-cc-prenom" style="font-size:${mfCorps(prenom,570,36,22)}px">${esc(prenom)}</div><b class="mf-cc-nom" style="font-size:${mfCorps(nom,570,110,22)}px">${nomHtml}</b><div class="mf-cc-bilan"><strong>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</strong><span>${esc(rang)} · ${esc(f.age)} ans${ville?' · '+esc(ville):''}</span></div><div class="mf-cc-traits">${traits}</div></div>`;
  };
  return `<div class="mf-cc-identites">${cote(a,'a')}<div class="mf-cc-duel"><div class="mf-cc-vs"><b>VS</b></div><span>${esc(tag)}</span></div>${cote(b,'b')}</div>`;
 }
+function mgmtPresentationPronosticsHtml(m,lignes){return lignes.map(x=>`<details class="mf-cc-prono mf-pr-ligne" data-sources="${esc(JSON.stringify(x.sources||[]))}"><summary><span class="mf-pr-media">${esc(x.media||'')}</span><span class="mf-cc-prono-valeur">${x.sujet?`<span class="mf-cc-prono-nom" style="font-size:${mfCorps(mgmtNomParId(m,x.sujet).last||mgmtNomParId(m,x.sujet).name,310,24,22)}px">${esc(mgmtNomParId(m,x.sujet).last||mgmtNomParId(m,x.sujet).name)}</span>`:''}${x.sourcePct!=null?` <b>${esc(Math.round(x.sourcePct))} %</b>`:''}<i aria-hidden="true">⌄</i></span></summary><p class="mf-pr-phrase">${esc(x.texte||'')}</p></details>`).join('');}
 function mgmtPresentationChiffresBas(m,v,panneaux){
  const analyse=panneaux.find(p=>p.titre==='CE QUE CHACUN IMPOSE')||panneaux.find(p=>p.titre==='CE QUI LE REND UNIQUE'),pronostics=panneaux.find(p=>p.titre==='LES PRONOSTICS');
- const gauche=analyse?mfPanneau(`<h2>CE QUI VA DÉCIDER</h2><div class="mf-cc-faits">${analyse.lignes.map(x=>mgmtPresentationLigneHtml(m,v,{...x,entete:'',texte:(x.entete?x.entete+' · ':'')+(x.texte||''),pastille:'jaune'})).join('')}</div>`,'normal','mf-cc-analyse'):'';
- const voix=pronostics?pronostics.lignes.map(x=>`<details class="mf-cc-prono" data-sources="${esc(JSON.stringify(x.sources||[]))}"><summary><span>${esc(x.media||'')}</span><span class="mf-cc-prono-valeur">${x.sujet?esc(mgmtNomParId(m,x.sujet).last||mgmtNomParId(m,x.sujet).name):''}${x.sourcePct!=null?` <b>${esc(Math.round(x.sourcePct))} %</b>`:''}<i aria-hidden="true">⌄</i></span></summary><p>${esc(x.texte||'')}</p></details>`).join(''):'';
+ const gauche=analyse?mfPanneau(`<h2>CE QUI VA DÉCIDER</h2><div class="mf-cc-faits">${analyse.lignes.map(x=>mgmtPresentationLigneHtml(m,v,x.compact?{...x,pastille:'jaune'}:{...x,entete:'',texte:(x.entete?x.entete+' · ':'')+(x.texte||''),pastille:'jaune'})).join('')}</div>`,'normal','mf-cc-analyse'):'';
+ const voix=pronostics?mgmtPresentationPronosticsHtml(m,pronostics.lignes):'';
  const droite=pronostics?mfPanneau(`<h2>LES PRONOSTICS · ${pronostics.lignes.length} VOIX</h2><div class="mf-cc-pronos">${voix}</div>`,'normal','mf-cc-pronostics'):'';
  return gauche||droite?`<div class="mf-cc-dessous">${gauche}${droite}</div>`:'';
 }
@@ -103,7 +109,7 @@ function mgmtPresentationChiffresBas(m,v,panneaux){
 /** Ouvre le nom choisi dans une présentation enfant ; fiche existante si T2 retourne null. */
 function mgmtPresentationNomOuvrir(){
   const v=mgmtPresentationCadre();if(!v) return;
-  const id=mgmtPresentationLignes(G.mgmt,v).noms[v.nom];if(!id) return;
+  const id=(v.noms||mgmtPresentationLignes(G.mgmt,v).noms)[v.nom];if(!id) return;
   const parents=MGMT_PRESENTATION_UI.pile.slice();
   if(mgmtPresentationOuvrir('combattant',[id],{h:v.h,retour:mgmtPresentationRoute(v)})){
     MGMT_PRESENTATION_UI.pile=parents.concat(MGMT_PRESENTATION_UI.pile);
@@ -168,10 +174,12 @@ function mgmtImposerLignes(m,ids,h){
     if(Math.abs(d)<0.15){texte=T.egal.replace('{x}',x).replace('{y}',y);marque='q';}
     else{texte=T.duo.replace('{x}',x).replace('{y}',y);
       marque=(d>0?zb[k]:za[k])<=-0.2?'moins':'plus';}
+    let precision='';
     if(k==='centre'){const dr=mgmtAllongeCm(a)-mgmtAllongeCm(b);
       if(Math.abs(dr)>=8) texte+=' '+T.allonge.replace('{x}',dr>0?nom(ids[0]):nom(ids[1]))
-        .replace('{n}',String(Math.round(Math.abs(dr))));}
-    out.push({texte,entete:MGMT_AVANT_TEXTES.zones[k],pastille:marque,sources:[]});
+        .replace('{n}',String(Math.round(Math.abs(dr))));
+      if(Math.abs(dr)>=8)precision='Allonge : +'+Math.round(Math.abs(dr))+' cm '+(dr>0?'à gauche':'à droite');}
+    out.push({texte,compact:Math.abs(d)<.15?'ÉQUILIBRÉ':d>0?'← AVANTAGE À GAUCHE':'AVANTAGE À DROITE →',precision,entete:MGMT_AVANT_TEXTES.zones[k],pastille:marque,sources:[]});
   }
   return out;
 }
@@ -218,16 +226,17 @@ function mgmtPresentationLignes(m,v){
       const issue=t.winner==='D'?'n':t.winner===c?'v':'d';
       let sous=MGMT_FAMILY_LABELS[t.family]||t.family||'';
       if(issue!=='n'&&Number.isSafeInteger(t.round)) sous+=', '+mgmtRoundOrdinal(t.round);
-      return {pastille:issue,sous};
+      const famille={ko:'KO',sub:'SOUM.',stop:'ARRÊT',dec:'DÉC.',draw:'NUL'}[t.family]||MGMT_FAMILY_LABELS[t.family]||t.family;
+      return {pastille:issue,sous,court:famille+(issue!=='n'&&Number.isSafeInteger(t.round)?' · R'+t.round:'')};
     };
     panneaux=[
       {titre:'CE QUI LE REND UNIQUE',lignes:d.faits.map(x=>({...phrase(x),pastille:'jaune'}))},
-      {titre:'CE QUE CHACUN IMPOSE',sous:'D’après leurs combats',lignes:mgmtImposerLignes(m,d.ids,d.h)},
+      {titre:'CE QUE CHACUN IMPOSE',lignes:mgmtImposerLignes(m,d.ids,d.h)},
        {titre:'LEUR HISTOIRE',lignes:d.histoire.flatMap(x=>{
            const t=m.hist[x.index];
            const entreEux=x.ids.includes(d.ids[0])&&x.ids.includes(d.ids[1]);
            const advId=entreEux?null:(t.a.id===d.ids[0]||t.a.id===d.ids[1]?t.b.id:t.a.id);
-           const tableau=d.ids.map(id=>lui(t,id)).filter(Boolean);
+           const tableau=d.ids.map(id=>lui(t,id));
            const base={texte:entreEux?mgmtHistoireSoireeLabel(m,x.index,lat):mgmtNomParId(m,advId).name,
              ids:entreEux?[]:inscrit(advId),tab:tableau,sources:[{type:'hist',index:x.index}]};
            const traits=[];
@@ -249,6 +258,9 @@ function mgmtPresentationLignes(m,v){
     /* Les deux participants restent consultables depuis l’avant-combat, même sans historique commun. */
     if(v.mode==='soiree') for(const id of v.ids) nom(id);
   }
+  const sujets=v.mode==='combattant'?[d.id]:d.ids,limite=d.h<m.hist.length?(m.hist[Math.max(0,d.h-1)]?.c??0):m.cycle;
+  const dits=new Set(),avis=mgmtFilListe(m).filter(x=>(x.k==='presse'||x.k==='public')&&sujets.some(id=>x.a===id||x.b===id)&&x.c<=limite&&(!Number.isSafeInteger(x.f)||x.f<d.h)).filter(x=>{const t=x.t||mgmtFilTitre(m,x);if(dits.has(t))return false;dits.add(t);return true;}).slice(0,3);
+  panneaux.push({titre:'CE QUE LES GENS EN PENSENT',lignes:avis.map(x=>({texte:x.t||mgmtFilTitre(m,x),resume:mgmtFilTitre(m,x),media:x.k==='presse'?'LA PRESSE':x.k==='public'?'LES FANS':mgmtNomParId(m,x.a).name,sources:[{type:'fil',index:(m.fil||[]).indexOf(x)}]})),notes:avis.length?'':'Pas encore d’avis publié.'});
   return {d,noms,panneaux:panneaux.filter(p=>p.lignes.length||p.notes)};
 }
 function mgmtPresentationNomHtml(m,v,id){
@@ -268,10 +280,11 @@ function mgmtPresentationMarqueHtml(x){
   return `<span class="mf-pr-marq ${x.pastille}">${x.pastille.toUpperCase()}</span>`;
 }
 function mgmtPresentationLigneHtml(m,v,x){
+  if(x.compact)return `<div class="mf-pr-ligne mf-pr-compact" title="${esc(x.texte)}">${mgmtPresentationMarqueHtml(x)}<div class="mf-pr-vr"><strong>${esc(x.entete)}</strong><span>${esc(x.compact)}</span>${x.precision?`<small>${esc(x.precision)}</small>`:''}</div></div>`;
   /* La ligne-tableau « Leur histoire » : trois colonnes, pastille V/D/N et méthode de chaque côté. */
   if(x.tab) return `<div class="mf-pr-ligne ta" data-sources="${esc(JSON.stringify(x.sources||[]))}">`
-    +`<div class="mf-pr-ta1">${[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(' · ')}${esc(x.texte||'')}</div>`
-    +x.tab.map(c=>`<div class="mf-pr-tac">${mgmtPresentationMarqueHtml(c)}<span class="mf-pr-sous">${esc(c.sous)}</span></div>`).join('')
+    +`<div class="mf-pr-ta1">${x.ids.length?[...new Set(x.ids)].map(id=>mgmtPresentationNomHtml(m,v,id)).join(' · '):esc(x.texte||'')}</div>`
+    +x.tab.map(c=>c?`<div class="mf-pr-tac" title="${esc(c.sous)}">${mgmtPresentationMarqueHtml(c)}<span class="mf-pr-sous">${esc(c.court||c.sous)}</span></div>`:'<div class="mf-pr-tac">—</div>').join('')
     +`</div>`;
   /* Une ligne d'histoire porte le nom de l'adversaire en bouton ; une ligne de pronostic
      porte la voix et son pourcentage autorisé (décision du 09/10). */
@@ -344,7 +357,6 @@ function mgmtPresentationHtml(m,vue){
   // Combat proposé par Leïla et porteur d'une raison : ses deux lignes en tête, lues sur la preuve enregistrée (rien si raison nulle ou origine joueur).
   const carteRaison=!solo&&(vue.mode==='combat'||vue.mode==='soiree')?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
   const lignesRaison=carteRaison&&a&&b?mgmtRaisonLignes(m,carteRaison.raison&&{...carteRaison.raison,origine:carteRaison.origine},[a,b]):null;
-  const raison=lignesRaison?`<div class="mf-pr-raison"><span>${lignesRaison.l1}</span><span>${lignesRaison.l2}</span></div>`:'';
   const programme=vue.mode==='soiree'?mgmtPresentationCombatSoiree(m,vue.i):null;
   const carte=vue.mode==='combat'?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
   /* Plaque sous le VS (planche) : étiquette du combat · catégorie · rounds · titre. */
@@ -356,18 +368,26 @@ function mgmtPresentationHtml(m,vue){
   const tag=plaque.filter(Boolean).join(' · ');
   const ban=`<div class="mf-pr-banniere">${affiche(a,'a')}${b?affiche(b,'b')+`<div class="mf-pr-vs"><b>VS</b>${tag?`<span>${esc(tag)}</span>`:''}</div>`:cartouche}</div>`;
   if(!solo&&vue.vue==='chiffres')return `<main class="mf-pr mf-pr-chiffres duo">${mgmtPresentationChiffresBanniere(m,vue,a,b,tag)}${mgmtPresentationFaceAFaceHtml(m,vue,a,b)}${mgmtPresentationChiffresBas(m,vue,panneaux)}</main>`;
-  /* Pagination : trois panneaux hauts (466 px), la rangée bas en une à trois colonnes.
-     La garde `Math.max(1,…)` évite une division par zéro si tout est filtré. */
-  const largeurP=k=>k<3?466:panneaux.length-3===1?1520:panneaux.length-3===2?730:466;
-  const hauteurP=k=>k<3?(solo?268:266)-(raison?72:0):(solo?142:254);
-  const pages=panneaux.map((p,k)=>mgmtPresentationPaginer(m,vue,p.lignes,hauteurP(k),largeurP(k)));
-  vue.pages=Math.max(1,...pages.map(p=>p.length));vue.page=Math.min(vue.page,vue.pages-1);
-  const panneau=(p,k)=>`<section class="mf-pr-panneau"><div class="mf-pr-ph"><h2>${esc(p.titre)}</h2>${p.sous?`<span class="mf-pr-phs">${esc(p.sous)}</span>`:''}</div>`
+  /* Anthony,28/10 : une synthèse entière dans le viewport, sans pages ni défilement.
+     Les données détaillées restent dans les fiches ; aucune phrase n'est tronquée. */
+  const resumes=panneaux.map(p=>{
+    if(p.titre==='LEUR HISTOIRE'){
+      const lignes=p.lignes.filter(x=>x.tab);return {...p,lignes:lignes.slice(0,2),tete:lignes.length?['Adversaire / soirée','Gauche','Droite']:null,sous:lignes.length>2?'2 lignes sur '+lignes.length:p.sous};
+    }
+    if(p.titre==='SON HISTOIRE ICI')return {...p,lignes:p.lignes.filter(x=>['v','d','n'].includes(x.pastille)).slice(0,2)};
+    if(p.titre==='CE QUE LES GENS EN PENSENT')return {...p,lignes:p.lignes.slice(0,2).map(x=>({...x,texte:x.texte.length>110?x.resume:x.texte}))};
+    if(p.titre==='LES PRONOSTICS')return p;
+    return {...p,lignes:p.lignes.slice(0,p.titre==='CE QUE CHACUN IMPOSE'?3:2)};
+  });
+  const visibles=new Set(resumes.flatMap(p=>p.lignes.flatMap(x=>x.ids||[])));
+  vue.noms=contenu.noms.filter(id=>visibles.has(id)||vue.mode==='soiree'&&vue.ids.includes(id));vue.nom=Math.max(0,Math.min(vue.nom||0,vue.noms.length-1));vue.pages=1;vue.page=0;
+  const panneau=(p,k)=>`<section class="mf-pr-panneau${p.titre==='LES PRONOSTICS'?' mf-pr-pronostics':''}"><div class="mf-pr-ph"><h2>${esc(p.titre)}</h2>${p.sous?`<span class="mf-pr-phs">${esc(p.sous)}</span>`:''}</div>`
     +(p.tete?`<div class="mf-pr-tab-tete">${p.tete.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:'')
-    +`<div class="mf-pr-lignes">${(pages[k][vue.page]||[]).map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div>`
+    +(k===0&&lignesRaison?`<p class="mf-pr-raison-mini">${lignesRaison.l1}</p>`:'')
+    +(p.titre==='LES PRONOSTICS'?`<div class="mf-cc-pronos">${mgmtPresentationPronosticsHtml(m,p.lignes)}</div>`:`<div class="mf-pr-lignes">${p.lignes.map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div>`)
     +(p.notes?`<div class="mf-pr-foot">${esc(p.notes)}</div>`:'')+'</section>';
-  const bas=panneaux.slice(3);
-  return `<main class="mf-pr ${solo?'solo':'duo'}">${ban}${raison}<div class="mf-pr-rangee">${panneaux.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div>`
+  const bas=resumes.slice(3);
+  return `<main class="mf-pr ${solo?'solo':'duo'}">${solo?ban:mgmtPresentationChiffresBanniere(m,vue,a,b,tag)}<div class="mf-pr-rangee">${resumes.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div>`
     +(bas.length?`<div class="mf-pr-rangee bas"${bas.length<3?` style="grid-template-columns:repeat(${bas.length},minmax(0,1fr))"`:''}>${bas.map((p,k)=>panneau(p,k+3)).join('')}</div>`:'')
     +'</main>';
 }
@@ -385,9 +405,9 @@ function scr_mgmt_presentation(){
   if((!soir&&(!chiffres||v.noms.length))||regarder) touches.push({ks:['Entrée'],t:soir?'Regarder le combat':'Ouvrir le nom choisi',jaune:true,onclick:soir?'CL.mgmtPresentationRegarder()':'CL.mgmtPresentationNomOuvrir()'});
   if(v.mode!=='combattant'&&!chiffres)touches.push({ks:['Tab'],t:'Les chiffres',onclick:'CL.mgmtPresentationVueAlterner()'});
   if(v.pages>1&&v.vue!=='chiffres') touches.push({ks:['⇤'],t:'',onclick:'CL.mgmtPresentationPage(-1)'},{ks:['⇥'],t:(v.page+1)+' / '+v.pages,onclick:'CL.mgmtPresentationPage(1)'});
-  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree()||(typeof mgmtDuoPresentationActive==='function'&&mgmtDuoPresentationActive()),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:'Présentation',compteur:(v.index+1)+' / '+v.liste.length,touches});
+  return mfEcran(html,{barre:'jeu',m:G.mgmt,grise:soir||mgmtPresentationDansSoiree()||(typeof mgmtDuoPresentationActive==='function'&&mgmtDuoPresentationActive()),plaque:soir?'Soirée':v.mode==='combattant'?'Effectif':'Carte',libelle:v.mode==='combattant'?'Présentation':'',onglets:v.mode==='combattant'?null:[{t:'Présentation',on:!chiffres,onclick:"CL.mgmtPresentationVueChoisir('histoire')"},{t:'Face-à-face',on:chiffres,onclick:"CL.mgmtPresentationVueChoisir('chiffres')"}],compteur:(v.index+1)+' / '+v.liste.length,touches});
 }
-Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationVueAlterner,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
+Object.assign(CL,{mgmtPresentationOuvrir,mgmtPresentationAutre,mgmtPresentationNom,mgmtPresentationPage,mgmtPresentationVueAlterner,mgmtPresentationVueChoisir,mgmtPresentationNomOuvrir,mgmtPresentationFiche,mgmtPresentationRegarder,mgmtPresentationRetour});
 SCREENS.mgmt_presentation_combattant=scr_mgmt_presentation;
 SCREENS.mgmt_presentation_combat=scr_mgmt_presentation;
 const mgmtPresentationTouches={ArrowLeft(){mgmtPresentationAutre(-1);},ArrowRight(){mgmtPresentationAutre(1);},ArrowUp(){mgmtPresentationNom(-1);},ArrowDown(){mgmtPresentationNom(1);},
