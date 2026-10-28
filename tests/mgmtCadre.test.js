@@ -146,6 +146,16 @@ test('Menu — les trois modes à venir sont visibles et ne créent aucune actio
   }finally{win.close();}
 });
 
+test('Noms de soirée — le grand cartouche du calendrier garde son corps, les en-têtes adaptent les mots longs',()=>{
+  const win=newGameWindow({runMain:true});
+  try{
+    const r=result(win,`return {cal:mfNomSoireeHtml('SPLIT FIGHT NIGHT',84,'cal'),entete:mfNomSoireeHtml('W'.repeat(27)+' FIGHT NIGHT',56,'')};`);
+    assert.match(r.cal,/font-size:84px/,'le calendrier conserve son grand titre');
+    const px=Number(r.entete.match(/font-size:(\d+)px/)[1]);
+    assert.ok(px>=22&&px<30,'seul le nom trop large dans l’en-tête est réduit');
+  }finally{win.close();}
+});
+
 test('Accueil — avec une soirée : l’affiche porte le combat principal, les noms échappés, la forme, ce qui est aussi à l’affiche', () => {
   const win=newGameWindow({runMain:true});
   const r=result(win,`${NEUVE}
