@@ -4,6 +4,17 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {newGameWindow}=require('./helpers/loadGame');
 
+test('Recruteur — la mission affiche la date du calendrier et le prix réellement débité',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(7);CL.mgmtEnter(1);const m=G.mgmt;MGMT_RC_UI.dest=1;MGMT_RC_UI.sem=3;
+    mgmtCroissanceCoutRecruteur=(m,cout)=>cout-200;m.treasury=17.8;const html=mgmtRcMission(),jour=mgmtJourDateTexte(m.cal.jour+21),avant=m.treasury;
+    CL.rcEnvoyer();return {html,jour,debite:avant-m.treasury,retour:mgmtRcMission(),date:mgmtJourDateTexte(m.recruteur.mission.retourLe)};})())`));
+  assert.match(r.html,/17\s*800\s*€/);assert.ok(r.html.includes(r.jour));assert.equal(r.debite,17.8);
+  assert.ok(r.retour.includes(r.date));assert.ok(!r.html.includes('Caisse insuffisante'));
+ }finally{w.close();}
+});
+
 test('Monde lot 42 T2 — Recrutement expose ses trois onglets sans remplacer les libres',()=>{const w=newGameWindow();try{const html=w.eval(`(()=>{G=G||{};G.mgmt=mgmtPasseGenerer('split',{soirees:3});return scr_mgmt_recrutement()})()`);assert.match(html,/LES LIBRES/);assert.match(html,/ENVOYER LE RECRUTEUR/);assert.match(html,/SES RETOURS/);assert.match(html,/Le recrutement/);}finally{w.close();}});
 test('Monde lot 42 T2 — mission, frais, verrou de mission et fonds insuffisants',()=>{const w=newGameWindow();try{const out=w.eval(`(()=>{let m=mgmtPasseGenerer('split',{soirees:3});G.mgmt=m;let d=MGMT_RECRUTEUR.destinations[1];m.treasury=80;MGMT_RC_UI.dest=1;let h=mgmtRcMission(),before=m.treasury,ok=mgmtRecruteurEnvoyer(m,{dest:d.id,cat:d.categories[0],style:'lutteur',sem:3}),after=m.treasury,one=mgmtRecruteurEnvoyer(m,{dest:d.id,cat:d.categories[0],style:'lutteur',sem:3});delete m.recruteur;m.treasury=10;let poor=mgmtRcMission();return JSON.stringify({html:h,ok,debit:before-after,one,poor:poor.includes('Caisse insuffisante')})})()`);const x=JSON.parse(out);assert.match(x.html,/18\s*000\s*€/);assert.match(x.html,/Lutte, judo/);assert.doesNotMatch(x.html,/H-light|daghestan/);assert.equal(x.html.includes('aria-disabled="true"'),false);assert.equal(x.ok,true);assert.equal(x.debit,18);assert.equal(x.one,false);assert.equal(x.poor,true);}finally{w.close();}});
 test('Monde lot 42 T2 — retour fermé puis dévoilé profil par profil',()=>{const w=newGameWindow();try{assert.equal(w.eval(`(()=>{let m=mgmtPasseGenerer('split',{soirees:3});m.treasury=50000;m.graine='retour-t2';G.mgmt=m;mgmtRecruteurEnvoyer(m,{dest:'france',cat:'H-light',style:'lutteur',sem:2});m.cal.jour+=14;let r=mgmtRecruteurRetour(m);if(r.bredouille)return JSON.stringify({bredouille:true});MGMT_RC_UI.profil=0;let before=mgmtRcRetours();CL.rcReveal();let after=mgmtRcRetours();return JSON.stringify({closed:before.includes('Encore fermé'),opened:after.includes(r.profils[0].name),lus:r.lus})})()`),JSON.stringify({closed:true,opened:true,lus:1}));}finally{w.close();}});
