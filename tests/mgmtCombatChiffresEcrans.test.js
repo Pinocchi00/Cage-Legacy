@@ -4,6 +4,33 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const creer=()=>{const w=newGameWindow({runMain:true});w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");return w;};
 
+test('Chiffres fidèles — les deux panneaux reprennent les lectures et les pronostics sans inventer de pourcentages',()=>{
+ const w=creer();
+ try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id),v={mode:'combat',ids:[a.id,b.id],page:0,nom:0,vue:'chiffres'},contenu=mgmtPresentationLignes(m,v),avant=JSON.stringify(m),seed=SEED,html=mgmtPresentationHtml(m,v);return {html,voix:contenu.panneaux.find(p=>p.titre==='LES PRONOSTICS')?.lignes||[],pur:avant===JSON.stringify(m)&&seed===SEED};})())`));
+  const page=w.document.createElement('div');page.innerHTML=r.html;
+  assert.ok(page.querySelector('.mf-cc-cadre .mf-cc-panneau'));assert.ok(page.querySelector('.mf-cc-analyse'));
+  assert.equal(page.querySelectorAll('.mf-cc-prono').length,r.voix.length);
+  [...page.querySelectorAll('.mf-cc-prono')].forEach((node,i)=>{
+   assert.equal(node.querySelector('p').textContent,r.voix[i].texte);
+   assert.equal(node.open,false);node.open=true;assert.ok(node.querySelector('p').textContent);
+   if(r.voix[i].sourcePct==null)assert.doesNotMatch(node.querySelector('summary').textContent,/\d+\s*%/);
+   else assert.ok(node.querySelector('summary').textContent.includes(Math.round(r.voix[i].sourcePct)+' %'));
+   assert.deepEqual(JSON.parse(node.dataset.sources),r.voix[i].sources||[]);
+  });
+  assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Chiffres fidèles — F et G ouvrent respectivement les combattants de gauche et de droite',()=>{
+ const w=creer();
+ try{
+  w.eval(`const m=G.mgmt;mgmtPresentationPartie=m;MGMT_PRESENTATION_UI.pile=[{mode:'combat',ids:m.roster.slice(0,2).map(f=>f.id),vue:'chiffres'}];G.screen='mgmt_presentation_combat';CL.mgmtFiche=id=>window.preuveFiche=id;keysHandle({key:'G',preventDefault(){}})`);
+  assert.equal(w.preuveFiche,w.eval('G.mgmt.roster[1].id'));
+  w.eval(`keysHandle({key:'F',preventDefault(){}})`);assert.equal(w.preuveFiche,w.eval('G.mgmt.roster[0].id'));
+ }finally{w.close();}
+});
+
 test('brief du 22/10, P1 T5 — vue chiffres affiche le face-à-face dans l’ordre et Tab alterne',()=>{
   const w=creer();
   const r=w.eval(`(()=>{const m=G.mgmt,a=m.roster[0],b=m.roster.find(f=>f.id!==a.id),v={mode:'combat',ids:[a.id,b.id],page:0,nom:0,vue:'histoire'};const h=mgmtPresentationHtml(m,v);const x=mgmtFaceAFace(m,a.id,b.id);v.vue='chiffres';const c=mgmtPresentationHtml(m,v);return {h,c,ids:x.lignes.map(q=>q.id),solo:mgmtPresentationHtml(m,{mode:'combattant',ids:[a.id],vue:'chiffres',page:0,nom:0}),labels:['Taille','Allonge','Coups significatifs donnés par minute','Précision','Encaissés par minute','Défense debout','Amenées par 15 minutes','Défense d’amenée','Contrôle par 15 minutes'],vals:x.lignes.map(q=>q.a),missing:x.lignes.filter(q=>(q.id==='taille'||q.id==='allonge')&&q.a==null&&q.b==null).length};})()`);
