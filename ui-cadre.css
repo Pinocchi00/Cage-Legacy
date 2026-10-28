@@ -2494,6 +2494,50 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .po2-bilan h1{font-size:72px;line-height:.9;padding-bottom:20px;margin-bottom:8px;border-bottom:2px solid rgba(233,230,225,.16)}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_STYLE] — Monde lot 58 T1 ==== */
+/* ==== [ANCRE: FIDELITE_CHOC_20261028] — Valeurs de UniChoc, sans modifier la simulation ==== */
+.ch3-screen.ch3-fid{top:128px;left:300px;width:1564px;height:856px;display:flex;flex-direction:column;gap:16px;background:transparent;padding:0}
+.ch3-fid .ch3-title{height:210px;min-height:210px;flex:none;box-sizing:border-box;position:relative;display:flex;align-items:center;padding:0;gap:0;background:linear-gradient(90deg,#E9E6E1 0 50%,#E23A2B 50% 100%);clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)}
+.ch3-fid .ch3-title .ch3-split,.ch3-fid .ch3-title .ch3-adverse{flex:1;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;justify-content:center;color:#0D0B0B}
+.ch3-fid .ch3-title .ch3-split{padding:0 110px 0 40px;align-items:flex-start}
+.ch3-fid .ch3-title .ch3-adverse{padding:0 40px 0 110px;align-items:flex-end;text-align:right}
+.ch3-fid .ch3-title b{font:800 120px/.72 var(--mf-titre);max-width:100%;overflow-wrap:anywhere}
+.ch3-fid .ch3-org-meta{font:600 22px/1 var(--mf-texte);text-transform:uppercase;overflow-wrap:anywhere}
+.ch3-fid .ch3-title .ch3-vs{position:absolute;top:22px;left:calc(50% - 84px);width:168px;height:168px;box-sizing:border-box;padding:9px;background:#0D0B0B;display:flex;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ch3-fid .ch3-title .ch3-vs>i{display:flex;align-items:center;justify-content:center;width:150px;height:150px;flex:none;background:#F0B220;color:#0D0B0B;clip-path:inherit;font:800 64px/1 var(--mf-titre)}
+.ch3-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;flex:1;min-height:0}
+.ch3-fight-panel,.ch3-terms-panel{min-height:0;min-width:0}
+.ch3-fid .ch3-fight-panel>.mf-p2>.mf-p3,.ch3-fid .ch3-terms-panel>.mf-p2>.mf-p3{padding:15px;display:flex;min-height:0;min-width:0}
+.ch3-fid .ch3-fight{display:flex;flex-direction:column;align-items:stretch;gap:14px;background:transparent;clip-path:none;padding:0;flex:1;min-height:0;min-width:0}
+.ch3-fight-top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex:none}
+.ch3-fid .ch3-fight-heading{font:600 22px/1.1 var(--mf-texte);letter-spacing:.04em;margin:0;padding:0;background:transparent;color:rgba(233,230,225,.74)}
+.ch3-fight-top>span{font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74);text-align:right}
+.ch3-paires{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;overflow-y:auto}
+.ch3-fid .ch3-paire{display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);align-items:center;gap:16px;flex:1;min-height:134px;box-sizing:border-box;padding:10px 20px;background:#1B1818;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.ch3-fid .ch3-side{min-width:0;display:flex;flex-direction:column;align-items:flex-end;gap:8px;text-align:right}
+.ch3-fid .ch3-side b{max-width:100%;font:800 46px/.8 var(--mf-titre);text-transform:uppercase;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.ch3-fid .ch3-side>span{font:500 22px/1.1 var(--mf-texte);white-space:normal;overflow-wrap:anywhere;color:rgba(233,230,225,.74)}
+.ch3-fid .ch3-opponent{align-items:flex-start;text-align:left}
+.ch3-fid .ch3-opponent b{color:#E23A2B}
+.ch3-fid .ch3-category{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;text-align:center;color:#E9E6E1}
+.ch3-medaille{position:absolute;top:0;left:calc(50% - 27px);display:block;width:54px;height:54px;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ch3-fid .ch3-paire .ch3-category .ch3-vs{position:relative;width:48px;height:48px;margin:3px;display:flex;align-items:center;justify-content:center;background:#0D0B0B;color:#F0B220;font:800 28px/1 var(--mf-titre);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ch3-fid .ch3-category strong{font:600 22px/1.1 var(--mf-texte);text-transform:uppercase;overflow-wrap:anywhere}
+.ch3-fid .ch3-terms{display:flex;flex-direction:column;gap:16px;min-height:0;min-width:0;padding:0;border:0;background:transparent;flex:1;overflow-y:auto}
+.ch3-fid .ch3-matchmaker{font:600 22px/1.1 var(--mf-texte);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.ch3-fid .ch3-quote{font:500 24px/1.2 var(--mf-texte);margin:0}
+.ch3-fid .ch3-detail{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16);font:500 24px/1 var(--mf-texte)}
+.ch3-fid .ch3-detail b{font:800 32px/1 var(--mf-titre);max-width:75%;text-align:right;white-space:normal;overflow-wrap:anywhere}
+.ch3-fid .ch3-terms .ch3-condition{font:600 24px/1.15 var(--mf-texte);color:#E9E6E1;margin:0;overflow-wrap:anywhere;letter-spacing:0}
+.ch3-fid .ch3-actions{margin-top:auto;display:flex;flex-direction:column;gap:12px;flex:none}
+.ch3-fid .ch3-actions>.ch3-button{height:62px;min-height:62px;font:800 34px/1 var(--mf-titre);background:#F0B220;color:#0D0B0B;border:0;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.ch3-fid .ch3-secondary-actions{display:flex;gap:12px}
+.ch3-fid .ch3-secondary-actions>.ch3-button{font:800 28px/1 var(--mf-titre);min-height:56px;padding:0 18px;flex:none;background:#252121;color:#E9E6E1;border:0;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.ch3-fid .ch3-actions .ch3-button{display:flex;align-items:center;justify-content:flex-end;flex-direction:row-reverse;gap:14px}
+.ch3-fid .ch3-button:disabled{opacity:.55}
+.ch3-fid .ch3-status{font:800 34px/1 var(--mf-titre)}
+.ch3-date-entete{display:flex;align-items:center;gap:16px;font:500 24px/1 var(--mf-texte)}
+.ch3-date-entete>b{font:800 40px/.9 var(--mf-titre);padding:12px 18px;border:2px solid rgba(233,230,225,.38);background:#0D0B0B}
+/* ==== [FIN ANCRE] ==== */
 .ch3-screen{position:absolute;left:300px;top:20px;width:1564px;height:1010px;box-sizing:border-box;padding:0;background:#0D0B0B;color:#E9E6E1;font:500 24px 'Saira Condensed','Arial Narrow',sans-serif;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-rows:64px 82px minmax(0,1fr);gap:20px}
 .ch3-head,.ch3-title{grid-column:1/-1}
 .ch3-brand,.ch3-deadline{display:flex;align-items:center;gap:18px}
