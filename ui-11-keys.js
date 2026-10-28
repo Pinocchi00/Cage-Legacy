@@ -32,7 +32,7 @@ function keysUnregister(screen){ delete KEYS.maps[screen]; }
 function keysHandle(e){
   if(!e||e.defaultPrevented) return false;
   const t=e.target;
-  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return false;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return false;
   if(e.ctrlKey||e.metaKey||e.altKey) return false;
   const map=(typeof G!=='undefined'&&G&&G.screen)?KEYS.maps[G.screen]:null;
   if(!map) return false;
