@@ -24,12 +24,14 @@ function mgmtEspArriveeOuvrir(etape=1,retour){
 /* ==== [ANCRE: FIDELITE_ARRIVEE_20261028] — Reprise visuelle des planches UniArriveeContrat et UniArriveeEspoirs ==== */
 function mgmtEspArriveeContratHtml(m,man,org){
   const p=m.poste,patron=mgmtPostePatron(m),quote=mgmtPosteNiveau(p.conf),rdv=mgmtJourDate(p.debut+182);
+  const div=(mgmtOrgProfil(m).manque?.categories||[])[0],lignes=man?man.lignes.slice():[];
+  if(div)lignes.unshift({libelle:div==='H-heavy'?'Lourds sous contrat':div==='H-fly'?'Mouches sous contrat':mgmtDivisionLabel(div)+' sous contrat',valeur:(m.roster||[]).filter(f=>f&&f.div===div&&!mgmtIsRetired(f)).length});
   const fin=mgmtJourDate(p.fin),annee=new Date(mgmtJourDate(p.debut).ts).getUTCFullYear();
   const rows=p.obj.map((o,i)=>`<div class="po-objectif"><b>${i+1}</b><div>${esc(mgmtPosteObjectifTexte(o,m))}<small>Aujourd'hui : ${esc(mgmtPosteValeurTexte(m,o))}</small></div></div>`).join('');
   const contrat=mfPanneau(`<div class="po-panel-head"><h2 class="po-title">TON CONTRAT<i class="po-trait" aria-hidden="true"></i></h2><div class="po-seal"><span>1</span></div></div><div class="po-caption">${esc(patron)}, PATRON DE ${esc(org)}</div><p class="po-quote">${esc(quote.banque[0].texte)}</p><div class="po-meta"><span>Durée<b>1 AN</b></span><span>Jusqu’au<b>${esc(fin.jour+' '+fin.mois+' '+new Date(fin.ts).getUTCFullYear())}</b></span><span>Salaire<b>${esc(mgmtEuros(p.salaire/1000))} PAR MOIS</b></span><span>Rendez-vous<b>MI-SAISON, EN ${esc(rdv.mois)}</b></span><span>Ta réputation<b>TOUT À FAIRE</b></span></div><p class="po-issues">À la fin de l’année, trois issues : <b>prolongé et augmenté</b>, prolongé sous condition, ou remercié.</p>`,'normal','po-card');
   const attentes=mfPanneau(`<div class="po-panel-head"><h2 class="po-title">CE QU’IL ATTEND<i class="po-trait" aria-hidden="true"></i></h2><div class="po-caption">SAISON ${esc(annee)}</div></div><div class="po-objectifs">${rows}</div><p class="po-note"><i class="po-note-pastille" aria-hidden="true"></i>${esc(MGMT_ESP_ARRIVEE_TEXTES.objectif.replace('{org}',org))}</p>`,'normal','po-card');
   const next=MGMT_ESP_ARRIVEE.etape===1?2:3;
-  const manque=mfPanneau(`<div class="po-manque"><div class="po-caption">${esc(MGMT_ESP_ARRIVEE_TEXTES.manque.replace('{org}',org).toUpperCase())}</div><div class="ma-title">${esc(man?man.titre:'')}</div><div class="ma-lines">${(man?man.lignes:[]).map(x=>`<div class="ma-line"><span>${esc(x.libelle)}</span><b>${esc(x.valeur)}</b></div>`).join('')}</div><div class="ma-leila"><div class="ma-leila-nom">LEÏLA</div><div>${esc(man&&man.leila?'« '+man.leila+' »':'')}</div></div>${man&&man.objectif?`<div class="ma-objective-detail">${esc(man.objectif.texte)}</div>`:''}</div><div class="po-action">${mfBouton(next===2?'SUITE : CE QUI MANQUE':MGMT_ESP_ARRIVEE_TEXTES.suite,{touche:'Entrée',jaune:true,onclick:`CL.mgmtEspArriveeEtape(${next})`})}</div>`,'normal','po-card');
+  const manque=mfPanneau(`<div class="po-manque"><div class="po-caption">${esc(MGMT_ESP_ARRIVEE_TEXTES.manque.replace('{org}',org).toUpperCase())}</div><div class="ma-title">${esc(man?man.titre:'')}</div><div class="ma-lines">${lignes.map(x=>`<div class="ma-line"><span>${esc(x.libelle)}</span><b>${esc(x.valeur)}</b></div>`).join('')}</div><div class="ma-leila"><div class="ma-leila-nom">LEÏLA</div><div>${esc(man&&man.leila?'« '+man.leila+' »':'')}</div></div>${man&&man.objectif?`<div class="ma-objective-detail">${esc(man.objectif.texte)}</div>`:''}</div><div class="po-action">${mfBouton(next===2?'SUITE : CE QUI MANQUE':MGMT_ESP_ARRIVEE_TEXTES.suite,{touche:'Entrée',jaune:true,onclick:`CL.mgmtEspArriveeEtape(${next})`})}</div>`,'normal','po-card');
   return `<div class="po-panels">${contrat}${attentes}${manque}</div>`;
 }
 function mgmtEspArriveePropositions(m){
@@ -104,6 +106,8 @@ const MGMT_ESP_FID_STYLE=`<style>
 .ma-fid .po-manque .ma-lines{margin:0}
 .ma-fid .po-manque .ma-line{display:flex;gap:16px;align-items:baseline;justify-content:space-between;padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16);font:500 24px/1.1 var(--mf-texte);color:rgba(233,230,225,.74)}
 .ma-fid .po-manque .ma-line b{font:800 32px/1 var(--mf-titre);text-align:right;color:#E9E6E1;min-width:0;overflow-wrap:anywhere}
+.ma-fid .po-manque .ma-line>span{min-width:0;flex:1;overflow-wrap:anywhere}
+.ma-fid .po-manque .ma-line>b{flex:none;max-width:45%}
 .ma-fid .po-manque .ma-leila{display:flex;flex-direction:column;gap:10px;margin:0;font:italic 500 26px/1.2 var(--mf-texte)}
 .ma-fid .po-manque .ma-leila-nom{font:600 22px/1 var(--mf-texte);letter-spacing:.04em;color:rgba(233,230,225,.74)}
 .ma-fid .po-manque .ma-leila>div:last-child{font-style:italic}

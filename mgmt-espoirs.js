@@ -5,6 +5,30 @@ function mgmtEspoirsCandidats(m){
   const all=[...(m.roster||[]),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>o.roster||[]):[]),...(m.exterieur||[]).map(e=>mgmtExteriorCombattant(m,e.id)).filter(Boolean)];
   const champions=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]), seen=new Set(); return all.filter(f=>f&&typeof f.id==='string'&&!seen.has(f.id)&&seen.add(f.id)&&!mgmtIsRetired(f)&&!champions.has(f.id)).sort((a,b)=>a.id.localeCompare(b.id));
 }
+/* ==== [ANCRE: ESPOIRS_RESUMES_FACTUELS_20261028] — Libellés factuels de lecture, relu:false ==== */
+function mgmtEspoirSerieCourante(m,f){
+  const vus=new Set(),hist=[];
+  for(const monde of [m,...Object.values(m.orgs||{})])for(const t of monde&&monde.hist||[]){
+    if(!t||!t.a||!t.b||(t.a.id!==f.id&&t.b.id!==f.id)||!['A','B','D'].includes(t.winner))continue;
+    const cle=mgmtStatsPaire(t);if(vus.has(cle))continue;vus.add(cle);hist.push(t);
+  }
+  hist.sort((a,b)=>a.c-b.c);
+  const serie=mgmtSerie({hist},f);if(serie)return serie;
+  const n=f.trace&&f.trace.streak;
+  return Number.isFinite(n)&&n!==0?{issue:n>0?'win':'loss',n:Math.abs(n)}:null;
+}
+function mgmtEspoirResume(m,f,angle,s,bilan,total){
+  const serie=mgmtEspoirSerieCourante(m,f),w=Number(bilan.W)||0,l=Number(bilan.L)||0;
+  if(angle==='monte'&&serie)return mgmtSerieTexte(serie)+'.';
+  if(angle==='revenant'&&serie)return 'Son dernier combat s’est terminé par '+(serie.issue==='win'?'une victoire':serie.issue==='loss'?'une défaite':'un nul')+'.';
+  if(angle==='jeune'&&Number.isFinite(f.age))return `${f.age} ans et ${w} victoire${w===1?'':'s'} au bilan.`;
+  if(angle==='oublie')return s&&Number.isFinite(s.sigParMin)?s.sigParMin.toFixed(2).replace('.',',')+' coups significatifs par minute.':`${w} victoire${w===1?'':'s'} pour ${l} défaite${l===1?'':'s'}.`;
+  if(angle==='libre')return `${w} victoire${w===1?'':'s'} en ${total} combat${total===1?'':'s'}.`;
+  if(angle==='reponse')return `${total} combat${total===1?'':'s'} au bilan professionnel.`;
+  if(angle==='revenant'&&Number.isFinite(f.age))return `${total} combat${total===1?'':'s'} à ${f.age} ans.`;
+  return MGMT_ESPOIRS_LIBELLES.phrases.absence;
+}
+/* ==== [FIN ANCRE] ==== */
 function mgmtEspoirsFabrique(m,ids){
   const fs=mgmtEspoirsCandidats(m), used=new Set(), angles=Object.keys(MGMT_ESPOIRS_LIBELLES.angles), out=[];
   const manque=mgmtOrgProfil(m).manque||{}, categorie=(manque.categories||[])[0];
@@ -27,13 +51,13 @@ function mgmtEspoirsFabrique(m,ids){
       exterior=mgmtExteriorCombattant(m,f.id), bilan=[f,exterior].find(x=>x&&Number.isFinite(x.W)&&Number.isFinite(x.L))||{},
       record=`${Number(bilan.W)||0}-${Number(bilan.L)||0}${Number(bilan.D)?'-'+Number(bilan.D):''}`,
       chiffres=[];
+    const lu=mgmtStatsTotal(m,f.id),total=Number.isFinite(lu)?lu:(Number(bilan.W)||0)+(Number(bilan.L)||0)+(Number(bilan.D)||0);
     if(s&&Number.isFinite(s.sigParMin))chiffres.push({libelle:'Coups / min',valeur:s.sigParMin.toFixed(2).replace('.',',')});
     if(s&&Number.isFinite(s.precision))chiffres.push({libelle:'Précision',valeur:Math.round(s.precision*100)+' %'});
-    if(s&&Number.isFinite(s.finitions))chiffres.push({libelle:'Finitions',valeur:`${s.finitions} SUR ${s.finitions}`});
-    while(chiffres.length<2)chiffres.push({libelle:'Combats',valeur:String(doc?doc.docs:0)});
-    const serie=s&&Number(s.serieMax)||0, traitTexte=Array.isArray(trait)&&trait.length?String(trait[0]).toLocaleUpperCase('fr'):'';
-    const dernier=f.last==='W'?'une victoire':f.last==='L'?'une défaite':f.last==='D'?'un nul':null;
-    const phrase=serie>0?MGMT_ESPOIRS_LIBELLES.phrases.victoire.replace('{n}',serie===1?'Une':String(serie)).replace('{plural}',serie===1?'':'s'):dernier?`Son dernier combat s’est terminé par ${dernier}.`:MGMT_ESPOIRS_LIBELLES.phrases.absence;
+    if(s&&s.vParMethode){const v=s.vParMethode,n=(v.ko||0)+(v.sub||0)+(v.stop||0),gagne=n+(v.dec||0);if(gagne>0)chiffres.push({libelle:'Finitions',valeur:`${n} SUR ${gagne}`});}
+    for(const x of [{libelle:'Combats',valeur:String(total)},{libelle:'Victoires',valeur:String(Number(bilan.W)||0)}])if(chiffres.length<2)chiffres.push(x);
+    const traitTexte=Array.isArray(trait)&&trait.length?String(trait[0]).toLocaleUpperCase('fr'):'';
+    const phrase=mgmtEspoirResume(m,f,angles[i],s,bilan,total);
     const ville=typeof mgmtIdentiteVille==='function'?mgmtIdentiteVille(f):f.city||f.ville||'';
     out.push({id:f.id,angle:angles[i],etiquette:MGMT_ESPOIRS_LIBELLES.angles[angles[i]],origine:f.org===mgmtOrgNom(m)?'effectif':(f.org?'monde':'libre'),raison:MGMT_ESPOIRS_LIBELLES.phrases.debut.replace('{n}',doc?doc.docs:0),fiche:{bilan:record,description:`${mgmtDivisionLabel(f.div)} · ${f.age||'—'} ans${ville?' · '+ville:''}`,chiffres:chiffres.slice(0,2),trait:traitTexte==='DEBUTANT'?'':traitTexte,traitNeutre:traitTexte==='DEBUTANT',phrase}});
  }

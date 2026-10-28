@@ -21,10 +21,18 @@ function mgmtManque(m){
   let lignes=[];
   if(man.categories&&man.categories.length){
     const div=man.categories[0], ranked=mgmtDivisionRanking(m,div,'world')||[], own=ranked.filter(r=>roster.some(f=>f.id===r.id));
-    const meilleur=own[0], championIds=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]);
+    const titre=typeof mgmtSplitTitle==='function'?mgmtSplitTitle(m,div):null;
+    const champion=titre&&roster.find(f=>f.id===titre.id),rang=champion?ranked.findIndex(r=>r.id===champion.id)+1:0;
     const top=own.filter(r=>ranked.indexOf(r)<15).length;
-    lignes=[{libelle:'Le meilleur de la catégorie',valeur:meilleur?(championIds.has(meilleur.id)?'le champion':(ranked.indexOf(meilleur)+1)+'e MONDIAL'):'AUCUN',sous:null},{libelle:'Dans le top 15 mondial',valeur:top?top+' DU TOP 15':'AUCUN',sous:null}];
-    const orgs=MGMT_ORGANISATIONS.map(o=>({nom:o.nom,n:(o.nom===mgmtOrgNom(m)?roster:(m.mondeVivant===true?((m.orgs&&m.orgs[o.id]&&m.orgs[o.id].roster)||[]):mgmtExteriorEffectifs(m,div))).filter(f=>f&&f.div===div&&ranked.findIndex(r=>r.id===f.id)>=0&&ranked.findIndex(r=>r.id===f.id)<15).length})).sort((a,b)=>b.n-a.n||a.nom.localeCompare(b.nom));
+    lignes=[{libelle:champion?'Le champion, '+champion.name:'Ceinture vacante',valeur:champion?(rang>0?rang+'e MONDIAL':'NON CLASSÉ'):'—',sous:null},{libelle:'Dans le top 15 mondial',valeur:top?top+' DU TOP 15':'AUCUN',sous:null}];
+    const propre=mgmtOrgParNom(mgmtOrgNom(m)),comptes=new Map();
+    for(const f of ranked.slice(0,15)){
+      if(roster.some(x=>x.id===f.id))continue;
+      let id=f.orgId;
+      if(!id){const ex=mgmtExteriorCombattant(m,f.id),nom=ex&&ex.trace?mgmtExtOrgs(m)[ex.trace.org]:ex&&ex.org;id=(mgmtOrgParNom(nom)||{}).id;}
+      if(id)comptes.set(id,(comptes.get(id)||0)+1);
+    }
+    const orgs=MGMT_ORGANISATIONS.filter(o=>!propre||o.id!==propre.id).map(o=>({nom:o.nom,n:comptes.get(o.id)||0})).sort((a,b)=>b.n-a.n||a.nom.localeCompare(b.nom));
     if(orgs.length)lignes.push({libelle:'Chez '+orgs[0].nom,valeur:orgs[0].n+' DU TOP 15',sous:null});
   } else if(man.id==='espoirs'||man.id==='experimentes') {
     const age=man.id==='espoirs'?24:32, pick=f=>man.id==='espoirs'?f.age<age:f.age>=age, count=roster.filter(pick).length;

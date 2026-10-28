@@ -47,6 +47,45 @@ test('Monde lot 38 T1 — remplacer un espoir ajoute un nom nouveau',()=>{
  const w=newGameWindow();const r=result(w,`setSeed(101);CL.mgmtEnter(1);const m=G.mgmt;mgmtEspoirsFixer(m);const ids=m.espoirsPropose.slice(),n=mgmtEspoirRemplacer(m,ids[0]);return {n,ids,now:m.espoirsPropose};`);
  assert.ok(r.n);assert.ok(!r.ids.includes(r.n.id));assert.ok(r.now.includes(r.n.id));assert.ok(r.now.length<=12);
 });
+test('Arrivée — le vrai champion conserve son nom et son rang, et le top15 est comparé à une autre organisation',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`setSeed(20261008);CL.mgmtEnter(1);const m=G.mgmt,base=m.roster.filter(f=>f.div==='H-heavy');
+    const modele=base[0],autre=base[1]||base[0];m.roster=Array.from({length:17},(_,i)=>({...modele,id:'preuve'+i,name:i===16?autre.name:modele.name}));
+    m.hist=[];m.facts=[{k:'title_initial',div:'H-heavy',a:m.roster[16].id,c:m.cycle}];MGMT_MANQUE_MEMO.delete(m);
+    const original=mgmtDivisionRanking;mgmtDivisionRanking=(partie,div,scope,cycle)=>partie===m&&div==='H-heavy'?m.roster.slice():original(partie,div,scope,cycle);
+    const avant=JSON.stringify(m),seed=SEED,manque=mgmtManque(m);return {lignes:manque.lignes,nom:m.roster[16].name,pur:avant===JSON.stringify(m)&&seed===SEED};`);
+  assert.equal(r.lignes[0].libelle,'Le champion, '+r.nom);assert.equal(r.lignes[0].valeur,'17e MONDIAL');
+  assert.equal(r.lignes[1].valeur,'15 DU TOP 15');assert.notEqual(r.lignes[2].libelle,'Chez Split');assert.equal(r.lignes[2].valeur,'0 DU TOP 15');assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Espoirs — un bilan22-14 sans relevé affiche36combats et22victoires, pas deux faux zéros',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`setSeed(9);CL.mgmtEnter(1);const m=G.mgmt,f=mgmtEspoirsCandidats(m).find(f=>m.roster.some(x=>x.id===f.id));
+    f.W=22;f.L=14;f.D=0;m.hist=[];for(const o of Object.values(m.orgs||{}))o.hist=[];mgmtStatsInvalider(m);
+    const avant=JSON.stringify(m),seed=SEED,x=mgmtEspoirsFabrique(m,[f.id])[0];return {x,pur:avant===JSON.stringify(m)&&seed===SEED};`);
+  assert.equal(r.x.fiche.bilan,'22-14');assert.deepEqual(r.x.fiche.chiffres,[{libelle:'Combats',valeur:'36'},{libelle:'Victoires',valeur:'22'}]);
+  assert.match(r.x.fiche.phrase,/36 combats/);assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
+test('Espoirs — résumés distincts et série actuelle relue dans tous les historiques, sans confondre le nom et le dernier résultat',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`const f={id:'a',first:'Max',last:'W',age:24,W:22,L:14,D:0};
+    const t=(c,winner)=>({c,a:{id:'a'},b:{id:'b'},winner,family:'dec',round:3});
+    const m={hist:[t(1,'A'),t(2,'A'),t(3,'B')],orgs:{ailleurs:{hist:[t(4,'A')]}}};
+    const avant=JSON.stringify(m),seed=SEED,externe=mgmtEspoirSerieCourante(m,f);delete m.orgs.ailleurs;
+    const local=mgmtEspoirSerieCourante(m,f),s={sigParMin:3.42,serieMax:9};
+    const phrases=['reponse','monte','jeune','oublie','revenant','libre'].map(angle=>mgmtEspoirResume(m,f,angle,s,f,36));
+    m.orgs.ailleurs={hist:[t(4,'A')]};return {externe,local,phrases,pur:avant===JSON.stringify(m)&&seed===SEED};`);
+  assert.deepEqual(r.externe,{issue:'win',n:1});assert.deepEqual(r.local,{issue:'loss',n:1});
+  assert.equal(r.phrases[1],'1 défaite.');assert.equal(new Set(r.phrases).size,6);assert.ok(!r.phrases.some(p=>/9 victoires/.test(p)));assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
 test('Monde lot 38 T1 — les fonctions rendent des données et non du HTML',()=>{
  const w=newGameWindow();const r=result(w,`setSeed(20261008);CL.mgmtEnter(1);const m=G.mgmt;const x=mgmtEspoirsProposer(m)[0];return {manque:mgmtManque(m),x};`);
  assert.equal(typeof r.x.id,'string');assert.ok(!JSON.stringify(r).includes('<img'));
