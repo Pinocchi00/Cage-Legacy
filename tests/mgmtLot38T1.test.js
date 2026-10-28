@@ -112,6 +112,21 @@ test('Espoirs — résumés distincts et série actuelle relue dans tous les his
  }finally{w.close();}
 });
 
+test('Espoirs — 26 ans inclus, jamais 27, même avec une ancienne proposition et un remplacement',()=>{
+ const w=newGameWindow();
+ try{
+  const r=result(w,`setSeed(101);CL.mgmtEnter(1);const m=G.mgmt,jeunes=mgmtEspoirsCandidats(m).filter(f=>m.roster.some(x=>x.id===f.id));
+    const limite=jeunes[0],ancien=jeunes[1];limite.age=26;ancien.age=27;
+    const avant=JSON.stringify(m),seed=SEED,candidats=mgmtEspoirsCandidats(m),forces=mgmtEspoirsFabrique(m,[limite.id,ancien.id]);
+    const pur=avant===JSON.stringify(m)&&seed===SEED;m.espoirsPropose=[ancien.id];m.espoirs=[];
+    const visible=mgmtEspoirsProposer(m),refus=mgmtEspoirGarder(m,ancien.id),garde=mgmtEspoirGarder(m,visible[0].id);
+    const neuf=mgmtEspoirRemplacer(m,visible[0].id),ages=new Map(candidats.map(f=>[f.id,f.age]));
+    return {limite:candidats.some(f=>f.id===limite.id),ancien:candidats.some(f=>f.id===ancien.id),forces:forces.map(x=>ages.get(x.id)),visible:visible.map(x=>ages.get(x.id)),refus,garde,inscrit:m.espoirsPropose.includes(visible[0].id),neuf:neuf&&ages.get(neuf.id),pur};`);
+  assert.equal(r.limite,true);assert.equal(r.ancien,false);assert.ok(r.forces.every(age=>age<=26));assert.ok(r.visible.every(age=>age<=26));
+  assert.equal(r.refus,false);assert.equal(r.garde,true);assert.equal(r.inscrit,true);assert.ok(r.neuf<=26);assert.equal(r.pur,true);
+ }finally{w.close();}
+});
+
 test('Monde lot 38 T1 — les fonctions rendent des données et non du HTML',()=>{
  const w=newGameWindow();const r=result(w,`setSeed(20261008);CL.mgmtEnter(1);const m=G.mgmt;const x=mgmtEspoirsProposer(m)[0];return {manque:mgmtManque(m),x};`);
  assert.equal(typeof r.x.id,'string');assert.ok(!JSON.stringify(r).includes('<img'));

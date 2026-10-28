@@ -3,7 +3,8 @@
 const MGMT_ESPOIRS_LIBELLES={angles:{reponse:'CELUI QUI RÉPOND AU MANQUE',monte:'CELUI QUI MONTE',jeune:'LA PLUS JEUNE',oublie:'CELUI QU’ON NE REGARDE PAS',revenant:'LE REVENANT',libre:'À RECRUTER'},phrases:{debut:'Combats documentés : {n}.',victoire:'{n} victoire{plural} de suite.',defaite:'Sa dernière défaite remonte à {n} combat{plural}.',absence:'En attente de son prochain combat.'}}; /* Proposition de Claude, relu:false. */
 function mgmtEspoirsCandidats(m){
   const all=[...(m.roster||[]),...(m.mondeVivant?Object.values(m.orgs||{}).flatMap(o=>o.roster||[]):[]),...(m.exterieur||[]).map(e=>mgmtExteriorCombattant(m,e.id)).filter(Boolean)];
-  const champions=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]), seen=new Set(); return all.filter(f=>f&&typeof f.id==='string'&&!seen.has(f.id)&&seen.add(f.id)&&!mgmtIsRetired(f)&&!champions.has(f.id)).sort((a,b)=>a.id.localeCompare(b.id));
+  // Décision d’Anthony du 28/10/2026 : les espoirs proposés ont 26 ans maximum.
+  const champions=new Set(typeof mgmtChampionIds==='function'?mgmtChampionIds(m):[]), seen=new Set(); return all.filter(f=>f&&typeof f.id==='string'&&!seen.has(f.id)&&seen.add(f.id)&&Number.isFinite(f.age)&&f.age<=26&&!mgmtIsRetired(f)&&!champions.has(f.id)).sort((a,b)=>a.id.localeCompare(b.id));
 }
 /* ==== [ANCRE: ESPOIRS_RESUMES_FACTUELS_20261028] — Libellés factuels de lecture, relu:false ==== */
 function mgmtEspoirHistoriques(m,f){
@@ -106,7 +107,18 @@ function mgmtEspoirsProposer(m){return mgmtEspoirsFabrique(m,Array.isArray(m.esp
 function mgmtEspoirsFixer(m){if(!Array.isArray(m.espoirsPropose))m.espoirsPropose=mgmtEspoirsFabrique(m).map(x=>x.id);return mgmtEspoirsProposer(m);}
 function mgmtEstEspoir(m,id){return Array.isArray(m&&m.espoirs)&&m.espoirs.includes(id)&&mgmtSuivis(m).includes(id);}
 function mgmtEspoirs(m){return (Array.isArray(m&&m.espoirs)?m.espoirs:[]).filter(id=>mgmtSuivis(m).includes(id));}
-function mgmtEspoirGarder(m,id){if(!m||!Array.isArray(m.espoirsPropose)||!m.espoirsPropose.includes(id))return false;if(!Array.isArray(m.espoirs))m.espoirs=[];if(m.espoirs.includes(id))return true;if(m.espoirs.length>=3)return false;if(!mgmtSuivis(m).includes(id)&&!mgmtSuivre(m,id))return false;m.espoirs.push(id);return true;}
+function mgmtEspoirGarder(m,id){
+  if(!m||!Array.isArray(m.espoirsPropose))return false;
+  const eligibles=new Set(mgmtEspoirsCandidats(m).map(f=>f.id));
+  if(!eligibles.has(id)||(!m.espoirsPropose.includes(id)&&!mgmtEspoirsProposer(m).some(x=>x.id===id)))return false;
+  if(!Array.isArray(m.espoirs))m.espoirs=[];if(m.espoirs.includes(id))return true;if(m.espoirs.length>=3)return false;
+  if(!mgmtSuivis(m).includes(id)&&!mgmtSuivre(m,id))return false;
+  // Une ancienne proposition trop âgée est remplacée à l’affichage : son
+  // remplaçant doit aussi pouvoir être gardé et enregistré normalement.
+  m.espoirsPropose=m.espoirsPropose.filter(x=>eligibles.has(x));
+  if(!m.espoirsPropose.includes(id))m.espoirsPropose.push(id);
+  m.espoirs.push(id);return true;
+}
 function mgmtEspoirRendre(m,id){if(!m||!Array.isArray(m.espoirs))return false;const n=m.espoirs.length;m.espoirs=m.espoirs.filter(x=>x!==id);return n!==m.espoirs.length;}
 function mgmtEspoirRemplacer(m,idRendu){
   if(!m||!Array.isArray(m.espoirsPropose))return null;
