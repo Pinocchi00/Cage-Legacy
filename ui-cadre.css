@@ -4124,3 +4124,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-tf-initiale.b{background:#E9E6E1}.mf-tf-corps{grid-template-columns:560px 1fr;gap:100px;align-items:start}.mf-tf-recit{padding:40px 0 0;overflow:visible}
 
 .mf-tf-score>.mf-tf-identite{flex:none}.mf-tf-identite>strong{flex:none}
+/* Semaine : faits du combat et tonalité des événements, sans mesures inventées. */
+.se-duel{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#252121;border-left:4px solid #E23A2B;overflow-wrap:anywhere}
+.se-duel>div{display:flex;justify-content:space-between;gap:26px;font:500 22px/1.1 var(--mf-texte)}.se-duel>div>b{color:#F0B220;font-weight:600}.se-duel>strong{font:600 26px/1.1 var(--mf-texte)}.se-duel i{font-style:normal;color:#E23A2B}
+.se-bref small{display:block;font:600 22px/1 var(--mf-texte);color:rgba(233,230,225,.74);margin-bottom:8px}.se-bref[data-ton="probleme"]>i{background:#E23A2B}.se-bref[data-ton="neutre"]>i{background:#E9E6E1}
+.se-principal[data-ton="bon"] .se-surtitre{color:#F0B220}.se-principal[data-ton="neutre"] .se-surtitre{color:#E9E6E1}
+.se-decision-prise{display:flex;flex-direction:column;gap:14px;padding:20px;border:2px solid #F0B220;background:rgba(240,178,32,.07);font:500 24px/1.15 var(--mf-texte)}.se-decision-prise>b{font:800 36px/1 var(--mf-titre);color:#F0B220}.se-indisponible{color:#F0B220}

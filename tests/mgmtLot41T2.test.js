@@ -15,6 +15,10 @@ test('Semaine fidèle — décision à gauche, résumé à droite, carte et fich
   assert.ok(w.document.querySelector('.se-cote .se-bref-tete'));
   assert.equal(w.document.querySelector('.se-principal .se-bref-tete'),null);
   assert.ok(w.document.querySelector('.se-option').textContent.includes(w.preuvePenalite));
+  w.eval(`CL.mgmtSemaineChoix('A')`);
+  assert.match(w.document.querySelector('.se-decision-prise').textContent,/DÉCISION PRISE · LE COMBAT A LIEU/);
+  assert.ok(w.document.querySelector('.se-decision-prise').textContent.includes(w.preuvePenalite));
+  assert.equal(w.document.querySelector('.se-option'),null);
   w.eval(`CL.mgmtFiche=id=>window.preuveOuvert=id;keysHandle({key:'F',preventDefault(){}})`);assert.equal(w.preuveOuvert,w.preuveFiche);
   w.eval(`keysHandle({key:'C',preventDefault(){}})`);assert.equal(w.eval('G.screen'),'mgmt_carte');
   w.eval(`G.mgmt.semaine.ev=[];G.mgmt.ville='<Ville>';MGMT_SE_JOUR=0;CL.go('mgmt_semaine')`);
