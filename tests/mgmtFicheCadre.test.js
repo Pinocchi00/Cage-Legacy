@@ -33,9 +33,18 @@ test('Aperçu — huit informations réelles et un panneau séparé pour la rela
   assert.equal(w.document.querySelectorAll('.mf-fi-infos .mf-fi-case').length,8);
   assert.equal(w.document.querySelector('.mf-fi-infos .mf-fi-pensee'),null);
   assert.ok(w.document.querySelector('.mf-fi-relation .mf-fi-pensee>strong').textContent);
+  /* Anthony,28/10 : le panneau et son état restent présents même sans souvenir. */
   const detail=w.document.querySelector('.mf-fi-pensee details');assert.equal(detail.open,false);detail.open=true;assert.ok(detail.querySelector('p').textContent);detail.open=false;
   assert.deepEqual([...w.document.querySelectorAll('.mf-fi-souvenir>span')].map(x=>x.textContent),['Prime accordée','Combat accepté au pied levé']);
   assert.ok(w.document.querySelector('.mf-fi-trait .mf-fi-trait-icone'));
-  w.eval(`delete G.mgmt.memoire;render()`);assert.equal(w.document.querySelector('.mf-fi-relation'),null);
+  w.eval(`delete G.mgmt.memoire;render()`);assert.match(w.document.querySelector('.mf-fi-relation').textContent,/RELATION INCONNUE/);assert.match(w.document.querySelector('.mf-fi-relation').textContent,/Aucun souvenir enregistré/);
+ }finally{w.close();}
+});
+
+test('Aperçu — sans coordonnées archivées, la cage affiche les forces du profil sans inventer de positions',()=>{
+ const w=newGameWindow({runMain:true});try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(7);CL.mgmtEnter(1);const m=G.mgmt,f=m.roster[0],avant=JSON.stringify(m),seed=SEED,html=mgmtFicheCageHtml(m,f,330);return {html,pur:avant===JSON.stringify(m)&&seed===SEED};})())`));
+  const p=w.document.createElement('div');p.innerHTML=r.html;assert.match(p.textContent,/Positions de combats non archivées/);assert.match(p.textContent,/CENTRE \/ SOL \/ CAGE/);
+  assert.equal(p.querySelectorAll('circle').length,0);assert.ok(p.querySelectorAll('path[fill]').length>=3);assert.equal(r.pur,true);
  }finally{w.close();}
 });

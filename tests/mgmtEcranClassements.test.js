@@ -227,8 +227,10 @@ test('Monde lot 9 T5 — le rang mondial de la liste est celui de la fiche', () 
       const world=mgmtDivisionRanking(m,d.id,'world');
       const f=m.roster.find(x=>x.div===d.id&&!mgmtIsRetired(x)&&world.some(w=>w.id===x.id)); if(!f) continue;
       const rang=world.findIndex(w=>w.id===f.id)+1;
-      CL.mgmtFiche(f.id); render();
-      const monde=(document.querySelector('.mf-fb-monde')||{}).textContent||'';
+      CL.mgmtFiche(f.id);CL.mgmtFicheOnglet('apercu');
+      /* Anthony,28/10 : une seule mention du mondial, dans la grille et non dans le bandeau. */
+      if(document.querySelector('.mf-fb-monde'))throw new Error('Rang mondial en double');
+      const monde=([...document.querySelectorAll('.mf-fi-case')].find(x=>x.querySelector('span').textContent==='Mondial')||{}).textContent||'';
       out.push({rang,situ:mgmtFicheSituation(m,f,'world'),monde});
     }
     return JSON.stringify(out); })()`));

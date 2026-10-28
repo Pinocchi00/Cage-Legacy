@@ -1852,6 +1852,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-pensee details{flex:none}.mf-fi-pensee summary{cursor:pointer}
 .mf-fi-pensee details:not([open])>p{display:none}
 .mf-fi-pensee details>p{margin:12px 0 0;font:500 24px/1.05 var(--mf-texte);overflow-wrap:anywhere}
+.mf-fi-cagebox:has(.mf-fi-cage-source){flex-direction:column;gap:8px}.mf-fi-cage-source{font:500 22px/1.1 var(--mf-texte);text-align:center;max-width:100%;overflow-wrap:anywhere}
 .mf-fi-souvenir{display:flex;gap:12px;align-items:center;font:500 24px/1 var(--mf-texte)}
 .mf-fi-souvenir>i{width:14px;height:14px;flex:none;background:#E9E6E1;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .mf-fi-souvenir>span{flex:1;min-width:0}.mf-fi-souvenir>small{font-size:22px;color:rgba(233,230,225,.74)}
