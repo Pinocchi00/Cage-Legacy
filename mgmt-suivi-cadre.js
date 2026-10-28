@@ -671,7 +671,7 @@ const mgmtSuAgenda=()=>!!(G&&G.mgmt&&mgmtAgendaActif(G.mgmt));
 Object.assign(CL,{
   /* Classements */
   mgmtSuClChoisir(k){
-    const n=mgmtClassementLignes(G.mgmt,mgmtSuDiv(MGMT_SU_CL),MGMT_SU_CL.portee).length;
+    const n=MGMT_SU_CL.vue==='meilleurs'?MGMT_MEILLEURS_LABELS.categories.length:mgmtClassementLignes(G.mgmt,mgmtSuDiv(MGMT_SU_CL),MGMT_SU_CL.portee).length;
     MGMT_SU_CL.curseur=Math.max(0,Math.min(n-1,k)); render();
   },
   mgmtSuClSexe(s){ const F=MGMT_SU_CL; F.sexe=s==='H'||s==='F'?s:(F.sexe==='H'?'F':'H'); F.div=''; F.curseur=0; render(); },
@@ -687,7 +687,8 @@ Object.assign(CL,{
   mgmtSuClOuvrir(){
     if(MGMT_SU_CL.vue==='meilleurs'){
       const r=mgmtMeilleurs(G.mgmt,{divId:mgmtSuDiv(MGMT_SU_CL),portee:MGMT_SU_CL.portee==='world'?'monde':'split'});
-      const rank=(r.find(x=>x.id==='finitions')||{}).rang||[]; if(rank[0]) CL.mgmtFiche(rank[0].id); return;
+      const categorie=MGMT_MEILLEURS_LABELS.categories[MGMT_SU_CL.curseur];
+      const rank=(r.find(x=>categorie&&x.id===categorie[0])||{}).rang||[]; if(rank[0]) CL.mgmtFiche(rank[0].id); return;
     }
     if(MGMT_SU_CL.vue==='records'){
       const r=mgmtRecords(G.mgmt),first=[...r.unCombat,...r.carriere].find(x=>x&&x.combattant); if(first) CL.mgmtFiche(first.combattant.id); return;
@@ -801,13 +802,15 @@ Object.assign(CL,{
 });
 
 keysRegister('mgmt_classements',{
+  ArrowLeft(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClChoisir(MGMT_SU_CL.curseur-1); },
+  ArrowRight(){ if(mgmtSuAgenda()&&MGMT_SU_CL.vue==='meilleurs') CL.mgmtSuClChoisir(MGMT_SU_CL.curseur+1); },
   ArrowUp(){ if(mgmtSuAgenda()) CL.mgmtSuClChoisir(MGMT_SU_CL.curseur-1); },
   ArrowDown(){ if(mgmtSuAgenda()) CL.mgmtSuClChoisir(MGMT_SU_CL.curseur+1); },
   g(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); }, G(){ if(mgmtSuAgenda()) CL.mgmtSuClSexe(); },
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
   Tab(){
     if(mgmtSuAgenda()){
-      if(MGMT_SU_CL.vue==='liste')CL.mgmtSuClCategorie(1);
+      if(MGMT_SU_CL.vue==='liste'||MGMT_SU_CL.vue==='meilleurs')CL.mgmtSuClCategorie(1);
       else CL.mgmtSuClVueSuivante();
     }
   },

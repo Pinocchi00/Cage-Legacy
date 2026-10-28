@@ -52,3 +52,40 @@ test('T6b — l’écran par défaut reste la liste des classements',()=>{
   const w=newGameWindow({runMain:true});w.eval(`setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});MGMT_SU_CL.div='H-heavy';mgmtAgendaActif=()=>true;CL.go('mgmt_classements')`);
   assert.equal(w.eval('MGMT_SU_CL.vue'),'liste');assert.ok(w.document.querySelector('.mf-su'));
 });
+
+test('Meilleurs — les huit cartes se choisissent et Entrée ouvre le détenteur sélectionné',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(9);CL.mgmtEnter(1);mgmtAgendaActif=()=>true;CL.go('mgmt_classements');CL.mgmtSuClVue('meilleurs');
+      const ids=G.mgmt.roster.slice(0,8).map(f=>f.id);window.preuveIds=ids;
+      mgmtMeilleurs=()=>MGMT_MEILLEURS_LABELS.categories.map(([id],i)=>({id,rang:[{id:ids[i],nom:'Détenteur '+i,valeur:1}]}));render();`);
+    w.document.querySelectorAll('.mf-me-carte')[5].click();
+    assert.equal(w.eval('MGMT_SU_CL.curseur'),5);
+    assert.equal(w.document.querySelector('.mf-me-carte.choisie').dataset.carte,'mur');
+    w.eval(`keysHandle({key:'ArrowRight',preventDefault(){}})`);
+    assert.equal(w.eval('MGMT_SU_CL.curseur'),6);
+    w.eval(`CL.mgmtFiche=id=>window.ouvert=id;keysHandle({key:'Enter',preventDefault(){}})`);
+    assert.equal(w.ouvert,w.preuveIds[6]);
+    w.eval('CL.mgmtSuClChoisir(999)');assert.equal(w.eval('MGMT_SU_CL.curseur'),7);
+    const div=w.eval('mgmtSuDiv(MGMT_SU_CL)');
+    w.eval(`keysHandle({key:'Tab',preventDefault(){}})`);
+    assert.equal(w.eval('MGMT_SU_CL.vue'),'meilleurs');assert.notEqual(w.eval('mgmtSuDiv(MGMT_SU_CL)'),div);
+    assert.equal(w.eval('MGMT_SU_CL.curseur'),0);
+    w.document.querySelectorAll('.mf-me-carte')[3].querySelector('.mf-me-nom').click();
+    assert.equal(w.ouvert,w.preuveIds[3]);assert.equal(w.eval('MGMT_SU_CL.curseur'),0);
+  }finally{w.close();}
+});
+
+test('Meilleurs — le bandeau rend seulement le record battu et ouvre les records',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  w.eval(`setSeed(9);CL.mgmtEnter(1);mgmtAgendaActif=()=>true;CL.go('mgmt_classements');CL.mgmtSuClVue('meilleurs');
+    mgmtRecords=()=>({unCombat:[],carriere:[],battu:{id:'sigAtt',valeur:131,combattant:{id:G.mgmt.roster[0].id,nom:'<img onerror=x>'},soiree:3,avant:null}});render();`);
+  assert.equal(w.document.querySelector('.mf-me-battu img'),null);
+  assert.match(w.document.querySelector('.mf-me-battu').textContent,/131 coups significatifs tentés/);
+  assert.ok(!w.document.querySelector('.mf-me-battu').textContent.includes('2023'));
+  w.document.querySelector('.mf-me-battu button').click();assert.equal(w.eval('MGMT_SU_CL.vue'),'records');
+  w.eval(`mgmtRecords=()=>({unCombat:[],carriere:[],battu:null});CL.mgmtSuClVue('meilleurs')`);
+  assert.equal(w.document.querySelector('.mf-me-battu'),null);
+ }finally{w.close();}
+});

@@ -23,18 +23,20 @@ function mgmtLeaderAnnee(m,soiree){
 }
 function mgmtMeilleursRendu(m){
   const F=MGMT_SU_CL,L=MGMT_MEILLEURS_LABELS,div=mgmtSuDiv(F),data=mgmtMeilleurs(m,{divId:div,portee:F.portee==='world'?'monde':'split'});
-  const cards=L.categories.map(([id,label,unit])=>{
+  const cards=L.categories.map(([id,label,unit],i)=>{
     const r=data.find(x=>x.id===id),rank=r?r.rang:[],first=rank[0],percent=['precis','defense','mur'].includes(id),value=v=>percent?String(Math.round(v*100)):id==='serie'?String(Math.round(v)):String(Number(v.toFixed(2))).replace('.',',');
-    const top=first?`<button class="mf-me-nom" style="font-size:${mfCorps(first.nom.toLocaleUpperCase('fr'),310,40,22)}px" onclick="CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toLocaleUpperCase('fr'))}</button>`:`<div class="mf-me-vide">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
-    const rows=rank.slice(1,3).map((x,i)=>`<div><button onclick="CL.mgmtFiche('${escJsAttr(x.id)}')">${i+2}. ${esc(x.nom.trim().split(/\s+/).pop())}</button><span>${esc(value(x.valeur))}${percent?' %':''}</span></div>`).join('');
-    return mfPanneau(`<h3>${esc(label)}</h3><div class="mf-me-valeur">${first?esc(value(first.valeur)):''}${first&&unit?`<small>${esc(unit)}</small>`:''}</div>${top}<div class="mf-me-rangs">${rows}</div>`,'normal','mf-me-carte');
+    const top=first?`<button class="mf-me-nom" style="font-size:${mfCorps(first.nom.toLocaleUpperCase('fr'),310,40,22)}px" onclick="event.stopPropagation();CL.mgmtFiche('${escJsAttr(first.id)}')">${esc(first.nom.toLocaleUpperCase('fr'))}</button>`:`<div class="mf-me-vide">—<small>${esc(id==='precis'?L.precise:L.insufficient)}</small></div>`;
+    const rows=rank.slice(1,3).map((x,j)=>`<div><button onclick="event.stopPropagation();CL.mgmtFiche('${escJsAttr(x.id)}')">${j+2}. ${esc(x.nom.trim().split(/\s+/).pop())}</button><span>${esc(value(x.valeur))}${percent?' %':''}</span></div>`).join('');
+    return mfPanneau(`<h3>${esc(label)}</h3><div class="mf-me-valeur">${first?esc(value(first.valeur)):''}${first&&unit?`<small>${esc(unit)}</small>`:''}</div>${top}<div class="mf-me-rangs">${rows}</div>`,'normal','mf-me-carte'+(F.curseur===i?' choisie':''),`data-carte="${id}" aria-current="${F.curseur===i?'true':'false'}" onclick="CL.mgmtSuClChoisir(${i})"`);
   }).join('');
   const r=mgmtRecords(m).battu, family=x=>(x||'').trim().split(/\s+/).pop();
   const units={sigAtt:'coups significatifs tentés',koRapide:'secondes',amenees:'amenées réussies',knockdowns:'knockdowns',controle3:'de contrôle au sol',corps:'coups au corps'};
   const oldYear=r&&r.avant?mgmtLeaderAnnee(m,r.avant.soiree):null;
   const old=r&&r.avant&&oldYear?` L'ancien record tenait depuis ${oldYear} (${family(r.avant.combattant.nom)}, ${r.avant.valeur}).`:'';
   const phrase=r&&L.beaten[r.id]?L.beaten[r.id].replace('{nom}',family(r.combattant.nom)).replace('{valeur}',`${r.valeur} ${units[r.id]||''}`.trim()).replace('{soiree}',String(r.soiree)).replace('{avant}',old):'';
-  const aside=phrase?`<aside class="mf-me-battu"><b>RECORD BATTU</b><span>${esc(phrase)}</span><button type="button" onclick="CL.mgmtSuClVue('records')"><kbd>R</kbd> LES RECORDS</button></aside>`:'';
+  const debut=r?`${family(r.combattant.nom)}, ${r.valeur} ${units[r.id]||''}`.trim():'';
+  const texte=debut&&phrase.startsWith(debut)?`<strong>${esc(debut)}</strong>${esc(phrase.slice(debut.length))}`:esc(phrase);
+  const aside=phrase?`<aside class="mf-me-battu"><b>RECORD BATTU</b><span>${texte}</span><button type="button" onclick="CL.mgmtSuClVue('records')"><kbd>R</kbd> LES RECORDS</button></aside>`:'';
   return `<main class="mf-contenu mf-me">${mgmtLeadersTabsHtml()}<div class="mf-me-grille">${cards}</div>${aside}</main>`;
 }
 function mgmtLeadersTabsHtml(){
@@ -43,7 +45,7 @@ function mgmtLeadersTabsHtml(){
 }
 function scr_mgmt_meilleurs_cadre(){
   const m=G.mgmt,F=MGMT_SU_CL,d=divById(mgmtSuDiv(F));
-  return mfEcran(mgmtMeilleursRendu(m),{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:`${F.sexe==='F'?'FEMMES':'HOMMES'} · ${String(d.name).toUpperCase()}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Onglet'},{ks:['G'],t:'Hommes / femmes',onclick:'CL.mgmtSuClSexe()'},{ks:['M'],t:'Portée',onclick:'CL.mgmtSuClPortee()'},{ks:['V'],t:'Changer de vue',onclick:'CL.mgmtSuClVueSuivante()'}]});
+  return mfEcran(mgmtMeilleursRendu(m),{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:`${F.sexe==='F'?'FEMMES':'HOMMES'} · ${String(d.name).toUpperCase()}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches:[{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['G'],t:'Hommes / femmes',onclick:'CL.mgmtSuClSexe()'},{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['Entrée'],t:'Ouvrir la fiche',jaune:true,onclick:'CL.mgmtSuClOuvrir()'},{ks:['M'],t:'Portée',onclick:'CL.mgmtSuClPortee()'},{ks:['V'],t:'Vue',onclick:'CL.mgmtSuClVueSuivante()'}]});
 }
 function mgmtRecordsRendu(m){
   const L=MGMT_MEILLEURS_LABELS,r=mgmtRecords(m),hist=(m.hist||[]).filter(x=>x&&x.date).map(x=>new Date(x.date).getFullYear()).filter(Number.isFinite),year=hist.length?Math.min(...hist):null;

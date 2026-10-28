@@ -4,6 +4,21 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const creer=()=>newGameWindow({runMain:true});
 
+test('Meilleurs — portée mondiale filtrée par catégorie dans les deux générations de sauvegarde',()=>{
+ const w=creer();
+ try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+    const a={id:'a',name:'Ada',div:'H-light'},b={id:'b',name:'Béa',div:'H-light'},autre={id:'autre',name:'Autre',div:'H-heavy'};
+    mgmtStatsIndex=()=>new Map();mgmtStatsCarriere=()=>({docs:5,vParMethode:{ko:1,sub:1,stop:0},sigParMin:2,precision:.5,defense:.5,ameneesPar15:1,defenseAmenee:.5,soumissionsPar15:1,serieMax:2});
+    mgmtDivisionRanking=()=>[b];mgmtExteriorCombattant=(m,id)=>id==='b'?b:null;
+    const m={roster:[a],orgs:{autre:{roster:[b,autre]}},mondeVivant:true};
+    const lire=()=>mgmtMeilleurs(m,{divId:'H-light',portee:'monde'})[0].rang.map(x=>x.id);
+    const vivant=lire();m.mondeVivant=false;return {vivant,ancien:lire(),split:mgmtMeilleurs(m,{divId:'H-light',portee:'split'})[0].rang.map(x=>x.id)};
+  })())`));
+  assert.deepEqual(r.vivant,['a','b']);assert.deepEqual(r.ancien,['a','b']);assert.deepEqual(r.split,['a']);
+ }finally{w.close();}
+});
+
 test('Monde lot 31 T6a — les huit classements retournent trois entrées au plus',()=>{
   const w=creer(),r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:6});return mgmtMeilleurs(m,{divId:m.roster[0].div,portee:'split'});})()`);
   assert.equal(r.length,8);assert.deepEqual(Array.from(r,x=>x.id),['finitions','volume','precis','defense','lutteur','mur','cou','serie']);assert.ok(r.every(x=>x.rang.length<=3));
