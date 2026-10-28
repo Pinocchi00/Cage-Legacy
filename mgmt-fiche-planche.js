@@ -84,18 +84,19 @@ function mgmtFicheCageHtml(m,f,taille){
      (mgmtLectureStyle) : les afficher explicitement comme profil, sans inventer des positions de combats. */
   const profil=total?null:mgmtLectureStyle(f).zones;
   const presence=total?(zones.rings[0]+zones.rings[1])/total:0;
-  const ext=118, cx=125, cy=125, int=Math.round(ext*(total?Math.max(0.35,Math.min(0.75,0.3+0.5*presence)):0.45)*10)/10;
+  const ext=118, cx=125, cy=125, int=total?Math.round(ext*Math.max(0.35,Math.min(0.75,0.3+0.5*presence))*10)/10:70;
   /* « Il le subit » : seulement quand un secteur du bord l'a vu enfermé contre le grillage (la règle de la fiche d'origine). */
   let subit=false;
   if(total){ const bordTotal=zones.rings[2]; subit=zones.pin.some((p,i)=>p.count>=3&&zones.bord[i]>0&&p.count/zones.bord[i]>=0.25&&bordTotal>0&&p.count/bordTotal>=0.05); }
   const pts=hist.map((tr,i)=>{ const p=mgmtFichePointCombat(tr,tr.a.id===f.id?'A':'B'); return p?{n:i+1,x:cx+(p.x/ARENE_RS)*ext*0.9,y:cy+(p.y/ARENE_RS)*ext*0.9}:null; }).filter(Boolean);
   const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+6.36).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:18.7px">${p.n}</text>`).join('');
   const teinte=force=>force>0?'#B32A1E':force<0?'url(#mf-fi-ha)':'#252121';
-  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${teinte(profil.cage)}"/><path d="${mgmtFicheOcto(cx,cy,ext*.74)}" fill="${teinte(profil.sol)}"/><path d="${mgmtFicheOcto(cx,cy,ext*.38)}" fill="${teinte(profil.centre)}"/>`;
-  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="${profil?'Forces du profil : centre, sol et cage. Positions de combats non archivées.':'La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit'}">`
+  /* Deux contours comme la planche. Le sol n'est pas un troisième secteur géographique. */
+  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${teinte(profil.cage)}"/><path d="${mgmtFicheOcto(cx,cy,int)}" fill="${teinte(profil.centre)}"/>`;
+  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="${profil?'Forces du profil : centre et cage. Positions de combats non archivées.':'La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit'}">`
     +`<defs><pattern id="mf-fi-ha" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="#252121"/><rect width="3" height="9" fill="#E9E6E1" fill-opacity="0.55"/></pattern></defs>`
     +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
-    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/>${total?`<path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>`:`<path d="${mgmtFicheOcto(cx,cy,ext*.74)}" stroke="#E9E6E1" stroke-width="2"/><path d="${mgmtFicheOcto(cx,cy,ext*.38)}" stroke="#E9E6E1" stroke-width="2"/>`}${marques}</svg>${profil?'<div class="mf-fi-cage-source">PROFIL · CENTRE / SOL / CAGE<br>Positions de combats non archivées</div>':''}`;
+    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/><path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>${marques}</svg>${profil?'<div class="mf-fi-cage-source">PROFIL · CENTRE / CAGE<br>Positions de combats non archivées</div>':''}`;
 }
 function mgmtFicheLegendeHtml(){
   return `<div class="mf-fi-leg"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;

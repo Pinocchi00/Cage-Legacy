@@ -44,7 +44,7 @@ test('Aperçu — huit informations réelles et un panneau séparé pour la rela
 test('Aperçu — sans coordonnées archivées, la cage affiche les forces du profil sans inventer de positions',()=>{
  const w=newGameWindow({runMain:true});try{
   const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(7);CL.mgmtEnter(1);const m=G.mgmt,f=m.roster[0],avant=JSON.stringify(m),seed=SEED,html=mgmtFicheCageHtml(m,f,330);return {html,pur:avant===JSON.stringify(m)&&seed===SEED};})())`));
-  const p=w.document.createElement('div');p.innerHTML=r.html;assert.match(p.textContent,/Positions de combats non archivées/);assert.match(p.textContent,/CENTRE \/ SOL \/ CAGE/);
-  assert.equal(p.querySelectorAll('circle').length,0);assert.ok(p.querySelectorAll('path[fill]').length>=3);assert.equal(r.pur,true);
+  const p=w.document.createElement('div');p.innerHTML=r.html;assert.match(p.textContent,/Positions de combats non archivées/);assert.match(p.textContent,/CENTRE \/ CAGE/);
+  assert.equal(p.querySelectorAll('circle').length,0);assert.equal(p.querySelectorAll('path[stroke]').length,2);assert.equal(p.querySelector('path[stroke-width="2"]').getAttribute('d'),w.eval('mgmtFicheOcto(125,125,70)'));assert.equal(r.pur,true);
  }finally{w.close();}
 });
