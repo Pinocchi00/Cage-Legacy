@@ -235,6 +235,62 @@ test('Fidélité lot 85 — le carnet lit les succès enregistrés, garde ses ar
     assert.equal(r.tabBloque,false);
   }finally{w.close();}
 });
+test('Carnet — deux défenses sur cinq affichent 40 %, puis la barre suit les faits sans attribuer de succès',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      const m=mgmtDefault('split');m.roster=[];m.hist=[];m.facts=[];m.lastEvent=null;G.mgmt=m;
+      const ajouter=()=>{const i=m.hist.length;m.hist.push({c:i+1,a:{id:'champ',name:'Champion',W:5,L:0,D:0,div:'H-light'},b:{id:'autre'+i,name:'Autre',W:2,L:1,D:0,div:'H-light'},winner:'A',family:'ko',round:1});m.facts.push({k:'title_fight',c:i+1,fight:i,div:'H-light'});};
+      const lire=()=>{const avant=JSON.stringify(m),seed=SEED,e=document.createElement('div');e.innerHTML=scr_mgmt_carnet();const carte=e.querySelector('[data-defi="carriere-cinq-defenses"]'),barre=carte.querySelector('[role="progressbar"]');return {texte:carte.querySelector('.ce3-carnet-avancement')?.textContent,width:barre?.firstElementChild.style.width,now:barre?.getAttribute('aria-valuenow'),max:barre?.getAttribute('aria-valuemax'),reussi:carte.classList.contains('ce3-carnet-reussi'),pur:avant===JSON.stringify(m)&&seed===SEED};};
+      ajouter();ajouter();ajouter();const deux=lire();ajouter();const trois=lire();ajouter();ajouter();ajouter();const plafond=lire();
+      const absent=!Object.hasOwn(m,'defis');m.defis={ok:{'carriere-cinq-defenses':{s:1}}};m.hist=[];m.facts=[];const acquis=lire();
+      return {deux,trois,plafond,acquis,absent};
+    })())`));
+    assert.equal(r.deux.texte,'2 / 5');assert.equal(r.deux.width,'40%');assert.equal(r.deux.now,'2');assert.equal(r.deux.max,'5');
+    assert.equal(r.trois.texte,'3 / 5');assert.equal(r.trois.width,'60%');
+    assert.equal(r.plafond.texte,'5 / 5');assert.equal(r.plafond.width,'100%');assert.equal(r.plafond.reussi,false);
+    assert.equal(r.absent,true);assert.equal(r.acquis.reussi,true);assert.equal(r.acquis.width,undefined);
+    assert.ok([r.deux,r.trois,r.plafond,r.acquis].every(x=>x.pur));
+  }finally{w.close();}
+});
+
+test('Carnet — le passé ne remplit pas les compteurs, mais établit les couronnements antérieurs',()=>{
+  const w=newGameWindow();
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      const m={roster:[],hist:[],facts:[],eventsPlayed:3,passe:{soirees:2,nHist:2,nFacts:2},comptes:[]};
+      for(let i=0;i<4;i++){m.hist.push({c:i+1,p:i<2,a:{id:'roi',W:5,L:0,D:0},b:{id:'adversaire'+i},winner:'A',family:'ko',round:1});m.facts.push({k:'title_fight',fight:i,c:i+1});}
+      const avant=JSON.stringify(m),seed=SEED,lecture=mgmtCarnetProgressionContexte(m);
+      const lire=id=>mgmtCarnetDefiProgression(lecture,id);
+      const apres={defenses:lire('carriere-cinq-defenses'),titres:lire('carriere-cinq-titres'),nouveau:lire('saison-nouveau-champion'),soirees:lire('carriere-cinquante-soirees'),finitions:lire('carriere-cent-finitions')};
+      const indices=lecture.ctx.titleFacts.map(x=>x.i),pur=avant===JSON.stringify(m)&&seed===SEED;
+      m.hist=m.hist.slice(0,2);m.facts=m.facts.slice(0,2);m.eventsPlayed=2;const ancien=mgmtCarnetProgressionContexte(m);
+      return {apres,indices,pur,ancien:mgmtCarnetDefiProgression(ancien,'carriere-cinq-defenses').valeur};
+    })())`));
+    assert.deepEqual(r.indices,[2,3]);assert.equal(r.apres.defenses.valeur,2);assert.equal(r.apres.titres.valeur,2);
+    assert.equal(r.apres.nouveau.valeur,0);assert.equal(r.apres.soirees.valeur,1);assert.equal(r.apres.finitions.valeur,2);
+    assert.equal(r.ancien,0);assert.equal(r.pur,true);
+  }finally{w.close();}
+});
+
+test('Carnet — compteurs monétaires précis, conditions sans fausse fraction et catalogue entièrement lisible',()=>{
+  const w=newGameWindow();
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      const m={roster:[],hist:[],facts:[],eventsPlayed:0,comptes:[],treasury:250.5};
+      const lire=id=>mgmtCarnetDefiProgression(mgmtCarnetProgressionContexte(m),id);
+      const vide=lire('soiree-une-decision'),caisse=lire('carriere-caisse-cinq-cent-mille'),classe=lire('carriere-premier-mondial');
+      m.comptes=[{capacite:8000,spectateurs:4000,recette:250.5}];const salle=lire('carriere-salle-pleine'),recette=lire('carriere-recette-million');
+      const lecture=mgmtCarnetProgressionContexte(m),tous=MGMT_DEFIS.map(d=>mgmtCarnetDefiProgression(lecture,d.id));
+      return {vide,caisse,classe,salle,recette,n:tous.length,valides:tous.every(p=>p&&Number.isFinite(p.ratio)&&p.ratio>=0&&p.ratio<=1&&p.texte),inconnu:mgmtCarnetDefiProgression(lecture,'inconnu')};
+    })())`));
+    assert.equal(r.vide.ratio,0);assert.equal(r.vide.texte,'Aucune soirée jouée');
+    assert.equal(r.caisse.valeur,250.5);assert.equal(r.caisse.ratio,0.501);assert.match(r.caisse.texte,/250\s500\s€/);
+    assert.equal(r.recette.valeur,250.5);assert.equal(r.salle.texte,'50 % / 95 %');assert.equal(r.salle.ratio,0.5/0.95);
+    assert.equal(r.classe.texte,'Non classé');assert.equal(r.n,43);assert.equal(r.valides,true);assert.equal(r.inconnu,null);
+  }finally{w.close();}
+});
+
 test('Lot 55 T1 — chaque prix possède trois formulations distinctes et spécifiques',()=>{
   const blocs=[...source.matchAll(/\{id:'(combattant|ko|soumission|combat|revelation|retour)'[^\n]*phrases:\[([^\]]+)\]/g)];
   assert.equal(blocs.length,6);

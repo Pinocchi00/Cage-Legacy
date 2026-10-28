@@ -100,6 +100,91 @@ function scr_mgmt_ceremonie(){
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
 
 /* ==== [ANCRE: P11_T3_ECRAN_CARNET] — Monde lot 55 T1 ==== */
+/* ==== [ANCRE: FIDELITE_CARNET_PROGRESSION_20261028] — Progression lue, jamais attribuée par le carnet ==== */
+function mgmtCarnetProgressionContexte(m){
+  if(typeof mgmtDefisContexte!=='function')return null;
+  const source=mgmtDefisContexte(m),passe=m&&m.passe;
+  const nHist=passe&&Number.isSafeInteger(passe.nHist)?passe.nHist:0;
+  const nFacts=passe&&Number.isSafeInteger(passe.nFacts)?passe.nFacts:0;
+  const joueur=x=>!!(x.t&&x.t.p!==true&&x.i>=nHist);
+  const anciens=source.hist.filter((t,i)=>t&&(t.p===true||i<nHist)&&Number.isFinite(t.c));
+  const dernierAncien=anciens.length?Math.max(...anciens.map(t=>t.c)):null;
+  const ctx={...source,
+    m:{...m,eventsPlayed:typeof mgmtSoireesJoueur==='function'?mgmtSoireesJoueur(m):m.eventsPlayed},
+    hist:source.hist.map((t,i)=>joueur({t,i})?t:null),
+    soiree:source.soiree.filter(joueur),saison:source.saison.filter(joueur),
+    titleFacts:source.titleFacts.filter(joueur),
+    facts:source.facts.filter((f,i)=>{
+      if(!f)return false;
+      if(Number.isSafeInteger(f.fight))return joueur({t:source.hist[f.fight],i:f.fight});
+      return i>=nFacts&&(dernierAncien===null||(Number.isFinite(f.c)&&f.c>dernierAncien));
+    })
+  };
+  // Les couronnements hérités établissent l'antériorité : leur première
+  // défense sous le joueur reste une défense, pas un nouveau champion.
+  const couronnes=new Set();let defenses=0,defensesSaison=0,nouveauxSaison=0;
+  for(const x of source.titleFacts){
+    const v=mgmtDefisVainqueur(x.t);if(!v)continue;
+    const deja=couronnes.has(v.id),saison=x.f.c>source.cycle-MGMT_DEFIS_SAISON_CYCLES;
+    if(joueur(x)){if(deja){defenses++;if(saison)defensesSaison++;}else if(saison)nouveauxSaison++;}
+    couronnes.add(v.id);
+  }
+  return {ctx,defenses,defensesSaison,nouveauxSaison};
+}
+function mgmtCarnetDefiProgression(lecture,id){
+  if(!lecture||typeof mgmtDefisTrouver!=='function')return null;
+  const d=mgmtDefisTrouver(id);if(!d||!d.test)return null;
+  const t=d.test,pred=MGMT_DEFIS_TESTS[t.type],c=lecture.ctx;
+  if(typeof pred!=='function')return null;
+  const resultat=(valeur,cible,texte)=>({valeur,cible,texte,ratio:cible>0?Math.max(0,Math.min(1,valeur/cible)):0});
+  if(Number.isSafeInteger(t.min)&&t.min>0){
+    let valeur=0;
+    const special={carriere_defenses:lecture.defenses,saison_defenses:lecture.defensesSaison,saison_champion:lecture.nouveauxSaison};
+    const argent=t.type.endsWith('_recette')||t.type==='carriere_caisse';
+    if(argent){
+      const finance=mgmtDefisFinanceSoiree(c);
+      const lu=t.type==='carriere_caisse'?c.m.treasury:t.type==='carriere_recette'?mgmtDefisMax(mgmtDefisFiches(c).map(f=>f.recette)):finance&&finance.recette;
+      valeur=Number.isFinite(lu)?Math.max(0,Math.min(t.min,lu)):0;
+    }
+    else if(Object.hasOwn(special,t.type))valeur=Math.min(t.min,special[t.type]);
+    else{
+      // Les seuils « min » du catalogue sont monotones. Recherche bornée à
+      // la cible, sans changer le test gelé ni dupliquer ses règles métier.
+      let bas=0,haut=t.min;
+      while(bas<haut){const milieu=Math.ceil((bas+haut)/2);if(pred(c,{...t,min:milieu}))bas=milieu;else haut=milieu-1;}
+      valeur=bas;
+    }
+    return resultat(valeur,t.min,argent?mgmtEuros(valeur)+' / '+mgmtEuros(t.min):valeur+' / '+t.min);
+  }
+  if(t.type==='soiree_decisions_max'){
+    const n=mgmtDefisCompter(c.soiree,x=>x&&x.family==='dec'),ok=c.soiree.length>0&&n<=t.max;
+    return resultat(ok?1:0,1,c.soiree.length?n+' décision'+(n===1?'':'s')+' · maximum '+t.max:'Aucune soirée jouée');
+  }
+  if(t.type==='carriere_salle_pleine'){
+    const fiches=mgmtDefisFiches(c).filter(f=>Number.isFinite(f.capacite)&&f.capacite>=t.capaciteMin);
+    if(!fiches.length)return resultat(0,1,'Aucune salle admissible');
+    const taux=Math.max(...fiches.map(f=>Math.max(0,f.spectateurs/f.capacite))),valeur=Math.min(t.tauxMin,taux);
+    return resultat(valeur,t.tauxMin,Math.round(valeur*1000)/10+' % / '+Math.round(t.tauxMin*100)+' %');
+  }
+  if(['saison_classement','saison_classement_monde','saison_espoir_classe','carriere_classement_premier'].includes(t.type)){
+    const monde=t.type!=='saison_classement'||t.portee==='monde';let rang=null;
+    for(const f of c.m.roster||[]){
+      if(!f||f.retired||(t.div&&f.div!==t.div)||(t.type==='saison_espoir_classe'&&!(c.m.espoirs||[]).includes(f.id)))continue;
+      const r=mgmtDivisionRank(c.m,f,monde?'world':'organization');
+      if(Number.isSafeInteger(r)&&r>0&&(rang===null||r<rang))rang=r;
+    }
+    const atteint=rang!==null&&rang<=(t.rangMax||1);
+    return resultat(atteint?1:0,1,rang===null?'Non classé':rang+'e '+(monde?'mondial':'de l’organisation'));
+  }
+  const atteint=!!pred(c,t);
+  return resultat(atteint?1:0,1,atteint?'Condition remplie':'À réaliser');
+}
+function mgmtCarnetProgressionHtml(lecture,id){
+  const p=mgmtCarnetDefiProgression(lecture,id);
+  if(!p)return '<span class="ce3-carnet-avancement">À réaliser</span>';
+  return `<div class="ce3-carnet-avance"><div class="ce3-carnet-progression" role="progressbar" aria-label="${esc(mgmtDefisTrouver(id).titre)}" aria-valuetext="${esc(p.texte)}" aria-valuemin="0" aria-valuemax="${p.cible}" aria-valuenow="${p.valeur}"><span style="width:${Math.round(p.ratio*10000)/100}%"></span></div><span class="ce3-carnet-avancement">${esc(p.texte)}</span></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_mgmt_carnet(){
   const m=G&&G.mgmt;if(!m)return '';const c=mgmtCarnetLire(m);
   /* ==== [ANCRE: FID85_CARNET_PLANCHE] — Fidélité carnet, lot 85 ==== */
@@ -118,10 +203,10 @@ function scr_mgmt_carnet(){
   const corpsFaits=`<div class="ce3-carnet-faits-contenu"><div class="ce3-carnet-champions">${corps(faits,x=>x)}</div><h2 class="ce3-carnet-espoirs-titre">TES ESPOIRS</h2><div class="ce3-carnet-espoirs">${corps(espoirs,x=>x)}</div>${archives}</div>`;
   // Le catalogue lit le format actuel {ok:{id:{s}}} sans attribuer de succès au passé hérité.
   const catalogue=typeof mgmtDefisListe==='function'&&!Array.isArray(m.defis)?mgmtDefisListe(m):c.defis.map(x=>({...x,ok:x.etat==='fait'}));
-  const reussis=catalogue.filter(x=>x.ok).length;
+  const reussis=catalogue.filter(x=>x.ok).length,progression=mgmtCarnetProgressionContexte(m);
   const cartes=catalogue.map(x=>{
     const classe=x.ok?'ce3-carnet-defi ce3-carnet-reussi':'ce3-carnet-defi';
-    return `<div class="${classe}"><div class="ce3-carnet-defi-titre"><p>${e(x.titre||x.id)}</p>${x.ok?'<i class="ce3-carnet-coche" aria-label="Réussi"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 10 4 4 8-9" fill="none" stroke="currentColor" stroke-width="3"></path></svg></i>':''}</div>${x.ok?'<b>RÉUSSI</b>':`<div class="ce3-carnet-progression" role="progressbar" aria-label="${e(x.titre||x.id)}" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><span style="width:0%"></span></div>`}</div>`;
+    return `<div class="${classe}" data-defi="${e(x.id)}"><div class="ce3-carnet-defi-titre"><p>${e(x.titre||x.id)}</p>${x.ok?'<i class="ce3-carnet-coche" aria-label="Réussi"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 10 4 4 8-9" fill="none" stroke="currentColor" stroke-width="3"></path></svg></i>':''}</div>${x.ok?'<b>RÉUSSI</b>':mgmtCarnetProgressionHtml(progression,x.id)}</div>`;
   }).join('');
   const defis=`<div class="ce3-carnet-defis">${cartes}</div>`;
   const defisContenu=`<header class="ce3-carnet-entete-panel">${titre('TES DÉFIS')}<div class="ce3-carnet-compteur"><span>${e(reussis)} SUR ${e(catalogue.length)}</span>${reussis?'':'<small>Rien encore.</small>'}</div></header>${defis}`;

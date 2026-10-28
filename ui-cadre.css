@@ -3681,6 +3681,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-fid85 .ce3-carnet-coche{display:flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;background:#F0B220;color:#0D0B0B;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .ce3-carnet-fid85 .ce3-carnet-progression{height:8px;width:100%;background:#252121;flex:none}
 .ce3-carnet-fid85 .ce3-carnet-progression span{height:8px;background:#E9E6E1}
+.ce3-carnet-fid85 .ce3-carnet-avance{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ce3-carnet-fid85 .ce3-carnet-avance .ce3-carnet-progression{flex:1;min-width:60px;width:auto}
+.ce3-carnet-fid85 .ce3-carnet-avancement{font:800 22px/1.1 var(--mf-titre);color:rgba(233,230,225,.74);overflow-wrap:anywhere;max-width:100%}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FID86_SOIREE_CADRES] — Fidélité soirée, lot 86.
    Les fonds encadrés restent en arrière-plan pour conserver les boîtes des noms. */
