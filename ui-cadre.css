@@ -3362,21 +3362,26 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-carnet-ecran .ce3-carnet-defi .ce3-carnet-progression{width:100%;flex:none}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_T4_ECRAN_DISCOURS] — Monde lot 59 T1 ==== */
-.di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;background:#0D0B0B;color:#E9E6E1}
+.di3-scene{position:absolute;inset:0;box-sizing:border-box;overflow:hidden;padding:110px 90px 70px 110px;color:#E9E6E1}
+.di3-scene::before{content:'';position:absolute;left:96px;top:54px;width:1728px;height:972px;background:url('images/accueil-octogones.jpg') 0 0/100% 100% no-repeat;opacity:.55}
+.di3-scene::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(13,11,11,.96) 0%,rgba(13,11,11,.82) 48%,rgba(13,11,11,.35) 100%)}
+.di3-principal,.di3-cote,.di3-lignes{z-index:1}
  .di3-principal{position:absolute;left:110px;top:110px;width:1180px;display:flex;flex-direction:column;gap:26px}
  .di3-cote{position:absolute;right:90px;top:150px;width:430px;display:flex;flex-direction:column;gap:18px}
- .di3-panneau{box-sizing:border-box;padding:18px 20px;background:#121010;border:2px solid rgba(233,230,225,.5);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);display:flex;flex-direction:column;gap:14px}
+ .di3-panneau{box-sizing:border-box;min-width:0;min-height:0}
+ .di3-panneau>.mf-p2>.mf-p3{padding:15px;display:flex;flex-direction:column;gap:14px;overflow-wrap:anywhere}
  .di3-panneau h2{font-size:22px;line-height:1;color:#F0B220;margin:0}
-  .di3-panneau>strong{font:800 50px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:normal}
+  .di3-panneau strong{font:800 50px/.9 'Saira Extra Condensed','Arial Narrow',sans-serif;white-space:normal}
  .di3-panneau p,.di3-reaction span{font-size:24px;line-height:1.1;margin:0}
  .di3-reaction{display:flex;gap:12px;align-items:baseline}
- .di3-reaction b{font:800 24px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;width:130px;flex:none}
- .di3-resultat{display:flex;gap:18px;align-items:baseline}
+ .di3-reaction b{font:800 28px/1 'Saira Extra Condensed','Arial Narrow',sans-serif;width:130px;flex:none}
+.di3-reaction span{min-width:0}
+.di3-resultat{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
   .di3-resultat strong{font:800 48px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;color:rgba(233,230,225,.74)}
- .di3-resultat span{font-size:24px}
-.di3-entete{display:flex;align-items:center;gap:18px}
+ .di3-resultat span{font-size:28px;line-height:1;max-width:100%;overflow-wrap:anywhere}
+.di3-entete{display:flex;align-items:center;gap:12px}
 .di3-contexte{font-size:26px;line-height:1}
-.di3-identite{display:flex;flex-direction:column;gap:8px}
+.di3-identite{display:flex;flex-direction:column;gap:12px}
   .di3-prenoms{font:800 56px/.8 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase}
 .di3-cartouche{font-size:30px;line-height:1;background:#E23A2B;color:#0D0B0B;padding:12px 18px;font-weight:800}
 .di3-nom{font:800 clamp(88px,12vw,230px)/.72 'Saira Extra Condensed','Arial Narrow',sans-serif;text-transform:uppercase;margin:0;max-width:1180px;white-space:nowrap}
@@ -3389,9 +3394,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .di3-emotion{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
   .di3-lignes{position:absolute;left:110px;top:560px;width:1180px;display:flex;gap:26px;align-items:flex-start;margin:0;border:0;padding:0;font-size:44px;line-height:1.18;font-weight:600;font-style:normal}
 .di3-guillemet{font:800 200px/.7 'Saira Extra Condensed','Arial Narrow',sans-serif;color:#F0B220}
-.di3-lignes p{margin:18px 0 0;font-style:normal}
- .di3-micro{position:absolute;left:312px;top:835px;font-size:22px;line-height:1;color:rgba(233,230,225,.74)}
-.di3-lignes p{margin:18px 0 0}
+.di3-citation{min-width:0;display:flex;flex-direction:column;gap:22px;padding-top:18px}
+.di3-lignes p{margin:0;font-style:normal;overflow-wrap:anywhere}
+ .di3-micro{font-size:26px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-interpelle{font-size:28px;line-height:1;color:rgba(233,230,225,.74)}
 .di3-suite{position:absolute;right:90px;bottom:22px;font:inherit;font-size:22px;min-height:48px;padding:0 16px;background:transparent;color:#F0B220;border:1px solid #F0B220;cursor:pointer}
 .di3-scene~.mf-touches{position:absolute;left:80px;bottom:22px;display:flex;gap:28px;font-size:24px}
@@ -3399,7 +3404,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 /* ==== [ANCRE: MONDE_LOT69_T1_DISCOURS_PLANCHE_DETAIL] — Monde lot 69 T1 ====
    La planche validée place l'étiquette rouge en texte blanc et garde la
    citation en paragraphe, avec une typographie de grande scène. ==== */
-.di3-cartouche{box-sizing:border-box;height:46px;padding:0 16px;display:flex;align-items:center;color:#fff;font-size:30px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.di3-cartouche{box-sizing:border-box;height:46px;padding:0 16px;display:flex;align-items:center;color:#0D0B0B;font-size:30px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
 .di3-resultat strong{font-size:48px}
  .di3-lignes{font-size:44px;line-height:1.18}
 .di3-lignes p{font-style:normal}

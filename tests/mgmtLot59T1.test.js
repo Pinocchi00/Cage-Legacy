@@ -4,6 +4,14 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
+test('Lot 59 T1 — le retour du combat conserve le discours puis avance une seule fois',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const suite=CL.go,ancien=render;let avances=0;window.render=()=>{};CL.go=s=>{G.screen=s;};G.screen='mgmt_combat';MGMT_COMBAT.retour='mgmt_soiree';MGMT_COMBAT.finRetour=()=>mgmtDiscoursEcran({}, {a:'a',lignes:['Texte auteur']},()=>{avances++;CL.go('mgmt_soiree');});MGMT_REGLAGES.soiree.sansDiscours=false;mgmtCombatSortir();const discours=G.screen;CL.mgmtDiscoursContinuer();CL.mgmtDiscoursContinuer();const retour=G.screen;G.screen='mgmt_combat';let vu=false;MGMT_COMBAT.retour='mgmt_duo_soiree';MGMT_COMBAT.finRetour=()=>{vu=true;};mgmtCombatSortir();const duo={vu,screen:G.screen};CL.go=suite;window.render=ancien;return {discours,retour,avances,duo};})()`);
+  assert.equal(r.discours,'mgmt_discours');
+  assert.equal(r.retour,'mgmt_soiree');
+  assert.equal(r.avances,1);
+  assert.deepEqual(JSON.parse(JSON.stringify(r.duo)),{vu:true,screen:'mgmt_duo_soiree'});
+});
 test('Lot 59 T1 — le parcours réel conserve au plus quatre discours et permet de les afficher une seule fois',()=>{
   const w=newGameWindow({runMain:true});
   w.eval(`mgmtRetraitProb=()=>0;setSeed(20261023);CL.mgmtEnter(1);mgmtPasseGenerer('split',{soirees:3});`);
@@ -14,6 +22,17 @@ test('Lot 59 T1 — le parcours réel conserve au plus quatre discours et permet
   assert.match(resultat.html,/di3-nom/);
   assert.match(resultat.html,/Continuer/);
   assert.ok(resultat.html.includes('S’ADRESSE À')||!resultat.seed,'une interpellation présente est montrée; le lot 50 autorise une cible absente');
+  const parcours=w.eval(`(()=>{const m=G.mgmt,d=MGMT_DISCOURS_UI.item,prog=mgmtSoireeProgramme(m),index=prog.findIndex(p=>p.trace&&[p.trace.a.id,p.trace.b.id].includes(d.a)&&[p.trace.a.id,p.trace.b.id].includes(d.adv));MGMT_SOIREE.index=index;mgmtVueCombatChoisir(prog[index].i,'forts');CL.go('mgmt_soiree');CL.mgmtSoRegarder();CL.mgmtCbPasser();CL.mgmtCbRetour();const ecran=G.screen,avant=MGMT_SOIREE.index;CL.mgmtDiscoursFiche();const fiche=G.screen;CL.mgmtFicheRetour();const retourFiche=G.screen;CL.mgmtDiscoursRevoir();const replay={screen:G.screen,index:MGMT_COMBAT.tempsFortActif,dernier:MGMT_COMBAT.tempsForts.length-1,pause:MGMT_COMBAT.pause};CL.mgmtCbPasser();CL.mgmtCbRetour();const retourReplay=G.screen,sansAvance=MGMT_SOIREE.index===avant;CL.mgmtDiscoursContinuer();const apres=MGMT_SOIREE.index;return {ecran,fiche,retourFiche,replay,retourReplay,sansAvance,avance:apres-avant,fin:G.screen};})()`);
+  assert.equal(parcours.ecran,'mgmt_discours');
+  assert.equal(parcours.fiche,'mgmt_fiche');
+  assert.equal(parcours.retourFiche,'mgmt_discours');
+  assert.equal(parcours.replay.screen,'mgmt_combat');
+  assert.equal(parcours.replay.index,parcours.replay.dernier);
+  assert.equal(parcours.replay.pause,true);
+  assert.equal(parcours.retourReplay,'mgmt_discours');
+  assert.equal(parcours.sansAvance,true);
+  assert.equal(parcours.avance,1);
+  assert.equal(parcours.fin,'mgmt_soiree');
 });
 test('Lot 59 T1 — l’écran échappe chaque texte et l’option sans discours supprime seulement sa présentation',()=>{
   const w=newGameWindow({runMain:true});
@@ -31,4 +50,18 @@ test('Lot 59 T1 — SOIRÉE expose le réglage de masquage',()=>{
   const source=fs.readFileSync('mgmt-options.js','utf8');
   assert.match(source,/id:'soiree',lib:'SOIRÉE'/);
   assert.match(source,/cle:'sansDiscours'/);
+});
+test('Lot 59 T1 — adversaire, interpellation et réactions proviennent du même combat',()=>{
+  const w=newGameWindow({runMain:true});
+  const r=w.eval(`(()=>{const original=mgmtResultatDetail;mgmtResultatDetail=()=>({methode:'KO',family:'ko',round:2});const m={eventsPlayed:7,lastEvent:{cycle:40},discours:{c:7},roster:[{id:'a',name:'Auteur'},{id:'b',name:'Adversaire battu'},{id:'c',name:'Cible distincte'}],hist:[{c:40,a:{id:'a',name:'Auteur',div:'lw'},b:{id:'b',name:'Adversaire battu'},winner:'A',family:'ko'}],fil:[{k:'presse',c:40,f:0,a:'a',w:'media',x:'Média connu',t:'Réaction publiée.'},{k:'presse',c:41,f:0,a:'a',w:'media',t:'Réaction future interdite.'},{k:'presse',c:40,f:0,a:'autre',w:'media',t:'Autre combat interdit.'}]};G.mgmt=m;MGMT_DISCOURS_UI={item:{a:'a',adv:'b',interpelle:'c',motif:'principal',lignes:['Texte auteur intact.']},retour:null};const avant=JSON.stringify(m),html=scr_mgmt_discours();const trace=mgmtDiscoursTrace(m,MGMT_DISCOURS_UI.item);m.discours.c=6;const ancien=mgmtDiscoursTrace(m,MGMT_DISCOURS_UI.item);mgmtResultatDetail=original;return {html,index:trace.i,ancien,pur:avant===JSON.stringify({...m,discours:{c:7}}),clavier:!!KEYS.maps.mgmt_discours.R};})()`);
+  assert.match(r.html,/BAT Adversaire battu/);
+  assert.match(r.html,/S’ADRESSE À · Cible distincte/);
+  assert.match(r.html,/KO, 2e round/);
+  assert.match(r.html,/Réaction publiée/);
+  assert.doesNotMatch(r.html,/14 %|le n°1|décision unanime|debout, l’ambiance|Réaction future interdite|Autre combat interdit/);
+  assert.match(r.html,/CL.mgmtDiscoursRevoir/);
+  assert.equal(r.index,0);
+  assert.equal(r.ancien,null);
+  assert.equal(r.pur,true);
+  assert.equal(r.clavier,true);
 });

@@ -365,7 +365,11 @@ function mgmtCombatSortir(){
   const C=MGMT_COMBAT, fin=C.finRetour, retour=C.retour;
   mgmtCombatNettoyer();
   C.finRetour=null; C.session=null; C.refuse=false;
-  if(fin) fin();
+  if(fin){
+    const avant=G&&G.screen;
+    fin();
+    if(G&&G.screen!==avant) return;
+  }
   CL.go(retour||'mgmt_soiree');
 }
 Object.assign(CL,{

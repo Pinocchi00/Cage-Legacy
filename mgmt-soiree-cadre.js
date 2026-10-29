@@ -351,7 +351,7 @@ Object.assign(CL,{
     if(!p||!p.trace) return;
     const sortir=function(){
       const m=G.mgmt, combat=mgmtSoireeTrace(m,MGMT_SOIREE.index);
-      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render(); };
+      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; CL.go('mgmt_soiree'); };
       const d=m.discours&&m.discours.c===m.eventsPlayed&&Array.isArray(m.discours.d)
         ?m.discours.d.find(x=>combat&&x&&[x.a,x.adv].includes(combat.a.id)&&[x.a,x.adv].includes(combat.b.id)):null;
       if(d&&typeof mgmtDiscoursEcran==='function'&&mgmtDiscoursEcran(m,d,avancer)) return;

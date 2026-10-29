@@ -327,7 +327,7 @@ Object.assign(CL,{
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_espoirs_arrivee'||G.screen==='mgmt_organisation'||G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
-      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
+      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'||G.screen==='mgmt_discours'
       /* ==== [ANCRE: MGMT_PRESENTATION_RETOUR_FICHE] — Monde lot 3 T5 ==== */
       ||G.screen==='mgmt_presentation_combattant'||G.screen==='mgmt_presentation_combat'||G.screen==='mgmt_soiree_avant'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
