@@ -4210,3 +4210,4 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-patron>strong{font:800 34px/.9 var(--mf-titre);text-transform:uppercase}.mf-ac-recruteur>button{font:500 22px/1 var(--mf-texte);padding:0;border:0;background:transparent;color:#F0B220;align-self:flex-start;cursor:pointer}
 .mf-ac-recruteur>div:not(.mf-ac-lib){font:500 22px/1.1 var(--mf-texte);color:var(--mf-texte2)}
 .mf-ac-ailleurs-saison{font:500 22px/1.1 var(--mf-texte);flex:none;max-height:240px;overflow:auto}.mf-ac-ailleurs-saison>summary{cursor:pointer}.mf-ac-ailleurs-saison>.mf-panneau{margin-top:10px}.mf-ac-raccourcis{margin-top:0}
+.se-carte-samedi{min-height:0;overflow:auto;flex:1}.se-carte-samedi>h2{margin:0 0 10px;font:800 32px/1 var(--mf-titre)}.se-carte-samedi>.se-combat{padding:8px 0;font:500 24px/1.1 var(--mf-texte)}.se-carte-samedi>p{font:500 24px/1.1 var(--mf-texte)}

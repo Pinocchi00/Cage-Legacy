@@ -5,6 +5,16 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
+test('Semaine — samedi présente les vrais combats et seulement une diminution déjà choisie',()=>{
+ const w=newGameWindow();
+ const r=w.eval(`(()=>{setSeed(9);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const [a,b,c,d]=m.roster;m.card.main=[{a:a.id,b:b.id}];m.card.prelims=[{a:c.id,b:d.id}];m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};MGMT_SE_JOUR=5;const avant=JSON.stringify(m),html=scr_mgmt_semaine(),pur=avant===JSON.stringify(m);m.semaine.ev[0].r='A';return {html,carte:mgmtSeCarte(m),pur,noms:[a.name,b.name,c.name,d.name]};})()`);
+ const p=w.document.createElement('div');p.innerHTML=r.html;
+ assert.equal(p.querySelectorAll('.se-carte-samedi .se-combat').length,2);
+ for(const nom of r.noms)assert.ok(p.querySelector('.se-carte-samedi').textContent.includes(nom));
+ assert.doesNotMatch(r.html,/diminué : sa forme baisse/);
+ assert.match(r.carte,/diminué : sa forme baisse/);
+ assert.equal(r.pur,true);
+});
 
 test('Monde lot 51 T1 — la blessure au camp permet de combattre diminué une seule fois',()=>{
   const w=newGameWindow();try{const r=w.eval(`(()=>{setSeed(9);const m=mgmtDefault();mgmtNewRoster(m);mgmtNewPile(m);G={theme:'dark',mgmt:m};const a=m.roster[0],b=m.roster.find(x=>x.id!==a.id);m.semaine={n:1,ev:[{f:'blessure_camp',j:'lundi',a:a.id,b:b.id,v:0,p:true}]};const html=scr_mgmt_semaine(),ok=mgmtSeChoisir(0,'A'),baisse=mgmtVieFormeBaisse(m,a,m.cycle),again=mgmtSeChoisir(0,'B');return {ok,baisse,again,html};})()`);assert.equal(r.ok,true);assert.equal(r.baisse,-6);assert.equal(r.again,false);assert.match(r.html,/blessure au camp/i);}finally{w.close();}
