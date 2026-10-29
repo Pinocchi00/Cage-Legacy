@@ -25,6 +25,16 @@ const path = require('node:path');
 const { newGameWindow } = require('./helpers/loadGame');
 
 const TRAVAIL_RE=/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|TODO/i;
+test('Fidélité lendemain — la une conserve son média et les paroles enregistrées',()=>{
+  const w=newGameWindow();
+  const r=w.eval(`(()=>{const original=mgmtMediasLendemain;mgmtMediasLendemain=()=>[{media:'micro-tendu',nom:'Micro Tendu',id:'a',texte:'Autre voix intacte.'},{media:'cage-hebdo',nom:'Cage Hebdo',id:'a',texte:'Article <conservé>.'}];const m={eventsPlayed:1,lastEvent:{cycle:8},hist:[{c:8,a:{id:'a',last:'Gagnant'},b:{id:'b',last:'Perdant'},winner:'A'}],roster:[{id:'a',name:'Gagnant'},{id:'c',name:'Cible'}],discours:{c:1,d:[{a:'a',interpelle:'c',lignes:['Parole auteur à Cible.']}]}};const html=mgmtLendemainUneHtml(m),micro=mgmtLendemainDiscoursHtml(m);mgmtResultatDetail=()=>null;const trace=m.hist[0];trace.a.div='H-light';trace.b.div='H-light';const categorie=mgmtLendemainMomentHtml(m,trace,0,'LE COMBAT',0,[0]);mgmtMediasLendemain=original;return {html,micro,categorie};})()`);
+  assert.match(r.html,/Gagnant bat Perdant/);
+  assert.match(r.html,/Article &lt;conservé&gt;/);
+  assert.match(r.html,/DANS LA PRESSE · Micro Tendu/);
+  assert.match(r.html,/Autre voix intacte/);
+  assert.match(r.micro,/Parole auteur à Cible/);
+  assert.match(r.categorie,/Poids léger/);
+});
 
 function freshMgmt(win,seed){
   win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
