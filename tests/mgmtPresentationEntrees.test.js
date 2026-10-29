@@ -164,8 +164,8 @@ test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
 
 /* Monde lot 21 (retour d'Anthony du 18/10/2026 : « dans l'avant-combat, cliquer sur un combattant nous sort de la soirée, qui se joue sans nous ») :
    la présentation d'un combattant ouverte depuis l'avant-combat — et la fiche qui s'ouvre depuis elle — gardent la barre des sections grisée. */
-/* Décision (superviseur, 22/10/2026, brief P4 T1 : le tableau de ce qui manque à chaque organisation) : avec la nouvelle composition de Split, l'avant-combat de cette fixture (graines 20261008, 777, 4242, 20261009) n'offre plus aucun nom cliquable (mgmtPresentationLignes(...).noms est vide pour les neuf combats). Le comportement testé (barre des sections grisée depuis un nom cliqué) n'est pas modifié par la tranche ; la fixture est à recaler : test marqué `todo` (il s'exécute, son échec n'arrête pas la suite) — dette notée dans le compte rendu de la tranche. */
-test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',{todo:'fixture à recaler : plus aucun nom cliquable dans l’avant-combat depuis P4 T1'},()=>{
+/* La présentation condensée rend de nouveau les noms visibles cliquables : ce parcours de soirée est bloquant comme les autres. */
+test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',()=>{
   const w=newGameWindow({runMain:true});
   w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
   const jouer=require('./helpers/jouerSoirees.js'); jouer(w,6);
