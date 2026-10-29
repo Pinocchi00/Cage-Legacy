@@ -146,7 +146,8 @@ const MGMT_ESP_FID_STYLE=`<style>
 
 function mgmtEspArriveeHtml(){
   const m=G&&G.mgmt;if(!m)return scr_mgmt_bureau();
-  const L=MGMT_ESP_ARRIVEE_TEXTES,man=mgmtManque(m),org=mgmtOrgNom(m),step=MGMT_ESP_ARRIVEE.etape;
+  const L=MGMT_ESP_ARRIVEE_TEXTES,org=mgmtOrgNom(m),step=MGMT_ESP_ARRIVEE.etape;
+  const man=(m.poste?step<=2:step===1)?mgmtManque(m):null;
   const propositions=step===(m.poste?3:2)?mgmtEspArriveePropositions(m):null;
   let body='';
   if(step<=2&&m.poste){

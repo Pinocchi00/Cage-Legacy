@@ -29,13 +29,13 @@ function mgmtReleveVotesOriginaux(res,n){
   return 'p'+lignes.map(r=>[0,2,4].map(i=>((r[i]-6)*5+r[i+1]-6).toString(36)).join('')).join('');
 }
 /* ==== [FIN ANCRE] ==== */
-function mgmtReleveDeResultat(res,rounds){
+function mgmtReleveDeResultat(res,rounds,conserverVotes=true){
   const stats=res&&res.stats||{}, parRound=Array.isArray(res&&res.roundStats)?res.roundStats:[];
   const n=Math.max(1,Math.min(5,parRound.length|| (Number.isSafeInteger(res&&res.round)?res.round:rounds)));
   const r=Array.from({length:n},(_,i)=>['A','B'].flatMap(c=>MGMT_RELEVE_ROUND.map(k=>mgmtReleveEntier(parRound[i]&&parRound[i][(k==='ctrlSec'?'ctrlSec':k)+c]))));
   const e=['A','B'].map(c=>MGMT_RELEVE_TOTAL.map(k=>mgmtReleveEntier(stats[c]&&stats[c][({dist:'distStrikes',clinch:'clinchStrikes',ground:'groundStrikes'})[k]||k])));
   const d=Number.isFinite(res&&res.finishTime)?(n-1)*300+Math.round(res.finishTime):rounds*300;
-  const j=n===rounds?mgmtReleveVotesOriginaux(res,n):null;
+  const j=conserverVotes&&n===rounds?mgmtReleveVotesOriginaux(res,n):null;
   return {d:Math.max(1,d),r,e,...(j?{j}:{})};
 }
 function mgmtReleveValide(s){

@@ -90,7 +90,8 @@ function mgmtPresentationChiffresBanniere(m,v,a,b,tag){
  const negatif=new Set(['menton-fele','fragile-apres-ko','s-eteint','sous-pression','hesite-apres-ko','serie-noire','ne-se-releve-pas','rouille']);
  const cote=(f,side)=>{
   const surnom=mgmtSurnomDe(m,f.id),prenom=mfNet(f.first||'')+(surnom?' « '+mfNet(surnom)+' »':''),nom=mfNet(f.last||f.name);
-  const rang=mgmtFicheSituation(m,f,'organization'),ville=mgmtIdentiteVille(f);
+  const avant=v.mode==='soiree'?mgmtLendemainRangs(m,f.id)?.avant:null;
+  const rang=v.mode==='soiree'?(avant?'N°'+avant:'Rang avant soirée inconnu'):mgmtFicheSituation(m,f,'organization'),ville=mgmtIdentiteVille(f);
   const traits=mgmtTraitsFiche(m,f.id,v.h).vus.slice(0,2).map(t=>`<span class="mf-cc-trait${negatif.has(t.id)?' negatif':''}">${esc(t.nom)}</span>`).join('');
   const k=v.noms?.indexOf(f.id)??-1,nomHtml=v.mode==='soiree'&&k>=0?`<button type="button" class="mf-pr-lien" onclick="MGMT_PRESENTATION_UI.pile.at(-1).nom=${k};CL.mgmtPresentationNomOuvrir()">${esc(nom)}</button>`:esc(nom);
   return `<div class="mf-cc-identite ${side}"><div class="mf-cc-prenom" style="font-size:${mfCorps(prenom,570,36,22)}px">${esc(prenom)}</div><b class="mf-cc-nom" style="font-size:${mfCorps(nom,570,110,22)}px">${nomHtml}</b><div class="mf-cc-bilan"><strong>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</strong><span>${esc(rang)} · ${esc(f.age)} ans${ville?' · '+esc(ville):''}</span></div><div class="mf-cc-traits">${traits}</div></div>`;
