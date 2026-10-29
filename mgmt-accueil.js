@@ -257,7 +257,7 @@ function mgmtAccueilSaison(m,c,liens=''){
   const dest=mission?mgmtRecruteurDestination(mission.dest):null;
   const jourRetour=mission&&mission.retourLe;
   const restant=Number.isSafeInteger(jourRetour)?Math.max(0,jourRetour-mgmtRecruteurJour(m)):null;
-   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>${restant?'DANS '+restant+' J':'AUJOURD’HUI'}</b>`:''}`:retour?'De retour · profils à consulter':'Aucune mission';
+   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>${restant?'DANS '+restant+' J':'AUJOURD’HUI'}</b>`:''}`:retour?(retour.bredouille?'De retour sans profil':'De retour · profils à consulter'):'Aucune mission';
    const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div>${retours.length?`<button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button>`:`<button type="button" onclick="CL.go('mgmt_recruteur')">Choisir une mission</button>`}</div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
     const annee=new Date(mgmtJourDate(mgmtCalAujourdhui(m)).ts).getUTCFullYear();
