@@ -36,7 +36,7 @@ function mgmtCeremonieCalculer(m){
              dépassent pas les anciens seuils de 182/90/30 jours. */
           cand=h.filter(({t})=>t.winner==='A'||t.winner==='B').map(({t,i})=>{const side=t.winner==='A'?t.a:t.b,previous=m.hist.filter(x=>x&&x.c<t.c&&x.c>=0&&(x.a&&x.a.id===side.id||x.b&&x.b.id===side.id)).reduce((v,x)=>Math.max(v,x.c),-Infinity),weight=typeof globalThis.mgmtHistoirePoidsCombat==='function'?globalThis.mgmtHistoirePoidsCombat(m,t):((Number(t.knockdownsA)||0)+(Number(t.knockdownsB)||0)+(t.retournement?2:0)+(t.finDernieresSecondes?2:0)+(titres.has(i)?2:0)+(t.surprise?2:0)),affiche=t.slot==='main'?3:t.slot==='co-main'?2:1;return {t,i,side,gap:Number.isFinite(previous)?t.c-previous:0,weight,affiche};}).filter(x=>x.gap>0).sort((a,b)=>b.weight-a.weight||b.affiche-a.affiche||b.t.c-a.t.c||(String(a.side.id)<String(b.side.id)?-1:String(a.side.id)>String(b.side.id)?1:0))[0];
     }
-        if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const laureats=p.id==='combat'?[bout.a.id,bout.b.id].filter(Boolean):id?[id]:[];const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const edition=Math.floor(now/365)+1;const index=(String(id||cand.i||'').length+value+edition-1)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,laureats,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${edition}.`,relu:false,stat:value});
+        if(cand&&(p.id!=='combat'||cand.score>0)){const id=p.id==='combat'?null:p.id==='ko'||p.id==='soumission'||p.id==='retour'?cand.side.id:cand.id;const fighter=byId.get(id);const bout=cand.t||null;const laureats=p.id==='combat'?[bout.a.id,bout.b.id].filter(Boolean):id?[id]:[];const value=p.id==='combattant'?cand.combats:p.id==='revelation'?cand.victoires:p.id==='combat'?cand.score:p.id==='retour'?cand.gap:bout.round||1;const values={nom:fighter?fighter.nom:'',a:bout?nom(bout.a):'',b:bout?nom(bout.b):'',n:value};const edition=Math.floor(now/365)+1;const index=(String(id||cand.i||'').length+value+edition-1)%3;const phrase=p.phrases[index].replace(/\{(nom|a|b|n)\}/g,(_,k)=>values[k]);out.push({id:p.id,titre:p.titre,laureat:id,laureats,nom:fighter?fighter.nom:bout?`${nom(bout.a)} – ${nom(bout.b)}`:'',phrase:`${phrase} Édition ${edition}.`,relu:false,stat:value,combat:Number.isSafeInteger(cand.i)?cand.i:null});
     }
   }
   return out;
@@ -71,17 +71,38 @@ function mgmtCarnetLire(m){
 
 /* ==== [ANCRE: P11_T1_ECRAN_CEREMONIE] — Monde lot 55 T1 ==== */
 function mgmtCeremonieEchapper(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+/* ==== [ANCRE: CEREMONIE_LECTURE_CARTES_20261029] — Revue globale d’Anthony ==== */
+const MGMT_CEREMONIE_ORDRE=['combattant','ko','combat','soumission','revelation'];
+const MGMT_CEREMONIE_UI={selection:0};
+function mgmtCeremonieCarteCourante(m){return mgmtCeremonieCalculer(m).find(p=>p.id===MGMT_CEREMONIE_ORDRE[MGMT_CEREMONIE_UI.selection])||null;}
+function mgmtCeremonieCarteTrace(m,p){
+  if(!p||!Number.isSafeInteger(p.combat)||!m.hist?.[p.combat])return null;
+  return {i:p.combat,t:m.hist[p.combat]};
+}
+function mgmtCeremonieCarteResume(m,p){
+  if(p.id==='combattant'&&Number.isFinite(p.stat))return p.stat+' combats cette saison.';
+  if(p.id==='revelation'&&Number.isFinite(p.stat))return p.stat+' victoires cette saison.';
+  const ligne=mgmtCeremonieCarteTrace(m,p),t=ligne&&ligne.t;if(!t)return p.phrase;
+  const methode=({ko:'KO',sub:'Soumission',stop:'Arrêt',dec:'Décision',draw:'Nul'})[t.family]||'';
+  const duree=t.s&&Number.isSafeInteger(t.s.d)?t.s.d-(t.round-1)*300:null;
+  return [methode,t.round===1?'1er round':t.round+'e round',duree>0&&duree<=300?Math.floor(duree/60)+':'+String(duree%60).padStart(2,'0'):null].filter(Boolean).join(' · ');
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_mgmt_ceremonie(){
   const m=G&&G.mgmt;if(!m)return '';
     const prix=mgmtCeremonieCalculer(m),jour=typeof mgmtCalAujourdhui==='function'?mgmtCalAujourdhui(m):0;
     const annee=typeof mgmtJourDate==='function'?new Date(mgmtJourDate(jour).ts).getUTCFullYear():2027;
     mgmtCeremonieInscrire(m,prix,annee);
-     const ordreCartes=['combattant','ko','combat','soumission','revelation'];
+     const ordreCartes=MGMT_CEREMONIE_ORDRE;
     const cartesParId=new Map(MGMT_CEREMONIE_PRIX.map(p=>[p.id,p]));
-    const cards=ordreCartes.map(id=>cartesParId.get(id)).filter(Boolean).map(p=>{const v=prix.find(x=>x.id===p.id),classe=p.id==='combattant'?'ce3-prix-combattant':'ce3-prix';return `<article class="${classe}"><h2>${mgmtCeremonieEchapper(p.titre)}</h2>${v?`<strong>${mgmtCeremonieEchapper(v.nom)}</strong><p>${mgmtCeremonieEchapper(v.phrase)}</p>`:`<p class="ce3-prix-vide">Aucun candidat cette année.</p>`}</article>`;}).join('');
+    const cards=ordreCartes.map(id=>cartesParId.get(id)).filter(Boolean).map((p,k)=>{
+      const v=prix.find(x=>x.id===p.id),grand=p.id==='combattant',classe=grand?'ce3-prix-combattant':'ce3-prix';
+      const espoir=v&&Array.isArray(m.espoirs)&&(v.laureats||[]).some(id=>m.espoirs.includes(id));
+      return `<article class="${classe}" data-selection="${k===MGMT_CEREMONIE_UI.selection}" tabindex="0" role="button" onclick="CL.mgmtCeremonieChoisir(${k})">${grand?'<span class="ce3-prix-anneau" aria-hidden="true"><i></i></span>':''}<div class="ce3-prix-tete"><h2>${mgmtCeremonieEchapper(p.titre)}</h2>${espoir?'<span class="ce3-prix-badge">TON ESPOIR</span>':''}</div>${v?`<strong style="font-size:${mfCorps(v.nom,grand?570:820,grand?112:54,22)}px">${mgmtCeremonieEchapper(v.nom)}</strong><p>${mgmtCeremonieEchapper(mgmtCeremonieCarteResume(m,v))}</p>`:`<p class="ce3-prix-vide">Aucun candidat cette année.</p>`}</article>`;
+    }).join('');
   const classement=typeof mgmtOrgClassement==='function'?mgmtOrgClassement(m):[];
   const rangs=Array.isArray(classement)?classement.slice(0,8).map((o,i)=>`<li class="ce3-rang"><b>${i+1}e</b><span>${mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')}</span></li>`).join(''):'<li class="ce3-rang">Classement indisponible.</li>';
-    const bilan=typeof mgmtOrgClassement==='function'?(mgmtOrgClassement(m)||[]).find(o=>o.estSplit):null;
+    const bilan=typeof mgmtOrgClassement==='function'?(mgmtOrgClassement(m)||[]).find(o=>o.estSplit||typeof mgmtPredecesseurOrgId==='function'&&o.id===mgmtPredecesseurOrgId(m)):null;
     const rang=bilan&&Number.isFinite(Number(bilan.rang))?Number(bilan.rang):null;
     const nomsClassement=Array.isArray(classement)?classement.map(o=>mgmtCeremonieEchapper(o.nom||o.name||o.id||'Organisation')).join(', '):'';
       const ordinal=['','PREMIÈRE','DEUXIÈME','TROISIÈME','QUATRIÈME','CINQUIÈME','SIXIÈME','SEPTIÈME','HUITIÈME'][rang]||'—';
@@ -92,12 +113,20 @@ function scr_mgmt_ceremonie(){
          `Recruteur · −${niveau('recruteur')} % sur le coût des missions`,
          `Agents libres · attrait de classement, palier ${niveau('agents')}/3`,
          `Salles · −${niveau('salle')} % sur les frais de salle`
-       ].map(x=>`<li>${mgmtCeremonieEchapper(x)}</li>`).join('');
-        const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}"><div><strong>${rang===null?'—':mgmtCeremonieEchapper(String(rang))}<small>${rang===null?'':'e'}</small></strong><section><h2>SPLIT FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Cinquième au premier jour</p></section></div><article><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul>${listeEffets}</ul></article></section>`;
+       ].map(x=>`<li><i class="ce3-effet-pastille" aria-hidden="true"></i>${mgmtCeremonieEchapper(x)}</li>`).join('');
+        const bilanHtml=`<section class="ce3-bilan" aria-label="Classement final : ${nomsClassement}">${mfPanneau(`<div class="ce3-bilan-rang"><strong>${rang===null?'—':mgmtCeremonieEchapper(String(rang))}<small>${rang===null?'':'e'}</small></strong><section><h2>${mgmtCeremonieEchapper(typeof mgmtOrgNom==='function'?mgmtOrgNom(m).toUpperCase():'SPLIT')} FINIT L’ANNÉE</h2><b>${ordinal} DES HUIT</b><p>Classement des huit organisations</p></section></div>`,'normal','ce3-bilan-classement')}${mfPanneau(`<div class="ce3-bilan-effets"><h2>CE QUE ÇA CHANGE EN ${annee+1}</h2><ul>${listeEffets}</ul></div>`,'normal','ce3-bilan-consequences')}</section>`;
        const body=`<main class="ce3-ecran"><header class="ce3-entete"><div class="ce3-entete-gauche"><h1>LES TROPHÉES ${annee}</h1><p>CHOISIS PAR LA PRESSE</p></div><strong><b>31 DÉCEMBRE</b><span>CAGE HEBDO</span></strong></header><section class="ce3-grille">${cards}</section>${bilanHtml}</main>`;
-   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['↑','↓','←','→'],t:'Choisir'},{ks:['R'],t:'Revoir le combat'},{ks:['F'],t:'Sa fiche'},{ks:['Entrée'],t:'Le bilan du patron'},{ks:['Échap'],t:'Accueil'}]});
+   const courant=mgmtCeremonieCarteCourante(m),trace=mgmtCeremonieCarteTrace(m,courant),revoir=trace&&typeof mgmtCombatRevoyable==='function'&&mgmtCombatRevoyable(trace.t);
+   return mfEcran(body,{barre:'jeu',courant:'accueil',m,plaque:'',droite:'',touches:[{ks:['↑','↓','←','→'],t:'Choisir'},...(revoir?[{ks:['R'],t:'Revoir le combat',onclick:'CL.mgmtCeremonieRevoir()'}]:[]),...(courant&&courant.laureats?.length?[{ks:['F'],t:'Sa fiche',onclick:'CL.mgmtCeremonieFiche()'}]:[]),{ks:['Entrée'],t:'Le bilan du patron',onclick:"CL.go('mgmt_poste_bilan')"},{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]});
 }
 if(typeof SCREENS!=='undefined')SCREENS.mgmt_ceremonie=scr_mgmt_ceremonie;
+Object.assign(CL,{
+  mgmtCeremonieChoisir(i){MGMT_CEREMONIE_UI.selection=Math.max(0,Math.min(4,i));render();},
+  mgmtCeremonieDeplacer(d){CL.mgmtCeremonieChoisir((MGMT_CEREMONIE_UI.selection+d+5)%5);},
+  mgmtCeremonieFiche(){const p=mgmtCeremonieCarteCourante(G.mgmt),id=p?.laureat||p?.laureats?.[0];if(id)CL.mgmtFiche(id);},
+  mgmtCeremonieRevoir(){const x=mgmtCeremonieCarteTrace(G.mgmt,mgmtCeremonieCarteCourante(G.mgmt));if(x&&mgmtCombatRevoyable(x.t))mgmtCombatOuvrir({trace:x.t,retour:'mgmt_ceremonie'});}
+});
+keysRegister('mgmt_ceremonie',{ArrowLeft(){CL.mgmtCeremonieDeplacer(-1);},ArrowRight(){CL.mgmtCeremonieDeplacer(1);},ArrowUp(){CL.mgmtCeremonieDeplacer(-1);},ArrowDown(){CL.mgmtCeremonieDeplacer(1);},f(){CL.mgmtCeremonieFiche();},F(){CL.mgmtCeremonieFiche();},r(){CL.mgmtCeremonieRevoir();},R(){CL.mgmtCeremonieRevoir();},Enter(){CL.go('mgmt_poste_bilan');},Escape(){CL.go('mgmt_accueil');}});
 
 /* ==== [ANCRE: P11_T3_ECRAN_CARNET] — Monde lot 55 T1 ==== */
 /* ==== [ANCRE: FIDELITE_CARNET_PROGRESSION_20261028] — Progression lue, jamais attribuée par le carnet ==== */

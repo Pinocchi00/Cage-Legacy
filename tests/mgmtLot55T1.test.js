@@ -622,7 +622,19 @@ test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; les 
 });
 
 test('Monde lot 67 T1 — décision : planches Uni* validées par Anthony ; ordre des cartes de cérémonie suit la planche',()=>{
-  const ordre=source.match(/const ordreCartes=\[([^\]]+)\]/);
-  assert.ok(ordre);
-  assert.deepEqual([...ordre[1].matchAll(/'([^']+)'/g)].map(m=>m[1]),['combattant','ko','combat','soumission','revelation']);
+  const c=charger();c.G={mgmt:{hist:[],roster:[],facts:[]}};c.mfEcran=x=>x;
+  const titres=[...c.scr_mgmt_ceremonie().matchAll(/<article class="ce3-prix(?:-combattant)?"[^>]*>[\s\S]*?<h2>([^<]+)<\/h2>/g)].map(m=>m[1]);
+  assert.deepEqual(titres,['COMBATTANT DE L’ANNÉE','KO DE L’ANNÉE','COMBAT DE L’ANNÉE','SOUMISSION DE L’ANNÉE','RÉVÉLATION DE L’ANNÉE']);
+});
+
+test('Cérémonie — la fiche et le rejeu ciblent le vrai lauréat et le combat primé, pas un autre KO du même combattant',()=>{
+ const c=charger(),a={id:'a',name:'Alice',W:4,L:0},b={id:'b',name:'Bob',W:4,L:0};
+ const hist=[{c:10,a,b,winner:'A',family:'ko',round:3,slot:'prelim',s:{d:650}},{c:20,a,b,winner:'A',family:'ko',round:1,slot:'main',s:{d:70}}];
+ const m={hist,roster:[a,b],facts:[]},avant=JSON.stringify(m),ko=c.mgmtCeremonieCalculer(m).find(p=>p.id==='ko');
+ assert.equal(ko.combat,1);assert.equal(c.mgmtCeremonieCarteTrace(m,ko).t,hist[1]);assert.equal(JSON.stringify(m),avant);
+ assert.match(c.mgmtCeremonieCarteResume(m,ko),/KO · 1er round · 1:10/);
+ c.G={mgmt:m};c.render=()=>{};let fiche,rejoue;
+ c.CL.mgmtFiche=id=>{fiche=id;};c.mgmtCombatRevoyable=t=>t===hist[1];c.mgmtCombatOuvrir=o=>{rejoue=o;};
+ c.CL.mgmtCeremonieChoisir(1);c.CL.mgmtCeremonieFiche();c.CL.mgmtCeremonieRevoir();
+ assert.equal(fiche,'a');assert.equal(rejoue.trace,hist[1]);assert.equal(rejoue.retour,'mgmt_ceremonie');
 });
