@@ -362,7 +362,8 @@ SCREENS.mgmt_presse=scr_mgmt_presse;
  *  @returns {Array<{d:(object|null),k:number,i:number,main:boolean}>} k : rang dans la liste, i : index dans m.hist */
 function mgmtSuResultatsListe(m,s){
   const tous=mgmtSoireeAffichage(m,s).map(i=>({d:mgmtResultatDetail(m,i),i,main:m.hist[i].slot==='main'}));
-  return tous.filter(x=>x.main).concat(tous.filter(x=>!x.main)).map((x,k)=>({d:x.d,k,i:x.i,main:x.main}));
+  const preliminaires=tous.filter(x=>!x.main).sort((a,b)=>a.i-b.i);
+  return tous.filter(x=>x.main).concat(preliminaires).map((x,k)=>({d:x.d,k,i:x.i,main:x.main}));
 }
 function mgmtSuRoundLigne(d){ return d.nul?`Match nul ${mgmtRoundTexte(d)}`:`${d.methode}, ${mgmtRoundTexte(d)}`; }
 
