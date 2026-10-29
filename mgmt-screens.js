@@ -287,7 +287,11 @@ keysRegister('mgmt_fiche',{
 keysRegister('mgmt_organisation',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
-keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+1)%MGMT_POSTE_ONGLETS.length;render();},ShiftTab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)-1+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();}});
+keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(e){
+  if(MGMT_POSTE_ONGLETS.length>1){mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+(e&&e.shiftKey?-1:1)+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();return;}
+  const boutons=[...document.querySelectorAll('.po2-bureau-nav .mo67-tab')],i=boutons.findIndex(b=>b.getAttribute('aria-current')==='page');
+  if(boutons.length)boutons[(i+(e&&e.shiftKey?-1:1)+boutons.length)%boutons.length].focus();
+},ShiftTab(){KEYS.maps.mgmt_poste.Tab({shiftKey:true});}});
 /* Décision : planches Uni* validées par Anthony ; souris et clavier suivent les mêmes choix de fin de saison. */
 keysRegister('mgmt_poste_bilan',{Escape(){CL.go('mgmt_accueil');},Enter(){mgmtPosteBilanContinuer();},k(){mgmtPosteBilanRencontrer();},K(){mgmtPosteBilanRencontrer();},Tab(){CL.go('mgmt_resultats');}});
 /* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements

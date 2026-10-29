@@ -4165,3 +4165,26 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .ce3-prix-anneau{position:absolute;right:-40px;bottom:-40px;width:240px;height:240px;background:rgba(13,11,11,.12);display:flex;align-items:center;justify-content:center;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);pointer-events:none}
 .ce3-prix-anneau>i{display:block;width:214px;height:214px;background:#F0B220;clip-path:inherit}
 .ce3-effet-pastille{display:block;width:16px;height:16px;flex:none;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+/* Ton poste : une seule rangée d'onglets, puis les trois panneaux de UniTonPoste. */
+.po2-scene{top:128px;bottom:96px;height:auto;gap:16px;overflow:visible}
+.po2-bureau-nav{display:flex;align-items:center;justify-content:space-between;gap:26px;min-height:56px;flex:none;min-width:0}
+.po2-bureau-nav .mo67-tabs{display:flex;gap:8px;flex:none;margin:0;padding:0;border:0}
+.po2-bureau-nav .mo67-tab{height:56px;padding:0 24px;border:0;background:#252121;color:#E9E6E1;font:800 32px/56px var(--mf-titre);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.po2-bureau-nav .mo67-tab[aria-current="page"]{background:#E9E6E1;color:#0D0B0B}
+.po2-depuis{font:500 24px/1.1 var(--mf-texte);color:rgba(233,230,225,.74);min-width:0;max-width:580px;overflow-wrap:anywhere;text-align:right}
+.po2-scene>.po2-grid.po2-grid-trois{grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr) minmax(0,1.1fr);gap:16px;flex:1;min-height:0}
+.po2-scene .po2-grid-trois .po2-panel .mf-p3{padding:15px}
+.po2-scene .po2-grid-trois .po2-card{gap:14px}
+.po2-scene .po2-grid-trois .po2-contrat .po2-contrat-ligne{padding:12px 0;gap:26px;flex:none}
+.po2-scene .po2-contrat-ligne>span{font-size:24px}.po2-scene .po2-contrat-ligne>strong{font:800 32px/1 var(--mf-titre);min-width:0;overflow-wrap:anywhere}
+.po2-scene .po2-verdict{line-height:.8;overflow-wrap:anywhere}
+.po2-scene .po2-evenement{grid-template-columns:110px 34px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:2px solid rgba(233,230,225,.16)}
+.po2-scene .po2-evenement-fleche.po2-evenement-positif{color:#F0B220}.po2-evenement-stable{color:rgba(233,230,225,.74)}
+.po2-scene .po2-historique strong{font:500 24px/1.05 var(--mf-texte)}
+.po2-scene .po2-prochain{margin-top:auto;gap:26px;flex-wrap:wrap}.po2-scene .po2-prochain strong{font:800 34px/.9 var(--mf-titre)}
+.po2-scene .po2-objectif-entete{gap:26px;min-width:0}.po2-scene .po2-objectif-entete>span{min-width:0}.po2-scene .po2-objectif-entete>strong{white-space:normal;min-width:0;overflow-wrap:anywhere}
+.po2-scene .po2-card.po2-contrat>.po2-offres-bas{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.po2-proposer{font:600 22px/1.1 var(--mf-texte)}.po2-proposer>summary{cursor:pointer}.po2-proposer[open]{display:flex;flex-direction:column;gap:10px}
+.po2-scene>.po2-grid.po2-grid-trois .po2-objectifs .po2-objectif-entete strong{white-space:normal;min-width:0;max-width:42%;overflow-wrap:anywhere}
+.po2-composition{display:flex;align-items:flex-start;gap:10px;min-width:0;border:0;padding:0;background:transparent;color:#E9E6E1;text-align:left;font:500 24px/1.05 var(--mf-texte);cursor:pointer}.po2-composition>.po2-pastille{display:block;width:16px;height:16px;flex:none;margin-top:4px;background:#F0B220;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}.po2-composition>span{min-width:0;overflow-wrap:anywhere}.po2-composition small{display:block;font:500 22px/1.1 var(--mf-texte);color:rgba(233,230,225,.74);margin-top:6px}
+.po2-scene .po2-card>h3,.po2-scene .po2-offres-bas>h3{margin:0;font:600 22px/1 var(--mf-texte);letter-spacing:.04em}

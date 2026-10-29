@@ -62,6 +62,26 @@ test('Monde lot 48 T1 — Tab et Maj+Tab changent l’onglet inscrit',()=>{
   assert.equal(r.keys,'function');assert.match(r.screen,/AUTRE/);
 });
 
+test('Ton poste — dates enregistrées, confiance documentée et aucune approche ou soirée inventée',()=>{
+ const w=newGameWindow({runMain:true});try{
+  w.eval(`setSeed(7);CL.mgmtEnter(1);const m=G.mgmt;m.poste.debut=31;m.poste.fin=396;m.poste.conf=3;
+   m.poste.hist=[{s:1,conf:4,note:'progres'},{s:2,conf:4,note:'progres'},{s:3,conf:3,note:'recul'}];m.offres=[];CL.go('mgmt_poste');`);
+  const fleches=[...w.document.querySelectorAll('.po2-evenement-fleche')].map(x=>x.textContent);assert.deepEqual(fleches,['—','—','▼']);
+  assert.deepEqual([...w.document.querySelectorAll('.po2-evenement-date')].map(x=>x.textContent),['SOIRÉE 1','SOIRÉE 2','SOIRÉE 3']);
+  assert.equal(w.document.querySelector('.po2-tabs'),null);
+  assert.ok(w.document.querySelector('.po2-bureau-nav .mo67-tabs'));assert.ok(w.document.querySelector('.po2-contrat .po2-offres-bas'));
+  assert.ok(w.document.querySelector('.po2-depuis').textContent.includes(w.eval('mgmtPosteDateTexte(G.mgmt.poste.debut)')));
+  assert.ok(w.document.querySelector('.po2-prochain strong').textContent.includes(w.eval('mgmtPosteDateTexte(G.mgmt.poste.debut+MGMT_POSTE.mi)')));
+  assert.doesNotMatch(w.document.querySelector('.po2-scene').textContent,/LA SOIRÉE 65|Knuckle Gate a demandé ton nom|Évolution de la confiance/);
+  const composition=[...w.document.querySelectorAll('.po2-composition')];assert.equal(composition.length,2);
+  assert.ok(composition[0].textContent.includes(w.eval(`String(Math.max(0,G.mgmt.card.sizeMain-G.mgmt.card.main.length))`)+' place'));
+  w.eval(`keysHandle({key:'Tab',preventDefault(){}})`);assert.equal(w.document.activeElement.textContent,'TON CARNET');
+  assert.equal(w.eval(`keysHandle({key:'Enter',target:document.activeElement,preventDefault(){throw Error('Onglet bloqué');}})`),false);
+  w.eval(`mgmtPosteOngletAjouter('autre','AUTRE',()=>'<p>Autre rubrique</p>');mgmtPosteOngletActif=0;keysHandle({key:'Tab',shiftKey:true,preventDefault(){}})`);
+  assert.equal(w.eval('mgmtPosteOngletActif'),1);assert.match(w.document.querySelector('.po2-scene').textContent,/Autre rubrique/);
+ }finally{w.close();}
+});
+
 /* Décision : planche UniBilanPatron validée par Anthony ; les trois issues restent accessibles au clavier comme à la souris. */
 test('Bilan — bouton et Entrée produisent le même contrat, les mêmes offres et la même destination',()=>{
   const w=newGameWindow({runMain:true});
