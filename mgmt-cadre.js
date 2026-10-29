@@ -352,7 +352,7 @@ function mfAncien(html,screen){
   const droite=m?`${mgmtOrgNom(m)} Fight Night ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
   /* ==== [FIN ANCRE] ====*/
   return mfEcran(`<main class="mf-contenu"><div class="mf-ancien">${html}</div></main>`,
-    {barre:'jeu',courant,grise:soir,m,plaque:lib||'Management',droite});
+    {barre:'jeu',courant,grise:soir,m,plaque:lib||'Management',droite,...(screen==='mgmt_vestiaire'?{touches:[{ks:['V'],t:'Effectif',onclick:"CL.go('mgmt_effectif')"},{ks:['Échap'],t:'Accueil',onclick:"CL.go('mgmt_accueil')"}]}:{})});
 }
 
 /* ---- La confirmation « Retour au menu principal » -------------------------- */

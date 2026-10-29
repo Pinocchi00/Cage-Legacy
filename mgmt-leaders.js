@@ -8,8 +8,11 @@ function mgmtMeilleurs(m,{divId,portee}={}){
   if(!m||!divId||(portee!=='split'&&portee!=='monde')) return [];
   const idx=mgmtStatsIndex(m),ids=new Set((m.roster||[]).filter(f=>f&&f.div===divId&&!mgmtIsRetired(f)).map(f=>f.id));
   if(portee==='monde'){
-    if(m.mondeVivant===true) for(const o of Object.values(m.orgs||{})) for(const f of o&&o.roster||[]) if(f&&f.div===divId&&!mgmtIsRetired(f))ids.add(f.id);
-    else for(const f of mgmtDivisionRanking(m,divId,'world')) ids.add(f.id);
+    if(m.mondeVivant===true){
+      for(const o of Object.values(m.orgs||{})) for(const f of o&&o.roster||[]) if(f&&f.div===divId&&!mgmtIsRetired(f))ids.add(f.id);
+    }else{
+      for(const f of mgmtDivisionRanking(m,divId,'world')) ids.add(f.id);
+    }
   }
   if(ids.size===0)return [];
   const defs=[['finitions',s=>s.vParMethode.ko+s.vParMethode.sub+s.vParMethode.stop,3],['volume',s=>s.sigParMin,5],['precis',s=>s.precision,5],['defense',s=>s.defense,5],['lutteur',s=>s.ameneesPar15,3],['mur',s=>s.defenseAmenee,5],['cou',s=>s.soumissionsPar15,3],['serie',s=>s.serieMax,3]];

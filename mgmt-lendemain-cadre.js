@@ -73,7 +73,7 @@ function scr_mgmt_lendemain_cadre(){
   const publicHtml=c&&c.public?`<div class="ld66-number"><b>Le public</b><strong>${esc(c.public.score)} / 100</strong></div>`:'';
   const chiffres=c?mfPanneau(`${mgmtLendemainTitreHtml('LES CHIFFRES')}<div class="ld79-scroll"><div class="ld66-number"><b>La salle</b><strong>${esc(c.salle.v)} / ${esc(e.finance.capacite||'—')}</strong></div><div class="ld66-number"><b>L’argent</b><strong>${esc(c.argent.v)}</strong></div><div class="ld66-number"><b>La popularité</b><strong>${esc(c.pop.v)}</strong></div>${publicHtml}<button class="ld79-suite-link" onclick="CL.mgmtLendemainSuite()">${mfTouche('↓')}<span>La presse, les mouvements, tous les résultats</span></button><details class="ld79-finance"><summary>Les détails</summary>${c.salle.l.concat(c.argent.l,c.pop.l).filter(x=>x.trim()).map(x=>`<p>${esc(x)}</p>`).join('')}</details></div>`,'normal','ld66-numbers ld79-panel'):'';
   const change=mgmtLendemainConstatsHtml(m)||'<p>Rien à signaler.</p>';
-  const presse=typeof mgmtLendemainPresseHtml==='function'?mgmtLendemainPresseHtml(m):'';
+  const presse=mgmtLendemainUneHtml(m);
   const chapeau=typeof mgmtLendemainDiscoursHtml==='function'?mgmtLendemainDiscoursHtml(m):'';
   return mfEcran(`<main class="mf-contenu ld66-screen ld79-screen" aria-label="Le lendemain de ${esc(nom)} ${esc(m.eventsPlayed)}"><section class="ld66-moments">${moments}</section><div class="ld66-lower">${mfPanneau(`${mgmtLendemainTitreHtml('CE QUE ÇA CHANGE POUR TOI')}<div class="ld79-scroll">${change}</div>`,'normal','ld66-change ld79-panel')}${mfPanneau(`<h2>CAGE HEBDO · LA UNE</h2><div class="ld79-scroll">${presse}${chapeau}</div>`,'normal','ld66-press ld79-panel')}${chiffres}</div></main>`,{barre:'jeu',courant:'resultats',prise:false,m,plaque:'Le lendemain',libelle:`${nom} Fight Night ${m.eventsPlayed}`,droiteHtml:enteteDroite,
     touches:[{ks:['R'],t:'Revoir un moment',onclick:'CL.mgmtLendemainRevoirSelectionne()'},{ks:['↓'],t:'La suite',onclick:'CL.mgmtLendemainSuite()'},{ks:['Tab'],t:'Bloc suivant',onclick:'CL.mgmtLendemainSuite()'},{ks:['Entrée'],t:`Préparer ${nom} Fight Night ${m.eventsPlayed+1}`,jaune:true,onclick:'CL.mgmtLendemainNext()'}]});
@@ -133,7 +133,13 @@ keysRegister('mgmt_lendemain',{
 keysRegister('mgmt_lendemain_suite',{
   ArrowUp(){ CL.go('mgmt_lendemain'); },
   Tab(){ CL.mgmtLendemainBlocSuivant(); },
-  Enter(){ CL.mgmtLendemainNext(); },
+  Enter(e){
+    const cible=e&&e.target,summary=cible&&cible.closest&&cible.closest('.ld79-prelims>summary');
+    if(summary){summary.parentElement.open=!summary.parentElement.open;return;}
+    const bouton=cible&&cible.closest&&cible.closest('.ld79-resultat-corps>button');
+    if(bouton){bouton.click();return;}
+    CL.mgmtLendemainNext();
+  },
   Escape(){},
 });
 /* ==== [FIN ANCRE] ==== */

@@ -39,7 +39,7 @@ const MGMT_AVANT_TEXTES={
   zones:{centre:'AU CENTRE',cage:'CONTRE LA CAGE',sol:'AU SOL'},
   zone:{
     seul:'{x} y est à l’aise.', seulPas:'{x} y perd ses moyens.', seulRien:'{x} n’y a rien montré de marquant.',
-    duo:'{x} y a l’avantage. {y} y perd ses moyens.', egal:'{x} et {y} s’y valent, d’après ce que tu as vu.',
+    duo:'{x} y a l’avantage. {y} y perd ses moyens.', egal:'{x} et {y} s’y valent.',
     allonge:'{x} a {n} cm d’allonge de plus.',
     inconnu:'Personne ne sait. {x} n’y est jamais allé.', inconnu2:'Personne ne sait. Ni {x} ni {y} n’y sont allés.', autre:'{x} n’y est jamais allé.',
   },

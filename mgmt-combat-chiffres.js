@@ -25,7 +25,8 @@ function mgmtReleveCombat(m,entree){
     const sigTouches=sum(0),sigTentes=sum(1),amenees=sum(7),amTentees=sum(8),controle=sum(11),kd=sum(10),sub=sum(12);
     return {sigTouches,sigTentes,precision:sigTentes?sigTouches/sigTentes:null,tete:sum(4),corps:sum(5),jambes:sum(6),amenees,amTentees,controle,kd,sub};
   };
-  const parRound=s.r.map((row,i)=>({r:i+1,a:{sigTouches:row[0],amenees:row[7],controle:row[11],kd:row[10]>0},b:{sigTouches:row[14],amenees:row[21],controle:row[25],kd:row[24]>0}}));
+  const decision=['dec','draw'].includes(entree.family),votes=decision?mgmtReleveVotes(s):null;
+  const parRound=s.r.map((row,i)=>({r:i+1,a:{sigTouches:row[0],amenees:row[7],controle:row[11],kd:row[10]>0},b:{sigTouches:row[14],amenees:row[21],controle:row[25],kd:row[24]>0},juges:votes?Array.from({length:3},(_,j)=>votes[i].slice(j*2,j*2+2)):null}));
   const a=coin('A'),b=coin('B');
-  return {rounds:s.r.length,a,b,parRound,total:{a,b},juges:null,tournant:null};
+  return {rounds:s.r.length,a,b,parRound,total:{a,b},juges:decision?mgmtReleveCartes(s):null,tournant:null};
 }

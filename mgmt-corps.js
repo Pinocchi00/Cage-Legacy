@@ -682,7 +682,7 @@ function mgmtRunEvent(m){
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
     m.hist.push({c:m.cycle,slot:cf.slot,...(mgmtHorsPasse(m)&&cf.position!==null&&cf.position!==undefined?{position:cf.position}:{}),seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
-      winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds)});
+      winner:res.winner,family:fam,round:roundF,s:mgmtReleveDeResultat(res,cf.rounds,mgmtHorsPasse(m))});
     /* ==== [ANCRE: P7_T1_SALLE_PRIMES_SOIREE] — Monde lot 44 T1 ====
        L'ambiance se met à jour ENTRE deux combats, une fois le relevé écrit ;
        l'ordre de la carte compte. Le calcul ne tire aucun hasard. */

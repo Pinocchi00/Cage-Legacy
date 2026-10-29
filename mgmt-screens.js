@@ -287,7 +287,11 @@ keysRegister('mgmt_fiche',{
 keysRegister('mgmt_organisation',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
-keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+1)%MGMT_POSTE_ONGLETS.length;render();},ShiftTab(){if(MGMT_POSTE_ONGLETS.length>1)mgmtPosteOngletActif=((mgmtPosteOngletActif||0)-1+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();}});
+keysRegister('mgmt_poste',{Escape(){CL.go('mgmt_accueil');},Tab(e){
+  if(MGMT_POSTE_ONGLETS.length>1){mgmtPosteOngletActif=((mgmtPosteOngletActif||0)+(e&&e.shiftKey?-1:1)+MGMT_POSTE_ONGLETS.length)%MGMT_POSTE_ONGLETS.length;render();return;}
+  const boutons=[...document.querySelectorAll('.po2-bureau-nav .mo67-tab')],i=boutons.findIndex(b=>b.getAttribute('aria-current')==='page');
+  if(boutons.length)boutons[(i+(e&&e.shiftKey?-1:1)+boutons.length)%boutons.length].focus();
+},ShiftTab(){KEYS.maps.mgmt_poste.Tab({shiftKey:true});}});
 /* Décision : planches Uni* validées par Anthony ; souris et clavier suivent les mêmes choix de fin de saison. */
 keysRegister('mgmt_poste_bilan',{Escape(){CL.go('mgmt_accueil');},Enter(){mgmtPosteBilanContinuer();},k(){mgmtPosteBilanRencontrer();},K(){mgmtPosteBilanRencontrer();},Tab(){CL.go('mgmt_resultats');}});
 /* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements
@@ -297,10 +301,12 @@ keysRegister('mgmt_classements',{
   Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_vestiaire',{
+  v(){CL.go('mgmt_effectif');},V(){CL.go('mgmt_effectif');},
   Escape(){ CL.go('mgmt_accueil'); },
 });
 /* Lot 5 T5 : le recrutement au clavier — flèches pour la ligne, Entrée la fiche, R recrute, échap ramène. */
 keysRegister('mgmt_recrutement',{
+  Tab(e){CL.rcOngletParcourir(e&&e.shiftKey?-1:1);},
   Escape(){ CL.go('mgmt_accueil'); },
   ArrowDown(){ CL.mgmtRecrutementCurseur(1); },
   ArrowUp(){ CL.mgmtRecrutementCurseur(-1); },
@@ -321,7 +327,7 @@ Object.assign(CL,{
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_espoirs_arrivee'||G.screen==='mgmt_organisation'||G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
-      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
+      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'||G.screen==='mgmt_discours'
       /* ==== [ANCRE: MGMT_PRESENTATION_RETOUR_FICHE] — Monde lot 3 T5 ==== */
       ||G.screen==='mgmt_presentation_combattant'||G.screen==='mgmt_presentation_combat'||G.screen==='mgmt_soiree_avant'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';

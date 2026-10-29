@@ -47,6 +47,14 @@ function neuve() {
 }
 /** Les phrases du détail et de la liste, lues sur la page. */
 const lignes = (win, sel) => lire(win, `return [...document.querySelectorAll(${JSON.stringify(sel)})].map(e=>e.textContent);`);
+test('Résultats — les préliminaires conservent leur numéro dans la soirée jouée',()=>{
+  const win=partie();
+  const r=lire(win,`const m=G.mgmt,s=mgmtSoirees(m).slice().reverse()[0],attendu=s.idx.filter(i=>m.hist[i].slot==='prelim').sort((a,b)=>a-b),liste=mgmtSuResultatsListe(m,s),avant=JSON.stringify(m);CL.mgmtSuResultatDe(attendu[0]);KEYS.maps.mgmt_releve.Escape();return {attendu,affiche:liste.filter(x=>!x.main).map(x=>x.i),lib:document.querySelector('.mf-re-det .mf-re-lab').textContent,pur:JSON.stringify(m)===avant};`);
+  assert.ok(r.attendu.length>=2);
+  assert.deepEqual(r.affiche,r.attendu);
+  assert.equal(r.lib,'Préliminaire 1');
+  assert.equal(r.pur,true);
+});
 
 test('Résultats — état joueur : la dernière soirée et son combat principal, « Ta soirée », revoir, fiche, spectateurs, bloc jaune', () => {
   const win = partie(); ouvrir(win, 0);
@@ -185,7 +193,8 @@ test('Résultats — combats séparés : carte principale et préliminaires, num
   const win = partie();
   for (const s of [0, 1, 3]) {
     ouvrir(win, s);
-    const r = lire(win, `const m=G.mgmt, soi=mgmtSoirees(m).slice().reverse()[${s}], aff=mgmtSoireeAffichage(m,soi);
+    // Le principal reste en tête ; les préliminaires reprennent leur ordre de passage.
+    const r = lire(win, `const m=G.mgmt, soi=mgmtSoirees(m).slice().reverse()[${s}], source=mgmtSoireeAffichage(m,soi),aff=source.filter(i=>m.hist[i].slot==='main').concat(soi.idx.filter(i=>m.hist[i].slot!=='main').sort((a,b)=>a-b));
       const main=aff.filter(i=>m.hist[i].slot==='main').length, prel=aff.length-main;
       const noms=aff.map(i=>mgmtResultatDetail(m,i)).map(d=>d.gagnant.last||d.gagnant.name);
       return {total:aff.length,main,prel,noms,gr:[...document.querySelectorAll('.mf-re-gr')].map(e=>e.textContent),
@@ -195,8 +204,7 @@ test('Résultats — combats séparés : carte principale et préliminaires, num
     assert.equal(r.gr[0], `Carte principale${r.main} combat${r.main > 1 ? 's' : ''}`);
     assert.equal(r.gr[1], `Carte préliminaire${r.prel} combat${r.prel > 1 ? 's' : ''}`);
     assert.deepEqual(r.nums, [...Array(r.main).keys()].map(k => k + 1).concat([...Array(r.prel).keys()].map(k => k + 1)));
-    const avecNom = r.lignes.filter((l, k) => l.includes(r.noms[r.noms.indexOf(r.noms[k])]));
-    assert.equal(avecNom.length, r.total, 'chaque ligne dit son vainqueur');
+    assert.ok(r.lignes.every((l,k)=>l.includes(r.noms[k])), 'chaque ligne dit le bon vainqueur dans le bon ordre');
     assert.ok(r.lignes.every(l => / bat | et .* : match nul/.test(l)));
   }
 });

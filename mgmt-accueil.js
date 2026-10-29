@@ -243,7 +243,7 @@ function mgmtAccueilAilleurs(m,c){
   return mfPanneau(mgmtAccueilTitre('ET AILLEURS')+(rows||`<div class="mf-ac-rs">Rien à signaler hors de ${esc(c.ou.org)}.</div>`),'normal','mf-ac-p mf-ac-c3');
 }
 /* ==== [ANCRE: MONDE64_T1_ACCUEIL_SAISON] — Monde lot 64 T1 ==== */
-function mgmtAccueilSaison(m,c){
+function mgmtAccueilSaison(m,c,liens=''){
   const poste=m.poste;
   const objectifs=poste&&Array.isArray(poste.obj)?poste.obj.slice(0,3).map(o=>{
     const valeur=mgmtPosteValeur(m,o),fait=o.e==='tenu'||o.e==='fait';
@@ -251,15 +251,17 @@ function mgmtAccueilSaison(m,c){
     const statut=o.t==='rang-orgs'?`${valeur}e → ${o.cible}e`:fait?'FAIT':'EN COURS';
     return `<div class="mf-ac-objectif"><div><span>${esc(mgmtPosteObjectifTexte(o))}</span><b>${esc(statut)}</b></div><div class="mf-ac-barre"><i style="width:${Math.round(ratio*100)}%"></i></div></div>`;
   }).join(''):'';
-  const patron=poste?`<div class="mf-ac-patron"><div class="mf-ac-lib">LE PATRON : ${esc(mgmtPosteNiveau(poste.conf).niveau.toUpperCase())}</div><div class="mf-ac-rs">${esc(mgmtPosteNiveau(poste.conf).banque[0].texte)}</div></div>`:'';
-  const retour=m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0], mission=m.recruteur&&m.recruteur.mission;
-  const dest=retour?mgmtRecruteurDestination(retour.dest):mission?mgmtRecruteurDestination(mission.dest):null;
-  const jourRetour=retour?retour.jour:mission&&mission.retourLe;
+  const patron=poste?`<div class="mf-ac-patron"><div class="mf-ac-lib">LE PATRON</div><strong>${esc(mgmtPosteNiveau(poste.conf).niveau.toUpperCase())}</strong><div class="mf-ac-rs">${esc(mgmtPosteNiveau(poste.conf).banque[0].texte)}</div></div>`:'';
+  const retours=m.recruteur&&m.recruteur.retours||[],mission=m.recruteur&&m.recruteur.mission;
+  const retour=retours.find(x=>x&&(x.bredouille||x.lus<(x.profils||[]).length));
+  const dest=mission?mgmtRecruteurDestination(mission.dest):null;
+  const jourRetour=mission&&mission.retourLe;
   const restant=Number.isSafeInteger(jourRetour)?Math.max(0,jourRetour-mgmtRecruteurJour(m)):null;
-   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>DANS ${restant} J</b>`:''}`:'Aucune mission';
-   const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div></div>`;
+   const statutRecruteur=dest?`${esc(dest.nom)}${restant!==null?` · retour <b>${restant?'DANS '+restant+' J':'AUJOURD’HUI'}</b>`:''}`:retour?(retour.bredouille?'De retour sans profil':'De retour · profils à consulter'):'Aucune mission';
+   const recruteur=`<div class="mf-ac-recruteur"><div class="mf-ac-lib">TON RECRUTEUR</div><div>${statutRecruteur}</div>${retours.length?`<button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button>`:`<button type="button" onclick="CL.go('mgmt_recruteur')">Choisir une mission</button>`}</div>`;
   const ailleurs=mgmtAccueilAilleurs(m,c);
-    return mfPanneau(mgmtAccueilTitre('TA SAISON')+objectifs+patron+recruteur+(ailleurs?`<div class="mf-ac-ailleurs-saison">${ailleurs}</div>`:''),'normal','mf-ac-p mf-ac-saison');
+    const annee=new Date(mgmtJourDate(mgmtCalAujourdhui(m)).ts).getUTCFullYear();
+    return mfPanneau(mgmtAccueilTitre('TA SAISON',String(annee))+objectifs+patron+`<nav class="mf-ac-raccourcis" aria-label="Accès complémentaires">${liens}</nav>`+(ailleurs?`<details class="mf-ac-ailleurs-saison"><summary>Et ailleurs</summary>${ailleurs}</details>`:'')+recruteur,'normal','mf-ac-p mf-ac-saison');
 }
 /** La première arrivée : l'héritage (organisation, dernière soirée, champions, promesses). */
 function mgmtAccueilHeritage(m,c){
@@ -292,8 +294,6 @@ function scr_mgmt_accueil(){
     const dernier=combats.length?`dernier combat · soirée ${combats[combats.length-1].c}`:'à booker';
     return `<button type="button" class="mf-ac-espoir" onclick="CL.mgmtFiche('${escJsAttr(id)}')"><b>${esc(f.name)}</b><span>N°${esc(rang||'—')} des ${esc(mgmtDivisionLabel(f.div).toLocaleLowerCase('fr'))} · ${esc(etat)}</span><span>${esc(dernier)}</span></button>`;
   }).join('')+`<button type="button" onclick="mgmtEspArriveeOuvrir(2,'mgmt_accueil')">Tes espoirs</button>`,'normal','mf-ac-p mf-ac-espoirs'):'';
-  const retourRecruteur=m.recruteur&&m.recruteur.retours&&m.recruteur.retours[0];
-  const karim=retourRecruteur?mfPanneau(`<p class="mf-ac-rs">Karim est rentré${retourRecruteur.bredouille?' bredouille':''} · <button type="button" onclick="CL.go('mgmt_recruteur_retours')">Voir ses retours</button></p>`,'normal','mf-ac-p'):'';
    const bilanVisible=m.poste&&mgmtCalAujourdhui(m)>=m.poste.fin&&!mgmtPosteBilanLu;
    const ceremonieVisible=Number.isSafeInteger(m.guerre&&m.guerre.anneeTraitee)&&m.guerre.anneeTraitee>0;
      const semaine=m.semaine&&Array.isArray(m.semaine.ev)&&m.semaine.ev.length?`<div class="mf-ac-semaine"><b>LA SEMAINE DU COMBAT</b><button type="button" onclick="CL.go('mgmt_semaine')">Ouvrir la semaine du combat</button></div>` : '';
@@ -302,6 +302,7 @@ function scr_mgmt_accueil(){
   const espoirsDansAttente=espoirHtml;
     /* ==== [ANCRE: ACCUEIL_LIENS_COMPLEMENTAIRES] — Réparation PR 259 ==== */
     const liensAccueil=[
+      `<button type="button" onclick="CL.go('mgmt_bureau')">Les affaires</button>`,
       m.poste?`<button type="button" onclick="CL.go('mgmt_poste')">Ton poste</button>`:'',
       guerre?`<button type="button" onclick="CL.go('mgmt_guerre')">Revoir le classement</button>`:'',
       ceremonieVisible?`<button type="button" onclick="CL.go('mgmt_ceremonie')">Revoir la cérémonie</button>`:'',
@@ -309,8 +310,8 @@ function scr_mgmt_accueil(){
     ].filter(Boolean).join('');
     const rangFinal=guerre?`<span>À la fin de l’année, Split a terminé ${esc(m.guerre.rangFinal)}e sur huit</span>`:'';
     const rangeeLiens=liensAccueil||rangFinal?`<div class="mf-ac-liens-complementaires">${rangFinal}${liensAccueil}</div>`:'';
-    const corps=`${karim}<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c)}</div>`;
-  const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m,rangeeLiens)}${corps}</main>`;
+    const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}${mgmtAccueilAttend(m,c,semaine+espoirsDansAttente)}${mgmtAccueilSaison(m,c,rangeeLiens)}</div>`;
+  const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
     touches:[{ks:['A','E'],t:'Section'},{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Entrée'],t:'Ouvrir',jaune:true}]});

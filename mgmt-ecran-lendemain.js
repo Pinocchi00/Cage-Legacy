@@ -200,15 +200,15 @@ function mgmtLendemainMomentHtml(m,t,combat,label,index,mains){
   const a=t.winner==='B'?t.b:t.a,b=t.winner==='B'?t.a:t.b;
   const gagne=t.winner==='A'||t.winner==='B';
   const nom=x=>mfNet(x.last||x.name||'');
-  const ligneA=nom(a)+(gagne?' BAT':' CONTRE'), ligneB=nom(b);
+  const ligneA=index===1&&gagne?nom(a):index===2?nom(a)+' —':nom(a)+(gagne?' BAT':' CONTRE'), ligneB=index===1&&gagne?'':nom(b);
   const largeur=(1564-32)*(index===0?1.45:1)/3.45-56, maximum=index===0?108:64;
   const corps=Math.min(mfCorps(ligneA,largeur,maximum,44),mfCorps(ligneB,largeur,maximum,44));
   const rang=mains.indexOf(combat),place=t.slot==='main'?(rang===mains.length-1?'Combat principal':rang===mains.length-2?'Co-principal':'Carte principale · '+(rang+1)+'e combat'):'Préliminaire';
   const titre=`${a.name||a.last}${gagne?' bat ':' contre '}${b.name||b.last}`;
   const methode=mgmtLendemainMethode(t), parties=methode.split(/, /);
   return `<article class="ld3-moment"><div class="ld66-moment-head"><div class="ld3-label">${esc(label)}</div><button class="ld66-rewatch" aria-label="Revoir ${esc(titre)}" onclick="CL.mgmtLendemainRevoir(${combat})">R</button></div>`
-    +`<div class="ld3-meta">${esc(place)} · ${esc(mgmtDivisionLabel(t.div))}</div>`
-    +`<div class="ld3-names" style="--ld79-corps:${corps}px"><span>${esc(ligneA)}</span><span>${esc(ligneB)}</span></div>`
+    +`<div class="ld3-meta">${esc(place)} · ${esc(mgmtDivisionLabel(t.a.div||t.b.div))}</div>`
+    +`<div class="ld3-names" style="--ld79-corps:${corps}px"><span>${esc(ligneA)}</span>${ligneB?`<span>${esc(ligneB)}</span>`:''}</div>`
     +`<div class="ld3-detail">${esc(parties.shift())}</div>`
     +(parties.length?`<div class="ld79-description">${esc(parties.join(', '))}</div>`:'')+`</article>`;
 }
@@ -302,12 +302,29 @@ function mgmtLendemainMomentsCompletsHtml(m){
  * complète. Exposée séparément afin de ne pas masquer l'écran historique. */
 function mgmtLendemainSuiteHtml(m){
   const presse=mgmtLendemainPresseHtml(m);
-  const resultats=mgmtLendemainResultatsHtml(m);
+  const resultats=mgmtLendemainResultatsSuiteHtml(m);
   const mouvements=mgmtLendemainMouvementsHtml(m)+mgmtLendemainConstatsHtml(m);
   return `<section class="ld3-suite" aria-label="Le lendemain, la suite">`
     +mfPanneau(`<div class="ld3-suite-press">${mgmtLendemainTitreHtml('LA PRESSE')}<div class="ld79-scroll">${presse}</div></div>`,'normal','ld79-panel')
     +mfPanneau(`<div class="ld3-suite-moves">${mgmtLendemainTitreHtml('LES MOUVEMENTS')}<div class="ld79-scroll">${mouvements||'<p class="ld3-suite-empty">Aucun mouvement notable.</p>'}</div></div>`,'normal','ld79-panel')
     +mfPanneau(`<div class="ld3-suite-results">${mgmtLendemainTitreHtml('TOUS LES RÉSULTATS')}<div class="ld79-scroll">${resultats}</div></div>`,'normal','ld79-panel')+`</section>`;
+}
+/** La carte en lecture éditoriale : principal en tête, préliminaires dépliables.
+ * Les indices restent ceux de la soirée jouée et de ses liens Revoir. */
+function mgmtLendemainResultatsSuiteHtml(m){
+  const e=m&&m.lastEvent;
+  if(!e||!Array.isArray(e.fights))return '';
+  const rows=e.fights.map((f,i)=>({f,i,t:mgmtSoireeTrace(m,i)})).filter(x=>x.f&&typeof x.f.a!=='number'&&typeof x.f.b!=='number'&&x.t&&x.t.a&&x.t.b);
+  const mains=rows.filter(x=>x.t.slot==='main').reverse(),prelims=rows.filter(x=>x.t.slot!=='main');
+  const ligne=(x,label)=>{
+    const t=x.t,g=t.winner==='B'?t.b:t.a,p=t.winner==='B'?t.a:t.b;
+    const detail=mgmtResultatDetail(m,(m.hist||[]).indexOf(t));
+    const methode=detail?detail.methode+(detail.family==='dec'||detail.family==='draw'?' · '+detail.rounds+' rounds':' · R'+detail.round):MGMT_FAMILY_LABELS[t.family]||'';
+    return `<div class="mgmt-ld-item" data-combat="${x.i}"><span class="mgmt-ld-slot">${esc(label)}</span><div class="ld79-resultat-corps"><button type="button" class="mgmt-ld-title" aria-label="${esc('Revoir '+g.name+' contre '+p.name)}" onclick="CL.mgmtLendemainRevoir(${x.i})">${esc(g.last||g.name)} <span>${t.winner==='D'?'contre':'bat'}</span> ${esc(p.last||p.name)}</button><div class="mgmt-ld-sub">${esc(methode)}</div></div></div>`;
+  };
+  const principal=mains.map((x,k)=>ligne(x,k===0?MGMT_LD_LABELS.mainEvent:k===1?MGMT_LD_LABELS.coMain:'Combat '+(k+1))).join('');
+  const noms=prelims.map(x=>{const t=x.t,f=t.winner==='B'?t.b:t.a;return f.last||f.name;}).join(', ');
+  return `<div class="ld79-resultats-liste">${principal}${prelims.length?`<details class="ld79-prelims"><summary><b>PRÉLIMINAIRES</b><span>${esc(noms)}<small>${prelims.length} combats · Ouvrir les résultats</small></span></summary>${prelims.map((x,k)=>ligne(x,MGMT_LD_LABELS.prelims+' '+(k+1))).join('')}</details>`:''}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -447,9 +464,22 @@ function mgmtLendemainAttentionHtml(m){
 
 /** Bloc discursif facultatif : la PR P7 T4 peut arriver après cette branche. */
 function mgmtLendemainDiscoursHtml(m){
-  if(typeof mgmtDiscoursLire!=='function'||!Array.isArray(m.discours)) return '';
-  const rows=m.discours.filter(d=>d&&d.c===m.lastEvent.cycle);
-  return rows.map(d=>`<div class="ld3-speech">${esc(typeof d.texte==='string'?d.texte:'')}</div>`).join('');
+  if(!m.discours||m.discours.c!==m.eventsPlayed||!Array.isArray(m.discours.d)) return '';
+  const d=m.discours.d.find(x=>x&&x.interpelle&&Array.isArray(x.lignes));
+  if(!d) return '';
+  const f=mgmtDiscoursNom(m,d.a),cible=mgmtDiscoursNom(m,d.interpelle);
+  const phrase=d.lignes.find(x=>cible&&x.includes(cible.name))||d.lignes[0];
+  return phrase?`<div class="ld3-speech"><b>AU MICRO</b><span>« ${esc(phrase)} » — ${esc(f&&f.name||d.a)}</span></div>`:'';
+}
+/** La une porte uniquement un article du média indiqué, sans lui attribuer les autres voix. */
+function mgmtLendemainUneHtml(m){
+  const rows=mgmtMediasLendemain(m)||[],row=rows.find(x=>x.media==='cage-hebdo');
+  if(!row)return '<div class="ld3-press"><b>À LA UNE</b><span>Aucune une publiée par Cage Hebdo.</span></div>';
+  const t=(m.hist||[]).findLast(x=>x&&x.c===m.lastEvent.cycle&&x.a&&x.b&&[x.a.id,x.b.id].includes(row.id));
+  const a=t&&(t.winner==='B'?t.b:t.a),b=t&&(t.winner==='B'?t.a:t.b);
+  const titre=t?`${a.last||a.name} ${t.winner==='D'?'contre':'bat'} ${b.last||b.name}`:'À la une';
+  const autre=rows.find(x=>x!==row);
+  return `<div class="ld3-press"><b>À LA UNE</b><span style="font-size:${mfCorps(titre.toUpperCase(),900,52,22)}px">${esc(titre)}</span><p>${esc(row.texte||row.titre||'')}</p></div>`+(autre?`<div class="ld3-press ld79-autre-media"><b>DANS LA PRESSE · ${esc(autre.nom||autre.media)}</b><p>${esc(autre.texte||autre.titre||'')}</p></div>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -610,7 +640,7 @@ Object.assign(CL,{
     const t=mgmtSoireeTrace(m,i);
     if(!t) return;
     /* Lot 11 : avec l'agenda, le combat se revoit sur l'écran animé (mgmtRevoirCombat) ; sinon, l'arène d'avant. */
-    mgmtRevoirCombat(t,'mgmt_lendemain',null);
+    mgmtRevoirCombat(t,G.screen==='mgmt_lendemain_suite'?'mgmt_lendemain_suite':'mgmt_lendemain',null);
   },
 });
 /* ==== [FIN ANCRE] ==== */

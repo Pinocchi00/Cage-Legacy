@@ -12,6 +12,22 @@ const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb
 const ouverte=()=>{ const w=neuve(); w.eval(`CL.go('mgmt_accueil');`); return w; };
 /* Une partie « après la première soirée » : l'état seul change (aucune soirée jouée par le joueur = première arrivée). */
 const apres=`m.eventsPlayed=(m.passe?m.passe.soirees:0)+1;`;
+test('Accueil — une ancienne prospection ne masque pas la mission actuelle',()=>{
+  const w=ouverte();
+  const r=res(w,`const m=G.mgmt,c=mgmtAccueilContenu(m),jour=mgmtRecruteurJour(m);m.recruteur={retours:[{dest:'france',jour:jour-14,profils:[{id:'ancien'}],lus:0}],mission:{dest:'daghestan',retourLe:jour+6}};const avant=JSON.stringify(m),mission=mgmtAccueilSaison(m,c);const pur=JSON.stringify(m)===avant;m.recruteur.mission=null;const retour=mgmtAccueilSaison(m,c);m.recruteur.retours[0].lus=1;const lu=mgmtAccueilSaison(m,c);m.recruteur.retours[0].bredouille='Texte auteur';m.recruteur.retours[0].profils=[];const vide=mgmtAccueilSaison(m,c);return {mission,retour,lu,vide,pur};`);
+  assert.match(r.mission,/Daghestan.*DANS 6 J/);
+  assert.doesNotMatch(r.mission,/DANS 0 J/);
+  assert.match(r.retour,/De retour · profils à consulter/);
+  assert.match(r.lu,/Aucune mission/);
+  assert.match(r.vide,/De retour sans profil/);
+  assert.doesNotMatch(r.vide,/profils à consulter/);
+  assert.match(r.mission,/Voir ses retours/);
+  assert.equal(r.pur,true);
+  const clavier=res(w,`const s=document.querySelector('.mf-ac-raccourcis button');return {present:!!s,consomme:keysHandle({key:'Enter',target:s}),screen:G.screen};`);
+  assert.equal(clavier.present,true);
+  assert.equal(clavier.consomme,false,'Entrée active le lien focalisé avec le comportement natif');
+  assert.equal(clavier.screen,'mgmt_accueil');
+});
 
 test('T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise : Accueil', () => {
   const w=neuve();

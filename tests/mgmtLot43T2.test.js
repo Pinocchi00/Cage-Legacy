@@ -26,6 +26,30 @@ test('Monde lot 43 T2 — Ton contrat précède le manque avec les valeurs des o
   assert.match(r.html,new RegExp('Aujourd.hui : '+r.valeur));
 });
 
+test('Fidélité arrivée — trois panneaux, leurs données et six cartes avec sélection réellement actionnable',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{
+      setSeed(20261023);const m=mgmtPasseGenerer('split',{soirees:3});mgmtPosteInit(m);G.mgmt=m;mgmtEspArriveeOuvrir(1);
+      const app=()=>document.getElementById('app'),key=k=>app().dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}));
+      const contrat={panneaux:app().querySelectorAll('.po-panels>.po-card').length,etapes:app().querySelectorAll('.ma-step').length,patron:app().querySelector('.po-caption').textContent,manque:app().querySelector('.po-manque').textContent,source:JSON.stringify(m),seed:SEED};
+      mgmtEspArriveeHtml();const pur=contrat.source===JSON.stringify(m)&&contrat.seed===SEED;
+      CL.mgmtEspArriveeEtape(3);const rows=mgmtEspArriveePropositions(m),ordre=rows.map(x=>x.angle);
+      key('ArrowRight');key('Enter');const garde=mgmtEspoirs(m).includes(rows[1].id),selection=MGMT_ESP_ARRIVEE.i;
+      app().querySelectorAll('.ma-card')[4].click();const clic=mgmtEspoirs(m).includes(rows[4].id)&&MGMT_ESP_ARRIVEE.i===4;
+      const etats=[...app().querySelectorAll('.ma-card')].map(e=>({selected:e.dataset.selected,kept:e.dataset.kept}));
+      let ouvert=null;const fiche=CL.mgmtEspArriveeFiche;CL.mgmtEspArriveeFiche=id=>{ouvert=id;fiche(id);};key('F');
+      return {contrat,pur,ordre,garde,selection,clic,etats,ouvert,attendu:rows[4].id,screen:G.screen};
+    })())`));
+    assert.equal(r.contrat.panneaux,3);assert.equal(r.contrat.etapes,3);assert.match(r.contrat.patron,/Jean-Michel Delatour/);
+    assert.match(r.contrat.manque,/LEÏLA/);assert.equal(r.pur,true);
+    assert.deepEqual(r.ordre,['reponse','monte','libre','jeune','oublie','revenant']);
+    assert.equal(r.garde,true);assert.equal(r.selection,1);assert.equal(r.clic,true);
+    assert.equal(r.etats.filter(x=>x.selected==='true').length,1);assert.equal(r.etats.filter(x=>x.kept==='true').length,2);
+    assert.equal(r.ouvert,r.attendu);assert.equal(r.screen,'mgmt_fiche');
+  }finally{w.close();}
+});
+
 test('Monde lot 43 T2 — une ancienne partie saute Ton contrat et échappe les valeurs joueur',()=>{
   const w=newGameWindow({runMain:true});
   const r=w.eval(`(()=>{const m=mgmtPasseGenerer('split',{soirees:3});delete m.poste;m.nom='<img src=x>';G.mgmt=m;mgmtEspArriveeOuvrir(1);const first=document.getElementById('app').textContent;const html=mgmtEspArriveeHtml();return {first,html}})()`);

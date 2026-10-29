@@ -242,14 +242,20 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
   let html=win.document.getElementById('app').innerHTML;
   /* Reprise de fidélité du 07/10 : la fiche suit les planches FicheStyle / FicheFinal — la cage d'abord, puis les lignes façon, force, faille, inconnu, allonge. */
   assert.match(html,/class="mf-fi-cage"/);
-  assert.match(html,/Rouge : là où il impose son combat/);
+  const legende=win.document.querySelector('.mf-fi-legv');
+  assert.ok(legende,'la cage observée possède sa légende');
+  for(const [marque,texte] of [['rouge','Il impose'],['hache','Il subit'],['rond','Ses combats']]){
+    assert.equal(legende.querySelector('i.'+marque)?.parentElement.querySelector('span')?.textContent,texte);
+  }
   assert.match(html,/FAÇON/);
   assert.match(html,/ALLONGE/);
   win.eval(`CL.mgmtFicheOnglet('apercu')`);
   html=win.document.getElementById('app').innerHTML;
   assert.match(html,/Taille/);
   assert.match(html,/Allonge/);
-  assert.match(html,/GAUCHER|ORTHODOXE/);
+  const garde=[...win.document.querySelectorAll('.mf-fi-case')].find(c=>c.querySelector('span')?.textContent==='Garde');
+  assert.ok(garde,'la garde est présente dans ses chiffres');
+  assert.equal(garde.querySelector('b').textContent,win.eval(`mgmtCombatProfile(G.mgmt.roster.find(f=>f.id===${JSON.stringify(id)})).phys.stance==='southpaw'?'GAUCHER':'ORTHO.'`));
   assert.match(html,/Chez Split/);
   assert.match(html,/class="mf-fb(?: or)?"/,'la bannière du tunnel');
   assert.ok(!html.includes('Son camp'));

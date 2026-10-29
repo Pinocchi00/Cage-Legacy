@@ -89,7 +89,7 @@ function mgmtCombatOuvrir(o){
   C.sonT=-1;
   C.session=S; C.d=0; C.pause=false; C.mode='fight'; C.fin=0; C.decT=0; C.real=0; C.last=0; C.decalRefait=false;
   C.vueCombat=o.vue||'complet';
-  C.tempsForts=C.vueCombat==='forts'?mgmtTempsFortsChoisir(m,t):null; C.tempsFortActif=-1;
+  C.tempsForts=C.vueCombat==='forts'?mgmtCombatImagesMoments(S):null; C.tempsFortActif=-1;
   C.vitesse=MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1;
   C.plan=ARENE_SALLE_PLANS.includes(R.camera)?R.camera:'cable';
   C.queue=S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0?MGMT_COMBAT_QUEUE_DECISION:MGMT_COMBAT_QUEUE_FINITION;
@@ -102,6 +102,7 @@ function mgmtCombatOuvrir(o){
   const et=o.etiquette||(t.slot==='main'?'CARTE PRINCIPALE':'PRÉLIMINAIRE');
   C.carte={a:mfNet(S.noms.a.court),b:mfNet(S.noms.b.court),ra:mgmtCombatBilan(t.a),rb:mgmtCombatBilan(t.b),
     la:mgmtCombatInitiale(S.noms.a.court),lb:mgmtCombatInitiale(S.noms.b.court),plate:et+' · '+divLib,rounds:Number.isSafeInteger(t.rounds)?t.rounds:3};
+  if(C.vueCombat==='forts'){C.tempsFortActif=0;C.pause=true;C.d=0;}
   C.salleDit=mgmtCombatSalleTexte(salle,o.quel||(t.slot==='main'&&o.etiquette===MGMT_SOIREE_TEXTES.principal?'le combat principal':'ce combat'),S.res&&S.res.log?S.res.log.length:S.segs.length);
   CL.go('mgmt_combat');
   mgmtCombatDemarrer();
@@ -127,6 +128,8 @@ function mgmtRevoirCombat(t,retour,finRetour){
 function mgmtCombatAvancer(dt){
   const C=MGMT_COMBAT, S=C.session;
   if(!S||C.refuse) return;
+  /* Anthony,28/10 : les temps forts sont des images fixes, uniquement sur action, sans annonce de la suite. */
+  if(C.vueCombat==='forts')return;
   C.real+=dt;
   if(C.pause) return;
   if(C.mode==='fight'){
@@ -308,17 +311,65 @@ function scr_mgmt_combat(){
     return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('Ce combat ne peut pas être montré.')}</div>`,'normal')}</div></main>`,
       {barre:'aucune',touches:[{ks:['Entrée'],t:'Revenir',jaune:true,onclick:'CL.mgmtCbRetour()'}]});
   }
+  if(C.vueCombat==='forts')return mgmtCombatImagesHtml();
   return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>${mgmtCombatFriseHtml()}`
     +`<div id="mc-barre" class="mf-cb-barre">${mgmtCombatBarreHtml()}</div></div></div>`;
 }
 SCREENS.mgmt_combat=scr_mgmt_combat;
+
+/* ==== [ANCRE: TEMPS_FORTS_IMAGES_MANUELLES_20261028] — Anthony : image par image, aucun événement futur affiché ==== */
+function mgmtCombatImagesMoments(S){
+ const debut={t:0,round:1,type:'debut',raison:MGMT_TF_TEXTES.debut[0]};
+ return [debut,...areneMomentsCles(S.res).filter(b=>b.t>0).map(b=>({t:b.t,round:b.r,type:b.finish?'finition':b.sub?'soumission':'knockdown',raison:areneTextePublic(b.text).replace(/^\[\d{1,2}:\d{2}\]\s*/,'' )}))];
+}
+/** Un moment public du résultat déjà chargé. Ne rejoue jamais le combat. */
+function mgmtCombatImageLecture(C,index){
+ const moment=C.tempsForts[index],beats=areneBeats(C.session.res).filter(b=>b.text&&b.text.trim());
+ const proches=beats.filter(b=>b.r===moment.round&&b.t<=moment.t&&moment.t-b.t<=1);
+ const beat=proches[0]||beats.filter(b=>b.r===moment.round&&b.t<=moment.t).at(-1)||null;
+ const texte=beat?areneTextePublic(beat.text).replace(/^\[\d{1,2}:\d{2}\]\s*/,''):moment.raison;
+ const precedent=beats.filter(b=>b.t<(beat?beat.t:moment.t)&&b.text!==beat?.text).at(-1);
+ const contexte=precedent?areneTextePublic(precedent.text).replace(/^\[\d{1,2}:\d{2}\]\s*/,''):'';
+ return {moment,beat,texte,contexte,t:beat?beat.t:moment.t};
+}
+function mgmtCombatImagesHtml(){
+ const C=MGMT_COMBAT,S=C.session,fin=C.mode==='dec',moments=C.tempsForts||[];
+ if(!S||!moments.length)return '';
+ const index=Math.max(0,Math.min(moments.length-1,C.tempsFortActif)),image=mgmtCombatImageLecture(C,index),t=fin?S.dureeCombat:image.t;
+ const e=areneMoment(S,t),carte=C.carte||{},round=fin?S.roundFin:image.moment.round;
+ const sec=Math.max(0,300-Math.floor(t-(round-1)*300)),horloge=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+ const nom=c=>S.noms[c].court,initiale=c=>mgmtCombatInitiale(nom(c));
+ const coord=x=>(200+Math.max(-ARENE_RS,Math.min(ARENE_RS,x))/ARENE_RS*166).toFixed(1);
+ const pion=(c,x,y)=>`<g transform="translate(${coord(x)} ${coord(y)})"><circle r="30" fill="${c==='a'?'#E23A2B':'#E9E6E1'}" stroke="#0D0B0B" stroke-width="5"/><foreignObject x="-30" y="-30" width="60" height="60"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;width:60px;height:60px;align-items:center;justify-content:center;color:#0D0B0B;font:800 30px/1 var(--mf-titre)">${esc(initiale(c))}</div></foreignObject></g>`;
+ // Le tracé ne lit que les secondes déjà écoulées, jamais la prochaine image.
+ const trajet=[];for(let s=Math.max(0,t-4);s<=t;s+=.5){const p=areneMoment(S,s);trajet.push([coord(p.ax),coord(p.ay)]);}
+ const trace=trajet.length>1&&Math.hypot(trajet[0][0]-trajet.at(-1)[0],trajet[0][1]-trajet.at(-1)[1])>10?`<polyline points="${trajet.map(p=>p.join(',')).join(' ')}" stroke="#E23A2B" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 10"/>`:'';
+ const cage=`<svg viewBox="0 0 400 400" fill="none" role="img" aria-label="Image fixe du combat au moment choisi"><path d="M121.8 12H278.2L388 121.8V278.2L278.2 388H121.8L12 278.2V121.8Z" fill="#D9CCC0" stroke="#0D0B0B" stroke-width="10"/><path d="M121.8 12H278.2L388 121.8V278.2L278.2 388H121.8L12 278.2V121.8Z" stroke="#E9E6E1" stroke-width="2"/><path d="M150 60H250L340 150V250L250 340H150L60 250V150Z" stroke="#0D0B0B" stroke-opacity="0.12" stroke-width="2"/>${Math.hypot(e.ax,e.ay)>ARENE_RS*.4&&Math.hypot(e.bx,e.by)>ARENE_RS*.4?`<text x="200" y="210" text-anchor="middle" fill="#0D0B0B" fill-opacity="0.18" font-family="Saira Extra Condensed" font-weight="800" font-size="52" style="display:inline">${esc(C.org+' '+C.num)}</text>`:''}${trace}${pion('a',e.ax,e.ay)}${pion('b',e.bx,e.by)}</svg>`;
+ const d=C.decision,verdict=fin?`<div class="mf-tf-verdict"><h1>${esc(d.nom||d.titre)}</h1><p>${esc(d.titre)}</p>${d.cartes.map(c=>`<div class="mf-tf-juge"><span>${esc(c.juge)}</span><b>${esc(c.score)}</b><strong>${esc(c.nom)}</strong></div>`).join('')}</div>`:'';
+ const recit=fin?verdict:`<div class="mf-tf-moment"><i>${index+1}</i><span>MOMENT ${index+1} SUR ${moments.length} · ROUND ${round}, ${esc(horloge)}</span></div><h1 style="font-size:${mfCorps(image.texte.toUpperCase(),1900,104,36)}px">${esc(image.texte)}</h1>${image.contexte?`<p>${esc(image.contexte)}</p>`:''}<div class="mf-tf-tags"><span>${esc(image.beat?.phase==='sol'?'AU SOL':image.beat?.phase==='clinch'?'AU CLINCH':'DEBOUT')}</span>${image.beat?.pos==='cage'?'<span>CONTRE LA CAGE</span>':''}</div>`;
+ const progression=moments.map((p,i)=>{const resume=p.type==='debut'?MGMT_TF_TEXTES.debut[0]:p.type==='soumission'?'Menace de soumission':p.type==='knockdown'?'Knockdown':C.decision?.decision?'Fin du combat':'Arrêt du combat';return `<button class="mf-tf-repere${i===index?' actif':''}"${i>index&&!fin?' disabled':''} onclick="CL.mgmtCbMoment(${i})" aria-label="Moment ${i+1}${i>index&&!fin?', à découvrir':''}"><b>${i+1}</b><span>${i<=index||fin?esc('R'+p.round+' · '+resume):'À découvrir'}</span></button>`;}).join('');
+ const bouton=(k,txt,action)=>`<button onclick="${action}">${mfTouche(k)}<span>${esc(txt)}</span></button>`;
+ const commandes=fin?bouton('R','Revoir les images','CL.mgmtCbRevoir()')+bouton('Entrée','Revenir à la soirée','CL.mgmtCbRetour()'):bouton('→','Image suivante','CL.mgmtCbMomentSuivant()')+bouton('←','Image précédente','CL.mgmtCbMomentPrecedent()')+bouton('T','Voir le combat en entier','CL.mgmtCbComplet()')+bouton('P','Passer au verdict','CL.mgmtCbPasser()')+bouton('Échap','Revenir à la soirée','mgmtCombatSortir()');
+ const nomHud=c=>`<strong style="font-size:${mfCorps(nom(c).toUpperCase(),280,50,22)}px">${esc(nom(c))}</strong>`,octHud=c=>`<i class="mf-tf-initiale ${c}">${esc(initiale(c))}</i>`;
+ return `<div class="mf-ecran"><div class="mf-stage"><div class="mf-fond" aria-hidden="true"></div><main class="mf-tf"><div class="mf-tf-titre"><b>TEMPS FORTS</b><span>${esc(carte.plate||'')} · ${esc(carte.rounds||'')} rounds</span></div><header class="mf-tf-score"><div class="mf-tf-identite">${octHud('a')}${nomHud('a')}<span>${esc(carte.ra||'')}</span></div><div class="mf-tf-horloge"><small>ROUND ${esc(round)}</small><b>${esc(horloge)}</b></div><div class="mf-tf-identite"><span>${esc(carte.rb||'')}</span>${nomHud('b')}${octHud('b')}</div></header><div class="mf-tf-corps"><div class="mf-tf-cage">${cage}</div><section class="mf-tf-recit" aria-live="polite">${recit}</section></div><nav class="mf-tf-progression" aria-label="Images du combat">${progression}</nav><footer class="mf-tf-commandes">${commandes}</footer></main></div></div>`;
+}
+Object.assign(CL,{
+ mgmtCbMoment(i){const C=MGMT_COMBAT;if(!C.session||C.vueCombat!=='forts'||C.mode!=='fight'||!Number.isInteger(i)||i<0||i>=C.tempsForts.length)return;C.tempsFortActif=i;C.d=C.tempsForts[i].t/MGMT_COMBAT_ECHELLE;C.pause=true;render();},
+ mgmtCbMomentSuivant(){const C=MGMT_COMBAT;if(C.tempsFortActif>=C.tempsForts.length-1){CL.mgmtCbPasser();return;}CL.mgmtCbMoment(Math.max(0,C.tempsFortActif+1));},
+ mgmtCbMomentPrecedent(){CL.mgmtCbMoment(Math.max(0,MGMT_COMBAT.tempsFortActif-1));},
+});
+/* ==== [FIN ANCRE] ==== */
 
 /** Retour de l'écran : la suite d'un combat vu (l'écran de soirée avance d'un combat), jamais un effet sur le combat. */
 function mgmtCombatSortir(){
   const C=MGMT_COMBAT, fin=C.finRetour, retour=C.retour;
   mgmtCombatNettoyer();
   C.finRetour=null; C.session=null; C.refuse=false;
-  if(fin) fin();
+  if(fin){
+    const avant=G&&G.screen;
+    fin();
+    if(G&&G.screen!==avant) return;
+  }
   CL.go(retour||'mgmt_soiree');
 }
 Object.assign(CL,{
@@ -342,17 +393,20 @@ Object.assign(CL,{
   mgmtCbPasser(){
     const C=MGMT_COMBAT; if(!C.session||C.mode!=='fight') return;
     C.mode='dec'; C.decT=0; C.fin=C.queue; mgmtCombatBarreMaj();
+    if(C.vueCombat==='forts'&&C.session.res&&G.screen==='mgmt_combat')render();
   },
   mgmtCbRevoir(){
     const C=MGMT_COMBAT; if(!C.session||C.mode!=='dec') return;
     C.mode='fight'; C.d=0; C.fin=0; C.decT=0; C.pause=false; C.sonT=-1;
     if(C.vue){ C.vue.camS=null; C.vue.trail={A:[],B:[]}; C.vue.tPrec=-1; }
     mgmtCombatBarreMaj();
+    if(C.vueCombat==='forts'){C.pause=true;C.tempsFortActif=0;if(G.screen==='mgmt_combat'&&C.session.res)render();}
   },
   /* ==== [ANCRE: P7_T1_TEMPS_FORTS_COMPLET] — Monde lot 53 T1 ==== */
   mgmtCbComplet(){
     const C=MGMT_COMBAT; if(!C.session||C.vueCombat!=='forts'||C.mode!=='fight') return;
     C.vueCombat='complet'; C.tempsForts=null; C.tempsFortActif=-1; mgmtCombatBarreMaj();
+    C.pause=false;if(G.screen==='mgmt_combat'&&C.session.res){render();mgmtCombatDemarrer();}
   },
   mgmtCbRetour(){
     const C=MGMT_COMBAT;
@@ -361,6 +415,8 @@ Object.assign(CL,{
   },
 });
 keysRegister('mgmt_combat',{
+  ArrowRight(){if(MGMT_COMBAT.vueCombat==='forts'&&MGMT_COMBAT.mode==='fight')CL.mgmtCbMomentSuivant();},
+  ArrowLeft(){if(MGMT_COMBAT.vueCombat==='forts'&&MGMT_COMBAT.mode==='fight')CL.mgmtCbMomentPrecedent();},
   ' '(){ CL.mgmtCbPause(); },
   v(){ CL.mgmtCbVitesse(); }, V(){ CL.mgmtCbVitesse(); },
   c(){ CL.mgmtCbCamera(); }, C(){ CL.mgmtCbCamera(); },
@@ -368,7 +424,7 @@ keysRegister('mgmt_combat',{
   t(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); }, T(){ if(MGMT_COMBAT.vueCombat==='forts') CL.mgmtCbComplet(); },
   p(){ CL.mgmtCbPasser(); }, P(){ CL.mgmtCbPasser(); },
   r(){ CL.mgmtCbRevoir(); }, R(){ CL.mgmtCbRevoir(); },
-  Enter(){ CL.mgmtCbRetour(); },
-  Escape(){ if(MGMT_COMBAT.mode==='dec'||MGMT_COMBAT.refuse) CL.mgmtCbRetour(); else CL.mgmtCbPasser(); },
+  Enter(){if(MGMT_COMBAT.vueCombat==='forts'&&MGMT_COMBAT.mode==='fight')CL.mgmtCbMomentSuivant();else CL.mgmtCbRetour();},
+  Escape(){if(MGMT_COMBAT.vueCombat==='forts'&&MGMT_COMBAT.mode==='fight')mgmtCombatSortir();else if(MGMT_COMBAT.mode==='dec'||MGMT_COMBAT.refuse)CL.mgmtCbRetour();else CL.mgmtCbPasser();},
 });
 /* ==== [FIN ANCRE] ==== */

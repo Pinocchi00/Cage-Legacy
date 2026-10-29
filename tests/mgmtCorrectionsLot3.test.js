@@ -15,13 +15,24 @@ test('3.1 — Le libellé « Combat principal » du lendemain désigne le dernie
   const win=neuve();
   win.eval(`CL.go('mgmt_lendemain')`);
   /* Décision : planches Uni* validées par Anthony ; l'écran suit UniLendemain (classes ld3-*) */
-  const cartes=win.eval(`(()=>{const zone=document.createElement('div');zone.innerHTML=mgmtLendemainSuiteHtml(G.mgmt);return [...zone.querySelectorAll('.ld3-suite-results .mgmt-ld-item')].map(x=>x.querySelector('.mgmt-ld-slot')?.textContent||'');})()`);
+  const cartes=win.eval(`(()=>{const zone=document.createElement('div');zone.innerHTML=mgmtLendemainSuiteHtml(G.mgmt);return [...zone.querySelectorAll('.ld3-suite-results .mgmt-ld-item')].map(x=>({i:Number(x.dataset.combat),lib:x.querySelector('.mgmt-ld-slot')?.textContent||''}));})()`);
   const idx=win.eval(`(function(){ const m=G.mgmt, e=m.lastEvent; const mains=[]; e.fights.forEach((f,i)=>{ const t=mgmtSoireeTrace(m,i); if(t&&t.slot==='main') mains.push(i); }); return mains; })()`);
   assert.ok(idx.length>=2);
   /* Décision : planches Uni* validées par Anthony ; l'écran suit UniLendemain (classes ld3-*). */
-  assert.equal(cartes[idx[idx.length-1]],'Combat principal','le dernier combat joué de la carte principale');
-  assert.equal(cartes[idx[idx.length-2]],'Co-principal');
-  for(const k of idx.slice(0,-2)) assert.equal(cartes[k]||'','', 'les autres n’ont pas de libellé fort');
+  // Revue globale : ordre éditorial de UniLendemainSuite, indices de replay inchangés.
+  assert.equal(cartes[0].i,idx[idx.length-1]);
+  assert.equal(cartes[0].lib,'Combat principal');
+  assert.equal(cartes[1].i,idx[idx.length-2]);
+  assert.equal(cartes[1].lib,'Co-principal');
+  assert.equal(new Set(cartes.map(x=>x.i)).size,cartes.length,'aucun combat dupliqué');
+  for(const k of idx.slice(0,-2)) assert.match(cartes.find(x=>x.i===k).lib,/^Combat \d+$/);
+  assert.equal(cartes.length,win.eval('G.mgmt.lastEvent.fights.length'),'tous les résultats restent accessibles');
+  win.eval(`CL.mgmtLendemainSuite();`);
+  const summary=win.document.querySelector('.ld79-prelims>summary');
+  assert.ok(summary,'les préliminaires se déplient');
+  win.eval(`KEYS.maps.mgmt_lendemain_suite.Enter({target:document.querySelector('.ld79-prelims>summary')});`);
+  assert.equal(summary.parentElement.open,true);
+  assert.equal(win.eval('G.screen'),'mgmt_lendemain_suite','ouvrir ne prépare pas une autre soirée');
 });
 
 test('3.2 — La presse du lendemain parle d’abord du combat principal, puis du résultat le plus marquant', () => {

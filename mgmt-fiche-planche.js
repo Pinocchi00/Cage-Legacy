@@ -80,21 +80,29 @@ function mgmtFicheCageHtml(m,f,taille){
   const t=taille||330, hist=m&&f?mgmtFightHistory(m,f).slice().reverse().slice(0,4):[];
   let zones=null; try{ zones=mgmtFicheZones(m,f); }catch(e){ zones=null; }
   const total=zones?zones.rings.reduce((a,b)=>a+b,0):0;
+  /* Le passé ne conserve pas les coordonnées de cage. Ses forces de profil sont déjà publiques
+     (mgmtLectureStyle) : les afficher explicitement comme profil, sans inventer des positions de combats. */
+  const profil=total?null:mgmtLectureStyle(f).zones;
   const presence=total?(zones.rings[0]+zones.rings[1])/total:0;
-  const ext=118, cx=125, cy=125, int=Math.round(ext*(total?Math.max(0.35,Math.min(0.75,0.3+0.5*presence)):0.45)*10)/10;
+  const ext=118, cx=125, cy=125, int=total?Math.round(ext*Math.max(0.35,Math.min(0.75,0.3+0.5*presence))*10)/10:70;
   /* « Il le subit » : seulement quand un secteur du bord l'a vu enfermé contre le grillage (la règle de la fiche d'origine). */
   let subit=false;
   if(total){ const bordTotal=zones.rings[2]; subit=zones.pin.some((p,i)=>p.count>=3&&zones.bord[i]>0&&p.count/zones.bord[i]>=0.25&&bordTotal>0&&p.count/bordTotal>=0.05); }
   const pts=hist.map((tr,i)=>{ const p=mgmtFichePointCombat(tr,tr.a.id===f.id?'A':'B'); return p?{n:i+1,x:cx+(p.x/ARENE_RS)*ext*0.9,y:cy+(p.y/ARENE_RS)*ext*0.9}:null; }).filter(Boolean);
-  const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+6.36).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:18.7px">${p.n}</text>`).join('');
-  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:'';
-  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit">`
+  const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+7.48).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:22px">${p.n}</text>`).join('');
+  /* Deux contours comme la planche. Le sol n'est pas un troisième secteur géographique. */
+  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="${profil.centre>0?'#B32A1E':'#252121'}"/>`;
+  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="${profil?'Profil public au centre. Zones de combat non observées.':'La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit'}">`
     +`<defs><pattern id="mf-fi-ha" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="#252121"/><rect width="3" height="9" fill="#E9E6E1" fill-opacity="0.55"/></pattern></defs>`
-    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
-    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/>${total?`<path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>`:''}${marques}</svg>`;
+    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit||profil?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
+    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/><path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>${marques}</svg>${profil?'<div class="mf-fi-cage-source">PROFIL · AU CENTRE<br>Positions de combats non archivées</div>':''}`;
 }
-function mgmtFicheLegendeHtml(){
-  return `<div class="mf-fi-leg"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
+function mgmtFicheLegendeHtml(m,f,vertical=false){
+  const classe=vertical?'mf-fi-legv':'mf-fi-leg';
+  let observees=false;
+  if(m&&f){try{observees=mgmtFicheZones(m,f).rings.some(x=>x>0);}catch(e){observees=false;}}
+  if(m&&f&&!observees)return `<div class="${classe}"><div><i class="rouge"></i><span>Profil au centre</span></div><div><i class="hache"></i><span>Zones non observées</span></div></div>`;
+  return `<div class="${classe}"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
 }
 
 /* ---- Les pièces communes -------------------------------------------------------------------------------------------- */
@@ -113,17 +121,16 @@ const MGMT_FICHE_CONTRAT_OCTO='M12.6 2.5h14.8l10.1 10.1v14.8L27.4 37.5H12.6L2.5 
 /** La bannière : le tunnel (rouge, jaune pour un champion), le nom, le palmarès, le rang. */
 function mgmtFicheBanniereHtml(m,f,champion){
   const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||''), sur=mgmtSurnomDe(m,f.id);
+  const prenomPx=mfCorps(prenom+(sur?' « '+mfNet(sur)+' »':''),1020,64,22);
   const rang=mgmtRangTexte(m,f);
   const forme=mgmtEffectifForme(m,f);
   const d=divById(f.div), cat=d?String(mgmtDivisionLabel(d)).toUpperCase().split(' '):[];
-  /* ==== [ANCRE: MONDE_LOT9_T5_FICHE_MONDIAL] — Monde lot 9 T5 : « le rang mondial de chacun se lit aussi sur sa fiche » (brief) ;
-     même lecture que la liste Classements → Mondial (mgmtFicheSituation, portée world). ==== */
-  const mondial=d&&d.gender==='F'?'mondiale':'mondial', situ=mgmtFicheSituation(m,f,'world');
-  const monde=/^[0-9]/.test(situ)?situ+' '+mondial:mondial+' : '+situ.toLowerCase();
+  /* ==== [ANCRE: MONDE_LOT9_T5_FICHE_MONDIAL] — Le rang mondial reste dans les huit informations de l'Aperçu.
+     Anthony,28/10 : supprimer son doublon en haut à droite. ==== */
   return `<div class="mf-fb${champion?' or':''}" data-m="head"><i class="mf-fb-img" aria-hidden="true"></i>`
-    +`<div class="mf-fb-nom"><span class="p">${esc(prenom)}${sur?` <em class="s">« ${esc(mfNet(sur))} »</em>`:''}</span><span class="n" style="font-size:${mfCorps(nom,1000,200,90)}px">${esc(nom)}</span></div>`
+    +`<div class="mf-fb-nom"><span class="p" style="font-size:${prenomPx}px">${esc(prenom)}${sur?` <em class="s" style="font-size:${Math.min(36,prenomPx)}px">« ${esc(mfNet(sur))} »</em>`:''}</span><span class="n" style="font-size:${mfCorps(nom,1020,200,22)}px">${esc(nom)}</span></div>`
     +`<div class="mf-fb-pal"><div class="mf-fb-pg"><span class="mf-fb-pl">PALMARÈS</span><b>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</b><div class="mf-fb-forme">${forme.map(mfMarque).join('')}</div></div>`
-    +`<div class="mf-fb-pd"><div class="mf-fb-rang${champion?' or':''}">${esc(rang)}</div><div class="mf-fb-cat">${cat.map(x=>`<div>${esc(x)}</div>`).join('')}</div><div class="mf-fb-monde">${esc(monde)}</div></div></div></div>`;
+    +`<div class="mf-fb-pd"><div class="mf-fb-rang${champion?' or':''}">${esc(rang)}</div><div class="mf-fb-cat">${cat.map(x=>`<div>${esc(x)}</div>`).join('')}</div></div></div></div>`;
 }
 
 /* ---- Les onglets ---------------------------------------------------------------------------------------------------------- */
@@ -133,25 +140,29 @@ function mgmtFicheApercuHtml(m,f,line){
   const phys=mgmtCombatProfile(f).phys||{}, prochain=mgmtEffectifProchain(m,f), inf=mfSoireeInfos(m);
   /* ==== [ANCRE: P2_T3_TRAITS_PANNEAU] — Monde lot 37 T1 ==== */
   const traits=mgmtTraitsFiche(m,f.id,m.cycle);
-  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone" aria-hidden="true">+</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
-  const cache=traits.caches?`<div class="mf-fi-trait-cache"><div class="mf-fi-trait-entete"><b>PAS ENCORE VU</b><span>caché</span></div><div>${esc(traits.indice||'')}</div></div>`:'';
+  const faiblesses=new Set(['menton-fele','fragile-apres-ko','s-eteint','sous-pression','hesite-apres-ko','serie-noire','ne-se-releve-pas','rouille']);
+  const traitsLignes=traits.vus.map(t=>`<div class="mf-fi-trait"><span class="mf-fi-trait-icone${faiblesses.has(t.id)?' faiblesse':''}" aria-hidden="true">${faiblesses.has(t.id)?'−':'+'}</span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">${esc(t.nom.toUpperCase())}</b><span class="mf-fi-trait-fait">${esc(t.fait)}</span></div><div class="mf-fi-trait-phrase">${esc(t.phrase)}</div></div></div>`).join('');
+  const cache=traits.caches?`<div class="mf-fi-trait-cache"><span class="mf-fi-trait-icone inconnu" aria-hidden="true"><i>?</i></span><div class="mf-fi-trait-contenu"><div class="mf-fi-trait-entete"><b class="mf-fi-trait-titre">PAS ENCORE VU</b><span class="mf-fi-trait-fait">caché</span></div><div class="mf-fi-trait-phrase">${esc(traits.indice||'')}</div></div></div>`:'';
   const distinction=mgmtFichePanneau('Ce qui le distingue',traits.vus.length+' TRAITS',traitsLignes+cache,'mf-fi-traits');
   const pense=mgmtMemoirePense(m,f.id);
-  const penseHtml=pense?`<div class="me-pensee"><b>Ce qu’il pense de toi</b><span>${esc(pense.phrase)}</span></div>`:'';
-  const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
+  const souvenirs=m.memoire&&m.memoire[f.id]&&m.memoire[f.id].s||[];
+  const labels={'attente-longue':'Attente prolongée','combat-refuse':'Combat refusé',relegation:'Passage en préliminaires','pied-leve':'Combat accepté au pied levé',prime:'Prime accordée','titre-accorde':'Combat pour le titre accordé','titre-refuse':'Combat pour le titre refusé'}; /* Libellés factuels, relu:false. */
+  const faits=souvenirs.slice(-2).map(([type,cycle])=>labels[type]?`<div class="mf-fi-souvenir"><i aria-hidden="true"></i><span>${esc(labels[type])}</span><small>soirée ${esc(cycle)}</small></div>`:'').join('');
+  const penseHtml=mfPanneau(`<div class="mf-fi-pensee"><details><summary class="mf-fi-pensee-titre">CE QU’IL PENSE DE TOI</summary><p>${esc(pense?pense.phrase:'Aucun souvenir enregistré.')}</p></details><strong>${esc(pense?pense.label.toUpperCase():'RELATION INCONNUE')}</strong>${faits}</div>`,'normal','mf-fi-pan mf-fi-relation');
+  const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f)}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
   const depuis=f.ct&&Number.isFinite(f.ct.since)?(f.ct.since===0?'LE DÉBUT':'SOIRÉE '+f.ct.since):'—';
   const restant=f.libre?'LIBRE':(f.ct?mgmtContratRestants(f)+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—');
    const gagne=m.surnoms&&m.surnoms[f.id];
-   const cases=[['Âge',f.age+' ANS'],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE'],['Taille',taille],['Allonge',allonge],['Chez '+mgmtOrgNom(m)+' depuis',depuis],['Contrat restant',restant],...(gagne?[['Surnom','SOIRÉE '+gagne.s]]:[])];
-  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>${penseHtml}`,'normal','mf-fi-pan');
+   const cases=[['Âge',f.age+' ANS'],['Taille',taille],['Allonge',allonge],['Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHO.'],['Chez '+mgmtOrgNom(m),depuis],['Contrat',restant],['Mondial',mgmtFicheSituation(m,f,'world')],['Surnom',gagne?'SOIRÉE '+gagne.s:'—']];
+  const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b style="font-size:${mfCorps(String(v),107,32,22)}px">${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan mf-fi-infos');
   const suite=prochain
-    ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
-    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
-  const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
+    ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT · SOIRÉE ${esc((m.eventsPlayed||0)+1)}</span></div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
+    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcd">AUCUN COMBAT PRÉVU</div></div>`;
+  const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
   void line;
-  return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
+  return `<div class="mf-fi-ligne mf-fi-apercu"><div class="mf-fi-c1 mf-fi-col">${distinction}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${penseHtml}${p4}</div></div>`;
 }
 
 /** Style : la cage et les lignes façon, force, faille, inconnu, allonge. */
@@ -178,7 +189,7 @@ function mgmtFicheStyleHtml(m,f){
   }
   const lignes=rows.slice(0,6).map(r=>`<div class="mf-fi-row"><div class="mf-fi-rl">${r.signe==='+'?mgmtFicheSigne('+'):(r.signe==='−'?mgmtFicheSigne('−'):(r.signe==='?'?'<b class="q">?</b>':'<span class="mf-fi-sg"></span>'))}<span>${r.lab}</span></div>`
     +`<div class="mf-fi-rc"><div class="mf-fi-rt"><b>${esc(r.t)}</b><span>${esc(r.src)}</span></div><div class="mf-fi-rp">${esc(r.p)}</div></div></div>`).join('');
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div><div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses quatre combats</span></div></div></div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f,true)}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-rows">${lignes}</div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
@@ -226,7 +237,7 @@ function mgmtFicheCombatsHtml(m,f,line){
     +`<div class="mf-fi-ct"><b>${esc(mfNet(x.adv))}</b><span>${esc(x.methode)}${x.round?', '+esc(x.round===1?'1er round':x.round+'e round'):''} · à ${esc(x.age)} ans</span></div>`
     +`<div class="mf-fi-cg">${marque(x.tag)} ${esc(x.phrase)}</div><div class="mf-fi-cm">${mfMarque(x.issue)}</div></div>`).join('');
   const parcours=mgmtFichePalmaresAmateurHtml(m,f)+(line&&line.trace?mgmtFicheParcoursHtml(line.trace):'');
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f,true)}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${total} COMBAT${total>1?'S':''}</span></div>`
     +`<div class="mf-fi-cos mf-fi-defile">${rows+vieux||'<div class="mf-fi-co autres"><b class="q">?</b><span>Aucun combat professionnel.</span></div>'}${parcours}</div></div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;

@@ -24,11 +24,23 @@ test('Monde lot 20 — le mouvement de classement d’un combattant se lit « av
 
 test('Monde lot 20 — la présentation d’un combat porte le rang de chaque combattant, et le pourcentage se lit seul', () => {
   const win = partie();
-  const html = win.eval(`(function(){const m=G.mgmt,d=m.roster.filter(f=>!mgmtIsRetired(f)),a=d[0],b=d.find(f=>f.div===a.div&&f.id!==a.id);
+  const r = JSON.parse(win.eval(`JSON.stringify((function(){const m=G.mgmt,d=m.roster.filter(f=>!mgmtIsRetired(f)),a=d[0],b=d.find(f=>f.div===a.div&&f.id!==a.id);
     CL.mgmtPresentationOuvrir('combat',[a.id,b.id],{retour:'mgmt_carte'});
-    return SCREENS.mgmt_presentation_combat?SCREENS.mgmt_presentation_combat():scr_mgmt_presentation();})()`);
-  assert.ok(/mf-pr-rg/.test(html), 'le rang chez l’organisation est à côté du prénom');
-  assert.ok(!/class="mf-pr-pct">[^<]*[A-Za-zÀ-ÿ]/.test(html), 'le pourcentage ne porte aucun nom');
+    const html=SCREENS.mgmt_presentation_combat?SCREENS.mgmt_presentation_combat():scr_mgmt_presentation(),attendus=[a,b].map(f=>mgmtFicheSituation(m,f,'organization'));
+    const lire=mgmtLendemainRangs,v={...mgmtPresentationCadre(),mode:'soiree'};let avant,inconnu;
+    try{mgmtLendemainRangs=()=>({avant:8,apres:3});avant=mgmtPresentationChiffresBanniere(m,v,a,b,'');
+      mgmtLendemainRangs=()=>({avant:null,apres:3});inconnu=mgmtPresentationChiffresBanniere(m,v,a,b,'');
+    }finally{mgmtLendemainRangs=lire;}
+    return {html,attendus,avant,inconnu};})())`));
+  const lire=html=>{const cadre=win.document.createElement('div');cadre.innerHTML=html;return cadre;};
+  const cadre=lire(r.html),rangs=[...cadre.querySelectorAll('.mf-cc-bilan span')];
+  assert.equal(rangs.length,2);
+  for(let i=0;i<2;i++)assert.ok(rangs[i].textContent.startsWith(r.attendus[i]+' · '),'le vrai rang courant est sous le nom');
+  const pourcentages=[...cadre.querySelectorAll('.mf-cc-prono-valeur b')];
+  assert.ok(pourcentages.length>0,'les pronostics contiennent des pourcentages');
+  for(const pct of pourcentages)assert.match(pct.textContent,/^\d+ %$/,'le pourcentage ne porte aucun nom');
+  for(const rang of lire(r.avant).querySelectorAll('.mf-cc-bilan span'))assert.match(rang.textContent,/^N°8 · /,'pendant la soirée, le rang précédent prime');
+  for(const rang of lire(r.inconnu).querySelectorAll('.mf-cc-bilan span'))assert.match(rang.textContent,/^Rang avant soirée inconnu · /,'un rang futur ne remplace pas une donnée absente');
 });
 
 test('Monde lot 20 — la résolution du combat baisse quand les images manquent, et remonte quand l’ordinateur suit', () => {

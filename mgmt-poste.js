@@ -153,6 +153,10 @@ function mgmtChocAnnee(m){
    Les affiches restent limitées aux catégories où les deux organisations ont
    un champion réel ; leur ordre suit le roster local, de façon déterministe. */
 function mgmtChocPaires(m,orgId){
+  return mgmtChocPairesDisponibles(m,orgId).slice(0,3);
+}
+/** Tous les duels de champions possibles, dans le même ordre que la proposition initiale. */
+function mgmtChocPairesDisponibles(m,orgId){
   const org=m&&m.orgs&&m.orgs[orgId],ids=mgmtChampionIds(m||{}),adverses=mgmtChampionIds(org||{});
   const prises=new Set(),paires=[];
   for(const a of m&&m.roster||[]){
@@ -160,7 +164,6 @@ function mgmtChocPaires(m,orgId){
     const b=(org&&org.roster||[]).find(f=>f&&f.div===a.div&&adverses.has(f.id));
     if(!b)continue;
     prises.add(a.div);paires.push({div:a.div,a:a.id,b:b.id});
-    if(paires.length===3)break;
   }
   return paires;
 }
@@ -198,6 +201,22 @@ function mgmtChocRepondre(m,accepte){
   for(let j=base+42;j<=base+70;j++)if(mgmtAgendaPoser(m,j,'petite').ok){m.choc.jour=j;m.choc.etat='programme';return true;}
   return false;
 }
+/* ==== [ANCRE: CHOC_CONTRE_COMBATS_20261028] — Anthony : contre-proposer les combats ==== */
+/** Même règle d'accord que les propositions sortantes ; aucun changement avant validation complète. */
+function mgmtChocEnvoyerContre(m,paires){
+  const c=m&&m.choc;if(!m||!m.mondeVivant||!mgmtChocValide(c)||c.etat!=='recu'||!Array.isArray(paires))return false;
+  const initiales=Array.isArray(c.paires)&&c.paires.length?c.paires:[{div:c.div,a:c.a,b:c.b}];
+  if(paires.length!==initiales.length)return false;
+  const disponibles=mgmtChocPairesDisponibles(m,c.orgId);
+  if(new Set(paires.map(p=>p&&p.div)).size!==paires.length||!paires.every(p=>p&&disponibles.some(q=>q.div===p.div&&q.a===p.a&&q.b===p.b)))return false;
+  if(paires.every((p,i)=>p.div===initiales[i].div&&p.a===initiales[i].a&&p.b===initiales[i].b))return false;
+  const suivant={...c,paires:paires.map(p=>({div:p.div,a:p.a,b:p.b})),div:paires[0].div,a:paires[0].a,b:paires[0].b,propose:true};
+  if(!mgmtChocTirageAcceptation(m,c.orgId)){suivant.etat='refuse';m.choc=suivant;return true;}
+  const base=mgmtCalAujourdhui(m);
+  for(let jour=base+42;jour<=base+70;jour++)if(mgmtAgendaPoser(m,jour,'petite').ok){suivant.jour=jour;suivant.etat='programme';m.choc=suivant;return true;}
+  return false;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MONDE_LOT58_T1_CHOC_SORTANT] — Monde lot 58 T1 ====
    Le joueur peut solliciter un partenaire admissible une seule fois par an;
    le refus ou l'accord sont déterministes et l'agenda reste le calendrier unique. ==== */

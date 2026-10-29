@@ -92,7 +92,7 @@ function mgmtSoCentreHtml(m,av,libre,joue,k){
   const actes=joue
     ?`<div class="mf-so-actes">${mfBouton('Revoir le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtSoRevoir(${k})`})}${mfBouton('Revenir au prochain combat',{touche:'Échap',onclick:'CL.mgmtSoAutre(0)'})}</div>`
      :libre
-      ?`<div class="mf-so-actes"><div class="mf-so-s">TU LE REGARDES EN</div>${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{jaune:mgmtVueDuCombat(m,k)===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}<div class="mf-so-s">${mgmtVueDuCombat(m,k)==='forts'?'Les moments clés, environ 45 secondes':mgmtVueDuCombat(m,k)==='resultat'?'Le résultat seul':'Le combat en entier'}</div></div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
+      ?`<div class="mf-so-actes"><div class="mf-so-s">TU LE REGARDES EN</div>${['complet','forts','resultat'].map((v,j)=>mfBouton(['COMPLET','TEMPS FORTS','RÉSULTAT'][j],{jaune:mgmtVueDuCombat(m,k)===v,onclick:`CL.mgmtVueCombatChoisir(${k},'${v}')`})).join('')}<div class="mf-so-s">${mgmtVueDuCombat(m,k)==='forts'?'Les moments clés, image par image à ton rythme':mgmtVueDuCombat(m,k)==='resultat'?'Le résultat seul':'Le combat en entier'}</div></div><div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
    return `<div class="so3-prochain">LE PROCHAIN · ${esc(av.etiquette)} · ${esc(av.divLabel)}</div>`+mgmtSoBanniereHtml(av)
     +`<div class="mf-so-cp"><div class="mf-so-rs">`
@@ -351,7 +351,7 @@ Object.assign(CL,{
     if(!p||!p.trace) return;
     const sortir=function(){
       const m=G.mgmt, combat=mgmtSoireeTrace(m,MGMT_SOIREE.index);
-      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render(); };
+      const avancer=()=>{ MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; CL.go('mgmt_soiree'); };
       const d=m.discours&&m.discours.c===m.eventsPlayed&&Array.isArray(m.discours.d)
         ?m.discours.d.find(x=>combat&&x&&[x.a,x.adv].includes(combat.a.id)&&[x.a,x.adv].includes(combat.b.id)):null;
       if(d&&typeof mgmtDiscoursEcran==='function'&&mgmtDiscoursEcran(m,d,avancer)) return;

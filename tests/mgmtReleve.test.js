@@ -16,10 +16,12 @@ test('Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poi
   const w=newGameWindow({runMain:true});
   const r=evalJSON(w,`setSeed(20261008); const m=mgmtDefault('split'); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; const out=[]; for(let i=0;i<40;i++){ const n=i%2?5:3, a=m.roster[i%m.roster.length], b=m.roster[(i+1)%m.roster.length]; const res=simulateFight(mgmtFightReady(a,m.cycle),mgmtFightReady(b,m.cycle),n), s=mgmtReleveDeResultat(res,n); out.push({s,round:res.round,stats:res.stats,roundStats:res.roundStats,method:res.method,n}); } return out;`);
   let mean=0,max=0; const diffs={sig:0,td:0,kd:0,subAtt:0};
-  for(const {s,round,stats,roundStats,n} of r){
+  for(const {s,round,stats,roundStats,n,method} of r){
     assert.equal(w.eval(`mgmtReleveValide(${JSON.stringify(s)})`),true);
     assert.equal(s.r.length,round||n,'arrêts et décisions doivent compter le round réellement joué');
     assert.ok(s.d>=1&&s.d<=n*300);
+    if(/^(Décision|Nul)/.test(method))assert.deepEqual(JSON.parse(w.eval(`JSON.stringify(mgmtReleveVotes(${JSON.stringify(s)}))`)),roundStats.map(r=>[...r.j1,...r.j2,...r.j3]));
+    else assert.equal(s.j,undefined,'aucun vote officiel pour un round interrompu');
     for(let i=0;i<s.r.length;i++) for(let c=0;c<2;c++){
       const row=s.r[i],o=c*14;
       assert.ok(row[o+4]+row[o+5]+row[o+6]<=row[o]+1);
@@ -32,7 +34,10 @@ test('Monde lot 31 T1 — 40 combats réels, nombre de rounds, cohérence et poi
     const bytes=Buffer.byteLength(JSON.stringify(s)); mean+=bytes;max=Math.max(max,bytes);
   }
   mean/=r.length;
-  assert.ok(mean>0); assert.ok(max>=mean); assert.ok(mean<=300,`poids moyen ${mean}`); assert.ok(max<=450,`poids maximal ${max}`);
+  assert.ok(mean>0); assert.ok(max>=mean); assert.ok(mean<=300,`poids moyen ${mean}`);
+  // Quinze paires compactes, un préfixe et sept octets de clé JSON au maximum.
+  for(const {s} of r){const base={...s};delete base.j;const brut=Buffer.byteLength(JSON.stringify(base));assert.ok(brut<=450);assert.ok(Buffer.byteLength(JSON.stringify(s))-brut<=23);}
+  assert.ok(max<=473,`poids maximal avec votes ${max}`);
   console.log('Mesures relevé:',JSON.stringify({ecartsMax:diffs,poidsMoyen:mean,poidsMax:max}));
 });
 

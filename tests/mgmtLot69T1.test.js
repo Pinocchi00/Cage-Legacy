@@ -5,6 +5,21 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const jouerSoirees=require('./helpers/jouerSoirees');
 
+test('Choc fidèle — proposition réelle, lecture pure et décisions masquées une fois la soirée programmée',()=>{
+ const w=newGameWindow({runMain:true});
+ try{
+  const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);const m=mgmtPasseGenerer('split',{soirees:6});mgmtMondeVivantGenerer(m,{soirees:6});G.mgmt=m;
+    const c=mgmtChocProposition(m);if(!c)throw new Error('Proposition naturelle absente');G.screen='mgmt_choc';const avant=JSON.stringify(m),seed=SEED;render();
+    return {pur:avant===JSON.stringify(m)&&seed===SEED,paires:c.paires.length,contre:typeof mgmtChocContreProposer==='function'};})())`));
+  assert.equal(r.pur,true);assert.equal(w.document.querySelectorAll('.ch3-paire').length,r.paires);
+  assert.ok(w.document.querySelector('.ch3-fight-panel'));assert.ok(w.document.querySelector('.ch3-terms-panel'));
+  assert.equal(w.document.querySelector('.ch3-counter').disabled,!r.contre);
+  assert.doesNotMatch(w.document.querySelector('.ch3-condition').textContent,/PASSE 2e/);
+  assert.equal(w.eval('mgmtChocRepondre(G.mgmt,true)'),true);w.eval('render()');
+  assert.equal(w.document.querySelector('.ch3-actions'),null);assert.match(w.document.querySelector('.ch3-status').textContent,/PROGRAMMÉE/);
+ }finally{w.close();}
+});
+
 test('Monde lot 69 T1 — offre acceptée, changement, arrivée, soirée et lendemain avec sauvegarde intermédiaire',()=>{
   const w=newGameWindow({runMain:true});
   try{
@@ -76,11 +91,15 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
       assert.match(renduProposition,/ch3-screen/);
       w.eval(`CL.go('mgmt_choc')`);
       const pageChoc=w.eval(`document.getElementById('app').innerHTML`);
-      assert.match(pageChoc,/CHAMPIONNE CONTRE CHAMPIONNE/,'la navigation réelle vers mgmt_choc doit monter le contenu de la proposition dans la page');
+      /* Décision : planches Uni* validées par Anthony ; les données réelles
+         (catégories et majorité) changent, sans inventer un passage au 2e rang. */
+      const genres=paires.map(p=>p.div.startsWith('F-')?'F':'H');
+      const entete=genres.every(g=>g==='F')?'CHAMPIONNE CONTRE CHAMPIONNE':genres.every(g=>g==='H')?'CHAMPION CONTRE CHAMPION':'CHAMPIONS CONTRE CHAMPIONS';
+      assert.ok(pageChoc.includes(entete),'la navigation réelle monte le titre correspondant aux champions effectivement proposés');
       w.eval(`G.mgmt.choc={orgId:${JSON.stringify(orgId)},div:${JSON.stringify(paires[0].div)},jour:14,annee:mgmtChocAnnee(G.mgmt),etat:'recu',propose:true,a:${JSON.stringify(paires[0].a)},b:${JSON.stringify(paires[0].b)},paires:${JSON.stringify(paires)}};`);
       w.eval(`G.screen='mgmt_choc';`);
     const choc=w.eval(`scr_mgmt_choc()`);
-        for(const texte of ['SPLIT','CHAMPIONNE CONTRE CHAMPIONNE','ch3-fight-heading','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
+        for(const texte of ['SPLIT',entete,'ch3-fight-heading','MOITIÉ CHACUNE','SI SPLIT GAGNE 2 SUR 3','ACCEPTER','CONTRE-PROPOSER','REFUSER','ch3-title','ch3-split','ch3-adverse','ch3-quote','ch3-detail']) assert.ok(choc.includes(texte),`bloc choc absent: ${texte}`);
         const matchmaker=JSON.parse(w.eval(`JSON.stringify(MGMT_MATCHMAKERS[${JSON.stringify(orgId)}])`));
         assert.ok(choc.includes(matchmaker.nom), 'la colonne de proposition identifie la matchmaker adverse');
         assert.ok(choc.includes(matchmaker.phrase), 'la citation provient du texte de signature existant de la matchmaker');
@@ -99,7 +118,9 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
          }
         assert.match(triple,/<span class="ch3-vs">C<\/span><strong>[^<]+<\/strong>/,'chaque affiche reprend le médaillon C et le nom de division de la planche');
         w.eval(`G.mgmt.choc.paires=G.mgmt.choc.paires.slice(0,1);G.screen='mgmt_choc';`);
-        assert.match(w.eval(`scr_mgmt_choc()`),/SI SPLIT GAGNE 1 SUR 1 · PASSE 2e/,'la règle de majorité reflète les paires réellement disputées quand le choc n’en comporte qu’une');
+        const seul=w.eval(`scr_mgmt_choc()`);
+        assert.match(seul,/SI SPLIT GAGNE 1 SUR 1/,'la majorité reflète les paires réellement disputées quand le choc n’en comporte qu’une');
+        assert.doesNotMatch(seul,/PASSE 2e/,'le rendu ne garantit pas un classement que la simulation ne calcule pas');
         w.eval(`G.mgmt.choc.paires=${JSON.stringify(paires)};G.screen='mgmt_choc';`);
        w.eval(`G.mgmt.choc.paires[1].b='combattant-absent';G.screen='mgmt_choc';scr_mgmt_choc()`);
        assert.equal(w.eval(`G.screen`),'mgmt_accueil','une proposition dont une paire référence un combattant absent revient à l’accueil plutôt que de produire un écran incomplet');
@@ -126,7 +147,7 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
         w.eval(`G.screen='mgmt_accueil';CL.go('mgmt_choc')`);
         const ecranAccepte=w.eval(`document.getElementById('app').innerHTML`);
         assert.ok(ecranAccepte.trim().length>0,'le choc accepté/programmé reste rendu lorsqu’on y revient depuis l’Accueil');
-        assert.match(ecranAccepte,/CHAMPIONNE CONTRE CHAMPIONNE/,'le choc programmé conserve son écran exploitable');
+        assert.ok(ecranAccepte.includes(entete),'le choc programmé conserve son écran exploitable et le titre des catégories proposées');
        assert.ok(w.eval(`G.mgmt.roster.some(f=>f.id===G.mgmt.choc.a)`),'le champion Split de la proposition reste associé au choc programmé');
        assert.ok(w.eval(`G.mgmt.orgs[G.mgmt.choc.orgId].roster.some(f=>f.id===G.mgmt.choc.b)`),'le champion adverse reste associé au choc programmé');
          const chocJoue=w.eval(`(()=>{const m=G.mgmt,c=m.choc,paires=c.paires;m.cal.prochaines[0].jour=c.jour;m.card.main=paires.map(p=>({a:p.a,b:p.b,cycle:m.cycle,slot:'main'}));m.card.prelims=[];m.card.sizeMain=paires.length;m.card.sizePrelims=0;m.card.sizeEarly=0;const event=mgmtRunEvent(m),combats=event&&paires.map(p=>event.fights.find(f=>(f.a===p.a&&f.b===p.b)||(f.a===p.b&&f.b===p.a))),traces=paires.map(p=>m.hist.find(h=>h.a&&h.b&&((h.a.id===p.a&&h.b.id===p.b)||(h.a.id===p.b&&h.b.id===p.a))));return {event:!!event,combats:combats&&combats.every(Boolean),traces:traces.every(Boolean),etat:c.etat,resultat:c.resultat,victoires:c.victoires,prestige:m.orgs[c.orgId].chocPrestige||0}})()`);
@@ -140,7 +161,8 @@ test('Monde lot 69 T1 — les écrans choc et discours exposent les blocs valid�
          assert.equal(chocJoue.prestige,chocJoue.victoires>=2?1:0,'le prestige augmente exactement lorsque Split gagne la majorité des trois affrontements');
       w.eval(`MGMT_DISCOURS_UI={item:{a:G.mgmt.roster[0].id,ton:'fier',motif:'surprise',interpelle:G.mgmt.roster[1].id,lignes:['Une citation de contrôle.']},retour:null};G.screen='mgmt_discours';`);
       const discours=w.eval(`scr_mgmt_discours()`);
-      for(const texte of ['di3-cartouche','LA SURPRISE DE LA SOIRÉE','di3-nom','di3-lignes','Une citation de contrôle.','S’ADRESSE À ·','di3-suite','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
+      // Revue globale : une seule commande Continuer, dans le pied de la planche.
+      for(const texte of ['di3-cartouche','LA SURPRISE DE LA SOIRÉE','di3-nom','di3-lignes','Une citation de contrôle.','S’ADRESSE À ·','Continuer']) assert.ok(discours.includes(texte),`bloc discours absent: ${texte}`);
       const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
        const classesEcran=[...new Set([...`${choc} ${discours}`.matchAll(/class="([^"]+)"/g)].flatMap(x=>x[1].split(/\s+/).filter(c=>/^(?:ch3|di3)-/.test(c))))];
        for(const classe of classesEcran) assert.ok(css.includes(`.${classe}`),`la classe visible ${classe} doit avoir une règle CSS dédiée`);

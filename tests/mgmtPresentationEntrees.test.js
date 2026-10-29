@@ -134,13 +134,14 @@ test('Monde lot 12 T3 — voix, pourcentage et sources affichées',()=>{
         const v={mode,ids:mode==='combattant'?[t.a.id]:[t.a.id,t.b.id],h,page:0,nom:0},c=mgmtPresentationLignes(m,v);mgmtPresentationHtml(m,v);
          const attendus=mode==='combattant'?c.d.faits.concat(c.d.histoire).map(x=>x.texte):c.d.faits.concat(c.d.pronostics).map(x=>x.texte);
          const profils=(mode==='combattant'?[t.a.id]:[t.a.id,t.b.id]).flatMap(id=>{const f=m.roster.find(x=>x.id===id);return mgmtLectureStyle(f).lignes.filter(x=>x!==MGMT_AVANT_TEXTES.lignes.rien);});if(mode==='combattant') attendus.push(...profils); else attendus.push(...mgmtImposerLignes(m,[t.a.id,t.b.id],h).map(x=>x.texte),...Object.values(MGMT_AVANT_TEXTES.zones));
-         const phrases=[],sources=[];for(let page=0;page<v.pages;page++){v.page=page;const el=document.createElement('div');el.innerHTML=mgmtPresentationHtml(m,v);for(const e of el.querySelectorAll('.mf-pr-phrase')){const ligne=e.closest('.mf-pr-ligne');phrases.push(e.textContent);sources.push(...JSON.parse(ligne?.dataset.sources||'[]'));}}
-        const bonnes=sources.every(s=>s.type==='hist'?!!m.hist[s.index]&&(s.projection?s.index>=h:s.index<h):s.type==='fiche'?m.roster.some(f=>f.id===s.id):s.type==='facts'?!!m.facts[s.index]:s.type==='classement'?s.h===h:s.type==='calendrier');
+         attendus.push(...c.panneaux.filter(p=>p.titre==='CE QUE LES GENS EN PENSENT').flatMap(p=>p.lignes.flatMap(x=>[x.texte,x.resume])));
+         const phrases=[],sources=[];for(let page=0;page<v.pages;page++){v.page=page;const el=document.createElement('div');el.innerHTML=mgmtPresentationHtml(m,v);for(const e of el.querySelectorAll('.mf-pr-phrase'))phrases.push(e.textContent);for(const ligne of el.querySelectorAll('[data-sources]'))sources.push(...JSON.parse(ligne.dataset.sources));}
+        const bonnes=sources.every(s=>s.type==='hist'?!!m.hist[s.index]&&(s.projection?s.index>=h:s.index<h):s.type==='fiche'?m.roster.some(f=>f.id===s.id):s.type==='facts'?!!m.facts[s.index]:s.type==='fil'?!!m.fil[s.index]&&m.fil[s.index].c<=(m.hist[Math.max(0,h-1)]?.c??0):s.type==='classement'?s.h===h:s.type==='calendrier');
         out.push({phrases,attendus,bonnes,variable:/\{[^}]+\}/.test(phrases.join(' '))});
       }}return out;`);
   assert.equal(p.length,8);
-  // La décision T3 remplace les lignes narratives par les zones de profil et le tableau histoire.
-   for(const x of p){assert.ok(x.bonnes);assert.ok(!x.variable);for(const phrase of x.attendus)if(phrase)assert.ok(x.phrases.includes(phrase),'phrase attendue absente : '+phrase);assert.ok(x.phrases.every(phrase=>x.attendus.includes(phrase)),`Phrase affichée sans source attendue: ${x.phrases.filter(phrase=>!x.attendus.includes(phrase)).join(' | ')}`);}
+  // Anthony,28/10 : synthèses condensées sans pagination ; chaque phrase retenue reste sourcée.
+   for(const x of p){assert.ok(x.bonnes);assert.ok(!x.variable);assert.ok(x.phrases.length>0);assert.ok(x.phrases.every(phrase=>x.attendus.includes(phrase)),`Phrase affichée sans source attendue: ${x.phrases.filter(phrase=>!x.attendus.includes(phrase)).join(' | ')}`);}
 });
 test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
   const w=passe();
@@ -163,8 +164,8 @@ test('Monde lot 3 T5 — échappement, absents et pagination',()=>{
 
 /* Monde lot 21 (retour d'Anthony du 18/10/2026 : « dans l'avant-combat, cliquer sur un combattant nous sort de la soirée, qui se joue sans nous ») :
    la présentation d'un combattant ouverte depuis l'avant-combat — et la fiche qui s'ouvre depuis elle — gardent la barre des sections grisée. */
-/* Décision (superviseur, 22/10/2026, brief P4 T1 : le tableau de ce qui manque à chaque organisation) : avec la nouvelle composition de Split, l'avant-combat de cette fixture (graines 20261008, 777, 4242, 20261009) n'offre plus aucun nom cliquable (mgmtPresentationLignes(...).noms est vide pour les neuf combats). Le comportement testé (barre des sections grisée depuis un nom cliqué) n'est pas modifié par la tranche ; la fixture est à recaler : test marqué `todo` (il s'exécute, son échec n'arrête pas la suite) — dette notée dans le compte rendu de la tranche. */
-test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',{todo:'fixture à recaler : plus aucun nom cliquable dans l’avant-combat depuis P4 T1'},()=>{
+/* La présentation condensée rend de nouveau les noms visibles cliquables : ce parcours de soirée est bloquant comme les autres. */
+test('Monde lot 21 — un nom cliqué dans l’avant-combat ne laisse aucune porte de sortie vers les sections',()=>{
   const w=newGameWindow({runMain:true});
   w.eval("setSeed(20261008);mgmtPasseGenerer('split',{soirees:6});");
   const jouer=require('./helpers/jouerSoirees.js'); jouer(w,6);
