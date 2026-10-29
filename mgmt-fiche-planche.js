@@ -89,17 +89,20 @@ function mgmtFicheCageHtml(m,f,taille){
   let subit=false;
   if(total){ const bordTotal=zones.rings[2]; subit=zones.pin.some((p,i)=>p.count>=3&&zones.bord[i]>0&&p.count/zones.bord[i]>=0.25&&bordTotal>0&&p.count/bordTotal>=0.05); }
   const pts=hist.map((tr,i)=>{ const p=mgmtFichePointCombat(tr,tr.a.id===f.id?'A':'B'); return p?{n:i+1,x:cx+(p.x/ARENE_RS)*ext*0.9,y:cy+(p.y/ARENE_RS)*ext*0.9}:null; }).filter(Boolean);
-  const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+6.36).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:18.7px">${p.n}</text>`).join('');
-  const teinte=force=>force>0?'#B32A1E':force<0?'url(#mf-fi-ha)':'#252121';
+  const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+7.48).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:22px">${p.n}</text>`).join('');
   /* Deux contours comme la planche. Le sol n'est pas un troisième secteur géographique. */
-  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${teinte(profil.cage)}"/><path d="${mgmtFicheOcto(cx,cy,int)}" fill="${teinte(profil.centre)}"/>`;
-  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="${profil?'Forces du profil : centre et cage. Positions de combats non archivées.':'La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit'}">`
+  const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="${profil.centre>0?'#B32A1E':'#252121'}"/>`;
+  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="${profil?'Profil public au centre. Zones de combat non observées.':'La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit'}">`
     +`<defs><pattern id="mf-fi-ha" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="#252121"/><rect width="3" height="9" fill="#E9E6E1" fill-opacity="0.55"/></pattern></defs>`
-    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
-    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/><path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>${marques}</svg>${profil?'<div class="mf-fi-cage-source">PROFIL · CENTRE / CAGE<br>Positions de combats non archivées</div>':''}`;
+    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit||profil?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
+    +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/><path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>${marques}</svg>${profil?'<div class="mf-fi-cage-source">PROFIL · AU CENTRE<br>Positions de combats non archivées</div>':''}`;
 }
-function mgmtFicheLegendeHtml(){
-  return `<div class="mf-fi-leg"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
+function mgmtFicheLegendeHtml(m,f,vertical=false){
+  const classe=vertical?'mf-fi-legv':'mf-fi-leg';
+  let observees=false;
+  if(m&&f){try{observees=mgmtFicheZones(m,f).rings.some(x=>x>0);}catch(e){observees=false;}}
+  if(m&&f&&!observees)return `<div class="${classe}"><div><i class="rouge"></i><span>Profil au centre</span></div><div><i class="hache"></i><span>Zones non observées</span></div></div>`;
+  return `<div class="${classe}"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
 }
 
 /* ---- Les pièces communes -------------------------------------------------------------------------------------------- */
@@ -146,7 +149,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const labels={'attente-longue':'Attente prolongée','combat-refuse':'Combat refusé',relegation:'Passage en préliminaires','pied-leve':'Combat accepté au pied levé',prime:'Prime accordée','titre-accorde':'Combat pour le titre accordé','titre-refuse':'Combat pour le titre refusé'}; /* Libellés factuels, relu:false. */
   const faits=souvenirs.slice(-2).map(([type,cycle])=>labels[type]?`<div class="mf-fi-souvenir"><i aria-hidden="true"></i><span>${esc(labels[type])}</span><small>soirée ${esc(cycle)}</small></div>`:'').join('');
   const penseHtml=mfPanneau(`<div class="mf-fi-pensee"><details><summary class="mf-fi-pensee-titre">CE QU’IL PENSE DE TOI</summary><p>${esc(pense?pense.phrase:'Aucun souvenir enregistré.')}</p></details><strong>${esc(pense?pense.label.toUpperCase():'RELATION INCONNUE')}</strong>${faits}</div>`,'normal','mf-fi-pan mf-fi-relation');
-  const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
+  const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f)}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
   const depuis=f.ct&&Number.isFinite(f.ct.since)?(f.ct.since===0?'LE DÉBUT':'SOIRÉE '+f.ct.since):'—';
@@ -186,7 +189,7 @@ function mgmtFicheStyleHtml(m,f){
   }
   const lignes=rows.slice(0,6).map(r=>`<div class="mf-fi-row"><div class="mf-fi-rl">${r.signe==='+'?mgmtFicheSigne('+'):(r.signe==='−'?mgmtFicheSigne('−'):(r.signe==='?'?'<b class="q">?</b>':'<span class="mf-fi-sg"></span>'))}<span>${r.lab}</span></div>`
     +`<div class="mf-fi-rc"><div class="mf-fi-rt"><b>${esc(r.t)}</b><span>${esc(r.src)}</span></div><div class="mf-fi-rp">${esc(r.p)}</div></div></div>`).join('');
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div><div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses quatre combats</span></div></div></div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f,true)}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-rows">${lignes}</div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
@@ -234,7 +237,7 @@ function mgmtFicheCombatsHtml(m,f,line){
     +`<div class="mf-fi-ct"><b>${esc(mfNet(x.adv))}</b><span>${esc(x.methode)}${x.round?', '+esc(x.round===1?'1er round':x.round+'e round'):''} · à ${esc(x.age)} ans</span></div>`
     +`<div class="mf-fi-cg">${marque(x.tag)} ${esc(x.phrase)}</div><div class="mf-fi-cm">${mfMarque(x.issue)}</div></div>`).join('');
   const parcours=mgmtFichePalmaresAmateurHtml(m,f)+(line&&line.trace?mgmtFicheParcoursHtml(line.trace):'');
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml(m,f,true)}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${total} COMBAT${total>1?'S':''}</span></div>`
     +`<div class="mf-fi-cos mf-fi-defile">${rows+vieux||'<div class="mf-fi-co autres"><b class="q">?</b><span>Aucun combat professionnel.</span></div>'}${parcours}</div></div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
