@@ -94,10 +94,13 @@ test('Regarder, passer, changer de caméra, revoir : même résultat, même trac
   const trace=win.eval(`JSON.stringify(mgmtSoireeProgramme(G.mgmt)[0].trace)`);
   win.eval(`CL.mgmtSoRegarder()`);
   assert.equal(win.eval(`G.screen`),'mgmt_combat');
+  /* Décision d'Anthony du 28/10 : les temps forts avancent seulement sur action du joueur. Le test regarde donc le combat en entier (touche T). */
+  win.eval(`CL.mgmtCbComplet()`);
   for(let i=0;i<30;i++) win.eval(`mgmtCombatAvancer(0.5)`);
   for(const p of ['plafond','large','coinA','coinB','cable']){ win.eval(`CL.mgmtCbCamera('${p}')`); win.eval(`mgmtCombatAvancer(0.5)`); }
   win.eval(`CL.mgmtCbVitesse(4); CL.mgmtCbPause(); CL.mgmtCbPause();`);
-  while(win.eval(`MGMT_COMBAT.mode`)==='fight') win.eval(`mgmtCombatAvancer(0.5)`);
+  for(let n=0;n<20000&&win.eval(`MGMT_COMBAT.mode`)==='fight';n++) win.eval(`mgmtCombatAvancer(0.5)`);
+  assert.notEqual(win.eval(`MGMT_COMBAT.mode`),'fight','le combat se termine');
   win.eval(`CL.mgmtCbRevoir()`); assert.equal(win.eval(`MGMT_COMBAT.mode`),'fight'); assert.equal(win.eval(`MGMT_COMBAT.d`),0);
   win.eval(`CL.mgmtCbPasser()`); assert.equal(win.eval(`MGMT_COMBAT.mode`),'dec');
   assert.equal(win.eval(`JSON.stringify(G.mgmt)+'|'+SEED`),avant,'rien n\'a bougé dans la partie ni dans la RNG');
@@ -110,6 +113,8 @@ test('Regarder, passer, changer de caméra, revoir : même résultat, même trac
 
 test('Le combat — aucune jauge, aucune barre de moments clés, aucun indicateur de domination', () => {
   const win=neuve(7); touche(win,'Enter'); win.eval(`CL.mgmtSoRegarder()`);
+  /* Décision d'Anthony du 28/10 : « Regarder » ouvre les temps forts en images fixes ; la touche T mène au combat en entier, objet de ce test. */
+  win.eval(`CL.mgmtCbComplet()`);
   const html=win.eval(`document.getElementById('app').innerHTML`);
   for(const mot of ['Moments clés','arene-fil','momentum','jauge','gauge','domination']) assert.ok(!html.includes(mot),'pas de '+mot);
   const cles=res(win,`return Object.keys(mgmtCombatCx());`);
@@ -120,6 +125,8 @@ test('Le combat — aucune jauge, aucune barre de moments clés, aucun indicateu
 
 test('Les touches du combat : Espace, V, C, P, R, Entrée', () => {
   const win=neuve(7); touche(win,'Enter'); win.eval(`CL.mgmtSoRegarder()`);
+  /* Décision d'Anthony du 28/10 : « Regarder » ouvre les temps forts en images fixes ; la touche T mène au combat en entier, objet de ce test. */
+  touche(win,'t');
   touche(win,' '); assert.equal(win.eval(`MGMT_COMBAT.pause`),true); assert.ok(win.eval(`document.getElementById('mc-pause').textContent`)==='Reprendre'); touche(win,' '); assert.equal(win.eval(`MGMT_COMBAT.pause`),false);
   const vits=[]; for(let i=0;i<3;i++){ touche(win,'v'); vits.push(win.eval(`MGMT_COMBAT.vitesse`)); } assert.deepEqual(vits,[2,4,1]);
   const cams=[]; for(let i=0;i<5;i++){ touche(win,'c'); cams.push(win.eval(`MGMT_COMBAT.plan`)); } assert.deepEqual(cams,['plafond','large','coinA','coinB','cable']);
