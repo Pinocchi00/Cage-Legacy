@@ -23,6 +23,10 @@ test('Accueil — une ancienne prospection ne masque pas la mission actuelle',()
   assert.doesNotMatch(r.vide,/profils à consulter/);
   assert.match(r.mission,/Voir ses retours/);
   assert.equal(r.pur,true);
+  const clavier=res(w,`const s=document.querySelector('.mf-ac-raccourcis button');return {present:!!s,consomme:keysHandle({key:'Enter',target:s}),screen:G.screen};`);
+  assert.equal(clavier.present,true);
+  assert.equal(clavier.consomme,false,'Entrée active le lien focalisé avec le comportement natif');
+  assert.equal(clavier.screen,'mgmt_accueil');
 });
 
 test('T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise : Accueil', () => {
