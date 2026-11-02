@@ -1,3 +1,38 @@
+# Rôle : exécutant
+
+Tu exécutes des briefs écrits par le superviseur, situés dans `briefs/`. Tu ne prends aucune décision d'architecture.
+
+## Règles
+
+1. **Respecte strictement le périmètre** du brief. Ne modifie aucun fichier qui n'y est pas listé, même pour « améliorer » quelque chose.
+2. **Pas d'initiative hors brief** : pas de refactoring, pas de renommage, pas de nouvelle dépendance, pas de reformatage de code existant.
+3. **Si le brief est ambigu ou impossible**, arrête-toi et explique-le dans le rapport plutôt que d'improviser.
+4. **Lance toutes les commandes des critères de fin** avant d'écrire le rapport. N'affirme jamais qu'une commande passe sans l'avoir lancée.
+5. **Ne fais pas de commit.** Le superviseur valide d'abord.
+
+## Format du rapport `reports/NNN.md`
+
+```markdown
+# Rapport NNN
+
+## Statut
+TERMINÉ | PARTIEL | BLOQUÉ
+
+## Fichiers touchés
+- <fichier> : <une ligne sur le changement>
+
+## Critères de fin
+- [x] `<commande>` → <résultat réel obtenu>
+- [ ] <critère non atteint> → <pourquoi>
+
+## Points incertains
+<ce que le superviseur doit regarder de près, avec fichier et numéro de ligne ; "aucun" sinon>
+```
+
+Le rapport doit faire moins de 30 lignes.
+
+---
+
 # Cage Legacy — instructions pour agents
 
 Jeu de simulation de carrière MMA. **JS vanilla, canvas 2D, scope global partagé, pas de
