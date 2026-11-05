@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cage Legacy — jeu actuel et maquette, côte à côte</title>
+<style>
+  @font-face{font-family:'Saira Extra Condensed';src:url('../../fonts/extracondensed-800.ttf') format('truetype');font-weight:800}
+  @font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-600-latin.woff2') format('woff2');font-weight:600}
+  body{margin:0;background:#0D0B0B;color:#E9E6E1;font-family:'Saira Condensed','Arial Narrow',sans-serif}
+  h1{font-family:'Saira Extra Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:40px;margin:0;padding:18px 24px 6px}
+  .ecran{padding:10px 24px 28px}
+  .ecran h2{font-family:'Saira Extra Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:30px;margin:10px 0 10px}
+  .ecran h2::after{content:"";display:block;width:48px;height:5px;background:#E23A2B;margin-top:8px}
+  .paire{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  figure{margin:0}
+  figcaption{font-size:20px;letter-spacing:.06em;text-transform:uppercase;color:rgba(233,230,225,.74);margin-bottom:6px}
+  figcaption b{color:#F0B220}
+  img{width:100%;display:block;border:2px solid rgba(233,230,225,.38);cursor:zoom-in}
+  .grand{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;place-items:center;z-index:9;cursor:zoom-out}
+  .grand.on{display:grid}.grand img{width:auto;max-width:96vw;max-height:94vh;border:0;cursor:zoom-out}
+</style>
+</head>
+<body>
+<h1>Jeu actuel / maquette</h1>
+<section class="ecran"><h2>Accueil</h2><div class="paire">
+  <figure><figcaption>Jeu actuel</figcaption><img src="captures/jeu-accueil.webp" alt="Accueil, jeu actuel"></figure>
+  <figure><figcaption><b>Maquette</b></figcaption><img src="captures/maquette-accueil.png" alt="Accueil, maquette"></figure></div></section>
+<section class="ecran"><h2>Fiche combattant</h2><div class="paire">
+  <figure><figcaption>Jeu actuel</figcaption><img src="captures/jeu-fiche.webp" alt="Fiche, jeu actuel"></figure>
+  <figure><figcaption><b>Maquette</b></figcaption><img src="captures/maquette-fiche.png" alt="Fiche, maquette"></figure></div></section>
+<section class="ecran"><h2>Fiche · combattants de la catégorie</h2><div class="paire">
+  <figure><figcaption>Jeu actuel</figcaption><img src="captures/jeu-fiche.webp" alt="Fiche avec « ‹ 1/30 › », jeu actuel"></figure>
+  <figure><figcaption><b>Maquette</b> · bouton « Poids légers » ouvert</figcaption><img src="captures/maquette-fiche-categorie.png" alt="Liste de la catégorie, maquette"></figure></div></section>
+<div class="grand" id="grand"><img alt=""></div>
+<script>
+"use strict";
+const g=document.getElementById('grand');
+document.querySelectorAll('.paire img').forEach(i=>i.addEventListener('click',()=>{g.firstElementChild.src=i.src;g.classList.add('on');}));
+g.addEventListener('click',()=>g.classList.remove('on'));
+</script>
+</body>
+</html>

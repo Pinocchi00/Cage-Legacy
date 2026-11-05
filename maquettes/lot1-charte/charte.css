@@ -1,0 +1,230 @@
+/* Maquette lot 1 — même cadre que le jeu (ui-cadre.css), corrections du plan du 01/11 seulement. Aucun fichier du jeu n'en dépend. */
+@font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-500-latin.woff2') format('woff2');font-weight:500}
+@font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-600-latin.woff2') format('woff2');font-weight:600}
+@font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-700-latin.woff2') format('woff2');font-weight:700}
+@font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-800-latin.woff2') format('woff2');font-weight:800}
+@font-face{font-family:'Saira Extra Condensed';src:url('../../fonts/extracondensed-800.ttf') format('truetype');font-weight:800}
+
+:root{
+  --noir:#0D0B0B; --panneau:#121010; --ligne:#252121; --blanc:#E9E6E1; --rouge:#B32A1E; --rouge-vif:#E23A2B; --jaune:#F0B220;
+  --texte2:rgba(233,230,225,.74); --sep:rgba(233,230,225,.16); --bord:rgba(233,230,225,.38);
+  --vert:#3DBE6A; --neg:#E5483B; /* T11 : vert = victoire / positif / montée, rouge = défaite / négatif / descente, jaune = important */
+  --titre:'Saira Extra Condensed','Saira Condensed','Arial Narrow',sans-serif; --texte:'Saira Condensed','Arial Narrow',sans-serif;
+  --c:10px; --barre:260px;
+}
+body[data-police="barlow"]{--titre:'Barlow Condensed','Arial Narrow',sans-serif;--texte:'Barlow Semi Condensed','Arial Narrow',sans-serif}
+body[data-police="bigshoulders"]{--titre:'Big Shoulders Display','Arial Narrow',sans-serif}
+body[data-police="oswald"]{--titre:'Oswald','Arial Narrow',sans-serif}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0a0909;overflow:hidden}
+body{color:var(--blanc);font-family:var(--texte);font-weight:500;font-size:22px;line-height:1.25}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+.T{font-family:var(--titre);font-weight:800;text-transform:uppercase;line-height:.9}
+
+/* Scène 1920 × 1080 mise à l'échelle, comme le jeu */
+.scene{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden}
+
+/* Fonds (C1 : le cendré part ; on garde une matière proche) */
+.fond{position:absolute;inset:0;z-index:0}
+body[data-fond="arene"] .fond{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+  radial-gradient(ellipse 900px 520px at 62% -6%,rgba(226,58,43,.16),transparent 70%),radial-gradient(ellipse 1100px 700px at 60% 45%,#2d2a29,#1b1919 75%)}
+body[data-fond="cendre"] .fond{background:#171413 url('../../images/cendre.jpg') center/1920px 1080px no-repeat}
+body[data-fond="cage"] .fond{background:radial-gradient(ellipse 500px 900px at 66% -10%,rgba(255,236,200,.10),transparent 70%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M0 22L22 0L44 22L22 44Z' fill='none' stroke='%23E9E6E1' stroke-opacity='.045' stroke-width='1.6'/%3E%3C/svg%3E"),#211f1e}
+body[data-fond="sobre"] .fond{background:#1c1a1a}
+
+/* Octogone : 4 coins coupés à la place de 2 (Q19b) */
+.oct{clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c))}
+.octr{clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+
+/* Barres de défilement fines (T11) */
+*{scrollbar-width:thin;scrollbar-color:rgba(233,230,225,.25) transparent}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(233,230,225,.22)}::-webkit-scrollbar-thumb:hover{background:var(--rouge-vif)}
+
+/* ---- Barre latérale : identique au jeu, repliable en icônes (T4) ---- */
+.barre{position:absolute;left:0;top:0;width:var(--barre);height:1080px;background:var(--noir);border-right:2px solid var(--bord);display:flex;flex-direction:column;z-index:5;transition:width .35s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.barre-logo{height:128px;flex:none;padding:0 22px;border-bottom:2px solid var(--sep);display:flex;align-items:center;gap:11px}
+.barre-logo svg{width:88px;height:88px;flex:none}
+.logo-mots{display:flex;flex-direction:column;gap:3px;line-height:.72;white-space:nowrap}
+.logo-mots b{font-family:var(--titre);font-weight:800;font-size:38px}.logo-mots i{font-family:var(--titre);font-weight:800;font-style:normal;font-size:26px}
+.item{width:100%;height:59px;flex:none;padding:0 22px 0 28px;border-bottom:2px solid var(--sep);display:flex;align-items:center;gap:16px;font-family:var(--titre);font-weight:800;font-size:30px;white-space:nowrap;text-transform:uppercase;position:relative}
+.item:hover{background:rgba(233,230,225,.06)}
+.item.cur{background:var(--blanc);color:var(--noir)}
+.item .ic{width:30px;height:30px;flex:none;display:none;position:relative}
+.item .lib{flex:1}
+.item>.mq{width:20px;height:20px;background:var(--jaune);flex:none}
+.barre-bas{margin-top:auto;border-top:2px solid var(--sep)}
+.repli{display:flex;align-items:center;gap:12px;height:50px;padding:0 28px;font-size:18px;color:var(--texte2);white-space:nowrap;width:100%}
+.inter{width:42px;height:22px;background:var(--ligne);position:relative;flex:none;border-radius:11px}
+.inter::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--blanc);transition:left .25s}
+body.repliee{--barre:84px}
+body.repliee .inter{background:var(--rouge)}body.repliee .inter::after{left:23px}
+body.repliee .logo-mots,body.repliee .item .lib,body.repliee .repli .lib{display:none}
+body.repliee .barre-logo{padding:0 12px}body.repliee .barre-logo svg{width:58px;height:58px}
+body.repliee #bRepli svg{transform:scaleX(-1)}
+body.repliee .item{padding:0;justify-content:center}
+body.repliee .item .ic{display:block}
+body.repliee .item>.mq{display:none}
+.item .ic .mq{display:none;position:absolute;top:-6px;right:-8px;width:13px;height:13px;background:var(--jaune)}
+body.repliee .item .ic .mq{display:block}
+body.repliee .repli{padding:0;justify-content:center}
+
+/* ---- Zone d'écran ---- */
+.zone{position:absolute;left:calc(var(--barre) + 40px);right:40px;top:0;bottom:0;transition:left .35s cubic-bezier(.2,.8,.2,1)}
+.entete{position:absolute;left:0;right:0;top:20px;height:64px;display:flex;align-items:center;gap:22px;z-index:6}
+.plaque{height:64px;padding:0 18px;border:2px solid var(--bord);background:var(--noir);display:flex;align-items:center;font-family:var(--titre);font-weight:800;font-size:56px;line-height:.69;text-transform:uppercase;white-space:nowrap}
+.retour{width:64px;height:64px;border:2px solid var(--bord);background:var(--noir);display:grid;place-items:center;flex:none}
+.retour:hover{background:var(--ligne)}.retour:disabled{opacity:.3;cursor:default}
+.ent-lib{font-weight:600;font-size:22px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.ent-n{font-family:var(--titre);font-weight:800;font-size:44px;line-height:.69;white-space:nowrap}
+.ent-d{font-size:24px;color:var(--texte2);white-space:nowrap;margin-left:auto}
+.boite{height:64px;padding:0 18px;border:2px solid var(--bord);background:var(--noir);display:flex;align-items:center;gap:16px;white-space:nowrap}
+.boite .T{font-size:42px;line-height:.69}
+.boite small{font-weight:600;font-size:22px;letter-spacing:.08em;text-transform:uppercase}
+.continuer{height:64px;padding:0 18px 0 20px;background:var(--rouge);display:flex;align-items:center;gap:14px;white-space:nowrap;position:relative;--c:12px}
+.continuer:hover{background:var(--rouge-vif)}
+.continuer .T{font-size:40px;line-height:.75}
+.continuer small{display:block;font-size:17px;line-height:1;opacity:.92;margin-top:4px}
+.continuer .mq{position:absolute;top:7px;right:7px;width:14px;height:14px;background:var(--jaune)}
+.alerte-l{position:absolute;left:0;top:94px;display:flex;align-items:center;gap:18px;z-index:6}
+.alerte-l .tag-j{height:30px;padding:0 12px;background:var(--jaune);color:var(--noir);display:flex;align-items:center;font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;--c:6px}
+.corps{position:absolute;left:0;right:0;top:136px;bottom:36px;transition:filter .3s}
+
+/* Panneau à double bord, comme .mf-panneau, mais octogonal */
+.pan{--b:var(--bord);display:flex;background:var(--b);padding:2px;--c:18px;min-width:0;min-height:0}
+.pan>.p2{flex:1;min-width:0;display:flex;background:var(--noir);padding:5px;--c:17px}
+.pan>.p2>.p3{flex:1;min-width:0;background:var(--panneau);--c:14px;display:flex;flex-direction:column;padding:22px 22px 18px;overflow:hidden}
+.pt{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;flex:none}
+.pt h2{margin:0;font-family:var(--titre);font-weight:800;font-size:44px;line-height:.86;text-transform:uppercase}
+.pt h2::after{content:"";display:block;width:56px;height:6px;background:var(--rouge-vif);margin-top:12px}
+.pt .ment{margin-left:auto;font-weight:600;font-size:20px;letter-spacing:.06em;text-transform:uppercase;color:var(--texte2);white-space:nowrap;padding-top:6px}
+.pt .ment button{color:var(--jaune);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.defile{overflow-y:auto;min-height:0;flex:1;padding-right:8px}
+.etiq{font-weight:600;font-size:20px;letter-spacing:.07em;text-transform:uppercase;color:var(--texte2)}
+.sous{font-size:20px;color:var(--texte2)}
+.tag{height:38px;padding:0 12px;border:2px solid var(--bord);display:inline-flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;flex:none}
+
+/* Pièces */
+.ligne{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:2px solid var(--sep);cursor:pointer}
+.point{width:16px;height:16px;flex:none;background:var(--jaune)}
+.pulse{animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.6}}
+.nom{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-color:rgba(233,230,225,.45);cursor:pointer}
+.nom:hover{text-decoration-color:var(--jaune)}
+.surn{color:var(--jaune)}
+.bouton{height:60px;padding:0 22px;background:var(--ligne);display:inline-flex;align-items:center;gap:12px;white-space:nowrap;--c:14px;font-family:var(--titre);font-weight:800;font-size:34px;text-transform:uppercase}
+.bouton.jaune{background:var(--jaune);color:var(--noir)}
+.bouton.jaune:hover{box-shadow:inset 0 0 0 3px #fff3c9}
+.bouton:not(.jaune):hover{background:#353030}
+.bouton.petit{height:46px;font-size:26px;padding:0 16px;--c:10px}
+.onglet{height:56px;padding:0 24px;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:32px;line-height:56px;white-space:nowrap;text-transform:uppercase;--c:10px;position:relative}
+.onglet:hover{background:#353030}
+.onglet.ouvert{background:var(--blanc);color:var(--noir)}
+.onglet-mq{width:14px;height:14px;background:var(--jaune);display:inline-block;margin-left:10px;vertical-align:4px}
+.marque{width:34px;height:34px;flex:none;display:inline-grid;place-items:center;font-family:var(--titre);font-weight:800;font-size:24px;color:var(--noir)}
+.marque.v{background:var(--vert)}.marque.d{background:var(--neg)}.marque.n{background:#8a8580}
+.lecture{color:var(--texte2);font-size:24px}
+
+/* Animations discrètes (T3) */
+.apparait{animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes apparait{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.jauge{height:8px;background:var(--ligne);position:relative;overflow:hidden}
+.jauge>i{position:absolute;left:0;top:0;bottom:0;transform-origin:left;animation:remplit 1.1s cubic-bezier(.2,.8,.2,1) .2s both}
+@keyframes remplit{from{transform:scaleX(0)}}
+
+/* Fiche en panneau par-dessus l'écran (T7) */
+.fiche{position:absolute;left:0;right:0;top:136px;bottom:36px;z-index:4;transform:translateX(110%);transition:transform .42s cubic-bezier(.2,.8,.2,1)}
+.fiche.ouverte{transform:none}
+.corps{transition:opacity .35s,filter .35s}
+.zone.fiche-ouverte .corps{opacity:0;filter:blur(3px)}
+.banniere{position:relative;height:270px;background:var(--noir);overflow:hidden;cursor:grab;user-select:none;touch-action:pan-y}
+.banniere:active{cursor:grabbing}
+.ban-contenu{position:absolute;inset:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.fl-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:90px;background:rgba(13,11,11,.8);display:grid;place-items:center;z-index:3;opacity:0;transition:opacity .2s}
+.banniere:hover .fl-nav{opacity:1}
+.fl-nav.g{left:0}.fl-nav.d{right:0}
+
+/* Choix à faire, messages courts */
+.reglages{position:absolute;right:40px;bottom:40px;width:460px;z-index:30;display:none;--c:14px;background:var(--bord);padding:2px}
+.reglages.on{display:block;animation:apparait .25s both}
+.reglages>div{background:#141111;--c:13px;padding:18px}
+.choix{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.choix button{border:2px solid var(--ligne);background:var(--ligne);padding:5px 12px;font-size:18px;line-height:1.15}
+.choix button.cur{border-color:var(--jaune);color:var(--jaune)}
+.choix small{display:block;color:var(--texte2);font-size:14px}
+.toast{position:absolute;left:50%;bottom:60px;transform:translateX(-50%);z-index:40;background:var(--bord);padding:2px;--c:10px}
+.toast>div{background:#141111;--c:9px;padding:14px 22px;font-size:22px;display:flex;gap:12px;align-items:center;white-space:nowrap}
+.relire{display:inline-block;font-size:14px;font-weight:700;color:var(--noir);background:var(--jaune);padding:1px 7px;margin-left:8px;vertical-align:middle;letter-spacing:.05em;text-transform:uppercase;font-style:normal;line-height:1.4}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- Retours du 05/11 ---- */
+/* Bandeau de l'accueil : le tunnel rouge du jeu, éclairci et en dégradé */
+.bandeau{position:relative;overflow:hidden;background:var(--noir);border:2px solid var(--sep)}
+.bandeau-img{position:absolute;left:-380px;top:-407px;width:1728px;height:972px;background:url('../../images/accueil-octogones.jpg') 0 0/1728px 972px no-repeat;filter:brightness(1.55) saturate(1.1)}
+.bandeau::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+  radial-gradient(ellipse 520px 220px at 47% 50%,rgba(255,140,110,.28),transparent 70%),
+  linear-gradient(90deg,#0D0B0B 0,#0D0B0B 14%,rgba(13,11,11,.2) 34%,transparent 50%,rgba(13,11,11,.35) 80%,rgba(13,11,11,.6))}
+.bandeau>div{z-index:1}
+/* Repli de la barre : petit bouton fonctionnel en haut */
+.barre-logo{position:relative}
+.repli-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;display:grid;place-items:center;color:rgba(233,230,225,.4)}
+.repli-btn:hover{color:var(--blanc);background:var(--ligne)}
+body.repliee .repli-btn{right:27px;top:auto;bottom:4px;transform:scaleX(-1)}
+/* Bannière de fiche : les images du jeu, au même cadrage (.mf-fb) */
+.fb-img{position:absolute;left:-150.6px;top:-356px;width:1728px;height:972px;background:url('../../images/accueil-octogones.jpg') 0 0/1728px 972px no-repeat}
+.fb-img.or{background-image:url('../../images/tunnel-or.jpg')}
+.fb-nom{position:absolute;left:32px;bottom:30px;display:flex;flex-direction:column;gap:16px;font-family:var(--titre);font-weight:800;line-height:.69;white-space:nowrap;text-transform:uppercase;
+  text-shadow:2px 0 0 #0D0B0B,-2px 0 0 #0D0B0B,0 2px 0 #0D0B0B,0 -2px 0 #0D0B0B,2px 2px 0 #0D0B0B,-2px -2px 0 #0D0B0B,2px -2px 0 #0D0B0B,-2px 2px 0 #0D0B0B}
+.fb-nom .s{font-style:normal;font-size:36px;letter-spacing:.04em;opacity:.86;margin-left:10px}
+.fb-pal{position:absolute;right:32px;top:30px;width:400px;height:200px;border:2px solid var(--bord);background:rgba(13,11,11,.86);padding:0 22px;display:flex;align-items:center;justify-content:space-between}
+.rang-c{width:84px;height:84px;display:grid;place-items:center;background:var(--jaune);padding:4px}
+.rang-c>span{width:100%;height:100%;display:grid;place-items:center;background:#0D0B0B;padding:3px}
+.rang-c>span>b{width:100%;height:100%;display:grid;place-items:center;background:var(--jaune);color:var(--noir);font-family:var(--titre);font-weight:800;font-size:46px}
+/* Bouton de catégorie et son panneau (défilement à la molette) */
+.btn-cat{height:56px;padding:0 20px;border:2px solid var(--bord);background:var(--noir);display:flex;align-items:center;gap:12px;font-family:var(--titre);font-weight:800;font-size:30px;text-transform:uppercase;white-space:nowrap}
+.btn-cat:hover,.btn-cat.on{border-color:var(--blanc)}
+.btn-cat .n{font-family:var(--texte);font-weight:600;font-size:20px;color:var(--texte2);text-transform:none}
+.panneau-cat{position:absolute;left:0;right:0;top:352px;bottom:0;z-index:5;animation:apparait .25s both}
+.lc{display:grid;grid-template-columns:56px minmax(0,1.6fr) 120px 130px 220px 220px;align-items:center;gap:16px;padding:10px 14px;border-bottom:2px solid var(--sep);cursor:pointer;--c:8px}
+.lc:hover{background:var(--ligne)}
+.lc.cur{background:var(--blanc);color:var(--noir)}
+.lc.cur .sous,.lc.cur .nom{color:var(--noir)}
+.barre-logo .repli-btn svg{width:18px;height:18px}
+/* Bandeau : tunnel entier et plus petit entre « Split » et les chiffres, en dégradé de rouge clair */
+.bandeau-img{left:-118px;top:-164px;width:864px;height:486px;background-size:864px 486px;filter:brightness(1.7) saturate(1.05) hue-rotate(6deg)}
+.bandeau::after{background:radial-gradient(ellipse 300px 160px at 28% 50%,rgba(255,150,120,.30),transparent 70%),
+  linear-gradient(90deg,#0D0B0B 0,#0D0B0B 12%,rgba(13,11,11,.15) 24%,transparent 32%,rgba(13,11,11,.15) 40%,rgba(13,11,11,.5) 48%)}
+/* ---- Retours du 05/11 (2) ---- */
+/* Tunnel de l'accueil : même départ et même étendue que la bannière de fiche (.mf-fb-img), moins lumineux */
+.bandeau-img{left:-150.6px;top:-407px;width:1728px;height:972px;background-size:1728px 972px;filter:brightness(.8) saturate(.95)}
+.bandeau::after{background:linear-gradient(90deg,#0D0B0B 0,#0D0B0B 14%,transparent 34%)}
+.bandeau .stat-b{background:rgba(13,11,11,.62)}
+/* Bouton à bord octogonal complet (le bord suit les angles coupés) */
+.bb{--c:10px;background:var(--bord);padding:2px;display:inline-flex;flex:none}
+.bb>span{--c:9px;background:var(--noir);display:flex;align-items:center;gap:12px;height:52px;padding:0 20px;font-family:var(--titre);font-weight:800;font-size:30px;text-transform:uppercase;white-space:nowrap}
+.bb:hover,.bb.on{background:var(--blanc)}
+.bb:hover>span{background:#1a1717}
+.lc{grid-template-columns:56px minmax(0,1.4fr) 110px 120px 200px 230px 170px}
+/* Contour des cases jaunes : liseré noir intérieur qui suit les angles, comme le C du champion */
+.cj{position:relative;isolation:isolate}
+.cj::before,.cj::after{content:"";position:absolute;z-index:-1;pointer-events:none}
+.cj::before{inset:4px;background:var(--noir);--k:calc(var(--c) - 2px);clip-path:polygon(var(--k) 0,calc(100% - var(--k)) 0,100% var(--k),100% calc(100% - var(--k)),calc(100% - var(--k)) 100%,var(--k) 100%,0 calc(100% - var(--k)),0 var(--k))}
+.cj::after{inset:6px;background:var(--jaune);--k:calc(var(--c) - 3px);clip-path:polygon(var(--k) 0,calc(100% - var(--k)) 0,100% var(--k),100% calc(100% - var(--k)),calc(100% - var(--k)) 100%,var(--k) 100%,0 calc(100% - var(--k)),0 var(--k))}
+.cj.fin::before{inset:3px}.cj.fin::after{inset:5px}
+.bouton.jaune.cj:hover{box-shadow:none}.bouton.jaune.cj:hover::after{background:#ffc63b}
+/* Contour jaune affiné : un filet de 1 px, discret */
+.cj::before{inset:3px;background:rgba(13,11,11,.55);--k:calc(var(--c) - 1px)}
+.cj::after{inset:4px;--k:calc(var(--c) - 1.5px)}
+.cj.fin::before{inset:2px}.cj.fin::after{inset:3px}
+/* Contour jaune = même trait que les autres cases : 2 px de bord, au bord */
+.cj{background:var(--bord)!important}
+.cj::before{display:none}
+.cj::after{inset:2px;background:var(--jaune);--k:calc(var(--c) - 1px)}
+.cj.fin::after{inset:2px}
+/* Bandeau de l'accueil : plus de séparations, fond des chiffres plus opaque */
+.bandeau .stat-b{background:rgba(13,11,11,.86);border-left:0!important}
+.cj{background:rgba(233,230,225,.7)!important}
+.cj{background:#74716F!important} /* même teinte, à l’écran, que le bord des panneaux */
+.cj.fin::after{inset:1px;--k:calc(var(--c) - .5px)} /* petite étiquette : contour de 1 px, proportionnel */
