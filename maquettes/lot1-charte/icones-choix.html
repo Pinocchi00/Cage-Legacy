@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cage Legacy — icônes à choisir</title>
+<style>
+  @font-face{font-family:'Saira Extra Condensed';src:url('../../fonts/extracondensed-800.ttf') format('truetype');font-weight:800}
+  @font-face{font-family:'Saira Condensed';src:url('../../fonts/condensed-600-latin.woff2') format('woff2');font-weight:600}
+  body{margin:0;background:#0D0B0B;color:#E9E6E1;font-family:'Saira Condensed','Arial Narrow',sans-serif;width:1920px;height:1080px}
+  h1{font-family:'Saira Extra Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:48px;margin:0;padding:30px 48px 4px}
+  p{margin:0 48px 22px;font-size:24px;color:rgba(233,230,225,.74)}
+  table{border-collapse:collapse;margin:0 48px}
+  th{font-family:'Saira Extra Condensed',sans-serif;font-weight:800;font-size:40px;text-transform:uppercase;text-align:left;padding:0 40px 0 0;width:300px}
+  td{padding:14px 34px;border-left:2px solid rgba(233,230,225,.16)}
+  .c{display:flex;align-items:center;gap:26px}
+  .k{font-family:'Saira Extra Condensed',sans-serif;font-weight:800;font-size:44px;color:#F0B220;width:34px}
+  .g svg{width:96px;height:96px}
+  .p{width:84px;height:59px;background:#0D0B0B;border:2px solid rgba(233,230,225,.16);display:grid;place-items:center;color:rgba(233,230,225,.8)}
+  .p svg{width:30px;height:30px}
+  .l{font-size:22px;color:rgba(233,230,225,.74);margin-top:6px;width:250px}
+  tr+tr td,tr+tr th{border-top:2px solid rgba(233,230,225,.16)}
+</style>
+</head>
+<body>
+<h1>Icônes à choisir</h1>
+<p>Pour chaque icône : en grand, puis à la taille réelle de la barre réduite. Dis-moi une lettre par ligne (par exemple « Classements B »).</p>
+<table id="t"></table>
+<script>
+"use strict";
+const VS=(x,y,s)=>`<text x="${x}" y="${y}" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${s}">VS</text>`;
+const oct=(cx,cy,r)=>{const a=r*.4142;return `M${cx-a} ${cy-r}h${2*a}l${r-a} ${r-a}v${2*a}l${a-r} ${r-a}h${-2*a}l${a-r} ${a-r}v${-2*a}z`;};
+const txt=(x,y,s,t)=>`<text x="${x}" y="${y}" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${s}">${t}</text>`;
+/* Les propositions (la première de chaque ligne est celle mise dans la barre en attendant ton choix). */
+window.ICONES={
+  prelims:['Préliminaires',[
+    ['Deux combats',`<path d="${oct(15,9,6.5)}"/><path fill="#0D0B0B" d="${oct(9.5,14.5,7)}"/>${VS(9.5,17.6,8.5)}`],
+    ['Liste de combats',`<path d="${oct(5,6,2.5)}M${5} 6zM10 6h11"/><path d="${oct(5,12,2.5)}M10 12h11"/><path d="${oct(5,18,2.5)}M10 18h11"/>`],
+    ['Petit VS',`<path d="${oct(12,12,7)}"/>${VS(12,15.3,8.5)}<path d="M3 21.5h18"/>`]]],
+  classements:['Classements',[
+    ['Numéro 1',`${txt(12,19.5,19,'#1')}`],
+    ['Montées et descentes',`<path d="M10 6h11M10 12h11M10 18h11"/><path d="M3 8l2.5-3.5L8 8z M3 16l2.5 3.5L8 16z" fill="currentColor"/><path d="M3.5 12h4"/>`],
+    ['Médaille',`<circle cx="12" cy="15" r="5.5"/><path d="M8.6 10.6L6 3h4l2 5 2-5h4l-2.6 7.6"/>${txt(12,18.2,8,'1')}`]]],
+  ceintures:['Ceintures',[
+    ['Ceinture',`<path d="M2 9.5h4M2 14.5h4M18 9.5h4M18 14.5h4M2 9.5v5M22 9.5v5"/><path d="${oct(12,12,6.5)}"/><path d="${oct(12,12,2.6)}"/>`],
+    ['Couronne',`<path d="M3 18.5h18M3.5 18.5L2.5 7l5.5 4.5L12 4.5l4 7L21.5 7l-1 11.5"/>`],
+    ['Ceinture large',`<path d="M2 9h20v6H2z"/><path fill="#0D0B0B" d="M7.5 5.5h9v13h-9z"/><circle cx="12" cy="12" r="2.5"/>`]]],
+  contrats:['Contrats',[
+    ['Plume',`<path d="M12 21.5l-6-9L9 4h6l3 8.5z"/><path d="M12 21.5v-7.5M9 4V2h6v2"/><circle cx="12" cy="12.5" r="1.4"/>`],
+    ['Document et stylo',`<path d="M13 3H5v18h7M13 3l6 6v2M13 3v6h6"/><path d="M12 20l1-3.5 6.5-6.5 2.5 2.5-6.5 6.5z"/>`],
+    ['Tampon',`<path d="M5 17.5h14v3.5H5zM9.5 17.5v-4h5v4"/><circle cx="12" cy="8" r="4.5"/>`]]],
+  resultats:['Résultats',[
+    ['Victoire / défaite',`<path d="${oct(7,12,5.5)}"/><path d="${oct(17,12,5.5)}"/>${txt(7,15.4,9,'V')}${txt(17,15.4,9,'D')}`],
+    ['Drapeau à damier',`<path d="M4.5 21.5V3"/><path d="M4.5 4h15v10h-15z"/><path fill="currentColor" stroke="none" d="M4.5 4h5v3.3h-5zM14.5 4h5v3.3h-5zM9.5 7.3h5v3.4h-5zM4.5 10.7h5V14h-5zM14.5 10.7h5V14h-5z"/>`],
+    ['Score',`<path d="M2.5 5.5h19v13h-19z"/>${txt(12,16,10.5,'3 – 1')}`]]],
+};
+const svg=b=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">${b}</svg>`;
+document.getElementById('t').innerHTML=Object.values(ICONES).map(([nom,v])=>`<tr><th>${nom}</th>${v.map(([l,b],i)=>`<td><div class="c"><span class="k">${'ABC'[i]}</span><span class="g">${svg(b)}</span><span class="p">${svg(b)}</span></div><div class="l">${l}</div></td>`).join('')}</tr>`).join('');
+</script>
+</body>
+</html>
