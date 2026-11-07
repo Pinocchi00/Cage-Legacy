@@ -1,6 +1,6 @@
 # Cage Legacy — règles des maquettes (mode management)
 
-**Date :** 05/11/2026 · **Source :** retours d'Anthony pendant la maquette du lot 1 (Accueil et fiche combattant), le plan de corrections du 01/11, la charte `docs/CHARTE-INTERFACE-MANAGEMENT.md` et les mesures du jeu (`ui-cadre.css`).
+**Date :** 05/11/2026 · **Sources :** retours d'Anthony pendant la maquette du lot 1 (Accueil et fiche combattant), le plan de corrections `docs/PLAN-CORRECTIONS-01-11.md`, le dossier `docs/DOSSIER-UI-UX-GESTION-2026.pdf`, la charte `docs/CHARTE-INTERFACE-MANAGEMENT.md` et les mesures du jeu (`ui-cadre.css`).
 **Référence visuelle validée :** `maquettes/lot1-charte/` (`index.html`, `comparaison.html`).
 **S'applique à :** toute nouvelle maquette d'écran du management, avant le code.
 
@@ -146,9 +146,139 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
   - **les huit faits** (âge, taille, allonge, garde, chez Split, contrat, mondial, style), **En ce moment** (état et temps depuis le dernier combat) et **Prochain combat** avec « Proposer un combat ».
 - **Statistiques** : chaque barre a un repère blanc pour la moyenne de la catégorie et un point vert si c'est mieux. Les fins de combat sont dites clairement (« arrêt de l'arbitre sur coups », « arrêt du médecin »).
 
-## 11. Interprétations à confirmer, et ce qui reste à décider ailleurs
+## 11. Les pièces communes pas encore maquettées
 
-- La boîte de date de l'en-tête affiche **la date du jour** (elle avance avec Continuer). Le 16 février est la date de la soirée et reste dans le bandeau.
-- Le nom de la soirée reste « Split Fight Night 63 » comme dans le jeu, alors que le plan prévoit « Split : X vs Y » pour les fight nights (Q29a).
-- Le fond cendré est retiré (C1). La maquette utilise un gris chaud texturé proche du jeu ; le choix final du fond n'est pas encore validé.
-- Les surnoms ajoutés aux poids légers (Le Notaire, Baba, Le Faucon…) sont des propositions à relire. Seul « Le Boucher » vient du jeu.
+Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-11.md`), de la charte et du dossier UI/UX (`docs/DOSSIER-UI-UX-GESTION-2026.pdf`). Elles s'appliquent dès qu'un écran contient la pièce. La première maquette qui la montre la fait valider.
+
+### Grands tableaux (Effectif, Classements, Contrats, Recrutement, Salles)
+- **Toutes les colonnes se trient** d'un clic sur leur titre. Le titre trié est blanc, avec ▾ ou ▴.
+- **Pas de titre bavard** au-dessus du tableau (« 29 combattants en poids léger », R15). Le titre de l'écran suffit ; les filtres disent le reste.
+- **Filtres en boutons octogonaux**, sur une ligne au-dessus du tableau. Le filtre actif a le bord blanc. **Un filtre choisi n'est jamais remis à zéro** quand on revient sur l'écran (dossier UI/UX).
+- **Vue essentielle et vue experte** : la vue essentielle a 6 à 8 colonnes utiles, la vue experte ajoute le détail. Les deux ont la même structure.
+- **Colonnes à prévoir pour un combattant** : nom souligné avec le surnom dessous, catégorie, âge, palmarès, rang Split (ou C avec contour), rang mondial avec ▲ / ▼, 5 derniers combats, dernier combat (mois et semaines), état.
+- **Aucune croix ni pastille sans rôle** (R15, R22). Un élément qu'on ne peut pas cliquer n'a pas l'air cliquable.
+- **Un clic sur un nom** ouvre la fiche en panneau. Un clic ailleurs sur la ligne ne fait rien d'inattendu.
+- Lignes de 56 à 60 px, séparées par un trait de 2 px (`--sep`), sans fond alterné.
+
+### Sous-menus d'un écran (onglets du haut)
+- Ils restent en haut, **sous l'en-tête, jamais par-dessus** (R18, Q18c) : à 136 px du haut (ou juste sous la ligne « Prochaine étape »).
+- Mêmes onglets que la fiche : 56 px, octogonaux, celui qui est ouvert est blanc.
+- Un onglet qui a du nouveau porte le **petit octogone jaune** à côté de son nom.
+
+### Écran Messages (R13, T10, Q5a)
+- **Deux colonnes, pas trois** : la liste des messages à gauche (≈ 520 px), le message ouvert au centre. Plus de colonne de droite.
+- Chaque ligne de la liste : point jaune si non lu, titre, auteur et date, étiquette du type (LEÏLA, MÉDECIN, PALIER, PRESSE, RECRUTEUR, AGENT, ORGANISATION).
+- Le message ouvert : qui parle, quand, le texte (largeur de lecture 55 à 80 caractères), puis **2 à 4 réponses au plus**, en boutons. La réponse principale est jaune, les autres sont noires avec un bord.
+- **Un message important arrête Continuer** : blessure à l'affiche, poids raté, retour du recruteur, offre d'une autre organisation…
+- **Un palier de croissance franchi arrive comme un message** (« Palier franchi »), pas dans le fil d'actualité.
+- « Le fil » et « Tes suivis » ne sont pas dans les Messages. Le fil va dans Presse et les suivis dans Recrutement, sauf si tu décides autrement (choix ouvert).
+
+### Continuer (T10)
+- Toujours au même endroit : en haut à droite, en bouton jaune.
+- Le temps avance **jour par jour** ; la date de la boîte change sous les yeux. Il **s'arrête sur le premier message important**.
+- S'il reste une décision qui bloque (un combattant blessé à l'affiche, par exemple), Continuer **le dit et mène à l'écran où l'on règle le problème**, avec la personne déjà sélectionnée (dossier UI/UX). Ce qui peut attendre ne bloque pas.
+
+### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
+- Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
+- Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
+- Ils se ferment par Retour, par un nouveau clic sur leur bouton, ou par un clic en dehors.
+
+### Confirmations et erreurs
+- **Pas de fenêtre de confirmation**, sauf pour une décision irréversible qui engage l'argent ou une carrière : libérer un combattant, valider la carte, fixer les primes (charte S6).
+- La confirmation reprend **ce qui va se passer, en chiffres** (qui, combien, quand), avec deux boutons : l'action en jaune, « Revenir » en noir.
+- **Un refus dit pourquoi et quoi faire** : « Impossible : Rizzo est blessé jusqu'au 2 février. » Jamais « Erreur » ou « Action impossible » seul.
+- Le retour d'une action se voit tout de suite (la ligne change, le compteur bouge). Un petit message en bas, au même cadre, pendant 3 secondes, suffit.
+
+### États vides
+- **Un emplacement vide le dit simplement** : « Libre », « Aucun combat prévu », « Aucune demande ». Il ne garde jamais le texte d'avant (R12).
+- **Pas de grisé pour une option qui n'existe pas** : elle n'est simplement pas là (charte R4).
+
+### La carte d'une soirée (R12, Q12, Q14)
+- Composer se fait **au glisser-déposer**, avec une **animation satisfaisante au dépôt**. Les places de la carte s'échangent entre elles de la même façon.
+- **4 combats en carte principale, 6 en préliminaires**. Les préliminaires sont composés seuls (priorité aux inactifs, au moins 2 combats féminins) et **modifiables à la main**.
+- La **liste complète des combattants** est à droite : elle défile, se filtre par catégorie et dit quel niveau de combat chacun mérite.
+- Un combattant **indisponible affiche sa raison** : blessé jusqu'au…, déjà à l'affiche, refuse (et pourquoi).
+- **Le combat sélectionné est au centre**, avec Présentation, Face-à-face et Retirer. Pas de croix sur chaque ligne de gauche.
+- **Le bilan se voit pendant la composition, avant de valider** : recette estimée (une fourchette), ce qu'on en dit (une phrase de la presse, jamais une jauge, charte H1), et ce qu'il reste à régler. Les préliminaires y pèsent très peu.
+- **Valider ouvre un résumé** de la carte avant de confirmer.
+- « Demander à Leïla » est **une aide à la demande** : elle n'impose jamais d'adversaire (Q7).
+- Comparer deux combattants : **un point devant la meilleure valeur** (ou la valeur en vert : choix ouvert, Q10b).
+
+### Mouvement
+- **Écrans de gestion : discret** (apparition douce de 0,45 s, compteurs, jauges, point qui pulse). Une action fréquente n'attend jamais une animation.
+- **Combat et soirée : spectaculaire autorisé** (T3) : faisceaux, noms qui entrent, flash, temps forts animés de l'arène vue du dessus (R38).
+- Tout mouvement s'arrête si l'ordinateur demande moins d'animations (`prefers-reduced-motion`).
+
+### Lisibilité (charte L1 à L5)
+- Prévu pour 1920, **lisible dès 1280** : la scène entière se met à l'échelle, sans défilement horizontal.
+- Toute info utile à une décision : **au moins 18 px dans la scène de 1920**. C'est le minimum de la charte (13 px à 1440, L2), arrondi ; viser 20 px pour rester confortable à 1280. Contraste d'au moins 4,5 : 1.
+- Libellés décoratifs (titres de colonne, mentions) : au moins 15 px dans la scène de 1920 (11 px à 1440, L3), avec un contraste d'au moins 3 : 1.
+- **Écart de lecture** : deux textes voisins d'une même ligne sont séparés d'au moins 26 px (`--mf-ecart`). On passe à la ligne plutôt que de les coller.
+- Un nom long n'est jamais coupé au point de devenir ambigu.
+
+## 12. Index écran par écran
+
+Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le plan** (`docs/PLAN-CORRECTIONS-01-11.md`, section « Écran par écran »), puis appliquer ce document. Les points d'interface à ne pas oublier :
+
+| Écran | Remarques | À appliquer en priorité |
+|---|---|---|
+| Arrivée | R1 à R4 | Intro façon FM, courte et marquante. « Ton contrat » et « Ce qui manque » fusionnés. **2 espoirs sur 6**, en cartes avec particularité et style, sans histoire. La fiche s'ouvre sans sauter l'étape. Le prédécesseur n'apparaît que dans l'histoire de l'organisation. |
+| Accueil | R5, R6 | Validé (section 10). |
+| Leïla, présentation, face-à-face | R7 à R10 | Leïla à la demande, des confrontations propres à chaque combattant. Le combattant choisi reste visible pendant le choix de l'adversaire. Présentation et face-à-face restent **deux écrans** riches et uniques. Marqueur du meilleur côté. Les trois médias renommés et présentés. Plus de « Peu de combats documentés » trompeur. |
+| Carte, préliminaires | R12, R14 | Section 11, « La carte d'une soirée ». |
+| Messages | R13, R17 | Section 11, « Écran Messages » et « Continuer ». |
+| Effectif, Infirmerie | R15, Q12b | Section 11, « Grands tableaux ». **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
+| Fiche | R16 | Validé (section 10). |
+| Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
+| Ceintures | R22 | Une version avec un vrai sens (lignée des champions, règnes, intérims, prochain défi), regroupée avec le Classement. **Tu décides ensuite de la garder ou non.** Défenses et durée du règne sont dans le Classement de toute façon. |
+| Contrats, recrutement | R23 à R25 | **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
+| Recruteur | R26 | Départ de Lyon, toutes les catégories, 2 / 4 / 6 profils selon la durée du voyage. De vrais styles de combat. |
+| Salles et camps | R27 | Liste verticale avec un classement (réputation, champions formés) et une spécialité. Elles évoluent seules. |
+| Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
+| Calendrier, résultats, lendemain | R29, R30, R40, R41 | Pour chaque soirée : enjeu, ceinture, ville, salle. Résultats lisibles d'un coup d'œil (vainqueur en couleur, méthode, round et temps, surnoms, mouvement au classement, bonus). Les 3 cartes des juges, avec le nom de celui qui a eu 10. Lendemain refait (phrases, défilement, couleur, mouvement). |
+| Finances | R31 | Toutes les infos (courbe du solde, recettes et dépenses par soirée, masse salariale). Pas de budget imposé. |
+| Organisation, croissance, poste | R32 à R35 | Mesures renommées, compréhensibles d'un coup d'œil. Le classement des organisations bouge. **Poste et Carnet fusionnés.** Défis par paliers. |
+| Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |
+
+## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
+
+Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranché sans toi.
+
+| Sujet | Hypothèse actuelle de la maquette | Source |
+|---|---|---|
+| Fond (le cendré est retiré) | Gris chaud texturé, proche du jeu | C1, T2 |
+| Police | Saira, celle du jeu | T2b |
+| Octogone « Dans la cage » | Version « rempli » (il impose / il subit). Deux autres versions existent : « en chiffres » et « comment il gagne » | Q16c |
+| Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
+| Barre latérale | Liste actuelle du jeu, « Actualités » devenu « Messages ». Le regroupement en familles sous de nouveaux noms (T4, Q11) reste à proposer | T4, Q11 |
+| Place du « Fil » et des « Suivis » | Fil dans Presse, Suivis dans Recrutement (et un aperçu sur l'Accueil) | Q13 |
+| Classement Split / Monde | À montrer : un écran avec filtre, ou deux écrans | Q20b |
+| Écran Ceintures | À montrer avec un vrai sens, puis à garder ou supprimer | Point tranché n° 2 |
+| Nom des soirées | « Split Fight Night 63 » comme dans le jeu ; le plan prévoit « Split : X vs Y » pour les fight nights et « Split 1 » pour les grandes soirées | Q21c, Q29a |
+| Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |
+| Surnoms affichés | Sous le nom dans les listes, à côté du prénom dans la bannière. La liste des écrans concernés reste à valider | T11 |
+| Noms des trois médias | Cage Hebdo, Tableau Noir, Le Forum (à renommer) | Q10c |
+| Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
+
+## 14. Méthode pour chaque nouvelle maquette
+
+1. Demander (ou retrouver) **la capture du jeu actuel** de l'écran.
+2. Lire **les remarques de l'écran** dans le plan (section 12) et les décisions qui s'y rattachent.
+3. Partir de `maquettes/lot1-charte/` (`charte.css`, `cadre.js`) : même scène, même cadre, mêmes pièces. Ne recréer une pièce que si elle n'existe pas encore.
+4. Appliquer ce document. Tout écart volontaire est signalé.
+5. Vérifier :
+   - capture à 1920 × 1080 ;
+   - console sans erreur ;
+   - chaque clic testé ;
+   - chaque nom cliquable ;
+   - aucune touche affichée ;
+   - couleurs conformes à la section 6.
+6. Livrer **côte à côte avec le jeu** (`comparaison.html`), avec la liste des hypothèses prises dans la section 13.
+7. Quand une règle nouvelle est validée par Anthony, **l'ajouter à ce document** le jour même.
+
+## 15. Documents de référence
+
+- `docs/PLAN-CORRECTIONS-01-11.md` : les 41 remarques, tes décisions mot pour mot, les conflits tranchés, l'ordre des lots.
+- `docs/DOSSIER-UI-UX-GESTION-2026.pdf` : l'étude comparative (FM, Crusader Kings III, Against the Storm…). Les pages 18 à 24 donnent les 12 lois utiles et l'architecture conseillée pour Cage Legacy.
+- `docs/CHARTE-INTERFACE-MANAGEMENT.md` : humanité, réalisme, simplicité, lisibilité (H1 à L5).
+- `maquettes/lot1-charte/` : la maquette de référence (Accueil et fiche) et sa comparaison avec le jeu.
