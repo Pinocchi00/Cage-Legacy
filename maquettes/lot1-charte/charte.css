@@ -87,7 +87,7 @@ body.repliee .repli{padding:0;justify-content:center}
 .continuer .T{font-size:40px;line-height:.75}
 .continuer small{display:block;font-size:17px;line-height:1;opacity:.92;margin-top:4px}
 .continuer .mq{position:absolute;top:7px;right:7px;width:14px;height:14px;background:var(--jaune)}
-.alerte-l{position:absolute;left:0;top:94px;display:flex;align-items:center;gap:18px;z-index:6}
+.alerte-l{position:absolute;left:0;top:102px;display:flex;align-items:center;gap:18px;z-index:6}
 .alerte-l .tag-j{height:30px;padding:0 12px;background:var(--jaune);color:var(--noir);display:flex;align-items:center;font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;--c:6px}
 .corps{position:absolute;left:0;right:0;top:136px;bottom:36px;transition:filter .3s}
 
@@ -228,3 +228,28 @@ body.repliee .repli-btn{right:27px;top:auto;bottom:4px;transform:scaleX(-1)}
 .cj{background:rgba(233,230,225,.7)!important}
 .cj{background:#74716F!important} /* même teinte, à l’écran, que le bord des panneaux */
 .cj.fin::after{inset:1px;--k:calc(var(--c) - .5px)} /* petite étiquette : contour de 1 px, proportionnel */
+
+/* ---- Retours du 07/11 ---- */
+/* Le bouton de repli garde la même taille et la même place, barre ouverte ou réduite ; seule la flèche se retourne */
+body.repliee #bRepli svg{transform:scaleX(-1)}
+/* Barre réduite : icônes fines, même trait partout */
+body.repliee .item .ic{width:30px;height:30px}
+body.repliee .item .ic svg{width:30px;height:30px;stroke-width:2}
+body.repliee .item{color:rgba(233,230,225,.8)}
+body.repliee .item:hover{color:var(--blanc)}
+body.repliee .item.cur{color:var(--noir)}
+.item .ic .mq{top:-4px;right:-6px;width:10px;height:10px}
+/* Un peu d'air sous la ligne « Prochaine étape » */
+.corps:has(>.eff){top:152px!important}
+body.repliee .barre-logo .repli-btn svg{width:18px;height:18px}
+.fiche{top:152px}
+/* Bouton de repli : dans l'angle en haut à droite de la barre, ouverte comme réduite */
+.barre-logo .repli-btn,body.repliee .barre-logo .repli-btn{position:absolute;top:4px;right:4px;left:auto;bottom:auto;margin:0;transform:none;width:26px;height:26px}
+/* Barre réduite : bloc du logo moins haut, logo plus large */
+body.repliee .barre-logo{height:92px;padding:0;justify-content:center}
+body.repliee .barre-logo>svg{width:54px;height:54px}
+body.repliee .item{height:calc(59px + 36px / 16)} /* les 36 px gagnés sur le logo sont répartis : pas de trou avant Options */
+.repli-btn:hover,body.repliee .repli-btn:hover{background:none;color:var(--blanc)} /* au survol : juste plus blanc, comme le reste */
+/* Barre réduite : le tunnel garde son cadrage et sa taille ; il se fond dans le noir à droite au lieu de s'arrêter net */
+.fb-img{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent 100%);mask-image:linear-gradient(90deg,#000 82%,transparent 100%)}
+.bandeau-img{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent 100%);mask-image:linear-gradient(90deg,#000 82%,transparent 100%)}

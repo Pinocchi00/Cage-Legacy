@@ -19,6 +19,25 @@ const P={
   retour:'<path d="M15 5l-7 7 7 7"/>',avant:'<path d="M9 5l7 7-7 7"/>',croix:'<path d="M6 6l12 12M18 6L6 18"/>',ok:'<path d="M4 12.5l5 5L20 6.5"/>',
   medical:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',alerte:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',lecture:'<path d="M7 4l13 8-13 8z"/>',livre:'<path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/>',
 };
+/* Icônes de la barre réduite, refondues le 07/11 : un seul trait, une seule idée par icône, mêmes proportions. */
+Object.assign(P,{
+  accueil:'<path d="M3.5 11L12 3.5l8.5 7.5"/><path d="M6 9v11.5h4.5v-6h3v6H18V9"/>',
+  messages:'<path d="M3 5.5h18v13H3z"/><path d="M3 5.5l9 7.5 9-7.5"/>',
+  carte:'<path d="M8.4 2.8h7.2l5.6 5.6v7.2l-5.6 5.6H8.4l-5.6-5.6V8.4z"/><text x="12" y="15.6" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="10.5">VS</text>',
+  prelims:'<path d="M11.39 2h6.21l4.39 4.39v6.21l-4.39 4.39h-6.21l-4.39 -4.39v-6.21z"/><text x="11" y="13.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="7">VS</text><path fill="#0D0B0B" d="M6.39 7h6.21l4.39 4.39v6.21l-4.39 4.39h-6.21l-4.39 -4.39v-6.21z"/>',
+  effectif:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20.5c0-3.8 2.9-6 6.5-6s6.5 2.2 6.5 6"/><path d="M15.5 4.6a3.5 3.5 0 010 6.8M17.5 14.8c2.4.6 4 2.6 4 5.7"/>',
+  classements:'<text x="12" y="19.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="19">#1</text>',
+  ceintures:'<path stroke-linejoin="bevel" d="M3 18.5h18M4 18.5L3 7.5l5 4L12 5l4 6.5 5-4-1 11"/>',
+  contrats:'<path stroke-linejoin="bevel" d="M12 20.5l-5.5-8.5L9 4.5h6l2.5 7.5z"/><path d="M12 20v-6.5M9 4.5V2.5h6v2"/><circle cx="12" cy="12" r="1.4"/>',
+  camps:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  presse:'<path d="M3.5 4.5h14v15.5h-14z"/><path d="M17.5 8.5h3V18a2 2 0 01-2 2h-1M6.5 8h8M6.5 11.5h8M6.5 15h5"/>',
+  calendrier:'<path d="M3.5 5.5h17v15h-17zM3.5 10h17M8 3v5M16 3v5"/>',
+  resultats:'<path d="M4.31 7.2h3.98l2.81 2.81v3.98l-2.81 2.81h-3.98l-2.81 -2.81v-3.98z"/><path d="M15.71 7.2h3.98l2.81 2.81v3.98l-2.81 2.81h-3.98l-2.81 -2.81v-3.98z"/><text x="6.3" y="15" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="8.5">V</text><text x="17.7" y="15" text-anchor="middle" fill="currentColor" stroke="none" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="8.5">D</text>',
+  finances:'<circle cx="12" cy="12" r="9"/><path d="M15 8.6a4 4 0 100 6.8M7.5 11h5.5M7.5 13.3h5.5"/>',
+  organisation:'<path d="M5 21V3.5h9V21M14 8.5h5V21M3 21h18M8 7.5h3M8 11.5h3M8 15.5h3"/>',
+  options:'<path d="M19.0 10.3L21.9 10.3L21.9 13.7L19.0 13.7L18.2 15.7L20.2 17.8L17.8 20.2L15.7 18.2L13.7 19.0L13.7 21.9L10.3 21.9L10.3 19.0L8.3 18.2L6.2 20.2L3.8 17.8L5.8 15.7L5.0 13.7L2.1 13.7L2.1 10.3L5.0 10.3L5.8 8.3L3.8 6.2L6.2 3.8L8.3 5.8L10.3 5.0L10.3 2.1L13.7 2.1L13.7 5.0L15.7 5.8L17.8 3.8L20.2 6.2L18.2 8.3Z"/><circle cx="12" cy="12" r="3"/>',
+  menu:'<path d="M10 3.5H4v17h6M15.5 7.5L20 12l-4.5 4.5M20 12H9.5"/>',
+});
 const ico=(n,t=24,w=2)=>`<svg width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">${P[n]||''}</svg>`;
 const LOGO='<svg viewBox="0 0 400 400" fill="none" aria-label="Cage Legacy"><path d="M292 238.1L238.1 292H161.9L108 238.1V161.9L161.9 108H238.1L292 161.9Z" stroke="#E23A2B" stroke-width="15"/><path d="M331 254.3L254.3 331H145.7L69 254.3V145.7L145.7 69H254.3L331 145.7Z" stroke="#E23A2B" stroke-width="21"/><path d="M371 270.8L270.8 371H129.2L29 270.8V129.2L129.2 29H270.8L371 129.2Z" stroke="#E23A2B" stroke-width="12"/></svg>';
 const pan=(contenu,style='',cls='')=>`<div class="pan oct ${cls}" style="${style}"><div class="p2 oct"><div class="p3 oct">${contenu}</div></div></div>`;
@@ -114,7 +133,7 @@ function accueilHtml(){
   const obj=(t,v,k,col)=>`<div style="padding:12px 0 14px;border-bottom:2px solid var(--sep)"><div style="display:flex;gap:20px;align-items:baseline"><span style="font-size:24px">${t}</span><span class="T" style="margin-left:auto;font-size:30px;white-space:nowrap;color:${col};text-transform:none">${v}</span></div>
       <div class="jauge" style="margin-top:10px"><i style="width:${k*100}%;background:${col}"></i></div></div>`;
   return `<div style="display:flex;flex-direction:column;gap:18px;height:100%">
-    <div class="apparait bandeau" style="height:158px;flex:none;display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto">
+    <div class="apparait bandeau" style="height:158px;flex:none;display:grid;grid-template-columns:540px minmax(0,1fr) minmax(0,1.3fr) minmax(0,.9fr) minmax(0,1fr)">
       <i class="bandeau-img"></i>
       <div style="position:relative;padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:12px">
         <span class="T" style="font-size:96px;line-height:.75">Split</span>
