@@ -24,6 +24,19 @@
         "127.0.0.1"
       ],
       "port": 8770
+    },
+    {
+      "name": "maquette-carte",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8781",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 8781,
+      "autoPort": false
     }
   ]
 }

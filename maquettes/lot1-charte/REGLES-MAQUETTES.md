@@ -61,6 +61,7 @@ De gauche à droite :
 ## 5. Les cases jaunes
 
 - **Contour de 2 px, posé sur le bord, de la même couleur que les autres encadrés (`#74716F`)**. Pas de liseré intérieur, pas de double trait.
+- **Une case jaune est toujours octogonale, contour compris** (décision du 08/11). La classe `.cj` découpe elle-même son octogone (`charte.css`) : un contour gris rectangulaire autour d'un bouton octogonal ne doit plus jamais apparaître. Tout nouvel encadré avec un contour suit la même règle : c'est l'élément qui porte le contour qui est découpé.
 - **Proportionnel** : une petite étiquette (≈ 34 px de haut) a un contour de **1 px**.
 - Le **C du champion** a aussi son contour, dans le même esprit.
 - Texte **noir** sur fond jaune.
@@ -83,6 +84,10 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 - *Rouge de marque* (`#B32A1E` / `#E23A2B`) : logo, barre sous les titres, tunnel, numéro de soirée. Décor seulement, jamais sur une donnée.
 - *Rouge de sens* (`#E5483B`) : défaite (D), blessé, descente (▼), objectif manqué, perte d'argent.
 - Jamais pour un bouton d'action.
+
+**Les côtés d'un combat, sur le résumé « Valider la carte » seulement (décision du 08/11)** — les lignes de la carte n'ont pas de dégradé sur les côtés.
+- Combat de titre : dégradé **jaune du côté du champion**, rouge en face, tunnel doré au milieu.
+- Combat sans ceinture en jeu ni champion : **rouge des deux côtés**, tunnel rouge au milieu.
 
 **Partout**
 - Jamais une couleur seule : toujours avec une lettre, un mot ou une icône (V / D, « Disponible », croix médicale, ▲ / ▼).

@@ -19,11 +19,11 @@ const ECHOS_NOUVEAUX=new Set(['nana','mezouar','rizzo']);
 const echosNouveau=c=>ECHOS_NOUVEAUX.has(c.id)&&!S.echosVus.has(c.id);
 
 /* ---- Bannière : les flèches ont leur bande à elles, le contenu ne passe jamais dessous ---- */
-const accentHaut=t=>/[ÀÂÄÉÈÊËÎÏÔÖÙÛÜ]/.test(t.toUpperCase());
+const accentHaut=t=>/[̀-̦̩-ͯ]/.test(String(t).toUpperCase().normalize('NFD'));
 function banniere(c){
   const champ=c.rang==='C';
   return `<div class="ban-contenu" id="banC"><i class="fb-img ${champ?'or':''}"></i>
-    <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
+    <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="${(()=>{const t=c.nom.length>8?150:200,a=accentHaut(c.nom);return `font-size:${Math.round(t*(a?.84:1))}px;padding-top:${a?Math.round(t*.16*.69):0}px`;})()}">${esc(c.nom)}</span></div>
     <div class="fb-pal"><div style="display:flex;flex-direction:column;gap:14px"><span style="font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--texte2)">PALMARÈS</span>
       <b class="T" style="font-size:116px;line-height:.69">${bilan(c)}</b><div style="margin-top:4px">${serie(c.serie)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
