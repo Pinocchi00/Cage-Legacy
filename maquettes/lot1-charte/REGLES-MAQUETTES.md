@@ -44,7 +44,7 @@ De gauche à droite :
 2. **La plaque du titre de l'écran** seule (« ACCUEIL », « EFFECTIF »). Pas de sous-libellé : pas de « Semaine 63 », pas de « Combattant », pas de « 1 / 11 ». *Ce retrait est à faire sur chaque écran du jeu plus tard.*
 3. À droite, **la date du jour avec l'année** (« 12 JANVIER 2027 ») dans une boîte. Rien d'autre dans cette boîte : le lieu est déjà affiché ailleurs.
 4. **Le nom de la soirée** dans une boîte, avec le numéro en rouge.
-5. **Continuer** : bouton jaune du jeu (64 px), libellé et chevron seulement, **sans date dessous**.
+5. **Continuer** : bouton jaune du jeu (64 px), libellé et chevron seulement, **sans date dessous**. **Rectangulaire, comme les autres boîtes de l'en-tête** : contour gris de 2 px, filet noir, puis le jaune (décision du 08/11).
 
 ### Ligne d'alerte sous l'en-tête (quand il y a une prochaine étape)
 - Étiquette jaune « PROCHAINE ÉTAPE » (34 px de haut, contour de 1 px), puis une phrase courte en blanc.
@@ -73,6 +73,7 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 - Oui : l'action principale (Continuer, Proposer un combat, Ouvrir la carte), la marque « à faire », la prochaine étape, les liens d'action (« Tout voir › », « Ouvrir › »), une valeur **en cours** vers un objectif, le champion (C, tunnel doré).
 - Non : un nom, un **surnom**, un titre, une donnée neutre, une décoration.
 - Limite : un seul bloc jaune plein par panneau, un seul bouton jaune par écran.
+- Exception validée le 07/11 : le **liseré à gauche des primes de performance** (fiche, onglet Contrat) est jaune.
 
 **Vert — ce qui va bien, rien d'autre**
 - Victoire (V), « Disponible », montée au classement (▲), objectif tenu, mieux que la moyenne de la catégorie.
@@ -119,7 +120,8 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
   - pas de donnée cachée affichée, comme la forme en % ou la fatigue.
 - **Surnoms** : sous le nom, dans la majorité des écrans où ils apportent quelque chose. Couleur neutre, pas jaune.
 - **Temps depuis le dernier combat** : en **mois et semaines** (« il y a 2 mois », « il y a 3 mois et 1 semaine », « il y a moins d'une semaine »). Quatre semaines comptent comme un mois.
-- **Série des 5 derniers combats** : marques octogonales V (vert) et D (rouge), **sans flèche** à côté.
+- **Série des 5 derniers combats** : marques octogonales V (vert) et D (rouge), **sans flèche** à côté. **Toujours du plus récent (à gauche) au plus ancien (à droite)**, partout (bannière, listes, effectif) : le combat le plus récent est le premier lu (décision du 08/11).
+- **Combats en 5 rounds** : un combat pour le titre, une défense de titre et un combat principal se jouent en 5 rounds (cartes des juges sur 50, par exemple 48-47). Les autres en 3 rounds (décision du 08/11).
 - **Dates courtes** : « 8 déc. 2026 ». Mois abrégés corrects : janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc.
 - **Pas de doublon** : une info déjà visible sur l'écran n'est pas répétée à côté (le lieu sous la soirée, « 2e des huit », la date sous « Split »).
 - **Une info par ligne** dans les listes courtes de l'accueil (« Tes suivis »), avec « Tout voir › » pour aller plus loin.

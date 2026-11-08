@@ -8,7 +8,13 @@ if(!ONGLETS.includes(S.onglet))S.onglet='Aperçu';
 S.echosVus=new Set();
 /* Un combattant a du nouveau dans ses échos tant que tu ne les as pas ouverts. */
 /* Soirées cohérentes avec son histoire : la ceinture et la défense se sont jouées chez Split. */
-(function(){const h=historique(parId('nana'));Object.assign(h[0],{soiree:'Split Fight Night 62'});Object.assign(h[1],{soiree:'Split Fight Night 59'});Object.assign(h[2],{soiree:'Split Fight Night 56'});})();
+/* Combats pour le titre et combats principaux en 5 rounds : une décision s'y rend au 5e round. */
+(function(){const h=historique(parId('nana'));[0,2].forEach(k=>Object.assign(h[k],{rd:5,tps:'5:00'}));Object.assign(h[0],{soiree:'Split Fight Night 62'});Object.assign(h[1],{soiree:'Split Fight Night 59'});Object.assign(h[2],{soiree:'Split Fight Night 56'});})();
+/* Mezouar a battu Nana par soumission en 2025 : le combat figure aussi dans son historique, à la même date. */
+(function(){const hn=historique(parId('nana')),hm=historique(parId('mezouar')),f=hn[3];
+  let i=hm.findIndex(x=>x.date<=f.date);if(i<2)i=2;
+  Object.assign(hm[i],{adv:'Parfait Nana',res:'v',meth:['Soumission','étranglement arrière'],rd:2,tps:'3:40',date:new Date(f.date),soiree:f.soiree,advR:4});
+  hm.forEach((x,k)=>{if(k!==i&&x.soiree===f.soiree)x.soiree='Split Fight Night 54';});})();
 const ECHOS_NOUVEAUX=new Set(['nana','mezouar','rizzo']);
 const echosNouveau=c=>ECHOS_NOUVEAUX.has(c.id)&&!S.echosVus.has(c.id);
 
@@ -56,28 +62,80 @@ const STYLES_PROPRES={
 };
 /* L'art martial écrit simplement (la spécialité reste dans l'Effectif, au clic). */
 const artCourt=a=>({'Jiu-jitsu brésilien':'Jiu-jitsu'})[a]||a||'Boxe';
-function styleCombat(c,k){
-  const t=STYLES_PROPRES[c.id]||STYLES[c.art]||STYLES['Boxe'];
-  return pan(titre('Style de combat',esc(artCourt(c.art)))+`<div class="cage-svg">${k.svg}</div><div class="cage-leg">${k.leg}</div>
-    <div class="style-l">${[['Comment il combat',t[0]],['Comment il gagne',t[1]],['Ce qui le rend à part',t[2]]].map(([l,x])=>`<div><div class="etiq">${l}</div><div>${esc(x)}</div></div>`).join('')}</div>`,'height:100%');
+/* Style de combat (refait le 08/11, sans octogone) : où se passe le combat, ses armes, puis comment il combat et gagne. */
+const ZONES={'Boxe':[55,35,10],'Lutte':[20,35,45],'Kickboxing':[65,25,10],'Jiu-jitsu brésilien':[20,25,55],'Karaté':[70,20,10],'Muay-thaï':[40,50,10],'Sambo':[25,35,40],'Judo':[20,45,35]};
+const ZONES_PROPRES={nana:[30,60,10],mezouar:[20,25,55]};
+const ARMES={'Boxe':['Crochets','Jab','Coups au corps'],'Lutte':['Double jambe','Contrôle au sol','Coups au sol'],'Kickboxing':['Low kick','Coup de pied au corps','Direct'],
+  'Jiu-jitsu brésilien':['Étranglement arrière','Triangle','Passage de garde'],'Karaté':['Contre','Coup de pied circulaire','Déplacements'],'Muay-thaï':['Genoux','Coudes','Clinch'],
+  'Sambo':['Projections','Clé de jambe','Contrôle'],'Judo':['Projections','Contrôle au sol','Clinch']};
+const ARMES_PROPRES={nana:['Crochet du droit','Coups au corps','Pression contre le grillage'],mezouar:['Double jambe','Étranglement arrière','Passage de garde']};
+/* Parcours avant le MMA : spécialité, amateur, autre sport, ceinture ou titre. */
+const BG={nana:[['Spécialité','Boxe anglaise'],['Amateur','12-3, champion de France 2017'],['Autre sport','Boxe thaï'],['Titre','Champion des poids légers Split']],
+  mezouar:[['Spécialité','Jiu-jitsu brésilien'],['Amateur','8-0, huit finitions'],['Autre sport','Lutte gréco-romaine'],['Ceinture','Noire de jiu-jitsu, vice-champion d’Europe']]};
+const BG_ART={'Boxe':['Boxe anglaise','Kickboxing'],'Lutte':['Lutte libre','Judo'],'Kickboxing':['Kickboxing','Boxe anglaise'],'Jiu-jitsu brésilien':['Jiu-jitsu brésilien','Lutte'],
+  'Karaté':['Karaté','Taekwondo'],'Muay-thaï':['Muay-thaï','Boxe anglaise'],'Sambo':['Sambo','Judo'],'Judo':['Judo','Lutte']};
+function bgDe(c){if(BG[c.id])return BG[c.id];const a=BG_ART[c.art]||BG_ART['Boxe'],r=graine('bg'+c.id);
+  return [['Spécialité',a[0]],['Amateur',`${6+Math.floor(r()*8)}-${Math.floor(r()*3)}`],['Autre sport',a[1]],[/Jiu|Judo|Karaté/.test(a[0])?'Ceinture':'Titre',/Jiu/.test(a[0])?'Ceinture noire':/Judo|Karaté/.test(a[0])?'Ceinture noire, 2e dan':'Champion régional amateur']];}
+/* Chiffres tirés de ses combats : temps dans la cage, plus longue série, finitions au 1er round, KO subis, primes. */
+function chiffresDe(c){
+  const h=historique(c),sec=f=>(f.rd-1)*300+(+f.tps.split(':')[0])*60+(+f.tps.split(':')[1]);
+  const tot=h.reduce((t,f)=>t+sec(f),0),hh=Math.floor(tot/3600),mm=Math.round(tot%3600/60);
+  let best=0,cur=0;[...h].reverse().forEach(f=>{cur=f.res==='v'?cur+1:0;best=Math.max(best,cur);});
+  const r1=h.filter(f=>f.res==='v'&&f.rd===1&&finDe(f)[0]!=='Décision').length;
+  const ko=h.filter(f=>f.res==='d'&&!['Décision','Soumission'].includes(finDe(f)[0])).length;
+  return [['Temps dans la cage',`${hh} h ${String(mm).padStart(2,'0')}`],['Plus longue série',`${best} V`],['KO subis',ko],['Primes de soirée',perfDe(c,[]).length]];
+}
+/* Spécialité précise dans son art martial (à droite du titre Style). */
+const SPECIALITES={
+  'Boxe':['Boxe anglaise','Boxe de puissance','Boxe en contre','Boxe de pression','Boxe à distance','Boxe au corps'],
+  'Kickboxing':['Kickboxing','Boxe française','Kickboxing à distance','Low-kicks','Kickboxing japonais'],
+  'Muay-thaï':['Boxe thaï','Boxe thaï au clinch','Boxe thaï, genoux et coudes'],
+  'Lutte':['Lutte libre','Lutte gréco-romaine','Lutte de contrôle','Lutte contre le grillage','Lutte et frappe au sol'],
+  'Jiu-jitsu brésilien':['Jiu-jitsu, jeu de garde','Jiu-jitsu, jeu du dessus','Jiu-jitsu, clés de jambe','Jiu-jitsu, étranglements'],
+  'Karaté':['Karaté Shotokan','Karaté Kyokushin','Karaté en contre'],
+  'Sambo':['Sambo de combat','Sambo sportif'],
+  'Judo':['Judo, projections','Judo, contrôle au sol']};
+const SPEC_PROPRES={nana:'Boxe de puissance',mezouar:'Jiu-jitsu, jeu du dessus'};
+const specialiteDe=c=>{if(SPEC_PROPRES[c.id])return SPEC_PROPRES[c.id];const l=SPECIALITES[c.art]||SPECIALITES['Boxe'];return l[Math.floor(graine('sp'+c.id)()*l.length)];};
+function styleCombat(c){
+  const t=STYLES_PROPRES[c.id]||STYLES[c.art]||STYLES['Boxe'],z=ZONES_PROPRES[c.id]||ZONES[c.art]||ZONES['Boxe'],a=ARMES_PROPRES[c.id]||ARMES[c.art]||ARMES['Boxe'];
+  const ZN=['À distance','Au corps-à-corps','Au sol'],fort=z.indexOf(Math.max(...z));
+  /* Profil en 4 cases (finitions, profil, rythme, défense), zones, niveaux en 5 crans, puis son plan. */
+  const h=historique(c),V=h.filter(f=>f.res==='v'),fin=V.filter(f=>finDe(f)[0]!=='Décision').length,ko=h.filter(f=>f.res==='d'&&finDe(f)[0]!=='Décision'&&finDe(f)[0]!=='Soumission').length;
+  const prof=z[2]>=45?'Grappler':z[1]>=50?'Cogneur':z[0]>=55?'Frappeur':'Complet';
+  const ry={nana:'Diesel',mezouar:'Explosif'}[c.id]||(V.filter(f=>f.rd===1).length*2>V.length?'Explosif':'Régulier');
+  const def=ko>=3?'Fragile':ko>=1?'Solide':'Forteresse';
+  const NIV={nana:[4,2,2],mezouar:[3,4,5]}[c.id]||(prof==='Grappler'?[2,4,4]:prof==='Frappeur'?[4,2,2]:[3,3,3]);
+  const tu=(l,v)=>`<div class="sc-tu oct"><div class="sous">${l}</div><div class="T">${v}</div></div>`;
+  /* Niveaux dits en un mot, sans cran : on devine le combattant sans lire son potentiel. */
+  const MOT=n=>n>=4?['Sa force','f']:n<=2?['Son point faible','p']:['Il se défend','m'];
+  return pan(titre('Style',esc(specialiteDe(c)))+`
+    <div class="sc-tus">${tu('Finitions',Math.round(fin/(V.length||1)*100)+' %')}${tu('Profil',prof)}${tu('Rythme',ry)}${tu('Défense',def)}</div>
+    <div class="sc-st">Zones</div>
+    <div class="sc-bar">${z.map((v,i)=>`<i class="z${i} ${i===fort?'on':''}" style="flex:${v}"></i>`).join('')}</div>
+    <div class="sc-z">${z.map((v,i)=>`<div class="sc-zc ${i===fort?'on':''}"><i class="z${i}"></i><b class="T">${v} %</b><span>${ZN[i]}</span></div>`).join('')}</div>
+    <div class="sc-ch">${chiffresDe(c).map(([l,v])=>`<div><span class="etiq">${l}</span><b class="T">${v}</b></div>`).join('')}</div>`,'height:100%');
 }
 
+const ORIGINES={nana:['Lyon','France'],mezouar:['Marseille','France']};
+const VILLES=[['Lyon','France'],['Bordeaux','France'],['Liège','Belgique'],['Genève','Suisse'],['Casablanca','Maroc'],['Lisbonne','Portugal'],['Tbilissi','Géorgie'],['Dakar','Sénégal'],['Lille','France'],['Montréal','Canada']];
+const origineDe=c=>ORIGINES[c.id]||VILLES[Math.floor(graine('o'+c.id)()*VILLES.length)];
 function apercu(c){
-  const h=historique(c).slice(0,5),k=cage(c);
+  const h=historique(c).slice(0,5);
   const traits=c.traits||[['+','Régulier','Jamais deux défaites de suite','Il revient toujours plus fort après un revers.']];
   const fait=(l,v)=>`<div class="oct" style="--c:8px;background:var(--ligne);padding:10px 14px;min-width:0"><div class="sous">${l}</div><div class="T" style="font-size:30px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v}</div></div>`;
   return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.45fr);gap:20px;height:100%">
-    ${pan(titre('Ce qui le distingue',`${traits.length} trait${traits.length>1?'s':''}`)+traits.map(([s,n,d,t])=>`<div class="oct" style="--c:10px;background:var(--ligne);padding:12px 16px;display:flex;gap:16px;align-items:center;margin-bottom:10px">
-        <span class="octr" style="width:44px;height:44px;flex:none;display:grid;place-items:center;background:${s==='+'?'var(--blanc)':'var(--neg)'};color:var(--noir);font-weight:800;font-size:28px">${s}</span>
+    ${pan(titre('Ses traits')+traits.map(([s,n,d,t])=>`<div class="oct" style="--c:10px;background:var(--ligne);padding:12px 16px;display:flex;gap:16px;align-items:center;margin-bottom:10px">
+        <span class="octr tr-sg ${s==='+'?'plus':'moins'}"><i></i>${s==='+'?'<i class="v"></i>':''}</span>
         <div style="flex:1;min-width:0"><span class="T" style="font-size:32px">${n}</span><div style="font-size:21px">${t}</div><div class="sous" style="font-size:18px">${d}</div></div></div>`).join('')
       +`<div class="etiq" style="margin:12px 0 2px">Derniers combats</div><div class="defile">${h.map(f=>`<div style="display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:2px solid var(--sep)">
         <span class="marque octr ${f.res}" style="width:28px;height:28px;font-size:20px">${f.res.toUpperCase()}</span>
         <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:21px">${f.res==='v'?'bat':'battu par'} ${advHtml(f,c)} <span class="sous">· ${methCourte(f)} R${f.rd}</span></span>
         <span class="sous" style="white-space:nowrap">${dMois(f.date)}</span></div>`).join('')}</div>`,'height:100%')}
-    ${styleCombat(c,k)}
+    ${styleCombat(c)}
     <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
       ${pan(`<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">${fait('Âge',c.age+' ans')}${fait('Taille',c.taille)}${fait('Allonge',c.allonge)}${fait('Garde',c.garde)}
-        ${fait('Chez Split','Depuis '+c.depuis)}${fait('Contrat',c.contrat[0]+' combat'+(c.contrat[0]>1?'s':''))}${fait('Mondial','n° '+c.mondial)}${fait('Art martial',esc(artCourt(c.art)))}</div>`,'flex:none')}
+        ${fait(origineDe(c)[1],origineDe(c)[0])}${fait('Contrat',c.contrat[0]+' combat'+(c.contrat[0]>1?'s':''))}${fait('Mondial','n° '+c.mondial)}${fait('Art martial',esc(artCourt(c.art)))}</div>`,'flex:none')}
       ${pan(`<div class="etiq">En ce moment</div><div style="font-size:26px;margin-top:10px">${etat(c)}</div>
         <div class="sous" style="margin-top:6px">Dernier combat le ${dCourt(c.dernier)}, il y a ${depuis(c.dernier)}</div>`,'flex:none')}
       ${pan(`<div style="display:flex;align-items:center;gap:20px;height:100%"><div style="flex:1"><div class="etiq">Prochain combat</div><div class="T" style="font-size:34px;margin-top:8px">${c.statut==='affiche'?'16 février':'Aucun combat prévu'}</div>${c.statut==='affiche'?`<div class="sous" style="margin-top:6px">${esc(c.affiche)}</div>`:''}</div>
@@ -99,108 +157,241 @@ function statsHtml(c){
       <span class="T" style="margin-left:auto;font-size:36px;display:flex;align-items:center;gap:10px" title="${mot}"><i class="octr" style="width:13px;height:13px;background:${col};display:inline-block"></i>${virg(s[k])}${u}</span></div>
       <div class="jauge" style="margin-top:8px;overflow:visible"><i style="width:${Math.min(100,s[k]/max*100)}%;background:rgba(233,230,225,.8)"></i><span style="position:absolute;left:${MOY[k]/max*100}%;top:-6px;bottom:-6px;width:3px;background:var(--blanc)"></span></div>
       <div class="sous" style="font-size:17px;margin-top:4px;padding-left:max(0px,calc(${MOY[k]/max*100}% - 40px))">moyenne ${virg(MOY[k])}${u}</div></div>`;};
-  const fins=l=>['KO, TKO ou arrêt','Soumission','Décision'].map(m=>`<div style="display:flex;padding:7px 0;border-bottom:2px solid var(--sep)"><span>${m}</span><span class="T" style="margin-left:auto;font-size:30px">${l.filter(f=>famille(f)===m).length}</span></div>`).join('');
-  return `<div style="display:grid;grid-template-columns:1fr 1fr .85fr;gap:20px;height:100%">
+  /* Méthodes : une ligne victoires et une ligne défaites par famille, la barre découpée par round (R1 foncé, R2, R3 et plus clair). */
+  const fam=f=>{const m=finDe(f)[0];return m==='Soumission'?'Soumission':m==='Décision'?'Décision':'KO / TKO';};
+  const FAM=['KO / TKO','Soumission','Décision'],maxN=Math.max(1,...FAM.map(m=>Math.max(V.filter(f=>fam(f)===m).length,D.filter(f=>fam(f)===m).length)));
+  const ligne=(l,tot,res,m)=>{const q=l.filter(f=>fam(f)===m),n=q.length;
+    const parts=m==='Décision'?[n,0,0]:[1,2,3].map(r=>q.filter(f=>r<3?f.rd===r:f.rd>=3).length);
+    return `<div class="mt-l ${res}"><span class="mt-r">${res==='v'?'V':'D'}</span><span class="mt-b">${n?parts.map((k,i)=>k?`<i class="t${i}" style="width:${k/maxN*100}%" title="${m==='Décision'?'':['Round 1','Round 2','Round 3 et plus'][i]+' : '+k}"></i>`:'').join(''):''}</span>
+      <span class="mt-p">${n?`${Math.round(n/(tot||1)*100)} %`:''}</span></div>`;};
+  const fins=()=>FAM.map(m=>{const nv=V.filter(f=>fam(f)===m).length,nd=D.filter(f=>fam(f)===m).length;
+    return `<div class="mt"><div class="mt-n"><b class="T">${m}</b><span class="sous">${nv} V · ${nd} D</span></div>
+      <div class="mt-g">${ligne(V,V.length,'v',m)}${ligne(D,D.length,'d',m)}</div></div>`;}).join('');
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1.05fr;gap:20px;height:100%">
     ${pan(titre('Debout')+`<div class="defile">${STATS.slice(0,4).map(barre).join('')}</div>`,'height:100%')}
     ${pan(titre('Lutte et sol')+`<div class="defile">${STATS.slice(4).map(barre).join('')}</div>`,'height:100%')}
-    ${pan(titre('Ses fins de combat')+`<div class="defile"><div class="etiq" style="color:var(--vert)">Victoires · ${V.length}</div>${fins(V)}
-      <div class="etiq" style="color:var(--neg);margin-top:18px">Défaites · ${D.length}</div>${fins(D)}
-      <div style="display:flex;margin-top:16px"><span class="sous">Durée moyenne d’un combat</span><span class="T" style="margin-left:auto;font-size:30px">${s.duree}</span></div></div>`,'height:100%')}</div>`;
+    ${pan(titre('Méthodes',`${V.length} V · ${D.length} D`)+`<div class="defile ct7-defile">${fins()}
+      <div class="mt-leg"><span><i class="t0"></i>Round 1</span><span><i class="t1"></i>Round 2</span><span><i class="t2"></i>Round 3 et plus</span></div>
+      <div class="mt-du"><span class="sous">Durée moyenne d’un combat</span><span class="T">${s.duree}</span></div></div>`,'height:100%')}</div>`;
 }
 
 /* ---- Combats : un bilan en tête, puis les combats par année, du plus récent au plus ancien ; plus de « Récit » ---- */
 function titreDe(c,f){return c.id==='nana'&&f.guerre;} /* Nana a pris la ceinture contre Belkacem (mars 2026) */
+/* Combats pour le titre : Nana l'a pris contre Belkacem, puis l'a défendu deux fois. */
+/* Par position dans l'historique (0 = le plus récent) : [libellé, rang de l'adversaire ce jour-là] */
+const TITRES={nana:[['Défense n° 2',3],['Défense n° 1',2],['Pour le titre','C']]};
+const ABSENCES={nana:{'Sofiane Belkacem':'Opéré de l’épaule'}};
+const virgJuges=(f,gagne)=>{const g=f.meth[1]==='partagée'?['29-28','28-29','29-28']:f.rd===3&&f.meth[1]==='unanime'?['30-27','29-28','29-28']:['29-28','29-28','29-28'];
+  return (gagne?g:g.map(x=>x.split('-').reverse().join('-'))).join(' · ');};
+/* Détail de la fin du combat : KO, TKO (arrêt de l'arbitre), arrêt du médecin, soumission, décision. Fictif et stable. */
+const FINS={
+  KO:['Crochet du droit','Crochet du gauche','Direct du droit','Uppercut','Coup de genou','Coup de pied à la tête','Coude en remontant'],
+  TKO:['Coups au sol','Enchaînement debout','Coups de coude au sol','Coups de pied au corps'],
+  Soumission:['Étranglement arrière','Guillotine','Triangle','Clé de bras','D’Arce','Kimura','Clé de talon'],
+  Médecin:['Coupure à l’arcade','Œil fermé','Nez cassé'],
+  Décision:['Unanime','Unanime','Partagée','Majoritaire']};
+const FINS_FIXES={'Rui Carvalho|Split Fight Night 59':['KO','Crochet du droit'],'Kévin Darras|Split Fight Night 62':['Décision','Unanime'],'Sofiane Belkacem|Split Fight Night 56':['Décision','Partagée'],'Ilyas Mezouar|Split Fight Night 53':['Soumission','Étranglement arrière'],'Parfait Nana|Split Fight Night 53':['Soumission','Étranglement arrière']};
+function finDe(f){
+  const fx=FINS_FIXES[f.adv+'|'+f.soiree];if(fx)return fx;
+  const r=graine('fin'+f.adv+f.date.getTime()),pick=l=>l[Math.floor(r()*l.length)];
+  if(f.meth[0]==='KO')return r()<.45?['TKO',pick(FINS.TKO)]:['KO',pick(FINS.KO)];
+  if(f.meth[0]==='Arrêt du médecin')return ['Arrêt du médecin',pick(FINS.Médecin)];
+  if(f.meth[0]==='Soumission')return ['Soumission',pick(FINS.Soumission)];
+  return ['Décision',pick(FINS.Décision)];
+}
+const cartesJuges=(t,gagne,r5)=>{const g=r5?(t==='Partagée'?['48-47','47-48','48-47']:t==='Majoritaire'?['48-47','48-47','47-47']:['50-45','49-46','48-47'])
+    :t==='Partagée'?['29-28','28-29','29-28']:t==='Majoritaire'?['29-28','29-28','28-28']:['30-27','29-28','29-28'];
+  return (gagne?g:g.map(x=>x.split('-').reverse().join('-'))).join(' · ');};
+/* Combats annulés (gardés dans la liste, en gris) */
+const ANNULES={nana:[{apres:'Ilyas Mezouar',adv:'Hugo Ferrand',raison:'Forfait de Nana, blessé à l’épaule à l’entraînement',mois:3}]};
+/* Bilan de l'adversaire au moment du combat (fictif, stable) */
+const bilanAdv=f=>{const r=graine(f.adv+f.date.getTime()),v=6+Math.round((36-Math.min(f.advR==='C'?1:f.advR,35))*0.45+r()*4),d=1+Math.floor(r()*6),n=r()<.2?1:0;return rec(v,d,n||undefined);};
 function combatsHtml(c){
   const h=historique(c),V=h.filter(f=>f.res==='v'),fin=V.filter(f=>f.meth[0]!=='Décision').length;
   let serieN=0;const r0=h[0]&&h[0].res;for(const f of h){if(f.res===r0)serieN++;else break;}
-  const tuile=(l,v,s,col)=>`<div class="cb-tu"><div class="etiq">${l}</div><div class="T" style="${col?`color:${col}`:''}">${v}</div>${s?`<div class="sous">${s}</div>`:''}</div>`;
-  const meth=f=>f.meth[0]==='KO'?['KO',f.meth[1]]:f.meth[0]==='Arrêt du médecin'?['Arrêt du médecin',f.meth[1]]:[f.meth[0],f.meth[1]];
-  let an=null;
-  const lignes=h.map(f=>{const y=f.date.getFullYear(),tete=y!==an?`<div class="cb-an">${y}</div>`:'';an=y;const [m,d]=meth(f),adv=parNom(f.adv,c.cat);
-    return tete+`<div class="cb-l ${f.res}">
-      <span class="marque octr ${f.res}">${f.res.toUpperCase()}</span>
-      <div class="eff-nom">${lien(adv)}<span class="sous">n° ${f.advR} à l’époque${adv.surnom?` · « ${esc(adv.surnom)} »`:''}</span></div>
-      <div class="eff-nom"><b>${m}</b><span class="sous">${esc(d)}</span></div>
-      <div class="eff-nom"><b>Round ${f.rd}</b><span class="sous">${f.tps}</span></div>
-      <div class="eff-nom"><span>${esc(f.soiree)}</span><span class="sous">${f.date.getDate()} ${MOIS[f.date.getMonth()]}</span></div>
-      <div class="cb-tag">${titreDe(c,f)?`<span style="color:var(--jaune)">${ico('ceintures',20)} Ceinture</span>`:f.guerre?'Combat de l’année':''}</div></div>`;}).join('');
+  const tuile=(l,v,s,col)=>`<div class="cb-tu-b oct"><div class="cb-tu oct"><div class="etiq">${l}</div><div class="T" style="${col?`color:${col}`:''}">${v}</div>${s?`<div class="sous">${s}</div>`:''}</div></div>`;
+  const horsSplit=f=>f.soiree&&!/^Split/.test(f.soiree);
+  const TT=TITRES[c.id]||[],T=f=>{const k=h.indexOf(f);return TT[k]&&TT[k][0];},tit=h.filter(f=>T(f)),titV=tit.filter(f=>f.res==='v').length;
+  const rangDe=f=>{const k=h.indexOf(f);return TT[k]?TT[k][1]:f.advR;};
+  const top=h.filter(f=>!horsSplit(f)&&(rangDe(f)==='C'||rangDe(f)<=15)),tv=top.filter(f=>f.res==='v').length;
+  const perf=perfDe(c,[]),COURT={soiree:'Combat de la soirée',perf:'Performance',fin:'Finition'};
+  const vus={};h.forEach(f=>{vus[f.adv]=(vus[f.adv]||0)+1;});
+  const place=f=>f.advR<=10?'Co-principal':f.advR<=20?'Carte principale':'Préliminaires';
+  const PROCH={nana:'Ilyas Mezouar',mezouar:'Parfait Nana'}[c.id];
+  const ABR={KO:'KO',TKO:'TKO',Soumission:'SOUM.',Décision:'DÉC.','Arrêt du médecin':'MÉD.'};
+  /* Badge du rang de l'adversaire ce jour-là : C (champion), n° 1 à 15, ou NC (non classé) */
+  const badge=f=>{if(horsSplit(f))return '<span class="cb-rg nc">Hors Split</span>';const r=rangDe(f);
+    return r==='C'?'<span class="cb-rg ch octr">C</span>':r<=15?`<span class="cb-rg oct">n° ${r}</span>`:'<span class="cb-rg nc">NC</span>';};
+  const dateCol=d=>`<div class="cb-dt"><span>${d.getDate()} ${MOIS_C[d.getMonth()]}</span></div>`;
+  const parAn={};h.forEach(f=>{const y=f.date.getFullYear();parAn[y]=parAn[y]||[0,0];parAn[y][f.res==='v'?0:1]++;});
+  let anCour=null;
+  const ann=ANNULES[c.id]||[];
+  let prec=null;
+  const lignes=h.map((f,i)=>{const adv=parNom(f.adv,c.cat),hs=horsSplit(f),ti=T(f);
+    let trou='';if(prec){const mois=Math.round((prec.date-f.date)/864e5/30.44);const raison=(ABSENCES[c.id]||{})[prec.adv];if(mois>=7&&raison)trou=`<div class="cb-trou"><span class="cb-trou-l"></span><span>${mois} mois sans combattre · ${esc(raison)}</span><span class="cb-trou-l"></span></div>`;}
+    /* combat annulé placé quelques mois après le combat indiqué */
+    const an=ann.filter(x=>x.apres===f.adv).map(x=>{const d=new Date(f.date);d.setMonth(d.getMonth()+x.mois);const a2=parNom(x.adv,c.cat);
+      return `<div class="cb-l annule"><div class="cb-res"><span class="marque octr">–</span><span class="cb-abr">ANNULÉ</span></div>
+        <div class="cb-c">${lien(a2)}<span class="sous">Combat annulé</span></div>
+        <div class="cb-c cb-large"><span class="sous" style="font-size:19px">${esc(x.raison)}</span></div>${dateCol(d)}</div>`;}).join('');
+    prec=f;
+    const pr=hs?[]:perf.filter(x=>x[1]===f.adv&&x[2]===dMois(f.date));
+    const [fm,fd]=finDe(f),dec=fm==='Décision';
+    const prem=h.findIndex(g=>g.adv===f.adv)===i;
+    const rv=prem&&f.adv===PROCH?'Revanche le 16 févr.':prem&&vus[f.adv]>1?'Revanche':'';
+    const methL1=`${esc(fm)} · ${esc(fd)}`;
+    const methL2=dec?cartesJuges(fd,f.res==='v',f.rd===5):`Round ${f.rd} · ${f.tps}`;
+    const y=f.date.getFullYear(),tete=y!==anCour?`<div class="cb-an"><span>${y}</span><span class="cb-an-b">Bilan ${rec(parAn[y][0],parAn[y][1])}</span></div>`:'';anCour=y;
+    return trou+tete+an+`<div class="cb-l ${f.res} ${hs?'hs':''} ${ti?'titre':''}">
+      <div class="cb-res"><span class="marque octr ${f.res}">${f.res.toUpperCase()}</span><span class="cb-abr">${ABR[fm]||''}</span></div>
+      <div class="cb-c"><span class="cb-nom">${lien(adv)}${badge(f)}</span><span class="sous">${adv.surnom?`« ${esc(adv.surnom)} » · `:''}Bilan ${bilanAdv(f)}${rv?` · <span class="cb-rv">${rv}</span>`:''}</span></div>
+      <div class="cb-c"><b>${methL1}</b><span class="sous">${methL2}</span></div>
+      <div class="cb-c"><span>${esc(f.soiree)}</span><span class="sous">${ti?`<span class="cb-ti">${ico('ceintures',16)} ${ti}</span>`:hs?'Hors Split':place(f)}</span></div>
+      <div class="cb-tags">${pr.map(x=>`<span class="cb-pr oct">${COURT[x[0]]}</span>`).join('')}</div>
+      ${dateCol(f.date)}</div>`;}).join('');
   return `<div style="display:flex;flex-direction:column;gap:18px;height:100%">
-    <div class="cb-bilan">${tuile('Bilan',bilan(c))}${tuile('Série en cours',`${serieN} ${r0==='v'?'victoire':'défaite'}${serieN>1?'s':''}`,'',r0==='v'?'var(--vert)':'var(--neg)')}
-      ${tuile('Finitions',`${Math.round(fin/(V.length||1)*100)} %`,'des victoires avant la limite')}${tuile('Dernier combat',dMois(c.dernier))}</div>
-    ${pan(`<div class="defile">${lignes}</div>`,'flex:1;min-height:0')}</div>`;
+    <div class="cb-bilan">${tuile('Contre le top 15',top.length?rec(tv,top.length-tv):'Aucun combat',top.length?'victoires et défaites':'')}
+      ${tuile('Combats pour le titre',tit.length?rec(titV,tit.length-titV):'Aucun',tit.length?(()=>{const d=tit.filter(f=>/^Défense/.test(T(f))).length;return d?`dont ${d} défense${d>1?'s':''}`:'';})():'')}
+      ${tuile('Série en cours',`${serieN} ${r0==='v'?'victoire':'défaite'}${serieN>1?'s':''}`)}
+      ${tuile('Finitions',`${Math.round(fin/(V.length||1)*100)} %`,'des victoires avant la limite')}</div>
+    ${pan(`<div class="defile ct7-defile ct8-fondu cb-liste">${lignes}</div>`,'flex:1;min-height:0')}</div>`;
 }
 
 /* ---- Contrat : ce qu'il reste, ce qu'il coûte, quand il finit ; puis sa place parmi les salaires de la catégorie ---- */
 const euros=t=>+String(t).replace(/\D/g,'');
+/* Primes de performance : montants fixés par le joueur pour toute l'organisation (1 000 à 100 000 €). */
+const PRIMES_ORGA={soiree:50000,perf:50000,fin:20000};
+const PERF_TYPES=[['soiree','Combat de la soirée'],['perf','Performance de la soirée'],['fin','Prime de finition']];
+const PERF_FIXES={nana:[
+  ['soiree','Kévin Darras','8 déc. 2026',50000],['perf','Rui Carvalho','19 juil. 2026',50000],['fin','Rui Carvalho','19 juil. 2026',20000],
+  ['soiree','Sofiane Belkacem','20 mars 2026',50000],['perf','Anton Kessler','14 sept. 2024',30000],['fin','Anton Kessler','14 sept. 2024',15000],
+  ['soiree','Thomas Labbé','2 mars 2023',25000],['fin','Gaël Mendes','11 juin 2022',15000]]};
+function perfDe(c,faits){
+  if(PERF_FIXES[c.id])return PERF_FIXES[c.id];
+  /* Générique : chaque finition donne la prime de finition, une sur trois aussi la performance de la soirée ; une victoire aux points sur cinq est le combat de la soirée. */
+  const out=[];let nf=0,nd=0;
+  historique(c).filter(f=>f.res==='v'&&f.date.getFullYear()>=+c.depuis).forEach(f=>{const dt=dMois(f.date);
+    if(f.meth[0]!=='Décision'){out.push(['fin',f.adv,dt,PRIMES_ORGA.fin]);if(nf++%3===0)out.push(['perf',f.adv,dt,PRIMES_ORGA.perf]);}
+    else if(nd++%5===0)out.push(['soiree',f.adv,dt,PRIMES_ORGA.soiree]);});
+  return out;
+}
 function contratHtml(c){
-  const champ=c.rang==='C',[n,b]=c.contrat,total=n+2,fin=new Date(S.date);fin.setMonth(fin.getMonth()+n*4);
+  const [n,bs]=c.contrat,b=euros(bs),total=n+2;
   const l=memeCat(c).map(x=>({x,e:euros(x.contrat[1])})).sort((a,z)=>z.e-a.e),pos=l.findIndex(o=>o.x.id===c.id),max=l[0].e;
-  const vus=l.slice(0,7);if(pos>=7)vus.push(l[pos]);
-  const pips=Array.from({length:total},(_,i)=>`<i class="octr ${i<total-n?'fait':''}"></i>`).join('');
-  const petit=(l,v)=>`<div><div class="etiq">${l}</div><div class="ct-v">${v}</div></div>`;
-  return `<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px;height:100%">
-    ${pan(titre('Son contrat',`signé en ${+c.depuis+Math.max(0,Math.floor((2026-c.depuis)/2)*2)}`)+`
-      <div class="ct-haut"><div><div class="etiq">Combats restants</div><div class="T ct-n">${n}<span> sur ${total}</span></div><div class="ct-pips">${pips}</div></div>
-        <div class="ct-sep"></div>
-        <div><div class="etiq">Bourse par combat</div><div class="T ct-b">${esc(b)}</div><div class="sous">et autant s’il gagne</div></div></div>
-      <div class="ct-bas">${petit('Fin prévue',`${MOIS[fin.getMonth()]} ${fin.getFullYear()}`)}${petit('Chez Split',`depuis ${c.depuis}`)}${petit('Clause',champ?'Titre en jeu à chaque combat':'Aucune')}</div>
-      <div style="display:flex;gap:12px;margin-top:auto"><button class="bouton jaune oct cj">Prolonger</button><button class="bouton oct">Libérer</button></div>`,'height:100%')}
-    ${pan(titre('Les salaires des '+esc(pluriel(c.cat).toLowerCase()),`${pos+1}<sup>${pos?'e':'er'}</sup> sur ${l.length}`)+`<div class="defile">${vus.map(o=>{const k=l.indexOf(o);return `<div class="sal ${o.x.id===c.id?'cur':''}">
-        <span class="T" style="font-size:26px;color:${o.x.id===c.id?'var(--noir)':'var(--texte2)'}">${k+1}</span><span class="eff-nom" style="min-width:0">${o.x.id===c.id?`<b>${esc(o.x.prenom)} ${esc(o.x.nom)}</b>`:lien(o.x)}</span>
-        <span class="sal-b"><i style="width:${o.e/max*100}%"></i></span><b style="white-space:nowrap">${esc(o.x.contrat[1])}</b></div>`;}).join('')}</div>`,'height:100%')}</div>`;
+  const faits=historique(c).filter(f=>!f.soiree||/^Split/.test(f.soiree)).slice(0,total-n).reverse();
+  const perf=perfDe(c,faits),perfTot=perf.reduce((t,x)=>t+x[3],0);
+  const pips=faits.map(f=>`<i class="octr ${f.res}">${f.res==='v'?'V':'D'}</i>`).join('')+Array.from({length:n},()=>'<i class="octr reste"></i>').join('');
+  const fr=v=>String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+'\u00a0€';
+  const COURT={soiree:'Combat',perf:'Performance',fin:'Finition'};
+  /* Moyennes de la catégorie (par combattant) : repère pour lire ses primes */
+  const cat=memeCat(c).map(x=>perfDe(x,[])),nb=Math.max(1,cat.length),virg=v=>String(Math.round(v*10)/10).replace('.',',');
+  const moyTot=Math.round(cat.reduce((t,q)=>t+q.reduce((u,x)=>u+x[3],0),0)/nb/1000)*1000;
+  const moyNb=k=>cat.reduce((t,q)=>t+q.filter(x=>x[0]===k).length,0)/nb;
+  const ecart=(v,m)=>v>m?`<span class="ct8-up">▲</span>`:v<m?`<span class="ct8-down">▼</span>`:'';
+  const chiffre=(lab,val,extra='')=>`<div class="ct8-c"><div class="etiq">${lab}</div><div class="T">${val}</div>${extra}</div>`;
+  const gauche=pan(`<div class="pt"><h2>Son contrat</h2><div class="ct8-bts"><button class="bouton jaune oct cj ct7-bt">Prolonger</button><button class="bouton oct ct7-bt">Libérer</button></div></div>
+    <div class="ct8-chiffres">
+      ${chiffre('Combats restants',`${n} <span class="ct8-sur">sur ${total}</span>`,`<div class="ct7-pips">${pips}</div>`)}
+      ${chiffre('Bourse fixe',fr(b/2),'<div class="sous">par combat</div>')}
+      ${chiffre('Prime de victoire',fr(b/2),'<div class="sous">par victoire</div>')}
+    </div>
+    <div class="ct8-perf">
+      <div class="ct8-ph"><h3>Primes de performance</h3>${perf.length?`<span class="sous">depuis ${esc(c.depuis)}</span><span class="ct8-moy">moyenne des ${esc(pluriel(c.cat).toLowerCase())} : <b>${fr(moyTot)}</b></span><b class="T">${ecart(perfTot,moyTot)} ${fr(perfTot)}</b>`:''}</div>
+      ${perf.length?`<div class="ct8-corps">
+        <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span>${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
+        <div class="defile ct7-defile ct8-liste ct8-fondu">${perf.map(([k,adv,dt,m])=>`<div class="ct8-li"><span class="ct8-d">${esc(dt)}</span><span class="ct8-tag oct">${COURT[k]}</span><span class="ct8-adv">${lien(parNom(adv,c.cat))}</span><b>${fr(m)}</b></div>`).join('')}</div>
+      </div>`:'<div class="ct8-aucune">Aucune prime de performance pour l’instant.</div>'}
+    </div>`,'height:100%');
+  const droite=pan(titre('Classement des salaires',`${pos+1}<sup>${pos?'e':'er'}</sup> sur ${l.length}`)+`<div class="defile ct7-defile ct8-fondu">${l.map((o,k)=>`<div class="sal ct8-sal">
+      <span class="T">${k+1}</span><span class="eff-nom" style="min-width:0">${o.x.id===c.id?`<b>${esc(o.x.prenom)} ${esc(o.x.nom)}</b>`:lien(o.x)}</span>
+      <span class="sal-b"><i style="width:${o.e/max*100}%;left:0"></i></span><b>${fr(o.e)}</b></div>`).join('')}</div>`,'height:100%');
+  return `<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;height:100%">${gauche}${droite}</div>`;
 }
 
 /* ---- Échos (ex « On en dit ») : qui parle, d'où, quand, et le ton (mot + couleur : positif, négatif, une info) ---- */
+/* Échos : [ton, source, genre, titre, citation, date, nouveau, signature]. La presse en grand, puis les autres voix.
+   Chaque voix a son ton : la presse titre, les statistiques constatent, le forum parle, l'entraîneur confie. Textes à relire. */
 function echosDe(c){
-  const st=stats(c),nana=c.id==='nana';
-  const l=nana?[
-    ['pos','Cage Hebdo','Presse','À 37 ans, Nana n’a jamais été aussi dangereux dans le troisième round. Ses adversaires le savent, et ça ne change rien.','il y a 2 semaines'],
-    ['info','Tableau Noir','Statistiques',`${virg(st.enc)} frappes encaissées par minute pour ${virg(st.fpm)} données : il accepte d’en prendre pour en placer.`,'il y a 1 mois'],
-    ['pos','Le Forum','Supporters','Belkacem contre Nana, j’y étais. Je n’ai jamais entendu Lyon aussi fort.','il y a 5 jours',1],
-    ['neg','Son entraîneur','Entourage','Il récupère moins vite qu’avant. On allège les sparrings, pas l’envie.','il y a 3 semaines'],
-    ['info','Hors de la cage','Portrait','Le surnom vient de son premier métier : il passe encore à la boutique familiale entre deux camps.','']]
+  const st=stats(c),nana=c.id==='nana',pr=st.fpm>=st.enc;
+  return nana?[
+    ['pos','Cage Hebdo','Presse','Les derniers rounds lui appartiennent','À 37 ans, il gagne encore quand les autres faiblissent. Ses trois dernières victoires se sont jouées après le deuxième round.','il y a 2 semaines',0,'Julien Morel'],
+    ['info','Tableau Noir','Statistiques','Il prend pour donner',`${virg(st.enc)} frappes reçues par minute, ${virg(st.fpm)} données. Il accepte l’échange, et pour l’instant ça lui réussit.`,'il y a 1 mois',0,''],
+    ['pos','Le Forum','Supporters','',`Belkacem contre Nana, j’y étais. Je n’avais jamais entendu la salle aussi fort.`,'il y a 5 jours',1,'Gones69'],
+    ['neg','Son entraîneur','Entourage','','Il récupère moins vite qu’avant. On a réduit les sparrings, pas l’envie.','il y a 3 semaines',0,'Karim Ouali'],
+    ['info','Hors de la cage','Portrait','Boucher le jour, champion le soir','Son surnom vient de son premier métier. Entre deux camps, il passe encore à la boucherie familiale.','',0,'']]
   :[
-    ['pos','Cage Hebdo','Presse',`${c.prenom} ${c.nom} n’a pas encore eu de grand soir. Split aurait tort d’attendre trop longtemps.`,'il y a 2 semaines'],
-    ['info','Tableau Noir','Statistiques',`${virg(st.fpm)} frappes données par minute, pour ${virg(st.enc)} encaissées.`,'il y a 1 mois'],
-    ['neg','Le Forum','Supporters',`${c.nom} ? Vu une fois en préliminaires. J’attends de le revoir plus haut sur la carte.`,'il y a 5 jours',ECHOS_NOUVEAUX.has(c.id)],
-    ['pos','Son entraîneur','Entourage','Il travaille plus que les autres. Il lui manque un combat qui compte.','il y a 3 semaines'],
-    ['info','Hors de la cage','Portrait','Discret en dehors de la salle. Presque jamais d’interview avant un combat.','']];
-  return l.sort((a,z)=>z[3].length-a[3].length); /* les phrases les plus longues dans les plus grandes cases */
+    ['pos','Cage Hebdo','Presse',`${c.nom} attend son grand soir`,`Il gagne, mais toujours loin de la tête d’affiche. Split aurait tort d’attendre trop longtemps.`,'il y a 2 semaines',0,'Julien Morel'],
+    ['info','Tableau Noir','Statistiques',pr?'Il touche plus qu’il ne prend':'Il prend plus qu’il ne touche',`${virg(st.fpm)} frappes données par minute, ${virg(st.enc)} reçues.`,'il y a 1 mois',0,''],
+    ['neg','Le Forum','Supporters','',`${c.nom} ? Vu une fois en préliminaires. J’attends de le voir plus haut sur la carte.`,'il y a 5 jours',ECHOS_NOUVEAUX.has(c.id),'Ring_Side'],
+    ['pos','Son entraîneur','Entourage','','Il travaille plus que tout le monde. Il lui manque un combat qui compte.','il y a 3 semaines',0,'Samir Haddad'],
+    ['info','Hors de la cage','Portrait','Loin des micros','Discret hors de la salle, il ne donne presque jamais d’interview avant un combat.','',0,'']];
 }
 const TON={pos:['var(--vert)','Positif'],neg:['var(--neg)','Négatif'],info:['var(--jaune)','Une info']};
 function echos(c){
   const l=echosDe(c),nouveau=echosNouveau(c);
-  const carte=([t,src,genre,txt,date,neuf],i)=>{const [col,mot]=TON[t];
-    return pan(`<div class="ec-tete"><div><div class="T ec-src">${esc(src)}</div><div class="sous ec-genre">${genre}${date?` · ${date}`:''}</div></div>
-        <span class="ec-ton" style="color:${col}"><i class="octr" style="background:${col}"></i>${mot}</span></div>
-      <p class="${i===0?'ec-g':'ec-p'}">${esc(txt)}</p>${neuf&&nouveau?'<div class="ec-neuf">Nouveau</div>':''}`,(i===0?'grid-column:span 2;':'')+`--ton:${col}`,'ec-c');};
+  const carte=([t,src,genre,tit,txt,date,neuf,sig],i)=>{const [col]=TON[t],parle=!tit;
+    return pan(`<div class="ec-tete"><span class="etiq">${esc(src)}</span><span class="sous">${genre}${date?` · ${date}`:''}</span>${neuf&&nouveau?'<span class="ec-neuf">Nouveau</span>':''}</div>
+      <div class="ec-corps">${tit?`<div class="T ec-titre ${i===0?'g':''}">${esc(tit)}</div>`:''}
+        <p class="ec-txt ${i===0?'g':''} ${parle?'ec-parole':''}">${parle?`« ${esc(txt)} »`:esc(txt)}</p>
+        ${sig?`<div class="ec-sig">${parle?'':'Par '}${esc(sig)}</div>`:''}</div>
+      `,(i===0?'grid-column:span 2;':'')+`--ton:${col}`,'ec-c');};
   return `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:20px;height:100%">${l.map(carte).join('')}</div>`;
 }
 
-/* ---- Relation (ex « Lui et Split ») : ce qu'il pense de toi et ce qui compte pour lui, son parcours à Split, ses demandes ---- */
+/* ---- Relation (v3, 08/11) : rapport avec l'organisation sur 5 crans (Neutre au milieu) et moments marquants de sa carrière à Split ;
+   son entourage et le vestiaire ; sa carrière (objectifs, progression au classement mondial). ---- */
+const RAPPORTS=['Hostile','Tendu','Neutre','Bon','Excellent'];
+const RAPPORT_COL=['var(--neg)','var(--neg)','var(--blanc)','var(--vert)','var(--vert)'];
+const RELATION={
+  nana:{rapport:3,
+    moments:[['2019','Signe chez Split','Premier contrat, en préliminaires'],['2020','Première victoire chez Split','Par KO au premier round'],['2021','Premier combat principal','À Lyon, contre Gaël Mendes'],['2022','Premier combat de la soirée','Sa première prime chez Split'],['2023','Entre dans le top 5','Après quatre victoires de suite'],['2024','Prolonge pour quatre combats','Sans passer par le marché'],['mars 2026','Champion des poids légers','Contre Sofiane Belkacem'],['déc. 2026','Deuxième défense réussie','Contre Kévin Darras']],
+    entourage:[['Agent','Marc Ferrand','Dur en affaires'],['Entraîneur','Karim Ouali','Depuis ses débuts'],['Préparateur','Lucie Garnier','Depuis 2024'],['Salle','Lyon Fight Club','Lyon']],
+    vestiaire:[['Partenaire','Thomas Labbé','Refuse de l’affronter'],['Rival','Ilyas Mezouar','Revanche le 16 févr.'],['Respect','Sofiane Belkacem','Depuis leur guerre']],
+    objectifs:[['Devenir champion','atteint','Mars 2026'],['Défendre sa ceinture trois fois','cours','2 sur 3'],['Entrer dans le top 10 mondial','cours','17e aujourd’hui']],
+    mondial:[['2019',null],['2021',68],['2023',41],['2025',26],['2026',17]]}
+};
+function relationDe(c){
+  if(RELATION[c.id])return RELATION[c.id];
+  const refus=c.statut==='refus',cat=memeCat(c).filter(x=>x.id!==c.id),pick=k=>cat[k%cat.length],dep=+c.depuis||2022,m=c.mondial||40,r=+c.rang||20;
+  return {rapport:refus?1:2,
+    moments:[[String(dep),'Signe chez Split','Premier contrat, en préliminaires'],[String(Math.min(2025,dep+2)),'Entre dans le top 15','Après trois victoires de suite'],['2025','Premier combat en carte principale',''],...(r<=5?[['2026',`${r===1?'N° 1':`${r}e`} de la catégorie`,'Sa meilleure place']]:[])],
+    entourage:[['Agent','Sans agent','Négocie seul'],['Entraîneur','Samir Haddad','Depuis 2022'],['Préparateur','Hugo Brissac','Depuis 2025'],['Salle','Team Rhône MMA','Villeurbanne']],
+    vestiaire:[['Partenaire',`${pick(3).prenom} ${pick(3).nom}`,'Même salle'],['Rival',`${pick(7).prenom} ${pick(7).nom}`,'Guerre des mots'],['Ami',`${pick(9).prenom} ${pick(9).nom}`,'Arrivés la même année']],
+    objectifs:[[c.id==='mezouar'?'Devenir champion':'Obtenir un combat pour le titre','cours',c.id==='mezouar'?'Combat pour le titre le 16 févr.':''],['Entrer dans le top 15 mondial',m<=15?'atteint':'cours',m<=15?'':`${m}e aujourd’hui`],['Rester invaincu sur une année','atteint','2025']],
+    mondial:[[String(dep),null],['2023',m+38],['2024',m+21],['2025',m+8],['2026',m]]};
+}
+/* Classement mondial dans le temps : 1 en haut ; « NC » (non classé) posé en bas. */
+function courbeMondial(v){
+  const W=520,H=150,px=30,py=26,n=v.length,rs=v.map(x=>x[1]).filter(Boolean),pire=Math.max(...rs)+10,bas=H-22;
+  const X=i=>px+i*(W-2*px)/(n-1),Y=r=>r==null?bas-4:py+(r-1)/(pire-1)*(bas-py-10);
+  const pts=v.map((x,i)=>[X(i),Y(x[1])]),d=pts.map((q,i)=>`${i?'L':'M'}${q[0].toFixed(1)} ${q[1].toFixed(1)}`).join(' ');
+  return `<svg class="rl-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Progression au classement mondial">
+    <line x1="${px}" x2="${W-px}" y1="${bas}" y2="${bas}" class="ax"/>
+    <path d="${d} L${pts[n-1][0].toFixed(1)} ${bas} L${pts[0][0].toFixed(1)} ${bas} Z" class="aire"/><path d="${d}" class="tr"/>
+    ${pts.map((q,i)=>`<g transform="translate(${q[0].toFixed(1)} ${q[1].toFixed(1)})"><circle r="5" class="pt ${i===n-1?'cur':''}"/><text y="-13" class="rk">${v[i][1]==null?'NC':'n° '+v[i][1]}</text></g>
+      <text x="${q[0].toFixed(1)}" y="${H-4}" class="an">${v[i][0]}</text>`).join('')}
+  </svg>`;
+}
 function relation(c){
-  const nana=c.id==='nana',h=historique(c),refus=c.statut==='refus';
-  const avis=nana?['À construire','var(--jaune)','On ne se connaît pas encore. Trouve-moi un nom, et on parlera.']:refus?['Tendue','var(--neg)','Je veux savoir où je vais avant de remonter dans la cage.']:['À construire','var(--jaune)','Je ne demande qu’à combattre. Mets-moi sur une carte.'];
-  const compte=nana?['Garder sa ceinture','Être payé comme un champion','Combattre devant le public de Lyon']:refus?['La sécurité d’un contrat','Être payé à sa valeur','Combattre souvent']:['Combattre souvent','Monter au classement','Un premier combat en carte principale'];
-  const best=h.filter(f=>f.res==='v').sort((a,z)=>a.advR-z.advR)[0];
-  const etapes=[[`${c.depuis}`,'Arrivée à Split','sous Kader Malika']];
-  if(nana)etapes.push(['20 mars 2026','Champion des poids légers','contre Sofiane Belkacem, en cinq rounds'],['8 déc. 2026','Première défense','contre Kévin Darras, aux points']);
-  else if(best)etapes.push([dMois(best.date),'Sa plus belle victoire',`contre ${best.adv}, n° ${best.advR}`]);
-  etapes.push(c.statut==='affiche'?['16 févr. 2027','Prochain combat',esc(c.affiche)]:[dMois(c.dernier),'Dernier combat','']);
-  const dem=nana?[['Défendre sa ceinture avant l’été','Il veut remettre son titre en jeu avant juin.','tenue','Déjà prévu : le 16 février.'],
-    ['Une prime à la hauteur','Il attend une prime de performance s’il gagne le 16 février.','attente','']]
-    :refus?[['Être prolongé','Il ne signera plus de combat sans prolongation.','attente','']]:[];
-  return `<div style="display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:20px;height:100%">
-    ${pan(titre('Ce qu’il pense de toi')+`<div class="rel-avis" style="color:${avis[1]}"><i class="octr" style="background:${avis[1]}"></i>${avis[0]}</div>
-      <p class="rel-cit">« ${avis[2]} »</p>
-      <div class="etiq" style="margin-top:auto">Ce qui compte pour lui</div>${compte.map((t,i)=>`<div class="rel-c"><span class="T">${i+1}</span>${t}</div>`).join('')}`,'height:100%')}
-    ${pan(titre('Son parcours à Split')+`<div class="rel-tl">${etapes.map(([d,t,s],i)=>`<div class="${i===etapes.length-1?'der':''}"><i class="octr"></i><div class="sous">${d}</div><div class="T" style="font-size:28px">${t}</div>${s?`<div style="font-size:20px">${s}</div>`:''}</div>`).join('')}</div>`,'height:100%')}
-    ${pan(titre(esc(S.nomDemandes),dem.length?`${dem.length} en cours`:'')+(dem.length?dem.map(([t,d,e,note])=>`<div class="dem oct">
-        <div class="T" style="font-size:30px">${t}</div>
-        <div style="font-size:21px;margin-top:6px">${d}</div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:12px">${e==='tenue'?`<span style="color:var(--vert);font-weight:700;display:inline-flex;gap:8px;align-items:center">${ico('ok',18)}En bonne voie</span><span class="sous">${note}</span>`
-          :`<span class="sous">Sans réponse de ta part</span><button class="bb oct petit" style="margin-left:auto" data-action="engager"><span class="oct">S’engager</span></button>`}</div></div>`).join('')
-      :'<div class="sous" style="font-size:22px">Aucune demande pour l’instant.</div>'),'height:100%')}</div>`;
+  const R=relationDe(c);
+  const lien2=n=>{const x=parNom(n,c.cat);return x&&x.id?lien(x):esc(n);};
+  const ligneE=(r,n,d,l)=>`<div class="rl-e"><span class="etiq">${r}</span><div><b>${l?lien2(n):esc(n)}</b><span class="sous">${esc(d)}</span></div></div>`;
+  const echelle=`<div class="rl-ech">${RAPPORTS.map((m,i)=>`<div class="rl-cr ${i===R.rapport?'on':''}" style="--k:${RAPPORT_COL[i]}"><i class="oct"></i><span>${m}</span></div>`).join('')}</div>`;
+  const gauche=pan(titre('Rapport avec l’organisation')+echelle+`
+    <div class="rl-st">Moments marquants</div>
+    <div class="rl-tl2 defile ct7-defile ct8-fondu">${[...R.moments].reverse().map(([d,t,s])=>`<div class="rl-mm"><span class="rl-md">${esc(d)}</span><i class="octr"></i><div><b>${esc(t)}</b>${s?`<span class="sous">${esc(s)}</span>`:''}</div></div>`).join('')}</div>`,'height:100%');
+  const milieu=pan(titre('Son entourage')+`<div class="rl-col">
+    ${R.entourage.map(([r,n,d])=>ligneE(r,n,d,false)).join('')}
+    <div class="rl-st">Dans le vestiaire</div>
+    ${R.vestiaire.map(([r,n,d])=>ligneE(r,n,d,true)).join('')}</div>`,'height:100%');
+  const ETAT={atteint:['Atteint','var(--blanc)',ico('ok',16)],cours:['En cours','var(--jaune)','']};
+  const mv=R.mondial,cur=mv[mv.length-1][1],prev=mv[mv.length-2][1],gain=prev==null?null:prev-cur;
+  const droite=pan(titre('Sa carrière')+`
+    <div class="rl-st" style="margin-top:0">Objectifs de carrière</div>
+    ${R.objectifs.map(([t,e,note])=>`<div class="rl-o ${e}"><span>${esc(t)}</span><span class="rl-oe" style="color:${ETAT[e][1]}">${ETAT[e][2]}${ETAT[e][0]}${note?` <span class="sous">· ${esc(note)}</span>`:''}</span></div>`).join('')}
+    <div class="rl-st">Classement mondial <span class="rl-v">${cur}<sup>e</sup> aujourd’hui${gain?` · <span style="color:${gain>0?'var(--vert)':'var(--neg)'}">${gain>0?'▲':'▼'} ${Math.abs(gain)} places en un an</span>`:''}</span></div>
+    ${courbeMondial(mv)}`,'height:100%');
+  return `<div style="display:grid;grid-template-columns:1fr .95fr 1.15fr;gap:20px;height:100%">${gauche}${milieu}${droite}</div>`;
 }
 
 /* ---- Flèches de la bannière : dans l'ordre du classement de la catégorie, et Retour revient au précédent ---- */
@@ -223,3 +414,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-action="engager"]'))toast('Tu t’engages : la demande passe « en cours », et il s’en souviendra.');
 });
 window.addEventListener('DOMContentLoaded',()=>{const q=new URLSearchParams(location.search);if(q.get('onglet')&&ONGLETS.includes(q.get('onglet'))&&S.fiche){S.onglet=q.get('onglet');rendreFiche();}});
+/* Fondu des listes sans barre : retiré quand on arrive en bas ou quand tout tient. */
+const majFondu=el=>el.classList.toggle('fin',el.scrollTop+el.clientHeight>=el.scrollHeight-4);
+document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('ct8-fondu'))majFondu(e.target);},true);
+new MutationObserver(()=>document.querySelectorAll('.ct8-fondu:not([data-vu])').forEach(el=>{el.dataset.vu=1;majFondu(el);})).observe(document.body,{childList:true,subtree:true});

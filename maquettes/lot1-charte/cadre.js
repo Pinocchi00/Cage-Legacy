@@ -47,7 +47,7 @@ const titre=(t,ment='')=>`<div class="pt"><h2>${t}</h2>${ment?`<span class="ment
 const COMBATTANTS=[
   {id:'nana',prenom:'Parfait',nom:'Nana',surnom:'Le Boucher',cat:'Poids léger',kg:70,age:37,v:14,d:8,n:0,rang:'C',mondial:17,tend:'=',serie:'ddvvv',statut:'dispo',dernier:new Date(2026,11,8),
    taille:'1,72 m',allonge:'1,77 m',garde:'Orthodoxe',depuis:'2019',contrat:[2,'120 000 €'],style:'Bagarreur, pression au centre',
-   traits:[['+','Diesel','3 victoires au troisième round','Monte en régime quand les autres s’éteignent.'],['+','Guerrier','Une guerre dont on parle encore','Ne recule jamais d’un échange.']]},
+   traits:[['+','Diesel','3 victoires dans les derniers rounds','Monte en régime quand les autres s’éteignent.'],['+','Guerrier','Une guerre dont on parle encore','Ne recule jamais d’un échange.']]},
   {id:'labbe',surnomP:1,prenom:'Thomas',nom:'Labbé',surnom:'Le Notaire',cat:'Poids léger',kg:70,age:29,v:12,d:3,n:0,rang:2,mondial:24,tend:'+2',serie:'vvdvv',statut:'dispo',dernier:new Date(2026,10,14),taille:'1,78 m',allonge:'1,81 m',garde:'Orthodoxe',depuis:'2022',contrat:[3,'34 000 €'],style:'Lutteur de contrôle'},
   {id:'bello',surnomP:1,prenom:'Babatunde',nom:'Bello',surnom:'Baba',cat:'Poids léger',kg:70,age:27,v:11,d:2,n:0,rang:3,mondial:29,tend:'+1',serie:'vdvvv',statut:'dispo',dernier:new Date(2026,10,14),taille:'1,80 m',allonge:'1,86 m',garde:'Fausse garde',depuis:'2023',contrat:[2,'28 000 €'],style:'Frappeur de distance'},
   {id:'mezouar',surnomP:1,prenom:'Ilyas',nom:'Mezouar',surnom:'Le Faucon',cat:'Poids léger',kg:70,age:28,v:13,d:3,n:0,rang:1,mondial:19,tend:'+1',serie:'vvvdv',statut:'dispo',dernier:new Date(2026,11,8),taille:'1,76 m',allonge:'1,80 m',garde:'Orthodoxe',depuis:'2021',contrat:[1,'52 000 €'],style:'Grappler, finisseur'},
@@ -75,9 +75,11 @@ function parNom(nom,cat){
     taille:'1,7'+(h%9)+' m',allonge:'1,8'+(h%5)+' m',garde:h%4?'Orthodoxe':'Fausse garde',depuis:'—',contrat:[0,'—'],style:['Frappeur','Lutteur','Grappler','Kickboxeur'][h%4],ext:true};
   EXT.push(e);return e;
 }
-const bilan=c=>`${c.v}-${c.d}-${c.n}`;
+/* Bilan « V-D » ou « V-D-N », en neutre (règle 6). */
+const rec=(v,d,n)=>`${v}-${d}${n===undefined?'':`-${n}`}`;
+const bilan=c=>rec(c.v,c.d,c.n);
 const lien=(c,surnom=false)=>`<span class="nom" data-fiche="${c.id}">${esc(c.prenom)} ${esc(c.nom)}</span>${surnom&&c.surnom?` <span class="surn">« ${esc(c.surnom)} »</span>`:''}`;
-const serie=s=>`<span style="display:inline-flex;gap:6px;align-items:center" title="Du plus ancien au plus récent">${[...s].map(x=>`<span class="marque octr ${x}" style="width:28px;height:28px;font-size:20px">${x.toUpperCase()}</span>`).join('')}</span>`;
+const serie=s=>`<span style="display:inline-flex;gap:6px;align-items:center" title="Du plus récent au plus ancien">${[...s].reverse().map(x=>`<span class="marque octr ${x}" style="width:28px;height:28px;font-size:20px">${x.toUpperCase()}</span>`).join('')}</span>`;
 const ETATS={dispo:['var(--vert)','ok','Disponible'],blesse:['var(--neg)','medical','Blessé'],pause:['var(--texte2)','alerte','En pause']};
 const etat=c=>{const [col,i,t]=ETATS[c.statut];return `<span style="color:${col};display:inline-flex;gap:8px;align-items:center;font-weight:700;white-space:nowrap">${ico(i,20)}${t}${c.retour?` · retour ${esc(c.retour)}`:''}</span>`;};
 const JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
@@ -117,7 +119,7 @@ function rendreEntete(plaque){
     <div class="plaque">${esc(plaque)}</div><span style="margin-left:auto"></span>
     <div class="boite"><span class="T" id="dateH">${S.date.getDate()} ${MOIS[S.date.getMonth()]} ${S.date.getFullYear()}</span></div>
     <div class="boite"><span class="T">Split Fight Night <span style="color:var(--rouge-vif)">63</span></span></div>
-    <button class="bouton jaune oct cj" id="bContinuer" style="height:64px;font-size:40px">Continuer ${ico('avant',30,3)}</button>`;
+    <button class="bouton jaune cj cont-carre" id="bContinuer" style="height:64px;font-size:40px">Continuer ${ico('avant',30,3)}</button>`;
 }
 
 /* ---- Accueil (R5 : messages, ce qui t'attend, saison cohérente ; T3 : mouvement discret) ---- */
