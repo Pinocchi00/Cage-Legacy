@@ -410,3 +410,5 @@
 .sc-z{margin-bottom:10px}.sc-bar{margin-bottom:8px}
 .sc-ch>div{padding:4px 0}.sc-ch .T{font-size:24px}
 .sc-ch{margin-top:auto}
+/* 09/11 : tout accent au-dessus d'une capitale (É, Č, Š…) a sa place, sans toucher le surnom */
+.fb-nom.accent{gap:16px;bottom:30px}

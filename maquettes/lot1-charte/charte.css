@@ -257,3 +257,7 @@ body.repliee .item{height:calc(59px + 36px / 16)} /* les 36 px gagnés sur le lo
 .cont-carre{clip-path:none;border:0}
 .cont-carre::before{inset:2px;clip-path:none;background:var(--noir)}
 .cont-carre::after{inset:3px;clip-path:none}
+
+/* 08/11 : une case jaune se découpe toujours elle-même en octogone (elle n'attend plus la classe .oct) :
+   son contour gris ne peut plus rester rectangulaire. */
+.cj{clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c))}
