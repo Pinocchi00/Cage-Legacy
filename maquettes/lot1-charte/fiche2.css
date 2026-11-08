@@ -78,3 +78,335 @@
 .rel-tl>div>i{position:absolute;left:-30px;top:4px;width:18px;height:18px;background:var(--bord)}
 .rel-tl>div.der>i{background:var(--blanc)}
 .fb-nom.accent{gap:32px;bottom:22px}
+/* ---- Contrat : prime de victoire, primes touchées, classement des salaires qui défile sans barre ---- */
+.ct7-pips{gap:6px}.ct7-pips i{width:28px;height:28px;display:grid;place-items:center;font-style:normal;font-family:var(--titre);font-weight:800;font-size:17px;color:var(--noir)}
+.ct7-pips i.v{background:var(--vert)}.ct7-pips i.d{background:var(--neg)}.ct7-pips i.reste{background:var(--blanc)}
+.ct7-bourse{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}.ct7-bourse .T{font-size:44px;line-height:1;margin-top:8px}
+.ct7-bourse>.sous{grid-column:1/-1;margin-top:10px}.ct7-prime,.ct7-ok{color:var(--vert)}
+.ct-bas .sous{font-size:17px;margin-top:2px}
+.ct7-defile{scrollbar-width:none;padding-right:0}.ct7-defile::-webkit-scrollbar{display:none}
+.ct7-proch{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:26px;align-items:baseline;margin-top:18px;padding:14px 16px;background:var(--ligne);--c:8px;font-size:22px;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.ct7-proch .etiq{font-size:16px}.ct7-cout{display:flex;align-items:baseline;gap:8px;white-space:nowrap;font-weight:700}.ct7-cout .sous{font-size:17px;font-weight:500;margin-right:10px}
+.ct7-proch{grid-template-columns:minmax(0,1fr) auto;row-gap:6px;margin:14px 0 16px}.ct7-proch .etiq{grid-column:1/-1}
+.ct7-qui{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-haut:has(.ct7-pips){padding-bottom:14px}.ct-haut:has(.ct7-pips) .ct-n{font-size:70px}
+.ct-haut:has(.ct7-pips)~.ct-bas{padding-top:12px}
+.ct7-perf{margin:14px 0 16px;padding:12px 16px;background:var(--ligne);clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.ct7-ph{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}.ct7-ph .etiq{font-size:16px}.ct7-ph b{font-size:22px}
+.ct7-pl{display:grid;grid-template-columns:230px minmax(0,1fr) auto;column-gap:20px;align-items:baseline;padding:4px 0;font-size:21px}
+.ct7-pl .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct7-pl b{white-space:nowrap}
+.ct7-pl.vide>span:first-child,.ct7-pl.vide b{color:var(--texte2)}
+.ct7-pn{font-size:16px;margin-top:6px;padding-top:8px;border-top:2px solid var(--sep)}
+.ct7-mod{color:var(--jaune);font-weight:700;margin-left:8px;font-size:16px}
+.ct7-bourse>.sous{line-height:1.5}
+.ct7-pl.vide b{font-weight:500}
+.ct7-pn{display:flex;align-items:baseline;justify-content:space-between}
+.ct7-perf{margin-top:16px}
+.ct7-bt{height:50px;font-size:28px;padding:0 18px}
+.ct7-perf{margin-top:auto;margin-bottom:0}
+/* Primes de performance, version lisible quel que soit le nombre */
+.ct7-perf{display:flex;flex-direction:column;flex:1;min-height:0;margin:16px 0 0;padding:14px 16px}
+.ct7-ph{flex:none;margin-bottom:10px}.ct7-ph .sous{font-size:18px}.ct7-ph .sous b{color:var(--blanc);font-size:20px}
+.ct7-tuiles{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.ct7-tu{display:flex;flex-direction:column;gap:2px;padding:8px 12px;background:var(--panneau);font-size:18px;clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
+.ct7-tu>span:first-child{color:var(--texte2);font-size:16px;font-weight:600;white-space:nowrap}.ct7-tu .T{font-size:30px;line-height:1}.ct7-tu .sous{font-size:17px}
+.ct7-tu.vide .T{color:var(--texte2)}
+.ct7-liste{flex:1;min-height:0}
+.ct7-li{display:grid;grid-template-columns:110px 200px minmax(0,1fr) auto;column-gap:18px;align-items:baseline;padding:6px 0;border-top:2px solid var(--sep);font-size:20px}
+.ct7-li .sous{font-size:17px;white-space:nowrap}.ct7-type{font-weight:600;white-space:nowrap}.ct7-adv{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct7-li b{white-space:nowrap}
+.ct7-aucune{padding:6px 0}
+/* ---- Contrat, version lisible (charte L2, L3, L5 ; règles 6 et 11) ---- */
+.ct8-bts{margin-left:auto;display:flex;gap:12px}
+.ct8-chiffres{display:grid;grid-template-columns:1.1fr 1fr 1fr;padding-bottom:18px;border-bottom:2px solid var(--sep)}
+.ct8-c{display:flex;flex-direction:column;gap:6px;padding:0 26px;border-left:2px solid var(--sep)}.ct8-c:first-child{padding-left:0;border-left:0}
+.ct8-c .etiq{font-size:17px}.ct8-c .T{font-size:52px;line-height:.95}.ct8-c .sous{font-size:19px}
+.ct8-sur{font-size:26px;color:var(--texte2)}
+.ct8-c .ct7-pips{display:flex;gap:6px;margin-top:2px}
+.ct8-perf{flex:1;min-height:0;display:flex;flex-direction:column;padding-top:18px}
+.ct8-ph{display:flex;align-items:baseline;column-gap:26px;margin-bottom:14px}
+.ct8-ph h3{margin:0;font-family:var(--titre);font-weight:800;font-size:30px;line-height:1;text-transform:uppercase}
+.ct8-ph .sous{font-size:19px}.ct8-ph .T{margin-left:auto;font-size:34px;line-height:1}
+.ct8-corps{flex:1;min-height:0;display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:26px}
+.ct8-types{display:flex;flex-direction:column;gap:10px}
+.ct8-ty{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:16px;align-items:baseline;padding:10px 14px 10px 18px;background:var(--ligne);position:relative;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.ct8-ty::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--rouge-vif)}
+.ct8-ty>span:first-child{font-size:20px;font-weight:600}
+.ct8-ty .T{grid-row:1/3;grid-column:2;font-size:44px;line-height:1;align-self:center}
+.ct8-m{font-size:19px;color:var(--texte2)}
+.ct8-ty.vide::before{background:var(--sep)}.ct8-ty.vide>span:first-child,.ct8-ty.vide .T{color:var(--texte2)}
+.ct8-liste{min-height:0}
+.ct8-li{display:grid;grid-template-columns:118px 132px minmax(0,1fr) auto;column-gap:18px;align-items:center;min-height:46px;border-bottom:2px solid var(--sep);font-size:21px}
+.ct8-li:first-child{border-top:2px solid var(--sep)}
+.ct8-d{font-size:19px;color:var(--texte2);white-space:nowrap}
+.ct8-tag{--c:6px;justify-self:start;background:var(--ligne);padding:3px 10px;font-size:17px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.ct8-adv{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct8-li b{white-space:nowrap;text-align:right}
+.ct8-aucune{font-size:20px;color:var(--texte2)}
+.ct8-sal{grid-template-columns:40px minmax(0,1fr) 120px 120px;column-gap:20px}.ct8-sal .T{font-size:26px;color:var(--texte2)}.ct8-sal.cur .T{color:var(--noir)}.ct8-sal>b{white-space:nowrap;text-align:right}.ct8-sal .eff-nom b{text-align:left}
+/* Liseré jaune des primes (décision d'Anthony du 07/11) et moyennes de la catégorie */
+.ct8-ty::before{background:var(--jaune)}
+.ct8-ty{grid-template-rows:auto auto;padding:8px 14px 8px 18px}
+.ct8-ty .T{grid-row:1/2;align-self:baseline;font-size:40px;white-space:nowrap}
+.ct8-mc{grid-column:2;grid-row:2;justify-self:end;font-size:16px;color:var(--texte2);white-space:nowrap}
+.ct8-up,.ct8-down{font-size:.5em;vertical-align:.35em;margin-right:4px}.ct8-up{color:var(--vert)}.ct8-down{color:var(--neg)}
+.ct8-moy{font-size:19px;color:var(--texte2);margin-left:auto}.ct8-moy b{color:var(--blanc)}
+.ct8-ph .T{margin-left:26px;white-space:nowrap}
+.ct8-ty{padding:10px 14px 10px 18px}.ct8-ty .T{grid-row:1/3;align-self:center;font-size:40px}
+.ct8-mc{margin-left:26px;font-size:17px}
+/* ---- Peaufinage de l'onglet Contrat ---- */
+.pt .ment sup{text-transform:none;font-size:.7em}
+/* Les listes défilent sans barre : un fondu en bas dit qu'il y a une suite, et disparaît en fin de liste */
+.ct8-fondu{-webkit-mask-image:linear-gradient(#000 calc(100% - 46px),transparent);mask-image:linear-gradient(#000 calc(100% - 46px),transparent);padding-bottom:30px}
+.ct8-fondu.fin{-webkit-mask-image:none;mask-image:none}
+/* Survol des lignes */
+.ct8-li,.ct8-sal{transition:background .15s}
+.ct8-li:hover{background:rgba(233,230,225,.04)}.ct8-sal:not(.cur):hover{background:rgba(233,230,225,.05)}
+/* Repère de la moyenne dans le classement des salaires (repère blanc, règle 6) */
+.sal-b{overflow:visible}.sal-b>em{position:absolute;top:-5px;bottom:-5px;width:2px;margin-left:-1px;background:var(--blanc)}
+.sal.cur .sal-b>em{background:var(--noir)}
+.ct8-salmoy{display:flex;align-items:center;gap:26px;padding:6px 12px;font-size:18px;color:var(--texte2);border-bottom:2px solid var(--sep)}
+.ct8-salmoy::before{content:"";width:28px;height:2px;background:var(--blanc);flex:none}
+.ct8-salmoy b{margin-left:auto;color:var(--blanc);font-size:19px}
+/* Jauges qui se remplissent (mouvement discret) */
+@keyframes ct8-rempli{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ct8-sal .sal-b>i{transform-origin:left;animation:ct8-rempli .6s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){.ct8-sal .sal-b>i{animation:none}}
+/* Tuiles de l'onglet Combats : contour qui suit l'octogone (deux couches, règle 4) */
+.cb-tu-b{--c:12px;background:var(--bord);padding:2px;display:flex;min-width:0}
+.cb-tu-b>.cb-tu{--c:11px;flex:1;min-width:0;border:0}
+/* ---- Onglet Combats enrichi ---- */
+.cb-l{grid-template-columns:44px minmax(0,1.35fr) minmax(0,1.05fr) 110px minmax(0,1.05fr) 250px;column-gap:26px;height:auto;min-height:70px;padding:6px 0}
+.cb-l .eff-nom .sous sup{font-size:.7em}
+.cb-dm{font-family:inherit;font-weight:500;color:var(--texte2);font-size:18px}
+.cb-tags{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:17px;white-space:nowrap}
+.cb-ti{display:inline-flex;align-items:center;gap:6px;color:var(--jaune);font-weight:700}
+.cb-pr{--c:5px;background:var(--ligne);padding:2px 10px 2px 12px;font-weight:600;position:relative}
+.cb-pr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--jaune)}
+.cb-rv{color:var(--texte2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:15px}
+.cb-l.hs{color:var(--texte2)}.cb-l.hs .marque{opacity:.75}
+.cb-hs{font-size:15px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--sep);padding:0 6px;margin-left:8px}
+.cb-trou{display:flex;align-items:baseline;gap:26px;padding:8px 0 8px 70px;border-bottom:2px solid var(--sep);font-size:18px;color:var(--texte2);font-style:italic}
+.cb-trou .sous{font-size:17px}
+
+/* ---- Onglet Combats, refonte ---- */
+.cb-l{grid-template-columns:40px minmax(0,1.3fr) minmax(0,1fr) 96px minmax(0,1.1fr) 200px;column-gap:26px;height:74px;min-height:0;padding:0 12px 0 12px;position:relative}
+.cb-l .marque{width:32px;height:32px;font-size:20px}
+.cb-c{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:22px}
+.cb-c>*{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cb-c .sous{font-size:18px}.cb-c sup{font-size:.7em}
+.cb-h{flex:none;height:auto;padding-bottom:10px;border-bottom:2px solid var(--bord);margin-right:0}.cb-h .etiq{font-size:15px}
+.cb-liste .cb-l:hover{background:rgba(233,230,225,.04)}
+.cb-l.titre::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--jaune)}
+.cb-ti{display:inline-flex;align-items:center;gap:5px;color:var(--jaune);font-weight:700}
+.cb-rv{color:var(--blanc);font-weight:600;text-transform:none;letter-spacing:0;font-size:18px}
+.cb-tags{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px}
+.cb-pr{font-size:16px;padding:2px 10px 2px 12px}
+.cb-an{display:flex;align-items:baseline;gap:26px;padding:16px 12px 8px;border-bottom:2px solid var(--bord)}
+.cb-an:first-child{padding-top:12px}
+.cb-an-b{font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:600;letter-spacing:0;color:var(--texte2)}.cb-an-b .v{color:var(--vert)}.cb-an-b .d{color:var(--neg)}
+.cb-trou{display:flex;align-items:center;gap:18px;padding:10px 12px;font-size:17px;font-style:normal;color:var(--texte2);border-bottom:2px solid var(--sep)}
+.cb-trou-l{flex:1;height:0;border-top:2px dashed var(--sep)}
+.cb-hs{color:var(--texte2)}
+.cb-l.hs .cb-c>:first-child{color:var(--texte2)}
+.cb-an-b{letter-spacing:0}.cb-an-b .zero{color:var(--texte2)}
+.cb-hs{border:0;padding:0;margin:0;text-transform:none;letter-spacing:0;font-size:inherit}
+
+/* ---- Onglet Combats, lignes v3 (inspiration : bloc résultat, badge de rang, date à droite) ---- */
+.cb-liste .cb-l{grid-template-columns:64px minmax(0,1.35fr) minmax(0,1.1fr) minmax(0,1fr) 190px 92px;column-gap:26px;height:76px;padding:0 14px 0 8px;margin-bottom:8px;border:0;background:rgba(233,230,225,.035);clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.cb-liste .cb-l:hover{background:rgba(233,230,225,.07)}
+.cb-res{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cb-res .marque{width:34px;height:34px;font-size:21px}
+.cb-abr{font-size:15px;font-weight:700;letter-spacing:.06em;color:var(--texte2)}
+.cb-nom{display:flex;align-items:center;gap:12px;min-width:0}.cb-nom .nom{overflow:hidden;text-overflow:ellipsis}
+.cb-rg{flex:none;font-size:15px;font-weight:700;letter-spacing:.03em;padding:2px 8px;--c:5px;background:var(--blanc);color:var(--noir);white-space:nowrap}
+.cb-rg.nc{background:none;color:var(--texte2);border:1px solid var(--bord);padding:1px 7px}
+.cb-rg.ch{width:24px;height:24px;padding:0;display:grid;place-items:center;background:var(--jaune);color:var(--noir);font-family:var(--titre);font-weight:800;font-size:16px}
+.cb-dt{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.cb-dt .T{font-size:24px;line-height:1}.cb-dt span{font-size:18px;color:var(--texte2);white-space:nowrap}
+.cb-l.titre::before{left:0;top:0;bottom:0;width:4px}
+.cb-l.annule{color:var(--texte2);background:none!important;outline:2px dashed var(--sep);outline-offset:-2px;clip-path:none}
+.cb-l.annule .marque{background:var(--ligne);color:var(--texte2)}
+.cb-large{grid-column:3/6}
+.cb-trou{margin-bottom:8px;border:0}
+/* Années séparées, avec leur bilan */
+.cb-liste .cb-an{display:flex;align-items:baseline;gap:26px;margin:22px 0 10px;padding:0 4px 8px;border-bottom:2px solid var(--bord);font-size:28px;letter-spacing:.04em}
+.cb-liste .cb-an:first-child{margin-top:4px}
+.cb-liste .cb-an-b{font-size:19px;color:var(--texte2)}
+.cb-dt span{font-size:20px;color:var(--blanc)}
+
+/* ---- Statistiques : Méthodes (victoires et défaites par famille, barres par round) ---- */
+.mt{display:grid;grid-template-columns:150px minmax(0,1fr);column-gap:18px;align-items:center;padding:10px 0;border-bottom:2px solid var(--sep)}
+.mt:first-child{padding-top:0}
+.mt-n{display:flex;flex-direction:column;gap:2px}.mt-n .T{font-size:28px;line-height:1}.mt-n .sous{font-size:17px}
+.mt-g{display:flex;flex-direction:column;gap:6px}
+.mt-l{display:grid;grid-template-columns:18px minmax(0,1fr) 54px;column-gap:10px;align-items:center}
+.mt-r{font-family:var(--titre);font-weight:800;font-size:18px}.mt-l.v .mt-r{color:var(--vert)}.mt-l.d .mt-r{color:var(--neg)}
+.mt-b{display:flex;height:20px;background:rgba(233,230,225,.05)}.mt-b i{height:100%}
+.mt-l.v .t0{background:#2E9A55}.mt-l.v .t1{background:#3DBE6A}.mt-l.v .t2{background:#86D9A2}
+.mt-l.d .t0{background:#B83A2F}.mt-l.d .t1{background:#E5483B}.mt-l.d .t2{background:#F09A91}
+.mt-p{font-size:18px;color:var(--texte2);text-align:right;white-space:nowrap}
+.mt-leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font-size:16px;color:var(--texte2)}.mt-leg span{display:inline-flex;align-items:center;gap:6px}
+.mt-leg i{width:14px;height:10px;display:inline-block}.mt-leg .t0{background:#7a7672}.mt-leg .t1{background:#a8a4a0}.mt-leg .t2{background:#d6d3cf}
+.mt-du{display:flex;align-items:baseline;margin-top:14px}.mt-du .T{margin-left:auto;font-size:30px}
+.mt{padding:18px 0}.mt-b{height:26px}.mt-g{gap:8px}.mt-n .T{font-size:32px}.mt-p{font-size:20px;color:var(--blanc)}
+.mt-leg{margin-top:16px}.mt-du{margin-top:auto;padding-top:16px;border-top:2px solid var(--sep)}
+.mt-du .sous{font-size:20px}
+/* Échos : la citation occupe la carte (moins de vide), sans rien ajouter */
+.ec-c>.p2>.p3{display:flex;flex-direction:column}
+.ec-c .ec-g,.ec-c .ec-p{flex:1;display:flex;align-items:center;margin:10px 0 6px;max-width:38em}
+.ec-c .ec-g{font-size:42px;line-height:1.25}
+.ec-c .ec-p{font-size:27px;line-height:1.35}
+.ec-c .ec-neuf{margin-top:0}
+
+/* ---- Échos, écriture et présentation v2 : un titre de presse, une citation entre guillemets, une signature ---- */
+.ec-c>.p2>.p3{position:relative}
+.ec-c .ec-tete{display:flex;align-items:baseline;gap:18px;white-space:nowrap}
+.ec-c .ec-tete .etiq{font-size:17px;color:var(--blanc)}.ec-c .ec-tete .sous{font-size:17px}
+.ec-c .ec-neuf{margin-left:auto}
+.ec-corps{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;max-width:40em}
+.ec-titre{font-size:34px;line-height:1;text-transform:uppercase}.ec-titre.g{font-size:50px}
+.ec-txt{margin:0;font-size:23px;line-height:1.4;color:var(--texte2);font-style:normal}.ec-txt.g{font-size:28px}
+.ec-parole{font-size:27px;color:var(--blanc);line-height:1.35}
+.ec-sig{font-size:18px;color:var(--texte2)}.ec-sig::before{content:"— "}
+.ec-relire{position:absolute;right:18px;bottom:14px;font-size:13px;letter-spacing:.06em;color:var(--texte2);border:1px solid var(--sep);padding:0 6px;opacity:.7}
+
+/* ---- Relation, refaite ---- */
+.rl-etat{display:flex;align-items:baseline;gap:26px}.rl-etat .etiq{font-size:16px}.rl-etat .T{font-size:34px;line-height:1;text-transform:uppercase}
+.rl-parole{margin:16px 0 6px;font-size:27px;line-height:1.35}
+.rl-sig{font-size:18px;color:var(--texte2)}.rl-sig::before{content:"— "}
+.rl-st{font-family:var(--titre);font-weight:800;font-size:22px;letter-spacing:.04em;text-transform:uppercase;margin:22px 0 6px;padding-bottom:6px;border-bottom:2px solid var(--bord)}
+.rl-m{display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:14px;align-items:baseline;padding:8px 0;border-bottom:2px solid var(--sep);font-size:21px}
+.rl-m .sous{font-size:17px;white-space:nowrap}.rl-ic{display:inline-flex;font-weight:800}.rl-m.p .rl-ic{color:var(--vert)}.rl-m.n .rl-ic{color:var(--neg)}
+.rl-l{display:grid;grid-template-columns:120px minmax(0,1fr);grid-template-rows:auto auto;column-gap:18px;padding:9px 0;border-bottom:2px solid var(--sep);font-size:22px}
+.rl-l .etiq{grid-row:1/3;font-size:15px;padding-top:5px}.rl-l b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rl-l .sous{font-size:18px}
+.rl-d{--c:8px;background:var(--ligne);padding:14px 16px;margin-bottom:10px;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.rl-d .T{font-size:28px;line-height:1.05;text-transform:uppercase}.rl-dt{font-size:20px;margin-top:6px;color:var(--texte2)}
+.rl-de{display:flex;align-items:center;gap:16px;margin-top:10px}.rl-de .sous{font-size:18px}
+.rl-ok{display:inline-flex;align-items:center;gap:8px;color:var(--vert);font-weight:700;font-size:19px;white-space:nowrap}
+.rl-vide{font-size:21px}
+.rl-c{display:flex;align-items:center;gap:16px;padding:7px 0;border-bottom:2px solid var(--sep);font-size:21px}.rl-c .T{font-size:24px;color:var(--texte2);width:16px}
+/* Relation : lignes d'entourage sur une seule ligne, demandes plus compactes */
+.rl-l{grid-template-columns:104px auto minmax(0,1fr);grid-template-rows:auto;align-items:baseline;padding:10px 0}
+.rl-l .etiq{grid-row:auto;padding-top:0}.rl-l .sous{text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-st{margin-top:18px}
+.rl-d{padding:12px 16px;margin-bottom:8px}.rl-d .T{font-size:25px}.rl-dt{font-size:19px;margin-top:4px}.rl-de{margin-top:6px}
+.rl-de .bb>span{height:40px;font-size:24px}
+.rl-c{padding:5px 0;font-size:20px}
+
+/* ---- Relation v2 : entourage peaufiné, objectifs de carrière, courbe de valeur ---- */
+.rl-e{display:grid;grid-template-columns:110px minmax(0,1fr);column-gap:18px;align-items:baseline;padding:8px 10px;margin:0 -10px;border-bottom:2px solid var(--sep);transition:background .15s}
+.rl-e:hover{background:rgba(233,230,225,.04)}
+.rl-e .etiq{font-size:15px}.rl-e>div{display:flex;align-items:baseline;justify-content:space-between;column-gap:26px;min-width:0}
+.rl-e b{font-size:22px;white-space:nowrap}.rl-e .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-o{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:14px;align-items:center;padding:7px 0;border-bottom:2px solid var(--sep)}
+.rl-o>span:first-child{font-size:21px;font-weight:600}
+.rl-oe{grid-row:2;display:inline-flex;align-items:center;gap:6px;font-size:17px;font-weight:700}.rl-oe .sous{font-weight:500;font-size:17px}
+.rl-o .bb{grid-row:1/3;grid-column:2}.rl-o .bb>span{height:38px;font-size:22px;padding:0 14px}
+.rl-o.atteint>span:first-child{color:var(--texte2)}
+.rl-v{float:right;font-family:'Barlow Semi Condensed',sans-serif;font-size:17px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte2);padding-top:4px}
+.rl-svg{width:100%;height:auto;display:block;margin-top:6px;overflow:visible}
+.rl-svg .ax{stroke:var(--sep);stroke-width:2}
+.rl-svg .aire{fill:rgba(233,230,225,.06)}
+.rl-svg .tr{fill:none;stroke:var(--blanc);stroke-width:3;vector-effect:non-scaling-stroke}.rl-svg .tr.est{stroke-dasharray:6 6;stroke:var(--texte2)}
+.rl-svg .pt{fill:var(--panneau);stroke:var(--blanc);stroke-width:2.5}.rl-svg .pt.ch{stroke:var(--jaune);fill:var(--jaune)}.rl-svg .pt.e{stroke-dasharray:3 3;fill:var(--panneau)}
+.rl-svg .rk{fill:var(--blanc);font:700 15px 'Barlow Semi Condensed',sans-serif;text-anchor:middle}.rl-svg .rk.ch{fill:var(--jaune)}
+.rl-svg .an{fill:var(--texte2);font:600 15px 'Barlow Semi Condensed',sans-serif;text-anchor:middle}
+.rl-o{padding:5px 0}.rl-o>span:first-child{font-size:20px}
+.rl-svg{margin-top:2px}
+
+/* ---- Relation v3 ---- */
+.rl-ech{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:4px}
+.rl-cr{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:17px;color:var(--texte2)}
+.rl-cr>i{--c:6px;width:100%;height:14px;background:var(--ligne)}
+.rl-cr.on>i{background:var(--k)}.rl-cr.on>span{color:var(--k);font-family:var(--titre);font-weight:800;font-size:24px;text-transform:uppercase;line-height:.9}
+.rl-tl2{display:flex;flex-direction:column;flex:1;justify-content:space-between;position:relative;padding:4px 0}
+.rl-tl2::before{content:"";position:absolute;left:105px;top:16px;bottom:16px;width:2px;background:var(--bord)}
+.rl-mm{display:grid;grid-template-columns:86px 14px minmax(0,1fr);column-gap:14px;align-items:baseline;padding:5px 0}
+.rl-md{font-size:17px;color:var(--texte2);text-align:right;white-space:nowrap}
+.rl-mm>i{width:14px;height:14px;background:var(--bord);position:relative;top:2px}.rl-mm:last-child>i{background:var(--blanc)}
+.rl-mm>div{display:flex;flex-direction:column;gap:1px}.rl-mm b{font-size:21px;font-weight:700}.rl-mm .sous{font-size:17px}
+.rl-col{flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.rl-col .rl-st{margin-top:10px}
+.rl-o{padding:6px 0}
+.rl-v sup{font-size:.7em}
+.rl-svg .pt.cur{fill:var(--blanc)}
+/* Moments marquants : du plus récent (en haut) au plus ancien, liste qui défile sans barre */
+.rl-tl2{justify-content:flex-start;gap:6px;min-height:0;padding-right:0}
+.rl-tl2::before{display:none}
+.rl-mm{position:relative}
+.rl-mm::before{content:"";position:absolute;left:105px;top:20px;bottom:-12px;width:2px;background:var(--bord)}
+.rl-mm:last-child::before{display:none}
+.rl-mm>i{z-index:1}
+.rl-mm:last-child>i{background:var(--bord)}.rl-mm:first-child>i{background:var(--blanc)}
+
+/* ---- Aperçu : signe des traits centré, style de combat sans octogone ---- */
+.tr-sg{width:44px;height:44px;flex:none;position:relative;background:var(--blanc)}
+.tr-sg.moins{background:var(--neg)}
+.tr-sg>i{position:absolute;left:50%;top:50%;width:18px;height:4px;margin:-2px 0 0 -9px;background:var(--noir)}
+.tr-sg>i.v{width:4px;height:18px;margin:-9px 0 0 -2px}
+.sc-st{font-weight:600;font-size:16px;letter-spacing:.07em;text-transform:uppercase;color:var(--texte2);margin:0 0 8px}
+.sc-z{display:flex;gap:4px;margin-bottom:20px}
+.sc-zc{min-width:0;display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:var(--ligne);border-top:4px solid var(--bord)}
+.sc-zc .T{font-size:30px;line-height:1}.sc-zc span{font-size:17px;color:var(--texte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-zc.on{border-top-color:var(--blanc)}.sc-zc.on span{color:var(--blanc)}
+.sc-a{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.sc-a span{--c:7px;background:var(--ligne);padding:6px 14px;font-size:20px;font-weight:600;white-space:nowrap}
+.sc-t{display:flex;flex-direction:column;gap:14px;flex:1;justify-content:flex-end;border-top:2px solid var(--sep);padding-top:16px}
+.sc-t .sc-st{margin-bottom:4px;font-size:15px}.sc-t p{margin:0;font-size:20px;line-height:1.35}
+.sc-bar{display:flex;gap:3px;height:12px;margin-bottom:10px}
+.sc-bar i{min-width:6px}.z0{background:#d6d3cf}.z1{background:#a8a4a0}.z2{background:#6f6b67}
+.sc-z{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-bottom:16px}
+.sc-zc{display:grid;grid-template-columns:12px auto;column-gap:8px;align-items:baseline;padding:0;background:none;border:0;gap:0 8px}
+.sc-zc>i{width:12px;height:12px;align-self:center}
+.sc-zc .T{font-size:26px}.sc-zc span{grid-column:2;font-size:17px}
+.sc-zc.on .T,.sc-zc.on span{color:var(--blanc)}.sc-zc:not(.on) .T{color:var(--texte2)}
+.sc-a{gap:6px;margin-bottom:16px}.sc-a span{font-size:18px;padding:4px 12px}
+.sc-t{gap:10px;padding-top:12px}.sc-t p{font-size:19px;line-height:1.3}
+.sc-bar{flex:none;height:14px}.sc-z,.sc-a,.sc-st{flex:none}
+.sc-t{gap:14px}.sc-t p{font-size:20px;line-height:1.35}
+/* + plus petit ; style : signature et plan */
+.tr-sg>i{width:14px;height:3px;margin:-1.5px 0 0 -7px}.tr-sg>i.v{width:3px;height:14px;margin:-7px 0 0 -1.5px}
+.sc-sig{flex:none;display:flex;flex-direction:column;margin-bottom:16px}
+.sc-sig>div{display:grid;grid-template-columns:150px minmax(0,1fr) auto;column-gap:18px;align-items:baseline;padding:8px 0;border-bottom:2px solid var(--sep)}
+.sc-sig>div:first-child{border-top:2px solid var(--sep)}
+.sc-sig .sous{font-size:17px}.sc-sig b{font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sc-n{font-size:18px;color:var(--texte2);white-space:nowrap}
+.sc-plan{margin-top:auto}.sc-plan p{margin:0;font-size:20px;line-height:1.35}
+/* Croix plus petite ; Style inspiré : 4 cases, zones, niveaux en 5 crans */
+.tr-sg{width:36px;height:36px}
+.tr-sg>i{width:11px;height:3px;margin:-1.5px 0 0 -5.5px}.tr-sg>i.v{width:3px;height:11px;margin:-5.5px 0 0 -1.5px}
+.sc-tus{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.sc-tu{--c:7px;background:var(--ligne);padding:8px 12px;display:flex;flex-direction:column;gap:2px;border-top:3px solid var(--bord)}
+.sc-tu span{font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--texte2)}.sc-tu .T{font-size:28px;line-height:1}
+.sc-niv{flex:none;display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:2px solid var(--sep);border-bottom:2px solid var(--sep)}
+.sc-niv>div{display:flex;align-items:center;justify-content:space-between}.sc-niv .etiq{font-size:16px}
+.sc-pips{display:flex;gap:5px}.sc-pips i{width:30px;height:9px;background:var(--ligne)}.sc-pips i.on{background:var(--rouge-vif)}
+.sc-plan{margin-top:auto;padding-top:10px}.sc-plan p{font-size:19px;color:var(--texte2)}
+.sc-z{margin-bottom:12px}
+.sc-tus{margin-bottom:12px;gap:6px}.sc-tu{padding:6px 12px}.sc-tu .T{font-size:26px}
+.sc-z{margin-bottom:8px}.sc-niv{padding:8px 0;gap:6px}.sc-plan{padding-top:6px}.sc-plan p{font-size:18px;line-height:1.3}
+/* Cases du style au propre (comme les faits à droite) et niveaux en mots */
+.sc-tu{--c:8px;border-top:0;padding:10px 14px;gap:4px;min-width:0}
+.sc-tu .sous{font-size:18px}.sc-tu .T{font-size:30px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-tus{gap:8px}
+.sc-mot{font-size:19px;font-weight:600}.sc-mot.f{color:var(--blanc)}.sc-mot.m{color:var(--texte2)}.sc-mot.p{color:var(--texte2);font-style:italic}
+.sc-niv{margin-top:auto;border-bottom:0;padding:12px 0 0;gap:10px}.sc-mot{font-size:20px}
+/* Cases du style à la taille des faits de droite, sur une ligne ; parcours */
+.sc-tus{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.sc-tu{padding:8px 10px}.sc-tu .sous{font-size:16px}.sc-tu .T{font-size:22px}
+.sc-bg-t{margin-top:4px}
+.sc-bg{flex:none;display:flex;flex-direction:column}
+.sc-bg>div{display:grid;grid-template-columns:110px minmax(0,1fr);column-gap:16px;align-items:baseline;padding:8px 0;border-bottom:2px solid var(--sep)}
+.sc-bg>div:first-child{border-top:2px solid var(--sep)}
+.sc-bg .etiq{font-size:15px}.sc-bg b{font-size:20px;font-weight:600;line-height:1.25}
+.sc-tu{padding:8px 8px 8px 10px}.sc-z{margin-bottom:18px}
+.sc-bg{margin-top:auto}.sc-bg-t{margin-top:auto}
+
+/* En chiffres (remplace le parcours) */
+.sc-ch{flex:none;display:flex;flex-direction:column;margin-top:0}
+.sc-ch>div{display:flex;align-items:baseline;justify-content:space-between;column-gap:26px;padding:6px 0;border-bottom:2px solid var(--sep)}
+.sc-ch>div:first-child{border-top:2px solid var(--sep)}
+.sc-ch .etiq{font-size:15px}.sc-ch .T{font-size:26px;line-height:1}
+/* Cases du style plus grandes : deux par ligne */
+.sc-tus{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.sc-tu{padding:10px 14px}.sc-tu .sous{font-size:18px}.sc-tu .T{font-size:30px}
+.sc-tus{margin-bottom:12px}.sc-tu{padding:8px 14px}.sc-tu .T{font-size:28px}
+.sc-z{margin-bottom:10px}.sc-bar{margin-bottom:8px}
+.sc-ch>div{padding:4px 0}.sc-ch .T{font-size:24px}
+.sc-ch{margin-top:auto}

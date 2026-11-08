@@ -253,3 +253,7 @@ body.repliee .item{height:calc(59px + 36px / 16)} /* les 36 px gagnés sur le lo
 /* Barre réduite : le tunnel garde son cadrage et sa taille ; il se fond dans le noir à droite au lieu de s'arrêter net */
 .fb-img{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent 100%);mask-image:linear-gradient(90deg,#000 82%,transparent 100%)}
 .bandeau-img{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent 100%);mask-image:linear-gradient(90deg,#000 82%,transparent 100%)}
+/* Continuer : encadré carré, comme les boîtes de l'en-tête (08/11) */
+.cont-carre{clip-path:none;border:0}
+.cont-carre::before{inset:2px;clip-path:none;background:var(--noir)}
+.cont-carre::after{inset:3px;clip-path:none}

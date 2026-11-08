@@ -796,6 +796,7 @@ Les 41 remarques dans l'ordre du jeu, chacune avec sa capture, ta décision et c
 - **Question Q39a.** Primes : le joueur fixe le montant des primes de la soirée (dans une fourchette) ? Voir le conflit avec le brief du 22/10 dans la section Conflits.
 - **Ta décision.** Oui il fixe entre 1000 et 100000K
 - **Ce qu'on fera.** Le joueur fixe lui-même les primes de la soirée, entre 1 000 € et 100 000 € par prime (confirmé, point tranché n° 4).
+- **Ajout du 07/11 (maquette de la fiche, onglet Contrat).** Trois primes de performance : **Combat de la soirée**, **Performance de la soirée** et une nouvelle **prime de finition** (versée pour une victoire avant la limite). Leurs montants sont fixés **pour toute l'organisation** et modifiables par le joueur (même fourchette de 1 000 € à 100 000 €). Une prime de finition plus haute **motive les combattants** à chercher la finition. La fiche, onglet Contrat, montre les primes de performance touchées depuis son arrivée : un total par type, puis la liste détaillée qui défile.
 - **Question Q39b.** « Revoir les combats » : rejouer le combat dans l'arène, ou relire le récit et les temps forts ?
 - **Ta décision.** Au choix
 - **Ce qu'on fera.** « Revoir les combats » laisse le choix au joueur : rejouer le combat dans l'arène, ou relire le récit et les temps forts.
