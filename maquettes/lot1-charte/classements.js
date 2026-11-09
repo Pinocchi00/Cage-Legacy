@@ -1,5 +1,5 @@
 "use strict";
-/* Maquette lot 1 — Classements (R18 à R21) : classement Split et classement mondial (Q20b, les deux formules),
+/* Maquette lot 1 — Classements (R18 à R21) : classement Split et classement mondial (Q20b : un filtre Split / Monde, choisi le 09/11),
    Les meilleurs (Q19a : un cadre ouvre la liste complète de sa statistique), Records en un seul onglet (Q21a).
    Chargé après messages.js : remplace rendre(), aller() et ouvrirFiche() pour l'écran « classements ». */
 
@@ -82,7 +82,7 @@ historique=function(c){
 
 /* ---- Réglages de l'écran : gardés au retour (dossier UI/UX) ---- */
 const CL_CLE='maquette-classements';
-S.cl={vue:'classement',portee:'split',sexe:'H',cats:{H:'Poids léger',F:'Poids paille F'},stat:null,formule:1};
+S.cl={vue:'classement',portee:'split',sexe:'H',cats:{H:'Poids léger',F:'Poids paille F'},stat:null};
 try{const g=JSON.parse(localStorage.getItem(CL_CLE)||'{}');delete g.stat;delete g.formule;delete g.tri;Object.assign(S.cl,g);}catch(e){}
 function clGarder(){try{const {stat,formule,anim,...g}=S.cl;localStorage.setItem(CL_CLE,JSON.stringify(g));}catch(e){}}
 const clCat=()=>S.cl.cats[S.cl.sexe];
@@ -444,13 +444,12 @@ function clRecordsHtml(){
 /* ---- L'écran ---- */
 function clOnglets(){
   const o=(v,t,on)=>`<button class="onglet oct ${on?'ouvert':''}" data-clvue="${v}">${t}</button>`,F=S.cl;
-  const liste=F.formule===2?[['split','Split',F.vue==='classement'&&F.portee==='split'],['monde','Mondial',F.vue==='classement'&&F.portee==='monde'],['meilleurs','Les meilleurs',F.vue==='meilleurs'],['records','Records',F.vue==='records']]
-    :[['classement','Classement',F.vue==='classement'],['meilleurs','Les meilleurs',F.vue==='meilleurs'],['records','Records',F.vue==='records']];
+  const liste=[['classement','Classement',F.vue==='classement'],['meilleurs','Les meilleurs',F.vue==='meilleurs'],['records','Records',F.vue==='records']];
   return `<div class="cl-haut">${liste.map(x=>o(...x)).join('')}</div>`;
 }
 function clFiltres(){
   const b=(attr,v,t,on)=>`<button class="bb oct petit ${on?'on':''}" ${attr}="${esc(v)}"><span class="oct">${t}</span></button>`;
-  const portee=S.cl.formule===1&&S.cl.vue==='classement'?`<span class="cl-portee">${b('data-clportee','split','Split',S.cl.portee==='split')}${b('data-clportee','monde','Monde',S.cl.portee==='monde')}</span>`:'';
+  const portee=S.cl.vue==='classement'?`<span class="cl-portee">${b('data-clportee','split','Split',S.cl.portee==='split')}${b('data-clportee','monde','Monde',S.cl.portee==='monde')}</span>`:'';
   return `<div class="eff-filtres">${b('data-clsexe','H','Hommes',S.cl.sexe==='H')}${b('data-clsexe','F','Femmes',S.cl.sexe==='F')}<i class="eff-sep"></i>
     ${CATS[S.cl.sexe].map(([cat,t])=>b('data-clcat',cat,t,clCat()===cat)).join('')}${portee}</div>`;
 }
@@ -492,8 +491,7 @@ document.addEventListener('click',e=>{
   if(S.ecran!=='classements')return;
   if(t.closest('#fiche')||t.closest('[data-fiche]'))return;
   const F=S.cl;
-  if((el=t.closest('[data-clvue]'))){const v=el.dataset.clvue;
-    if(v==='split'||v==='monde'){F.vue='classement';F.portee=v;}else F.vue=v;
+  if((el=t.closest('[data-clvue]'))){F.vue=el.dataset.clvue;
     F.stat=null;F.anim=true;rendre();return;}
   if((el=t.closest('[data-clportee]'))){F.portee=el.dataset.clportee;rendre();return;}
   /* Hommes ou Femmes : toutes les catégories du sexe choisi ; une catégorie : elle seule. */
@@ -511,10 +509,9 @@ ouvrirFiche=function(id,g){
 };
 document.addEventListener('click',e=>{if(e.target.closest('[data-lc]')&&S.clNavMonde)S._clGarde=true;},true);
 
-/* ---- Lancement : ?ecran=classements, options clvue=meilleurs|records, portee=monde, sexe=F, clcat=<catégorie|toutes>, stat=<clé>, formule=2, fiche=<id> ---- */
+/* ---- Lancement : ?ecran=classements, options clvue=meilleurs|records, portee=monde, sexe=F, clcat=<catégorie|toutes>, stat=<clé>, fiche=<id> ---- */
 window.addEventListener('DOMContentLoaded',()=>{
   const q=new URLSearchParams(location.search);
-  if(q.get('formule')==='2')S.cl.formule=2;
   if(q.get('ecran')!=='classements')return;
   S.ecran='classements';S.hist=['accueil'];
   if(q.get('clvue'))S.cl.vue=q.get('clvue');
