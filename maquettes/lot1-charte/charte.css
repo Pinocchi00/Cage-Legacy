@@ -261,3 +261,21 @@ body.repliee .item{height:calc(59px + 36px / 16)} /* les 36 px gagnés sur le lo
 /* 08/11 : une case jaune se découpe toujours elle-même en octogone (elle n'attend plus la classe .oct) :
    son contour gris ne peut plus rester rectangulaire. */
 .cj{clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c))}
+
+/* 09/11 (2e retour) : toute case jaune = contour de 1 px de la couleur du cadre de la date (#74716F), puis le jaune, sans espace.
+   Coin de la couche rentrée de 1 px : c − 0,586 px, pour un contour égal sur les diagonales. */
+.cj{background:#74716F!important}
+.cj::before{display:none!important}
+.cj::after,.cj.fin::after{inset:1px;background:var(--jaune);--k:calc(var(--c) - .59px)}
+.alerte-l .tag-j.cj{--c:9px!important;height:38px!important;padding:0 16px!important}
+/* Continuer est à part : encadré rectangulaire, comme les boîtes de l'en-tête (contour 2 px, filet noir, jaune). */
+.cj.cont-carre{clip-path:none!important}
+.cj.cont-carre::before{display:block!important;inset:2px;clip-path:none;background:var(--noir)}
+.cj.cont-carre::after{inset:4px;clip-path:none}
+
+/* 09/11 (3e retour) : Continuer, encadré rectangulaire collé au jaune, sans écart */
+.cj.cont-carre::before{display:none!important}
+.cj.cont-carre::after{inset:2px}
+
+/* Prochaine étape : un bouton plus haut que l'étiquette ne la décale plus */
+.alerte-l>.af-valider{margin-top:-3px;margin-bottom:-3px}

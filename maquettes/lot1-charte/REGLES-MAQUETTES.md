@@ -51,7 +51,8 @@ De gauche à droite :
 
 ## 4. Les formes
 
-- **Octogone partout** : les 4 coins sont coupés, jamais 2 seulement (fin des coins rognés, Q19b). Cela vaut pour les panneaux, les boutons, les onglets, les étiquettes, les cases et les marques.
+- **Octogone partout** : les 4 coins sont coupés, jamais 2 seulement (fin des coins rognés, Q19b). Cela vaut pour les panneaux, les boutons, les onglets, les étiquettes, les cases et les marques. **Seule exception : le bouton Continuer, rectangulaire** (09/11).
+- **Une surbrillance (ligne choisie, survol) suit elle aussi l'octogone et porte son encadré** : jamais un fond rectangulaire coupé par les angles d'un panneau (09/11).
 - **Panneau** : bord de 2 px (`rgba(233,230,225,.38)`, qui ressort en `#74716F` à l'écran), puis 5 px de noir, puis le fond `#121010`. Coins coupés de 18 / 17 / 14 px.
 - **Un bord suit toujours les angles coupés.** Ne jamais combiner `border` et `clip-path` : le bord disparaît dans les coins. Il faut deux couches, une extérieure de la couleur du bord et une intérieure du fond (classes `.pan`, `.bb`).
 - **Titre de panneau** : 44 px en capitales, avec la **barre rouge de 56 × 6 px** dessous. Une mention à droite en capitales espacées de 20 px (« 2 NON LUS · TOUT VOIR › »).
@@ -60,9 +61,11 @@ De gauche à droite :
 
 ## 5. Les cases jaunes
 
-- **Contour de 2 px, posé sur le bord, de la même couleur que les autres encadrés (`#74716F`)**. Pas de liseré intérieur, pas de double trait.
-- **Une case jaune est toujours octogonale, contour compris** (décision du 08/11). La classe `.cj` découpe elle-même son octogone (`charte.css`) : un contour gris rectangulaire autour d'un bouton octogonal ne doit plus jamais apparaître. Tout nouvel encadré avec un contour suit la même règle : c'est l'élément qui porte le contour qui est découpé.
-- **Proportionnel** : une petite étiquette (≈ 34 px de haut) a un contour de **1 px**.
+- **Contour de 1 px, sans espace, sur toutes les cases jaunes** (décision du 09/11, qui remplace les précédentes) : un trait de 1 px de la même couleur que le cadre de la date (`#74716F`), puis directement le jaune. Pas de filet noir, quelle que soit la taille de la case.
+- **Le contour a la même épaisseur dans les angles coupés** : la couche jaune rentrée de 1 px a des coins de `c − 0,59 px` (`.cj`, `charte.css`).
+- **Continuer est à part** : encadré **rectangulaire** comme les boîtes de l'en-tête (contour gris de 2 px), puis le jaune **sans écart**. C'est le seul bouton rectangulaire.
+- **Une case jaune est toujours octogonale, contour compris** (décision du 08/11). La classe `.cj` découpe elle-même son octogone : un contour gris rectangulaire autour d'un bouton octogonal ne doit plus jamais apparaître. Tout nouvel encadré avec un contour suit la même règle : c'est l'élément qui porte le contour qui est découpé.
+- Toute autre case, jaune ou non, est octogonale (étiquettes de type comprises). Les boîtes de l'en-tête restent comme dans le jeu (hypothèse, à confirmer).
 - Le **C du champion** a aussi son contour, dans le même esprit.
 - Texte **noir** sur fond jaune.
 
@@ -178,6 +181,11 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - Le message ouvert : qui parle, quand, le texte (largeur de lecture 55 à 80 caractères), puis **2 à 4 réponses au plus**, en boutons. La réponse principale est jaune, les autres sont noires avec un bord.
 - **Un message important arrête Continuer** : blessure à l'affiche, poids raté, retour du recruteur, offre d'une autre organisation…
 - **Un palier de croissance franchi arrive comme un message** (« Palier franchi »), pas dans le fil d'actualité.
+- **Retours du 09/11 (première maquette)** : le panneau de gauche s'appelle « Messages » ; pas de mention (« 1 non lu », « Tout est lu »), pas de filtres (Tous, Non lus, À répondre), pas de « Réponse attendue » : **un point jaune suffit** (non lu, ou décision attendue), et ces lignes sont plus blanches. La ligne choisie est octogonale, avec son encadré.
+- **Pas d'intitulé « Ta réponse ».** Les boutons sont en bas, simples ; ce qui mène ailleurs (Infirmerie, Ouvrir la carte, Ouvrir le recrutement) est un bouton à part, jamais obligatoire. Un message qui n'appelle pas de décision n'a pas de réponse (une blessure hors affiche : juste le bouton Infirmerie, le même que dans l'Effectif).
+- **Chaque message montre ses données** dans des cases : chiffres, frise, bilans, série… Les cases vides se remplissent d'éléments utiles, jamais de décor. Mouvement léger à l'ouverture (apparition, jauges, compteurs).
+- **Un message se supprime** (corbeille en haut à droite), **seulement une fois la décision prise** : tant qu'il attend une réponse, la corbeille n'est pas là.
+- **Pas de barre de défilement visible** dans les listes et le message ; une jauge prend la place du trait de sa ligne, jamais un trait puis une jauge décalée.
 - « Le fil » et « Tes suivis » ne sont pas dans les Messages. Le fil va dans Presse et les suivis dans Recrutement, sauf si tu décides autrement (choix ouvert).
 
 ### Continuer (T10)
