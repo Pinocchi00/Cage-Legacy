@@ -175,7 +175,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - Mêmes onglets que la fiche : 56 px, octogonaux, celui qui est ouvert est blanc.
 - Un onglet qui a du nouveau porte le **petit octogone jaune** à côté de son nom.
 
-### Écran Messages (R13, T10, Q5a)
+### Écran Messages (R13, T10, Q5a, validé le 09/11)
 - **Deux colonnes, pas trois** : la liste des messages à gauche (≈ 520 px), le message ouvert au centre. Plus de colonne de droite.
 - Chaque ligne de la liste : point jaune si non lu, titre, auteur et date, étiquette du type (LEÏLA, MÉDECIN, PALIER, PRESSE, RECRUTEUR, AGENT, ORGANISATION).
 - Le message ouvert : qui parle, quand, le texte (largeur de lecture 55 à 80 caractères), puis **2 à 4 réponses au plus**, en boutons. La réponse principale est jaune, les autres sont noires avec un bord.
@@ -193,7 +193,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - Le temps avance **jour par jour** ; la date de la boîte change sous les yeux. Il **s'arrête sur le premier message important**.
 - S'il reste une décision qui bloque (un combattant blessé à l'affiche, par exemple), Continuer **le dit et mène à l'écran où l'on règle le problème**, avec la personne déjà sélectionnée (dossier UI/UX). Ce qui peut attendre ne bloque pas.
 
-### Écran Classements (R18 à R21, maquette du 09/11, à valider)
+### Écran Classements (R18 à R21, validé le 09/11)
 - **Onglets sous l'en-tête** : Classement · Les meilleurs · Records, puis la ligne des filtres. Le filtre choisi est gardé au retour.
 - **Hommes ou Femmes** (sans catégorie) : toutes les catégories du sexe choisi, partout (classement Split, mondial, Les meilleurs). Au classement : les 30 meilleurs d'après leur rang mondial.
 - **Split ou Monde (Q20b, tranché le 09/11)** : un seul écran, avec un filtre **Split / Monde** à droite de la ligne des catégories. Pas d'onglets Split et Mondial séparés.
@@ -209,6 +209,21 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Records (Q21a)** : un seul onglet, quatre familles. Chaque record dit qui, quand et ce qu'il devient ; les soirées donnent leur combat principal (tiré de l'historique du combattant). Pas de phrase « avant ton arrivée ».
 - **Fiches de staff** : un ancien devenu consultant, entraîneur, commentateur, agent ou gérant de salle ouvre une fiche à lui : son rôle et ses dernières semaines (avec une couleur de ton), sa carrière en frise et ses records, sa relation avec Split, ce qu'il pense d'un combattant de Split, ce qu'il peut t'apporter et une action.
 - **Noms** : jamais le nom d'un vrai combattant (« Arman Tsarukyan » retiré de la liste d'adversaires de la fiche).
+
+### Écran Recrutement (R23 à R25, Q24, Q25a, Q25b, validé le 09/11)
+- **Un seul écran**, à la place de « Contrats » dans la barre (hypothèse : les contrats de Split se gèrent dans la fiche et par le message de fin de contrat, Q23b, Q23c). Onglets : Combattants · Recruteur (R26, prochaine maquette).
+- **Pas de « Tes suivis » ici** (retour du 09/11) : « Suivre » reste sur la fiche courte ; leur place est à décider (aperçu de l'Accueil).
+- **Filtres** : Hommes / Femmes et catégories à gauche, **Libres / Fin de contrat / Tous** à droite (Q24). Gardés au retour.
+- **Un marché varié** (retour du 09/11 : « toujours les mêmes ») : fins de contrat tirées du classement mondial, libérés après des défaites, vétérans (ex-n° X mondial), anciens champions, champions de petites organisations, espoirs invaincus non classés. Jamais deux fois le même nom ; la série colle au palmarès. Arrivé sur le marché depuis moins de dix jours : le mot « Nouveau », petit et gris, après le surnom (pas de point jaune, réservé à « non lu » et « à toi d'agir », 09/11).
+- **Tableau** en lignes octogonales triables ; la ligne choisie porte son encadré. **Fiche courte à droite** : situation, palmarès, rang, gabarit, trois dernières victoires, style seulement s'il a été vu (sinon « Envoyer le recruteur »), ce qu'il demande, son agent et son caractère.
+- **Négociation**, par-dessus l'écran :
+  - un bandeau : lui, **« Où vous en êtes »** (une règle Loin · À discuter · Proche · Accord, le curseur glisse après chaque réponse, tes offres en pastilles, la dernière en rouge), et **son agent** (initiales, caractère, humeur en une phrase colorée) ;
+  - **ton offre** : bourse, combats, prime de victoire, prime de signature, puis **ses demandes** ; sous chaque levier, ce qu'il demande (repère blanc sur la barre) ; vert quand tu l'atteins ; ce qu'il vient de lâcher s'affiche « ▼ 1 000 € » en vert ;
+  - **la discussion** (retour du 09/11 : « plus lisible ») : ton offre à droite, encadrée, en une ligne (« Toi · offre 2 ») ; sa réponse à gauche, avec son nom, sa phrase, puis **« D'accord sur : … »** en vert et un petit tableau **Il veut / Tu proposais** pour ce qui reste à régler ; il « lit ton offre » un instant (points animés) avant de répondre.
+  - **de vraies options** (retour du 09/11 : « pas accepter que ce qu'il veut ») : « Faire cette offre », « Prendre ses chiffres », « Plus tard » (pas de « Couper la poire en deux », retiré le 09/11). L'agent fait des compromis sur l'argent **et sur le nombre de combats**, et un levier plus généreux peut en compenser un autre.
+- **Ses demandes (retour du 09/11 : « tout le monde veut sa place pour le titre »)** : 1 à 3 par combattant, selon son profil, parmi ce qu'un combattant négocie vraiment (retour du 09/11 : « pas réaliste ») — chance au titre (seulement le top 10, ou un ancien champion), tête d'affiche d'une soirée dans l'année (top 15), au moins trois combats par an, pouvoir partir après six mois sans combat, garder ses propres sponsors, le voyage et l'hôtel pour trois personnes de son équipe, ne jamais affronter un combattant de sa salle, pouvoir faire un combat de boxe anglaise ailleurs, combattre une fois dans son pays, pouvoir changer de catégorie. Chacune a un poids : **Il y tient** (non négociable, sauf à payer très cher), **Ça compte**, **Un souhait**. Tu t'engages ou non (« T'engager »). L'agent peut **renoncer** à un souhait, puis à ce qui compte (barré, « Il y renonce » en vert) ; jamais à ce à quoi il tient. Le mot « promesse » n'apparaît jamais.
+- **Règles des échanges** : le caractère de l'agent fixe le nombre d'offres (2 à 4) et la taille de ses pas ; il ne bouge pas si tu refais la même offre ; il ne descend jamais sous un plancher ; il prévient avant la dernière offre. **Une négociation rompue reste close deux mois**, même après « Plus tard » ou en rechargeant. Accord = **confirmation en chiffres** (charte S6).
+- **Fiche d'un combattant du marché** : Contrat = sa situation et ce qu'il demande ; Statistiques cachées tant que personne ne l'a vu (Q25b) ; un libre a le tunnel gris et « Libre » dans la case Organisation.
 
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
@@ -263,7 +278,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Fiche | R16 | Validé (section 10). |
 | Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
 | Ceintures | R22 | Une version avec un vrai sens (lignée des champions, règnes, intérims, prochain défi), regroupée avec le Classement. **Tu décides ensuite de la garder ou non.** Défenses et durée du règne sont dans le Classement de toute façon. |
-| Contrats, recrutement | R23 à R25 | **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
+| Contrats, recrutement | R23 à R25 | Section 11, « Écran Recrutement ». **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
 | Recruteur | R26 | Départ de Lyon, toutes les catégories, 2 / 4 / 6 profils selon la durée du voyage. De vrais styles de combat. |
 | Salles et camps | R27 | Liste verticale avec un classement (réputation, champions formés) et une spécialité. Elles évoluent seules. |
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
@@ -283,7 +298,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Octogone « Dans la cage » | Version « rempli » (il impose / il subit). Deux autres versions existent : « en chiffres » et « comment il gagne » | Q16c |
 | Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
 | Barre latérale | Liste actuelle du jeu, « Actualités » devenu « Messages ». Le regroupement en familles sous de nouveaux noms (T4, Q11) reste à proposer | T4, Q11 |
-| Place du « Fil » et des « Suivis » | Fil dans Presse, Suivis dans Recrutement (et un aperçu sur l'Accueil) | Q13 |
+| Place du « Fil » et des « Suivis » | Fil dans Presse ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
 | Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
 | Écran Ceintures | À montrer avec un vrai sens, puis à garder ou supprimer | Point tranché n° 2 |
@@ -291,6 +306,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |
 | Surnoms affichés | Sous le nom dans les listes, à côté du prénom dans la bannière. La liste des écrans concernés reste à valider | T11 |
 | Noms des trois médias | Cage Hebdo, Tableau Noir, Le Forum (à renommer) | Q10c |
+| Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
 | Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
