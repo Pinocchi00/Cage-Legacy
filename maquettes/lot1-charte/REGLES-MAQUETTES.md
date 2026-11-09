@@ -161,7 +161,7 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-11.md`), de la charte et du dossier UI/UX (`docs/DOSSIER-UI-UX-GESTION-2026.pdf`). Elles s'appliquent dès qu'un écran contient la pièce. La première maquette qui la montre la fait valider.
 
 ### Grands tableaux (Effectif, Classements, Contrats, Recrutement, Salles)
-- **Toutes les colonnes se trient** d'un clic sur leur titre. Le titre trié est blanc, avec ▾ ou ▴.
+- **Toutes les colonnes se trient** d'un clic sur leur titre. Le titre trié est blanc, avec ▾ ou ▴. **Exception : les classements**, dont l'ordre ne change pas (09/11).
 - **Pas de titre bavard** au-dessus du tableau (« 29 combattants en poids léger », R15). Le titre de l'écran suffit ; les filtres disent le reste.
 - **Filtres en boutons octogonaux**, sur une ligne au-dessus du tableau. Le filtre actif a le bord blanc. **Un filtre choisi n'est jamais remis à zéro** quand on revient sur l'écran (dossier UI/UX).
 - **Vue essentielle et vue experte** : la vue essentielle a 6 à 8 colonnes utiles, la vue experte ajoute le détail. Les deux ont la même structure.
@@ -192,6 +192,23 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - Toujours au même endroit : en haut à droite, en bouton jaune.
 - Le temps avance **jour par jour** ; la date de la boîte change sous les yeux. Il **s'arrête sur le premier message important**.
 - S'il reste une décision qui bloque (un combattant blessé à l'affiche, par exemple), Continuer **le dit et mène à l'écran où l'on règle le problème**, avec la personne déjà sélectionnée (dossier UI/UX). Ce qui peut attendre ne bloque pas.
+
+### Écran Classements (R18 à R21, maquette du 09/11, à valider)
+- **Onglets sous l'en-tête** : Classement · Les meilleurs · Records, puis la ligne des filtres. Le filtre choisi est gardé au retour.
+- **Hommes ou Femmes** (sans catégorie) : toutes les catégories du sexe choisi, partout (classement Split, mondial, Les meilleurs). Au classement : les 30 meilleurs d'après leur rang mondial.
+- **Split ou Monde (Q20b)** : les deux formules sont montrées. Formule 1 : un filtre Split / Monde à droite. Formule 2 (`?formule=2`) : Split et Mondial sont deux onglets.
+- **Podium** : au classement Split d'une catégorie, le champion a le contour jaune et le tunnel doré, les autres le contour rouge. En vue toutes catégories, contour rouge pour tous et badge C pour les champions. **Au mondial, contour rouge pour tous** ; le tunnel prend la couleur de l'organisation et un champion n'est marqué que par le badge C, même dans les trois premiers. Le rang est écrit dans le logo du jeu (hypothèse pour « le logo sur le n° 1 et le n° 2 »).
+- **Couleur des organisations** : chacune a sa couleur, utilisée pour le contour et le tunnel ; dans les tableaux, **le nom de l'organisation seul**, sans couleur ni pastille (rouge = Split ; Garden of Blood violet, MMA Korner bleu, Pure Impact vert d'eau, Ultimate Rim orange, Knuckle Gate acier, Undisputed Cage rose, Fighting Pacific cyan : couleurs proposées). La fiche d'un combattant d'une autre organisation prend le tunnel de son organisation, son **rang mondial** dans l'octogone (doré s'il est champion), et le nom de l'organisation **dans la case « Organisation »** (à la place de « Contrat »), sans étiquette. Ses flèches et le panneau de catégorie suivent **le classement d'où la fiche a été ouverte** : ouverte depuis le mondial (ou pour un combattant d'ailleurs), les 30 premiers du mondial, combattants de Split compris ; ouverte depuis Split, les 30 de Split. Dans le parcours du mondial, un combattant de Split montre aussi son **rang mondial** dans l'octogone (doré s'il est champion), pas son rang chez Split.
+- **Tous les onglets de sa fiche parlent de son organisation** : ses combats sont ceux de ses soirées (après son départ pour un ancien de Split), jamais contre un combattant de Split ; Contrat = « Sous contrat avec … », chiffres estimés par la presse, ce qu'il coûterait chez Split ; Échos et Relation (« Rapport avec Split ») adaptés ; Aperçu : « Sous contrat avec … », son prochain combat là-bas, un bouton « Le suivre » au lieu de « Proposer un combat ».
+- **Surnoms** : tout combattant classé a un surnom, jamais deux fois le même dans une catégorie.
+- **Bas du tableau** : seulement la phrase utile (▲ ▼ ou « les 30 meilleurs… »), pas de légende.
+- **Champion** : jamais le mot en toutes lettres dans les tableaux, le **badge C de l'Effectif, en petit**, à côté de l'organisation ou de la catégorie (légende en bas du tableau).
+- **Mondial** : « Rang mondial » ; les sept champions des autres organisations sont en tête. Chaque combattant a son organisation, son surnom, sa forme, son dernier et son prochain combat. Les combattants de Split ont un trait jaune.
+- **Tableau** : pas de tri au clic sur les titres de colonnes (retour du 09/11) ; l'ordre est celui du classement. Chaque ligne a sa forme, son dernier combat et son prochain combat, jamais vides. 30 classés par catégorie.
+- **Les meilleurs** : vitrine de 8 cadres, qui s'anime à l'ouverture (chiffres qui montent, barres qui se remplissent). Seul l'essentiel : la mesure, la valeur, le nom du meilleur, le 2e et le 3e ; un clic sur le cadre ouvre la liste complète, un clic sur un nom ouvre la fiche (Q19a).
+- **Records (Q21a)** : un seul onglet, quatre familles. Chaque record dit qui, quand et ce qu'il devient ; les soirées donnent leur combat principal (tiré de l'historique du combattant). Pas de phrase « avant ton arrivée ».
+- **Fiches de staff** : un ancien devenu consultant, entraîneur, commentateur, agent ou gérant de salle ouvre une fiche à lui : son rôle et ses dernières semaines (avec une couleur de ton), sa carrière en frise et ses records, sa relation avec Split, ce qu'il pense d'un combattant de Split, ce qu'il peut t'apporter et une action.
+- **Noms** : jamais le nom d'un vrai combattant (« Arman Tsarukyan » retiré de la liste d'adversaires de la fiche).
 
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
@@ -267,7 +284,9 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
 | Barre latérale | Liste actuelle du jeu, « Actualités » devenu « Messages ». Le regroupement en familles sous de nouveaux noms (T4, Q11) reste à proposer | T4, Q11 |
 | Place du « Fil » et des « Suivis » | Fil dans Presse, Suivis dans Recrutement (et un aperçu sur l'Accueil) | Q13 |
-| Classement Split / Monde | À montrer : un écran avec filtre, ou deux écrans | Q20b |
+| Classement Split / Monde | Les deux formules sont montrées (filtre, ou deux onglets avec `?formule=2`) : à choisir | Q20b |
+| Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
+| Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
 | Écran Ceintures | À montrer avec un vrai sens, puis à garder ou supprimer | Point tranché n° 2 |
 | Nom des soirées | « Split Fight Night 63 » comme dans le jeu ; le plan prévoit « Split : X vs Y » pour les fight nights et « Split 1 » pour les grandes soirées | Q21c, Q29a |
 | Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |

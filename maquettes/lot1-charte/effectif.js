@@ -63,8 +63,8 @@ const CATS={H:[['Poids mouche','Mouche',57],['Poids coq','Coq',61],['Poids plume
   let k=0;const vus=new Set(COMBATTANTS.map(c=>c.prenom+c.nom));
   for(const sexe of ['H','F'])for(const [cat,,kg] of CATS[sexe]){
     const pris=new Set(COMBATTANTS.filter(c=>c.cat===cat).map(c=>c.rang));
-    /* Comme le jeu (environ 30 par catégorie) : le champion, puis tout l'effectif classé de 1 à 27. */
-    const places=['C',...Array.from({length:27},(_,i)=>i+1)];
+    /* Comme le jeu (30 par catégorie) : le champion, puis tout l’effectif classé de 1 à 29. */
+    const places=['C',...Array.from({length:29},(_,i)=>i+1)];
     for(const place of places){
       if(pris.has(place))continue;
       const rang=typeof place==='string'&&place[0]==='n'?'–':place,num=rang==='C'?0:rang==='–'?15+(+place.slice(1)):rang;

@@ -2,7 +2,7 @@
 /* Maquette lot 1 — fiche du combattant (R16) en panneau par-dessus l'Effectif (T7), réglages de maquette, lancement. */
 
 /* ---- Combats passés (fictifs, stables) ---- */
-const ADV=['Kévin Darras','Rui Carvalho','Sofiane Belkacem','Anton Kessler','Marek Hrubý','Lucas Ferreira','Kenji Mori','Pavel Sokolov','Diego Morales','Oumar Diallo','Liam Byrne','Tariq Haddou','Zviad Lomidze','Mateus Prado','Ilya Borissov','Hugo Ferrand','Rafael Lima','Bruno Silveira','Arman Tsarukyan','Jalen Moore','Amir Saïd','Yoann Petit'];
+const ADV=['Kévin Darras','Rui Carvalho','Sofiane Belkacem','Anton Kessler','Marek Hrubý','Lucas Ferreira','Kenji Mori','Pavel Sokolov','Diego Morales','Oumar Diallo','Liam Byrne','Tariq Haddou','Zviad Lomidze','Mateus Prado','Ilya Borissov','Hugo Ferrand','Rafael Lima','Bruno Silveira','Arman Sarkisov','Jalen Moore','Amir Saïd','Yoann Petit'];
 function graine(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return()=>((h=Math.imul(h^(h>>>15),2246822507)>>>0)%10000)/10000;}
 function historique(c){
   if(c._h)return c._h;

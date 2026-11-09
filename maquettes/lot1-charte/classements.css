@@ -1,0 +1,220 @@
+/* Maquette lot 1 — Classements (R18 à R21). Grands tableaux et sous-menus : section 11 des règles. */
+.cl{height:100%;display:flex;flex-direction:column;gap:16px}
+.corps:has(>.cl){bottom:20px}
+.cl-haut{display:flex;align-items:center;gap:12px;flex:none}
+.cl-note{margin-left:auto}
+.cl-portee{margin-left:auto;display:flex;gap:10px}
+.cl-up{color:var(--vert);font-weight:700;white-space:nowrap}
+.cl-down{color:var(--neg);font-weight:700;white-space:nowrap}
+.cl-dispo{color:var(--vert);font-weight:700}
+.cl-split{color:var(--jaune);font-weight:700}
+.cl-ch{font-size:17px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--jaune)}
+.cl-ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;display:block}
+.cl-2l{display:flex;flex-direction:column;gap:4px;line-height:1.1;min-width:0}
+.cl-2l>.sous{font-size:18px}
+.cl-l1{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-size:22px}
+.cl-l1 .sous{font-size:18px}
+.cl-l1 .marque{width:26px;height:26px;font-size:18px}
+.cl-st{font-size:17px}
+.cl-st>span{font-weight:600}
+
+/* Podium */
+.cl-podium{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:20px;height:228px;flex:none}
+.cl-c{--c:18px;background:var(--bord);padding:2px;display:flex;min-width:0}
+.cl-c.or{background:var(--jaune)}
+.cl-ci{--c:17px;flex:1;position:relative;overflow:hidden;background:var(--noir);min-width:0}
+.cl-img{position:absolute;left:calc(100% - 700px);top:-150px;width:1100px;height:619px;background:url('../../images/accueil-octogones.jpg') 0 0/1100px 619px no-repeat;filter:brightness(.8) saturate(.95)}
+.cl-img.or{background-image:url('../../images/tunnel-or.jpg');filter:none;left:calc(100% - 760px)}
+.cl-ci::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0D0B0B 0,#0D0B0B 26%,rgba(13,11,11,.55) 48%,rgba(13,11,11,.1) 70%,transparent)}
+.cl-ci>div{position:absolute;z-index:1}
+.cl-badge{left:22px;top:20px;display:flex;align-items:center;gap:14px}
+.cl-badge .rang-c{width:76px;height:76px}
+.cl-badge .rang-c b{font-size:42px}
+.cl-ct{font-size:22px}
+.cl-logo{position:relative;width:84px;height:84px;display:grid;place-items:center}
+.cl-logo>svg{position:absolute;inset:0;width:100%;height:100%}
+.cl-logo>b{position:relative;font-size:34px;line-height:1;color:var(--blanc)}
+.cl-noms{left:24px;bottom:18px;right:250px;display:flex;flex-direction:column;gap:6px;white-space:nowrap;text-transform:uppercase}
+.cl-pre{font-family:var(--titre);font-weight:800;font-size:28px;line-height:1;overflow:hidden;text-overflow:ellipsis}
+.cl-pre i{font-style:normal;color:var(--texte2);font-size:24px}
+.cl-nom{font-family:var(--titre);font-weight:800;font-size:62px;line-height:.82;overflow:hidden;text-overflow:ellipsis;text-decoration-thickness:3px;text-underline-offset:6px}
+.cl-box{right:20px;top:20px;bottom:20px;width:214px;border:2px solid var(--bord);background:rgba(13,11,11,.86);padding:0 16px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.cl-bil{font-size:50px;line-height:.85}
+.cl-box .s5 .marque{width:28px;height:28px;font-size:19px}
+.cl-box .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Tableau */
+.cl-pan{flex:1;min-height:0;display:flex}
+.cl-pan>.pan{flex:1}
+.cl-defile{scrollbar-width:none}
+.cl-defile::-webkit-scrollbar{display:none}
+.cl-t td{height:66px}
+.cl-t .marque{width:26px;height:26px}
+.cl-t .s5 .marque{width:26px;height:26px;font-size:18px}
+.cl-nous td:first-child{box-shadow:inset 4px 0 0 var(--jaune)}
+.cl-pied{flex:none;display:flex;gap:30px;justify-content:space-between;padding-top:10px;font-size:17px;color:var(--texte2)}
+.cl-pied span{display:inline-flex;align-items:center;gap:10px}
+.cl-nous-m{width:4px;height:20px;background:var(--jaune)}
+
+/* Les meilleurs */
+.cl-mg{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:20px}
+.cl-m{--c:16px;background:var(--bord);padding:2px;display:flex;text-align:left;min-width:0}
+.cl-m:hover{background:var(--blanc)}
+.cl-mi{--c:15px;flex:1;position:relative;overflow:hidden;background:var(--panneau);padding:20px 22px 16px;display:flex;flex-direction:column;min-width:0}
+.cl-mimg{position:absolute;right:-250px;top:-210px;width:600px;height:338px;background:url('../../images/accueil-octogones.jpg') 0 0/600px 338px no-repeat;opacity:.38;
+  -webkit-mask-image:radial-gradient(circle at 70% 55%,#000 0,transparent 60%);mask-image:radial-gradient(circle at 70% 55%,#000 0,transparent 60%);pointer-events:none}
+.cl-mi>*{position:relative}
+.cl-mx{font-size:18px;margin-top:4px}
+.cl-mv{display:flex;align-items:baseline;gap:8px;margin-top:14px}
+.cl-mv .T{font-size:88px;line-height:.8}
+.cl-mv small{font-size:24px;color:var(--texte2);font-weight:600}
+.cl-ml{font-size:28px;font-weight:700;margin-top:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-mrs{margin-top:auto;display:flex;flex-direction:column}
+.cl-mr{display:grid;grid-template-columns:22px minmax(0,1fr) 90px 58px;gap:10px;align-items:center;padding:7px 0;border-top:2px solid var(--sep);font-size:20px}
+.cl-mn{color:var(--texte2);font-weight:700}
+.cl-mr>b{text-align:right;font-weight:700}
+.cl-mb{height:6px;background:var(--ligne);display:block;position:relative}
+.cl-mb>i{position:absolute;left:0;top:0;bottom:0;background:var(--rouge-vif)}
+.cl-mr .cl-mb>i{background:rgba(233,230,225,.55)}
+.cl-mtous{font-size:18px;font-weight:700;color:var(--texte2);margin-top:10px;text-align:right}
+.cl-m:hover .cl-mtous{color:var(--blanc)}
+.cl-lb{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:18px;align-items:center}
+.cl-lb>b{font-weight:700;font-size:24px}
+.cl-lb small{font-size:17px;color:var(--texte2);font-weight:600}
+.cl-tete .cl-mb>i{background:var(--rouge-vif)}
+.cl-t .cl-mb>i{background:rgba(233,230,225,.55)}
+.cl-t .cl-tete .cl-mb>i{background:var(--rouge-vif)}
+
+/* Records */
+.cl-recs{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.cl-recs>.pan{height:100%}
+.cl-recs .defile{scrollbar-width:none}
+.cl-rec{display:grid;grid-template-columns:118px minmax(0,1fr);gap:16px;padding:14px 0;border-bottom:2px solid var(--sep)}
+.cl-rec:last-child{border-bottom:0}
+.cl-rv{font-size:48px;line-height:.9;white-space:nowrap}
+.cl-rl{font-size:22px;font-weight:700;line-height:1.15}
+.cl-rq{font-size:22px;margin-top:6px}
+.cl-rt .sous{font-size:18px;margin-top:3px}
+.cl-rd{font-size:18px;margin-top:6px;color:var(--texte2);display:flex;gap:8px;align-items:flex-start;line-height:1.25}
+.cl-rd.actif{color:var(--vert)}
+.cl-rd svg{flex:none;margin-top:2px}
+/* Le tunnel se voit entre le nom et le palmarès ; les accents des capitales ne sont pas coupés */
+.cl-img{left:calc(100% - 930px)}
+.cl-img.or{left:calc(100% - 960px)}
+.cl-nom{line-height:1;padding-top:4px;margin-bottom:-8px}
+
+/* Les meilleurs : le tunnel reste en fond ; Records plus compacts */
+.cl-mi>.cl-mimg{position:absolute}
+.cl-rec{grid-template-columns:112px minmax(0,1fr);gap:14px;padding:12px 0}
+.cl-rv{font-size:46px}
+.cl-rl{font-size:21px}
+.cl-rq{font-size:21px;margin-top:4px}
+
+/* Records : quatre familles en 2 × 2, un record par ligne (valeur, ce que c'est et qui, quand et ce qu'il devient) */
+.cl-recs{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr 1fr}
+.cl-recs .p3{padding:18px 26px 12px}
+.cl-recs .pt h2{font-size:40px}
+.cl-recs .pt h2::after{margin-top:8px}
+.cl-rec{grid-template-columns:150px minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center;padding:10px 0}
+.cl-rv{font-size:46px}
+.cl-rd{margin-top:3px}
+.cl-rt .sous{margin-top:0}
+.cl-recs .p3{padding:16px 26px 8px}
+.cl-recs .pt{margin-bottom:4px}
+.cl-recs .pt h2{font-size:36px}
+.cl-rec{padding:7px 0}
+.cl-rv{font-size:42px}
+
+/* ---- Retours du 09/11 (2) ---- */
+/* Contour du podium : la couleur du tunnel (rouge Split, couleur de l'organisation au mondial) */
+.cl-c{background:var(--rouge-vif)}
+.cl-c.or{background:var(--jaune)!important}
+/* Les titres de colonnes ne se trient plus */
+.cl-t.fixe th{cursor:default}
+.cl-t.fixe th:hover{color:var(--texte2)}
+/* Pastille de l'organisation */
+.cl-pt{width:12px;height:12px;flex:none;display:inline-block;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.cl-rd .cl-pt{margin-top:5px}
+/* Les meilleurs : le meilleur avec son rang dans le logo, sa forme ; barres qui se remplissent */
+.cl-ml{display:flex;align-items:center;gap:14px;margin-top:12px;min-width:0}
+.cl-ml .cl-logo{width:54px;height:54px;flex:none}
+.cl-ml .cl-logo>b{font-size:24px}
+.cl-mlnom{font-size:28px;font-weight:700}
+.cl-mf{display:flex;align-items:center;gap:12px;white-space:nowrap;min-width:0}
+.cl-mf .s5 .marque{width:22px;height:22px;font-size:15px}
+.cl-mf .sous{font-size:17px;overflow:hidden;text-overflow:ellipsis}
+.cl-mb>i{transform-origin:left;animation:clBarre .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes clBarre{from{transform:scaleX(0)}}
+.cl-mimg{opacity:.5;transition:opacity .25s,transform .4s}
+.cl-m:hover .cl-mimg{opacity:.85;transform:scale(1.06)}
+.cl-mv .T{text-shadow:0 0 24px rgba(226,58,43,.35)}
+.cl-mv{margin-top:10px}
+.cl-mx{min-height:22px}
+/* Fiche : l'organisation d'un combattant venu d'ailleurs, le rôle d'un ancien */
+.cl-ftag{position:absolute;left:32px;top:26px;z-index:2;height:34px;padding:0 14px;display:inline-flex;align-items:center;background:var(--ligne);color:var(--noir);font-weight:700;font-size:19px;letter-spacing:.06em;text-transform:uppercase;clip-path:polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px)}
+.cl-staff-img{filter:grayscale(1) brightness(.75)}
+.ban-contenu .cl-ftag:not([style]){background:var(--blanc)}
+.cl-staff{height:calc(100% - 278px);margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.cl-staff .p3{display:flex;flex-direction:column}
+.cl-sf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0}
+.cl-cite{font-size:24px;font-style:italic;color:var(--texte2);line-height:1.3;margin-top:auto}
+/* L'étiquette (organisation, rôle) se pose à gauche du palmarès, jamais sur le nom */
+.cl-ftag{left:auto;right:452px;top:30px}
+.cl-recs .cl-rl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-recs .sous{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- Retours du 09/11 (3) ---- */
+/* Sigle d'organisation (octogone à sa couleur) et petit C doré du champion */
+.cl-sigle{width:28px;height:28px;flex:none;display:inline-grid;place-items:center;font-family:var(--titre);font-weight:800;font-size:15px;color:#0D0B0B;letter-spacing:0}
+.cl-c-mini{width:24px;height:24px;flex:none;display:inline-grid;place-items:center;background:var(--jaune);padding:2px;margin-left:2px}
+.cl-c-mini>b{width:100%;height:100%;display:grid;place-items:center;background:var(--jaune);box-shadow:inset 0 0 0 2px #0D0B0B;color:#0D0B0B;font-family:var(--titre);font-weight:800;font-size:14px}
+.cl-l1{gap:10px}
+.cl-box .cl-l1{font-size:19px}
+.cl-box .cl-sigle{width:24px;height:24px;font-size:13px}
+.cl-pied-d{display:inline-flex;gap:26px}
+.cl-leg{display:inline-flex;align-items:center;gap:8px}
+/* Les meilleurs : l'essentiel, et tout tient dans la case */
+.cl-mi{padding:18px 20px 12px}
+.cl-ml{display:block;font-size:28px;font-weight:700;margin-top:8px}
+.cl-mv{margin-top:8px}
+.cl-mv .T{font-size:80px}
+.cl-mr{padding:6px 0}
+.cl-mtous{margin-top:6px}
+/* Fiche d'un combattant d'une autre organisation : sigle et nom, rang mondial dans l'octogone */
+.cl-ftag{background:rgba(13,11,11,.86)!important;color:var(--blanc);border:2px solid var(--org,var(--bord));gap:10px;height:40px;padding:0 14px 0 8px;font-size:20px;clip-path:none}
+.cl-ftag .cl-sigle{width:26px;height:26px}
+.cl-fmond{background:var(--blanc)}
+.cl-fmlib{font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte2);margin-top:-8px}
+/* Fiche de staff : plus pleine, plus vivante */
+.cl-staff-img{filter:grayscale(.85) brightness(.85) sepia(.25)}
+.cl-staff .p3{gap:0}
+.cl-chez{font-size:24px;margin-top:-6px}
+.cl-sf{margin:16px 0 18px}
+.cl-fait{--c:8px;background:var(--ligne);padding:10px 14px;min-width:0}
+.cl-fait .T{font-size:30px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-act{display:grid;grid-template-columns:14px 74px minmax(0,1fr);gap:10px;align-items:baseline;padding:10px 0;border-bottom:2px solid var(--sep);font-size:21px;line-height:1.25}
+.cl-act>i{width:12px;height:12px;align-self:center}
+.cl-act .sous{font-size:18px}
+.cl-cite{margin-top:auto;padding-left:16px;border-left:4px solid var(--rouge-vif);font-size:23px}
+.cl-titre-c{display:flex;gap:12px;align-items:center;font-size:22px;font-weight:700;padding:4px 0 14px;border-bottom:2px solid var(--sep)}
+.cl-frise{position:relative;margin:16px 0 10px;display:flex;flex-direction:column;gap:14px}
+.cl-frise::before{content:"";position:absolute;left:79px;top:10px;bottom:10px;width:2px;background:var(--sep)}
+.cl-frise>div{display:grid;grid-template-columns:62px 14px minmax(0,1fr);gap:12px;align-items:center;font-size:21px}
+.cl-frise b{font-size:30px;color:var(--texte2)}
+.cl-frise i{width:14px;height:14px;background:var(--blanc);position:relative}
+.cl-frise>div:last-child i{background:var(--rouge-vif)}
+.cl-frise>div:last-child b{color:var(--blanc)}
+.cl-srec{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;align-items:center;padding:8px 0;border-top:2px solid var(--sep);font-size:21px}
+.cl-srec b{font-size:36px}
+.cl-sj{margin:12px 0 22px;height:10px}
+.cl-sj>i{transform-origin:left;animation:clBarre 1s .2s cubic-bezier(.2,.8,.2,1) both}
+.cl-avis{font-size:23px;font-style:italic;line-height:1.3;margin-top:8px;padding:12px 16px;background:var(--ligne);clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px)}
+.cl-fmond{font-size:40px!important}
+.cl-nom.long{font-size:50px}
+/* 09/11 (4) : le nom de l'organisation seul ; le C du champion = badge de l'Effectif en petit */
+.rang-c.cl-cb{width:30px;height:30px;padding:2px;flex:none;margin-left:4px}
+.rang-c.cl-cb>span{padding:2px}
+.rang-c.cl-cb b{font-size:18px}
+.cl-ftag .rang-c.cl-cb{width:26px;height:26px}
+.cl-ftag .rang-c.cl-cb b{font-size:15px}
+.cl-box .cl-l1{min-width:0;max-width:100%}
