@@ -77,7 +77,7 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 - Oui : l'action principale (Continuer, Proposer un combat, Ouvrir la carte), la marque « à faire », la prochaine étape, les liens d'action (« Tout voir › », « Ouvrir › »), une valeur **en cours** vers un objectif, le champion (C, tunnel doré).
 - Non : un nom, un **surnom**, un titre, une donnée neutre, une décoration.
 - Limite : un seul bloc jaune plein par panneau, un seul bouton jaune par écran.
-- Exception validée le 07/11 : le **liseré à gauche des primes de performance** (fiche, onglet Contrat) est jaune.
+- **Primes de performance en médailles** (10/11, remplace le liseré jaune du 07/11) : un petit octogone doré (contour jaune, fond sombre, pictogramme jaune), un pictogramme par prime — **flamme** = combat de la soirée, **éclair** = performance, **cible** = finition — suivi du nom de la prime et du montant. Partout : résultats, relevé, lendemain, fiche (Combats, Contrat). Pièce commune `medaille()` (`fiche2.js`).
 
 **Vert — ce qui va bien, rien d'autre**
 - Victoire (V), « Disponible », montée au classement (▲), objectif tenu, mieux que la moyenne de la catégorie.
@@ -225,6 +225,21 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Règles des échanges** : le caractère de l'agent fixe le nombre d'offres (2 à 4) et la taille de ses pas ; il ne bouge pas si tu refais la même offre ; il ne descend jamais sous un plancher ; il prévient avant la dernière offre. **Une négociation rompue reste close deux mois**, même après « Plus tard » ou en rechargeant. Accord = **confirmation en chiffres** (charte S6).
 - **Fiche d'un combattant du marché** : Contrat = sa situation et ce qu'il demande ; Statistiques cachées tant que personne ne l'a vu (Q25b) ; un libre a le tunnel gris et « Libre » dans la case Organisation.
 
+### Écran Résultats et lendemain (R29, R30, R40, R41, Q30, Q40, Q41, validé le 10/11)
+- **Un seul écran, deux onglets** : Résultats · Le lendemain. Le lendemain reste consultable ici (R41) ; il porte l'octogone jaune qui pulse tant qu'il n'a pas été ouvert. Il n'existe que pour la dernière soirée.
+- **Les soirées** à gauche : nom, date, ville · salle, combat principal (C du champion pour un titre). « Tes soirées » puis « Avant toi ».
+- **Bandeau** : la soirée (tunnel doré pour un titre), une case « L'enjeu » (avec la ceinture : « X devient champion » / « garde sa ceinture ») et une case « Le public ».
+- **Chaque combat sur une ligne, comme une affiche** : V vert et vainqueur à gauche (nom souligné, surnom dessous), la méthode au centre dans une case (« SOUMISSION / 4e round · 3:12 », ou « DÉCISION PARTAGÉE / 29-28 · 28-29 · 29-28 »), le perdant en gris à droite ; une flèche ▲ / ▼ seulement quand le rang bouge ; catégorie et rounds ; les primes en médailles.
+- **Le relevé d'un combat** s'ouvre par-dessus la liste :
+  - les **juges en tableau** (un round par ligne, un juge par colonne, le nom du gagnant du round dans la case : blanc pour le vainqueur du combat, gris pour l'autre), le round de la finition « non noté », les rounds non disputés ; le score de chaque juge et une phrase (« 2 juges sur 3 donnent la victoire à… », « Avant la fin, X menait sur 2 cartes sur 3 ») ;
+  - les **frappes significatives round par round** en colonnes ;
+  - **les statistiques en tuiles**, chacune avec sa forme : frappes significatives (tête, corps, jambes), précision des frappes en jauges octogonales, amenées au sol et tentatives de soumission en pastilles, temps de contrôle sur la durée du combat, knockdowns ;
+  - **termes du MMA** : frappes significatives, temps de contrôle, amenées au sol, tentatives de soumission, knockdowns ;
+  - Revoir (l'arène) et Le récit, en haut ; combat précédent / suivant.
+- **Le lendemain, sur un seul écran sans défilement** : trois moments (la ceinture, la finition, le combat de la soirée) avec deux phrases et « Voir le combat › » ; le classement qui a bougé (rang avant → après, champion en or, rang mondial) avec un lien vers les Classements ; « On en parle » (la une, deux voix, les vestiaires) ; « La soirée » (public, recette, dépenses détaillées, ce qu'il te reste, popularité, les primes de chacun, tes blessés).
+- **Mouvement** : lignes qui arrivent l'une après l'autre, flèches et médailles qui apparaissent, jauges et barres qui se remplissent, compteurs ; tout s'arrête avec `prefers-reduced-motion`.
+- Après la soirée, **les autres écrans suivent** (Classements, fiches, en-tête « Split Fight Night 64 »).
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -282,7 +297,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Recruteur | R26 | Départ de Lyon, toutes les catégories, 2 / 4 / 6 profils selon la durée du voyage. De vrais styles de combat. |
 | Salles et camps | R27 | Liste verticale avec un classement (réputation, champions formés) et une spécialité. Elles évoluent seules. |
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
-| Calendrier, résultats, lendemain | R29, R30, R40, R41 | Pour chaque soirée : enjeu, ceinture, ville, salle. Résultats lisibles d'un coup d'œil (vainqueur en couleur, méthode, round et temps, surnoms, mouvement au classement, bonus). Les 3 cartes des juges, avec le nom de celui qui a eu 10. Lendemain refait (phrases, défilement, couleur, mouvement). |
+| Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
 | Finances | R31 | Toutes les infos (courbe du solde, recettes et dépenses par soirée, masse salariale). Pas de budget imposé. |
 | Organisation, croissance, poste | R32 à R35 | Mesures renommées, compréhensibles d'un coup d'œil. Le classement des organisations bouge. **Poste et Carnet fusionnés.** Défis par paliers. |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |

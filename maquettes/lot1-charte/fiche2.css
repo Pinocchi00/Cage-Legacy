@@ -138,12 +138,14 @@
 .ct8-li{display:grid;grid-template-columns:118px 132px minmax(0,1fr) auto;column-gap:18px;align-items:center;min-height:46px;border-bottom:2px solid var(--sep);font-size:21px}
 .ct8-li:first-child{border-top:2px solid var(--sep)}
 .ct8-d{font-size:19px;color:var(--texte2);white-space:nowrap}
-.ct8-tag{--c:6px;justify-self:start;background:var(--ligne);padding:3px 10px;font-size:17px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.ct8-tag{justify-self:start;display:inline-flex;align-items:center;gap:9px;font-size:17px;font-weight:700;white-space:nowrap}
 .ct8-adv{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct8-li b{white-space:nowrap;text-align:right}
 .ct8-aucune{font-size:20px;color:var(--texte2)}
 .ct8-sal{grid-template-columns:40px minmax(0,1fr) 120px 120px;column-gap:20px}.ct8-sal .T{font-size:26px;color:var(--texte2)}.ct8-sal.cur .T{color:var(--noir)}.ct8-sal>b{white-space:nowrap;text-align:right}.ct8-sal .eff-nom b{text-align:left}
 /* Liseré jaune des primes (décision d'Anthony du 07/11) et moyennes de la catégorie */
-.ct8-ty::before{background:var(--jaune)}
+.ct8-ty::before{display:none}
+.ct8-tyl{display:flex;align-items:center;gap:12px}
+.ct8-ty.vide .m8{opacity:.35}
 .ct8-ty{grid-template-rows:auto auto;padding:8px 14px 8px 18px}
 .ct8-ty .T{grid-row:1/2;align-self:baseline;font-size:40px;white-space:nowrap}
 .ct8-mc{grid-column:2;grid-row:2;justify-self:end;font-size:16px;color:var(--texte2);white-space:nowrap}
@@ -179,8 +181,7 @@
 .cb-dm{font-family:inherit;font-weight:500;color:var(--texte2);font-size:18px}
 .cb-tags{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:17px;white-space:nowrap}
 .cb-ti{display:inline-flex;align-items:center;gap:6px;color:var(--jaune);font-weight:700}
-.cb-pr{--c:5px;background:var(--ligne);padding:2px 10px 2px 12px;font-weight:600;position:relative}
-.cb-pr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--jaune)}
+.cb-pr{display:inline-flex;align-items:center;gap:8px;font-weight:600}
 .cb-rv{color:var(--texte2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:15px}
 .cb-l.hs{color:var(--texte2)}.cb-l.hs .marque{opacity:.75}
 .cb-hs{font-size:15px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--sep);padding:0 6px;margin-left:8px}
@@ -198,7 +199,7 @@
 .cb-ti{display:inline-flex;align-items:center;gap:5px;color:var(--jaune);font-weight:700}
 .cb-rv{color:var(--blanc);font-weight:600;text-transform:none;letter-spacing:0;font-size:18px}
 .cb-tags{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px}
-.cb-pr{font-size:16px;padding:2px 10px 2px 12px}
+.cb-pr{font-size:16px}
 .cb-an{display:flex;align-items:baseline;gap:26px;padding:16px 12px 8px;border-bottom:2px solid var(--bord)}
 .cb-an:first-child{padding-top:12px}
 .cb-an-b{font-family:'Barlow Semi Condensed',sans-serif;font-size:18px;font-weight:600;letter-spacing:0;color:var(--texte2)}.cb-an-b .v{color:var(--vert)}.cb-an-b .d{color:var(--neg)}
@@ -412,3 +413,8 @@
 .sc-ch{margin-top:auto}
 /* 09/11 : tout accent au-dessus d'une capitale (É, Č, Š…) a sa place, sans toucher le surnom */
 .fb-nom.accent{gap:16px;bottom:30px}
+
+/* ---- Les primes en médailles (10/11) : octogone doré, pictogramme doré sur fond sombre ---- */
+.m8{--t:28px;width:var(--t);height:var(--t);flex:none;display:inline-grid;padding:2px;background:var(--jaune);vertical-align:middle}
+.m8>span{display:grid;place-items:center;background:#1a1414;color:var(--jaune)}
+.m8+.m8{margin-left:-2px}
