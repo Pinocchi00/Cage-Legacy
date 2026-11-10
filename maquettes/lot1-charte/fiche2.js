@@ -247,7 +247,7 @@ function combatsHtml(c){
       <div class="cb-c"><span class="cb-nom">${lien(adv)}${badge(f)}</span><span class="sous">${adv.surnom?`« ${esc(adv.surnom)} » · `:''}Bilan ${bilanAdv(f)}${rv?` · <span class="cb-rv">${rv}</span>`:''}</span></div>
       <div class="cb-c"><b>${methL1}</b><span class="sous">${methL2}</span></div>
       <div class="cb-c"><span>${esc(f.soiree)}</span><span class="sous">${ti?`<span class="cb-ti">${ico('ceintures',16)} ${ti}</span>`:hs?'Hors Split':place(f)}</span></div>
-      <div class="cb-tags">${pr.map(x=>`<span class="cb-pr oct">${COURT[x[0]]}</span>`).join('')}</div>
+      <div class="cb-tags">${pr.map(x=>`<span class="cb-pr">${medaille(x[0],24)}${COURT[x[0]]}</span>`).join('')}</div>
       ${dateCol(f.date)}</div>`;}).join('');
   return `<div style="display:flex;flex-direction:column;gap:18px;height:100%">
     <div class="cb-bilan">${tuile('Contre le top 15',top.length?rec(tv,top.length-tv):'Aucun combat',top.length?'victoires et défaites':'')}
@@ -262,6 +262,13 @@ const euros=t=>+String(t).replace(/\D/g,'');
 /* Primes de performance : montants fixés par le joueur pour toute l'organisation (1 000 à 100 000 €). */
 const PRIMES_ORGA={soiree:50000,perf:50000,fin:20000};
 const PERF_TYPES=[['soiree','Combat de la soirée'],['perf','Performance de la soirée'],['fin','Prime de finition']];
+/* Les primes en médailles (décision du 10/11, remplace le liseré jaune du 07/11) : un octogone doré,
+   un pictogramme par prime — flamme = combat de la soirée, éclair = performance, cible = finition. */
+P.eclair='<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
+P.flamme='<path d="M12 22a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-3 5-3 8a6 6 0 0 0 6 6z"/>';
+P.cible='<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>';
+const PRIME_PICTO={soiree:'flamme',perf:'eclair',fin:'cible'};
+const medaille=(k,t=28)=>`<span class="m8 octr" style="--t:${t}px" title="${esc(PERF_TYPES.find(x=>x[0]===k)[1])} · ${nb(PRIMES_ORGA[k])} €"><span class="octr">${ico(PRIME_PICTO[k],Math.round(t*.55),2.4)}</span></span>`;
 const PERF_FIXES={nana:[
   ['soiree','Kévin Darras','8 déc. 2026',50000],['perf','Rui Carvalho','19 juil. 2026',50000],['fin','Rui Carvalho','19 juil. 2026',20000],
   ['soiree','Sofiane Belkacem','20 mars 2026',50000],['perf','Anton Kessler','14 sept. 2024',30000],['fin','Anton Kessler','14 sept. 2024',15000],
@@ -298,8 +305,8 @@ function contratHtml(c){
     <div class="ct8-perf">
       <div class="ct8-ph"><h3>Primes de performance</h3>${perf.length?`<span class="sous">depuis ${esc(c.depuis)}</span><span class="ct8-moy">moyenne des ${esc(pluriel(c.cat).toLowerCase())} : <b>${fr(moyTot)}</b></span><b class="T">${ecart(perfTot,moyTot)} ${fr(perfTot)}</b>`:''}</div>
       ${perf.length?`<div class="ct8-corps">
-        <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span>${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
-        <div class="defile ct7-defile ct8-liste ct8-fondu">${perf.map(([k,adv,dt,m])=>`<div class="ct8-li"><span class="ct8-d">${esc(dt)}</span><span class="ct8-tag oct">${COURT[k]}</span><span class="ct8-adv">${lien(parNom(adv,c.cat))}</span><b>${fr(m)}</b></div>`).join('')}</div>
+        <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span class="ct8-tyl">${medaille(k,32)}${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
+        <div class="defile ct7-defile ct8-liste ct8-fondu">${perf.map(([k,adv,dt,m])=>`<div class="ct8-li"><span class="ct8-d">${esc(dt)}</span><span class="ct8-tag">${medaille(k,24)}${COURT[k]}</span><span class="ct8-adv">${lien(parNom(adv,c.cat))}</span><b>${fr(m)}</b></div>`).join('')}</div>
       </div>`:'<div class="ct8-aucune">Aucune prime de performance pour l’instant.</div>'}
     </div>`,'height:100%');
   const droite=pan(titre('Classement des salaires',`${pos+1}<sup>${pos?'e':'er'}</sup> sur ${l.length}`)+`<div class="defile ct7-defile ct8-fondu">${l.map((o,k)=>`<div class="sal ct8-sal">
