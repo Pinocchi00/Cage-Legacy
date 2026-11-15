@@ -211,7 +211,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Noms** : jamais le nom d'un vrai combattant (« Arman Tsarukyan » retiré de la liste d'adversaires de la fiche).
 
 ### Écran Recrutement (R23 à R25, Q24, Q25a, Q25b, validé le 09/11)
-- **Un seul écran**, à la place de « Contrats » dans la barre (hypothèse : les contrats de Split se gèrent dans la fiche et par le message de fin de contrat, Q23b, Q23c). Onglets : Combattants · Recruteur (R26, prochaine maquette).
+- **Un seul écran**, à la place de « Contrats » dans la barre (hypothèse : les contrats de Split se gèrent dans la fiche et par le message de fin de contrat, Q23b, Q23c). Onglets : Combattants · Recruteur · Rapports (R26, validé le 15/11).
 - **Pas de « Tes suivis » ici** (retour du 09/11) : « Suivre » reste sur la fiche courte ; leur place est à décider (aperçu de l'Accueil).
 - **Filtres** : Hommes / Femmes et catégories à gauche, **Libres / Fin de contrat / Tous** à droite (Q24). Gardés au retour.
 - **Un marché varié** (retour du 09/11 : « toujours les mêmes ») : fins de contrat tirées du classement mondial, libérés après des défaites, vétérans (ex-n° X mondial), anciens champions, champions de petites organisations, espoirs invaincus non classés. Jamais deux fois le même nom ; la série colle au palmarès. Arrivé sur le marché depuis moins de dix jours : le mot « Nouveau », petit et gris, après le surnom (pas de point jaune, réservé à « non lu » et « à toi d'agir », 09/11).
@@ -239,6 +239,19 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Le lendemain, sur un seul écran sans défilement** : trois moments (la ceinture, la finition, le combat de la soirée) avec deux phrases et « Voir le combat › » ; le classement qui a bougé (rang avant → après, champion en or, rang mondial) avec un lien vers les Classements ; « On en parle » (la une, deux voix, les vestiaires) ; « La soirée » (public, recette, dépenses détaillées, ce qu'il te reste, popularité, les primes de chacun, tes blessés).
 - **Mouvement** : lignes qui arrivent l'une après l'autre, flèches et médailles qui apparaissent, jauges et barres qui se remplissent, compteurs ; tout s'arrête avec `prefers-reduced-motion`.
 - Après la soirée, **les autres écrans suivent** (Classements, fiches, en-tête « Split Fight Night 64 »).
+
+### Écran Recruteur et Rapports (R26, Q26a à Q26d, T10, validé le 15/11)
+- **Onglet Recruteur** : le tableau du marché, **un chiffre par case** (destination et villes, spécialités, distance de Lyon, billet aller-retour, bourse demandée), triable ; filtres par région (Europe de l’Ouest, Europe de l’Est et Asie centrale, Asie et Océanie, Amériques, Afrique). Les colonnes ne changent pas avec la durée.
+- **Panneau de droite** : le pays sur le tunnel gris du jeu, sa scène en une phrase, ses spécialités, trois cases (le voyage, la bourse demandée en moyenne, la date de retour avec le nombre de profils), la durée **3 / 7 / 14 jours = 2 / 4 / 6 profils**, et « Envoyer Marco ». En voyage : où il en est, retour, profils, coût.
+- **Prix** : billet selon la distance depuis Lyon + 280 € par jour (route comprise) + interprète là où Marco ne parle pas la langue. Rien d’autre ne change le prix ; la chance d’une pépite est la même partout.
+- **Spécialités** : neuf styles communs (boxe anglaise, kickboxing, muay-thaï, karaté, taekwondo, lutte, judo, sambo, jiu-jitsu brésilien) et quelques styles propres à un pays (boxe française, lutte sénégalaise, lutte mongole, sanda, lutte universitaire, karaté Kyokushin, lutte gréco-romaine). Deux ou trois par pays, selon sa réputation. Toujours « muay-thaï », jamais « boxe thaï ».
+- **Messages** : le départ (où, quand, coût détaillé, ce qu’il cherche), puis au retour **un condensé** qui arrête Continuer : une ligne par profil, l’avis de Marco, la bourse demandée, et « Lire le rapport ».
+- **Onglet Rapports** : pas de bandeau. À gauche le voyage et ses profils dans l’ordre de Marco ; à droite un seul profil : son nom sur le tunnel du jeu, **l’avis de Marco en un mot** (Coup de cœur, À signer, Intéressant, Solide, À suivre, Pas encore prêt, Un pari, À revoir, Pour dépanner) avec une phrase, trois cases (ce qu’il demande, combien de fois Marco l’a vu et où, son gabarit), **Ses points forts / À surveiller** (trois lignes au plus chacun), puis Faire une offre.
+- **Profils variés** : jeunes pros invaincus, champions de circuits locaux, venus d’un autre sport, invaincus dans leur pays contre des adversaires faibles (faux bons profils), combattants expérimentés, profils avec peu de combats officiels. Jamais deux fois le même parcours plus de deux fois dans un voyage, ni un nom déjà pris.
+- **Textes de Marco** : factuels, comme un rapport de recruteur. **Jamais de phrase romancée** (« lui s’en fichait », dîners, scènes). Pas de prédiction de classement chez Split.
+- **Tous ses rapports** : la colonne de gauche liste les voyages (pays, date, durée, coût, profils, à signer, signés) ; un clic ouvre le rapport.
+- **La fiche d’un profil ramené** : statistiques visibles (Q25b), traits selon son parcours, « Libre, sans contrat », mondial « — », onglet Relation propre (sa carrière, son entourage, ses objectifs, son bilan par année).
+- **Mouvement** : tunnel qui glisse, cases qui apparaissent l’une après l’autre, chiffres qui défilent, lignes qui se décalent au survol.
 
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
@@ -294,7 +307,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
 | Ceintures | R22 | Une version avec un vrai sens (lignée des champions, règnes, intérims, prochain défi), regroupée avec le Classement. **Tu décides ensuite de la garder ou non.** Défenses et durée du règne sont dans le Classement de toute façon. |
 | Contrats, recrutement | R23 à R25 | Section 11, « Écran Recrutement ». **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
-| Recruteur | R26 | Départ de Lyon, toutes les catégories, 2 / 4 / 6 profils selon la durée du voyage. De vrais styles de combat. |
+| Recruteur | R26 | Validé (section 11, « Écran Recruteur et Rapports »). |
 | Salles et camps | R27 | Liste verticale avec un classement (réputation, champions formés) et une spécialité. Elles évoluent seules. |
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
@@ -321,7 +334,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |
 | Surnoms affichés | Sous le nom dans les listes, à côté du prénom dans la bannière. La liste des écrans concernés reste à valider | T11 |
 | Noms des trois médias | Cage Hebdo, Tableau Noir, Le Forum (à renommer) | Q10c |
-| Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
+| Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur · Rapports ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
 | Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
