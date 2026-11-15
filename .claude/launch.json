@@ -37,6 +37,19 @@
       ],
       "port": 8781,
       "autoPort": false
+    },
+    {
+      "name": "maquette-recruteur",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8792",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 8792,
+      "autoPort": false
     }
   ]
 }
