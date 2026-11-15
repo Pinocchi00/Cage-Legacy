@@ -265,6 +265,16 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Vérifié avec la vraie vie** : 240 salles dans le monde entier (10 % en France ; les pays pèsent comme dans l’effectif de l’UFC, États-Unis et Brésil devant) ; un tiers des combattants de Split en France, les autres partout ; environ 1,3 combat par combattant et par an ; une salle gagne au mieux 6 combats sur 10 ; 5 champions en titre au plus par salle. Les classés viennent des Classements, les combattants de Split de l’Effectif ; la fiche (onglet Relation) lit la salle et l’entraîneur de cet écran.
 - **Retirés** : le carrousel, « S’ils se battent, ils le prennent mal », le tableau, l’onglet Entraîneurs, les « champions formés ». L’effet du camp sur la forme n’est pas affiché (donnée cachée).
 
+### Écran Finances (R31, Q31, validé le 15/11)
+- **Deux onglets** : La caisse · Les bourses. Pas de budget imposé (Q31) : l’argent disponible dépend des soirées et des bourses.
+- **Bandeau sur le tunnel** : En caisse, puis trois ou quatre chiffres (En 2026, Découvert autorisé, Préventes de la prochaine soirée avec leur jauge ; dans Les bourses : sous contrat, bourse moyenne, versé en 2026, la plus haute, fins de contrat). **Chaque bloc a la même structure et se centre dans la barre** : étiquette, chiffre, ligne du dessous, à égale distance, alignés d’un bloc à l’autre (retour du 15/11).
+- **Le solde** : une seule courbe, en escalier, une marche par soirée (verte si elle rapporte, rouge si elle coûte), sans prévision ; repère « aujourd’hui », la prochaine soirée en pointillé. Sous la courbe, une case par soirée (de la plus ancienne à la plus récente, dans le sens de la courbe) avec ce qu’il te reste ; la prochaine dit « dans 35 jours ».
+- **Le détail d’une soirée** : le tunnel rouge (doré pour un titre), ce qu’il te reste ; Recettes (billetterie, diffuseur, partenaires, bar, boutique, VIP) et Dépenses (bourses fixes, primes de victoire, primes de performance en médailles, salle et production), chacune avec sa jauge ; puis **ce qui a changé depuis la soirée d’avant** : les deux plus gros écarts, en effet sur ce qu’il te reste, avec leur raison (« 2 780 spectateurs de moins qu’à Lyon », « sans Parfait Nana, 120 000 € à la 56 »). « Voir les résultats › » ouvre la soirée dans les Résultats.
+- **La soirée à venir** ne montre que le signé et le vendu (préventes, diffuseur, partenaires, bourses des combats composés, salle) et tes primes, **sur une seule ligne** (retour du 15/11), avec « Modifier › ».
+- **Les bourses** : une carte par catégorie, **du plus léger au plus lourd**, sans bouton de tri (retour du 15/11) ; filtre Hommes / Femmes gardé au retour. Chaque carte : bourse moyenne par combat, versé en 2026, la bourse la plus haute et son nom. Panneau : combats en 2026, fins de contrat, les bourses les plus hautes, puis le dernier combat sous contrat de chacun avec « Prolonger › » (fiche, onglet Contrat).
+- **Données** : les soirées et leurs combats viennent des Résultats, les bourses des contrats de l’Effectif (moitié fixe, moitié à la victoire). Après la soirée, la 63 reprend les chiffres du Lendemain. Ordres de grandeur vérifiés (billetterie de l’UFC Paris, bourses de Bellator) ; diffuseur, partenaires, bar et salle sont des hypothèses. Pas de frais fixes (absents du jeu).
+- **Mouvement** : courbe qui se trace, marches et octogones qui apparaissent, chiffres qui défilent, jauges qui se remplissent.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -323,7 +333,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Salles et camps | R27 | Validé (section 11, « Écran Camps »). |
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
-| Finances | R31 | Toutes les infos (courbe du solde, recettes et dépenses par soirée, masse salariale). Pas de budget imposé. |
+| Finances | R31 | Validé (section 11, « Écran Finances »). |
 | Organisation, croissance, poste | R32 à R35 | Mesures renommées, compréhensibles d'un coup d'œil. Le classement des organisations bouge. **Poste et Carnet fusionnés.** Défis par paliers. |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |
 
