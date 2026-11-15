@@ -1,0 +1,165 @@
+/* Maquette lot 1 — les Camps d'entraînement (R27), 2e passe du 15/11. Préfixe cp-.
+   Reprend le tableau du marché (.rc-l) et le panneau du Recruteur (.rt-p, .rt-ban). */
+.cp-g{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 520px;gap:20px}
+
+/* Le mur de cartes, rangé par taille (retours du 15/11) */
+.cp-mur{min-height:0;overflow:auto;position:relative;padding:0 8px 24px 0;scrollbar-width:none}
+.cp-mur::-webkit-scrollbar{display:none}
+.cp-sec{display:flex;align-items:center;gap:16px;margin:6px 0 14px;padding-bottom:10px;border-bottom:2px solid var(--sep)}
+.cp-sec:not(:first-child){margin-top:30px}
+.cp-st{font-family:var(--titre);font-weight:800;font-size:36px;text-transform:uppercase;line-height:1}
+.cp-sec .sous{font-size:19px}
+.cp-sec .cp-tp i{width:16px;height:16px}
+.cp-tp{display:inline-flex;gap:4px;align-items:center}
+.cp-tp i{width:12px;height:12px;background:rgba(233,230,225,.18)}
+.cp-tp i.on{background:var(--blanc)}
+.cp-grille{display:grid;gap:16px}
+.cp-grille.g-ecurie{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cp-grille.g-salle{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cp-grille.g-club{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cp-k{--c:14px;background:var(--sep);padding:2px;cursor:pointer;transition:transform .2s,background .2s}
+.cp-ki{--c:13px;position:relative;overflow:hidden;background:var(--panneau);height:100%;padding:14px 18px 14px;display:flex;flex-direction:column;gap:10px}
+.cp-k:hover{transform:translateY(-3px);background:var(--bord)}
+.cp-k.sel{background:var(--blanc)}
+.cp-k.sel .cp-ki{background:var(--ligne)}
+.cp-kimg{position:absolute;right:-260px;top:-150px;width:640px;height:360px;background:url('../../images/accueil-octogones.jpg') 0 0/640px 360px no-repeat;filter:grayscale(1) brightness(.4);opacity:.5;pointer-events:none;transition:filter .3s,opacity .3s;
+  -webkit-mask-image:linear-gradient(90deg,transparent 35%,#000 75%);mask-image:linear-gradient(90deg,transparent 35%,#000 75%)}
+.cp-k:hover .cp-kimg,.cp-k.sel .cp-kimg{filter:grayscale(.2) brightness(.6);opacity:.8}
+.cp-ki>*:not(i){position:relative}
+.cp-kt{display:flex;align-items:center;justify-content:space-between;min-height:22px}
+.cp-kr{display:inline-flex;align-items:baseline;gap:8px}
+.cp-kr .T{font-size:26px;line-height:1;text-transform:none}
+.cp-kh{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cp-kn{font-size:31px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-kh .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-kc{display:flex;align-items:center;gap:12px}
+.cp-kg{font-size:58px;line-height:.8}
+.cp-kc .sous{font-size:17px;line-height:1.2}
+.cp-pts{display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:13px}
+.cp-pts i{width:13px;height:13px;background:rgba(233,230,225,.28);animation:cpPop .35s cubic-bezier(.2,.8,.2,1) both}
+.cp-pts i.p-af{background:var(--jaune)}
+.cp-pts i.p-bl{background:var(--neg)}
+.cp-pts .sous{font-size:16px;margin-left:4px}
+@keyframes cpPop{from{transform:scale(0)}to{transform:none}}
+.cp-kf{display:grid;gap:8px;margin-top:auto;padding-top:10px;border-top:2px solid var(--sep)}
+.cp-kf.n2{grid-template-columns:repeat(2,minmax(0,1fr))}.cp-kf.n3{grid-template-columns:repeat(3,minmax(0,1fr))}.cp-kf.n4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cp-m{display:flex;flex-direction:column;min-width:0}
+.cp-m .T{font-size:26px;line-height:1}
+.cp-m span{font-size:16px;color:var(--texte2);white-space:nowrap;line-height:1.2}
+.cp-m.m-af .T{color:var(--blanc)}
+.cp-m.m-bl .T{color:var(--neg)}
+/* Grandes écuries : plus grandes, le tunnel plus présent */
+.cp-k.t-ecurie .cp-ki{padding:18px 22px 16px}
+.cp-k.t-ecurie .cp-kn{font-size:40px}
+.cp-k.t-ecurie .cp-kimg{right:-120px;top:-110px;width:760px;height:428px;background-size:760px 428px;opacity:.7}
+.cp-k.t-ecurie .cp-m .T{font-size:30px}
+/* Clubs : petites cartes */
+.cp-k.t-club .cp-ki{padding:12px 14px;gap:8px}
+.cp-k.t-club .cp-kn{font-size:24px}
+.cp-k.t-club .cp-kh .sous{font-size:16px}
+.cp-k.t-club .cp-kg{font-size:40px}
+.cp-k.t-club .cp-kc .sous{font-size:15px}
+.cp-k.t-club .cp-m .T{font-size:22px}
+.cp-k.t-club .cp-kr .T{font-size:20px}
+.cp-k.t-club .cp-kimg{opacity:.3}
+.cp-k.split .cp-ki::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;background:var(--jaune)}
+.cp-up{color:var(--vert);font-weight:700;font-size:17px}
+.cp-down{color:var(--neg);font-weight:700;font-size:17px}
+.cp-tn{color:var(--texte2)}
+
+/* Le panneau de droite */
+.cp-p{gap:22px!important}
+.cp-p .rt-ban{min-height:128px}
+.cp-p .rt-grand.cp-grand{font-size:var(--fs)!important;max-width:460px}
+.cp-sur{font-weight:600;font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:var(--texte2);margin-bottom:6px}
+.cp-p .rc-fait{padding:12px 14px}
+.cp-p .rc-fait .T{font-size:38px;text-transform:none}
+.cp-p .rc-fait .sous{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-coach{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.cp-coach b{font-size:26px;margin-top:4px}
+.cp-coach .sous{font-size:19px}
+.cp-bloc{display:flex;flex-direction:column;gap:6px;flex:none}
+.cp-flex{flex:1;min-height:0}
+.cp-cl{flex:1;min-height:0;overflow:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(180deg,#000 calc(100% - 40px),transparent);padding-bottom:30px}
+.cp-cl::-webkit-scrollbar{display:none}
+.cp-cb{display:flex;align-items:center;gap:16px;min-height:64px;border-bottom:2px solid var(--sep);padding:4px 0 4px 14px;position:relative}
+.cp-cb>.rc-2l{flex:1;min-width:0}
+.cp-cb.split::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;background:var(--jaune)}
+.cp-cbn{font-size:22px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.cp-cb .rc-2l .sous{font-size:18px}
+.cp-mt{font-size:19px;text-align:right;white-space:nowrap;flex:none}
+.cp-af{font-weight:600}
+.cp-af .nom{font-weight:700}
+.cp-afj{color:var(--jaune);font-weight:700;font-size:19px}
+.cp-bl{color:var(--neg);font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.cp-ok{color:var(--vert);font-weight:700}
+.cp-cbm{text-align:right;white-space:nowrap;font-size:21px;font-weight:600;flex:none}
+.cp-cbm .sous{font-size:16px;font-weight:500;margin-right:4px}
+.cp-bas{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;border-top:2px solid var(--sep)}
+.cp-bas .sous{font-size:18px}
+.cp-bas .bb>span{height:48px;font-size:24px}
+.cp-vide{font-size:20px;color:var(--texte2);padding:8px 0}
+.cp-fixe .rt-ban-img,.cp-fixe .rt-grand,.cp-fixe .rc-fait,.cp-fixe .cp-cb{animation:none}
+@media (prefers-reduced-motion: reduce){.cp-k{transition:none}.cp-cb,.cp-pts i{animation:none}}
+
+.cp-voy{white-space:nowrap}
+.cp-m span{line-height:1.2}
+
+/* Le rang (croissant / décroissant) et la spécialité (retour du 15/11) */
+.eff-filtres .bb>span svg{flex:none}
+.cp-spw{position:relative;display:inline-flex}
+.cp-chev{font-size:20px;color:var(--texte2)}
+.cp-menu{position:absolute;left:0;top:calc(100% + 8px);z-index:20;--c:12px;background:var(--bord);padding:2px;min-width:330px;animation:apparait .2s ease both}
+.cp-menu>div{--c:11px;background:var(--noir);display:flex;flex-direction:column;padding:8px}
+.cp-menu button{display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:9px 14px;font-size:22px;font-weight:600;text-align:left}
+.cp-menu button:hover{background:var(--ligne)}
+.cp-menu button.on{background:var(--blanc);color:var(--noir)}
+.cp-menu button.on .sous{color:var(--noir)}
+.cp-menu .sous{font-size:18px}
+.cp-kt{gap:10px;justify-content:flex-start!important}
+.cp-kt .cp-kr{margin-left:auto}
+.cp-spc{font-size:17px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;background:var(--ligne);color:var(--blanc);white-space:nowrap;
+  clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px)}
+.cp-spc.on{background:var(--blanc);color:var(--noir)}
+.cp-k.t-club .cp-spc{font-size:15px;padding:2px 8px}
+
+/* Montées et descentes, spécialité, entraîneur, mouvements (retour du 15/11 : « réalisme ») */
+.cp-bg{font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.cp-bg.up{color:var(--vert)}.cp-bg.down{color:var(--neg)}
+button.cp-spc{cursor:pointer}
+button.cp-spc:hover{background:#3a3434}
+.cp-pop{display:flex;flex-direction:column;gap:6px;padding:4px 0 2px;animation:apparait .25s ease both}
+.cp-popv{display:flex;align-items:baseline;gap:10px}
+.cp-popv .T{font-size:44px;line-height:.9;text-transform:none}
+.cp-popv span{font-size:18px;line-height:1.2}
+.cp-popj{position:relative;height:6px;background:var(--ligne);margin:4px 0 2px}
+.cp-popj>i{position:absolute;left:0;top:0;bottom:0;background:var(--vert);animation:remplit .6s cubic-bezier(.2,.8,.2,1) both;transform-origin:left}
+.cp-popj>b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--blanc)}
+.cp-pop .sous{font-size:16px}
+.cp-col{cursor:pointer;color:var(--blanc)}
+.cp-duo{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cp-duo .cp-coach b{font-size:24px}
+.cp-duo .cp-coach b .sous{font-size:16px;font-weight:500}
+.cp-duo .cp-coach>.sous{font-size:17px;line-height:1.2}
+.cp-cv{font-size:20px}
+.cp-mv{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:baseline;padding:5px 0;border-bottom:2px solid var(--sep);font-size:18px;line-height:1.25}
+.cp-mv:last-child{border-bottom:0}
+.cp-mvd{font-size:15px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--texte2);white-space:nowrap}
+.cp-mv .nom{font-weight:700}
+.cp-sl{font-weight:600;text-decoration:underline;text-decoration-color:rgba(233,230,225,.35);text-underline-offset:4px;text-align:left}
+.cp-sl:hover{text-decoration-color:var(--jaune)}
+.cp-p{gap:16px!important}
+.cp-popv .T{white-space:nowrap;flex:none}
+.cp-k.t-club .cp-popv .T{font-size:32px}
+.cp-pc .cp-cv{font-size:21px;font-weight:600}
+.cp-pcf{border-top:0;padding-top:4px}
+.cp-pcs{margin-top:8px;font-size:19px}
+.cp-pcs b{font-size:22px}
+.cp-pc .cp-bloc{gap:6px}
+.cp-pc{gap:18px!important}
+.cp-pc .cp-bas{margin-top:auto}
+.cp-m .T{text-transform:none}
+.cp-eq{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+.cp-eq>div{display:flex;flex-direction:column;padding:4px 0;border-bottom:2px solid var(--sep)}
+.cp-eq .sous{font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.cp-eq b{font-size:21px}
