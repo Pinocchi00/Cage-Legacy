@@ -1,0 +1,195 @@
+/* Maquette lot 1 — les Finances (R31, Q31). Préfixe fi-. Reprend le bandeau de l'Accueil (.bandeau, .stat-b),
+   les onglets du Recrutement (.cl-haut, .onglet), les cases (.rc-fait) et le tunnel gris du panneau du Recruteur (.rt-ban). */
+.fi{gap:18px}
+.fi-haut .bb>span{white-space:nowrap}
+.fi-sens{display:inline-block;margin-left:2px}
+.fi-pos{color:var(--vert)}
+.fi-neg{color:var(--neg)}
+
+/* Le bandeau : la caisse sur le tunnel, puis trois chiffres */
+.fi-band{height:150px;flex:none;display:grid;grid-template-columns:430px;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+.fi-bt{position:relative;padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.fi-caisse{font-size:76px;line-height:.78;white-space:nowrap;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.fi-bt .sous{font-size:20px}
+.fi-st{position:relative;padding:0 28px;border-left:2px solid var(--sep);display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0}
+.fi-stv{font-size:50px;line-height:.8;white-space:nowrap}
+.fi-st .sous{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-sth .nom{font-size:21px;font-weight:700}
+.fi-jp{height:5px;width:200px;margin-top:2px}
+
+/* Deux colonnes : à gauche le solde ou les catégories, à droite le détail */
+.fi-g{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 580px;gap:20px}
+.fi-gauche .p3,.fi-droite .p3{padding-bottom:16px}
+
+/* La courbe du solde */
+.fi-courbe{flex:1;min-height:0;position:relative;margin:-4px 0 0}
+.fi-courbe svg{display:block;overflow:visible}
+.fi-gr{stroke:rgba(233,230,225,.10);stroke-width:2}
+.fi-ax{fill:rgba(233,230,225,.62);font-family:var(--texte);font-size:15px;font-weight:600;letter-spacing:.04em}
+.fi-ax27{fill:var(--blanc)}
+.fi-ligne{fill:none;stroke:var(--blanc);stroke-width:3;stroke-dasharray:1;stroke-dashoffset:1;animation:fi-trace 1.4s cubic-bezier(.4,.1,.2,1) .2s forwards}
+.fi-aire{opacity:0;animation:fi-fond .8s ease .9s forwards}
+.fi-m{stroke-width:5;opacity:0;animation:fi-fond .35s ease forwards}
+.fi-m.fi-mp{stroke:var(--vert)}.fi-m.fi-mn{stroke:var(--neg)}
+.fi-pt{cursor:pointer;opacity:0;transform-box:fill-box;transform-origin:center;animation:fi-pop .4s cubic-bezier(.2,.8,.2,1) forwards;transition:transform .2s}
+.fi-pt:hover{transform:scale(1.18)}
+.fi-pt polygon{fill:var(--panneau);stroke-width:2.5}
+.fi-pt polygon.fi-mp{stroke:var(--vert)}.fi-pt polygon.fi-mn{stroke:var(--neg)}
+.fi-pt text{fill:var(--blanc);font-family:var(--titre);font-weight:800;font-size:17px;pointer-events:none}
+.fi-pt.sel polygon{fill:var(--blanc)}
+.fi-pt.sel text{fill:var(--noir)}
+.fi-pt63{animation-delay:1.8s}
+.fi-pt63 polygon{stroke:var(--bord);stroke-dasharray:4 3}
+.fi-pointille{stroke:rgba(233,230,225,.38);stroke-width:2;stroke-dasharray:6 6;opacity:0;animation:fi-fond .5s ease 1.6s forwards}
+.fi-auj{stroke:rgba(233,230,225,.45);stroke-width:2;stroke-dasharray:3 5}
+.fi-auj-t{fill:var(--blanc)}
+.fi-fixe .fi-ligne{animation:none;stroke-dashoffset:0}
+.fi-fixe .fi-aire,.fi-fixe .fi-m,.fi-fixe .fi-pt,.fi-fixe .fi-pointille{animation:none;opacity:1}
+
+/* Les soirées, sous la courbe */
+.fi-puces{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:14px}
+.fi-s{--c:12px;background:var(--sep);padding:2px;text-align:left;cursor:pointer;transition:background .2s,transform .2s}
+.fi-si{--c:11px;display:flex;flex-direction:column;gap:6px;background:var(--panneau);padding:10px 16px 12px;height:100%}
+.fi-s:hover{background:var(--bord);transform:translateY(-2px)}
+.fi-s.sel{background:var(--blanc)}
+.fi-s.sel .fi-si{background:var(--ligne)}
+.fi-sh{display:flex;align-items:baseline;gap:10px;min-width:0}
+.fi-sn{font-size:30px;line-height:.9}
+.fi-sv{font-size:20px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-sh .sous{margin-left:auto;font-size:18px;white-space:nowrap}
+.fi-sr{font-size:34px;line-height:.9;white-space:nowrap}
+.fi-avenir{font-size:22px;font-weight:600;color:var(--texte2);letter-spacing:.06em;text-transform:uppercase;line-height:34px}
+
+/* Le détail d'une soirée */
+.fi-d{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}
+.fi-ban{flex:none;min-height:96px!important}
+.fi-ban-img{filter:grayscale(1) brightness(.5)!important}
+/* Une soirée : le tunnel rouge, doré pour un combat de titre (comme les Résultats), à droite, fondu sous le titre */
+.fi-rouge .fi-ban-img,.fi-or .fi-ban-img{left:auto!important;right:-674px;top:-438px!important;-webkit-mask-image:linear-gradient(90deg,transparent 40%,#000 62%);mask-image:linear-gradient(90deg,transparent 40%,#000 62%)}
+.fi-rouge .fi-ban-img{filter:brightness(.85)!important}
+.fi-or .fi-ban-img{background-image:url('../../images/tunnel-or.jpg')!important;filter:brightness(.9)!important}
+.fi-bant{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%}
+.fi-bn{font-size:40px;line-height:.9;white-space:nowrap}
+.fi-bl{font-size:19px;color:var(--texte2);margin-top:6px;white-space:nowrap}
+.fi-res{display:flex;flex-direction:column;align-items:flex-end;gap:6px;background:rgba(13,11,11,.86);padding:8px 12px}
+.fi-res .etiq{font-size:16px}
+.fi-res .T{font-size:42px;line-height:.85;white-space:nowrap}
+.fi-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;flex:none}
+.fi-colt{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:5px;border-bottom:2px solid var(--sep);margin-bottom:2px}
+.fi-colt .T{font-size:28px}
+.fi-l{padding:5px 0 6px;animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+.fi-lh{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.fi-lt{font-size:20px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center}
+.fi-lv{font-size:26px;white-space:nowrap}
+.fi-lv.sous{font-family:var(--texte);font-size:17px;text-transform:none}
+.fi-ls{font-size:17px;line-height:22px;height:22px;color:var(--texte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.fi-lh2{margin-top:2px;align-items:center}
+.fi-lh2 .fi-meds{min-height:22px}
+.fi-lj{height:5px;background:var(--ligne);margin-top:5px;position:relative}
+.fi-lj i{position:absolute;left:0;top:0;bottom:0;width:var(--p);animation:fi-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+.fi-lj i.fi-jr{background:var(--blanc)}
+.fi-lj i.fi-jd{background:rgba(233,230,225,.45)}
+.fi-meds{display:inline-flex;gap:8px;vertical-align:middle}
+.fi-tes{gap:8px!important;flex-wrap:nowrap!important;justify-content:space-between}
+.fi-tes .fi-med{flex:none;gap:5px}
+.fi-tes .fi-med span{font-size:17px!important;white-space:nowrap}
+.fi-ls .m8{vertical-align:middle}
+.fi-med{display:inline-flex;align-items:center;gap:4px}
+.fi-med b{font-size:16px;font-family:var(--titre);margin-right:2px}
+.fi-tes{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.fi-tes .fi-med span{font-size:18px;font-weight:700}
+.fi-lp .fi-lien{font-size:17px}
+.fi-chg{flex:1;min-height:0;justify-content:flex-start;border-top:2px solid var(--sep);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.fi-ct{display:flex;align-items:baseline;gap:16px}
+.fi-ct .etiq{font-size:18px}
+.fi-ct .fi-lien{margin-left:auto;font-size:18px}
+.fi-ctn{font-size:24px}
+.fi-c{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+.fi-cf{font-size:18px;font-weight:700}
+.fi-cl{display:flex;flex-direction:column;min-width:0;font-size:20px;line-height:1.2}
+.fi-cl .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-cl .sous .nom{font-size:18px}
+.fi-ce{font-size:28px;white-space:nowrap}
+.fi-pied{margin-top:auto;display:flex;justify-content:flex-end}
+.fi-lien{color:var(--jaune);font-weight:700;font-size:20px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.fi-lien:hover{text-decoration:underline}
+.fi-fixe .fi-l,.fi-fixe .fi-c,.fi-fixe .fi-lj i,.fi-fixe .fi-h,.fi-fixe .fi-hj i{animation:none}
+
+/* Les bourses : une carte par catégorie */
+.fi-mur{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:16px;min-height:0}
+.fi-mur-F{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fi-k{--c:14px;background:var(--sep);padding:2px;text-align:left;cursor:pointer;transition:background .2s,transform .2s;min-height:0}
+.fi-ki{--c:13px;position:relative;overflow:hidden;background:var(--panneau);height:100%;padding:14px 20px 12px;display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+.fi-k:hover{background:var(--bord);transform:translateY(-3px)}
+.fi-k.sel{background:var(--blanc)}
+.fi-k.sel .fi-ki{background:var(--ligne)}
+.fi-kh{display:flex;flex-direction:column;gap:4px}
+.fi-kn{font-size:34px;line-height:.9}
+.fi-kh .sous{font-size:18px}
+.fi-kc{display:flex;flex-direction:column;gap:4px}
+.fi-kv{font-size:44px;line-height:.85;white-space:nowrap}
+.fi-kc .sous{font-size:17px;line-height:1.2}
+.fi-kj{height:6px;background:rgba(233,230,225,.10);position:relative;display:block}
+.fi-kj i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--blanc);animation:fi-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+.fi-kb{display:flex;flex-direction:column;gap:3px;padding-top:8px;border-top:2px solid var(--sep)}
+.fi-kr{display:flex;align-items:baseline;gap:10px;min-width:0}
+.fi-kr .sous{font-size:17px;white-space:nowrap;flex:none}
+.fi-kr b{margin-left:auto;font-size:19px;white-space:nowrap}
+.fi-kr b.T{font-size:28px;line-height:.9}
+.fi-kt2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fi-kt2 .nom{font-size:19px;font-weight:700}
+.fi-kb>.fi-kt2{display:block;margin-top:-2px}
+.fi-mur-F .fi-kv{font-size:60px}
+
+/* La catégorie choisie */
+.fi-faits{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.fi-fait .T{font-size:34px!important}
+.fi-fait{padding:10px 14px!important}
+.fi-sect{font-size:18px;margin-top:4px}
+.fi-hauts{display:flex;flex-direction:column;flex:none}
+.fi-h,.fi-f{display:grid;grid-template-columns:46px minmax(0,1fr) 120px 112px;gap:12px;align-items:center;min-height:44px;border-bottom:2px solid var(--sep)}
+.fi-h{animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+.fi-f{grid-template-columns:46px minmax(0,1fr) auto auto;gap:18px}
+.fi-rg{font-size:18px;color:var(--texte2);white-space:nowrap}
+.fi-c8{width:30px;height:30px;font-size:19px;background:var(--jaune);color:var(--noir)}
+.fi-hn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-hn .nom{font-size:21px;font-weight:700}
+.fi-hj{height:6px;background:rgba(233,230,225,.10);position:relative}
+.fi-hj i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--blanc);animation:fi-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+.fi-hv{font-size:26px;text-align:right;white-space:nowrap}
+.fi-fb{font-size:20px;white-space:nowrap}
+.fi-af{font-size:17px}
+.fi-fins{-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.fi-f .fi-lien{font-size:17px}
+.fi-fins{flex:1;min-height:0;overflow:auto;scrollbar-width:none}
+.fi-fins::-webkit-scrollbar{display:none}
+
+@keyframes fi-trace{to{stroke-dashoffset:0}}
+@keyframes fi-fond{to{opacity:1}}
+@keyframes fi-pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+@keyframes fi-rempli{from{width:0}}
+@media (prefers-reduced-motion:reduce){
+  .fi-ligne{animation:none;stroke-dashoffset:0}
+  .fi-aire,.fi-m,.fi-pt,.fi-pointille{animation:none;opacity:1}
+  .fi-l,.fi-c,.fi-lj i,.fi-kj i,.fi-h,.fi-hj i{animation:none}
+}
+
+/* Femmes : quatre grandes cartes, le chiffre à gauche, le détail à droite (rien d'étiré sur toute la largeur) */
+.fi-mur-F .fi-ki{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:28px;row-gap:12px}
+.fi-mur-F .fi-kh{grid-column:1/3}
+.fi-mur-F .fi-kc{grid-column:1;grid-row:2;align-self:center}
+.fi-mur-F .fi-kb{grid-column:2;grid-row:2;align-self:center;border-top:0;border-left:2px solid var(--sep);padding:0 0 0 22px;gap:6px}
+.fi-mur-F .fi-kj{grid-column:1/3;grid-row:3}
+
+/* Le bandeau : chaque bloc a la même hauteur (étiquette, chiffre, ligne du dessous) et se centre dans la barre,
+   pour que les étiquettes, les chiffres et les sous-titres soient alignés d'un bloc à l'autre (retour du 15/11). */
+.fi-bt,.fi-st{justify-content:center;gap:6px;padding-top:0;padding-bottom:0}
+.fi-bt>.etiq,.fi-st>.etiq{line-height:22px;height:22px;white-space:nowrap}
+.fi-caisse,.fi-stv{height:60px;display:flex;align-items:center;gap:0;white-space:pre}
+.fi-bt>.sous,.fi-st>.sous{line-height:24px;height:24px}
+.fi-jp{display:block;height:5px;width:150px;margin:6px 0 0 18px}
+.fi-stv{align-items:flex-end;padding-bottom:9px}
+/* Écarts réguliers : étiquette, chiffre et ligne du dessous à égale distance, dans tous les blocs */
+.fi-caisse{font-size:64px;height:52px;align-items:center}
+.fi-stv{height:52px;align-items:center;padding-bottom:0}
+.fi-bt,.fi-st{gap:8px}
