@@ -275,6 +275,17 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Données** : les soirées et leurs combats viennent des Résultats, les bourses des contrats de l’Effectif (moitié fixe, moitié à la victoire). Après la soirée, la 63 reprend les chiffres du Lendemain. Ordres de grandeur vérifiés (billetterie de l’UFC Paris, bourses de Bellator) ; diffuseur, partenaires, bar et salle sont des hypothèses. Pas de frais fixes (absents du jeu).
 - **Mouvement** : courbe qui se trace, marches et octogones qui apparaissent, chiffres qui défilent, jauges qui se remplissent.
 
+### Écran Organisation (R32, R33, Q32a, Q32b, Q33a, Q33b, validé le 16/11)
+- **Deux onglets** : Les huit · La croissance. Poste et Carnet (R34, R35) viendront plus tard.
+- **Bandeau sur le tunnel** : Ta place (6e des huit, flèche et place un mois plus tôt), Juste devant (nom cliquable, avec le chiffre qui suffit pour la passer, calculé sur le vrai rang), Juste derrière (et l'écart), Fin de saison (le rang fixe le diffuseur et les agents libres).
+- **Les huit en colonnes**, de la 1re à la 8e : tunnel à la couleur de l'organisation, emblème (les trois octogones du logo, recolorés), place et flèche, nom et ville ; Split ressort en rouge.
+- **Quatre mesures, chacune avec son unité** (retour du 16/11 : « Public », « Vedettes », « Classés » ne se comprenaient pas) : **Spectateurs** (par soirée), **Record** (spectateurs), **Top 5 mondial** (combattants), **Top 30 mondial** (combattants), avec une jauge comparée à la meilleure des huit. Le rang additionne les places sur les quatre, le public départage ; il est revu chaque mois.
+- **Bas de colonne** : des faits, pas de formules (retour du 16/11) : « Dernière soirée », date et ville, spectateurs.
+- **Le détail d'une organisation** s'ouvre par-dessus les colonnes, **sans cadre rectangulaire autour de l'octogone** (retour du 16/11 : les colonnes sont masquées) : bannière, place, croix ; « Ce qui a bougé » (place d'il y a un mois, puis un fait daté) ; les quatre mesures en tuiles avec la valeur de Split ; diffuseur et salles ; ses cinq meilleurs classés (noms vers la fiche) et « Classement mondial › ».
+- **La croissance** : six pistes à gauche (marche actuelle, avancée, la plus proche) ; à droite la piste choisie : escalier de quatre marches (« Tu es ici », « Prochaine marche »), ce que Split a aujourd'hui, les conditions en gros chiffres avec le visuel qui convient (jauge, place sur huit, rang sur le top 10, dépendance vers une autre piste), ce que ça donne et un bouton vers l'écran concerné.
+- **Dates** : on est le 12 janvier 2027 ; flèches comparées au 12 décembre ; fin de saison le 31 déc. 2027.
+- **Données** : top 5 et top 30 comptés dans le classement mondial des Classements ; le public et la dernière soirée de Split viennent des Résultats ; les chiffres des sept autres sont inventés à l'échelle réelle (UFC, Oktagon, PFL) et leurs raisons de mouvement sont « à relire ». **Ouvert** : Split est 6e avec ces données, alors que l'Accueil affiche « 2e ».
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -334,7 +345,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
 | Finances | R31 | Validé (section 11, « Écran Finances »). |
-| Organisation, croissance, poste | R32 à R35 | Mesures renommées, compréhensibles d'un coup d'œil. Le classement des organisations bouge. **Poste et Carnet fusionnés.** Défis par paliers. |
+| Organisation, croissance | R32, R33 | Validé (section 11, « Écran Organisation »). Poste et Carnet (R34, R35) restent à faire. |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
