@@ -11,7 +11,7 @@
 const OG_CLE='maquette-organisation-2';
 S.og=Object.assign({onglet:'huit',sel:null,piste:'salles',anim:true},(()=>{try{return JSON.parse(localStorage.getItem(OG_CLE))||{};}catch(e){return {};}})());
 function ogGarder(){try{const {onglet,piste}=S.og;localStorage.setItem(OG_CLE,JSON.stringify({onglet,piste}));}catch(e){}}
-const ogEtat=()=>JSON.stringify({onglet:S.og.onglet,sel:S.og.sel,piste:S.og.piste});
+const ogEtat=()=>JSON.stringify({onglet:S.og.onglet,sel:S.og.sel,piste:S.og.piste,palier:S.og.palier||0});
 
 /* ---- Les huit organisations ----
    pub : spectateurs en moyenne par soirée en 2026 ; rec : sa plus grande soirée [spectateurs, ville, date] ; avant : rang au 12 décembre (le classement est revu chaque mois ; on est le 12 janvier 2027) ; der : dernière soirée [date, ville, spectateurs] ;
@@ -76,7 +76,7 @@ Object.assign(P,{
 /* ---- Onglets ---- */
 function ogHaut(){
   const o=(v,t)=>`<button class="onglet oct ${S.og.onglet===v?'ouvert':''}" data-ogong="${v}">${t}</button>`;
-  return `<div class="cl-haut og-haut">${o('huit','Les huit')}${o('croissance','La croissance')}</div>`;
+  return `<div class="cl-haut og-haut">${o('huit','Les huit')}${o('croissance','La croissance')}${typeof mcHtml==='function'?o('carriere','Ta carrière'):''}</div>`;
 }
 
 /* ---- Les huit : le bandeau de Split, puis les huit en colonnes ---- */
@@ -203,7 +203,7 @@ function ogCroissance(){
   return `<div class="og-g2"><div class="og-pls">${PS.map(tuile).join('')}</div>${detail}</div>`;
 }
 
-function ogHtml(){ogGarder();return `<div class="rc og">${ogHaut()}${S.og.onglet==='croissance'?ogCroissance():ogHuit()}</div>`;}
+function ogHtml(){ogGarder();return `<div class="rc og">${ogHaut()}${S.og.onglet==='croissance'?ogCroissance():S.og.onglet==='carriere'&&typeof mcHtml==='function'?mcHtml():ogHuit()}</div>`;}
 
 /* ---- Mouvement : les chiffres défilent ---- */
 function ogCompter(){document.querySelectorAll('.og [data-ogn]').forEach((e,i)=>{const v=+e.dataset.ogn,t0=performance.now()+Math.min(i,16)*30;
@@ -220,7 +220,7 @@ rendre=function(){
   $('#corps').innerHTML=ogHtml();
   const p=$('.og .og-p,.og .og-pdt');
   if(!S.og.anim&&p&&p.dataset.cle===cle){p.classList.add('og-fixe');document.querySelectorAll('.og [data-ogn]').forEach(e=>e.textContent=nb(+e.dataset.ogn));}
-  else if(!S.og.anim){document.querySelectorAll('.og-mur [data-ogn],.og-band [data-ogn]').forEach(e=>e.textContent=nb(+e.dataset.ogn));document.querySelectorAll('.og-p [data-ogn],.og-pdt [data-ogn]').forEach((e,i)=>{const v=+e.dataset.ogn,t0=performance.now()+i*40,f=t=>{const k=Math.max(0,Math.min(1,(t-t0)/600)),x=1-Math.pow(1-k,3);e.textContent=nb(v*x);if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);setTimeout(()=>{e.textContent=nb(v);},1300);});}
+  else if(!S.og.anim){document.querySelectorAll('.og-mur [data-ogn],.og-band [data-ogn],.mc-zone [data-ogn]').forEach(e=>e.textContent=nb(+e.dataset.ogn));document.querySelectorAll('.og-p [data-ogn],.og-pdt [data-ogn]').forEach((e,i)=>{const v=+e.dataset.ogn,t0=performance.now()+i*40,f=t=>{const k=Math.max(0,Math.min(1,(t-t0)/600)),x=1-Math.pow(1-k,3);e.textContent=nb(v*x);if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);setTimeout(()=>{e.textContent=nb(v);},1300);});}
   else ogCompter();
   S.og.anim=false;
   $('#zone').classList.toggle('fiche-ouverte',!!S.fiche);

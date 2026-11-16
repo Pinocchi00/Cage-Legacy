@@ -1,0 +1,129 @@
+/* Maquette lot 1 — Ta carrière (R34, R35). Préfixe mc-. S'appuie sur organisation.css (bandeau, og-cond). */
+
+/* ---- Bandeau ---- */
+.mc-band{grid-template-columns:430px}
+.mc-poste{font-size:60px;line-height:.85}
+.mc-band .og-stv{font-size:36px}
+.mc-rep{display:flex;gap:6px}
+.mc-rep i{width:20px;height:20px;background:rgba(233,230,225,.14)}
+
+/* ---- Trois colonnes ---- */
+.mc-zone{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.22fr);gap:20px}
+.mc-col .p3,.mc-pan .p3{display:flex;flex-direction:column;gap:14px;height:100%;min-height:0}
+.mc-col,.mc-pan{height:100%;min-height:0}
+
+/* Objectifs : les conditions de la croissance, en colonne */
+.mc-objs{flex:1;min-height:0;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:12px}
+.mc-objs .og-cond{justify-content:center}
+.mc-objs .og-condh{flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px}
+.mc-objs .og-condl{font-size:20px}
+.mc-objs .og-condv b{font-size:40px}
+.mc-objs .og-rangs span{width:34px;height:34px;font-size:18px}
+.mc-regle{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border-left:4px solid var(--jaune);background:rgba(240,180,41,.08);font-size:18px;line-height:1.3;color:var(--texte)}
+.mc-regle svg{color:var(--jaune);flex:none}
+
+/* Parcours et Split avant toi */
+.mc-col2{min-height:0;display:grid;grid-template-rows:minmax(0,1.45fr) minmax(0,1fr);gap:20px}
+.mc-cases{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mc-case{--c:10px;background:var(--ligne);clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));
+  padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mc-case .etiq{font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-case b{font-size:40px;line-height:.9}
+.mc-case .sous{font-size:15px;line-height:1.2}
+.mc-fil{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-top:4px}
+.mc-fil::before{content:"";position:absolute;left:93px;top:22px;bottom:22px;width:2px;background:var(--sep)}
+.mc-ev{display:grid;grid-template-columns:76px 16px minmax(0,1fr) auto;align-items:center;gap:12px;text-align:left;padding:8px 6px 8px 0;font-size:19px;animation:apparait .4s cubic-bezier(.2,.8,.2,1) both;position:relative}
+.mc-ev:hover{background:rgba(233,230,225,.05)}
+.mc-evd{font-weight:700;color:var(--texte2);text-align:right;white-space:nowrap}
+.mc-ev i{width:16px;height:16px;background:var(--jaune)}
+.mc-evt{line-height:1.25}
+.mc-avant .mc-case{background:rgba(233,230,225,.05)}
+.mc-lien{align-self:flex-end;margin-top:auto}
+
+/* Défis */
+.mc-defis .pt{align-items:center}
+.mc-pls{margin-left:auto;display:flex;gap:6px}
+.mc-pl{width:38px;height:38px;display:grid;place-items:center;font-family:var(--titre);font-weight:800;font-size:20px;background:rgba(233,230,225,.10);color:var(--texte2);transition:background .2s,color .2s}
+.mc-pl.cur{background:var(--jaune);color:var(--noir)}
+.mc-pl.fait{background:var(--vert);color:var(--noir)}
+.mc-pl:hover{background:rgba(233,230,225,.24);color:var(--blanc)}
+.mc-pl.sel{outline:2px solid var(--blanc);outline-offset:2px}
+.mc-pl.cur:hover{background:var(--jaune);color:var(--noir)}
+.mc-ph{flex:none;display:flex;align-items:baseline;gap:14px}
+.mc-ph .T{font-size:28px;white-space:nowrap}
+.mc-ph .sous{font-size:17px}
+.mc-ds{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:10px}
+.mc-d{--c:10px;background:var(--ligne);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0;animation:apparait .4s cubic-bezier(.2,.8,.2,1) both}
+.mc-d.ok{background:rgba(70,180,90,.13)}
+.mc-d.ferme{background:rgba(233,230,225,.04);justify-content:center}
+.mc-d.ferme .mc-dt{color:var(--texte2)}
+.mc-dh{display:flex;align-items:flex-start;gap:8px}
+.mc-dt{flex:1;font-size:18px;font-weight:700;line-height:1.2}
+.mc-ok{width:26px;height:26px;display:grid;place-items:center;background:var(--vert);color:var(--noir);flex:none}
+.mc-cad{color:var(--texte2);flex:none}
+.mc-dp{display:flex;align-items:baseline;gap:5px;margin-top:auto}
+.mc-dp b{font-size:30px;line-height:.9}
+.mc-dp>span:not(.mc-dj){font-size:17px;color:var(--texte2)}
+.mc-dj{flex:1;align-self:center;margin-left:8px;height:6px;background:rgba(233,230,225,.10);position:relative}
+.mc-dj i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--jaune);animation:og-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+.mc-d.ok .mc-dj i{background:var(--vert)}
+.mc-dd{font-size:15px;color:var(--texte2);line-height:1.25;min-height:19px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.mc-dd .nom{font-size:15px}
+.mc-dd .og-lien{font-size:14px}
+
+@media (prefers-reduced-motion:reduce){.mc-ev,.mc-d,.mc-dj i{animation:none}}
+
+/* ---- Passe 2 ---- */
+.mc-objs{gap:10px}
+.mc-o{--c:12px;background:var(--ligne);padding:12px 18px;display:flex;flex-direction:column;justify-content:center;gap:9px;min-height:0;animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+.mc-o.ok{background:rgba(70,180,90,.13)}
+.mc-ol{font-size:19px;font-weight:700;line-height:1.2}
+.mc-ov{display:flex;align-items:center;gap:12px}
+.mc-or{display:flex;gap:4px;flex:1;min-width:0}
+.mc-or span{width:28px;height:28px;flex:none;display:grid;place-items:center;font-family:var(--titre);font-weight:800;font-size:16px;background:rgba(233,230,225,.08);color:var(--texte2)}
+.mc-or span.but{background:rgba(233,230,225,.22);color:var(--blanc)}
+.mc-or span.ici{background:var(--jaune);color:var(--noir)}
+.mc-oj{flex:1;height:8px;background:rgba(233,230,225,.10);position:relative}
+.mc-oj i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--jaune);animation:og-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+.mc-ova{display:flex;align-items:baseline;gap:5px;white-space:nowrap;margin-left:auto}
+.mc-ova b{font-size:36px;line-height:.9;text-transform:none}
+.mc-ova>span{font-size:18px;color:var(--texte2)}
+.mc-od{font-size:16px;color:var(--texte2)}
+.mc-od .nom{font-size:16px}
+.mc-col2{grid-template-rows:minmax(0,1.3fr) minmax(0,1fr)}
+.mc-cases{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mc-case b{font-size:36px}
+.mc-avs{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between}
+.mc-av{display:grid;grid-template-columns:150px minmax(0,1fr) auto;align-items:baseline;gap:10px;padding:5px 0;border-bottom:2px solid var(--sep)}
+.mc-av:last-child{border-bottom:0}
+.mc-av .etiq{font-size:15px}
+.mc-av .sous{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-av b{font-size:30px;line-height:.9}
+.mc-avant .pt{align-items:center}
+.mc-avant .pt .og-lien{margin-left:auto}
+.mc-fil{justify-content:space-around}
+.mc-ev{font-size:18px;padding:5px 6px 5px 0}
+.mc-af{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte2);padding:3px 10px;border:2px solid var(--sep)}
+.mc-af.ok{color:var(--vert);border-color:var(--vert)}
+.mc-ph .sous{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- Passe 3 : tout tient ---- */
+.mc-case{padding:10px 14px;gap:4px}
+.mc-evt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-ev{padding:4px 6px 4px 0}
+.mc-fil::before{top:16px;bottom:16px}
+.mc-av{padding:3px 0}
+.mc-av b{font-size:28px}
+.mc-dd{min-height:38px;align-content:flex-start}
+.mc-col2{grid-template-rows:minmax(0,1fr) auto}
+.mc-or{gap:3px}
+.mc-or span{width:26px;height:26px;font-size:15px}
+.mc-avs{gap:2px}
+.mc-case{padding:8px 12px}
+.mc-case b{font-size:30px}
+.mc-avs{flex:none;gap:0}
+.mc-av{padding:2px 0}
+.mc-av b{font-size:25px}
+.mc-ev{padding:2px 6px 2px 0}
+.mc-pl.sel:not(.cur){background:var(--blanc);color:var(--noir)}
+.mc-pl.sel{outline:0}

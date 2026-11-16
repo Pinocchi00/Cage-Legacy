@@ -286,6 +286,17 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Dates** : on est le 12 janvier 2027 ; flèches comparées au 12 décembre ; fin de saison le 31 déc. 2027.
 - **Données** : top 5 et top 30 comptés dans le classement mondial des Classements ; le public et la dernière soirée de Split viennent des Résultats ; les chiffres des sept autres sont inventés à l'échelle réelle (UFC, Oktagon, PFL) et leurs raisons de mouvement sont « à relire ». **Ouvert** : Split est 6e avec ces données, alors que l'Accueil affiche « 2e ».
 
+### Ta carrière (R34, R35, Q34a, Q34b, Q35a, Q35b, validé le 16/11)
+- **Poste et Carnet fusionnés** en « Ta carrière », troisième onglet de l'écran Organisation (après Les huit et La croissance), sans entrée de plus dans la barre.
+- **Rien n'est compté comme fait si le joueur ne l'a pas fait** : il arrive le 4 janvier 2027 ; 0 soirée, 0 signature avant la première soirée. L'historique de l'organisation est à part (« Split avant toi »).
+- **Bandeau** : Ton poste (Matchmaker, depuis le 4 janv., en jours), Ton contrat (fin, durée, salaire), Ta réputation (cinq niveaux en octogones, aucun avant la première soirée), Ta première soirée, Le patron (son humeur, son nom, le bilan de mi-saison du 1er juillet).
+- **Objectifs 2027 du patron**, jugés le 31 déc. : l'intitulé, puis sur une ligne la place visée et la tienne (huit places, top 10 mondial ou jauge) et une phrase concrète (« Il faut passer… », « Le mieux classé : … »). Règle affichée : manqués, un avertissement ; manqués encore la saison suivante, le renvoi (Q34a).
+- **Ton parcours** : trois chiffres (soirées, combats placés, signatures) puis les événements datés depuis l'arrivée, une ligne chacun, qui ouvrent l'écran concerné.
+- **Split avant toi** : soirées depuis 2004 sous le prédécesseur, champions, record, salles pleines ; « Les soirées › » vers les Résultats.
+- **Défis** : cinq paliers de neuf ; le suivant s'ouvre quand le précédent est fini (Q35a). Le palier ouvert suit l'état réel ; un défi à faire une fois dit « À faire » (pas de « 0 / 1 »), un défi à compter a sa jauge. Les paliers fermés se consultent, avec un cadenas.
+- **Grande salle** (Q35b) : une arène de 15 000 places ou plus, comme les grandes soirées de l'UFC ; défi du palier 3.
+- **Ouvert** : Messages et l'Accueil disent « Rester dans les deux premières » ; ici « Finir la saison dans les quatre premières » (Split 6e). À aligner. Combien d'objectifs manqués déclenchent l'avertissement : à trancher.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -345,7 +356,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
 | Finances | R31 | Validé (section 11, « Écran Finances »). |
-| Organisation, croissance | R32, R33 | Validé (section 11, « Écran Organisation »). Poste et Carnet (R34, R35) restent à faire. |
+| Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
