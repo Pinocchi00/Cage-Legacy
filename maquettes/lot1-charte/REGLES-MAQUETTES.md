@@ -297,6 +297,18 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Grande salle** (Q35b) : une arène de 15 000 places ou plus, comme les grandes soirées de l'UFC ; défi du palier 3.
 - **Ouvert** : Messages et l'Accueil disent « Rester dans les deux premières » ; ici « Finir la saison dans les quatre premières » (Split 6e). À aligner. Combien d'objectifs manqués déclenchent l'avertissement : à trancher.
 
+### Écran Calendrier (R29, Q29a, Q29b, Q21c, T9, validé le 17/11)
+- **Six mois à la fois** (« Janvier – juin 2027 »), flèches pour les six mois d'avant ou d'après, de janvier 2026 à décembre 2027. Les jours des mois voisins ne sont pas affichés (« trop d'information ») ; la hauteur d'une semaine s'ajuste pour remplir la case d'un mois.
+- **Légende au-dessus, seulement les repères présents** : aujourd'hui (anneau blanc), ta soirée (octogone rouge), ceinture en jeu (octogone doré), jouée (gris), fermé (une seule zone hachurée), rendez-vous (trait sous le chiffre). **Le jour choisi est en blanc cassé, texte noir**, comme l'élément courant du jeu. Pas de couleurs d'autres organisations (retour du 17/11).
+- **Chaque soirée a sa ligne sous son mois** : la date dans un octogone à la couleur de la soirée, le nom, la ville. Une soirée jouée se lit par son résultat (« Nana bat Darras »).
+- **Noms** : « Fight Night 63 », comme l'en-tête, avec l'affiche « Nana vs Mezouar » ; « Soirée phare » remplace « grande soirée », numérotée « Split 1 », une par mois, une ceinture en jeu (proposition).
+- **Règles proposées** : poser ou retirer une soirée **au moins 10 semaines avant** (le temps de vendre les places ; billetterie ouverte à ce moment-là) ; **au moins 3 semaines entre deux soirées** (le plus court écart de Split en 2026 est de 24 jours), donc deux soirées au plus par mois. Retirer coûte une part de la location : rien au-delà de 180 jours, 20 % de 91 à 180, 50 % de 70 à 90. Un jour fermé dit pourquoi et donne la première date libre.
+- **À droite, la soirée choisie** : en-tête sur le tunnel (doré pour une ceinture), trois cases (places, préventes, billet), l'enjeu, la carte principale et les préliminaires, la semaine du combat, puis le retrait (possible ou non, avec le coût) et « Ouvrir la carte ». Une soirée à composer : billetterie, location, « Le même soir » (texte), la salle la dernière fois, les plus longtemps sans combat.
+- **Poser** : un clic sur un jour libre ; le genre, la salle (places, dernière soirée de Split, location), le nom qu'elle prendra, « Poser la soirée ». **Retirer** : confirmation en chiffres (date, salle, coût, ensuite).
+- **Un jour à rendez-vous** : le mois dans l'ordre (rendez-vous, soirées, autres organisations), ce jour en blanc, avec les liens.
+- **En bas** : Tes soirées en 2027, Première date libre, Bilan de mi-saison (1er juil.), Fin de saison (31 déc.).
+- **Inventé, à relire** : la 64 posée par le prédécesseur le 2 déc. 2026, la conférence de presse et la pesée, les soirées des autres organisations. **Écarts ailleurs** : 4 000 ou 4 200 places à la 63, ceinture gardée ou prise à la 56, soirées 62 et 63 un mardi.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -354,7 +366,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Recruteur | R26 | Validé (section 11, « Écran Recruteur et Rapports »). |
 | Salles et camps | R27 | Validé (section 11, « Écran Camps »). |
 | Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
-| Calendrier, résultats, lendemain | R29, R30, R40, R41 | Résultats et lendemain validés (section 11). Calendrier : pour chaque soirée, enjeu, ceinture, ville, salle. |
+| Calendrier, résultats, lendemain | R29, R30, R40, R41 | Validés (section 11, « Écran Calendrier » et « Écran Résultats et lendemain »). |
 | Finances | R31 | Validé (section 11, « Écran Finances »). |
 | Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Niveau **spectaculaire**. Le résultat reste jusqu'au clic « Combat suivant ». Recettes à la fin seulement. Discours selon la règle de Q37. Temps forts vus du dessus. **Primes fixées par le joueur, de 1 000 € à 100 000 €.** « Revoir » au choix : l'arène ou le récit. |

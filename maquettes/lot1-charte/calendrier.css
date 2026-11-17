@@ -1,0 +1,224 @@
+/* Maquette lot 1 — Calendrier (R29, Q29a, Q29b). Préfixe ca-. Quatrième passe (17/11) : la première version, reprise au propre.
+   Reprend les panneaux (.pan, .pt), les boutons à bord (.bb), les cases jaunes (.cj), le C du champion des Résultats (rsCb)
+   et les tunnels du jeu (images/accueil-octogones.jpg, images/tunnel-or.jpg). */
+.ca{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 600px;gap:20px}
+.ca-a{color:var(--jaune);font-weight:700;font-size:18px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.ca-a:hover{text-decoration:underline}
+.ca-jaune{color:var(--jaune)}
+.ca-gris{color:var(--texte2)}
+.ca-gris .nom{color:var(--texte2)}
+
+/* ---- Six mois ---- */
+.ca-g>.p2>.p3{padding:18px 26px 14px}
+.ca-g .pt{align-items:center;margin-bottom:0}
+.ca-nav{margin-left:auto;display:flex;gap:10px}
+.ca-fl{width:56px}
+.ca-fl>span{height:46px;width:52px;padding:0;justify-content:center}
+.ca-fl.vide{display:inline-block;height:50px}
+
+/* la légende : chaque repère du calendrier, dit en clair */
+.ca-leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0 0;flex:none}
+.ca-lg{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--texte2);white-space:nowrap}
+.ca-lg i{width:20px;height:20px;flex:none;position:relative}
+.ca-lg i.auj{background:var(--blanc)}
+.ca-lg i.auj::after{content:"";position:absolute;inset:3px;background:var(--panneau)}
+.ca-lg i.soiree{background:var(--rouge-vif)}
+.ca-lg i.titre{background:var(--jaune)}
+.ca-lg i.jouee{background:#4a4545}
+.ca-lg i.auj,.ca-lg i.soiree,.ca-lg i.titre,.ca-lg i.jouee,.ca-lg i.auj::after{clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ca-lg i.ferme{background:linear-gradient(135deg,rgba(233,230,225,.24) 0 12.5%,transparent 12.5% 50%,rgba(233,230,225,.24) 50% 62.5%,transparent 62.5%) 0 0/10px 10px}
+.ca-lg i.rdv{width:12px;height:3px;margin:0 4px;background:var(--texte2);align-self:center}
+
+.ca-mur{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px 34px}
+.ca-mois{display:flex;flex-direction:column;min-width:0;min-height:0}
+.ca-mh{display:flex;align-items:center;gap:10px;margin:2px 0 3px;height:30px}
+.ca-mn{font-size:30px;line-height:.9}
+.ca-mc{margin-left:auto;font-weight:600;font-size:15px;letter-spacing:.07em;text-transform:uppercase;color:var(--texte2);white-space:nowrap}
+/* sept colonnes de 40 px sur des rangées de 30 px : les hachures (carreau de 10 px) se raccordent d'un jour à l'autre en une seule zone */
+.ca-mois{width:294px;justify-self:center}
+.ca-sem,.ca-grille{display:grid;grid-template-columns:repeat(7,42px)}
+.ca-sem span{text-align:center;font-weight:600;font-size:15px;letter-spacing:.07em;color:var(--texte2);padding-bottom:4px;border-bottom:2px solid var(--sep)}
+.ca-grille{grid-auto-rows:var(--rh,32px);margin-top:4px;flex:none}
+.ca-j{position:relative;display:grid;place-items:center;font-size:19px;font-weight:600;color:var(--blanc);isolation:isolate;cursor:pointer}
+.ca-n{position:relative;z-index:2;width:34px;height:34px;display:grid;place-items:center;line-height:1;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);transition:background .15s,transform .2s}
+/* passé : éteint */
+.ca-j.passe{color:rgba(233,230,225,.34);cursor:default}
+.ca-j.passe[data-cajour]{cursor:pointer}
+/* libre : on peut y poser une soirée */
+.ca-j.libre:hover .ca-n{background:var(--ligne)}
+/* fermé : moins de 10 semaines, hachuré */
+.ca-j.ferme{color:rgba(233,230,225,.5);cursor:not-allowed;background:repeating-linear-gradient(135deg,rgba(233,230,225,.11) 0 1.6px,transparent 1.6px 7px) calc(var(--x)*-42px) calc(var(--y)*-1*var(--rh,32px))/294px calc(var(--rh,32px)*6) no-repeat}
+.ca-j.ferme[data-cajour]{cursor:pointer}
+/* aujourd'hui : un anneau rouge (deux couches : le bord suit les angles) */
+.ca-j.auj::before{content:"";position:absolute;width:38px;height:38px;z-index:0;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ca-j.auj::after{content:"";position:absolute;width:33px;height:33px;z-index:1;background:var(--panneau);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.ca-j.auj::before{background:var(--blanc)}
+.ca-j.auj{color:var(--blanc);font-weight:800}
+/* une soirée : octogone plein, rouge ; doré si une ceinture est en jeu ; gris si elle est jouée */
+.ca-j.soiree .ca-n{background:var(--rouge-vif);color:var(--blanc);font-weight:800}
+.ca-j.soiree.titre .ca-n{background:var(--jaune);color:var(--noir)}
+.ca-j.soiree.jouee .ca-n{background:#4a4545;color:var(--blanc)}
+.ca-j.soiree.jouee.titre .ca-n{background:#6e5a26;color:var(--blanc)}
+.ca-j.soiree:hover .ca-n{transform:scale(1.1)}
+/* le jour ou la soirée choisis : un anneau blanc, plus large, autour */
+.ca-j.sel .ca-n,.ca-j.sel.soiree .ca-n,.ca-j.sel.soiree.titre .ca-n,.ca-j.sel.soiree.jouee .ca-n{background:var(--blanc);color:var(--noir);font-weight:800}
+/* un rendez-vous : un petit carré sous le chiffre */
+.ca-rdv{display:block;width:7px;height:7px;background:var(--texte2);flex:none}
+.ca-j .ca-rdv{position:absolute;z-index:3;width:12px;height:3px;left:50%;bottom:4px;margin-left:-6px;background:var(--texte2)}
+.ca-j.sel .ca-rdv{background:var(--noir)}
+.ca-j.passe .ca-rdv{opacity:.55}
+
+/* les soirées du mois : une place fixe sous la grille, deux lignes au plus */
+.ca-mls{margin-top:6px;display:flex;flex-direction:column;gap:2px;flex:none}
+.ca-ml{--c:8px;display:grid;grid-template-columns:26px minmax(0,1fr) auto;align-items:center;gap:9px;height:30px;padding:0 12px 0 6px;font-size:18px;text-align:left;background:#1c1919;
+  clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));border-left:0}
+.ca-mo{width:26px;height:26px;display:grid;place-items:center;font-size:17px;background:var(--rouge-vif);color:var(--blanc)}
+.ca-ml.titre .ca-mo{background:var(--jaune);color:var(--noir)}
+.ca-ml.jouee .ca-mo{background:#4a4545;color:var(--blanc)}
+.ca-ml.jouee.titre .ca-mo{background:#6e5a26}
+.ca-mln{display:flex;align-items:center;gap:6px;min-width:0;font-weight:700}
+.ca-mln>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ca-mlv{color:var(--texte2);font-size:16px;white-space:nowrap}
+.ca-ml.jouee .ca-mln{color:var(--texte2);font-weight:600}
+.ca-ml:hover{background:var(--ligne)}
+.ca-ml.on{background:var(--blanc);color:var(--noir)}
+.ca-ml.on .ca-mlv,.ca-ml.on .ca-mln{color:var(--noir)}
+
+/* ---- Les faits de la saison ---- */
+.ca-faits{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--sep);padding-top:12px;margin-top:6px}
+.ca-f{display:flex;flex-direction:column;gap:6px;padding:0 18px;border-left:2px solid var(--sep);min-width:0}
+.ca-f:first-child{border-left:0;padding-left:0}
+.ca-fv{font-size:34px;line-height:.85;white-space:nowrap}
+.ca-f .sous{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- À droite ---- */
+.ca-dr>.p2>.p3{padding:0 22px 18px}
+.ca-d{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.ca-ban{position:relative;flex:none;overflow:hidden;margin:0 -22px 2px;height:136px;background:var(--noir);border-bottom:4px solid var(--rouge-vif);display:flex;align-items:flex-end}
+.ca-ban.or{border-bottom-color:var(--jaune)}
+.ca-ban.gris,.ca-ban.jouee{border-bottom-color:var(--bord)}
+.ca-ban-img{position:absolute;left:-150px;top:-410px;width:1728px;height:972px;background:url('../../images/accueil-octogones.jpg') 0 0/1728px 972px no-repeat;filter:brightness(1.05) saturate(1.1);pointer-events:none;animation:ca-glisse 1.2s cubic-bezier(.2,.8,.2,1) both}
+.ca-ban.or .ca-ban-img{background-image:url('../../images/tunnel-or.jpg');filter:brightness(.95)}
+.ca-ban.gris .ca-ban-img{filter:grayscale(1) brightness(.5)}
+.ca-ban.jouee .ca-ban-img{filter:grayscale(.6) brightness(.55)}
+.ca-ban::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,11,11,.92) 0,rgba(13,11,11,.55) 50%,rgba(13,11,11,0) 100%);pointer-events:none}
+@keyframes ca-glisse{from{transform:translateX(-40px);opacity:.3}}
+.ca-ban-t{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;padding:0 22px 16px;min-width:0}
+.ca-ban-t .etiq{display:flex;align-items:center;gap:8px;color:var(--blanc);font-size:17px;white-space:nowrap}
+.ca-ban.or .ca-ban-t .etiq{color:var(--jaune)}
+.ca-bn{font-size:56px;line-height:.85;white-space:nowrap}
+.ca-bs{font-size:20px;color:var(--texte2);min-height:24px}
+
+.ca-ks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:none}
+.ca-k{--c:10px;background:#1c1919;padding:12px 14px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.ca-k .etiq{font-size:17px}
+.ca-kv{font-size:36px;line-height:.85;white-space:nowrap}
+.ca-k .sous{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ca-jg{height:5px;background:rgba(233,230,225,.12);position:relative;margin-top:2px}
+.ca-jg i{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:var(--blanc);animation:ca-rempli 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ca-rempli{from{width:0}}
+
+.ca-sec{display:flex;align-items:baseline;gap:12px;padding:6px 0 6px;border-bottom:2px solid var(--sep);flex:none}
+.ca-sm{margin-left:auto;font-weight:600;font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--texte2);white-space:nowrap}
+.ca-sm b{font-family:var(--titre);font-weight:800;font-size:22px;letter-spacing:0}
+.ca-sm .ca-a{font-size:17px}
+.ca-ce{display:flex;align-items:center;gap:16px;flex:none}
+.ca-ct{font-size:22px;font-weight:700}
+.ca-ce .sous{font-size:18px;margin-top:2px}
+
+.ca-cls{display:flex;flex-direction:column;flex:none;margin-top:-6px}
+.ca-cl{display:flex;align-items:center;gap:12px;height:42px;border-bottom:2px solid var(--sep);font-size:21px;min-width:0}
+.ca-ci{width:20px;font-family:var(--titre);font-weight:800;font-size:22px;color:var(--texte2);flex:none}
+.ca-cn{font-weight:700;white-space:nowrap}
+.ca-vs{color:var(--texte2);font-size:18px}
+.ca-cc{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:18px;white-space:nowrap}
+.ca-cc small{font-size:16px;color:var(--texte2);margin-left:4px}
+.ca-cl .ca-a{font-size:17px}
+.ca-fin{margin-left:auto}
+
+.ca-prog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:none}
+.ca-prog span{display:flex;flex-direction:column;gap:5px;font-size:18px;color:var(--texte2);white-space:nowrap}
+.ca-prog b{font-size:28px;color:var(--blanc);line-height:.9}
+
+.ca-rien{font-size:20px;color:var(--texte2);flex:none;line-height:1.3}
+.ca-blanc{color:var(--blanc)}
+.ca-lib{display:flex;flex-direction:column;flex:none;margin-top:-6px}
+.ca-li{display:grid;grid-template-columns:minmax(0,1fr) 170px 190px;align-items:center;gap:12px;height:54px;border-bottom:2px solid var(--sep);font-size:20px}
+.ca-ln{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.ca-lc{color:var(--texte2);font-size:16px;white-space:nowrap}
+.ca-ld{color:var(--texte2);font-size:17px;white-space:nowrap}
+.ca-le{font-size:17px;justify-self:end;white-space:nowrap}
+.ca-le svg{width:18px;height:18px}
+.ca-pn{font-weight:700;font-size:20px;white-space:nowrap}
+.ca-pq{font-size:19px;white-space:normal;text-align:right;justify-content:flex-end}
+.ca-v{width:26px;height:26px;font-size:18px}
+
+/* le pied : retirer, poser, ou pourquoi on ne peut pas */
+.ca-pied{margin-top:auto;display:flex;align-items:center;gap:16px;padding-top:10px;border-top:2px solid var(--sep);flex:none;min-height:70px}
+.ca-note{flex:1;display:flex;gap:10px;align-items:flex-start;font-size:18px;line-height:1.3;color:var(--texte2);min-width:0}
+.ca-note>svg{flex:none;margin-top:2px;color:var(--jaune)}
+.ca-note>span{display:flex;flex-direction:column;gap:3px}
+.ca-note b{color:var(--blanc)}
+.ca-note small{font-size:16px}
+.ca-res{flex-direction:column;gap:4px}
+.ca-res b.T{font-size:30px;line-height:.9}
+.ca-res>span{font-size:18px;color:var(--blanc)}
+
+/* ---- Un jour, et poser une soirée ---- */
+.ca-evs{display:flex;flex-direction:column;flex:none;margin-top:-6px}
+.ca-evl{display:flex;align-items:center;gap:12px;min-height:46px;border-bottom:2px solid var(--sep);font-size:20px}
+.ca-evl .ca-a{margin-left:auto}
+.ca-tys{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.ca-ty{--c:10px;background:var(--sep);padding:2px;text-align:left}
+.ca-ty>span{--c:9px;background:var(--noir);display:flex;flex-direction:column;gap:5px;padding:10px 16px;height:100%}
+.ca-ty b{font-size:28px;line-height:.9}
+.ca-ty .sous{font-size:16px}
+.ca-ty:hover{background:var(--bord)}
+.ca-ty.on{background:var(--blanc)}
+.ca-ty.on>span{background:#1f1b1b}
+.ca-sh{display:grid;grid-template-columns:1.45fr .75fr 1.25fr .8fr;gap:8px;padding:0 16px;font-weight:600;font-size:15px;letter-spacing:.07em;text-transform:uppercase;color:var(--texte2);flex:none;margin-top:-4px}
+.ca-sls{display:flex;flex-direction:column;gap:2px;flex:none}
+.ca-sl{--c:9px;padding:2px;background:transparent;text-align:left;display:block;width:100%}
+.ca-sl>span.oct{--c:8px;display:grid;grid-template-columns:1.45fr .75fr 1.25fr .8fr;gap:8px;align-items:center;padding:8px 14px;background:transparent}
+.ca-sl:hover>span.oct{background:var(--ligne)}
+.ca-sl.on{background:var(--blanc)}
+.ca-sl.on>span.oct{background:#1f1b1b}
+.ca-sl span>span{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.ca-sl b{font-size:20px;white-space:nowrap}
+.ca-sl .sous{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- Confirmer un retrait ---- */
+.ca-conf{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;padding-top:6px}
+.ca-ct2{font-size:40px;line-height:.9;margin:0 0 8px}
+.ca-cfl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:baseline;padding:10px 0;border-bottom:2px solid var(--sep);font-size:20px}
+.ca-cfl span{color:var(--texte2)}
+.ca-cfb{margin-top:auto;display:flex;justify-content:flex-end;gap:12px}
+
+/* un jour qui a aussi un rendez-vous : la pose se resserre pour tenir */
+.ca-sls.serre .ca-sl>span.oct{padding:3px 14px}
+.ca-tys.serre .ca-ty>span{padding:7px 16px}
+
+/* un jour : le mois autour, dans l'ordre */
+.ca-evl .ca-rdv{width:12px;height:3px}
+.ca-ag{display:flex;flex-direction:column;flex:none;margin-top:-6px}
+.ca-agl{display:grid;grid-template-columns:90px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:44px;border-bottom:2px solid var(--sep);font-size:19px;color:var(--texte2)}
+.ca-agl b.T{font-size:22px;color:var(--texte2)}
+.ca-agl>span b{color:var(--blanc)}
+.ca-agl.on,.ca-agl.on b.T{color:var(--blanc)}
+
+/* les autres organisations : en texte seulement (retour du 17/11 : « enlève les couleurs ») */
+.ca-meme{display:flex;align-items:center;gap:10px;font-size:19px;color:var(--texte2);flex:none;padding:2px 0}
+.ca-meme b{color:var(--blanc)}
+.ca-sm2{font-weight:600;font-size:16px;letter-spacing:.07em;text-transform:uppercase;color:var(--texte2);margin-right:4px}
+.ca-agl.ail>span{display:flex;align-items:center;gap:10px}
+
+.ca-salle{display:flex;flex-direction:column;gap:6px;flex:none}
+.ca-salle>span:first-child{font-size:19px;color:var(--texte2)}
+.ca-salle b.T{font-size:30px;color:var(--blanc);margin-right:4px}
+.ca-salle .sous{font-size:17px}
+
+/* les jours des mois voisins : ils complètent les six semaines, éteints */
+.ca-j.hors{cursor:default;color:rgba(233,230,225,.16)}
+.ca-j{font-size:20px}
+
+@media (prefers-reduced-motion: reduce){.ca-ban-img,.ca-jg i{animation:none}.ca-n{transition:none}}
