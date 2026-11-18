@@ -309,6 +309,18 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **En bas** : Tes soirées en 2027, Première date libre, Bilan de mi-saison (1er juil.), Fin de saison (31 déc.).
 - **Inventé, à relire** : la 64 posée par le prédécesseur le 2 déc. 2026, la conférence de presse et la pesée, les soirées des autres organisations. **Écarts ailleurs** : 4 000 ou 4 200 places à la 63, ceinture gardée ou prise à la 56, soirées 62 et 63 un mardi.
 
+### Écran Ceintures (R22, T4c, Q22a à Q22c, validé le 18/11)
+- **Un onglet des Classements** : Classement · Ceintures · Les meilleurs · Records, avec la même ligne de filtres (Hommes, Femmes, catégories), gardée d'un onglet à l'autre. **Ceintures quitte la barre**, comme Préliminaires a rejoint la Carte.
+- **Hommes ou Femmes sans catégorie** : une carte par champion, sur le tunnel doré : catégorie et poids, le C, prénom « surnom » en texte courant, le nom, puis palmarès · rang mondial et « 9e champion de la lignée ». Dessous : le prochain défi (combat signé, ou « Rien de prévu » et le n° 1) et le dernier combat pour le titre (date, il y a combien). Femmes : quatre cartes larges, avec les trois championnes d'avant.
+- **Une catégorie : la lignée en frise datée**, un trait par règne à l'échelle du temps : gris (un règne), doré (en titre), hachuré au-dessus (intérim), pointillés (vacante), octogone doré (prochain défi). Légende des seuls repères présents. Chaque champion au-dessus ou au-dessous, en alternance, sans chevauchement : nom, dates, défenses (et intérim), fin du règne. **Pas d'axe des années.** Textes de 18 px au moins.
+- **Pas de doublon avec le Classement** : le règne en cours ne répète ni ses défenses ni sa durée (à ajouter au Classement, R22).
+- **Le prochain défi** : bandeau doré pour un combat signé (date, soirée, salle, 5 rounds, « Ouvrir la carte »), tunnel éteint pour « rien de signé » (le champion face au n° 1, « Proposer le combat »). À droite : leur dernier combat ou le dernier combat pour le titre, puis les n° 2 et 3 avec leur état. Les deux côtés partent de la même hauteur.
+- **Un ancien champion** a sa fiche courte, tirée de la lignée : ce qu'il fait (à relire), son parcours, sa ceinture (la prise, la fin), toute la lignée avec sa place, « Voir la lignée ».
+- **Règles réelles** : pas de délai de défense affiché (l'UFC n'en a pas ; ses grands champions défendent tous les 6 à 9 mois). Intérim rare (aucun chez les femmes), quand le champion ne peut pas combattre des mois ; l'intérimaire réunifie ou est promu. Refuser de défendre fait perdre la ceinture. Aucun règne au-delà de 40 mois (Zaïtsev), aucune série au-delà de 5 défenses (Garcia-Roy).
+- **Données** : la fiche de Nana prime pour la 56 (ceinture prise à Belkacem) ; en 2026, ceinture en jeu aux soirées 56, 59 et 62 seulement, donc cinq champions sans défense depuis plus d'un an. Le dernier combat des champions est leur dernier combat pour le titre, et leur fiche le marque. Anciens champions et adversaires des défenses inventés, à relire.
+- **Mouvement** : tunnel qui glisse, C qui se pose, carte qui se soulève au survol ; traits qui se tracent, reflet sur le règne en cours, prochain défi qui pulse ; combattants qui arrivent de leur coin, VS qui se pose, nombres qui défilent.
+- **Écarts repérés, à aligner** : Résultats de la 56 (« gardée »), « qu'il avait battu en 2025 » (Résultats, Calendrier), autres combats pour le titre absents des Résultats 56, 59, 62, champions de 22-23 ans face au record du plus jeune champion (25 ans), numéros de soirée des Records.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -361,7 +373,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Effectif, Infirmerie | R15, Q12b | Section 11, « Grands tableaux ». **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
 | Fiche | R16 | Validé (section 10). |
 | Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
-| Ceintures | R22 | Une version avec un vrai sens (lignée des champions, règnes, intérims, prochain défi), regroupée avec le Classement. **Tu décides ensuite de la garder ou non.** Défenses et durée du règne sont dans le Classement de toute façon. |
+| Ceintures | R22 | Validé (section 11, « Écran Ceintures ») : un onglet des Classements. Défenses et durée du règne restent à ajouter au Classement. |
 | Contrats, recrutement | R23 à R25 | Section 11, « Écran Recrutement ». **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
 | Recruteur | R26 | Validé (section 11, « Écran Recruteur et Rapports »). |
 | Salles et camps | R27 | Validé (section 11, « Écran Camps »). |
@@ -385,7 +397,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Place du « Fil » et des « Suivis » | Fil dans Presse ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
 | Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
-| Écran Ceintures | À montrer avec un vrai sens, puis à garder ou supprimer | Point tranché n° 2 |
+| Écran Ceintures | Gardé, en onglet des Classements (validé le 18/11) | Point tranché n° 2 |
 | Nom des soirées | « Split Fight Night 63 » comme dans le jeu ; le plan prévoit « Split : X vs Y » pour les fight nights et « Split 1 » pour les grandes soirées | Q21c, Q29a |
 | Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |
 | Surnoms affichés | Sous le nom dans les listes, à côté du prénom dans la bannière. La liste des écrans concernés reste à valider | T11 |
