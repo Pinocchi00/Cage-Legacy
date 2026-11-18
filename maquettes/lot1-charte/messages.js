@@ -102,7 +102,7 @@ const MS_BOITE=[
         <div><span class="etiq">Tableau Noir</span><p>« Nana à 37 ans en tête d’affiche : courage ou entêtement ? »</p></div>
         <div><span class="etiq">Les fans, en ligne</span><p>« Mezouar contre Nana, enfin. Le reste, on verra. »</p></div></div>`,'large')}
     </div>`,
-   act:()=>msNon('Presse ›','data-mstoast="Écran Presse, hors de cette maquette."')},
+   act:()=>msNon('Presse ›','data-prouvre="a09ch"')},
 
   {id:'recruteur',tag:'Recruteur',qui:'Marco Ferri',role:'ton recruteur',date:msJ(8),lu:true,
    t:'Ton recruteur est disponible',

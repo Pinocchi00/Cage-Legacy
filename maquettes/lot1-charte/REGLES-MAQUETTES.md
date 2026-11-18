@@ -321,6 +321,17 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Mouvement** : tunnel qui glisse, C qui se pose, carte qui se soulève au survol ; traits qui se tracent, reflet sur le règne en cours, prochain défi qui pulse ; combattants qui arrivent de leur coin, VS qui se pose, nombres qui défilent.
 - **Écarts repérés, à aligner** : Résultats de la 56 (« gardée »), « qu'il avait battu en 2025 » (Résultats, Calendrier), autres combats pour le titre absents des Résultats 56, 59, 62, champions de 22-23 ans face au record du plus jeune champion (25 ans), numéros de soirée des Records.
 
+### Écran Presse (R28, Q28a, Q28b, Q13, Q10c, validé le 18/11)
+- **Trois onglets**, trois façons de lire la presse : À la une · Les défis · Le fil.
+- **À la une** : l'article du moment sur le tunnel (doré pour un titre), avec trois faits datés ; « Tes combattants dans la presse », une ligne chacun avec **Salué** (vert), **Critiqué** (rouge) ou **Cité** (gris), le média et la date ; les trois médias présentés (ce qu'ils sont, leur public, un autre article) ; le pronostic des lecteurs (qui gagne, en % des votes, jamais une note du combat, H1).
+- **Les défis** : qui réclame qui, la phrase exacte, sa source et sa date, puis ce que la carte permet : « Possible » (blanc, place vide) avec « Placer sur la carte › », « Signé » (vert), « Déjà à l'affiche » (gris), blessé (rouge, avec la date de retour). Un clic sur la ligne ouvre l'article.
+- **Les envies du public** (Q28b) : un seul encadré, pour une très grosse affiche seulement (ici champion contre champion), avec le sondage et la condition qui la rend possible.
+- **Le fil** (Q13) : tout ce qui s'est écrit, par jour, filtres par sujet (Split, ta soirée, tes combattants, ailleurs) et par média, gardés au retour ; la ligne choisie comme dans les Messages. L'article : média, titre, chapeau, signature, texte, trois faits, les autres médias sur le sujet, une action. Liste vide : une phrase et les boutons qui défont le filtre.
+- **Précision d'un vrai média** : le geste et le temps d'une finition (« coude au sol, à 0:50 du 1er round »), les cartes des juges d'une décision. Retirés : « attend depuis 15 mois », le nombre de nouvelles, les envies du public pour n'importe quel combat.
+- **Pas de doublon avec les Messages** : un article déjà annoncé par message est une ligne du fil, avec « Le message ».
+- **Médias** : Cage Hebdo, Tableau Noir, Le Forum gardés pour l'instant ; « Le Forum » se confond avec le Forum de Lille (propositions de noms dans comparaison.html). Le jeu a dix médias dans ses données : le sort des sept autres reste à décider.
+- **Mouvement** : tunnel qui glisse et reflet, chiffres qui défilent, jauges des pronostics, combattants qui arrivent de leur coin, lignes qui se décalent au survol.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -377,7 +388,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Contrats, recrutement | R23 à R25 | Section 11, « Écran Recrutement ». **Un seul écran de recrutement** avec un filtre (agents libres, fins de contrat ailleurs). Négociation FM en 2 à 4 allers-retours (salaire, nombre de combats, primes, chance au titre sous le nom des demandes). « Il dit » et l'avis des médias passent dans la fiche. « Tu l'as vu » est retiré. |
 | Recruteur | R26 | Validé (section 11, « Écran Recruteur et Rapports »). |
 | Salles et camps | R27 | Validé (section 11, « Écran Camps »). |
-| Presse | R28 | **Nouveaux exemples visuels à montrer avant toute refonte.** Les « envies du public » seulement pour les très grosses affiches. |
+| Presse | R28 | Validé (section 11, « Écran Presse ») : À la une, Les défis, Le fil. Médias à renommer (Q10c). |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Validés (section 11, « Écran Calendrier » et « Écran Résultats et lendemain »). |
 | Finances | R31 | Validé (section 11, « Écran Finances »). |
 | Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
@@ -394,7 +405,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Octogone « Dans la cage » | Version « rempli » (il impose / il subit). Deux autres versions existent : « en chiffres » et « comment il gagne » | Q16c |
 | Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
 | Barre latérale | Liste actuelle du jeu, « Actualités » devenu « Messages ». Le regroupement en familles sous de nouveaux noms (T4, Q11) reste à proposer | T4, Q11 |
-| Place du « Fil » et des « Suivis » | Fil dans Presse ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
+| Place du « Fil » et des « Suivis » | Fil dans Presse (validé le 18/11) ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
 | Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
 | Écran Ceintures | Gardé, en onglet des Classements (validé le 18/11) | Point tranché n° 2 |
