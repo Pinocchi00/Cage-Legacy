@@ -1,0 +1,230 @@
+/* Maquette lot 1 — Ceintures (R22), onglet des Classements. Préfixe ce-. Mêmes pièces que les Classements (onglets, filtres, panneaux, C du champion). */
+.rang-c.ce-cb{width:30px;height:30px;padding:2px;flex:none}
+.rang-c.ce-cb>span{padding:2px}
+.rang-c.ce-cb b{font-size:18px}
+.ce-rg{width:28px;height:28px;flex:none;display:inline-grid;place-items:center;background:var(--blanc);color:var(--noir);font-family:var(--titre);font-weight:800;font-size:19px;line-height:1}
+.ce-vert{color:var(--vert);font-weight:700}
+.ce-neg{color:var(--neg);font-weight:700}
+.ce-vert,.ce-neg{display:inline-flex;align-items:center;gap:6px}
+
+/* ---- Les champions : une carte par ceinture ---- */
+.ce-mur{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:20px}
+.ce-mur.f{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ce-carte{--c:18px;background:var(--bord);padding:2px;display:flex;min-width:0;min-height:0;cursor:pointer}
+.ce-carte:hover{background:var(--blanc)}
+.ce-ci{--c:17px;flex:1;min-width:0;display:flex;flex-direction:column;background:var(--panneau);overflow:hidden}
+.ce-haut{position:relative;height:196px;flex:none;overflow:hidden;background:var(--noir)}
+.ce-img{position:absolute;left:calc(100% - 640px);top:-170px;width:1000px;height:563px;background:url('../../images/tunnel-or.jpg') 0 0/1000px 563px no-repeat}
+.ce-haut::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0D0B0B 0,rgba(13,11,11,.92) 30%,rgba(13,11,11,.55) 62%,rgba(13,11,11,.2))}
+.ce-mur.f .ce-img{left:calc(100% - 560px)}
+.ce-haut>div{position:absolute;z-index:1}
+.ce-cat{left:22px;top:18px;display:flex;align-items:baseline;gap:12px}
+.ce-cat .T{font-size:38px;line-height:.8}
+.ce-kg{font-size:18px;color:var(--texte2)}
+.ce-pal{right:16px;top:16px;padding:8px 12px;background:rgba(13,11,11,.86);border:2px solid var(--bord);display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.ce-pal .T{font-size:30px;line-height:.85}
+.ce-pal .sous{font-size:17px;white-space:nowrap}
+.ce-champ{left:22px;right:16px;bottom:42px;display:flex;align-items:flex-end;gap:14px}
+.ce-champ .rang-c{width:58px;height:58px;flex:none;padding:3px}
+.ce-champ .rang-c>span{padding:3px}
+.ce-champ .rang-c b{font-size:32px}
+.ce-noms{display:flex;flex-direction:column;gap:6px;min-width:0;text-transform:uppercase}
+.ce-pre{font-family:var(--titre);font-weight:800;font-size:22px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce-pre i{font-style:normal;color:var(--texte2);font-size:19px}
+.ce-nom{font-family:var(--titre);font-weight:800;font-size:54px;line-height:.82;padding-top:9px;margin-top:-9px;white-space:nowrap;text-decoration-thickness:3px;text-underline-offset:6px;align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.ce-nom.long{font-size:46px}
+.ce-lg{left:22px;bottom:14px;font-size:18px;color:var(--texte2)}
+.ce-lg sup{font-size:12px}
+.ce-bas{flex:1;min-height:0;display:flex;flex-direction:column;padding:2px 22px 4px}
+/* Femmes : quatre cartes larges, le champion à gauche, les faits à droite */
+.ce-mur.f .ce-ci{flex-direction:row}
+.ce-mur.f .ce-haut{height:auto;width:58%}
+.ce-mur.f .ce-champ{bottom:56px}
+.ce-mur.f .ce-lg{bottom:22px}
+.ce-mur.f .ce-bas{padding:10px 26px}
+.ce-l{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px;border-bottom:2px solid var(--sep)}
+.ce-l:last-child{border-bottom:0}
+.ce-l .etiq{font-size:17px}
+.ce-l b{font-size:23px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce-l .sous{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce-aprog{color:var(--texte2)}
+
+/* ---- Une catégorie : la lignée, puis le prochain défi ---- */
+.ce-det{flex:1;min-height:0;display:flex;flex-direction:column;gap:20px}
+.ce-lig{flex:none;height:404px}
+.ce-pd{flex:1;min-height:0}
+.ce-ment{margin-left:22px!important}
+.ce-ment sup,.cl-staff sup{font-size:.6em}
+.ce-leg{margin-left:auto;display:flex;align-items:center;gap:26px;font-size:18px;color:var(--texte2);padding-top:8px;white-space:nowrap}
+.ce-leg>span{display:inline-flex;align-items:center;gap:10px}
+.ce-leg i{display:inline-block;width:26px;height:12px}
+.ce-lg-tr{background:#5a5351}
+.ce-lg-cur{background:var(--jaune)}
+.ce-lg-int{background:repeating-linear-gradient(135deg,#8a8280 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px #8a8280}
+.ce-lg-vac{height:0!important;border-top:2px dashed var(--bord)}
+.ce-lg-fut{width:14px!important;height:14px!important;background:var(--jaune)}
+
+.ce-frise{position:relative;flex:1;min-height:0}
+.ce-tr{position:absolute;top:112px;height:34px;background:#5a5351;--c:6px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));
+  display:grid;place-items:center;transform-origin:left;animation:ce-trace .7s cubic-bezier(.2,.8,.2,1) both;transition:background .15s}
+.ce-tr b{font-family:var(--titre);font-weight:800;font-size:22px;line-height:1;color:var(--blanc)}
+.ce-tr.cur{background:var(--jaune)}
+.ce-tr.cur b{color:var(--noir)}
+.ce-tr.int{top:96px;height:12px;--c:3px;background:repeating-linear-gradient(135deg,#8a8280 0 3px,transparent 3px 6px);box-shadow:inset 0 0 0 1px #8a8280}
+.ce-tr.on{background:#7a716e}
+.ce-tr.cur.on{background:#ffc63b}
+@keyframes ce-trace{from{transform:scaleX(0)}}
+.ce-vac{position:absolute;top:128px;height:0;border-top:2px dashed var(--bord)}
+.ce-futur{position:absolute;top:120px;width:18px;height:18px;background:var(--jaune)}
+.ce-an{position:absolute;top:154px;transform:translateX(-50%);font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--texte2)}
+.ce-tick{position:absolute;top:148px;width:1px;height:5px;background:var(--bord)}
+.ce-nm{position:absolute;display:flex;flex-direction:column;gap:1px;line-height:1.13;padding:0 4px;white-space:nowrap}
+.ce-nm.h{top:2px}
+.ce-nm.b{top:180px}
+.ce-nm:not(.h):not(.b){visibility:hidden}
+.ce-nm1{display:flex;align-items:center;gap:8px;font-size:21px;font-weight:700;white-space:nowrap;min-width:0}
+.ce-nmn{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ce-num{width:26px;height:26px;flex:none;display:grid;place-items:center;background:#5a5351;font-family:var(--titre);font-weight:800;font-size:17px;line-height:1}
+.ce-nm.cur .ce-num{background:var(--jaune);color:var(--noir)}
+.ce-nm2,.ce-nm3{font-size:17px;color:var(--texte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce-nm3 .nom{color:var(--texte2)}
+.ce-nm.cur .ce-nm3{color:var(--blanc)}
+.ce-nm.on .ce-num{background:#7a716e}
+.ce-nm.cur.on .ce-num{background:#ffc63b}
+.ce-lien{position:absolute;width:1px;background:rgba(233,230,225,.3)}
+.ce-lien.h{top:92px;height:20px}
+.ce-lien.b{top:146px;height:34px}
+
+/* Le prochain défi */
+.ce-defi{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 620px;gap:26px}
+.ce-band{position:relative;overflow:hidden;background:var(--noir);--c:12px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));border-bottom:4px solid var(--jaune)}
+.ce-band.aprog{border-bottom-color:var(--bord)}
+.ce-band-img{position:absolute;left:50%;top:50%;width:1300px;height:731px;margin:-365px 0 0 -650px;background:url('../../images/tunnel-or.jpg') 0 0/1300px 731px no-repeat;pointer-events:none;animation:ce-glisse 1.2s cubic-bezier(.2,.8,.2,1) both}
+.ce-band.aprog .ce-band-img{filter:grayscale(1) brightness(.55)}
+@keyframes ce-glisse{from{transform:translateX(40px);opacity:.4}}
+.ce-band::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(13,11,11,.94) 0,rgba(13,11,11,.62) 32%,rgba(13,11,11,.2) 50%,rgba(13,11,11,.62) 68%,rgba(13,11,11,.94) 100%)}
+.ce-band>div{position:absolute;z-index:1}
+.ce-band-t{left:16px;top:14px;padding:6px 10px;background:rgba(13,11,11,.86);display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;letter-spacing:.07em;text-transform:uppercase;color:var(--jaune);white-space:nowrap}
+.ce-band.aprog .ce-band-t{color:var(--texte2)}
+.rang-c.ce-cbp{width:24px;height:24px}
+.rang-c.ce-cbp b{font-size:15px}
+.ce-cote{bottom:18px;display:flex;flex-direction:column;gap:6px;max-width:38%}
+.ce-cote.a{left:24px}
+.ce-cote.b{right:24px;align-items:flex-end;text-align:right}
+.ce-c1{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:600;white-space:nowrap;text-transform:uppercase}
+.ce-cote.b .ce-c1{flex-direction:row-reverse}
+.ce-c2{font-family:var(--titre);font-weight:800;font-size:66px;line-height:.82;text-transform:uppercase;white-space:nowrap;text-shadow:0 3px 18px rgba(0,0,0,.4)}
+.ce-c2 .long{font-size:54px}
+.ce-c2 .nom{text-decoration-thickness:3px;text-underline-offset:7px;text-decoration-color:rgba(233,230,225,.3)}
+.ce-c3{display:flex;align-items:baseline;gap:12px;font-size:18px;color:var(--texte2);white-space:nowrap}
+.ce-cote.b .ce-c3{flex-direction:row-reverse}
+.ce-c3 .T{font-size:28px;color:var(--blanc)}
+.ce-c4{font-size:18px;white-space:nowrap}
+.ce-mil{left:50%;top:50%;transform:translate(-50%,-44%);display:flex;flex-direction:column;align-items:center;gap:10px}
+.ce-mil .vsw{padding:2px;background:rgba(233,230,225,.6)}
+.ce-mil .vsr{padding:4px;background:var(--noir)}
+.ce-mil .vs{width:70px;height:70px;background:var(--blanc);color:var(--noir);display:grid;place-items:center;font-family:var(--titre);font-weight:800;font-size:36px;line-height:1}
+.ce-chip{--c:6px;height:28px;padding:0 12px;background:rgba(13,11,11,.9);display:flex;align-items:center;font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.ce-droite{display:flex;flex-direction:column;min-width:0}
+.ce-faits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;flex:1;min-height:0}
+.ce-f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ce-f .etiq{font-size:17px;padding-bottom:6px;border-bottom:2px solid var(--sep)}
+.ce-f b{font-size:22px;line-height:1.2}
+.ce-f .sous{font-size:18px}
+.ce-dr{display:flex;align-items:center;gap:12px;padding:6px 0}
+.ce-drt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ce-drn{font-size:21px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce-dre{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--texte2)}
+.ce-dre.ce-vert{color:var(--vert)}.ce-dre.ce-neg{color:var(--neg)}
+.ce-act{align-self:flex-end;flex:none}
+
+/* La fiche d'un ancien champion (même cadre que les anciens du staff) */
+.ce-anc .cl-frise>div{font-size:20px}
+.ce-sf{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.ce-anl{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:2px solid var(--sep);font-size:21px}
+.ce-anl .etiq{font-size:17px}
+.ce-voir{margin-top:auto}
+
+@media (prefers-reduced-motion:reduce){.ce-tr,.ce-band-img{animation:none}}
+/* Cartes larges (femmes) : les championnes d'avant ; le tunnel se fond à droite */
+.ce-mur.f .ce-img{-webkit-mask-image:linear-gradient(90deg,#000 62%,transparent 86%);mask-image:linear-gradient(90deg,#000 62%,transparent 86%)}
+.ce-avant{justify-content:flex-start;padding-top:12px;gap:6px}
+.ce-av{display:flex;align-items:baseline;justify-content:space-between;gap:16px;font-size:20px;font-weight:600}
+.ce-av .sous{font-size:18px;font-weight:500;flex:none}
+/* Fiche d'un ancien : toute la lignée de sa ceinture */
+.ce-ll{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden}
+.ce-lli{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 10px;--c:8px;border-bottom:2px solid var(--sep);font-size:20px}
+.ce-lli .sous{font-size:18px}
+.ce-lli .ce-num{width:26px;height:26px}
+.ce-num.cur{background:var(--jaune);color:var(--noir)}
+.ce-lli.moi{background:var(--blanc);color:var(--noir);border-bottom-color:transparent;font-weight:700}
+.ce-lli.moi .sous{color:rgba(13,11,11,.7)}
+.ce-lln{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+
+/* ---- Retours du 18/11 : lisibilité (textes plus grands, rien ne se chevauche, mêmes hauteurs) ---- */
+/* Frise : quatre lignes de 18 px au moins, pas d'axe des années sous le trait */
+.ce-an,.ce-tick{display:none}
+.ce-nm{gap:2px;line-height:1.18}
+.ce-nm1{font-size:22px;gap:10px}
+.ce-num{width:28px;height:28px;font-size:18px}
+.ce-nm2,.ce-nm3{font-size:18px}
+.ce-nm.h{top:0}
+.ce-nm.b{top:164px}
+.ce-lien.h{top:98px;height:14px}
+.ce-lien.b{top:146px;height:18px}
+.ce-tr.int{top:98px}
+/* Prochain défi : les deux côtés partent de la même hauteur, le nom à la même ligne */
+.ce-cote{top:62px;bottom:auto}
+.ce-c1{height:28px}
+.ce-band-t{top:14px}
+.ce-dre{font-size:18px}
+/* Cartes : prénom et surnom en texte courant, la place dans la lignée sous le nom, sur fond sombre */
+.ce-haut::after{background:linear-gradient(90deg,#0D0B0B 0,rgba(13,11,11,.94) 42%,rgba(13,11,11,.6) 70%,rgba(13,11,11,.25))}
+.ce-champ{bottom:20px;align-items:center}
+.ce-noms{gap:6px;text-transform:none}
+.ce-pre{font-family:var(--texte);font-weight:600;font-size:20px;line-height:1.1}
+.ce-pre i{font-size:20px;color:var(--texte2)}
+.ce-nom{text-transform:uppercase}
+.ce-lg{position:static!important;font-size:18px;line-height:1.1;color:var(--texte2);white-space:nowrap}
+.ce-pal .sous{font-size:18px}
+.ce-mur.f .ce-champ{bottom:28px}
+/* Cartes : plus de cadre du palmarès sur le tunnel ; palmarès, rang mondial et place dans la lignée sur une ligne sous le nom */
+.ce-champ{bottom:22px;top:auto}
+.ce-lg b{font-weight:700;color:var(--blanc)}
+.ce-noms{max-width:calc(100% - 72px)}
+.ce-pre,.ce-lg{overflow:hidden;text-overflow:ellipsis}
+.ce-noms{gap:4px}
+.ce-nom{font-size:50px}
+.ce-nom.long{font-size:44px}
+.ce-champ{bottom:16px}
+.ce-nom+.ce-lg{margin-top:4px}
+.ce-nom{padding-top:8px;margin-top:0}
+.ce-noms{gap:2px}
+.ce-cat{top:14px}
+
+/* ---- Retour du 18/11 : un peu plus de vie (discret, section 11 « Mouvement » ; tout s'arrête avec prefers-reduced-motion) ---- */
+/* Cartes : le tunnel glisse, le C se pose, la carte se soulève au survol */
+.ce-img{animation:ce-glisse 1.3s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both}
+.ce-champ .rang-c{animation:ce-pose .5s cubic-bezier(.3,1.6,.5,1) calc(var(--d,0ms) + 250ms) both}
+@keyframes ce-pose{from{transform:scale(.4);opacity:0}}
+.ce-carte{transition:background .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
+.ce-carte:hover{transform:translateY(-4px)}
+.ce-carte:hover .ce-img{filter:brightness(1.15);transition:filter .3s}
+/* Frise : les traits de rappel descendent vers chaque nom, un reflet passe sur le règne en cours, le prochain défi pulse */
+.ce-lien{transform-origin:top;animation:ce-tige .4s cubic-bezier(.2,.8,.2,1) both}
+.ce-lien.h{transform-origin:bottom}
+@keyframes ce-tige{from{transform:scaleY(0)}}
+.ce-tr.cur{overflow:hidden}
+.ce-tr.cur::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-120%);animation:ce-reflet 1.1s ease-in-out 1.1s both}
+@keyframes ce-reflet{to{transform:translateX(120%)}}
+.ce-tr:hover{filter:brightness(1.2)}
+/* Prochain défi : les deux combattants arrivent de leur coin, le VS se pose entre eux */
+.ce-cote.a{animation:ce-gauche .6s cubic-bezier(.2,.8,.2,1) .15s both}
+.ce-cote.b{animation:ce-droite .6s cubic-bezier(.2,.8,.2,1) .15s both}
+@keyframes ce-gauche{from{transform:translateX(-40px);opacity:0}}
+@keyframes ce-droite{from{transform:translateX(40px);opacity:0}}
+.ce-mil .vsw{animation:ce-pose .5s cubic-bezier(.3,1.6,.5,1) .45s both}
+.ce-dr{animation:apparait .45s cubic-bezier(.2,.8,.2,1) both}
+.ce-dr+.ce-dr{animation-delay:.12s}
+@media (prefers-reduced-motion:reduce){.ce-img,.ce-champ .rang-c,.ce-lien,.ce-tr.cur::after,.ce-cote,.ce-mil .vsw,.ce-dr{animation:none}.ce-carte:hover{transform:none}}
+.ce-tr.int{top:101px;height:9px}
