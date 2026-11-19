@@ -332,6 +332,17 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Médias** : Cage Hebdo, Tableau Noir, Le Forum gardés pour l'instant ; « Le Forum » se confond avec le Forum de Lille (propositions de noms dans comparaison.html). Le jeu a dix médias dans ses données : le sort des sept autres reste à décider.
 - **Mouvement** : tunnel qui glisse et reflet, chiffres qui défilent, jauges des pronostics, combattants qui arrivent de leur coin, lignes qui se décalent au survol.
 
+### Écran Arrivée (R1 à R4, point tranché n° 8, validé le 19/11)
+- **Une ouverture courte, puis trois étapes** : tunnel qui s'ouvre sur « Bienvenue chez SPLIT · Split t'embauche comme MATCHMAKER » (3,9 s, un clic la passe, absente en mouvement réduit), puis Split · Ton contrat · Tes espoirs, en onglets cochés au passage. Pas de barre latérale ; le bouton jaune de l'en-tête nomme l'étape suivante (« Ton contrat », « Tes espoirs », « Entrer chez Split »). Retour et Avant suivent les étapes.
+- **Split** : bandeau sur le tunnel (SPLIT, Lyon · depuis 2004 ; Ton poste : MATCHMAKER, depuis ce matin) et **quatre cases, un thème chacune**, tirées des autres écrans : place au classement et son point faible (la mesure du classement des huit où Split est le plus mal placé), caisse au 4 janvier (Finances), places vendues en 2026 (une jauge), combats pour un titre en 2026 (12 octogones, pleins = ceinture mise en jeu, vides dessinés en entier). Un libellé sur une ligne, un sous-titre, rien qui déborde.
+- **Le fil « Split en bref »** sous le bandeau, sur toute la largeur, détaché (fond plus clair, trait opaque, étiquette blanche) ; le tunnel s'arrête net au-dessus. Il ne répète rien des cases et **tient en entier quand il ne défile pas** (mouvement réduit) : trois nouvelles au plus.
+- **Dessous** : « Ta première soirée » (date, salle, combat principal, carte, préventes, billet) et « Ton équipe » (Vasseur, Leïla, Marco, Dr Roux, avec leur état).
+- **Ton contrat** fusionne contrat et « Ce qui manque » : à gauche poste, durée, salaire, bilan du 1er juillet, réputation, la phrase du patron ; à droite les objectifs de la saison (aujourd'hui, ce qu'il veut, ce qui manque, encadré à bord jaune).
+- **Tes espoirs : 2 sur 6**, en cartes sans histoire : catégorie et âge, état, prénom « surnom », nom (ouvre la fiche), palmarès, série, rang Split et mondial, art et style, **une particularité** chiffrée, le contrat, Choisir. Le nom choisi vole vers sa case du bandeau. Un troisième choix ou « Suite » à moins de deux est refusé (message et case vide qui tremble). **La fiche s'ouvre par-dessus sans quitter l'étape.**
+- **La fin** : l'Accueil du 4 janvier (cinq messages du jour, dont celui de Leïla qui nomme les deux espoirs, « Tes suivis » = les espoirs choisis) ; Continuer mène au 12 janvier, l'Accueil validé, sans le changer. Le prédécesseur n'apparaît que dans l'histoire de l'organisation.
+- **Mouvement** : tunnel qui respire, reflet, logo qui luit, chiffres qui défilent, visuels qui se posent, fil qui défile (pause au survol), bandeau qui change de hauteur d'une étape à l'autre ; tout s'arrête en mouvement réduit.
+- **Écarts repérés, à aligner** : objectifs de l'Accueil (2e, top 10 / n° 14) et de Ta carrière (4e, top 5) ; message du patron daté du 5 janvier ; « 2 combats placés » (Ta carrière) face à Nana–Mezouar déjà annoncé ; blessure de Rizzo (28 déc. ou « hier ») ; fiche générée de Petrov ; messages du 4 janvier absents de la boîte ; combats pour un titre hors combat principal absents des Résultats.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -376,7 +387,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 
 | Écran | Remarques | À appliquer en priorité |
 |---|---|---|
-| Arrivée | R1 à R4 | Intro façon FM, courte et marquante. « Ton contrat » et « Ce qui manque » fusionnés. **2 espoirs sur 6**, en cartes avec particularité et style, sans histoire. La fiche s'ouvre sans sauter l'étape. Le prédécesseur n'apparaît que dans l'histoire de l'organisation. |
+| Arrivée | R1 à R4 | Validé (section 11, « Écran Arrivée ») : ouverture, Split, Ton contrat, Tes espoirs (2 sur 6), puis l'Accueil du 4 janvier. |
 | Accueil | R5, R6 | Validé (section 10). |
 | Leïla, présentation, face-à-face | R7 à R10 | Leïla à la demande, des confrontations propres à chaque combattant. Le combattant choisi reste visible pendant le choix de l'adversaire. Présentation et face-à-face restent **deux écrans** riches et uniques. Marqueur du meilleur côté. Les trois médias renommés et présentés. Plus de « Peu de combats documentés » trompeur. |
 | Carte, préliminaires | R12, R14 | Section 11, « La carte d'une soirée ». |
