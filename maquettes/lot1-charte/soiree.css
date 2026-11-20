@@ -1,0 +1,430 @@
+/* Maquette lot 1 — La soirée en direct, le discours, les temps forts, le bilan (R36 à R39). Préfixe sd-.
+   Niveau spectaculaire (T3). Mesures en pixels de la scène de 1920 × 1080. Reprend l'affiche validée (classes pz- de presentation.css).
+   Deuxième passe (retours du 20/11) : arène vivante, verdict dévoilé pas à pas, interview au micro, récit minute par minute. */
+
+/* Pendant un combat, son résultat et le discours, la barre s'efface : l'écran entier est à la soirée (comme l'Arrivée). */
+body.sd-mode{--barre:0px}
+body.sd-mode .barre{transform:translateX(-102%)}
+
+.sd{position:relative;height:100%;display:flex;flex-direction:column;gap:14px}
+.sd .relire{margin-left:8px}
+.sd-cols{flex:1;min-height:0;display:flex;gap:15px}
+.sd-cols>.pan>.p2>.p3{padding:20px 24px 18px}
+.sd-lien{color:var(--jaune);font-weight:700;font-size:19px;letter-spacing:.04em;text-transform:uppercase;align-self:flex-start}
+.sd-lien:hover{text-decoration:underline;text-underline-offset:4px}
+.sd .pz-cs .T{font-size:30px}
+.sd .pz-quand{font-size:18px}
+.sd .pz-cs .sous{font-size:18px}
+.sd-ment{font-size:18px}
+.sd-pt{display:inline-block;width:22px;height:22px;flex:none;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.sd-pt.a{background:var(--blanc)}.sd-pt.b{background:var(--rouge-vif)}
+.sd-k{display:inline-block;width:18px;height:18px;flex:none;vertical-align:-2px}
+.sd-k.a{background:var(--blanc)}.sd-k.b{background:#7a7471}
+.sd-lgd{display:inline-flex;align-items:center;gap:10px;font-size:18px;text-transform:none;letter-spacing:0}
+.sd-lgd i{width:1px;height:18px;background:var(--sep)}
+.sd-lgd i.sd-k{width:18px;background:var(--blanc)}.sd-lgd i.sd-k.b{background:#7a7471}
+.sd-fb{flex:1;height:12px;background:#7a7471;position:relative;overflow:hidden}
+.sd-fb i{position:absolute;left:0;top:0;bottom:0;background:var(--blanc);transform-origin:left}
+
+/* ==== La soirée en direct ==== */
+.sd-ls{display:flex;flex-direction:column;flex:1;min-height:0}
+.sd-l{--c:10px;position:relative;isolation:isolate;display:grid;grid-template-columns:38px 196px minmax(0,1fr) auto;align-items:center;column-gap:18px;height:50px;padding:0 12px;border-bottom:2px solid var(--sep);flex:none}
+.sd-l:last-child{border-bottom:0}
+.sd-l.on{border-bottom-color:transparent}
+.sd-l.on::before,.sd-l.on::after{content:"";position:absolute;z-index:-1;pointer-events:none}
+.sd-l.on::before{inset:0;background:rgba(233,230,225,.8)}
+.sd-l.on::after{inset:2px;background:#25201f;--k:calc(var(--c) - .83px);clip-path:polygon(var(--k) 0,calc(100% - var(--k)) 0,100% var(--k),100% calc(100% - var(--k)),calc(100% - var(--k)) 100%,var(--k) 100%,0 calc(100% - var(--k)),0 var(--k))}
+.sd-l-n{width:36px;height:36px;display:grid;place-items:center;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:23px}
+.sd-l-n.or{background:var(--jaune);color:var(--noir)}
+.sd-l.on .sd-l-n{background:var(--blanc);color:var(--noir)}
+.sd-l-r{display:flex;flex-direction:column;line-height:1.08;white-space:nowrap;min-width:0}
+.sd-l-r b{font-size:19px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.sd-l-r span{font-size:18px;color:var(--texte2)}
+.sd-l-f{display:flex;align-items:center;gap:12px;white-space:nowrap;min-width:0}
+.sd-l-f .nom{font-family:var(--titre);font-weight:800;font-size:31px;text-transform:uppercase;line-height:1}
+.sd-l-f .sous{font-size:18px}
+.sd-l-f .marque{width:28px;height:28px;font-size:19px}
+.sd-l.joue .sd-l-r,.sd-l.joue .sd-l-n{opacity:.62}
+.sd-l.joue .sd-l-f .nom+.sous+.nom{color:var(--texte2)}
+.sd-l-m{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;white-space:nowrap}
+.sd-l-m b{font-size:19px;font-weight:700}
+.sd-l-m span{font-size:18px;color:var(--texte2)}
+.sd-l-v{display:flex;gap:6px}
+.sd-l-v button{--c:8px;height:34px;padding:0 12px;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:20px;text-transform:uppercase;white-space:nowrap;color:var(--texte2)}
+.sd-l-v button:hover{background:#353030;color:var(--blanc)}
+.sd-l-v button.ouvert{background:var(--blanc);color:var(--noir)}
+.sd-s-n{display:flex;align-items:baseline;gap:10px}
+.sd-s-n .T{font-size:76px;line-height:.8}
+.sd-s-cap{font-family:var(--titre);font-weight:800;font-size:34px;color:var(--texte2)}
+.sd-s-s{margin-top:4px}
+.sd-plan{width:100%;height:auto;margin:16px 0 10px;display:block}
+.sd-plan rect{fill:rgba(233,230,225,.1);transform-box:fill-box;transform-origin:center}
+.sd-plan rect.on{fill:rgba(233,230,225,.8)}
+.sd-plan-cage{fill:none;stroke:var(--blanc);stroke-width:2.5}
+.sd-plan-sol{fill:#2b2625}
+.sd-amb{margin-top:auto;border-top:2px solid var(--sep);padding-top:14px}
+.sd-amb-l{display:flex;align-items:center;gap:16px;margin:8px 0 6px}
+.sd-amb-l .T{font-size:42px}
+.sd-amb-o{display:flex;gap:6px}
+.sd-amb-o i{width:24px;height:24px;background:var(--ligne)}
+.sd-amb-o i.on{background:var(--blanc)}
+.sd-amb-r{font-size:19px;color:var(--texte2);line-height:1.25}
+
+/* ==== Le temps fort : l'arène en grand (caméra « Plafond » du jeu), le récit par-dessus ==== */
+.sd-fort{display:block}
+.sd-cv{position:absolute;left:-40px;top:-108px;width:1920px;height:1080px;z-index:0;display:block}
+.sd-fort>*:not(.sd-cv){position:absolute;z-index:1}
+.sd-th{left:0;right:0;top:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;height:80px}
+.sd-th-g{display:flex;flex-direction:column;gap:4px;text-shadow:0 2px 10px #000}
+.sd-th-r{font-size:20px;white-space:nowrap}
+.sd-th-d{text-align:right;text-shadow:0 2px 10px #000}
+.sd-tb{--c:12px;background:var(--bord);padding:2px}
+.sd-tb-i{--c:11px;display:flex;align-items:stretch;background:var(--noir);height:74px}
+.sd-tb-c{display:flex;align-items:center;gap:14px;padding:0 24px;white-space:nowrap}
+.sd-tb-c .nom{font-family:var(--titre);font-weight:800;font-size:46px;text-transform:uppercase;line-height:1}
+.sd-tb-b{font-size:20px;color:var(--texte2)}
+.sd-tb-c.b{flex-direction:row-reverse}
+.sd-tb-h{background:var(--blanc);color:var(--noir);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 26px;min-width:150px}
+.sd-tb-h .etiq{color:var(--noir);font-size:16px;line-height:1}
+.sd-tb-h .T{font-size:42px;line-height:.9}
+/* le bandeau du moment, en bas à gauche : quand, quoi, le chiffre du round (retour du 21/11 : lisible d'un coup d'œil) */
+.sd-cap{--c:14px;left:0;bottom:150px;width:620px;background:rgba(13,11,11,.9);padding:16px 22px 16px 28px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 8px 0 0 var(--rouge-vif)}
+.sd-cap-q{font-size:18px}
+.sd-cap-t{font-size:46px;line-height:.92}
+.sd-cap-f{display:flex;align-items:baseline;gap:14px;font-size:22px;white-space:nowrap}
+.sd-cap-f .etiq{font-size:16px}
+.sd-cap-f b{font-family:var(--titre);font-weight:800;font-size:32px;margin:0 6px}
+/* la frise du combat, avec ses flèches : on passe d'un moment à l'autre de gauche à droite */
+.sd-fzp{left:0;right:0;bottom:0}
+.sd-fzp>.p2>.p3{padding:10px 18px 10px;background:rgba(18,16,16,.94)}
+.sd-fzw{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;align-items:center;gap:22px}
+.sd-nav{--c:12px;width:64px;height:64px;display:grid;place-items:center;background:var(--ligne);color:var(--blanc)}
+.sd-nav:hover:not(:disabled){background:var(--blanc);color:var(--noir)}
+.sd-nav:disabled{opacity:.25;cursor:default}
+.sd-fz{position:relative;height:70px}
+.sd-fz-r{position:absolute;left:0;right:0;top:24px;height:40px;display:flex}
+.sd-fz-r>span{width:var(--w);border-left:2px solid var(--sep);background:#1c1818;display:flex;align-items:flex-end;gap:12px;padding:0 10px 6px;position:relative}
+.sd-fz-r>span:first-child{border-left:0}
+.sd-fz-r b{font-size:17px;font-weight:700;letter-spacing:.07em;color:var(--texte2)}
+.sd-fz-r>span.nd{background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(233,230,225,.05) 8px 10px)}
+.sd-fz-r em{font-style:normal;font-size:16px;color:var(--texte2)}
+.sd-fz-stop{position:absolute;top:-6px;bottom:-6px;width:4px;background:var(--blanc);margin-left:-2px}
+.sd-fz-m{position:absolute;top:0;width:52px;height:52px;margin-left:-26px;background:var(--bord);padding:2px;z-index:1}
+.sd-fz-m>span{width:100%;height:100%;display:grid;place-items:center;background:var(--noir);color:var(--blanc)}
+.sd-fz-m.vu>span{color:var(--texte2)}
+.sd-fz-m:hover{background:var(--blanc)}
+.sd-fz-m.on{background:var(--blanc)}.sd-fz-m.on>span{background:var(--blanc);color:var(--noir)}
+.sd-fz-lg{display:flex;gap:22px;justify-content:center;margin-top:6px;font-size:16px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--texte2)}
+.sd-fz-lg>span{display:inline-flex;align-items:center;gap:7px}
+.sd-fz-lgf i{display:inline-block;width:4px;height:18px;background:var(--blanc)}
+
+/* ==== Le résultat : le verdict se dévoile, puis reste (Q36a) ==== */
+.sd-res-e.dec{--d1:.9s;--dv:3.2s}
+.sd-res-e.fin{--d1:.7s;--dv:1.7s}
+.pz-banw.sd-res{height:330px}
+/* le tunnel centré sur le verdict : l'affiche fait ici toute la largeur (1 840 px) et 330 px de haut */
+.sd-res .pz-img{left:-561px;top:-477px}
+.sd-res .pz-hc.sd-perd{opacity:.42;filter:grayscale(1)}
+.sd-vm{width:34px!important;height:34px!important;font-size:24px!important}
+.sd-nc{--c:8px;display:flex;align-items:center;gap:10px;background:rgba(13,11,11,.86);height:42px;padding:0 14px 0 6px;color:var(--jaune);font-weight:700;font-size:20px;letter-spacing:.06em;text-transform:uppercase}
+.sd-res .pz-hc4>span.sd-nc{height:42px;font-size:20px}
+.sd-ver{gap:12px}
+.sd-vjs{display:flex;gap:10px}
+.sd-vj{--c:9px;background:rgba(13,11,11,.9);display:flex;flex-direction:column;align-items:center;padding:6px 16px 7px;min-width:136px;line-height:1.1}
+.sd-vj em{font-style:normal;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:var(--texte2)}
+.sd-vj .T{font-size:34px;line-height:.95}
+.sd-vj span{font-size:18px;font-weight:700}
+.sd-varr{--c:9px;background:rgba(13,11,11,.9);display:flex;flex-direction:column;align-items:center;padding:8px 22px;line-height:1.1}
+.sd-varr .T{font-size:36px}
+.sd-varr span{font-size:20px;font-weight:700}
+.sd-mw{--c:20px;padding:3px;background:var(--rouge-vif)}
+.pz-banw.or .sd-mw{background:var(--jaune)}
+.sd-mr{--c:19px;padding:5px;background:var(--noir)}
+.sd-m{--c:16px;background:var(--blanc);color:var(--noir);display:flex;flex-direction:column;align-items:center;padding:10px 34px 12px;min-width:320px}
+.sd-m-v{font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.sd-m-t{font-size:62px;line-height:.86}
+.sd-m-q{font-size:21px;font-weight:700;margin-top:4px;white-space:nowrap}
+/* la phrase du verdict, en clair (la même que le relevé des Résultats) */
+.sd-phr{--c:12px;flex:none;display:flex;align-items:center;gap:16px;background:#151212;padding:12px 22px;font-size:24px;min-height:62px}
+.sd-phr .marque{width:30px;height:30px;font-size:20px}
+.sd-phr-d{margin-left:auto;white-space:nowrap}
+/* les cartes des juges */
+.sd-sc{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sd-sc-c{--c:12px;background:#1b1717;display:flex;flex-direction:column;padding:0 0 12px}
+.sd-sc-h{background:var(--blanc);color:var(--noir);font-weight:700;font-size:18px;padding:7px 14px;letter-spacing:.02em;white-space:nowrap}
+.sd-sc-r{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 14px 6px;border-bottom:2px solid var(--sep);font-size:20px}
+.sd-sc-r>span{font-family:var(--titre);font-weight:800;font-size:20px;color:var(--texte2)}
+.sd-sc-r b.g,.sd-sc-t b.g{font-weight:700}
+.sd-sc-r b.p,.sd-sc-t b.p{font-weight:600;color:var(--texte2)}
+.sd-sc-r em{font-style:normal;font-size:18px;color:var(--texte2)}
+.sd-sc-t{display:flex;flex-direction:column;padding:10px 14px 0;gap:2px}
+.sd-sc-t .T{font-size:40px;line-height:.9}
+.sd-sc-t b{font-size:19px}
+.sd-j-p{margin-top:16px;font-size:20px;color:var(--texte2)}
+/* le combat en chiffres : les deux côte à côte, le meilleur en blanc avec son point */
+.sd-cps{display:flex;flex-direction:column;gap:2px}
+.sd-cp{display:grid;grid-template-columns:96px minmax(0,1fr) 190px minmax(0,1fr) 96px;align-items:center;column-gap:10px;height:37px;border-bottom:2px solid var(--sep)}
+.sd-cp-h{height:30px}
+.sd-cp-h .sd-cp-v{font-family:var(--texte);font-size:19px;font-weight:700}
+.sd-cp-v{display:flex;align-items:center;gap:8px;font-family:var(--titre);font-weight:800;font-size:28px;color:var(--texte2);white-space:nowrap}
+.sd-cp-v.d{justify-content:flex-end}
+.sd-cp-v.w{color:var(--blanc)}
+.sd-cp-l{text-align:center;font-size:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--texte2);white-space:nowrap}
+.sd-cp-b{height:10px;background:var(--ligne);position:relative;overflow:hidden}
+.sd-cp-b i{position:absolute;top:0;bottom:0;background:var(--blanc)}
+.sd-cp-b.g i{right:0;transform-origin:right}.sd-cp-b.d i{left:0;transform-origin:left;background:#9a9490}
+.sd-ros{margin-top:auto;padding-top:10px}
+.sd-ros .etiq{font-size:17px}
+.sd-ros-l{display:flex;gap:10px;margin-top:8px}
+.sd-ro{--c:10px;flex:1;background:#1b1717;padding:6px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.sd-ro .etiq{font-size:16px}
+.sd-ro .T{font-size:28px}
+.sd-ro .sous{font-size:18px}
+.sd-dur{margin-top:auto;padding-top:10px;display:flex;align-items:center;gap:8px;font-size:18px}
+/* ce que ça change */
+.sd-ch{padding:12px 0 14px;border-bottom:2px solid var(--sep);display:flex;flex-direction:column;gap:10px}
+.sd-ch:last-child{border-bottom:0}
+.sd-ch-n{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:700}
+.sd-ch-n .marque{width:28px;height:28px;font-size:19px}
+.sd-ch-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sd-ch-c{--c:10px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));background:#1b1717;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:76px}
+.sd-ch-c .etiq{font-size:15px;white-space:nowrap}
+.sd-ch-c .marque{width:22px!important;height:22px!important;font-size:16px!important}
+.sd-ch-v{font-family:var(--titre);font-weight:800;font-size:26px;white-space:nowrap;color:var(--texte2)}
+.sd-ch-v b{color:var(--blanc)}
+.sd-ch-m{color:var(--neg);font-weight:700;font-size:19px;display:flex;align-items:center;gap:8px}
+
+/* ==== Le discours : le grand moment où l'on écoute le vainqueur (refait le 21/11) ==== */
+.sd-dv{--c:18px;height:270px;flex:none;padding:2px;background:rgba(226,58,43,.8)}
+.sd-dv.or{background:rgba(240,178,32,.75)}
+.sd-dv-i{--c:17px;position:relative;isolation:isolate;overflow:hidden;height:100%;background:var(--noir);display:flex;align-items:center;justify-content:space-between;padding:0 40px}
+.sd-dv-img{position:absolute;left:-481px;top:-507px;width:2304px;height:1296px;background:url('../../images/accueil-octogones.jpg') 0 0/2304px 1296px no-repeat;z-index:-3}
+.sd-dv.or .sd-dv-img{background-image:url('../../images/tunnel-or.jpg')}
+.sd-dv-i::after{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(13,11,11,.95) 0,rgba(13,11,11,.72) 34%,rgba(13,11,11,.12) 52%,rgba(13,11,11,.55) 66%,rgba(13,11,11,.93) 100%)}
+/* le projecteur sur le vainqueur */
+.sd-dv-spot{position:absolute;left:-160px;top:-330px;width:960px;height:960px;z-index:-1;pointer-events:none;background:radial-gradient(circle,rgba(255,240,215,.17),rgba(255,240,215,0) 60%)}
+.sd-dv-g{display:flex;flex-direction:column;position:relative}
+.sd-dv-h{display:flex;align-items:center;gap:16px}
+.sd-dp{--c:8px;display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;background:var(--blanc);color:var(--noir);font-weight:700;font-size:19px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.sd-dp .rang-c.af-cc{width:28px;height:28px;padding:2px}.sd-dp .rang-c.af-cc b{font-size:18px}
+.sd-dc{font-size:22px}
+.sd-dpre{font-size:30px;font-weight:700;margin-top:14px}
+.sd-dn{line-height:.84;white-space:nowrap;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.sd-dbt{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:24px;white-space:nowrap}
+.sd-dbt .marque{width:28px;height:28px;font-size:19px}
+.sd-dv-r{display:flex;flex-direction:column;align-items:flex-end;gap:16px;text-align:right}
+.sd-live{--c:7px;display:inline-flex;align-items:center;gap:10px;background:var(--blanc);color:var(--noir);padding:5px 14px;font-weight:700;font-size:17px;letter-spacing:.1em;text-transform:uppercase}
+.sd-live i{width:11px;height:11px;background:var(--rouge-vif);border-radius:50%}
+.sd-dv-big{display:flex;align-items:center;gap:18px}
+.sd-dv-big .T{display:block;font-size:66px;line-height:.88;text-shadow:0 4px 20px rgba(0,0,0,.7)}
+.sd-dv-s{display:block;font-size:24px;font-weight:600;margin-top:6px}
+.sd-dv-amb{display:flex;align-items:center;gap:12px}
+.sd-dv-amb .T{font-size:32px}
+.sd-dv-amb .sd-amb-o i{width:20px;height:20px}
+/* l'interview, qui se déroule */
+.sd-mic>.p2>.p3{padding:20px 30px 16px 34px}
+.sd-mic .pt .ment{display:flex;align-items:center;gap:6px}
+.sd-passer{margin-left:22px;color:var(--jaune);font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase}
+.sd-passer:hover{text-decoration:underline;text-underline-offset:4px}
+.sd-echs{display:flex;flex-direction:column;gap:22px}
+.sd-ech{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr);column-gap:18px}
+.sd-ech::before{content:"";position:absolute;left:-20px;top:0;bottom:0;width:5px;background:var(--blanc);opacity:0}
+.sd-ech-n{width:40px;height:40px;display:grid;place-items:center;background:var(--ligne);font-family:var(--titre);font-weight:800;font-size:24px}
+.sd-q{font-size:22px;line-height:1.3;color:var(--texte2)}
+.sd-who{font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--texte2);margin-right:12px;white-space:nowrap}
+.sd-q .sd-who::before{content:"";display:inline-block;width:10px;height:10px;background:var(--texte2);margin-right:8px;vertical-align:1px}
+.sd-r-h{display:flex;align-items:center;gap:14px;margin-top:8px;min-height:30px}
+.sd-who.b{color:var(--blanc);margin:0;font-size:17px}
+.sd-who .nom{text-decoration-thickness:1px}
+.sd-voix{display:inline-flex;align-items:center;gap:3px;height:24px}
+.sd-voix i{width:4px;height:6px;background:var(--blanc);opacity:.45}
+.sd-reac{display:inline-flex;align-items:center;gap:8px;font-size:19px;color:var(--texte2);margin-left:auto;white-space:nowrap}
+.sd-r-tag{--c:7px;background:var(--blanc);color:var(--noir);font-weight:700;font-size:17px;letter-spacing:.05em;text-transform:uppercase;padding:4px 12px;white-space:nowrap}
+.sd-r-tag .nom{text-decoration-color:rgba(13,11,11,.5)}
+.sd-r-t{margin:4px 0 0;font-size:27px;line-height:1.3;font-weight:600}
+.sd-w{display:inline-block}
+/* à droite : ce qu'il gagne, ce qui en reste, le défi */
+.sd-dr{width:560px;flex:none;display:flex;flex-direction:column;gap:14px}
+.sd-gc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sd-gc>div{--c:10px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));background:#1b1717;padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-height:96px}
+.sd-gc .etiq{font-size:15px;white-space:nowrap}
+.sd-gc .marque{width:24px!important;height:24px!important;font-size:16px!important}
+.sd-gc-v{font-family:var(--titre);font-weight:800;font-size:28px;white-space:nowrap;color:var(--texte2)}
+.sd-gc-v b{color:var(--blanc)}
+.sd-reste-t{font-size:16px;margin-top:16px}
+.sd-reste{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.sd-reste li{font-size:20px;line-height:1.3;padding-left:20px;position:relative}
+.sd-reste li::before{content:"";position:absolute;left:0;top:.5em;width:9px;height:9px;background:var(--texte2)}
+.sd-dd1{flex:1}
+.sd-combat-t{font-size:17px;margin-bottom:12px}
+.sd-dr-ro{display:flex;gap:8px;margin-top:8px}
+.sd-dro{--c:9px;flex:1;min-width:0;background:#1b1717;height:46px;padding:0 12px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.sd-dro .etiq{font-size:15px}.sd-dro .T{font-size:26px;color:var(--texte2)}.sd-dro .T b{font-weight:800}.sd-dro .T b.w{color:var(--blanc)}.sd-dro .sous{font-size:18px;overflow:hidden;text-overflow:ellipsis}
+.sd-gc .sous{font-size:18px;white-space:nowrap}
+.sd-dd1>.p2>.p3{padding:0 0 14px}
+.sd-dd-ban{--c:14px;position:relative;isolation:isolate;overflow:hidden;height:166px;flex:none}
+.sd-dd-img{position:absolute;left:-760px;top:-500px;width:2304px;height:1296px;background:url('../../images/tunnel-or.jpg') 0 0/2304px 1296px no-repeat;z-index:-2;filter:brightness(.8)}
+.sd-dd-ban::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(13,11,11,.9),rgba(13,11,11,.45))}
+.sd-dd-in{padding:14px 22px;display:flex;flex-direction:column;gap:4px}
+.sd-dd-in .etiq{font-size:16px}
+.sd-dd-h{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600}
+.sd-dd-n{font-size:60px;line-height:.86}
+.sd-dd-l{display:flex;align-items:center;gap:12px}
+.sd-dd-l>.T{font-size:28px}
+.sd-dd-l .marque{width:24px!important;height:24px!important;font-size:16px!important}
+.sd-dd-x{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font-size:20px;padding:8px 22px 0}
+.sd-dd-x .etiq{font-size:16px;white-space:nowrap}
+.sd-dd-x>span:last-child{text-align:right}
+.sd-de{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:20px}
+.sd-de.neg{color:var(--neg)}.sd-de.ok{color:var(--vert)}
+
+/* ==== Le bilan de fin de soirée (R39) ==== */
+.sd-bb{--c:18px;height:204px;flex:none;padding:2px;background:rgba(226,58,43,.8)}
+.sd-bb.or{background:rgba(240,178,32,.75)}
+.sd-bb-i{--c:17px;position:relative;isolation:isolate;overflow:hidden;height:100%;background:var(--noir);display:flex;align-items:center;gap:12px;padding-right:22px}
+/* retour du 20/11 (« c'est sombre derrière Split Fight Night ») : le tunnel est visible derrière le titre */
+.sd-bb-img{position:absolute;left:-1000px;top:-560px;width:2304px;height:1296px;background:url('../../images/tunnel-or.jpg') 0 0/2304px 1296px no-repeat;z-index:-2}
+.sd-bb-i::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(13,11,11,.35) 0,rgba(13,11,11,.18) 30%,rgba(13,11,11,.25) 60%,rgba(13,11,11,.4))}
+.sd-bb-g{width:470px;flex:none;padding-left:36px;text-shadow:0 3px 18px rgba(0,0,0,.85)}
+.sd-bb-t{font-size:66px;line-height:.86}
+.sd-bb-l{font-size:22px;margin-top:10px;font-weight:600}
+.sd-bc{--c:12px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));background:rgba(13,11,11,.86);flex:1;min-width:0;height:156px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.sd-bc .etiq{font-size:17px;white-space:nowrap}
+.sd-bc>.T{font-size:46px;line-height:.9;white-space:nowrap}
+.sd-bc .sous{font-size:18px;line-height:1.2}
+.sd-bc .relire{margin-left:4px}
+.sd-lg{display:flex;align-items:center;gap:8px;font-size:18px;text-transform:none;letter-spacing:0}
+.sd-lg i{width:1px;height:18px;background:var(--sep);margin:0 6px}
+.sd-vs{display:flex;flex-direction:column}
+.sd-v{display:grid;grid-template-columns:30px minmax(0,1fr) 196px 64px 104px;align-items:center;column-gap:14px;height:52px;border-bottom:2px solid var(--sep)}
+.sd-v.sep{border-top:2px solid var(--bord);margin-top:8px}
+.sd-v .marque{width:28px;height:28px;font-size:19px}
+.sd-v-n{display:flex;flex-direction:column;line-height:1.08;white-space:nowrap;min-width:0}
+.sd-v-n>.nom{font-size:22px;font-weight:700;align-self:flex-start}
+.sd-v-n .sous{font-size:18px}
+.sd-v-m{display:flex;flex-direction:column;line-height:1.08;white-space:nowrap}
+.sd-v-m b{font-size:19px}.sd-v-m span{font-size:18px;color:var(--texte2)}
+.sd-v-mv .rs-mv{font-size:19px}
+.sd-v-r{display:flex;gap:8px;justify-content:flex-end}
+.sd-ic{--c:9px;width:46px;height:42px;display:grid;place-items:center;background:var(--ligne)}
+.sd-ic:hover{background:#3a3434}
+.sd-tout{margin-top:auto;padding-top:12px}
+.sd-pb{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;column-gap:14px;padding:13px 0;border-bottom:2px solid var(--sep)}
+.sd-pb-t{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sd-pb-n{font-size:19px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sd-pb-q{font-size:19px;line-height:1.25}
+.sd-pb-v{font-size:34px;white-space:nowrap}
+.sd-pt-t{display:flex;align-items:baseline;gap:14px;margin-top:16px}
+.sd-pt-t .T{font-size:44px}
+.sd-pt-d{margin-top:12px;font-size:19px;line-height:1.3}
+.sd-dt{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:5px;font-size:19px;margin-bottom:9px}
+.sd-dt b{font-size:20px;white-space:nowrap}
+.sd-dt .jauge{grid-column:1/-1;height:6px}
+.sd-dt-h{font-size:17px;margin:4px 0 8px}
+.sd-det .sd-lien{margin-top:auto}
+/* par-dessus le bilan : le récit */
+.sd-over{position:absolute;left:0;right:0;top:218px;bottom:0;z-index:3;animation:apparait .3s both}
+.sd-bilan:has(.sd-over) .sd-cols{opacity:.12;filter:blur(2px);pointer-events:none}
+.sd-rc-s{display:flex;align-items:center;gap:12px;font-size:21px;margin:-6px 0 12px}
+.sd-rc-s .marque{width:26px;height:26px;font-size:18px}
+.sd-mn-h{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.sd-mn-h .etiq{font-size:17px}
+.sd-mn{width:100%;height:auto;display:block;margin:6px 0 10px}
+.sd-mn rect{fill:#171414}.sd-mn rect.imp{fill:#1c1818}.sd-mn rect.nd{fill:#121010;opacity:.6}
+.sd-mn rect.a{fill:var(--blanc);transform-box:fill-box;transform-origin:bottom}
+.sd-mn rect.b{fill:#7a7471;transform-box:fill-box;transform-origin:top}
+.sd-mn-ax{stroke:rgba(233,230,225,.35);stroke-width:2}
+.sd-mn-fin{stroke:var(--blanc);stroke-width:4}
+.sd-mn-r{font-family:var(--texte);font-size:17px;font-weight:700;fill:var(--texte2);letter-spacing:.06em}
+.sd-mn-m polygon{fill:var(--noir);stroke:var(--blanc);stroke-width:3}
+.sd-mn-i{fill:none;stroke:var(--blanc);stroke-width:2.4;stroke-linecap:square}
+.sd-rc-cs{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:12px;flex:1;min-height:0}
+.sd-rc-c{--c:12px;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));background:rgba(233,230,225,.045);padding:12px 16px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.sd-rc-h{display:flex;justify-content:space-between;align-items:center}
+.sd-rc-h .T{font-size:30px}
+.sd-rc-js{display:flex;gap:5px}
+.sd-rc-js i{width:18px;height:18px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.sd-rc-js i.a{background:var(--blanc)}.sd-rc-js i.b{background:#7a7471}.sd-rc-js i.nn{background:transparent;box-shadow:inset 0 0 0 2px var(--sep)}
+.sd-rc-f{display:flex;align-items:center;gap:12px}
+.sd-rc-f .T{font-size:28px}
+.sd-rc-m{display:flex;gap:10px;align-items:flex-start;border-top:2px solid var(--sep);padding-top:8px}
+.sd-rc-m b{font-size:19px}
+.sd-rc-m p{margin:3px 0 0;font-size:19px;line-height:1.28;color:var(--texte2)}
+.sd-rc-m.vide{display:block;font-size:19px;color:var(--texte2)}
+.sd-rc-n{width:30px;height:30px;flex:none;display:grid;place-items:center;background:var(--blanc);color:var(--noir);font-family:var(--titre);font-weight:800;font-size:19px}
+.sd-rc-lg{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:18px}
+
+/* ==== Mouvement : spectaculaire pour la soirée (T3), tout s'arrête en mouvement réduit ==== */
+.sd.anim .sd-l,.sd.anim .sd-v,.sd.anim .sd-pb{animation:sd-entre .5s calc(.25s + var(--i,0) * .05s) cubic-bezier(.2,.8,.2,1) both}
+@keyframes sd-entre{from{opacity:0;transform:translateX(-26px)}}
+@keyframes sd-pop{from{transform:scale(0);opacity:0}}
+@keyframes sd-monte{from{transform:translateY(22px);opacity:0}}
+@keyframes sd-fond{from{opacity:0}}
+.sd.anim .sd-plan rect.on{animation:sd-pop .45s calc(.4s + var(--d)) cubic-bezier(.3,1.5,.5,1) both}
+.sd.anim .sd-amb-o i.on{animation:sd-pop .4s calc(.6s + var(--k) * .09s) cubic-bezier(.3,1.5,.5,1) both}
+.sd-amb-o i.on:not(:has(~ .on)){animation:sd-bat 1.6s 1.4s ease-in-out infinite}
+@keyframes sd-bat{50%{transform:scale(1.18);opacity:.8}}
+.sd-l.on .sd-l-n{animation:sd-bat 1.6s ease-in-out infinite}
+/* temps fort : le récit et les faits arrivent, la frise se pose */
+.sd.anim .sd-fz-m{animation:sd-pop .4s calc(.3s + var(--i,0) * .08s) both}
+/* résultat : ce qui s'est passé, les cartes une à une, puis le vainqueur ; le perdant s'éteint ensuite */
+.sd-res-e.anim .pz-hc{animation:none}
+.sd-res-e.anim .sd-v0{animation:sd-fond .5s .2s both}
+.sd-res-e.anim .sd-vj{animation:sd-monte .5s calc(var(--d1) + var(--q) * .75s) cubic-bezier(.2,.8,.2,1) both}
+.sd-res-e.anim .sd-varr{animation:sd-monte .5s var(--d1) cubic-bezier(.2,.8,.2,1) both}
+.sd-res-e.anim .sd-mw{animation:sd-verdict .7s var(--dv) cubic-bezier(.2,.8,.2,1) both}
+@keyframes sd-verdict{from{opacity:0;transform:translateY(16px) scale(.94)}}
+.sd-res-e.anim .pz-flash{animation:pz-flash .9s calc(var(--dv) + .1s) ease-out both}
+.sd-res-e.anim .pz-hc.sd-perd{animation:sd-gris .9s calc(var(--dv) + .4s) both}
+@keyframes sd-gris{from{opacity:1;filter:none}}
+.sd-res-e.anim .sd-vm,.sd-res-e.anim .sd-nc{animation:sd-pop .5s calc(var(--dv) + .5s) cubic-bezier(.3,1.5,.5,1) both}
+.sd-res-e.anim .sd-phr{animation:sd-monte .6s calc(var(--dv) + .7s) cubic-bezier(.2,.8,.2,1) both}
+.sd-res-e.anim .sd-cols>.pan{animation:sd-monte .6s calc(var(--dv) + 1s) cubic-bezier(.2,.8,.2,1) both}
+.sd-res-e.anim .sd-cols>.pan+.pan{animation-delay:calc(var(--dv) + 1.12s)}
+.sd-res-e.anim .sd-cols>.pan+.pan+.pan{animation-delay:calc(var(--dv) + 1.24s)}
+.sd-res-e.anim .sd-cp-b i{animation:remplit .9s calc(var(--dv) + 1.3s + var(--i,0) * .06s) cubic-bezier(.2,.8,.2,1) both}
+/* discours : le tunnel avance, le projecteur respire, le nom arrive ; chaque réponse s'écrit pendant que la voix bouge,
+   un trait blanc marque celui qui parle, la salle réagit ; « Tout afficher › » montre tout d'un coup */
+.sd.anim .sd-dv-img{animation:pz-tunnel 1.5s cubic-bezier(.2,.8,.2,1) both}
+.sd-dv-spot{animation:sd-spot 4s ease-in-out infinite}
+@keyframes sd-spot{50%{opacity:.55;transform:scale(1.06)}}
+.sd-live i{animation:sd-bat 1.2s ease-in-out infinite}
+.sd.anim .pz-reflet{animation:pz-reflet 2.4s .6s ease-in-out both}
+.sd.anim .sd-dn{animation:pz-coinA .8s .15s cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-dpre,.sd.anim .sd-dbt,.sd.anim .sd-dv-h{animation:pz-coinA .7s .3s cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-dv-r>*{animation:pz-coinB .7s calc(.35s + var(--i,0) * .15s) cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-dv-c{animation:sd-pop .6s 1s cubic-bezier(.3,1.5,.5,1) both}
+.sd.anim .sd-ech{animation:sd-entre .45s var(--t) cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-ech::before{animation:sd-actif var(--tn) var(--t) linear}
+.sd.anim .sd-ech-n{animation:sd-actifn var(--tn) var(--t) linear}
+@keyframes sd-actif{0%,100%{opacity:0}6%,94%{opacity:1}}
+@keyframes sd-actifn{0%,100%{background:var(--ligne);color:var(--blanc)}6%,94%{background:var(--blanc);color:var(--noir)}}
+.sd.anim .sd-w{animation:sd-mot .3s var(--d) ease-out both}
+@keyframes sd-mot{from{opacity:0;transform:translateY(6px)}}
+.sd.anim .sd-voix i{animation:sd-voix .4s var(--d0) var(--n) ease-in-out}
+.sd.anim .sd-voix i:nth-child(2){animation-delay:calc(var(--d0) + .1s)}
+.sd.anim .sd-voix i:nth-child(3){animation-delay:calc(var(--d0) + .2s)}
+.sd.anim .sd-voix i:nth-child(4){animation-delay:calc(var(--d0) + .05s)}
+.sd.anim .sd-voix i:nth-child(5){animation-delay:calc(var(--d0) + .15s)}
+@keyframes sd-voix{50%{height:24px;opacity:1}}
+.sd.anim .sd-tard{animation:sd-pop .45s var(--d) cubic-bezier(.3,1.5,.5,1) both}
+.sd.anim .sd-passer{animation:sd-cache .01s var(--fin) forwards}
+@keyframes sd-cache{to{opacity:0;visibility:hidden}}
+.sd .sd-mic.tout *,.sd .sd-mic.tout *::before{animation:none!important}
+.sd .sd-mic.tout .sd-passer{visibility:hidden}
+.sd.anim .sd-dr>.pan{animation:pz-coinB .7s .6s cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-dr>.pan+.pan{animation-delay:.75s}
+.sd.anim .sd-dd-img{animation:pz-tunnel 1.5s .7s cubic-bezier(.2,.8,.2,1) both}
+/* bilan et récit */
+.sd.anim .sd-bb-img{animation:pz-tunnel 1.5s cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-bb .sd-bc{animation:sd-monte .6s calc(.3s + var(--i) * .1s) cubic-bezier(.2,.8,.2,1) both}
+.sd.anim .sd-pb .m8{animation:sd-pop .5s calc(.6s + var(--i,0) * .12s) cubic-bezier(.3,1.5,.5,1) both}
+.sd.anim .sd-mn rect.a,.sd.anim .sd-mn rect.b{animation:sd-barre .5s calc(.3s + var(--i,0) * .03s) cubic-bezier(.2,.8,.2,1) both}
+@keyframes sd-barre{from{transform:scaleY(0)}}
+.sd.anim .sd-rc-c{animation:sd-monte .5s calc(.6s + var(--i) * .1s) both}
+@media (prefers-reduced-motion:reduce){
+  .sd *,.sd *::before,.sd *::after{animation:none!important;transition:none!important}
+  .sd .pz-reflet,.sd .pz-flash{display:none}
+  body.sd-mode .barre,.barre{transition:none!important}
+}
+.sd.anim .sd-cap{animation:pz-coinA .6s .3s cubic-bezier(.2,.8,.2,1) both}
