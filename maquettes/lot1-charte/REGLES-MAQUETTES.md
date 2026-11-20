@@ -343,6 +343,15 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Mouvement** : tunnel qui respire, reflet, logo qui luit, chiffres qui défilent, visuels qui se posent, fil qui défile (pause au survol), bandeau qui change de hauteur d'une étape à l'autre ; tout s'arrête en mouvement réduit.
 - **Écarts repérés, à aligner** : objectifs de l'Accueil (2e, top 10 / n° 14) et de Ta carrière (4e, top 5) ; message du patron daté du 5 janvier ; « 2 combats placés » (Ta carrière) face à Nana–Mezouar déjà annoncé ; blessure de Rizzo (28 déc. ou « hier ») ; fiche générée de Petrov ; messages du 4 janvier absents de la boîte ; combats pour un titre hors combat principal absents des Résultats.
 
+### Présentation et face-à-face (R10, Q10a à Q10c, validé le 20/11)
+- **Deux écrans d'un même combat**, ouverts par les boutons Présentation et Face-à-face du combat ouvert sur la Carte ; onglets Présentation · Face-à-face sous l'en-tête, plaque « Carte ». À droite : la place du combat (« Co-principal · 16 févr. · Forum de Lille ») ou « Placer sur la carte » pour une paire pas encore placée. Retour et Avant suivent chaque pas.
+- **Pas d'écran à part pour les dossiers de Leïla** (retiré le 20/11) : la Carte validée garde son encadré.
+- **L'affiche**, commune aux deux : le tunnel du jeu **centré sur le VS**, doré pour une ceinture ; **contour de l'affiche et du VS doré pour un titre, rouge sinon**. Prénom « surnom » et rang, nom en très grand, palmarès et série, trois cases : mondial, âge, art (présentation) ou mondial, taille, allonge (face-à-face). Au milieu : date et salle, VS, catégorie et rounds. À l'ouverture : tunnel qui avance, combattants qui entrent de leur coin, VS qui tombe avec un éclair, reflet.
+- **Présentation, trois cadres** : **l'enjeu** (titre du combat, la phrase de la Carte, leur histoire en frise datée, ce qui fait le combat, trois cases : classement ou ceinture, déjà affrontés, bourses ou demande ; il tient sans défilement) ; **victoires et défaites**, centrées, en papillon (% avant la limite en grand, puis KO, TKO · Soumission · Décision pour les victoires en vert comme pour les défaites en rouge ; l'arrêt du médecin compte en TKO) ; **la presse** : les trois médias présentés, chacun avec sa couleur d'identité (décor), son pronostic pour un combat annoncé, ce qu'il a écrit sur eux sinon.
+- **Face-à-face** : les chiffres comme la première version : la valeur, sa barre vers l'extérieur avec le **repère blanc de la moyenne de la catégorie**, la mesure au milieu ; **le meilleur des deux en blanc avec un point jaune** (variante : la valeur en vert, Q10b), légende dans le titre. Pas de « sur 22 et 16 combats », pas de phrase sous le tableau, pas de gabarit. À droite : leurs trois derniers combats et leurs adversaires communs.
+- **Données** : historiques et statistiques de la fiche, carte du 16 février, articles et défis de la Presse. Les historiques des hommes sont rendus cohérents entre fiches (un combat contre un combattant de Split figure dans les deux fiches, à la même date) ; à reprendre dans `fiche.js` (T8).
+- **Ouvert** : les noms des médias (Q10c) ; les couleurs des médias (bleu, blanc, violet) sont une proposition ; R7 à R9 (dossiers de Leïla) restent à traiter dans la Carte.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -389,7 +398,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 |---|---|---|
 | Arrivée | R1 à R4 | Validé (section 11, « Écran Arrivée ») : ouverture, Split, Ton contrat, Tes espoirs (2 sur 6), puis l'Accueil du 4 janvier. |
 | Accueil | R5, R6 | Validé (section 10). |
-| Leïla, présentation, face-à-face | R7 à R10 | Leïla à la demande, des confrontations propres à chaque combattant. Le combattant choisi reste visible pendant le choix de l'adversaire. Présentation et face-à-face restent **deux écrans** riches et uniques. Marqueur du meilleur côté. Les trois médias renommés et présentés. Plus de « Peu de combats documentés » trompeur. |
+| Leïla, présentation, face-à-face | R7 à R10 | Présentation et face-à-face validés (section 11, « Présentation et face-à-face ») : l'affiche au tunnel centré sur le VS, l'enjeu, victoires et défaites, la presse ; les chiffres avec le point du meilleur. Dossiers de Leïla (R7 à R9) : l'encadré de la Carte, le reste à traiter dans la Carte. Médias à renommer (Q10c). |
 | Carte, préliminaires | R12, R14 | Section 11, « La carte d'une soirée ». |
 | Messages | R13, R17 | Section 11, « Écran Messages » et « Continuer ». |
 | Effectif, Infirmerie | R15, Q12b | Section 11, « Grands tableaux ». **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
@@ -421,7 +430,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
 | Écran Ceintures | Gardé, en onglet des Classements (validé le 18/11) | Point tranché n° 2 |
 | Nom des soirées | « Split Fight Night 63 » comme dans le jeu ; le plan prévoit « Split : X vs Y » pour les fight nights et « Split 1 » pour les grandes soirées | Q21c, Q29a |
-| Meilleur côté dans une comparaison | Un point jaune devant la valeur, ou la valeur en vert | Q10b |
+| Meilleur côté dans une comparaison | Un point jaune devant la valeur (validé le 20/11 sur le face-à-face) ; la valeur en vert reste en variante | Q10b |
 | Surnoms affichés | Sous le nom dans les listes, à côté du prénom dans la bannière. La liste des écrans concernés reste à valider | T11 |
 | Noms des trois médias | Cage Hebdo, Tableau Noir, Le Forum (à renommer) | Q10c |
 | Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur · Rapports ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
