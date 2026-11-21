@@ -617,12 +617,11 @@ function sdBenef(){
   const out=[];SD_ORDRE.forEach(k=>{const f=sdF(k);for(const s of ['a','b'])for(const p of ((f.d.pr||{})[s]||[]))out.push({c:sdCote(f,s),p,f});});
   return out;
 }
-const sdTotal=()=>sdBenef().reduce((t,b)=>t+PRIMES_ORGA[b.p],0);
-/** Proposition (à valider) : un combattant trouve sa prime basse quand ce qu'il touche en primes ce soir est sous sa bourse
-    (plafonnée à 30 000 €) ; si la soirée perd de l'argent, il en accepte la moitié. Les montants se fixent dans les Finances. */
+const sdTotal=()=>sdBenef().reduce((t,b)=>t+primeDe(b.p,63),0);
+/** La règle commune (primeBasse, fiche2.js) : elle tient compte de ce que la soirée a rapporté (R39). Les montants se fixent dans les Finances. */
 function sdPlainte(c,reste){
-  const tot=sdBenef().filter(b=>b.c===c).reduce((t,b)=>t+PRIMES_ORGA[b.p],0),seuil=Math.min(afBourse(sdAv(c)),30000)*(reste<0?.5:1);
-  return tot<seuil;
+  const l=sdBenef().filter(b=>b.c===c),tot=l.reduce((t,b)=>t+primeDe(b.p,63),0);
+  return primeBasse(tot,fiBourse(c,l.some(b=>b.f.k==='m0')),reste+sdTotal(),reste);
 }
 function sdChiffres(){const o=fiSoiree(63),primes=sdTotal(),dep=o.dep.fixe+o.dep.vict+primes+o.dep.salle;return {o,primes,dep,reste:o.recette-dep};}
 function sdBilan(){
@@ -645,11 +644,11 @@ function sdBilan(){
     `<div class="sd-vs">${[...SD_ORDRE].reverse().map(ligne).join('')}</div><button class="sd-lien sd-tout" data-sdtout="1">Tous les résultats ›</button>`,'flex:1','sd-vq');
   const ben=sdBenef();
   const prime=(p,i)=>{const l=ben.filter(b=>b.p===p);
-    return `<div class="sd-pb" style="--i:${i}">${medaille(p,40)}<div class="sd-pb-t"><span class="sd-pb-n">${esc(PERF_TYPES.find(y=>y[0]===p)[1])}</span>
-      <span class="sd-pb-q">${l.map(b=>sdN(b.c)).join(', ')}</span></div><span class="T sd-pb-v">${nb(PRIMES_ORGA[p])} €</span></div>`;};
+    return `<div class="sd-pb" style="--i:${i}">${medaille(p,40,63)}<div class="sd-pb-t"><span class="sd-pb-n">${esc(PERF_TYPES.find(y=>y[0]===p)[1])}</span>
+      <span class="sd-pb-q">${l.map(b=>sdN(b.c)).join(', ')}</span></div><span class="T sd-pb-v">${nb(primeDe(p,63))} €</span></div>`;};
   const plaintes=[...new Set(ben.map(b=>b.c))].filter(c=>sdPlainte(c,x.reste));
   /* Retour du 20/11 : les montants se fixent dans les Finances, avant ou après une soirée, pas au bilan. */
-  const primes=pan(titre('Les primes',`<button data-go="finances">Montants : Finances ›</button>`)+`${['soiree','perf','fin'].map(prime).join('')}
+  const primes=pan(titre('Les primes',`<button data-pmouvrir>Montants : Finances ›</button>`)+`${['soiree','perf','fin'].map(prime).join('')}
     <div class="sd-pt-t"><span class="etiq">Ce soir</span><span class="T">${nb(x.primes)} €</span><span class="sous">${ben.length} primes</span></div>
     <div class="sd-pt-d">${plaintes.length?`<span class="cl-down">▼</span> ${plaintes.map(sdN).join(', ')} ${plaintes.length>1?'trouvent leur':'trouve sa'} prime basse`:`<span class="cl-up">●</span> Personne ne se plaint de sa prime`}</div>`,'width:440px;flex:none','sd-pr');
   const l=(t,v,max,neg)=>`<div class="sd-dt"><span>${t}</span><b>${neg?'− ':''}${nb(v)} €</b><span class="jauge"><i style="width:${v/max*100}%;background:${neg?'var(--texte2)':'var(--blanc)'}"></i></span></div>`;

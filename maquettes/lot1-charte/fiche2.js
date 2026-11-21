@@ -247,7 +247,7 @@ function combatsHtml(c){
       <div class="cb-c"><span class="cb-nom">${lien(adv)}${badge(f)}</span><span class="sous">${adv.surnom?`« ${esc(adv.surnom)} » · `:''}Bilan ${bilanAdv(f)}${rv?` · <span class="cb-rv">${rv}</span>`:''}</span></div>
       <div class="cb-c"><b>${methL1}</b><span class="sous">${methL2}</span></div>
       <div class="cb-c"><span>${esc(f.soiree)}</span><span class="sous">${ti?`<span class="cb-ti">${ico('ceintures',16)} ${ti}</span>`:hs?'Hors Split':place(f)}</span></div>
-      <div class="cb-tags">${pr.map(x=>`<span class="cb-pr">${medaille(x[0],24)}${COURT[x[0]]}</span>`).join('')}</div>
+      <div class="cb-tags">${pr.map(x=>`<span class="cb-pr">${medaille(x[0],24,numSoiree(f.soiree))}${COURT[x[0]]}</span>`).join('')}</div>
       ${dateCol(f.date)}</div>`;}).join('');
   return `<div style="display:flex;flex-direction:column;gap:18px;height:100%">
     <div class="cb-bilan">${tuile('Contre le top 15',top.length?rec(tv,top.length-tv):'Aucun combat',top.length?'victoires et défaites':'')}
@@ -259,8 +259,17 @@ function combatsHtml(c){
 
 /* ---- Contrat : ce qu'il reste, ce qu'il coûte, quand il finit ; puis sa place parmi les salaires de la catégorie ---- */
 const euros=t=>+String(t).replace(/\D/g,'');
-/* Primes de performance : montants fixés par le joueur pour toute l'organisation (1 000 à 100 000 €). */
-const PRIMES_ORGA={soiree:50000,perf:50000,fin:20000};
+/* Primes de performance : montants fixés par le joueur pour toute l'organisation (1 000 à 100 000 €).
+   PRIMES_ORGA = les montants des soirées déjà jouées, figés. Un nouveau montant est un barème qui vaut « à partir de » une soirée
+   (primes.js) : tout écran lit primeDe(type, n° de la soirée), donc une soirée jouée garde pour toujours les montants de son soir. */
+const PRIMES_ORGA=Object.freeze({soiree:50000,perf:50000,fin:20000});
+const PRIMES_BAREMES=[{des:0,m:PRIMES_ORGA}];
+const primeDe=(k,n)=>{let m=PRIMES_ORGA;for(const b of PRIMES_BAREMES)if(b.des<=n)m=b.m;return m[k];};
+const numSoiree=t=>{const x=/Fight Night (\d+)/.exec(t||'');return x?+x[1]:0;};
+/** Proposition (à valider, R39) : une prime paraît basse quand elle est sous la bourse du combattant ET sous 6 % de ce que la soirée
+    a rapporté avant les primes ; une soirée qui finit en perte ne fait pas de plainte. Une règle unique pour le bilan et les Finances. */
+const PRIME_PART_SOIREE=.06;
+const primeBasse=(total,bourse,avantPrimes,reste)=>reste>=0&&total<Math.min(bourse,avantPrimes*PRIME_PART_SOIREE);
 const PERF_TYPES=[['soiree','Combat de la soirée'],['perf','Performance de la soirée'],['fin','Prime de finition']];
 /* Les primes en médailles (décision du 10/11, remplace le liseré jaune du 07/11) : un octogone doré,
    un pictogramme par prime — flamme = combat de la soirée, éclair = performance, cible = finition. */
@@ -268,7 +277,7 @@ P.eclair='<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>';
 P.flamme='<path d="M12 22a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-2 2-3 5-3 8a6 6 0 0 0 6 6z"/>';
 P.cible='<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>';
 const PRIME_PICTO={soiree:'flamme',perf:'eclair',fin:'cible'};
-const medaille=(k,t=28)=>`<span class="m8 octr" style="--t:${t}px" title="${esc(PERF_TYPES.find(x=>x[0]===k)[1])} · ${nb(PRIMES_ORGA[k])} €"><span class="octr">${ico(PRIME_PICTO[k],Math.round(t*.55),2.4)}</span></span>`;
+const medaille=(k,t=28,n)=>`<span class="m8 octr" style="--t:${t}px" title="${esc(PERF_TYPES.find(x=>x[0]===k)[1])}${n===undefined?'':` · ${nb(primeDe(k,n))} €`}"><span class="octr">${ico(PRIME_PICTO[k],Math.round(t*.55),2.4)}</span></span>`;
 const PERF_FIXES={nana:[
   ['soiree','Kévin Darras','8 déc. 2026',50000],['perf','Rui Carvalho','19 juil. 2026',50000],['fin','Rui Carvalho','19 juil. 2026',20000],
   ['soiree','Sofiane Belkacem','20 mars 2026',50000],['perf','Anton Kessler','14 sept. 2024',30000],['fin','Anton Kessler','14 sept. 2024',15000],
@@ -278,8 +287,8 @@ function perfDe(c,faits){
   /* Générique : chaque finition donne la prime de finition, une sur trois aussi la performance de la soirée ; une victoire aux points sur cinq est le combat de la soirée. */
   const out=[];let nf=0,nd=0;
   historique(c).filter(f=>f.res==='v'&&f.date.getFullYear()>=+c.depuis).forEach(f=>{const dt=dMois(f.date);
-    if(f.meth[0]!=='Décision'){out.push(['fin',f.adv,dt,PRIMES_ORGA.fin]);if(nf++%3===0)out.push(['perf',f.adv,dt,PRIMES_ORGA.perf]);}
-    else if(nd++%5===0)out.push(['soiree',f.adv,dt,PRIMES_ORGA.soiree]);});
+    const sn=numSoiree(f.soiree);if(f.meth[0]!=='Décision'){out.push(['fin',f.adv,dt,primeDe('fin',sn)]);if(nf++%3===0)out.push(['perf',f.adv,dt,primeDe('perf',sn)]);}
+    else if(nd++%5===0)out.push(['soiree',f.adv,dt,primeDe('soiree',sn)]);});
   return out;
 }
 function contratHtml(c){
