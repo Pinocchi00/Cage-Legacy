@@ -1,0 +1,83 @@
+/* Maquette lot 1 — les Options (T1, T5). Préfixe op-. L'écran du jeu mis à la charte : des onglets, un panneau, une ligne par réglage.
+   Dimensions reprises du jeu (mgmt-options) : ligne 88 px, écart 8, nom 36, phrase 22, boutons 48 en 30, blocs 28 × 40.
+   Les choix sont posés sur une grille commune (--u) : leurs bords s'alignent d'une ligne à l'autre, d'un onglet à l'autre. */
+.op{position:relative;gap:18px;--u:156px;--g:6px}
+.op .relire{font-size:15px;margin-left:0}
+
+/* Une ligne par réglage */
+.op-ls{flex:none;display:flex;flex-direction:column;gap:8px}
+.op-l{--c:10px;flex:none;height:88px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 20px;background:var(--ligne)}
+.op-t{display:flex;flex-direction:column;gap:5px;min-width:0}
+.op-t b{font-family:var(--titre);font-weight:800;font-size:36px;line-height:.86;text-transform:uppercase;white-space:nowrap}
+.op-t span{font-size:22px;line-height:1.1;color:var(--texte2);white-space:nowrap}
+
+/* Les choix */
+.op-seg{display:flex;gap:var(--g);flex:none}
+.op-ch{--c:9px;width:var(--u);height:48px;padding:2px;background:var(--bord);cursor:pointer;transition:background .15s}
+.op-ch>span{--c:8px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--noir);color:var(--blanc);font-family:var(--titre);font-weight:800;font-size:30px;line-height:1;text-transform:uppercase;white-space:nowrap;transition:background .15s,color .15s}
+.op-ch:hover{background:var(--blanc)}
+.op-ch.on{background:var(--blanc)}
+.op-ch.on>span{background:var(--blanc);color:var(--noir)}
+
+/* Les actions : la largeur de deux choix */
+.op-act,.op-raz{--c:9px;flex:none;width:calc(var(--u)*2 + var(--g));height:48px;justify-content:center;cursor:pointer}
+.op-act.bb>span,.op-raz.bb>span{--c:8px;flex:1;justify-content:center;height:44px;padding:0 10px;font-size:30px}
+.op-act.bouton{padding:0 10px;font-size:30px;justify-content:center}
+
+/* Les niveaux : dix blocs de la largeur de deux choix, le chiffre devant */
+.op-niv{display:flex;align-items:center;gap:14px;flex:none}
+.op-blocs{display:flex;gap:4px;width:calc(var(--u)*2 + var(--g));justify-content:space-between}
+.op-bloc{width:28px;height:40px;background:var(--noir);cursor:pointer;transition:background .12s}
+.op-bloc.on{background:var(--blanc)}
+.op-bloc:hover{background:#8c8883}
+.op-nv{order:-1;width:44px;text-align:right;font-size:36px;line-height:1}
+.op-ch:focus-visible,.op-bloc:focus-visible,.op-ar:focus-visible,.op-act:focus-visible,.op-raz:focus-visible{outline:2px solid var(--blanc);outline-offset:2px}
+
+/* Le bas du panneau */
+.op-pied{flex:none;margin-top:auto;display:flex;align-items:center;justify-content:flex-end;min-height:30px;padding:0 20px}
+.op-pt{margin-right:auto;font-size:22px;color:var(--texte2)}
+.op-pt b{color:var(--blanc);font-weight:700}
+
+/* Les touches */
+.op-tg{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px}
+.op-tb+.op-tb{margin-top:24px}
+.op-tb>.etiq{display:block;margin-bottom:8px;font-size:22px}
+.op-tl{display:grid;grid-template-columns:220px minmax(0,1fr);align-items:center;gap:20px;height:56px;border-top:2px solid var(--sep);font-size:24px}
+.op-tk{display:flex;gap:6px}
+.op-k{--c:7px;background:var(--bord);padding:2px;display:inline-flex}
+.op-k>span{--c:6px;min-width:38px;height:36px;padding:0 9px;background:var(--noir);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
+
+/* L'aide : les familles dans la ligne des onglets, la liste, puis le texte */
+.op-fams{margin-left:auto;display:flex;gap:6px}
+.op-fams .bb>span{height:52px;padding:0 13px;font-size:25px}
+.op-ga{flex:1;min-height:0;display:grid;grid-template-columns:440px minmax(0,1fr);gap:18px}
+.op-ars{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.op-ar{--c:10px;flex:none;width:100%;height:64px;background:var(--ligne);padding:2px;text-align:left;cursor:pointer;transition:background .15s}
+.op-ar>span{--c:9px;display:flex;align-items:center;height:100%;padding:0 18px;background:var(--ligne);font-size:25px;font-weight:700;transition:background .15s}
+.op-ar:hover,.op-ar:hover>span{background:#332e2e}
+.op-ar.sel,.op-ar.sel>span{background:var(--blanc);color:var(--noir)}
+.op-doc{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.op-x{margin:0 0 20px;font-size:26px;line-height:1.3;max-width:980px}
+.op-dl{display:flex;flex-direction:column}
+.op-dl>div{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:center;gap:20px;min-height:58px;padding:6px 0;border-top:2px solid var(--sep);font-size:24px;line-height:1.2}
+.op-dl b{font-weight:700}
+.op-dl span{color:var(--texte2)}
+.op-rs{display:flex;flex-direction:column}
+.op-rl{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:center;gap:20px;min-height:70px;border-top:2px solid var(--sep);font-size:24px;line-height:1.2}
+.op-rp{display:inline-flex;align-items:center;gap:6px;justify-self:start}
+.tag-j.op-rp{height:36px;padding:0 13px;background:var(--jaune);color:var(--noir);font-size:19px;font-weight:700;white-space:nowrap}
+.op-gr{font-size:28px;font-weight:700;color:var(--texte2)}
+.op-oj{display:block;width:22px;height:22px;background:var(--jaune)}
+.op-med{color:var(--neg);display:inline-flex}
+
+/* La confirmation en chiffres (charte S6) */
+.op-voile{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;background:rgba(13,11,11,.74)}
+.op-dlg{width:820px}
+.op-dlg .pan{width:100%}
+.op-dlg .p3{padding:26px 30px 24px}
+.op-cf{display:grid;grid-template-columns:.8fr .8fr 1.5fr 1.1fr;gap:18px;padding:16px 0;border-top:2px solid var(--sep);border-bottom:2px solid var(--sep)}
+.op-cf>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.op-cf .etiq{font-size:18px}
+.op-cf b{font-size:34px;line-height:1;white-space:nowrap}
+.op-cn{margin:16px 0 20px;font-size:22px}
+.op-cb2{display:flex;justify-content:flex-end;gap:14px}
