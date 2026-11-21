@@ -13,7 +13,7 @@
 const FI_CLE='maquette-finances-1';
 S.fi=Object.assign({onglet:'caisse',sel:null,sexe:'H',cat:'Poids léger',sens:-1,anim:true},(()=>{try{return JSON.parse(localStorage.getItem(FI_CLE))||{};}catch(e){return {};}})());
 function fiGarder(){try{const {onglet,sexe,cat,sens}=S.fi;localStorage.setItem(FI_CLE,JSON.stringify({onglet,sexe,cat,sens}));}catch(e){}}
-const fiEtat=()=>JSON.stringify({onglet:S.fi.onglet,sel:S.fi.sel,sexe:S.fi.sexe,cat:S.fi.cat,sens:S.fi.sens});
+const fiEtat=()=>JSON.stringify({onglet:S.fi.onglet,sel:S.fi.sel,sexe:S.fi.sexe,cat:S.fi.cat,sens:S.fi.sens,pm:S.fi.pm});
 
 /* ---- Les chiffres d'une soirée ----
    Prix moyen du billet et coût de la salle (location, cage, lumière, image, sécurité) par soirée. Ordres de grandeur :
@@ -50,7 +50,7 @@ function fiSoiree(n){
   const r=rsSoiree(n),pr={soiree:0,perf:0,fin:0};let fixe=0,vict=0,top=null;
   r.combats.forEach((f,i)=>{['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0);fixe+=b/2;if(f.g===sd)vict+=b/2;
     if(!top||b>top.b)top={c,b};((f.pr||{})[sd]||[]).forEach(p=>pr[p]++);});});
-  const primes=Object.entries(pr).reduce((t,[k,q])=>t+q*PRIMES_ORGA[k],0);
+  const primes=Object.entries(pr).reduce((t,[k,q])=>t+q*primeDe(k,n),0);
   if(n===63){ /* les chiffres du Lendemain */
     const k=FI_LENDEMAIN.bourses/(fixe+vict);fixe=Math.round(fixe*k/1000)*1000;vict=FI_LENDEMAIN.bourses-fixe;
     const billet=s.public[0]*prix;
@@ -74,7 +74,7 @@ function fiHaut(){
   const F=S.fi,o=(v,t)=>`<button class="onglet oct ${F.onglet===v?'ouvert':''}" data-fiong="${v}">${t}</button>`;
   const b=(k,v,l)=>`<button class="bb oct petit ${F[k]===v?'on':''}" data-fif="${k}:${v}"><span class="oct">${l}</span></button>`;
   const fl=F.onglet==='bourses'?`<span style="margin-left:auto"></span>${b('sexe','H','Hommes')}${b('sexe','F','Femmes')}`:'';
-  return `<div class="cl-haut fi-haut">${o('caisse','La caisse')}${o('bourses','Les bourses')}${fl}</div>`;
+  return `<div class="cl-haut fi-haut">${o('caisse','La caisse')}${o('bourses','Les bourses')}${o('primes','Les primes')}${fl}</div>`;
 }
 
 /* ---- La caisse : le bandeau ---- */
@@ -152,8 +152,8 @@ function fiChangements(o){
   const sans=o.top&&p.top&&p.top.b>o.top.b*1.5&&!fiAvec(o,p.top.c);
   add('Bourses',-(b-bp),sans?`sans ${lien(p.top.c)}, ${fiE(p.top.b)} à la ${p.n}`:`plus grosse bourse : ${lien(o.top.c)}, ${fiE(o.top.b)}`);
   const PL={soiree:'combat de la soirée',perf:'performance',fin:'finition'};
-  const kx=Object.keys(PL).sort((a,z)=>Math.abs((o.pr[z]-p.pr[z])*PRIMES_ORGA[z])-Math.abs((o.pr[a]-p.pr[a])*PRIMES_ORGA[a]))[0],dk=o.pr[kx]-p.pr[kx];
-  add('Primes',-(o.dep.primes-p.dep.primes),dk?`${Math.abs(dk)} prime${Math.abs(dk)>1?'s':''} « ${PL[kx]} » de ${dk>0?'plus':'moins'}, ${fiE(PRIMES_ORGA[kx])} chacune`:'mêmes primes');
+  const kx=Object.keys(PL).sort((a,z)=>Math.abs((o.pr[z]-p.pr[z])*primeDe(z,o.n))-Math.abs((o.pr[a]-p.pr[a])*primeDe(a,o.n)))[0],dk=o.pr[kx]-p.pr[kx];
+  add('Primes',-(o.dep.primes-p.dep.primes),dk?`${Math.abs(dk)} prime${Math.abs(dk)>1?'s':''} « ${PL[kx]} » de ${dk>0?'plus':'moins'}, ${fiE(primeDe(kx,o.n))} chacune`:'mêmes primes');
   add('Salle et production',-(o.dep.salle-p.dep.salle),`${esc(o.salle)} contre ${esc(p.salle)}`);
   const l=ch.sort((x,y)=>Math.abs(y.eff)-Math.abs(x.eff)).slice(0,2);
   return `<div class="fi-chg"><div class="fi-ct"><span class="etiq">Depuis la ${p.n}</span><span class="T fi-ctn ${o.net-p.net>=0?'fi-pos':'fi-neg'}">${fiSigne(o.net-p.net)}</span><button class="fi-lien" data-firesu="${o.n}">Voir les résultats ›</button></div>
@@ -163,7 +163,7 @@ function fiChangements(o){
 function fiDetail(){
   const o=fiSoiree(fiSel()),R=o.rec,D=o.dep;
   const max=Math.max(...Object.values(R).concat(Object.values(D)).filter(v=>v!==null));
-  const med=o.pr?Object.entries(o.pr).filter(([,q])=>q).map(([k,q])=>`<span class="fi-med">${medaille(k,24)}${q>1?`<b>${q}</b>`:''}</span>`).join(''):'';
+  const med=o.pr?Object.entries(o.pr).filter(([,q])=>q).map(([k,q])=>`<span class="fi-med">${medaille(k,24,o.n)}${q>1?`<b>${q}</b>`:''}</span>`).join(''):'';
   const pub=o.joue?`${nb(o.public[0])} spectateurs, ${o.prix} € en moyenne`:`${nb(o.public[0])} places vendues sur ${nb(o.public[1])}`;
   const recettes=[fiLigne('Billetterie',pub,R.billet,max,'fi-jr',0),fiLigne('Diffuseur','contrat de la saison, par soirée',R.diff,max,'fi-jr',1),
     fiLigne('Partenaires','contrat de la saison, par soirée',R.part,max,'fi-jr',2),fiLigne('Bar, boutique, VIP',R.bar===null?'après la soirée':`${nb(R.bar/o.public[0])} € par spectateur`,R.bar,max,'fi-jr',3)].join('');
@@ -173,7 +173,7 @@ function fiDetail(){
         <div class="fi-lj"><i class="fi-jd" style="--p:${Math.max(2,D.primes/max*100)}%;animation-delay:760ms"></i></div></div>`,fiLigne('Salle et production','location, cage, image, sécurité',D.salle,max,'fi-jd',7)].join('')
     :[fiLigne('Bourses fixes',`${o.combats} combats sur ${o.places} composés`,D.fixe,max,'fi-jd',4),fiLigne('Primes de victoire','selon les vainqueurs',null,max,'fi-jd',5),
       `<div class="fi-l fi-lp" style="animation-delay:660ms"><div class="fi-lh"><span class="fi-lt">Primes de performance</span><button class="fi-lien" data-fiprimes>Modifier ›</button></div>
-        <div class="fi-tes">${PERF_TYPES.map(([k])=>`<span class="fi-med">${medaille(k,22)}<span>${fiE(PRIMES_ORGA[k])}</span></span>`).join('')}</div></div>`,
+        <div class="fi-tes">${PERF_TYPES.map(([k])=>`<span class="fi-med">${medaille(k,22,o.n)}<span>${fiE(primeDe(k,o.n))}</span></span>`).join('')}</div></div>`,
       fiLigne('Salle et production',esc(o.salle),D.salle,max,'fi-jd',7)].join('');
   const tete=o.joue
     ?`<div class="fi-res"><span class="etiq">Ce qu’il te reste</span><span class="T ${o.net>=0?'fi-pos':'fi-neg'}">${o.net>=0?'+':'−'} <span data-fin="${Math.abs(o.net)}">0</span> €</span></div>`
@@ -221,7 +221,7 @@ function fiBandeauB(){
 const fiAffiche=id=>!S.rs.apres&&S.af.m.concat(S.af.p).some(f=>f.a===id||f.b===id);
 /** Ce que la catégorie a coûté en 2026 : bourses et primes de ses combattants, soirée par soirée (les mêmes que dans « La caisse »). */
 function fiVerseCat(cat){let v=0,n=0;fiJouees().filter(o=>o.date.getFullYear()===2026).forEach(o=>rsSoiree(o.n).combats.forEach((f,i)=>{if(f.cat!==cat)return;n++;
-  ['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0);v+=b/2+(f.g===sd?b/2:0)+((f.pr||{})[sd]||[]).reduce((t,p)=>t+PRIMES_ORGA[p],0);});}));return {v,n};}
+  ['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0);v+=b/2+(f.g===sd?b/2:0)+((f.pr||{})[sd]||[]).reduce((t,p)=>t+primeDe(p,o.n),0);});}));return {v,n};}
 function fiCatPanneau(x){
   const tri=[...x.l].sort((a,b)=>euros(b.contrat[1])-euros(a.contrat[1])),max=euros(tri[0].contrat[1]),tot=x.l.reduce((t,c)=>t+euros(c.contrat[1]),0);
   const rang=c=>c.rang==='C'?`<span class="marque octr fi-c8">C</span>`:`<span class="fi-rg">n° ${c.rang}</span>`;
@@ -240,13 +240,15 @@ function fiCatPanneau(x){
 function fiHtml(){
   fiGarder();
   if(S.fi.onglet==='bourses')return `<div class="rc fi">${fiHaut()}${fiBourses()}</div>`;
+  if(S.fi.onglet==='primes')return `<div class="rc fi pm">${fiHaut()}${pmHtml()}</div>`;
   return `<div class="rc fi">${fiHaut()}${fiBandeau()}<div class="fi-g">${fiSolde()}${fiDetail()}</div></div>`;
 }
 
 /* ---- Mouvement : les chiffres défilent, une fois par changement ---- */
 function fiCompter(){
+  const calme=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   document.querySelectorAll('.fi [data-fin]').forEach((e,i)=>{const v=+e.dataset.fin;
-    if(!S.fi.anim&&e.closest('.fi-band,.fi-k')){e.textContent=nb(v);return;}
+    if(calme||(!S.fi.anim&&e.closest('.fi-band,.fi-k'))){e.textContent=nb(v);return;}
     const t0=performance.now()+Math.min(i,12)*35,f=t=>{const k=Math.max(0,Math.min(1,(t-t0)/700)),x=1-Math.pow(1-k,3);e.textContent=nb(v*x);if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);setTimeout(()=>{e.textContent=nb(v);},1500);});
 }
 
@@ -314,7 +316,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-firesu]'))){e.stopImmediatePropagation();S.rs.sel=+el.dataset.firesu;S.rs.vue='resultats';S.rs.det=null;aller('resultats');return;}
   if((el=t.closest('[data-figo]'))){e.stopImmediatePropagation();aller(el.dataset.figo);return;}
   if((el=t.closest('[data-fiprol]'))){e.stopImmediatePropagation();S.onglet='Contrat';ouvrirFiche(el.dataset.fiprol);return;}
-  if(t.closest('[data-fiprimes]')){e.stopImmediatePropagation();toast('Les primes se fixent pour toute l’organisation, de 1 000 à 100 000 €, avant la soirée (R39, hors de cette maquette).');return;}
+  if(t.closest('[data-fiprimes]')){e.stopImmediatePropagation();pmOuvrir();return;}
 },true);
 
 /* ---- Lancement : ?ecran=finances, options vue=caisse|bourses, soiree=<56…63>, sexe=H|F, categorie=<catégorie> (onglet et cat sont pris par la fiche), apres=1 (après la 63), fiche=<id> ---- */

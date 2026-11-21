@@ -267,7 +267,7 @@ function caPrimes(r){
   if(!r||!r.combats)return '';const g={};
   r.combats.forEach(x=>['a','b'].forEach(sd=>((x.pr||{})[sd]||[]).forEach(p=>{(g[p]=g[p]||[]).push(sd==='a'?x.A:x.B);})));
   const l=Object.keys(RS_PR).filter(p=>g[p]);if(!l.length)return '';
-  return `${caSec('Les primes')}<div class="ca-cls">${l.map(p=>`<div class="ca-cl">${rsMedaille(p,26)}<span class="ca-pn">${esc(RS_PR[p])}</span><span class="ca-cc ca-pq"><span>${g[p].slice(0,2).map(c=>lien(c)).join(', ')}${g[p].length>2?` <span class="ca-vs">et ${g[p].length-2} autre${g[p].length>3?'s':''}</span>`:''}</span></span></div>`).join('')}</div>`;
+  return `${caSec('Les primes')}<div class="ca-cls">${l.map(p=>`<div class="ca-cl">${rsMedaille(p,26,r.n)}<span class="ca-pn">${esc(RS_PR[p])}</span><span class="ca-cc ca-pq"><span>${g[p].slice(0,2).map(c=>lien(c)).join(', ')}${g[p].length>2?` <span class="ca-vs">et ${g[p].length-2} autre${g[p].length>3?'s':''}</span>`:''}</span></span></div>`).join('')}</div>`;
 }
 const caMeth=f=>f.meth==='Décision'?`Décision ${esc(f.det)}`:`${f.meth==='KO'?'KO':'Soumission'} · ${rsOrd(f.rd)} round`;
 

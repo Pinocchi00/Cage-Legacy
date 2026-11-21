@@ -144,7 +144,10 @@ function rsRanger(cat,fixes){
 }
 /** Joue Split Fight Night 63 dans les données de la maquette : bilans, séries, dates, rangs, historique de la fiche. */
 function rsJouer63(){
-  if(S.rs.apres)return;S.rs.apres=true;
+  if(S.rs.apres)return;
+  /* Les soirées passées sont tirées d'après les rangs : on les fige AVANT que la 63 ne les change, sinon une page ouverte après la 63 réécrit le passé. */
+  RS_SOIREES.forEach(x=>{if(x.n<63)rsSoiree(x.n);});
+  S.rs.apres=true;
   S.rsCarte={m:S.af.m.map(f=>({...f})),p:S.af.p.map(f=>({...f}))};
   const date=new Date(2027,1,16),fixes={},s=RS_SOIREES[0];
   const tous=[...S.rsCarte.m,...S.rsCarte.p];
@@ -195,12 +198,12 @@ function rsMvt(av,ap){
 const RS_PR={soiree:'Combat de la soirée',perf:'Performance',fin:'Finition'};
 /** Une seule étiquette par combat : la prime la plus rare (la finition va de soi après un KO ou une soumission). */
 /* Les primes en médailles : un octogone doré, un pictogramme par prime (éclair, flamme, cible). */
-const rsMedaille=(p,t=28)=>medaille(p,t); /* la médaille commune (fiche2.js) */
+const rsMedaille=(p,t=28,n)=>medaille(p,t,n); /* la médaille commune (fiche2.js) */
 /** Les primes d'un combat : les médailles, puis la plus rare en toutes lettres et son montant. */
-function rsPrimeTag(f){
+function rsPrimeTag(f,n){
   const all=Object.values(f.pr||{}).flat(),types=['soiree','perf','fin'].filter(p=>all.includes(p));
   if(!types.length)return '';const p=types[0];
-  return `<span class="rs-bonus">${types.map(x=>rsMedaille(x)).join('')}<span class="rs-bt"><b>${RS_PR[p]}</b><span>${types.length>1?`+ ${types.slice(1).map(x=>RS_PR[x].toLowerCase()).join(' + ')} · ${nb(types.reduce((t,x)=>t+PRIMES_ORGA[x],0))} €`:`${nb(PRIMES_ORGA[p])} €${p==='soiree'?' chacun'+(rsF(f.A)?'e':''):''}`}</span></span></span>`;
+  return `<span class="rs-bonus">${types.map(x=>rsMedaille(x,28,n)).join('')}<span class="rs-bt"><b>${RS_PR[p]}</b><span>${types.length>1?`+ ${types.slice(1).map(x=>RS_PR[x].toLowerCase()).join(' + ')} · ${nb(types.reduce((t,x)=>t+primeDe(x,n),0))} €`:`${nb(primeDe(p,n))} €${p==='soiree'?' chacun'+(rsF(f.A)?'e':''):''}`}</span></span></span>`;
 }
 const rsSurn=c=>`<span class="rs-surn">${c.surnom?`« ${esc(c.surnom)} »`:esc(rsCatC(c.cat))}</span>`;
 const rsQuoi=f=>f.meth==='Décision'?[0,1,2].map(q=>{const c=rsCarteJuge(f,q);return c.gagne===f.g?c.txt:c.txt.split('-').reverse().join('-');}).join(' · '):`${rsOrd(f.rd)} round · ${f.tps}`;
@@ -215,7 +218,7 @@ function rsLigne(f,s,i){
     <div class="rs-cote rs-perd"><span class="rs-n">${lien(l)}</span>${rsSurn(l)}</div>
     <span class="rs-mvc">${mv(ls)}</span>
     <span class="rs-cat">${titre?`<span class="rs-titre">${rsCb(22)}Titre</span>`:''}<span>${esc(rsCatC(f.cat))}</span><span class="sous">${f.n} rounds</span></span>
-    <span class="rs-pr">${rsPrimeTag(f)}</span>
+    <span class="rs-pr">${rsPrimeTag(f,s.n)}</span>
     <span class="rs-chev">${ico('avant',22)}</span>
   </div>`;
 }
@@ -338,7 +341,7 @@ function rsDetailHtml(s){
   const col=(v,cls)=>v===undefined?`<span class="rs-col ${cls} vide"></span>`:`<span class="rs-col ${cls}"><em>${v}</em><i style="--h:${v/mx*100}%"></i></span>`;
   const rounds=Array.from({length:f.n},(_,r)=>`<div class="rs-rd ${r>=W.co.length?'off':''}" style="--r:${r}"><div class="rs-cols">${col(W.co[r],'g')}${col(L.co[r],'d')}</div><span class="rs-rdl">R${r+1}</span></div>`).join('');
   const graph=`<div class="rs-dsec"><div class="rs-dt"><span class="etiq">Frappes significatives, round par round</span></div><div class="rs-rds">${rounds}</div></div>`;
-  const prix=sd=>((f.pr||{})[sd]||[]).map(p=>`<span class="rs-bp">${rsMedaille(p,24)}${RS_PR[p]} ${nb(PRIMES_ORGA[p])} €</span>`).join('');
+  const prix=sd=>((f.pr||{})[sd]||[]).map(p=>`<span class="rs-bp">${rsMedaille(p,24,s.n)}${RS_PR[p]} ${nb(primeDe(p,s.n))} €</span>`).join('');
   const bilan=(c,sd)=>{const av=f.or?f.or[sd]:undefined,ap=s.n===63?c.rang:(f.nr||{})[sd],t=x=>x==='C'?'champion':'n° '+x,p=prix(sd);
     const d=av===undefined||ap===undefined?null:rsRangV(av)-rsRangV(ap);
     return `<div class="rs-bil"><span class="rs-bil-n">${esc(c.nom)}</span><span>${s.n===63?rec(c.v,c.d):''}</span><span>${d===null?'':d?`${t(av)} → <b class="${ap==='C'?'or':''}">${t(ap)}</b> <span class="${d>0?'cl-up':'cl-down'}">${d>0?'▲':'▼'}</span>`:`reste ${t(ap)}`}</span>${p?`<span class="rs-bil-p">${p}</span>`:'<span></span>'}</div>`;};
@@ -398,7 +401,7 @@ function rsLendemainHtml(){
       <div class="rs-q"><p>« Je l’avais dit : il fallait l’emmener au 4e. »</p><span class="rs-n">${lien(w0)}</span></div>
       <div class="rs-q"><p>« Je veux la revanche. Pas dans un an : cet été. »</p><span class="rs-n">${lien(l0)}</span></div></div>`,'height:100%');
   /* Les chiffres, à la fin seulement (R39). Primes : montants de l'organisation (fiche, onglet Contrat). */
-  const pr=s.combats.reduce((t,f)=>t+Object.values(f.pr||{}).flat().reduce((a,p)=>a+PRIMES_ORGA[p],0),0);
+  const pr=s.combats.reduce((t,f)=>t+Object.values(f.pr||{}).flat().reduce((a,p)=>a+primeDe(p,s.n),0),0);
   const recette=846000,dep=345000+120000+pr,reste=recette-dep,pct=Math.round(s.public[0]/s.public[1]*100);
   const chiffres=pan(`<div class="pt"><h2>La soirée</h2></div>
     <div class="rs-ch"><span>Le public</span><b class="T"><span data-rscompte="${s.public[0]}">0</span><small> / ${nb(s.public[1])}</small></b></div>
@@ -410,7 +413,7 @@ function rsLendemainHtml(){
     <div class="rs-ch"><span>La popularité de Split</span><b class="T">40 → 43 <span class="cl-up">▲</span></b></div>
     <div class="etiq rs-medt">Les primes</div>
     ${[['soiree','Combat de la soirée'],['perf','Performance'],['fin','Finition']].map(([k,t])=>{const qui=s.combats.flatMap(f=>['a','b'].filter(sd=>((f.pr||{})[sd]||[]).includes(k)).map(sd=>sd==='a'?f.A:f.B));
-      return qui.length?`<div class="rs-pl">${rsMedaille(k,30)}<span class="rs-pl-t">${t}</span><span class="rs-pl-n">${qui.slice(0,qui.length>3?2:3).map(c=>lien({...c,prenom:''}).replace('> ','>')).join(', ')}${qui.length>3?` <span class="sous">et ${qui.length-2} autres</span>`:''}</span><span class="sous">${nb(PRIMES_ORGA[k])} €</span></div>`:'';}).join('')}
+      return qui.length?`<div class="rs-pl">${rsMedaille(k,30,s.n)}<span class="rs-pl-t">${t}</span><span class="rs-pl-n">${qui.slice(0,qui.length>3?2:3).map(c=>lien({...c,prenom:''}).replace('> ','>')).join(', ')}${qui.length>3?` <span class="sous">et ${qui.length-2} autres</span>`:''}</span><span class="sous">${nb(primeDe(k,s.n))} €</span></div>`:'';}).join('')}
     <div class="etiq rs-medt">Tes blessés</div>
     ${s.combats.flatMap(f=>[f.A,f.B]).filter(c=>c._rsMed).map(c=>`<div class="rs-med"><span class="rs-med-i">${ico('medical',20)}</span><span class="rs-n">${lien(c)}</span><span class="sous">${esc(c._rsMed.replace(', suspendu 60 jours',''))} · retour le ${esc(c.retour)}</span></div>`).join('')}`,'height:100%');
   return `<div class="rs-ld">${moments}<div class="rs-ld2">${classement}${presse}${chiffres}</div></div>`;
