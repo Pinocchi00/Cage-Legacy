@@ -160,7 +160,7 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 
 Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-11.md`), de la charte et du dossier UI/UX (`docs/DOSSIER-UI-UX-GESTION-2026.pdf`). Elles s'appliquent dès qu'un écran contient la pièce. La première maquette qui la montre la fait valider.
 
-### Grands tableaux (Effectif, Classements, Contrats, Recrutement, Salles)
+### Grands tableaux (Effectif, Classements, Contrats, Recrutement, Salles ; Effectif et Infirmerie validés le 21/11)
 - **Toutes les colonnes se trient** d'un clic sur leur titre. Le titre trié est blanc, avec ▾ ou ▴. **Exception : les classements**, dont l'ordre ne change pas (09/11).
 - **Pas de titre bavard** au-dessus du tableau (« 29 combattants en poids léger », R15). Le titre de l'écran suffit ; les filtres disent le reste.
 - **Filtres en boutons octogonaux**, sur une ligne au-dessus du tableau. Le filtre actif a le bord blanc. **Un filtre choisi n'est jamais remis à zéro** quand on revient sur l'écran (dossier UI/UX).
@@ -379,6 +379,20 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Mouvement** : discret (lignes qui apparaissent, chiffres du bandeau qui défilent) ; tout s'arrête en mouvement réduit.
 - **Écarts repérés, à aligner** : l'onglet Contrat de la fiche déduit les primes d'une règle générale (67 participations sur 158 diffèrent des Résultats) ; à 50 000 / 50 000 / 20 000 €, les primes pèsent 18 à 38 % de la recette, et bourses plus primes 58 à 83 % ; Split cumule performance et finition, l'UFC non.
 
+### Écran Options (T1, T5, validé le 21/11)
+- **Tout simple** (retour du 21/11 : « c'est des options, ça suit la DA mais c'est tout simple ») : le vrai écran du jeu mis à la charte. Des onglets, un panneau, une ligne par réglage. Pas d'aperçu, pas de capture, pas de recherche, pas de barre de touches.
+- **Sept onglets** : Combat · Affichage · Son · Soirée · Touches · Partie · Aide. Mêmes réglages, mêmes valeurs d'origine et mêmes phrases que le jeu (`mgmt-options.js`, `mgmt-reglages.js`).
+- **Une ligne** : le nom, sa phrase dessous, le choix à droite. Dimensions du jeu : ligne de 88 px, écart de 8, nom en 36, phrase en 22, boutons de 48 en 30, blocs de 28 × 40.
+- **Les choix sur une même grille** : boutons de 156 px, écart de 6, alignés à droite ; leurs bords tombent au même endroit d'une ligne à l'autre et d'un onglet à l'autre. Choix actif en blanc cassé, les autres en noir avec un bord qui suit l'octogone. Les actions et « Réglages d'origine » ont la largeur de deux choix.
+- **Le son** : dix blocs octogonaux de la largeur de deux choix, le chiffre devant. Un clic sur le dernier bloc allumé baisse d'un cran, jusqu'à 0.
+- **Touches** : le seul endroit où les touches restent écrites (exception à T1), en quatre groupes.
+- **Partie** : sauvegarder (le seul bouton jaune), revoir son arrivée, changer de partie, exporter, importer, effacer, accompagnement de Leïla ; l'emplacement en bas. Effacer demande une confirmation en chiffres (S6). Ouvert depuis le menu principal, sans partie : pas de barre, pas d'action sur une partie.
+- **Aide** (T5) : les cinq familles sur la ligne des onglets (La soirée, Combattants, L'argent, Organisation, Les repères), la liste à gauche, le texte à droite. 24 articles, tirés des règles validées et des constantes du jeu, marqués « à relire ». L'inventaire complet des phrases de tutoriel du jeu reste à faire au lot 3.
+- **Ajout** : « Temps forts » dans la vue des combats, pour suivre la Soirée validée.
+- **Maquette** : les réglages sont gardés en `localStorage` mais ne pilotent pas encore les autres écrans ; exporter, importer et changer de partie donnent un message. Adresses : `?ecran=options&opong=combat|affichage|son|soiree|touches|partie|aide`, `&oparticle=<id>`, `&opetat=effacer|sanspartie`.
+- **Mouvement** : discret, les lignes apparaissent une fois à l'ouverture ; rien en mouvement réduit.
+- **Ouvert** : l'accompagnement de Leïla, gardé et activé comme dans le jeu, ressemble au tutoriel que T5 retire. **Écart repéré** : le jeu compose encore 9 combats (5 + 4), la règle validée en demande 10 (4 + 6).
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -394,7 +408,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Un emplacement vide le dit simplement** : « Libre », « Aucun combat prévu », « Aucune demande ». Il ne garde jamais le texte d'avant (R12).
 - **Pas de grisé pour une option qui n'existe pas** : elle n'est simplement pas là (charte R4).
 
-### La carte d'une soirée (R12, Q12, Q14)
+### La carte d'une soirée (R12, Q12, Q14, validée le 21/11)
 - Composer se fait **au glisser-déposer**, avec une **animation satisfaisante au dépôt**. Les places de la carte s'échangent entre elles de la même façon.
 - **4 combats en carte principale, 6 en préliminaires**. Les préliminaires sont composés seuls (priorité aux inactifs, au moins 2 combats féminins) et **modifiables à la main**.
 - La **liste complète des combattants** est à droite : elle défile, se filtre par catégorie et dit quel niveau de combat chacun mérite.
@@ -426,9 +440,9 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Arrivée | R1 à R4 | Validé (section 11, « Écran Arrivée ») : ouverture, Split, Ton contrat, Tes espoirs (2 sur 6), puis l'Accueil du 4 janvier. |
 | Accueil | R5, R6 | Validé (section 10). |
 | Leïla, présentation, face-à-face | R7 à R10 | Présentation et face-à-face validés (section 11, « Présentation et face-à-face ») : l'affiche au tunnel centré sur le VS, l'enjeu, victoires et défaites, la presse ; les chiffres avec le point du meilleur. Dossiers de Leïla (R7 à R9) : l'encadré de la Carte, le reste à traiter dans la Carte. Médias à renommer (Q10c). |
-| Carte, préliminaires | R12, R14 | Section 11, « La carte d'une soirée ». |
+| Carte, préliminaires | R12, R14 | Validé (section 11, « La carte d'une soirée »). |
 | Messages | R13, R17 | Section 11, « Écran Messages » et « Continuer ». |
-| Effectif, Infirmerie | R15, Q12b | Section 11, « Grands tableaux ». **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
+| Effectif, Infirmerie | R15, Q12b | Validé (section 11, « Grands tableaux »). **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
 | Fiche | R16 | Validé (section 10). |
 | Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
 | Ceintures | R22 | Validé (section 11, « Écran Ceintures ») : un onglet des Classements. Défenses et durée du règne restent à ajouter au Classement. |
@@ -440,6 +454,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Finances, primes | R31, Q39a | Validé (section 11, « Écran Finances » et « Les primes ») : La caisse, Les bourses, Les primes. Un nouveau montant vaut dès la prochaine soirée et ne réécrit jamais une soirée jouée. |
 | Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Validé (section 11, « Soirée en direct, temps forts, résultat, discours, bilan ») : temps forts dans l'arène lisibles d'un coup d'œil, résultat dévoilé pas à pas, discours en scène et interview, bilan avec « Revoir » au choix. Primes fixées par le joueur (1 000 € à 100 000 €) **dans les Finances** (section 11, « Les primes »). |
+| Options, aide | T1, T5 | Validé (section 11, « Écran Options ») : le vrai écran du jeu à la charte, tout simple ; les aides regroupées dans l'onglet Aide. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
@@ -462,6 +477,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Noms des trois médias | Cage Hebdo, Tableau Noir, Le Forum (à renommer) | Q10c |
 | Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur · Rapports ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
 | Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
+| Accompagnement de Leïla | Gardé et activé, comme dans le jeu ; il ressemble au tutoriel que T5 retire | T5, Options |
 
 ## 14. Méthode pour chaque nouvelle maquette
 
