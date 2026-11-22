@@ -226,7 +226,7 @@ function opAvancer(){
 function opAction(k){
   if(k==='sauver'){const d=new Date();S.op.sauve=`${d.getHours()} h ${String(d.getMinutes()).padStart(2,'0')}`;opMaj();toast('Partie sauvegardée.');return;}
   if(k==='arrivee'){opGarder();location.href='index.html?ecran=arrivee&ppetape=split&ppouv=0';return;}
-  if(k==='changer'){toast('L’écran des emplacements viendra avec la maquette Nouvelle partie.');return;}
+  if(k==='changer'){mnOuvrirParties();return;}
   if(k==='exporter'){toast('Fichier prêt : cage-legacy-partie-1.json (simulé dans la maquette).');return;}
   if(k==='importer'){toast('Le choix du fichier reste celui du jeu (simulé dans la maquette).');return;}
   if(k==='effacer')opPas(()=>{S.op.conf=true;});

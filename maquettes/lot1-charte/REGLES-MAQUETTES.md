@@ -389,7 +389,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Partie** : sauvegarder (le seul bouton jaune), revoir son arrivée, changer de partie, exporter, importer, effacer, accompagnement de Leïla ; l'emplacement en bas. Effacer demande une confirmation en chiffres (S6). Ouvert depuis le menu principal, sans partie : pas de barre, pas d'action sur une partie.
 - **Aide** (T5) : les cinq familles sur la ligne des onglets (La soirée, Combattants, L'argent, Organisation, Les repères), la liste à gauche, le texte à droite. 24 articles, tirés des règles validées et des constantes du jeu, marqués « à relire ». L'inventaire complet des phrases de tutoriel du jeu reste à faire au lot 3.
 - **Ajout** : « Temps forts » dans la vue des combats, pour suivre la Soirée validée.
-- **Maquette** : les réglages sont gardés en `localStorage` mais ne pilotent pas encore les autres écrans ; exporter, importer et changer de partie donnent un message. Adresses : `?ecran=options&opong=combat|affichage|son|soiree|touches|partie|aide`, `&oparticle=<id>`, `&opetat=effacer|sanspartie`.
+- **Maquette** : les réglages sont gardés en `localStorage` mais ne pilotent pas encore les autres écrans ; exporter et importer donnent un message, « Changer de partie » ouvre Mes parties (22/11). Adresses : `?ecran=options&opong=combat|affichage|son|soiree|touches|partie|aide`, `&oparticle=<id>`, `&opetat=effacer|sanspartie`.
 - **Mouvement** : discret, les lignes apparaissent une fois à l'ouverture ; rien en mouvement réduit.
 - **Ouvert** : l'accompagnement de Leïla, gardé et activé comme dans le jeu, ressemble au tutoriel que T5 retire. **Écart repéré** : le jeu compose encore 9 combats (5 + 4), la règle validée en demande 10 (4 + 6).
 
@@ -404,6 +404,20 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Inventé, à relire** : les 20 poids, le poids manqué de Darras, les réponses de Labbé, les phrases de face-à-face.
 - **Ouvert** : ce qui fait accepter ou refuser un adversaire ; la place des 22 familles d'événements du jeu (blessure au camp, visa…), qui n'ont plus d'écran ; « les soirées le mardi ».
 - **Écarts repérés, à aligner** : le jeu laisse le joueur choisir et retire la pénalité de la caisse de Split ; le bloc « La semaine du combat » du Calendrier annonce encore la conférence ; Darras « de Lille » (Presse, Messages) ou de Dakar (fiche) ; son trait « Jamais deux défaites de suite » est faux après la 63 ; Mezouar à Grenoble (Camps) ou à Marseille (discours de la Soirée).
+
+### Menu principal, Mes parties, Nouvelle partie, création (T1, T2, T3, T5, T6, R1, validé le 22/11)
+- **L'accueil reste celui du jeu** (retour du 22/11 : « l'accueil fait comme avant ») : mêmes entrées (Management, Duo, Mode histoire, Patron, Dirigeant de salle, Options, Quitter), mêmes mesures, même affiche de la prochaine soirée sur le tunnel. Carrière et Duel n'y sont pas (décision du 16/10). Deux écarts seulement : la barre de touches disparaît (T1), **« Reprendre » en jaune prend sa place** avec l'organisation et la date, et l'entrée choisie a ses quatre coins coupés.
+- **Nouvelle partie et chargement poussés à fond** (retour du 22/11) : exception voulue au mouvement discret des écrans de gestion. Le tunnel du jeu avance, **teinté à la couleur de l'organisation** (`CL_TEINTES`).
+- **Mes parties** : la dernière partie en grand avec le seul bouton jaune, les deux autres à côté ; un clic reprend, sans étape « choisir puis valider ». Un emplacement montre seulement l'organisation, la date de jeu, la prochaine soirée, la place, la caisse et la dernière sauvegarde. Le fond prend la couleur de la partie survolée.
+- **Les états** : aucune partie, emplacement libre, trois pleins (« Nouvelle partie » en haut à droite, puis « Remplacer cette partie »), sauvegarde abîmée (« Reprendre la copie »), illisible sans copie (seulement la corbeille).
+- **Effacer ou remplacer** : confirmation en chiffres (S6 : emplacement, organisation, date, caisse), l'action en jaune, « Revenir » en noir et sélectionné par défaut. Une partie remplacée n'est écrasée **qu'à la fin de la création** : abandonner ne perd rien.
+- **Nouvelle partie** : les huit organisations en liste à gauche ; à droite une scène par organisation : ville, nom en très grand, phrase, atouts (+ vert, − rouge), classement et quatre mesures de l'écran Organisation avec **huit octogones qui montrent sa place**, puis effectif, âge, popularité, salle, bourses. On change à la liste, à la molette ou en tirant la scène.
+- **La création** : l'année au centre d'un octogone qui se trace en six ans, les soirées, combats et ceintures qui montent, les vrais changements de ceinture (lignée des Ceintures), la frise de 2021 à 2026. Elle dure 9,5 s dans la maquette, un clic la passe, Retour abandonne sans rien écrire, puis **on entre seul sur l'Arrivée validée**. Les cinq cartons de lecture du jeu sont retirés (T5).
+- **Reprendre une partie** : 0,7 s dans le tunnel de l'organisation, un clic la passe, rien en mouvement réduit.
+- **Maquette** : seule la clé `maquette-menu-1` est écrite, jamais une sauvegarde du jeu. Seul Split se joue jusqu'au bout. Options › « Changer de partie » ouvre Mes parties. Adresses : `?ecran=menu&mnvue=menu|parties|nouvelle|creation&mnetat=aucune|une|libre|pleines|abimee|illisible&mnconf=effacer|ecraser&mnslot=1..3&mnorg=<id>&mnduo=1&mnchoix=1&mngen=0..1&mnmouv=1` (`mnmouv=1` montre le mouvement même si l'ordinateur en demande moins).
+- **Inventé, à relire** : les parties Garden of Blood et MMA Korner, les phrases de sauvegarde abîmée et de remplacement.
+- **Ouvert** : garder ou non le choix de l'organisation ; « À venir » reste jaune comme dans le jeu alors que le jaune est réservé à l'action ; la durée réelle de la création dépendra du calcul.
+- **Écarts repérés, à aligner** : Split 6e ou 2e ; caisse de départ de 50 000 € dans le jeu et 952 200 € à l'Arrivée (donc non affichée à la création) ; « plus grande salle » du jeu égale aux spectateurs moyens de Garden of Blood (12 600) ; Split « depuis 2004 » mais 62 soirées de 2021 à 2026 ; 9 combats par soirée dans le jeu, 10 dans la règle validée ; dans le jeu, une bande diagonale cache le 3e emplacement.
 
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
@@ -468,6 +482,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Validé (section 11, « Soirée en direct, temps forts, résultat, discours, bilan ») : temps forts dans l'arène lisibles d'un coup d'œil, résultat dévoilé pas à pas, discours en scène et interview, bilan avec « Revoir » au choix. Primes fixées par le joueur (1 000 € à 100 000 €) **dans les Finances** (section 11, « Les primes »). |
 | Options, aide | T1, T5 | Validé (section 11, « Écran Options ») : le vrai écran du jeu à la charte, tout simple ; les aides regroupées dans l'onglet Aide. |
 | Pesée (à la place de la semaine du combat) | T10, Q17 | Validé (section 11, « Écran Pesée ») : préliminaires sur un écran, carte principale deux par deux, jauges qui montent ensemble depuis 0, une phrase de face-à-face. Sur un poids manqué, c'est l'adversaire qui décide. |
+| Menu, Mes parties, Nouvelle partie, création | T1, T2, T3, T5, T6, R1 | Validé (section 11, « Menu principal, Mes parties, Nouvelle partie, création ») : l'accueil du jeu avec « Reprendre » à la place des touches ; la dernière partie en grand ; une scène par organisation ; six ans qui défilent, puis l'Arrivée. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
@@ -491,6 +506,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Écran Recrutement | Remplace « Contrats » dans la barre ; onglets Combattants · Recruteur · Rapports ; « Ses demandes » avec trois poids et « T'engager » | R23 à R25, 09/11 |
 | Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
 | Accompagnement de Leïla | Gardé et activé, comme dans le jeu ; il ressemble au tutoriel que T5 retire | T5, Options |
+| Choix de l'organisation à la création | Gardé comme dans le jeu, Split par défaut ; seul Split va jusqu'à l'Arrivée dans la maquette | Menu, 22/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
 
