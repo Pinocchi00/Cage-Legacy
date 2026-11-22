@@ -37,6 +37,7 @@ Ce document ne tranche rien de nouveau. Il fixe ce qu'Anthony a dit, pour que ch
 - « Quelque chose à faire » = **petit octogone jaune plein de 20 px** à droite du libellé.
 - **Bouton de repli** : petite double flèche discrète (30 × 30 px, blanc à 40 %) **en haut à droite du bloc logo**. Il est purement fonctionnel : pas de libellé, pas de languette, pas d'interrupteur.
 - Barre repliée : **84 px**, icônes SVG seules. L'octogone jaune passe dans le coin haut droit de l'icône.
+- **Ordre, titres et hauteurs en version repliée** : section 11, « Barre latérale et navigation » (validée le 22/11).
 
 ### En-tête (64 px de haut, à 20 px du haut)
 De gauche à droite :
@@ -419,6 +420,20 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Ouvert** : garder ou non le choix de l'organisation ; « À venir » reste jaune comme dans le jeu alors que le jaune est réservé à l'action ; la durée réelle de la création dépendra du calcul.
 - **Écarts repérés, à aligner** : Split 6e ou 2e ; caisse de départ de 50 000 € dans le jeu et 952 200 € à l'Arrivée (donc non affichée à la création) ; « plus grande salle » du jeu égale aux spectateurs moyens de Garden of Blood (12 600) ; Split « depuis 2004 » mais 62 soirées de 2021 à 2026 ; 9 combats par soirée dans le jeu, 10 dans la règle validée ; dans le jeu, une bande diagonale cache le 3e emplacement.
 
+### Barre latérale et navigation (T4, Q11, validé le 22/11)
+- **Tout est visible sous quatre titres** (retour du 22/11) : Accueil, Messages ; **Soirées** : Carte, Calendrier, Résultats ; **Combattants** : Effectif, Recrutement ; **Le monde** : Classements, Camps, Presse ; **Direction** : Finances, Organisation ; en bas, Options et Menu principal.
+- **Chaque écran est à un clic**, barre ouverte ou repliée. Les quatre titres ne sont pas cliquables.
+- **Mêmes hauteurs ouverte et repliée** : logo sur 128 px, lignes de 59 px, titres de 31 px, trait de 2 px avant Options. La barre remplit les 1080 px et aucune ligne ne bouge en hauteur quand on la replie. Largeur : 260 px, 84 px repliée.
+- **Repliée** : les icônes sont centrées dans leur ligne, les titres restent écrits et centrés en 16 px. Le logo de 54 px garde le même centre vertical que le grand logo et s'aligne sur la colonne des icônes. Le bouton de repli reste dans l'angle.
+- **L'octogone jaune** reste sur la ligne de l'écran concerné, à droite du libellé, puis dans l'angle de l'icône en version repliée.
+- **Mouvement** : la case blanche est celle de `mouvement.js`, sans second système ni mode de fusion.
+- **Identifiants inchangés** : `S.ecran`, `data-go`, adresses, Retour et Avant. Les sous-menus restent en haut de l'écran, sous l'en-tête. Recruteur et Rapports éclairent Recrutement, la présentation éclaire la Carte, la Pesée éclaire l'Accueil.
+- **Sans barre** : Menu principal, Mes parties, Nouvelle partie, création, Arrivée, et les temps forts, résultats et discours de la soirée.
+- **Maquette** : `barre.js`, `barre.css`, préfixe `br-`, chargés juste avant `mouvement.js`. Seule la clé `maquette-barre-1` est écrite. Adresses : `&brbarre=ouverte|repliee`, `&brvar=titres|groupes|r11|jeu` (la version validée, deux variantes écartées, la barre d'avant), `&brgroupe=soirees|monde|direction|aucun` pour les variantes à groupes.
+- **Inventé, à relire** : les quatre titres. La mention « à relire » s'affiche barre ouverte ; elle ne tient pas en version repliée.
+- **Ouvert** : une fin de contrat allume « Contrats » dans le jeu ; la maquette n'allume pas Recrutement, car ces contrats se gèrent dans la fiche et par message.
+- **Écarts pour le code** : les touches A et E devront suivre le nouvel ordre ; l'octogone des Préliminaires devra allumer la Carte ; la Pesée éclaire l'Accueil alors qu'on y arrive par le Calendrier.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -499,6 +514,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Pesée (à la place de la semaine du combat) | T10, Q17 | Validé (section 11, « Écran Pesée ») : préliminaires sur un écran, carte principale deux par deux, jauges qui montent ensemble depuis 0, une phrase de face-à-face. Sur un poids manqué, c'est l'adversaire qui décide. |
 | Menu, Mes parties, Nouvelle partie, création | T1, T2, T3, T5, T6, R1 | Validé (section 11, « Menu principal, Mes parties, Nouvelle partie, création ») : l'accueil du jeu avec « Reprendre » à la place des touches ; la dernière partie en grand ; une scène par organisation ; six ans qui défilent, puis l'Arrivée. |
 | Mouvement commun, tous les écrans | T3 | Validé (section 11, « Le mouvement commun à tous les écrans ») : barre, onglets, filtres, tris et survol, sans tunnel animé sur l'Accueil ni mode de fusion sur le texte. |
+| Barre latérale et navigation | T4, Q11 | Validé (section 11, « Barre latérale et navigation ») : les 12 écrans visibles sous quatre titres, chacun à un clic, aux mêmes hauteurs ouverte et repliée. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
@@ -510,7 +526,7 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Police | Saira, celle du jeu | T2b |
 | Octogone « Dans la cage » | Version « rempli » (il impose / il subit). Deux autres versions existent : « en chiffres » et « comment il gagne » | Q16c |
 | Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
-| Barre latérale | Liste actuelle du jeu, « Actualités » devenu « Messages ». Le regroupement en familles sous de nouveaux noms (T4, Q11) reste à proposer | T4, Q11 |
+| Barre latérale | Structure validée le 22/11 : 12 écrans visibles sous quatre titres. Restent à relire les noms Soirées, Combattants, Le monde et Direction ; reste à trancher si une fin de contrat allume Recrutement | T4, Q11 |
 | Place du « Fil » et des « Suivis » | Fil dans Presse (validé le 18/11) ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
 | Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |

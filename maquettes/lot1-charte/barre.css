@@ -1,0 +1,50 @@
+/* ==== [ANCRE: MAQUETTE_BARRE] — La barre regroupée (T4, Q11). Mêmes dimensions que le jeu : 260 px, 84 px repliée, lignes de 59 px. ==== */
+.barre.br-on .item:focus-visible,.br-zone:focus-visible{outline:2px solid var(--blanc);outline-offset:-4px}
+.barre.br-on .item.cur:focus-visible{outline-color:var(--noir)}
+
+/* Une ligne de groupe : son nom, ce qu'elle contient, puis le chevron */
+.item.br-g{padding-right:40px;gap:0}
+.item.br-g>.mq{position:absolute;right:22px;top:50%;margin-top:-10px} /* même colonne que sur une ligne simple */
+.br-g .lib{display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0;line-height:1}
+.br-nom{display:flex;align-items:center;gap:9px;line-height:.92}
+.br-relire{font-family:var(--texte);font-style:normal;font-weight:600;font-size:15px;line-height:1;letter-spacing:.02em;text-transform:none;color:var(--texte2);white-space:nowrap}
+.br-sous{font-family:var(--texte);font-weight:500;font-size:18px;line-height:1;letter-spacing:0;text-transform:none;color:var(--texte2);white-space:nowrap}
+.item.cur .br-relire,.item.cur .br-sous,.item.mv-copie .br-relire,.item.mv-copie .br-sous{color:rgba(13,11,11,.78)}
+.barre.mv-glisse .item.cur .br-relire,.barre.mv-glisse .item.cur .br-sous{color:var(--texte2)}
+.br-fl{position:absolute;right:2px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--texte2)}
+.br-fl svg{display:block}
+.item.cur .br-fl{color:var(--noir)}
+.barre.mv-glisse .item.cur .br-fl{color:var(--texte2)}
+.item.mv-copie .br-fl{color:var(--noir)}
+
+/* La zone du chevron : posée sur la ligne, sans décaler le calcul de la case blanche */
+.br-zone{flex:none;align-self:flex-end;position:relative;z-index:1;width:44px;height:57px;margin:-59px 0 2px}
+.br-zone:hover{background:rgba(233,230,225,.1)}
+.item.cur+.br-zone:hover{background:rgba(13,11,11,.1)}
+
+/* Les écrans du groupe ouvert */
+.item.br-e{padding-left:48px;background:rgba(233,230,225,.035)}
+.item.br-e:hover{background:rgba(233,230,225,.09)}
+.item.br-e.cur{background:var(--blanc)}
+.barre.mv-glisse .item.br-e.cur{background:rgba(233,230,225,.035)}
+.item.br-e.mv-copie{background:transparent}
+.item.br-e::before{content:"";position:absolute;left:28px;top:0;bottom:-2px;width:2px;background:var(--bord)}
+.item.br-e.cur::before{background:rgba(13,11,11,.45)}
+.barre.mv-glisse .item.br-e.cur::before{background:var(--bord)}
+.item.br-e.mv-copie::before{background:rgba(13,11,11,.45)}
+
+/* Variante « titres » : tout reste visible sous quatre titres */
+.br-titre{height:31px;flex:none;padding:0 28px 3px;display:flex;align-items:flex-end;gap:9px;border-bottom:2px solid var(--sep);font-weight:700;font-size:16px;line-height:1;letter-spacing:.09em;text-transform:uppercase;color:var(--texte2);white-space:nowrap;overflow:hidden}
+
+/* Repliée : l'icône seule, à la même hauteur de ligne */
+body.repliee .barre.br-on .item{height:59px}
+body.repliee .item.br-g{padding:0;gap:0}
+body.repliee .br-fl,body.repliee .br-zone{display:none}
+body.repliee .item.br-e{padding:0}
+body.repliee .item.br-e::before{left:9px}
+/* Ouverte ou repliée, chaque élément garde sa hauteur : 128 + 12 × 59 + 4 × 31 + 2 + 2 × 59 = 1080 px. */
+body.repliee .barre.br-on .barre-logo{height:128px}
+body.repliee .barre.br-on .item .ic svg{display:block} /* sinon l'icône tombe sur la ligne de base, 4 px trop bas */
+body.repliee .br-titre{padding:0 0 3px;justify-content:center;gap:0;font-family:var(--titre);font-size:16px;letter-spacing:0}
+body.repliee .br-titre .br-relire{display:none}
+/* ==== [FIN ANCRE] ==== */
