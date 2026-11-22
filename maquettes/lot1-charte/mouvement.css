@@ -1,0 +1,34 @@
+/* Le mouvement « fluide » (T3), commun à tous les écrans. Rien n'est actif en mouvement réduit, sauf avec &mvmouv=1. */
+body.mv-propre .jauge>i{animation:none}
+/* Pendant un glissement, Windows lisse les lettres par sous-pixels et leurs bords bleuissent :
+   le texte de la barre et des onglets passe en gris neutre, les pastilles gardent leur jaune. */
+.barre.mv-glisse .logo-mots,.barre.mv-glisse .item .lib,.barre.mv-glisse .item .ic svg,.mv-rang-gris .mv-gris,.mv-rang-gris .onglet>.n{filter:grayscale(1)}
+
+/* Le reflet de la prochaine chose à faire */
+.mv-reflet{position:absolute;left:0;top:0;bottom:0;width:30%;z-index:3;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,250,225,.62),transparent)}
+
+/* L'élément courant de la barre */
+.mv-cur{position:absolute;z-index:3;overflow:hidden;background:var(--blanc);pointer-events:none;will-change:transform}
+.mv-cur-v{position:absolute;will-change:transform}
+.item.mv-copie{background:transparent;color:var(--noir)}
+.barre.mv-glisse .item.cur{background:transparent;color:var(--blanc)}
+
+/* L'onglet ouvert : une copie de la rangée, découverte par la plaque */
+.mv-plaque{z-index:7;background:var(--blanc);pointer-events:none;animation:none!important;will-change:clip-path}
+.mv-plaque *{animation:none!important;transition:none!important}
+.onglet.ouvert.mv-sous{background:var(--ligne)!important;color:var(--blanc)!important}
+
+/* Le filtre choisi */
+.mv-filtre{position:absolute;left:0;width:1px;height:3px;z-index:7;background:var(--blanc);transform-origin:0 50%;pointer-events:none;will-change:transform,opacity}
+
+/* Les lignes */
+body.mv-on #corps :is(.ligne,.ms-l,.pr-it){transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+body.mv-on #corps :is(.ligne,.ms-l,.pr-it):hover{transform:translateX(6px)}
+
+/* Les tableaux */
+.mv-sv{position:relative}
+.mv-svt{position:relative;z-index:1}
+.mv-tri>*{background:var(--panneau)}
+.mv-survol{--c:10px;position:absolute;left:0;top:0;z-index:0;background:rgba(233,230,225,.38);opacity:0;pointer-events:none;transition:transform .13s cubic-bezier(.2,.8,.2,1),opacity .12s;will-change:transform}
+.mv-survol::after{content:'';position:absolute;inset:2px;background:#201C1C;clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px)}
+.mv-survol.on{opacity:1}

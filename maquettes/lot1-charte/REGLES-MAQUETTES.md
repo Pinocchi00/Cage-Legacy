@@ -450,6 +450,21 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Combat et soirée : spectaculaire autorisé** (T3) : faisceaux, noms qui entrent, flash, temps forts animés de l'arène vue du dessus (R38).
 - Tout mouvement s'arrête si l'ordinateur demande moins d'animations (`prefers-reduced-motion`).
 
+### Le mouvement commun à tous les écrans (T3, validé le 22/11)
+- **Un seul jeu d'effets** (`mouvement.js`, `mouvement.css`, préfixe `mv-`), chargé en dernier, qui ne change ni les données ni le rendu des écrans. Toute nouvelle maquette en profite sans rien ajouter.
+- **Trois règles** : rien ne bloque un clic ; seul ce qui est visible s'anime ; un écran déjà vu s'ouvre plus vite.
+- **Barre latérale** : la case blanche glisse d'un écran à l'autre en 0,26 s. La case d'arrivée ne s'allume pas avant la fin du passage.
+- **Onglets** : la plaque blanche glisse vers l'onglet choisi, y compris dans la fiche.
+- **Filtres** : un trait blanc relie l'ancien filtre au nouveau. **Sa durée dépend de la distance** (retour du 22/11 : « trop rapide ») : de 0,32 à 0,72 s, puis il se pose et s'efface.
+- **Tris** : chaque ligne visible glisse à sa nouvelle place. Au-delà de 40 lignes, le tableau bouge d'un seul bloc pour ne pas saccader.
+- **Survol** : une surbrillance octogonale suit la souris dans les tableaux ; les lignes de l'Accueil, des Messages et de la Presse se décalent de 6 px.
+- **Accueil et Effectif** : blocs qui arrivent en moins de 0,7 s, chiffres qui défilent, jauges qui se remplissent, reflet sur la prochaine chose à faire, lignes en cascade, série qui se pose.
+- **Pas de tunnel animé sur l'Accueil** (retour du 22/11). Les tunnels déjà validés (Arrivée, Nouvelle partie, création, soirée) gardent le leur.
+- **Gardé tel quel** : les entrées validées de chaque écran ; la pesée, la présentation, la soirée, l'Arrivée et le menu gardent leur mise en scène.
+- **Couleurs** (retour du 22/11) : **jamais de mode de fusion** (`mix-blend-mode`) pour un effet qui passe sur du texte : il transforme le jaune en bleu. La plaque contient une vraie copie du texte en noir. Pendant un glissement, le texte de la barre et des onglets reste en gris neutre, car Windows colore sinon le bord des lettres.
+- **Maquette** : `&mvmouv=1` montre tout le mouvement même si l'ordinateur en demande moins, et le garde pendant la session ; `&mvmouv=0` revient au réglage de l'ordinateur ; `&mvessai=0` retire ce jeu d'effets pour comparer.
+- **Pas encore dans le jeu** : il y entrera avec chaque écran.
+
 ### Lisibilité (charte L1 à L5)
 - Prévu pour 1920, **lisible dès 1280** : la scène entière se met à l'échelle, sans défilement horizontal.
 - Toute info utile à une décision : **au moins 18 px dans la scène de 1920**. C'est le minimum de la charte (13 px à 1440, L2), arrondi ; viser 20 px pour rester confortable à 1280. Contraste d'au moins 4,5 : 1.
@@ -483,6 +498,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Options, aide | T1, T5 | Validé (section 11, « Écran Options ») : le vrai écran du jeu à la charte, tout simple ; les aides regroupées dans l'onglet Aide. |
 | Pesée (à la place de la semaine du combat) | T10, Q17 | Validé (section 11, « Écran Pesée ») : préliminaires sur un écran, carte principale deux par deux, jauges qui montent ensemble depuis 0, une phrase de face-à-face. Sur un poids manqué, c'est l'adversaire qui décide. |
 | Menu, Mes parties, Nouvelle partie, création | T1, T2, T3, T5, T6, R1 | Validé (section 11, « Menu principal, Mes parties, Nouvelle partie, création ») : l'accueil du jeu avec « Reprendre » à la place des touches ; la dernière partie en grand ; une scène par organisation ; six ans qui défilent, puis l'Arrivée. |
+| Mouvement commun, tous les écrans | T3 | Validé (section 11, « Le mouvement commun à tous les écrans ») : barre, onglets, filtres, tris et survol, sans tunnel animé sur l'Accueil ni mode de fusion sur le texte. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
