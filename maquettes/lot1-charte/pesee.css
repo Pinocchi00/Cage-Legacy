@@ -1,0 +1,133 @@
+/* Maquette lot 1 — la pesée. Préfixe pe-. Les préliminaires ensemble, puis la carte principale duel par duel, avec une jauge qui monte.
+   Touche au combat : le mouvement peut être marqué (T3), et tout s'arrête en mouvement réduit. */
+.pe{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;min-height:0}
+.pe .relire{font-size:15px;margin-left:0}
+.pe .neg{color:var(--neg)}.pe .pos{color:var(--vert)}
+.pe-pan{min-height:0}
+.pe-pan .p3{min-height:0}
+.pe-zone{position:relative;flex:1;min-height:0}
+.pe-lien{margin-left:auto;font-weight:700;font-size:20px;color:var(--jaune);cursor:pointer;white-space:nowrap}
+.pe-lien:hover{text-decoration:underline;text-underline-offset:4px}
+.ca-sec .pe-lcal{margin-left:16px;font-size:20px;padding-top:0}
+
+/* Les étapes */
+.pe-tabs{flex:none;display:flex;align-items:center;gap:6px}
+.pe-tabs .relire{flex:none;margin-left:6px}
+.pe-tabs .onglet{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:10px;height:56px;line-height:1;padding:0 10px;font-size:30px;cursor:pointer}
+.pe-tabs .onglet:disabled{color:rgba(233,230,225,.5);background:rgba(37,33,33,.5);cursor:default}
+
+/* La jauge */
+.pe-jg{--bas:24px;position:relative;z-index:2;height:100%;min-height:0;display:flex;justify-content:center;padding-bottom:var(--bas)}
+.pe-j{--c:8px;position:relative;flex:none;width:42px;height:100%;background:#2f2a2a;overflow:hidden}
+.pe-jf{position:absolute;left:0;right:0;bottom:0;height:100%;background:var(--blanc);transform-origin:bottom;transform:scaleY(var(--p));will-change:transform;transition:background .16s}
+.pe-j.pose.ok .pe-jf{background:var(--vert)}
+.pe-j.pose.trop .pe-jf{background:var(--neg)}
+.pe-ln{position:absolute;z-index:3;left:0;right:0;bottom:calc(var(--bas) + (100% - var(--bas))*var(--l));height:3px;margin-bottom:-1px;background:var(--blanc);box-shadow:0 0 0 1px rgba(13,11,11,.75)}
+.pe-b0{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:16px;line-height:20px;color:var(--texte2);white-space:nowrap}
+
+/* Un combattant */
+.pe-co{position:relative;z-index:2;min-width:0;display:flex;flex-direction:column}
+.pe-co.g{align-items:flex-end;text-align:right}
+.pe-co.d{align-items:flex-start;text-align:left}
+.pe-no{line-height:.94;text-transform:uppercase;white-space:nowrap}
+.pe-bi{font-size:20px;color:var(--texte2);white-space:nowrap}
+.pe-val{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.pe-kg{font-variant-numeric:tabular-nums;line-height:.95}
+.pe-val>span{color:var(--texte2)}
+.pe-v{display:inline-flex;align-items:center;gap:7px;font-weight:700;white-space:nowrap;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+.pe-v.pose{opacity:1;transform:none}
+.pe-v i{font-style:normal;font-weight:800}
+.pe-v.ok{color:var(--vert)}.pe-v.trop{color:var(--neg)}
+
+/* Les préliminaires */
+.pe-pre{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:12px}
+.pe-pre .pan>.p2>.p3{padding:14px 18px 12px}
+/* Fluidité : une découpe posée sur un parent force le navigateur à refaire tout le panneau à chaque image de la jauge.
+   Ici, l'octogone du panneau est dessiné sur une couche à part, derrière le contenu : même rendu, 60 images par seconde. */
+.pe-pre .pan,.pe-pre .pan>.p2,.pe-pre .pan>.p2>.p3{position:relative;isolation:isolate;clip-path:none;background:none}
+.pe-pre .pan::before,.pe-pre .pan>.p2::before,.pe-pre .pan>.p2>.p3::before{content:"";position:absolute;inset:0;z-index:-1;clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c))}
+.pe-pre .pan::before{background:var(--bord)}
+.pe-pre .pan>.p2::before{background:var(--noir)}
+.pe-pre .pan>.p2>.p3::before{background:var(--panneau)}
+.pe-ph{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pe-ph .etiq{font-size:18px;white-space:nowrap}
+.pe-phl{display:inline-flex;align-items:center;gap:7px;font-size:18px;white-space:nowrap}
+.pe-phl i{width:18px;height:3px;background:var(--blanc)}
+.pe-pb{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 118px minmax(0,1fr);align-items:center;gap:12px;margin-top:10px}
+.pe-pb .pe-jg{gap:14px}
+.pe-pb .pe-no{font-size:40px}
+.pe-pb .pe-bi{margin-top:2px;font-size:19px}
+.pe-pb .pe-val{margin-top:12px}
+.pe-pb .pe-kg{font-size:62px}
+.pe-pb .pe-val>span{font-size:24px}
+.pe-pb .pe-v{margin-top:5px;font-size:19px}
+
+/* Un duel de la carte principale */
+.pe-du{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px}
+.pe-fo{--c:18px;flex:1;min-height:0;padding:3px;background:var(--rouge-vif)}
+.pe-fo.or{background:var(--jaune)}
+.pe-sc{--c:16px;position:relative;width:100%;height:100%;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 360px minmax(0,1fr);align-items:center;gap:30px;padding:62px 46px 18px;background:#090707}
+.pe-tun{--w:2240px;position:absolute;left:calc(50% - var(--w)*.64);top:calc(50% - var(--w)*.28125);width:var(--w);height:calc(var(--w)*.5625);pointer-events:none;background:url('../../images/accueil-octogones.jpg') 0 0/100% 100% no-repeat;filter:brightness(.3)}
+.pe-fo.or .pe-tun{background-image:url('../../images/tunnel-or.jpg')}
+.pe-role{position:absolute;z-index:3;left:50%;top:15px;transform:translateX(-50%);padding:3px 14px;background:rgba(13,11,11,.86);font-size:22px;font-weight:600;white-space:nowrap}
+.pe-sc .pe-jg{justify-content:space-between}
+.pe-sc .pe-j{--c:12px;width:92px}
+.pe-vs{position:absolute;z-index:4;left:50%;bottom:calc(var(--bas) + (100% - var(--bas))*.16);display:grid;place-items:center;width:84px;height:84px;margin-left:-42px;background:var(--blanc);color:var(--noir);font-size:42px}
+.pe-lim{position:absolute;z-index:4;left:50%;bottom:calc(var(--bas) + (100% - var(--bas))*var(--l) + 7px);transform:translateX(-50%);padding:1px 8px;background:rgba(13,11,11,.9);font-size:20px;font-weight:600;white-space:nowrap}
+.pe-sc .pe-b0{left:92px;right:92px}
+.pe-pr{font-size:27px;font-weight:600;white-space:nowrap}
+.pe-pr i{font-style:normal;color:var(--texte2)}
+.pe-sc .pe-no{margin-top:12px}
+.pe-sc .pe-no .nom{text-decoration-thickness:4px;text-underline-offset:7px}
+.pe-sc .pe-v svg{width:32px;height:32px}
+.pe-sc .pe-bi{margin-top:6px;font-size:23px;color:var(--blanc)}
+.pe-sc .pe-val{margin-top:14px}
+.pe-sc .pe-kg{font-size:128px}
+.pe-sc .pe-val>span{font-size:46px}
+.pe-sc .pe-v{margin-top:6px;font-family:var(--titre);font-weight:800;font-size:38px;line-height:1;text-transform:uppercase}
+
+/* La phrase du face-à-face */
+.pe-phrase{flex:none}
+.pe-phrase .pan>.p2>.p3,.pe-phrase>.p2>.p3{padding:15px 24px;gap:8px}
+.pe-face{display:flex;align-items:center;gap:20px}
+.pe-face .etiq{flex:none}
+.pe-face p{margin:0;font-size:27px;line-height:1.15}
+.pe-face .relire{margin-left:auto}
+
+/* La réponse de l'adversaire */
+.pe-rep{display:grid;grid-template-columns:minmax(0,1fr) 780px;align-items:center;gap:24px}
+.pe-rt{min-width:0}
+.pe-rt>b{display:flex;align-items:center;gap:10px;font-size:40px;line-height:1;white-space:nowrap}
+.pe-rt>b>span:first-child{display:inline-flex}
+.pe-rt>b i{font-style:normal}
+.pe-rt p{margin:5px 0 0;font-size:20px;line-height:1.14;color:var(--texte2)}
+.pe-rt .pe-dit{color:var(--blanc);font-size:21px}
+.pe-dit .relire{vertical-align:2px}
+.pe-bande .pe-cells{height:104px}
+.pe-bande .pe-face{padding-top:9px;border-top:2px solid var(--sep)}
+.pe-monte .pe-bande{animation:pe-in .28s 1s cubic-bezier(.2,.8,.2,1) both}
+.pe-cells{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pe-cells>div{--c:9px;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;padding:4px 12px;background:var(--ligne)}
+.pe-cells .etiq{font-size:17px;line-height:1.05;white-space:nowrap}
+.pe-cells b{font-size:32px;line-height:1;white-space:nowrap}
+
+/* La carte, depuis la barre */
+.pe-ca{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:12px}
+.pe-ca>div{min-width:0}
+.pe-ca .etiq{display:block;margin-bottom:5px}
+.pe-c{display:flex;align-items:center;justify-content:space-between;gap:12px;height:72px;border-top:2px solid var(--sep)}
+.pe-cn{min-width:0;display:flex;align-items:baseline;gap:8px;font-size:26px;font-weight:700;white-space:nowrap}
+.pe-cn i{font-style:normal;font-weight:500;font-size:19px;color:var(--texte2)}
+.pe-cr{flex:none;font-size:20px;color:var(--texte2)}
+.pe-c b{flex:none;font-size:20px}
+.pe-c.hors .pe-cn{color:var(--texte2);text-decoration:line-through}
+
+/* Mouvement */
+.pe-anime .pe-pre>*,.pe-anime .pe-fo{animation:pe-in .34s cubic-bezier(.2,.8,.2,1) both}
+/* Quand les jauges montent, rien d'autre ne retarde l'écran ; le repère du bas revient à l'arrivée. */
+.pe-monte .pe-pre>*,.pe-monte .pe-fo{animation:none}
+.pe-monte .pe-b0{animation:pe-b0 .2s 1s both}
+@keyframes pe-b0{from{opacity:0}to{opacity:1}}
+@keyframes pe-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.pe .onglet:focus-visible,.pe .bb:focus-visible,.pe .bouton:focus-visible,.pe-lien:focus-visible{outline:2px solid var(--blanc);outline-offset:-2px}
+@media (prefers-reduced-motion:reduce){.pe *,.pe,.pe *::before,.pe *::after{animation:none!important;transition:none!important}.pe:not(.pe-force) .pe-v{opacity:1!important;transform:none!important}}

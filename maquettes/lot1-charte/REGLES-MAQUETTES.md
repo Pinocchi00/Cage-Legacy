@@ -393,6 +393,18 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Mouvement** : discret, les lignes apparaissent une fois à l'ouverture ; rien en mouvement réduit.
 - **Ouvert** : l'accompagnement de Leïla, gardé et activé comme dans le jeu, ressemble au tutoriel que T5 retire. **Écart repéré** : le jeu compose encore 9 combats (5 + 4), la règle validée en demande 10 (4 + 6).
 
+### Écran Pesée (T1, T3, T5, T10, Q17, validé le 22/11)
+- **Plus d'écran « semaine du combat »** (retour du 22/11) : conférence, journée des médias, face-à-face à part et jour J sont retirés. Il reste **la pesée**, le 15 février, puis la Soirée.
+- **Déroulé** : onglets Préliminaires, puis les quatre combats de la carte principale, du combat 4 au combat principal. **Les six préliminaires sur un même écran**, adversaires côte à côte ; **la carte principale deux par deux**, un duel par écran. Le bouton jaune nomme l'étape suivante (Carte principale, Combat suivant, La soirée).
+- **La jauge** : les deux adversaires **partent de 0 en même temps et arrivent ensemble en une seconde**, le chiffre suit la barre, puis le verdict se pose (« Dans le poids » en vert, « 1,2 kg de trop » en rouge). Trait blanc = limite de la catégorie. L'échelle commence à 85 % de la limite, valeur écrite sous la paire. Mouvement fluide, sans délai au clic.
+- **Face-à-face** : une phrase, pour la carte principale seulement.
+- **Un poids manqué : c'est l'adversaire qui décide** (retour du 22/11), jamais le joueur. Pas de bouton ni de confirmation : l'écran montre sa réponse, sa phrase et les chiffres (ce que perd le fautif, ce que reçoit l'adversaire, le versé sans combat, la carte). S'il accepte : poids convenu, 20 % de la bourse du fautif passent à l'adversaire, 0 € pour Split. S'il refuse : combat annulé, l'adversaire reçoit sa part fixe (hypothèse).
+- **Un clic pendant la montée du duel au poids manqué** affiche le verdict au lieu de passer au combat suivant.
+- **Maquette** : la carte complète de la 63 est lue sans rien changer (Résultats, Soirée, Finances identiques). « Accepte » par défaut ; « refuse » ne lance pas la Soirée, qui joue une carte fixe. On y arrive par « Voir la pesée › » dans le Calendrier ; dans le jeu, Continuer s'arrêtera le jour de la pesée. Adresses : `?ecran=pesee&pepas=0..4&pecas=accepte|refuse|sans&pevue=carte&pemouv=1` (`pemouv=1` montre la montée même si l'ordinateur demande moins d'animations).
+- **Inventé, à relire** : les 20 poids, le poids manqué de Darras, les réponses de Labbé, les phrases de face-à-face.
+- **Ouvert** : ce qui fait accepter ou refuser un adversaire ; la place des 22 familles d'événements du jeu (blessure au camp, visa…), qui n'ont plus d'écran ; « les soirées le mardi ».
+- **Écarts repérés, à aligner** : le jeu laisse le joueur choisir et retire la pénalité de la caisse de Split ; le bloc « La semaine du combat » du Calendrier annonce encore la conférence ; Darras « de Lille » (Presse, Messages) ou de Dakar (fiche) ; son trait « Jamais deux défaites de suite » est faux après la 63 ; Mezouar à Grenoble (Camps) ou à Marseille (discours de la Soirée).
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -455,6 +467,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Validé (section 11, « Soirée en direct, temps forts, résultat, discours, bilan ») : temps forts dans l'arène lisibles d'un coup d'œil, résultat dévoilé pas à pas, discours en scène et interview, bilan avec « Revoir » au choix. Primes fixées par le joueur (1 000 € à 100 000 €) **dans les Finances** (section 11, « Les primes »). |
 | Options, aide | T1, T5 | Validé (section 11, « Écran Options ») : le vrai écran du jeu à la charte, tout simple ; les aides regroupées dans l'onglet Aide. |
+| Pesée (à la place de la semaine du combat) | T10, Q17 | Validé (section 11, « Écran Pesée ») : préliminaires sur un écran, carte principale deux par deux, jauges qui montent ensemble depuis 0, une phrase de face-à-face. Sur un poids manqué, c'est l'adversaire qui décide. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
