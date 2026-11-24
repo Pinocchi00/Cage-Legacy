@@ -18,14 +18,14 @@ const PP_JOUR=new Date(2027,0,4),PP_PREV=2140,PP_PLACES=4000;
 const ppCalme=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* Six espoirs de Split, une particularité chacun, vérifiée dans les données (Classements, Effectif). */
 const PP_ESPOIRS=[
-  {id:'rizzo',part:'Invaincu : 6 combats, 6 victoires'},
+  {id:'rizzo',part:'Invaincu : 6 combats, 6 victoires'},
   {id:'musaev',part:'5 de ses 7 victoires par soumission'},
   {id:'rachidi',part:'5 victoires de suite'},
   {id:'gpoidslourd1',part:'Le plus jeune du top 20 mondial'},
   {id:'gpoidsmouchef12',part:'14 victoires à 22 ans'},
-  {id:'gpoidsplume2',part:'Fausse garde : il combat en gaucher'},
+  {id:'gpoidsplume2',part:'Fausse garde : il combat en gaucher'},
 ];
-const PP_ESP_COURT={rizzo:'Invaincu, 6 victoires',musaev:'Cinq victoires sur sept par soumission',rachidi:'Cinq victoires de suite',
+const PP_ESP_COURT={rizzo:'Invaincu, 6 victoires',musaev:'5 victoires sur 7 par soumission',rachidi:'5 victoires de suite',
   gpoidslourd1:'Le plus jeune du top 20 mondial',gpoidsmouchef12:'14 victoires à 22 ans',gpoidsplume2:'Combat en gaucher'};
 
 S.pp=Object.assign({etape:'split',choix:[],anim:true,actif:false,accueil:false,dir:1,bandeH:0,vol:null},(()=>{try{const v=JSON.parse(localStorage.getItem(PP_CLE))||{},o={};
@@ -91,9 +91,9 @@ function ppBande(){
     const champs=moi.filter(x=>x.rang==='C'),titres=s26.filter(x=>x.titre),enJeu=new Set(titres.map(x=>x.titre));
     const vis=[
       `<span class="pp-v8">${Array.from({length:8},(_,n)=>`<i class="octr ${n+1===sp.rang?'ici':''}" style="--d:${700+n*70}ms">${n+1}</i>`).join('')}</span>`,
-      `<span class="pp-vb pp-vbc">${niv.map((v,n)=>`<i style="--h:${Math.max(4,Math.round(v/nMax*100))}%;--d:${800+n*70}ms" title="${n?`Après la Fight Night ${ca.pts.filter(x=>!x.avant)[n].o.n}`:'Le 1er janvier 2026'} : ${nb(v)} €"></i>`).join('')}</span>`,
+      `<span class="pp-vb pp-vbc">${niv.map((v,n)=>`<i style="--h:${Math.max(4,Math.round(v/nMax*100))}%;--d:${800+n*70}ms" title="${n?`Après la Fight Night ${ca.pts.filter(x=>!x.avant)[n].o.n}`:'Le 1er janvier 2026'} : ${nb(v)} €"></i>`).join('')}</span>`,
       `<span class="pp-vh pp-vhl" title="${nb(vend)} places vendues sur ${nb(cap)} en 2026"><i style="--p:${vend/cap*100}%"></i></span>`,
-      `<span class="pp-vc">${champs.map((x,n)=>`<i class="octr ${enJeu.has(x.cat)?'':'att'}" style="--d:${900+n*60}ms" title="${esc(x.cat)}${enJeu.has(x.cat)?' : mise en jeu en 2026':''}"></i>`).join('')}</span>`,
+      `<span class="pp-vc">${champs.map((x,n)=>`<i class="octr ${enJeu.has(x.cat)?'':'att'}" style="--d:${900+n*60}ms" title="${esc(x.cat)}${enJeu.has(x.cat)?' : mise en jeu en 2026':''}"></i>`).join('')}</span>`,
     ];
     const ch=(v,suf,l,so,i)=>`<div class="pp-hc" style="animation-delay:${500+i*110}ms"><div class="pp-hcr"><b class="T"><span data-ppn="${v}">${nb(v)}</span>${suf}</b>${vis[i]}</div><span class="pp-hcl">${l}</span><span class="sous">${so}</span></div>`;
     /* Le fil du bas : ce qui ne figure pas déjà au-dessus. */
@@ -101,25 +101,25 @@ function ppBande(){
     const rec=[...s26].sort((x,y)=>y.public[0]-x.public[0])[0],der=s26[s26.length-1],dev=ogClasse().find(x=>x.rang===sp.rang-1);
     const m=der.main,ga=m&&parId(m.g==='a'?m.a:m.b),pe=m&&(parId(m.g==='a'?m.b:m.a)||{nom:m.g==='a'?m.b:m.a});
     const fil=[
-      `Record : <b>${nb(rec.public[0])} spectateurs</b> à ${esc(rec.ville)}, le ${dc(new Date(rec.date))}`,
-      `Dernière soirée : <b>Fight Night ${der.n}</b>, ${esc(der.ville)}, le ${dc(new Date(der.date))}${ga?` · <b>${esc(ga.nom)}</b> bat ${esc(pe.nom)}`:''}`,
-      `Juste devant Split : <b>${esc(dev.court||dev.nom)}</b>, ${dev.rang}/8`,
+      `Record : <b>${nb(rec.public[0])} spectateurs</b> à ${esc(rec.ville)}, le ${dc(new Date(rec.date))}`,
+      `Dernière soirée : <b>Fight Night ${der.n}</b>, ${esc(der.ville)}, le ${dc(new Date(der.date))}${ga?` · <b>${esc(ga.nom)}</b> bat ${esc(pe.nom)}`:''}`,
+      `Juste devant Split : <b>${esc(dev.court||dev.nom)}</b>, ${dev.rang}/8`,
     ].map(t=>`<span>${t}</span><i class="octr"></i>`).join('');
     c=`<div class="pp-hid"><span class="T pp-split">Split</span><span class="pp-ville">Lyon · depuis 2004</span></div>
       <div class="pp-hposte"><span class="etiq">Poste</span><span class="T pp-poste">Matchmaker</span><span class="pp-ville">depuis ce matin</span></div>
-      <div class="pp-hch">${ch(sp.rang,'<small>/8</small>','place',`point faible : ${sp[faible]}/8 ${MES[faible]}`,0)}${ch(k(ca.c),'<small> k€</small>','en caisse au 4 janvier',`${ca.c>=FI_CAISSE0?'+':'−'} ${nb(k(Math.abs(ca.c-FI_CAISSE0)))} k€ sur 2026`,1)}${ch(Math.round(vend/cap*100),' %','des places vendues en 2026',`${pleines} salle pleine sur ${s26.length} soirées`,2)}${ch(titres.length,'','combats pour un titre en 2026',`<i class="pp-lg octr"></i> ceinture mise en jeu : ${enJeu.size} sur ${champs.length}`,3)}</div>
+      <div class="pp-hch">${ch(sp.rang,'<small>/8</small>','place',`point faible : ${sp[faible]}/8 ${MES[faible]}`,0)}${ch(k(ca.c),'<small> k€</small>','en caisse au 4 janvier',`${ca.c>=FI_CAISSE0?'+':'−'} ${nb(k(Math.abs(ca.c-FI_CAISSE0)))} k€ sur 2026`,1)}${ch(Math.round(vend/cap*100),' %','des places vendues en 2026',`${pleines} salle pleine sur ${s26.length} soirées`,2)}${ch(titres.length,'','combats pour un titre en 2026',`<i class="pp-lg octr"></i> ceinture mise en jeu : ${enJeu.size}/${champs.length}`,3)}</div>
       <div class="pp-fil"><span class="pp-filt">Split en bref</span><div class="pp-filv"><div class="pp-fild"><span class="pp-fc">${fil}</span><span class="pp-fc pp-fc2" aria-hidden="true">${fil}</span></div></div></div>`;
   }else if(e==='contrat'){
     const f=(l,v,s,i)=>`<div class="pp-bf" style="animation-delay:${250+i*90}ms"><span class="etiq">${l}</span><b class="T">${v}</b><span class="sous">${s}</span></div>`;
-    c=`<div class="pp-btit"><span class="T">Ton contrat</span><span class="pp-bphr">Ce que tu signes, et ce que Gérard Vasseur attend de ta saison.</span></div>
-      <div class="pp-bfs">${f('Durée','Une saison','jusqu’au 31 déc. 2027',0)}${f('Salaire','3 200 €','par mois',1)}${f('Bilan de mi-saison','Juillet','le 1er, avec Gérard Vasseur',2)}
+    c=`<div class="pp-btit"><span class="T">Ton contrat</span><span class="pp-bphr">Contrat et objectifs 2027.</span></div>
+      <div class="pp-bfs">${f('Durée','1 saison','jusqu’au 31 déc. 2027',0)}${f('Salaire','3 200 €','par mois',1)}${f('Bilan de mi-saison','Juillet','le 1er, avec Gérard Vasseur',2)}
         <div class="pp-bf" style="animation-delay:520ms"><span class="etiq">Réputation</span><span class="pp-rep">${['En France','En Europe','Reconnu','Respecté','Une référence'].map(t=>`<i class="octr" title="${t}"></i>`).join('')}</span><span class="sous">pas encore établie</span></div></div>`;
   }else{
     const slot=i=>{const id=S.pp.choix[i],x=id&&parId(id);
       return `<div class="pp-slot oct ${x?'plein':''} ${S.pp.vol===id&&x?'arrive':''}" data-slot="${i}"><div class="oct">
         <span class="etiq">Espoir ${i+1}</span>${x?`<b class="T pp-slotn"><span class="nom" data-fiche="${x.id}">${esc(x.nom)}</span></b><span class="sous">${esc(x.cat.replace(/ F$/,' féminin'))} · ${x.age} ans</span>`
-          :'<b class="T pp-slotn vide">À choisir</b><span class="sous">un des six ci-dessous</span>'}</div></div>`;};
-    c=`<div class="pp-btit"><span class="T">Tes espoirs</span><span class="pp-bphr">Choisis-en deux. Leïla te donnera de leurs nouvelles chaque semaine.</span></div>
+          :'<b class="T pp-slotn vide">À choisir</b><span class="sous">parmi les 6 ci-dessous</span>'}</div></div>`;};
+    c=`<div class="pp-btit"><span class="T">Tes espoirs</span><span class="pp-bphr">Choisis-en 2. Leïla donne de leurs nouvelles chaque semaine.</span></div>
       <div class="pp-slots">${slot(0)}${slot(1)}</div>`;
   }
   return `<div class="pp-band pp-band-${e}">${e==='split'?'<span class="pp-tunc"><i class="pp-tun"></i></span>':'<i class="pp-tun"></i>'}<i class="pp-reflet"></i><span class="pp-emb">${LOGO}</span>${c}</div>`;
@@ -131,7 +131,7 @@ function ppSplit(){
   const st=(ini,nom,role,val,sous,col='')=>`<div class="pp-st"><span class="pp-ini octr">${ini}</span><div class="pp-stn"><b>${nom}</b><span class="sous">${role}</span></div>
       <div class="pp-stv"><b style="${col?`color:${col}`:''}">${val}</b><span class="sous">${sous}</span></div></div>`;
   return `<div class="pp-bas">
-      ${pan(`${titre('Ta première soirée',`dans ${S.jours} jours`)}
+      ${pan(`${titre('Première soirée',`dans ${S.jours} jours`)}
         <div class="pp-soir">
           <div class="pp-sd"><span class="T pp-sdj">16 févr.</span><span class="pp-sdl">Forum de Lille</span><span class="sous">${nb(PP_PLACES)} places</span></div>
           <div class="pp-aff">
@@ -147,12 +147,12 @@ function ppSplit(){
           <div class="pp-case"><span class="etiq">Préventes</span><b class="T"><span data-ppn="${S.preventes}">${nb(S.preventes)}</span><small> / ${nb(PP_PLACES)}</small></b><span class="sous pp-js"><span class="jauge pp-j"><i style="width:${S.preventes/PP_PLACES*100}%;background:var(--blanc)"></i></span>${Math.round(S.preventes/PP_PLACES*100)} % des places</span></div>
           <div class="pp-case"><span class="etiq">Billet</span><b class="T">66 €</b><span class="sous">prix moyen d’une place</span></div>
         </div>`,'','pp-p pp-psoir')}
-      ${pan(`${titre('Ton équipe')}
+      ${pan(`${titre('Équipe')}
         <div class="pp-sts">
           ${st('GV','Gérard Vasseur','Patron et fondateur de Split','Il attend de voir','bilan le 1er juillet')}
           ${st('LM','Leïla Malika','Adjointe','Disponible','pour un avis, à la demande','var(--vert)')}
-          ${st('MF','Marco Ferri','Ton recruteur','En voyage à Turin','retour le 8 janv.')}
-          ${st('HR','Dr Hélène Roux','Le médecin de Split',`${abs.length} absents`,`${abs.filter(b=>/Suspension/.test(b.quoi)).length} suspendu, ${abs.filter(b=>!/Suspension/.test(b.quoi)).length} blessés`)}
+          ${st('MF','Marco Ferri','Recruteur','En voyage à Turin','retour le 8 janv.')}
+          ${st('HR','Dr Hélène Roux','Médecin de Split',`${abs.length} absents`,`${abs.filter(b=>/Suspension/.test(b.quoi)).length} suspendu, ${abs.filter(b=>!/Suspension/.test(b.quoi)).length} blessés`)}
         </div>`,'','pp-p pp-peq')}
     </div>`;
 }
@@ -165,7 +165,7 @@ function ppObjectifs(){
     {type:'rang',lab:'Finir dans le top 4',v:sp.rang,but:4,auj:`${sp.rang}/8`,auS:'place',vis:'4/8',viS:'ou mieux',
      manque:`Passer ${dev.join(' et ')}.`},
     {type:'mondial',lab:'Un poids lourd dans le top 5 mondial',v:lourd.mondial,but:5,auj:`n° ${lourd.mondial}`,auS:lien(lourd),vis:'n° 5',viS:'ou mieux',
-     manque:`${lourd.mondial-5} places à gagner. ${esc(lourd.nom)} a ${lourd.age} ans ; derrière lui, ${lien(pet)} est n° ${pet.mondial}.`},
+     manque:`${lourd.mondial-5} places à gagner. ${esc(lourd.nom)} a ${lourd.age} ans ; derrière lui, ${lien(pet)} est n° ${pet.mondial}.`},
     {type:'jauge',lab:'Remplir le Forum de Lille',v:S.preventes,but:PP_PLACES,auj:`<span data-ppn="${S.preventes}">${nb(S.preventes)}</span>`,auS:'places vendues',vis:nb(PP_PLACES),viS:'le 16 févr.',
      manque:`${nb(reste)} places en ${S.jours} jours, environ ${Math.round(reste/S.jours)} par jour.`},
   ];
@@ -179,21 +179,21 @@ function ppObj(o,i){
     <div class="pp2-og">
       <div class="pp2-ovis">${vis}</div>
       <div class="pp2-ov"><span class="etiq">Aujourd’hui</span><b class="T">${o.auj}</b><span class="sous">${o.auS}</span></div>
-      <div class="pp2-ov"><span class="etiq">Il veut</span><b class="T">${o.vis}</b><span class="sous">${o.viS}</span></div>
-      <div class="pp2-om"><span class="etiq">Ce qui manque</span><p>${o.manque}</p></div>
+      <div class="pp2-ov"><span class="etiq">Cible</span><b class="T">${o.vis}</b><span class="sous">${o.viS}</span></div>
+      <div class="pp2-om"><span class="etiq">Reste à faire</span><p>${o.manque}</p></div>
     </div></div>`;
 }
 function ppContrat(){
   const li=(l,v,s)=>`<div class="pp2-cl"><span class="etiq">${l}</span><span class="pp2-clv"><b class="T">${v}</b><span class="sous">${s}</span></span></div>`;
   return `<div class="pp2">
     ${pan(`${titre('Ton contrat','signé le 4 janv.')}
-      <div class="pp2-cls">${li('Poste','Matchmaker','chez Split')}${li('Durée','Une saison','du 4 janv. au 31 déc. 2027')}${li('Salaire','3 200 €','par mois')}${li('Bilan de mi-saison','1<span style="text-transform:none">er</span> juillet','avec Gérard Vasseur')}
+      <div class="pp2-cls">${li('Poste','Matchmaker','chez Split')}${li('Durée','1 saison','du 4 janv. au 31 déc. 2027')}${li('Salaire','3 200 €','par mois')}${li('Bilan de mi-saison','1<span style="text-transform:none">er</span> juillet','avec Gérard Vasseur')}
         ${li('Réputation',`<span class="pp-rep">${['En France','En Europe','Reconnu','Respecté','Une référence'].map(t=>`<i class="octr" title="${t}"></i>`).join('')}</span>`,'pas encore établie')}</div>
       <div class="pp2-patron"><span class="pp-ini octr">GV</span><div><b>Gérard Vasseur</b><span class="sous">patron et fondateur de Split, en 2004</span>
-        <p>« Je ne te demande pas de miracle. Je veux voir où tu emmènes Split. »</p></div></div>`,'','pp-p pp2-pcontrat')}
-    ${pan(`${titre('Ce qu’il attend de ta saison','jugé le 31 déc.')}
+        <p>« Je ne te demande pas de miracle. Je veux voir où tu emmènes Split. »</p></div></div>`,'','pp-p pp2-pcontrat')}
+    ${pan(`${titre('Objectifs 2027','jugé le 31 déc.')}
       <div class="pp2-os">${ppObjectifs().map(ppObj).join('')}</div>
-      <div class="mc-regle pp2-regle">${ico('ppCible',22,2)}<span>Manqués au 31 déc. : <b>un avertissement</b>. Manqués encore la saison suivante : <b>le renvoi</b>.</span></div>`,'','pp-p pp2-pobj')}
+      <div class="mc-regle pp2-regle">${ico('ppCible',22,2)}<span>Manqués au 31 déc. : <b>un avertissement</b>. Manqués encore la saison suivante : <b>le renvoi</b>.</span></div>`,'','pp-p pp2-pobj')}
   </div>`;
 }
 
@@ -204,7 +204,7 @@ function ppCarte(x,i){
   const [nc,bourse]=c.contrat||[0,'—'];
   return `<div class="pp-c oct ${ch?'choisi':''}" data-ppchoix="${x.id}" style="animation-delay:${120+i*80}ms"><div class="pp-c2 oct"><div class="pp-c3 oct">
     <div class="pp-ch"><span class="etiq">${esc(c.cat.replace(/ F$/,' féminin'))} · ${c.age} ans</span>${etatH}</div>
-    <div class="pp-cnm"><span class="pp-cpr">${esc(c.prenom)}${c.surnom?` <span class="pp-surn">« ${esc(c.surnom)} »</span>`:''}</span>
+    <div class="pp-cnm"><span class="pp-cpr">${esc(c.prenom)}${c.surnom?` <span class="pp-surn">« ${esc(c.surnom)} »</span>`:''}</span>
       <span class="T pp-cnom nom" data-fiche="${c.id}">${esc(c.nom)}</span></div>
     <div class="pp-cr"><b class="T pp-cbil">${bilan(c)}</b>${serie(c.serie)}<span class="pp-crg"><b>${rang}</b><span class="sous">n° ${c.mondial} mondial</span></span></div>
     <div class="pp-cst"><span class="pp-tag oct">${esc(c.art||'')}</span><span>${esc(c.style||'')}</span></div>
@@ -260,21 +260,21 @@ rendre=function(){
 /* ---- L'Accueil du 4 janvier : l'Accueil validé, avec les données de ce jour-là ---- */
 const PP_MSGS=[
   {id:'pp1',lu:false,t:'Bienvenue chez Split',de:'Leïla · aujourd’hui',tag:'Leïla'},
-  {id:'pp2',lu:false,t:'Ce que Gérard Vasseur attend de ta saison',de:'Gérard Vasseur · aujourd’hui',tag:'Organisation'},
-  {id:'pp3',lu:false,t:'Tes deux espoirs<span class="relire">à relire</span>',de:'Leïla · aujourd’hui · de leurs nouvelles chaque semaine',tag:'Leïla'},
+  {id:'pp2',lu:false,t:'Gérard Vasseur fixe tes objectifs 2027',de:'Gérard Vasseur · aujourd’hui',tag:'Organisation'},
+  {id:'pp3',lu:false,t:'2 espoirs<span class="relire">à relire</span>',de:'Leïla · aujourd’hui · de leurs nouvelles chaque semaine',tag:'Leïla'},
   {id:'pp4',lu:true,t:'Split nomme un nouveau matchmaker',de:'Cage Hebdo · aujourd’hui',tag:'Presse',go:'presse'},
-  {id:'pp5',lu:true,t:'Quatre absents au 4 janvier<span class="relire">à relire</span>',de:'Le médecin · aujourd’hui · Rizzo revient le 2 février',tag:'Médecin'},
+  {id:'pp5',lu:true,t:'4 absents au 4 janvier<span class="relire">à relire</span>',de:'Médecin · aujourd’hui · Rizzo revient le 2 février',tag:'Médecin'},
 ];
 const ppAccueilBase=accueilHtml;
 accueilHtml=function(){
   if(!S.pp.accueil)return ppAccueilBase();
-  PP_MSGS[2].t=`Tes deux espoirs : ${S.pp.choix.map(id=>esc(parId(id).nom)).join(' et ')}<span class="relire">à relire</span>`;
+  PP_MSGS[2].t=`2 espoirs : ${S.pp.choix.map(id=>esc(parId(id).nom)).join(' et ')}<span class="relire">à relire</span>`;
   const sauve=MESSAGES;MESSAGES=PP_MSGS;let h;try{h=ppAccueilBase();}finally{MESSAGES=sauve;}
   const suivis=S.pp.choix.map(id=>{const c=parId(id),info=c.statut==='blesse'?'<span style="color:var(--neg)">Blessé, retour le 2 février</span>':esc(PP_ESP_COURT[id]);
     return `<div class="ligne" data-fiche="${c.id}"><span style="font-size:23px;font-weight:700;white-space:nowrap">${lien(c)}</span><span style="margin-left:auto;font-size:21px;color:var(--texte2);text-align:right">${info}</span></div>`;}).join('');
   let n=0;
   h=h.replace(/<div class="ligne" data-fiche="(rizzo|musaev|rachidi)">[\s\S]*?<\/span><\/div>/g,()=>n++?'':suivis);
-  return h.replace('<span style="color:var(--jaune)">2 / 4</span>','<span style="color:var(--jaune)">1 / 4</span>').replace('2 places à finir','3 places à finir')
+  return h.replace('<span style="color:var(--jaune)">2 / 4</span>','<span style="color:var(--jaune)">1 / 4</span>').replace('2 places libres','3 places libres')
     .replace('Il manque 2 combats en carte principale.','Il manque 3 combats en carte principale.').replace('Retour le 3 février','Retour le 8 janvier');
 };
 
@@ -310,7 +310,7 @@ function ppVol(id){
 function ppChoisir(id){
   const C=S.pp.choix,i=C.indexOf(id);
   if(i>=0)C.splice(i,1);
-  else if(C.length>=2){toast(`Deux espoirs au plus : retire d’abord ${C.map(x=>esc(parId(x).nom)).join(' ou ')}.`);return;}
+  else if(C.length>=2){toast(`2 espoirs au plus : retire d’abord ${C.map(x=>esc(parId(x).nom)).join(' ou ')}.`);return;}
   else C.push(id);
   ppGarder();rendre();
   if(C.includes(id)){ppVol(id);const el=$(`.pp-c[data-ppchoix="${id}"]`);if(el&&!ppCalme())el.animate([{transform:'scale(.97)'},{transform:'scale(1.015)'},{transform:'none'}],{duration:320,easing:'cubic-bezier(.2,.8,.2,1)'});}

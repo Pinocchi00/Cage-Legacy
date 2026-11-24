@@ -47,10 +47,10 @@ const prT=t=>prTy(esc(t));
 /* ---- Les trois médias (noms à renommer, Q10c : propositions dans comparaison.html). Inventés, À RELIRE. ---- */
 const PR_MEDIAS={
   ch:{nom:'Cage Hebdo',quoi:'L’hebdo du MMA français, en kiosque le samedi',n:18400,u:'lecteurs par numéro'},
-  tn:{nom:'Tableau Noir',quoi:'Le site d’analyse : combats revus image par image',n:46000,u:'abonnés à ses vidéos'},
-  lf:{nom:'Le Forum',quoi:'Le forum des fans : les sujets ouverts par les membres',n:12300,u:'membres'},
+  tn:{nom:'Tableau Noir',quoi:'Le site d’analyse : combats revus image par image',n:46000,u:'abonnés à ses vidéos'},
+  lf:{nom:'Le Forum',quoi:'Le forum des fans : les sujets ouverts par les membres',n:12300,u:'membres'},
 };
-const PR_SUJ={tout:'Tout',split:'Split',soiree:'Ta soirée',combattants:'Tes combattants',ailleurs:'Ailleurs'};
+const PR_SUJ={tout:'Tout',split:'Split',soiree:'Soirée',combattants:'Combattants',ailleurs:'Ailleurs'};
 
 /* ---- Les articles, du plus récent au plus ancien ----
    s : sujets (filtres) ; p() : paragraphes ; f() : les faits, un chiffre par case [étiquette, valeur, précision] ;
@@ -62,132 +62,132 @@ function prFins62(){
 const prFin=f=>{const w=rsW(f),l=rsL(f);
   return f.meth==='KO'?`${lien(w)} a arrêté ${lien(l)} au ${rsOrd(f.rd)} round, à ${f.tps}`:`${lien(w)} a soumis ${lien(l)} par ${esc(f.det)} au ${rsOrd(f.rd)} round, à ${f.tps}`;};
 const PR_ART=[
-  {id:'a12ch',d:prJ(12),m:'ch',s:['soiree','split'],t:'« Lille mérite mieux qu’une carte à moitié vide »',par:'Inès Garcia-Roy',
+  {id:'a12ch',d:prJ(12),m:'ch',s:['soiree','split'],t:'« Lille mérite mieux qu’une carte à moitié vide »',par:'Inès Garcia-Roy',
    ch:'La chronique de l’ancienne championne des poids pailles.',
-   p:()=>[`À 35 jours de Split Fight Night 63, deux combats sur quatre sont signés en carte principale : ${prN('nana')} contre ${prN('mezouar')} pour la ceinture des légers, ${prN('rachidi')} contre ${prN('meziane')} chez les pailles. ${prN('belkacem')}, 4e des légers, attend toujours un adversaire.`,
-     `« Le Forum de Lille a 4 000 places. Avec une carte complète, il se remplit. Sans, il faudra compter sur Nana seul. »`],
+   p:()=>[`À 35 jours de Split Fight Night 63, deux combats sur quatre sont signés en carte principale : ${prN('nana')} contre ${prN('mezouar')} pour la ceinture des légers, ${prN('rachidi')} contre ${prN('meziane')} chez les pailles. ${prN('belkacem')}, 4e des légers, attend toujours un adversaire.`,
+     `« Le Forum de Lille a 4 000 places. Avec une carte complète, il se remplit. Sans, il faudra compter sur Nana seul. »`],
    f:()=>[['Carte principale','2 / 4','combats signés le 12 janv.'],['Places vendues','2 626','sur 4 000'],['Avant la soirée','35 jours','']],
    act:[['Ouvrir la carte','data-prgo="carte"',1]]},
-  {id:'a12lf',d:prJ(12),m:'lf',s:['soiree','combattants'],t:'Pronostics du 16 février : 61 % pour Mezouar',par:'Sujet ouvert par Gones69',
+  {id:'a12lf',d:prJ(12),m:'lf',s:['soiree','combattants'],t:'Pronostics du 16 février : 61 % pour Mezouar',par:'Sujet ouvert par Gones69',
    ch:'Le sondage du Forum, ouvert le 9 janvier.',
    p:()=>[`Sur 3 140 votes, 61 % donnent ${prN('mezouar')} vainqueur le 16 février, 39 % ${prN('nana')}. Pour le co-principal, 74 % votent ${prN('rachidi')} contre ${prN('meziane')}.`,
-     `Le message le plus repris du sujet, signé Ring_Side : « Il l’a déjà fait taper une fois. Nana a 37 ans. »`],
+     `Le message le plus repris du sujet, signé Ring_Side : « Il l’a déjà fait taper une fois. Nana a 37 ans. »`],
    f:()=>[['Votes','3 140','depuis le 9 janv.'],['Mezouar','61 %','39 % pour Nana'],['Rachidi','74 %','26 % pour Meziane']],
-   cite:['mezouar','salue','« Il l’a déjà fait taper une fois. Nana a 37 ans. »']},
-  {id:'a11tn',d:prJ(11),m:'tn',s:['soiree','combattants'],une:1,t:'Nana–Mezouar 2 : ce qui a changé depuis le 4 août 2025',par:'Analyse vidéo',
+   cite:['mezouar','salue','« Il l’a déjà fait taper une fois. Nana a 37 ans. »']},
+  {id:'a11tn',d:prJ(11),m:'tn',s:['soiree','combattants'],une:1,t:'Nana–Mezouar 2 : ce qui a changé depuis le 4 août 2025',par:'Analyse vidéo',
    ch:'Leur premier combat, puis les trois combats de Nana depuis.',
    p:()=>[`Le 4 août 2025, à Split Fight Night 53, ${prN('mezouar')} a soumis ${prN('nana')} par étranglement arrière au 2e round, à 3:40.`,
-     `Depuis, Nana a gagné ses trois combats pour la ceinture : ${prN('belkacem')} aux points le 20 mars, ${prN('carvalho')} par KO au 3e round, à 2:14, le 19 juillet, ${prN('darras')} aux points le 8 décembre.`,
-     `Le 16 février, la question reste celle de 2025 : Nana peut-il garder le combat debout pendant cinq rounds ?`],
-   f:()=>[['Leur combat de 2025','Soumission','2e round, à 3:40'],['Nana depuis','3 victoires','la ceinture, puis 2 défenses'],['Le 16 février','5 rounds','ceinture des légers']],
+     `Depuis, Nana a gagné ses trois combats pour la ceinture : ${prN('belkacem')} aux points le 20 mars, ${prN('carvalho')} par KO au 3e round, à 2:14, le 19 juillet, ${prN('darras')} aux points le 8 décembre.`,
+     `Le 16 février, la question reste celle de 2025 : Nana peut-il garder le combat debout pendant cinq rounds ?`],
+   f:()=>[['Combat de 2025','Soumission','2e round, à 3:40'],['Nana depuis','3 victoires','la ceinture, puis 2 défenses'],['Le 16 février','5 rounds','ceinture des légers']],
    act:[['Ouvrir la carte','data-prgo="carte"',1]]},
-  {id:'a10ch',d:prJ(10),m:'ch',s:['combattants','soiree'],t:'Belkacem : « Je veux un top 3 à Lille »',par:'Julien Morel',
+  {id:'a10ch',d:prJ(10),m:'ch',s:['combattants','soiree'],t:'Belkacem : « Je veux un top 3 à Lille »',par:'Julien Morel',
    ch:'Le 4e des légers n’a pas d’adversaire pour le 16 février.',
    p:()=>[`${prN('belkacem')} (11-4), 4e des légers chez Split, n’a pas encore d’adversaire pour Split Fight Night 63. Il a répondu à Cage Hebdo dimanche.`,
-     `« Je veux un top 3. Bello est 3e et il n’a rien de prévu. Qu’on le mette en face. »`,`Contacté, l’entourage de ${prN('bello')} n’a pas répondu.`],
+     `« Je veux un top 3. Bello est 3e et il n’a rien de prévu. Qu’on le mette en face. »`,`Contacté, l’entourage de ${prN('bello')} n’a pas répondu.`],
    f:()=>[['Belkacem','n° 4','11-4 · n° 33 mondial'],['Bello','n° 3','11-2 · n° 29 mondial'],['Combat 3','Libre','en carte principale']],
-   act:[['Voir le défi','data-prdefi="d1"']],cite:['belkacem','cite','« Je veux un top 3 à Lille. »']},
-  {id:'a09ch',d:prJ(9),m:'ch',s:['split','soiree'],t:'« Split a un nouveau matchmaker. Il a 38 jours pour remplir le Forum. »',par:'La une du numéro',
+   act:[['Voir le défi','data-prdefi="d1"']],cite:['belkacem','cite','« Je veux un top 3 à Lille. »']},
+  {id:'a09ch',d:prJ(9),m:'ch',s:['split','soiree'],t:'« Split a un nouveau matchmaker. Il a 38 jours pour remplir le Forum. »',par:'La une du numéro',
    ch:'La une du samedi 9 janvier.',
    p:()=>[`Cage Hebdo consacre sa une à ton arrivée chez Split, le 4 janvier, et à la soirée du 16 février au Forum de Lille.`],
    f:()=>[['Lecteurs du numéro','18 400','']],act:[['Le message','data-prgo="messages"']]},
-  {id:'a08tn',d:prJ(8),m:'tn',s:['combattants'],t:'Rachidi, cinq victoires de suite',par:'Vidéo de 9 minutes',
+  {id:'a08tn',d:prJ(8),m:'tn',s:['combattants'],t:'Rachidi, 5 victoires de suite',par:'Vidéo de 9 minutes',
    ch:'La 12e mondiale des pailles a fini trois de ses cinq derniers combats avant la limite.',
    p:()=>[`${prN('rachidi')} (8-1, 25 ans) a gagné ses cinq derniers combats, dont trois avant la limite. Elle est 12e au classement mondial des poids pailles.`,
-     `Dans notre vidéo, elle regarde déjà après le 16 février : « Après Meziane, je veux Kovač. » ${prN('gpoidspaillefC')} est la championne des poids pailles.`],
+     `Dans notre vidéo, elle regarde déjà après le 16 février : « Après Meziane, je veux Kovač. » ${prN('gpoidspaillefC')} est la championne des poids pailles.`],
    f:()=>[['Série','5 victoires','dont 3 avant la limite'],['Mondial','n° 12','poids pailles'],['Le 16 février','Meziane','en co-principal']],
-   act:[['Voir le défi','data-prdefi="d3"']],cite:['rachidi','salue','Cinq victoires de suite, dont trois avant la limite']},
+   act:[['Voir le défi','data-prdefi="d3"']],cite:['rachidi','salue','5 victoires de suite, dont 3 avant la limite']},
   {id:'a07ch',d:prJ(7),m:'ch',s:['combattants'],t:'Van Belle courtisé par MMA Korner et Pure Impact',par:'Julien Morel',
    ch:'Il ne lui reste qu’un combat à son contrat.',
    p:()=>[`Selon nos informations, MMA Korner et Pure Impact ont contacté l’agent de ${prN('vanbelle')} (9-2), 8e des légers chez Split. Il ne lui reste qu’un combat à son contrat.`,
      `Son agent, Luc Verhaegen, n’a pas voulu commenter.`],
    f:()=>[['Contrat','1 combat','restant'],['Classement','n° 8','poids légers'],['Le 16 février','Carvalho','en préliminaires']],
    act:[['Le message de son agent','data-prgo="messages"']]},
-  {id:'a06ch',d:prJ(6),m:'ch',s:['combattants','soiree'],t:'Darras : « Je suis de Lille, je veux le Forum »',par:'Julien Morel',
+  {id:'a06ch',d:prJ(6),m:'ch',s:['combattants','soiree'],t:'Darras : « Je suis de Lille, je veux le Forum »',par:'Julien Morel',
    ch:'Battu par Nana le 8 décembre, il demande à combattre chez lui.',
    p:()=>[`${prN('darras')} (9-4) a perdu aux points contre ${prN('nana')} le 8 décembre, après cinq rounds. Né à Lille, il veut être sur la carte du 16 février.`,
-     `« Je ne demande pas la ceinture. Je veux Labbé, ou n’importe qui du top 3, devant mon public. » ${prN('labbe')} est 2e des légers.`],
+     `« Je ne demande pas la ceinture. Je veux Labbé, ou n’importe qui du top 3, devant mon public. » ${prN('labbe')} est 2e des légers.`],
    f:()=>[['Darras','n° 5','9-4'],['Labbé','n° 2','12-3'],['Combat 4','Libre','en carte principale']],
    act:[['Voir le défi','data-prdefi="d2"']]},
   {id:'a05ch',d:prJ(5),m:'ch',s:['combattants'],t:'Garcia-Roy classe Rachidi n° 1 des espoirs français',par:'Inès Garcia-Roy',
    ch:'Son classement des espoirs, publié chaque début d’année.',
    p:()=>[`Dans son classement des espoirs français, <span class="nom" data-fiche="sgarciaroy">Inès Garcia-Roy</span> place ${prN('rachidi')} en tête.`,
-     `« Elle a ce que j’avais : la patience. Donnez-lui sa chance avant l’été. »`],
+     `« Elle a ce que j’avais : la patience. Donnez-lui sa chance avant l’été. »`],
    f:()=>[['Rachidi','n° 1','des espoirs français'],['Âge','25 ans',''],['Bilan','8-1','']]},
   {id:'a04ch',d:prJ(4),m:'ch',s:['split'],t:'Split nomme un nouveau matchmaker',par:'La rédaction',
    ch:'Il prend en main la Fight Night 63, le 16 février à Lille.',
    p:()=>[`Split a annoncé lundi l’arrivée de son nouveau matchmaker. Sa première soirée sera Split Fight Night 63, le 16 février au Forum de Lille, avec ${prN('nana')} contre ${prN('mezouar')} en combat principal.`],
    f:()=>[['Arrivée','4 janv.','lundi'],['Première soirée','16 févr.','Forum de Lille']],act:[['Ta carrière','data-prgo="carriere"']]},
-  {id:'a03lf',d:prJ(3),m:'lf',s:['combattants'],t:'« Le Notaire porte bien son nom »',par:'Sujet ouvert par Gones69',
+  {id:'a03lf',d:prJ(3),m:'lf',s:['combattants'],t:'« Le Notaire porte bien son nom »',par:'Sujet ouvert par Gones69',
    ch:'Un sujet sur les combats de Thomas Labbé.',
-   p:()=>[`Le sujet compte les décisions de ${prN('labbe')} : cinq sur ses six derniers combats.`,
-     `« Quinze minutes de contrôle contre la cage. Il gagne, mais personne ne paie pour ça. »`,`La réponse la plus reprise : « Il est 2e. Le classement ne se gagne pas au spectacle. »`],
+   p:()=>[`Le sujet compte les décisions de ${prN('labbe')} : cinq sur ses six derniers combats.`,
+     `« Quinze minutes de contrôle contre la cage. Il gagne, mais personne ne paie pour ça. »`,`La réponse la plus reprise : « Il est 2e. Le classement ne se gagne pas au spectacle. »`],
    f:()=>[['Décisions','5','sur ses 6 derniers combats'],['Classement','n° 2','poids légers'],['Réponses','214','dans le sujet']],
-   cite:['labbe','critique','« Il gagne, mais personne ne paie pour ça. »']},
-  {id:'a03tn',d:prJ(3),m:'tn',s:['ailleurs'],t:'Pure Impact à Dubaï : un coude au sol, à 0:50 du 1er round',par:'Analyse vidéo',
+   cite:['labbe','critique','« Il gagne, mais personne ne paie pour ça. »']},
+  {id:'a03tn',d:prJ(3),m:'tn',s:['ailleurs'],t:'Pure Impact à Dubaï : un coude au sol, à 0:50 du 1er round',par:'Analyse vidéo',
    ch:'4 100 spectateurs pour la première soirée de l’année.',
    p:()=>[`Le combat principal de Pure Impact, dimanche à Dubaï, a duré 50 secondes. ${prX('Yusuf Demir','Poids mi-moyen')} a amené ${prX('Lucas Brandão','Poids mi-moyen')} au sol au premier échange, puis l’a arrêté d’un coude, à 0:50 du 1er round.`,
      `4 100 spectateurs, loin du record de 7 200 du 21 novembre. En décembre, Pure Impact a signé trois combattants classés venus de Fighting Pacific.`],
-   f:()=>[['Durée','0:50','1er round'],['Spectateurs','4 100','record : 7 200'],['Classés signés','3','en décembre']],
+   f:()=>[['Durée','0:50','1er round'],['Spectateurs','4 100','record : 7 200'],['Classés signés','3','en décembre']],
    act:[['Les huit organisations','data-prgo="organisation"']]},
-  {id:'a02lf',d:prJ(2),m:'lf',s:['split','combattants'],t:'Le combat que vous voulez en 2027 : Nana–Mercier, loin devant',par:'Sondage du Forum',
-   ch:'Champion contre champion : le léger contre le mi-moyen.',
+  {id:'a02lf',d:prJ(2),m:'lf',s:['split','combattants'],t:'Le combat que vous voulez en 2027 : Nana–Mercier, loin devant',par:'Sondage du Forum',
+   ch:'Champion contre champion : le léger contre le mi-moyen.',
    p:()=>[`Sur 4 210 votes, 38 % choisissent ${prN('nana')} contre ${prN('gpoidsmimoyenC')}, les deux champions de Split. ${prN('rachidi')} contre ${prN('gpoidspaillefC')} est 2e, avec 11 %.`,
      `Nana combat en poids léger (70 kg), Mercier en mi-moyen (77 kg).`],
    f:()=>[['Votes','4 210',''],['Nana–Mercier','38 %','1er'],['Rachidi–Kovač','11 %','2e']],act:[['Voir les défis','data-prvue="defis"']]},
   {id:'a02tn',d:prJ(2),m:'tn',s:['combattants'],t:'Musaev veut Rizzo, l’invaincu des mouches',par:'Vidéo de 6 minutes',
    ch:'Le 7e des mouches vise le 4e.',
-   p:()=>[`${prN('musaev')} (7-1, 22 ans), cinq victoires par soumission, a demandé ${prN('rizzo')} dans notre vidéo : « Il est invaincu, il est 4e. Je veux sa place. »`],
+   p:()=>[`${prN('musaev')} (7-1, 22 ans), cinq victoires par soumission, a demandé ${prN('rizzo')} dans notre vidéo : « Il est invaincu, il est 4e. Je veux sa place. »`],
    f:()=>[['Musaev','n° 7','7-1 · poids mouche'],['Rizzo','n° 4','6-0 · invaincu']],act:[['Voir le défi','data-prdefi="d4"']]},
-  {id:'a29ch',d:prJ(29,11,2026),m:'ch',s:['split'],t:'Bilan 2026 : « Split a retrouvé des têtes d’affiche »',par:'Inès Garcia-Roy',
+  {id:'a29ch',d:prJ(29,11,2026),m:'ch',s:['split'],t:'Bilan 2026 : « Split a retrouvé des têtes d’affiche »',par:'Inès Garcia-Roy',
    ch:'L’année de Split, soirée par soirée.',
-   p:()=>[`Sept soirées en 2026, de la 56 à la 62, et un record : 6 340 spectateurs au Dôme de Marseille le 14 novembre.`,
+   p:()=>[`Sept soirées en 2026, de la 56 à la 62, et un record : 6 340 spectateurs au Dôme de Marseille le 14 novembre.`,
      `${prN('nana')} a gagné ses trois combats pour la ceinture des légers. Le Palais des sports de Lyon a été plein une fois, le 20 mars.`,
-     `<span class="nom" data-fiche="sgarciaroy">Inès Garcia-Roy</span> : « Split a retrouvé des têtes d’affiche. »`],
+     `<span class="nom" data-fiche="sgarciaroy">Inès Garcia-Roy</span> : « Split a retrouvé des têtes d’affiche. »`],
    f:()=>[['Soirées','7','en 2026'],['Record','6 340','spectateurs, Marseille'],['Salle pleine','1 fois','Lyon, 20 mars']],act:[['Les soirées','data-prgo="resultats"']]},
   {id:'a28ch',d:prJ(28,11,2026),m:'ch',s:['combattants'],t:'Les derniers rounds lui appartiennent',par:'Julien Morel',
    ch:'Parfait Nana, 37 ans, champion des légers.',
    p:()=>[`À 37 ans, ${prN('nana')} gagne encore quand les autres faiblissent. Ses trois dernières victoires se sont jouées après le deuxième round.`],
    f:()=>[['Âge','37 ans',''],['Bilan','14-8',''],['Série','3 victoires','']],cite:['nana','salue','Les derniers rounds lui appartiennent']},
-  {id:'a20tn',d:prJ(20,11,2026),m:'tn',s:['ailleurs'],t:'Garden of Blood : 16 900 spectateurs à New York',par:'La rédaction',
+  {id:'a20tn',d:prJ(20,11,2026),m:'tn',s:['ailleurs'],t:'Garden of Blood : 16 900 spectateurs à New York',par:'La rédaction',
    ch:'Plus grosse affluence des 8 organisations en décembre.',
    p:()=>[`Garden of Blood a réuni 16 900 spectateurs à New York le 20 décembre, la plus grosse affluence du mois. Son record reste 19 400, le 12 septembre.`,
-     `Combat principal : ${prX('Andre Whitfield','Poids moyen')} garde sa ceinture des poids moyens contre ${prX('Mateo Ruiz','Poids moyen')}, par décision unanime (49-46, 49-46, 48-47).`],
+     `Combat principal : ${prX('Andre Whitfield','Poids moyen')} garde sa ceinture des poids moyens contre ${prX('Mateo Ruiz','Poids moyen')}, par décision unanime (49-46, 49-46, 48-47).`],
    f:()=>[['Spectateurs','16 900','New York'],['Record','19 400','12 sept. 2026']],act:[['Les huit organisations','data-prgo="organisation"']]},
-  {id:'a18ch',d:prJ(18,11,2026),m:'ch',s:['soiree'],t:'C’est officiel : Nana–Mezouar 2 le 16 février à Lille',par:'La rédaction',
+  {id:'a18ch',d:prJ(18,11,2026),m:'ch',s:['soiree'],t:'C’est officiel : Nana–Mezouar 2 le 16 février à Lille',par:'La rédaction',
    ch:'Le combat principal de la Fight Night 63.',
-   p:()=>[`Split a confirmé le combat principal de sa Fight Night 63 : ${prN('nana')} défend sa ceinture des légers contre ${prN('mezouar')}, le 16 février au Forum de Lille, en cinq rounds.`],
+   p:()=>[`Split a confirmé le combat principal de sa Fight Night 63 : ${prN('nana')} défend sa ceinture des légers contre ${prN('mezouar')}, le 16 février au Forum de Lille, en cinq rounds.`],
    f:()=>[['Date','16 févr.','Forum de Lille'],['Rounds','5','ceinture des légers']],act:[['Voir le défi','data-prdefi="d5"']]},
-  {id:'a09dch',d:prJ(9,11,2026),m:'ch',s:['combattants'],t:'Mezouar : « Il a gardé sa ceinture. Je l’ai déjà battu. »',par:'Julien Morel',
+  {id:'a09dch',d:prJ(9,11,2026),m:'ch',s:['combattants'],t:'Mezouar : « Il a gardé sa ceinture. Je l’ai déjà battu. »',par:'Julien Morel',
    ch:'Le 1er des légers réclame Nana, au lendemain de la Fight Night 62.',
-   p:()=>[`Au lendemain de la Fight Night 62, ${prN('mezouar')}, 1er des légers, a réclamé le combat pour la ceinture : « Il a gardé sa ceinture. Je l’ai déjà battu. À moi. »`,
+   p:()=>[`Au lendemain de la Fight Night 62, ${prN('mezouar')}, 1er des légers, a réclamé le combat pour la ceinture : « Il a gardé sa ceinture. Je l’ai déjà battu. À moi. »`,
      `Mezouar a soumis ${prN('nana')} le 4 août 2025, par étranglement arrière au 2e round.`],
    f:()=>[['Mezouar','n° 1','13-3'],['Leur combat','4 août 2025','Mezouar par soumission']],act:[['Voir le défi','data-prdefi="d5"']]},
-  {id:'a09dlf',d:prJ(9,11,2026),m:'lf',s:['split'],t:'« Nana ne recule jamais » : la phrase de Ferhat tourne partout',par:'Sujet ouvert par Ring_Side',
+  {id:'a09dlf',d:prJ(9,11,2026),m:'lf',s:['split'],t:'« Nana ne recule jamais » : la phrase de Ferhat tourne partout',par:'Sujet ouvert par Ring_Side',
    ch:'L’extrait de la Fight Night 62 le plus partagé.',
-   p:()=>[`Au 4e round contre ${prN('darras')}, <span class="nom" data-fiche="sferhat">Yacine Ferhat</span> commente : « Nana ne recule jamais. » L’extrait posté sur le Forum a été vu 210 000 fois en 24 heures.`],
+   p:()=>[`Au 4e round contre ${prN('darras')}, <span class="nom" data-fiche="sferhat">Yacine Ferhat</span> commente : « Nana ne recule jamais. » L’extrait posté sur le Forum a été vu 210 000 fois en 24 heures.`],
    f:()=>[['Vues','210 000','en 24 heures'],['Round','4e','contre Darras']]},
-  {id:'a08dch',d:prJ(8,11,2026),m:'ch',s:['split'],t:'Fight Night 62 : Nana garde sa ceinture face à Darras',par:'Julien Morel',
+  {id:'a08dch',d:prJ(8,11,2026),m:'ch',s:['split'],t:'Fight Night 62 : Nana garde sa ceinture face à Darras',par:'Julien Morel',
    ch:'Décision unanime après cinq rounds, au Palais des sports de Lyon.',
-   p:()=>{const fins=prFins62();return [`${prN('nana')} a battu ${prN('darras')} par décision unanime : 50-45, 49-46, 48-47. Les deux ont reçu la prime du combat de la soirée.`,
+   p:()=>{const fins=prFins62();return [`${prN('nana')} a battu ${prN('darras')} par décision unanime : 50-45, 49-46, 48-47. Les deux ont reçu la prime du combat de la soirée.`,
      fins.length>1?`Plus bas sur la carte, ${prFin(fins[0])}, et ${prFin(fins[1])}.`:'',`5 210 spectateurs pour 5 800 places.`].filter(Boolean);},
    f:()=>[['Les juges','50-45','49-46 · 48-47'],['Spectateurs','5 210','sur 5 800 places'],['Finitions',String(prFins62().length),'sur 10 combats']],
    act:[['Voir le résultat','data-prresu="62"',1]]},
-  {id:'a08dtn',d:prJ(8,11,2026),m:'tn',s:['combattants'],t:'Darras, trois rounds sur quinze',par:'Analyse vidéo',
+  {id:'a08dtn',d:prJ(8,11,2026),m:'tn',s:['combattants'],t:'Darras, 3 rounds sur 15',par:'Analyse vidéo',
    ch:'Ce que disent les cartes des juges.',
-   p:()=>[`Sur les trois cartes, ${prN('darras')} n’a gagné que trois rounds sur quinze : aucun pour le premier juge, un pour le deuxième, deux pour le troisième.`,
+   p:()=>[`Sur les trois cartes, ${prN('darras')} n’a gagné que trois rounds sur quinze : aucun pour le premier juge, un pour le deuxième, deux pour le troisième.`,
      `Il a perdu le premier round sur les trois cartes.`],
-   f:()=>[['Rounds gagnés','3','sur 15'],['Décision','unanime','50-45 · 49-46 · 48-47']],cite:['darras','critique','Trois rounds sur quinze sur les cartes des juges']},
+   f:()=>[['Rounds gagnés','3','sur 15'],['Décision','unanime','50-45 · 49-46 · 48-47']],cite:['darras','critique','3 rounds sur 15 sur les cartes des juges']},
 ];
 const prArt=id=>PR_ART.find(a=>a.id===id);
 
 /* ---- Les défis : qui réclame qui (phrase réelle de l'article), puis ce que permet ta carte ---- */
 const PR_DEFIS=[
-  {id:'d1',de:'belkacem',vers:'bello',art:'a10ch',dit:'« Je veux un top 3. Bello est 3e et il n’a rien de prévu. »'},
-  {id:'d2',de:'darras',vers:'labbe',art:'a06ch',dit:'« Je veux Labbé, ou n’importe qui du top 3, devant mon public. »'},
-  {id:'d3',de:'rachidi',vers:'gpoidspaillefC',art:'a08tn',dit:'« Après Meziane, je veux Kovač. »'},
-  {id:'d4',de:'musaev',vers:'rizzo',art:'a02tn',dit:'« Il est invaincu, il est 4e. Je veux sa place. »'},
-  {id:'d5',de:'mezouar',vers:'nana',art:'a09dch',dit:'« Il a gardé sa ceinture. Je l’ai déjà battu. À moi. »'},
+  {id:'d1',de:'belkacem',vers:'bello',art:'a10ch',dit:'« Je veux un top 3. Bello est 3e et il n’a rien de prévu. »'},
+  {id:'d2',de:'darras',vers:'labbe',art:'a06ch',dit:'« Je veux Labbé, ou n’importe qui du top 3, devant mon public. »'},
+  {id:'d3',de:'rachidi',vers:'gpoidspaillefC',art:'a08tn',dit:'« Après Meziane, je veux Kovač. »'},
+  {id:'d4',de:'musaev',vers:'rizzo',art:'a02tn',dit:'« Il est invaincu, il est 4e. Je veux sa place. »'},
+  {id:'d5',de:'mezouar',vers:'nana',art:'a09dch',dit:'« Il a gardé sa ceinture. Je l’ai déjà battu. À moi. »'},
 ];
 const prDefi=id=>PR_DEFIS.find(x=>x.id===id);
 /** Où est un combattant sur la carte du 16 février : [clé, combat] ou null. */
@@ -200,12 +200,12 @@ function prEtatDefi(x){
   const A=parId(x.de),B=parId(x.vers),pa=prSurCarte(x.de),pb=prSurCarte(x.vers);
   if(pa&&pb&&pa[0]===pb[0])return {k:'signe',t:pa[0]==='m0'?'Signé':'Sur la carte',s:`${afRole(pa[0])}, le 16 févr.`};
   const bl=[A,B].find(c=>c.statut==='blesse');
-  if(bl)return {k:'blesse',t:`${esc(bl.nom)} blessé`,s:`retour le ${esc(bl.retour)} ; au plus tôt à la Fight Night 64, le 3 avr.`};
+  if(bl)return {k:'blesse',t:`${esc(bl.nom)} blessé`,s:`retour le ${esc(bl.retour)} ; au plus tôt à la Fight Night 64, le 3 avr.`};
   const pris=[[A,pa],[B,pb]].find(([c,p])=>p&&afComplet(p[1]));
   if(pris)return {k:'pris',t:'Déjà à l’affiche',s:`${esc(pris[0].nom)} contre ${esc(parId(pris[1][1].a===pris[0].id?pris[1][1].b:pris[1][1].a).nom)}, le 16 févr.`};
   const k=pa?pa[0]:pb?pb[0]:['m0','m1','m2','m3'].find(q=>{const f=S.af.m[+q[1]];return !f.a&&!f.b;});
   if(!k)return {k:'pris',t:'Carte complète',s:'au plus tôt à la Fight Night 64, le 3 avr.'};
-  return {k:'possible',t:'Possible le 16 févr.',s:pa||pb?`${afRole(k)} : l’adversaire manque`:`${afRole(k)} libre`,place:k};
+  return {k:'possible',t:'Possible le 16 févr.',s:pa||pb?`${afRole(k)} : l’adversaire manque`:`${afRole(k)} libre`,place:k};
 }
 /* Signé (vert, coche), possible (blanc, place vide), blessé (rouge, croix médicale), déjà à l'affiche (gris, la carte). */
 P.prplace='<path d="M8.4 2.8h7.2l5.6 5.6v7.2l-5.6 5.6H8.4l-5.6-5.6V8.4z"/><path d="M12 8v8M8 12h8"/>';
@@ -247,7 +247,7 @@ function prCombattants(){
       <span class="pr-ton" style="color:${col}">${tt}</span>
       <span class="pr-cb-t">${prT(txt)}</span>
       <span class="pr-cb-s">${PR_MEDIAS[a.m].nom}<span class="sous">${prDc(a.d)}</span></span></div>`;};
-  return pan(titre('Tes combattants dans la presse',`<span class="pr-relire-m">${prRelire}</span><button data-prsuj="combattants">Tout voir ›</button>`)+
+  return pan(titre('Combattants de Split dans la presse',`<span class="pr-relire-m">${prRelire}</span><button data-prsuj="combattants">Tout voir ›</button>`)+
     `<div class="pr-cbs">${l.map(ligne).join('')}</div>`,'','pr-p-cb');
 }
 /** Les articles déjà visibles sur À la une (l'article du moment, le pronostic, les phrases sur tes combattants) : pas répétés à côté. */
@@ -260,7 +260,7 @@ function prMedias(){
       <span class="pr-md-h"><span class="T pr-md-n">${M.nom}</span><span class="pr-md-a"><span class="T" data-prn="${M.n}">${nb(M.n)}</span><span class="sous">${M.u}</span></span></span>
       <span class="sous pr-md-q">${prT(M.quoi)}</span>
       <span class="pr-md-l"><span class="sous">${prDc(a.d)}</span><span class="pr-md-t" data-prart="${a.id}">${prT(a.t)}</span></span></button>`;};
-  return pan(titre('Les trois médias',prRelire)+`<div class="pr-mds">${['ch','tn','lf'].map(bloc).join('')}</div>`,'','pr-p-md');
+  return pan(titre('Médias',prRelire)+`<div class="pr-mds">${['ch','tn','lf'].map(bloc).join('')}</div>`,'','pr-p-md');
 }
 /** Le pronostic des lecteurs : qui gagne, pas la qualité du combat (H1). */
 function prProno(){
@@ -271,7 +271,7 @@ function prProno(){
       <div class="pr-pr-b"><span class="T ${fa?'':'pr-pr-moins'}"><b data-prn="${p}">${p}</b> %</span>
         <span class="pr-pr-j"><i class="${fa?'':'moins'}" style="width:${p}%"></i><i class="${fa?'moins':''}" style="width:${100-p}%"></i></span>
         <span class="T ${fa?'pr-pr-moins':''}"><b data-prn="${100-p}">${100-p}</b> %</span></div></div>`;};
-  return pan(titre('Les pronostics',`16 févr. · ${prLienJ('Lire','data-prart="a12lf"')}`)+`${l.map(ligne).join('')}
+  return pan(titre('Pronostics',`16 févr. · ${prLienJ('Lire','data-prart="a12lf"')}`)+`${l.map(ligne).join('')}
     <div class="pr-pr-src sous">Le Forum · <span data-prn="3140">3 140</span> votes depuis le 9 janv. · qui gagne, en % des votes</div>`,'','pr-p-pr');
 }
 function prUneHtml(){
@@ -292,7 +292,7 @@ function prDefisHtml(){
       <div class="pr-df-e"><span class="pr-df-et" style="color:${col}">${ico(ic,22,2.4)}${prTy(e.t)}</span><span class="sous">${prTy(e.s)}</span>
         ${e.k==='possible'?prLienJ('Placer sur la carte',`data-prplace="${x.id}"`):''}</div></div>`;};
   return `<div class="pr-g">
-    ${pan(titre('Les défis',`<span>depuis la Fight Night 62</span>${prRelire}`)+`<div class="pr-dfs">${PR_DEFIS.map(ligne).join('')}</div>`,'','pr-p-df')}
+    ${pan(titre('Défis',`<span>depuis la Fight Night 62</span>${prRelire}`)+`<div class="pr-dfs">${PR_DEFIS.map(ligne).join('')}</div>`,'','pr-p-df')}
     <div class="pr-col">${prEnvie()}${prCarte()}</div></div>`;
 }
 /** Les envies du public : seulement une très grosse affiche (Q28b). Ici, la seule : champion contre champion. */
@@ -302,7 +302,7 @@ function prEnvie(){
       <span class="pr-ev-l"><span class="pr-c oct"><span class="oct"><b class="oct">C</b></span></span><span class="T pr-ev-nom"><span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span></span></span>
       <span class="sous">${esc(c.prenom)} · ${bilan(c)} · n° ${c.mondial} mondial</span></div>`;
   const f=(e,v)=>`<div class="pr-ev-f"><span class="etiq">${e}</span><span>${v}</span></div>`;
-  return pan(titre('Le public réclame',`${prRelire}${prLienJ('Le sujet','data-prart="a02lf"')}`)+`<div class="pr-ev oct"><i class="fb-img or pr-ev-img"></i>
+  return pan(titre('Demande du public',`${prRelire}${prLienJ('Sujet','data-prart="a02lf"')}`)+`<div class="pr-ev oct"><i class="fb-img or pr-ev-img"></i>
       ${cote(A,70,'g')}<span class="T pr-ev-vs">VS</span>${cote(B,77,'d')}</div>
     ${f('Sondage du Forum, 2 janv.',`<b class="T pr-ev-pc"><span data-prn="38">38</span>&nbsp;%</b> des 4 210 votes`)}
     ${f('2e du sondage',`${prNomL(parId('rachidi'))} – ${prNomL(parId('gpoidspaillefC'))}, 11&nbsp;%`)}
@@ -313,7 +313,7 @@ function prCarte(){
     return `<div class="pr-ca"><span class="sous">${afRole(k)}</span><span class="pr-ca-n">${a?prNomL(a):libre}<span class="pr-vs">contre</span>${b?prNomL(b):libre}</span>
       ${a&&b&&a.rang==='C'?'<span class="pr-titre">Titre</span>':''}</div>`;};
   const n=S.af.m.filter(afComplet).length;
-  return pan(titre('Ta carte du 16 février',`${n} / 4`)+`${S.af.m.map(ligne).join('')}
+  return pan(titre('Carte du 16 février',`${n} / 4`)+`${S.af.m.map(ligne).join('')}
     <button class="bouton jaune cj pr-ouvrir" data-prgo="carte">Ouvrir la carte</button>`,'','pr-p-ca');
 }
 
@@ -325,7 +325,7 @@ function prFilHtml(){
     items+=`<button class="pr-it oct ${a&&a.id===x.id?'cur':''}" data-prsel="${x.id}" style="animation-delay:${Math.min(i,10)*40}ms"><span class="pr-it-i oct">
       <span class="pr-it-m">${PR_MEDIAS[x.m].nom}</span><span class="pr-it-t">${prT(x.t)}</span></span></button>`;});
   if(!l.length){
-    const qui={tous:'La presse',ch:'Cage Hebdo',tn:'Tableau Noir',lf:'Le Forum'}[S.pr.media],sur={tout:'',split:' sur Split',soiree:' sur ta soirée',combattants:' sur tes combattants',ailleurs:' sur les autres organisations'}[S.pr.sujet];
+    const qui={tous:'La presse',ch:'Cage Hebdo',tn:'Tableau Noir',lf:'Le Forum'}[S.pr.media],sur={tout:'',split:' sur Split',soiree:' sur la soirée du 16 février',combattants:' sur les combattants de Split',ailleurs:' sur les autres organisations'}[S.pr.sujet];
     const b=(t,att)=>`<button class="bb oct" ${att}><span class="oct">${t}</span></button>`;
     return `${prFiltres()}<div class="pr-g pr-gf pr-gv">${pan(`<div class="pr-vide2 apparait"><span class="T">Aucun article</span>
       <span>${qui} n’a rien écrit${sur} depuis le 8 décembre.</span>
@@ -434,7 +434,7 @@ function prPlacer(id){
   if(f.a===x.de||f.b===x.de){if(f.a===x.de)f.b=x.vers;else f.a=x.vers;}else if(f.a===x.vers||f.b===x.vers){if(f.a===x.vers)f.b=x.de;else f.a=x.de;}else{f.a=x.de;f.b=x.vers;}
   rendre();
   const l=$(`.pr-df[data-prdefil="${id}"]`);if(l)l.animate([{background:'rgba(61,190,106,.22)'},{background:'transparent'}],{duration:900});
-  toast(`${esc(parId(x.de).nom)} contre ${esc(parId(x.vers).nom)} : placé en ${afRole(e.place).toLowerCase()}, le 16 février.`);
+  toast(`${esc(parId(x.de).nom)} contre ${esc(parId(x.vers).nom)} : placé en ${afRole(e.place).toLowerCase()}, le 16 février.`);
 }
 
 /* ---- Clics ---- */

@@ -23,7 +23,7 @@ const accentHaut=t=>/[̀-̦̩-ͯ]/.test(String(t).toUpperCase().normalize('NFD')
 function banniere(c){
   const champ=c.rang==='C';
   return `<div class="ban-contenu" id="banC"><i class="fb-img ${champ?'or':''}"></i>
-    <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="${(()=>{const t=c.nom.length>8?150:200,a=accentHaut(c.nom);return `font-size:${Math.round(t*(a?.84:1))}px;padding-top:${a?Math.round(t*.16*.69):0}px`;})()}">${esc(c.nom)}</span></div>
+    <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="${(()=>{const t=c.nom.length>8?150:200,a=accentHaut(c.nom);return `font-size:${Math.round(t*(a?.84:1))}px;padding-top:${a?Math.round(t*.16*.69):0}px`;})()}">${esc(c.nom)}</span></div>
     <div class="fb-pal"><div style="display:flex;flex-direction:column;gap:14px"><span style="font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--texte2)">PALMARÈS</span>
       <b class="T" style="font-size:116px;line-height:.69">${bilan(c)}</b><div style="margin-top:4px">${serie(c.serie)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
@@ -47,18 +47,18 @@ function ficheHtml(c){
 
 /* ---- Style de combat : comment il combat, comment il gagne, ce qui le rend à part ---- */
 const STYLES={
-  'Boxe':['Debout, garde haute, il cherche l’échange au centre de la cage.','Aux poings : sur un enchaînement, ou aux points quand l’autre refuse l’échange.','Il coupe la cage mieux que la plupart des boxeurs de sa catégorie.'],
-  'Lutte':['Il ferme la distance, colle l’adversaire au grillage et l’amène au sol.','Au contrôle : il gagne les rounds au sol, rarement avant la limite.','Son cardio : le même rythme du premier au dernier round.'],
+  'Boxe':['Debout, garde haute, il cherche l’échange au centre de la cage.','Aux poings : sur un enchaînement, ou aux points quand l’autre refuse l’échange.','Il coupe la cage mieux que la plupart des boxeurs de sa catégorie.'],
+  'Lutte':['Il ferme la distance, colle l’adversaire au grillage et l’amène au sol.','Au contrôle : il gagne les rounds au sol, rarement avant la limite.','Son cardio : le même rythme du 1er au dernier round.'],
   'Kickboxing':['Il travaille de loin, avec beaucoup de coups de pied au corps et aux jambes.','À l’usure, puis par KO quand la garde de l’autre commence à baisser.','Il change de garde en plein échange, ce qui dérègle ses adversaires.'],
-  'Jiu-jitsu brésilien':['Il cherche le sol à tout prix, quitte à tirer l’adversaire dans sa garde.','Par soumission : étranglements et clés de bras.','Aussi dangereux sur le dos que par-dessus.'],
-  'Karaté':['Il reste loin, de profil, et entre et sort de la distance très vite.','Sur un contre : un coup de pied ou un direct que l’autre ne voit pas partir.','Presque impossible à toucher proprement.'],
-  'Muay-thaï':['Il cherche le corps-à-corps debout pour placer genoux et coudes.','Par arrêt : coupures, genoux au corps.','Le clinch : c’est là que les autres le craignent le plus.'],
-  'Sambo':['Il projette debout, puis enchaîne au sol sans laisser respirer.','Par soumission, souvent sur une clé de jambe.','Ses projections partent de nulle part.'],
+  'Jiu-jitsu brésilien':['Il cherche le sol à tout prix, quitte à tirer l’adversaire dans sa garde.','Par soumission : étranglements et clés de bras.','Aussi dangereux sur le dos que par-dessus.'],
+  'Karaté':['Il reste loin, de profil, et entre et sort de la distance très vite.','Sur un contre : un coup de pied ou un direct que l’autre ne voit pas partir.','Presque impossible à toucher proprement.'],
+  'Muay-thaï':['Il cherche le corps-à-corps debout pour placer genoux et coudes.','Par arrêt : coupures, genoux au corps.','Le clinch : son point fort.'],
+  'Sambo':['Il projette debout, puis enchaîne au sol sans laisser respirer.','Par soumission, souvent sur une clé de jambe.','Ses projections se voient rarement venir.'],
   'Judo':['Il attend le contact pour projeter, puis contrôle au sol.','Aux points, en gagnant chaque phase au corps-à-corps.','Presque personne ne le fait tomber.'],
 };
 const STYLES_PROPRES={
-  nana:['Il avance sans arrêt, enferme l’autre contre le grillage et accepte d’en prendre pour placer ses crochets.','Au troisième round : il use l’autre, puis il le finit ou gagne aux points.','Peu de boxeurs frappent aussi fort au corps : c’est ce qui casse les autres.'],
-  mezouar:['Il amène au sol dès le premier échange et passe la garde en force.','Par soumission, surtout l’étranglement arrière.','Il a soumis Parfait Nana, ce que personne d’autre n’a réussi.'],
+  nana:['Il avance sans arrêt, enferme l’autre contre le grillage et accepte d’en prendre pour placer ses crochets.','Au 3e round : il use l’autre, puis le finit ou gagne aux points.','Peu de boxeurs frappent aussi fort au corps.'],
+  mezouar:['Il amène au sol dès le premier échange et passe la garde en force.','Par soumission, surtout l’étranglement arrière.','Le seul à avoir soumis Parfait Nana.'],
 };
 /* L'art martial écrit simplement (la spécialité reste dans l'Effectif, au clic). */
 const artCourt=a=>({'Jiu-jitsu brésilien':'Jiu-jitsu'})[a]||a||'Boxe';
@@ -71,7 +71,7 @@ const ARMES={'Boxe':['Crochets','Jab','Coups au corps'],'Lutte':['Double jambe',
 const ARMES_PROPRES={nana:['Crochet du droit','Coups au corps','Pression contre le grillage'],mezouar:['Double jambe','Étranglement arrière','Passage de garde']};
 /* Parcours avant le MMA : spécialité, amateur, autre sport, ceinture ou titre. */
 const BG={nana:[['Spécialité','Boxe anglaise'],['Amateur','12-3, champion de France 2017'],['Autre sport','Boxe thaï'],['Titre','Champion des poids légers Split']],
-  mezouar:[['Spécialité','Jiu-jitsu brésilien'],['Amateur','8-0, huit finitions'],['Autre sport','Lutte gréco-romaine'],['Ceinture','Noire de jiu-jitsu, vice-champion d’Europe']]};
+  mezouar:[['Spécialité','Jiu-jitsu brésilien'],['Amateur','8-0, 8 finitions'],['Autre sport','Lutte gréco-romaine'],['Ceinture','Noire de jiu-jitsu, vice-champion d’Europe']]};
 const BG_ART={'Boxe':['Boxe anglaise','Kickboxing'],'Lutte':['Lutte libre','Judo'],'Kickboxing':['Kickboxing','Boxe anglaise'],'Jiu-jitsu brésilien':['Jiu-jitsu brésilien','Lutte'],
   'Karaté':['Karaté','Taekwondo'],'Muay-thaï':['Muay-thaï','Boxe anglaise'],'Sambo':['Sambo','Judo'],'Judo':['Judo','Lutte']};
 function bgDe(c){if(BG[c.id])return BG[c.id];const a=BG_ART[c.art]||BG_ART['Boxe'],r=graine('bg'+c.id);
@@ -108,7 +108,7 @@ function styleCombat(c){
   const NIV={nana:[4,2,2],mezouar:[3,4,5]}[c.id]||(prof==='Grappler'?[2,4,4]:prof==='Frappeur'?[4,2,2]:[3,3,3]);
   const tu=(l,v)=>`<div class="sc-tu oct"><div class="sous">${l}</div><div class="T">${v}</div></div>`;
   /* Niveaux dits en un mot, sans cran : on devine le combattant sans lire son potentiel. */
-  const MOT=n=>n>=4?['Sa force','f']:n<=2?['Son point faible','p']:['Il se défend','m'];
+  const MOT=n=>n>=4?['Sa force','f']:n<=2?['Point faible','p']:['Il se défend','m'];
   return pan(titre('Style',esc(specialiteDe(c)))+`
     <div class="sc-tus">${tu('Finitions',Math.round(fin/(V.length||1)*100)+' %')}${tu('Profil',prof)}${tu('Rythme',ry)}${tu('Défense',def)}</div>
     <div class="sc-st">Zones</div>
@@ -122,10 +122,10 @@ const VILLES=[['Lyon','France'],['Bordeaux','France'],['Liège','Belgique'],['Ge
 const origineDe=c=>ORIGINES[c.id]||VILLES[Math.floor(graine('o'+c.id)()*VILLES.length)];
 function apercu(c){
   const h=historique(c).slice(0,5);
-  const traits=c.traits||[['+','Régulier','Jamais deux défaites de suite','Il revient toujours plus fort après un revers.']];
+  const traits=c.traits||[['+','Régulier','Jamais 2 défaites de suite','Il revient toujours plus fort après un revers.']];
   const fait=(l,v)=>`<div class="oct" style="--c:8px;background:var(--ligne);padding:10px 14px;min-width:0"><div class="sous">${l}</div><div class="T" style="font-size:30px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v}</div></div>`;
   return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.45fr);gap:20px;height:100%">
-    ${pan(titre('Ses traits')+traits.map(([s,n,d,t])=>`<div class="oct" style="--c:10px;background:var(--ligne);padding:12px 16px;display:flex;gap:16px;align-items:center;margin-bottom:10px">
+    ${pan(titre('Traits')+traits.map(([s,n,d,t])=>`<div class="oct" style="--c:10px;background:var(--ligne);padding:12px 16px;display:flex;gap:16px;align-items:center;margin-bottom:10px">
         <span class="octr tr-sg ${s==='+'?'plus':'moins'}"><i></i>${s==='+'?'<i class="v"></i>':''}</span>
         <div style="flex:1;min-width:0"><span class="T" style="font-size:32px">${n}</span><div style="font-size:21px">${t}</div><div class="sous" style="font-size:18px">${d}</div></div></div>`).join('')
       +`<div class="etiq" style="margin:12px 0 2px">Derniers combats</div><div class="defile">${h.map(f=>`<div style="display:flex;gap:12px;align-items:center;padding:6px 0;border-bottom:2px solid var(--sep)">
@@ -137,7 +137,7 @@ function apercu(c){
       ${pan(`<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">${fait('Âge',c.age+' ans')}${fait('Taille',c.taille)}${fait('Allonge',c.allonge)}${fait('Garde',c.garde)}
         ${fait(origineDe(c)[1],origineDe(c)[0])}${fait('Contrat',c.contrat[0]+' combat'+(c.contrat[0]>1?'s':''))}${fait('Mondial','n° '+c.mondial)}${fait('Art martial',esc(artCourt(c.art)))}</div>`,'flex:none')}
       ${pan(`<div class="etiq">En ce moment</div><div style="font-size:26px;margin-top:10px">${etat(c)}</div>
-        <div class="sous" style="margin-top:6px">Dernier combat le ${dCourt(c.dernier)}, il y a ${depuis(c.dernier)}</div>`,'flex:none')}
+        <div class="sous" style="margin-top:6px">Dernier combat : ${c.dernier.getDate()} ${MOIS_C[c.dernier.getMonth()]} ${c.dernier.getFullYear()}, il y a ${depuis(c.dernier)}</div>`,'flex:none')}
       ${pan(`<div style="display:flex;align-items:center;gap:20px;height:100%"><div style="flex:1"><div class="etiq">Prochain combat</div><div class="T" style="font-size:34px;margin-top:8px">${c.statut==='affiche'?'16 février':'Aucun combat prévu'}</div>${c.statut==='affiche'?`<div class="sous" style="margin-top:6px">${esc(c.affiche)}</div>`:''}</div>
         ${c.statut==='affiche'?'':'<button class="bouton jaune oct cj" data-action="proposer">Proposer un combat</button>'}</div>`,'flex:1')}
     </div></div>`;
@@ -162,7 +162,7 @@ function statsHtml(c){
   const FAM=['KO / TKO','Soumission','Décision'],maxN=Math.max(1,...FAM.map(m=>Math.max(V.filter(f=>fam(f)===m).length,D.filter(f=>fam(f)===m).length)));
   const ligne=(l,tot,res,m)=>{const q=l.filter(f=>fam(f)===m),n=q.length;
     const parts=m==='Décision'?[n,0,0]:[1,2,3].map(r=>q.filter(f=>r<3?f.rd===r:f.rd>=3).length);
-    return `<div class="mt-l ${res}"><span class="mt-r">${res==='v'?'V':'D'}</span><span class="mt-b">${n?parts.map((k,i)=>k?`<i class="t${i}" style="width:${k/maxN*100}%" title="${m==='Décision'?'':['Round 1','Round 2','Round 3 et plus'][i]+' : '+k}"></i>`:'').join(''):''}</span>
+    return `<div class="mt-l ${res}"><span class="mt-r">${res==='v'?'V':'D'}</span><span class="mt-b">${n?parts.map((k,i)=>k?`<i class="t${i}" style="width:${k/maxN*100}%" title="${m==='Décision'?'':['Round 1','Round 2','Round 3 et plus'][i]+' : '+k}"></i>`:'').join(''):''}</span>
       <span class="mt-p">${n?`${Math.round(n/(tot||1)*100)} %`:''}</span></div>`;};
   const fins=()=>FAM.map(m=>{const nv=V.filter(f=>fam(f)===m).length,nd=D.filter(f=>fam(f)===m).length;
     return `<div class="mt"><div class="mt-n"><b class="T">${m}</b><span class="sous">${nv} V · ${nd} D</span></div>
@@ -172,7 +172,7 @@ function statsHtml(c){
     ${pan(titre('Lutte et sol')+`<div class="defile">${STATS.slice(4).map(barre).join('')}</div>`,'height:100%')}
     ${pan(titre('Méthodes',`${V.length} V · ${D.length} D`)+`<div class="defile ct7-defile">${fins()}
       <div class="mt-leg"><span><i class="t0"></i>Round 1</span><span><i class="t1"></i>Round 2</span><span><i class="t2"></i>Round 3 et plus</span></div>
-      <div class="mt-du"><span class="sous">Durée moyenne d’un combat</span><span class="T">${s.duree}</span></div></div>`,'height:100%')}</div>`;
+      <div class="mt-du"><span class="sous">Durée moyenne</span><span class="T">${s.duree}</span></div></div>`,'height:100%')}</div>`;
 }
 
 /* ---- Combats : un bilan en tête, puis les combats par année, du plus récent au plus ancien ; plus de « Récit » ---- */
@@ -244,7 +244,7 @@ function combatsHtml(c){
     const y=f.date.getFullYear(),tete=y!==anCour?`<div class="cb-an"><span>${y}</span><span class="cb-an-b">Bilan ${rec(parAn[y][0],parAn[y][1])}</span></div>`:'';anCour=y;
     return trou+tete+an+`<div class="cb-l ${f.res} ${hs?'hs':''} ${ti?'titre':''}">
       <div class="cb-res"><span class="marque octr ${f.res}">${f.res.toUpperCase()}</span><span class="cb-abr">${ABR[fm]||''}</span></div>
-      <div class="cb-c"><span class="cb-nom">${lien(adv)}${badge(f)}</span><span class="sous">${adv.surnom?`« ${esc(adv.surnom)} » · `:''}Bilan ${bilanAdv(f)}${rv?` · <span class="cb-rv">${rv}</span>`:''}</span></div>
+      <div class="cb-c"><span class="cb-nom">${lien(adv)}${badge(f)}</span><span class="sous">${adv.surnom?`« ${esc(adv.surnom)} » · `:''}Bilan ${bilanAdv(f)}${rv?` · <span class="cb-rv">${rv}</span>`:''}</span></div>
       <div class="cb-c"><b>${methL1}</b><span class="sous">${methL2}</span></div>
       <div class="cb-c"><span>${esc(f.soiree)}</span><span class="sous">${ti?`<span class="cb-ti">${ico('ceintures',16)} ${ti}</span>`:hs?'Hors Split':place(f)}</span></div>
       <div class="cb-tags">${pr.map(x=>`<span class="cb-pr">${medaille(x[0],24,numSoiree(f.soiree))}${COURT[x[0]]}</span>`).join('')}</div>
@@ -305,20 +305,20 @@ function contratHtml(c){
   const moyNb=k=>cat.reduce((t,q)=>t+q.filter(x=>x[0]===k).length,0)/nb;
   const ecart=(v,m)=>v>m?`<span class="ct8-up">▲</span>`:v<m?`<span class="ct8-down">▼</span>`:'';
   const chiffre=(lab,val,extra='')=>`<div class="ct8-c"><div class="etiq">${lab}</div><div class="T">${val}</div>${extra}</div>`;
-  const gauche=pan(`<div class="pt"><h2>Son contrat</h2><div class="ct8-bts"><button class="bouton jaune oct cj ct7-bt">Prolonger</button><button class="bouton oct ct7-bt">Libérer</button></div></div>
+  const gauche=pan(`<div class="pt"><h2>Contrat</h2><div class="ct8-bts"><button class="bouton jaune oct cj ct7-bt">Prolonger</button><button class="bouton oct ct7-bt">Libérer</button></div></div>
     <div class="ct8-chiffres">
       ${chiffre('Combats restants',`${n} <span class="ct8-sur">sur ${total}</span>`,`<div class="ct7-pips">${pips}</div>`)}
       ${chiffre('Bourse fixe',fr(b/2),'<div class="sous">par combat</div>')}
       ${chiffre('Prime de victoire',fr(b/2),'<div class="sous">par victoire</div>')}
     </div>
     <div class="ct8-perf">
-      <div class="ct8-ph"><h3>Primes de performance</h3>${perf.length?`<span class="sous">depuis ${esc(c.depuis)}</span><span class="ct8-moy">moyenne des ${esc(pluriel(c.cat).toLowerCase())} : <b>${fr(moyTot)}</b></span><b class="T">${ecart(perfTot,moyTot)} ${fr(perfTot)}</b>`:''}</div>
+      <div class="ct8-ph"><h3>Primes de performance</h3>${perf.length?`<span class="sous">depuis ${esc(c.depuis)}</span><span class="ct8-moy">moyenne des ${esc(pluriel(c.cat).toLowerCase())} : <b>${fr(moyTot)}</b></span><b class="T">${ecart(perfTot,moyTot)} ${fr(perfTot)}</b>`:''}</div>
       ${perf.length?`<div class="ct8-corps">
         <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span class="ct8-tyl">${medaille(k,32)}${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
         <div class="defile ct7-defile ct8-liste ct8-fondu">${perf.map(([k,adv,dt,m])=>`<div class="ct8-li"><span class="ct8-d">${esc(dt)}</span><span class="ct8-tag">${medaille(k,24)}${COURT[k]}</span><span class="ct8-adv">${lien(parNom(adv,c.cat))}</span><b>${fr(m)}</b></div>`).join('')}</div>
-      </div>`:'<div class="ct8-aucune">Aucune prime de performance pour l’instant.</div>'}
+      </div>`:'<div class="ct8-aucune">Aucune prime de performance.</div>'}
     </div>`,'height:100%');
-  const droite=pan(titre('Classement des salaires',`${pos+1}<sup>${pos?'e':'er'}</sup> sur ${l.length}`)+`<div class="defile ct7-defile ct8-fondu">${l.map((o,k)=>`<div class="sal ct8-sal">
+  const droite=pan(titre('Classement des salaires',`${pos+1}/${l.length}`)+`<div class="defile ct7-defile ct8-fondu">${l.map((o,k)=>`<div class="sal ct8-sal">
       <span class="T">${k+1}</span><span class="eff-nom" style="min-width:0">${o.x.id===c.id?`<b>${esc(o.x.prenom)} ${esc(o.x.nom)}</b>`:lien(o.x)}</span>
       <span class="sal-b"><i style="width:${o.e/max*100}%;left:0"></i></span><b>${fr(o.e)}</b></div>`).join('')}</div>`,'height:100%');
   return `<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;height:100%">${gauche}${droite}</div>`;
@@ -333,13 +333,13 @@ function echosDe(c){
     ['pos','Cage Hebdo','Presse','Les derniers rounds lui appartiennent','À 37 ans, il gagne encore quand les autres faiblissent. Ses trois dernières victoires se sont jouées après le deuxième round.','il y a 2 semaines',0,'Julien Morel'],
     ['info','Tableau Noir','Statistiques','Il prend pour donner',`${virg(st.enc)} frappes reçues par minute, ${virg(st.fpm)} données. Il accepte l’échange, et pour l’instant ça lui réussit.`,'il y a 1 mois',0,''],
     ['pos','Le Forum','Supporters','',`Belkacem contre Nana, j’y étais. Je n’avais jamais entendu la salle aussi fort.`,'il y a 5 jours',1,'Gones69'],
-    ['neg','Son entraîneur','Entourage','','Il récupère moins vite qu’avant. On a réduit les sparrings, pas l’envie.','il y a 3 semaines',0,'Karim Ouali'],
+    ['neg','Entraîneur','Entourage','','Il récupère moins vite qu’avant. On a réduit les sparrings, pas l’envie.','il y a 3 semaines',0,'Karim Ouali'],
     ['info','Hors de la cage','Portrait','Boucher le jour, champion le soir','Son surnom vient de son premier métier. Entre deux camps, il passe encore à la boucherie familiale.','',0,'']]
   :[
     ['pos','Cage Hebdo','Presse',`${c.nom} attend son grand soir`,`Il gagne, mais toujours loin de la tête d’affiche. Split aurait tort d’attendre trop longtemps.`,'il y a 2 semaines',0,'Julien Morel'],
     ['info','Tableau Noir','Statistiques',pr?'Il touche plus qu’il ne prend':'Il prend plus qu’il ne touche',`${virg(st.fpm)} frappes données par minute, ${virg(st.enc)} reçues.`,'il y a 1 mois',0,''],
-    ['neg','Le Forum','Supporters','',`${c.nom} ? Vu une fois en préliminaires. J’attends de le voir plus haut sur la carte.`,'il y a 5 jours',ECHOS_NOUVEAUX.has(c.id),'Ring_Side'],
-    ['pos','Son entraîneur','Entourage','','Il travaille plus que tout le monde. Il lui manque un combat qui compte.','il y a 3 semaines',0,'Samir Haddad'],
+    ['neg','Le Forum','Supporters','',`${c.nom} ? Vu une fois en préliminaires. J’attends de le voir plus haut sur la carte.`,'il y a 5 jours',ECHOS_NOUVEAUX.has(c.id),'Ring_Side'],
+    ['pos','Entraîneur','Entourage','','Il travaille plus que tout le monde. Il lui manque un combat qui compte.','il y a 3 semaines',0,'Samir Haddad'],
     ['info','Hors de la cage','Portrait','Loin des micros','Discret hors de la salle, il ne donne presque jamais d’interview avant un combat.','',0,'']];
 }
 const TON={pos:['var(--vert)','Positif'],neg:['var(--neg)','Négatif'],info:['var(--jaune)','Une info']};
@@ -348,7 +348,7 @@ function echos(c){
   const carte=([t,src,genre,tit,txt,date,neuf,sig],i)=>{const [col]=TON[t],parle=!tit;
     return pan(`<div class="ec-tete"><span class="etiq">${esc(src)}</span><span class="sous">${genre}${date?` · ${date}`:''}</span>${neuf&&nouveau?'<span class="ec-neuf">Nouveau</span>':''}</div>
       <div class="ec-corps">${tit?`<div class="T ec-titre ${i===0?'g':''}">${esc(tit)}</div>`:''}
-        <p class="ec-txt ${i===0?'g':''} ${parle?'ec-parole':''}">${parle?`« ${esc(txt)} »`:esc(txt)}</p>
+        <p class="ec-txt ${i===0?'g':''} ${parle?'ec-parole':''}">${parle?`« ${esc(txt)} »`:esc(txt)}</p>
         ${sig?`<div class="ec-sig">${parle?'':'Par '}${esc(sig)}</div>`:''}</div>
       `,(i===0?'grid-column:span 2;':'')+`--ton:${col}`,'ec-c');};
   return `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr 1fr;gap:20px;height:100%">${l.map(carte).join('')}</div>`;
@@ -360,17 +360,17 @@ const RAPPORTS=['Hostile','Tendu','Neutre','Bon','Excellent'];
 const RAPPORT_COL=['var(--neg)','var(--neg)','var(--blanc)','var(--vert)','var(--vert)'];
 const RELATION={
   nana:{rapport:3,
-    moments:[['2019','Signe chez Split','Premier contrat, en préliminaires'],['2020','Première victoire chez Split','Par KO au premier round'],['2021','Premier combat principal','À Lyon, contre Gaël Mendes'],['2022','Premier combat de la soirée','Sa première prime chez Split'],['2023','Entre dans le top 5','Après quatre victoires de suite'],['2024','Prolonge pour quatre combats','Sans passer par le marché'],['mars 2026','Champion des poids légers','Contre Sofiane Belkacem'],['déc. 2026','Deuxième défense réussie','Contre Kévin Darras']],
+    moments:[['2019','Signe chez Split','Premier contrat, en préliminaires'],['2020','Première victoire chez Split','Par KO au premier round'],['2021','Premier combat principal','À Lyon, contre Gaël Mendes'],['2022','Premier combat de la soirée','Première prime chez Split'],['2023','Entre dans le top 5','Après 4 victoires de suite'],['2024','Prolonge pour 4 combats','Sans passer par le marché'],['mars 2026','Champion des poids légers','Contre Sofiane Belkacem'],['déc. 2026','2e défense réussie','Contre Kévin Darras']],
     entourage:[['Agent','Marc Ferrand','Dur en affaires'],['Entraîneur','Karim Ouali','Depuis ses débuts'],['Préparateur','Lucie Garnier','Depuis 2024'],['Salle','Lyon Fight Club','Lyon']],
     vestiaire:[['Partenaire','Thomas Labbé','Refuse de l’affronter'],['Rival','Ilyas Mezouar','Revanche le 16 févr.'],['Respect','Sofiane Belkacem','Depuis leur guerre']],
-    objectifs:[['Devenir champion','atteint','Mars 2026'],['Défendre sa ceinture trois fois','cours','2 sur 3'],['Entrer dans le top 10 mondial','cours','17e aujourd’hui']],
+    objectifs:[['Devenir champion','atteint','Mars 2026'],['Défendre sa ceinture 3 fois','cours','2/3'],['Entrer dans le top 10 mondial','cours','17e aujourd’hui']],
     mondial:[['2019',null],['2021',68],['2023',41],['2025',26],['2026',17]]}
 };
 function relationDe(c){
   if(RELATION[c.id])return RELATION[c.id];
   const refus=c.statut==='refus',cat=memeCat(c).filter(x=>x.id!==c.id),pick=k=>cat[k%cat.length],dep=+c.depuis||2022,m=c.mondial||40,r=+c.rang||20;
   return {rapport:refus?1:2,
-    moments:[[String(dep),'Signe chez Split','Premier contrat, en préliminaires'],[String(Math.min(2025,dep+2)),'Entre dans le top 15','Après trois victoires de suite'],['2025','Premier combat en carte principale',''],...(r<=5?[['2026',`${r===1?'N° 1':`${r}e`} de la catégorie`,'Sa meilleure place']]:[])],
+    moments:[[String(dep),'Signe chez Split','Premier contrat, en préliminaires'],[String(Math.min(2025,dep+2)),'Entre dans le top 15','Après 3 victoires de suite'],['2025','Premier combat en carte principale',''],...(r<=5?[['2026',`${r===1?'N° 1':`${r}e`} de la catégorie`,'Meilleure place']]:[])],
     entourage:[['Agent','Sans agent','Négocie seul'],['Entraîneur','Samir Haddad','Depuis 2022'],['Préparateur','Hugo Brissac','Depuis 2025'],['Salle','Team Rhône MMA','Villeurbanne']],
     vestiaire:[['Partenaire',`${pick(3).prenom} ${pick(3).nom}`,'Même salle'],['Rival',`${pick(7).prenom} ${pick(7).nom}`,'Guerre des mots'],['Ami',`${pick(9).prenom} ${pick(9).nom}`,'Arrivés la même année']],
     objectifs:[[c.id==='mezouar'?'Devenir champion':'Obtenir un combat pour le titre','cours',c.id==='mezouar'?'Combat pour le titre le 16 févr.':''],['Entrer dans le top 15 mondial',m<=15?'atteint':'cours',m<=15?'':`${m}e aujourd’hui`],['Rester invaincu sur une année','atteint','2025']],
@@ -396,13 +396,13 @@ function relation(c){
   const gauche=pan(titre('Rapport avec l’organisation')+echelle+`
     <div class="rl-st">Moments marquants</div>
     <div class="rl-tl2 defile ct7-defile ct8-fondu">${[...R.moments].reverse().map(([d,t,s])=>`<div class="rl-mm"><span class="rl-md">${esc(d)}</span><i class="octr"></i><div><b>${esc(t)}</b>${s?`<span class="sous">${esc(s)}</span>`:''}</div></div>`).join('')}</div>`,'height:100%');
-  const milieu=pan(titre('Son entourage')+`<div class="rl-col">
+  const milieu=pan(titre('Entourage')+`<div class="rl-col">
     ${R.entourage.map(([r,n,d])=>ligneE(r,n,d,false)).join('')}
     <div class="rl-st">Dans le vestiaire</div>
     ${R.vestiaire.map(([r,n,d])=>ligneE(r,n,d,true)).join('')}</div>`,'height:100%');
   const ETAT={atteint:['Atteint','var(--blanc)',ico('ok',16)],cours:['En cours','var(--jaune)','']};
   const mv=R.mondial,cur=mv[mv.length-1][1],prev=mv[mv.length-2][1],gain=prev==null?null:prev-cur;
-  const droite=pan(titre('Sa carrière')+`
+  const droite=pan(titre('Carrière')+`
     <div class="rl-st" style="margin-top:0">Objectifs de carrière</div>
     ${R.objectifs.map(([t,e,note])=>`<div class="rl-o ${e}"><span>${esc(t)}</span><span class="rl-oe" style="color:${ETAT[e][1]}">${ETAT[e][2]}${ETAT[e][0]}${note?` <span class="sous">· ${esc(note)}</span>`:''}</span></div>`).join('')}
     <div class="rl-st">Classement mondial <span class="rl-v">${cur}<sup>e</sup> aujourd’hui${gain?` · <span style="color:${gain>0?'var(--vert)':'var(--neg)'}">${gain>0?'▲':'▼'} ${Math.abs(gain)} places en un an</span>`:''}</span></div>
@@ -427,7 +427,7 @@ function rendreFiche(dir=0){
 }
 
 document.addEventListener('click',e=>{
-  if(e.target.closest('[data-action="engager"]'))toast('Tu t’engages : la demande passe « en cours », et il s’en souviendra.');
+  if(e.target.closest('[data-action="engager"]'))toast('Engagement pris : demande en cours.');
 });
 window.addEventListener('DOMContentLoaded',()=>{const q=new URLSearchParams(location.search);if(q.get('onglet')&&ONGLETS.includes(q.get('onglet'))&&S.fiche){S.onglet=q.get('onglet');rendreFiche();}});
 /* Fondu des listes sans barre : retiré quand on arrive en bas ou quand tout tient. */

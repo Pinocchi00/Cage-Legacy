@@ -36,7 +36,7 @@ const RS_SOIREES=[
   {n:59,date:new Date(2026,6,19),ville:'Lyon',salle:'Palais des sports',public:[5650,5800],titre:'Poids léger',ceinture:'gardée',
    enjeu:'Nana défend sa ceinture contre Carvalho.',main:{a:'nana',b:'carvalho',g:'a',meth:'KO',det:'crochet du droit',rd:3,tps:'2:14',n:5,j:['ab','bb','ab'],pr:{a:['perf','fin']},nr:{a:'C',b:6},or:{a:'C',b:5}}},
   {n:58,date:new Date(2026,5,6),ville:'Nice',salle:'Palais Nikaïa',public:[4100,5000],
-   enjeu:'Labbé contre Kessler : le gagnant se rapproche de la ceinture.',main:{a:'labbe',b:'kessler',g:'a',meth:'Décision',det:'unanime',rd:5,tps:'5:00',n:5,j:['aaaba','aabaa','abaaa'],nr:{a:2,b:7},or:{a:3,b:6}}},
+   enjeu:'Labbé contre Kessler : le gagnant se rapproche de la ceinture.',main:{a:'labbe',b:'kessler',g:'a',meth:'Décision',det:'unanime',rd:5,tps:'5:00',n:5,j:['aaaba','aabaa','abaaa'],nr:{a:2,b:7},or:{a:3,b:6}}},
   {n:57,date:new Date(2026,3,25),ville:'Bordeaux',salle:'Palais des sports',public:[3020,3800],
    enjeu:'Diallo veut la 2e place des mi-moyens.',main:{a:'diallo',b:null,g:'a',meth:'Décision',det:'partagée',rd:5,tps:'5:00',n:5,j:['aabba','abbab','aabab'],nr:{a:2},or:{a:3}}},
   {n:56,date:new Date(2026,2,20),ville:'Lyon',salle:'Palais des sports',public:[5800,5800],titre:'Poids léger',ceinture:'gardée',
@@ -78,7 +78,7 @@ function rsQuand(f){return f.meth==='Décision'?`après ${f.n} rounds`:`${rsOrd(
 /** La phrase du relevé, avec le nom du vainqueur même en cas de finition (R41). */
 function rsPhrase(f){
   const w=rsW(f),l=rsL(f);
-  if(f.meth==='Décision')return `${w.prenom} ${w.nom} gagne aux points, par décision ${f.det} des juges${f.det==='partagée'?' (deux juges sur trois)':''}, après ${f.n} rounds.`;
+  if(f.meth==='Décision')return `${w.prenom} ${w.nom} gagne aux points, par décision ${f.det} des juges${f.det==='partagée'?' (2 juges sur 3)':''}, après ${f.n} rounds.`;
   const m=f.meth==='KO'?(f.det.startsWith('arrêt')?`par KO (${f.det})`:`par KO, sur un ${f.det}`):`par soumission (${f.det})`;
   return `${w.prenom} ${w.nom} gagne ${m} au ${rsOrd(f.rd)} round, à ${f.tps}.`;
 }
@@ -193,7 +193,7 @@ function rsMvt(av,ap){
   if(av===undefined||av===null||ap===undefined||ap==='–')return '';
   const d=rsRangV(av)-rsRangV(ap),t=x=>x==='C'?'champion':'n° '+x;
   if(!d)return '';
-  return `<span class="rs-mv ${d>0?'up':'down'}" title="Chez Split : ${t(av)} → ${t(ap)}">${ap==='C'?rsCb(24):''}${d>0?'▲':'▼'}${ap==='C'?'':` ${Math.abs(d)}`}</span>`;
+  return `<span class="rs-mv ${d>0?'up':'down'}" title="Chez Split : ${t(av)} → ${t(ap)}">${ap==='C'?rsCb(24):''}${d>0?'▲':'▼'}${ap==='C'?'':` ${Math.abs(d)}`}</span>`;
 }
 const RS_PR={soiree:'Combat de la soirée',perf:'Performance',fin:'Finition'};
 /** Une seule étiquette par combat : la prime la plus rare (la finition va de soi après un KO ou une soumission). */
@@ -205,7 +205,7 @@ function rsPrimeTag(f,n){
   if(!types.length)return '';const p=types[0];
   return `<span class="rs-bonus">${types.map(x=>rsMedaille(x,28,n)).join('')}<span class="rs-bt"><b>${RS_PR[p]}</b><span>${types.length>1?`+ ${types.slice(1).map(x=>RS_PR[x].toLowerCase()).join(' + ')} · ${nb(types.reduce((t,x)=>t+primeDe(x,n),0))} €`:`${nb(primeDe(p,n))} €${p==='soiree'?' chacun'+(rsF(f.A)?'e':''):''}`}</span></span></span>`;
 }
-const rsSurn=c=>`<span class="rs-surn">${c.surnom?`« ${esc(c.surnom)} »`:esc(rsCatC(c.cat))}</span>`;
+const rsSurn=c=>`<span class="rs-surn">${c.surnom?`« ${esc(c.surnom)} »`:esc(rsCatC(c.cat))}</span>`;
 const rsQuoi=f=>f.meth==='Décision'?[0,1,2].map(q=>{const c=rsCarteJuge(f,q);return c.gagne===f.g?c.txt:c.txt.split('-').reverse().join('-');}).join(' · '):`${rsOrd(f.rd)} round · ${f.tps}`;
 function rsLigne(f,s,i){
   const w=rsW(f),l=rsL(f),ws=rsWs(f),ls=rsLs(f),mv=sd=>f.or?rsMvt(f.or[sd],f.nr?(s.n===63?(sd==='a'?f.A:f.B).rang:f.nr[sd]):undefined):'';
@@ -232,7 +232,7 @@ function rsSoireesHtml(){
       <span class="rs-so2">${esc(s.ville)} · ${esc(s.salle)}</span>
       <span class="rs-so3">${s.titre?rsCb(24):''}<span>${esc(w.nom)} bat ${esc(lo.nom)}</span></span></button>`;};
   const toi=l.filter(s=>s.n===63),avant=l.filter(s=>s.n!==63);
-  return pan(`<div class="pt"><h2>Les soirées</h2></div>
+  return pan(`<div class="pt"><h2>Soirées</h2></div>
     <div class="rs-sol">${toi.length?`<div class="etiq rs-grp">Tes soirées</div>${toi.map(it).join('')}`:''}
     <div class="etiq rs-grp">Avant toi</div>${avant.map(it).join('')}
     <div class="sous rs-plus">Et 55 soirées plus anciennes, depuis 2004.</div></div>`,'width:380px;flex:none','rs-gauche');
@@ -243,7 +243,7 @@ function rsBandeau(s){
     <div class="rs-ban-img ${s.titre?'or':''}"></div>
     <div class="rs-ban-g"><div class="T rs-ban-t">Split Fight Night <span style="color:var(--rouge-vif)">${s.n}</span></div>
       <div class="rs-ban-l">${s.date.getDate()} ${MOIS[s.date.getMonth()]} ${s.date.getFullYear()} · ${esc(s.salle)}, ${esc(s.ville)}</div></div>
-    <div class="rs-case"><span class="etiq">L’enjeu</span><span class="rs-case-t">${esc(s.enjeu)}</span>
+    <div class="rs-case"><span class="etiq">Enjeu</span><span class="rs-case-t">${esc(s.enjeu)}</span>
       ${s.titre?`<span class="rs-c1">${rsCb(26)}<span>${s.ceinture==='change de mains'?`<b>${esc(w.nom)}</b> devient champion`:`<b>${esc(w.nom)}</b> garde sa ceinture`}</span></span>`:''}</div>
     <div class="rs-case rs-case-p"><span class="etiq">Public</span><span class="T rs-case-n">${nb(s.public[0])}</span><span class="sous">${s.public[0]>=s.public[1]?'à guichets fermés':`salle pleine à ${Math.round(s.public[0]/s.public[1]*100)} %`}</span></div>
   </div>`;
@@ -318,7 +318,7 @@ function rsDetailHtml(s){
   /* Les juges : un tableau, un round par ligne, un juge par colonne ; dans chaque case, celui qui gagne le round (Q41). */
   const cartes=[0,1,2].map(q=>rsCarteJuge(f,q)),pourW=cartes.filter(c=>c.gagne===ws).length;
   const fin=f.meth!=='Décision';
-  const verdict=!cartes[0].r.length?`Fini au 1er round : aucun round n’était terminé.`
+  const verdict=!cartes[0].r.length?`Fini au 1er round : aucun round n’était terminé.`
     :fin?`Avant la fin, ${esc(pourW>=2?w.nom:l.nom)} menait sur ${pourW>=2?pourW:3-pourW} carte${(pourW>=2?pourW:3-pourW)>1?'s':''} sur 3.`
     :pourW===3?`Les 3 juges donnent la victoire à ${esc(w.nom)}.`:`${pourW} juges sur 3 donnent la victoire à ${esc(w.nom)}.`;
   const cel=x=>x?`<span class="rs-jc ${x===ws?'g':'d'}">${esc((x==='a'?f.A:f.B).nom)}</span>`:'';
@@ -326,7 +326,7 @@ function rsDetailHtml(s){
   for(let r=1;r<=f.n;r++){
     const xs=cartes.map(c=>c.r[r-1]);
     if(xs.some(Boolean))lignes+=`<div class="rs-jl"><span class="rs-jn">R${r}</span>${xs.map(cel).join('')}</div>`;
-    else if(fin&&r===f.rd)lignes+=`<div class="rs-jl"><span class="rs-jn">R${r}</span><span class="rs-jfin">${esc(f.meth==='KO'?'KO':'Soumission')} de ${esc(w.nom)} à ${f.tps} : le round n’est pas noté</span></div>`;
+    else if(fin&&r===f.rd)lignes+=`<div class="rs-jl"><span class="rs-jn">R${r}</span><span class="rs-jfin">${esc(f.meth==='KO'?'KO':'Soumission')} de ${esc(w.nom)} à ${f.tps} : le round n’est pas noté</span></div>`;
     else lignes+=`<div class="rs-jl rs-jvide"><span class="rs-jn">R${r}</span><span class="rs-jfin">pas disputé</span></div>`;
   }
   const scores=cartes.map(c=>c.r.length?`<span class="rs-js"><b class="T">${c.txt}</b> ${esc((c.gagne===ws?w:l).nom)}</span>`:'<span class="rs-js">–</span>').join('');
@@ -347,12 +347,12 @@ function rsDetailHtml(s){
     return `<div class="rs-bil"><span class="rs-bil-n">${esc(c.nom)}</span><span>${s.n===63?rec(c.v,c.d):''}</span><span>${d===null?'':d?`${t(av)} → <b class="${ap==='C'?'or':''}">${t(ap)}</b> <span class="${d>0?'cl-up':'cl-down'}">${d>0?'▲':'▼'}</span>`:`reste ${t(ap)}`}</span>${p?`<span class="rs-bil-p">${p}</span>`:'<span></span>'}</div>`;};
   return `<div class="rs-det">${pan(`
     <div class="rs-dh"><span class="etiq">${titre?`${rsCb(22)} Titre des ${esc(rsCatPl(f.cat))}`:esc(rsCatL(f.cat))} · ${f.n} rounds</span>
-      <span class="rs-dnav"><button class="bb oct petit" data-rsrevoir="arene"><span class="oct">${ico('avant',20)}Revoir</span></button><button class="bb oct petit" data-rsrevoir="recit"><span class="oct">Le récit</span></button>
+      <span class="rs-dnav"><button class="bb oct petit" data-rsrevoir="arene"><span class="oct">${ico('avant',20)}Revoir</span></button><button class="bb oct petit" data-rsrevoir="recit"><span class="oct">Récit</span></button>
         <i class="rs-dsep"></i><button class="bb oct petit" data-rsnav="-1" ${i?'':'disabled'} title="Combat précédent"><span class="oct">${ico('retour',22)}</span></button><button class="bb oct petit" data-rsnav="1" ${i<s.combats.length-1?'':'disabled'} title="Combat suivant"><span class="oct">${ico('avant',22)}</span></button></span></div>
     <div class="rs-face">
-      <div class="rs-fc"><span class="rs-fp"><span class="marque octr v">V</span>${esc(w.prenom)}${w.surnom?` « ${esc(w.surnom)} »`:''}</span><span class="T rs-fn"><span class="nom" data-fiche="${w.id}">${esc(w.nom)}</span></span></div>
+      <div class="rs-fc"><span class="rs-fp"><span class="marque octr v">V</span>${esc(w.prenom)}${w.surnom?` « ${esc(w.surnom)} »`:''}</span><span class="T rs-fn"><span class="nom" data-fiche="${w.id}">${esc(w.nom)}</span></span></div>
       <span class="rs-fbat">bat</span>
-      <div class="rs-fc rs-fd"><span class="rs-fp">${esc(l.prenom)}${l.surnom?` « ${esc(l.surnom)} »`:''}</span><span class="T rs-fn"><span class="nom" data-fiche="${l.id}">${esc(l.nom)}</span></span></div>
+      <div class="rs-fc rs-fd"><span class="rs-fp">${esc(l.prenom)}${l.surnom?` « ${esc(l.surnom)} »`:''}</span><span class="T rs-fn"><span class="nom" data-fiche="${l.id}">${esc(l.nom)}</span></span></div>
     </div>
     <div class="rs-ph">${esc(rsPhrase(f))}</div>
     <div class="rs-d2"><div class="rs-dcol">${juges}${graph}</div>${chiffres}</div>
@@ -373,9 +373,9 @@ function rsLendemainHtml(){
     <span class="rs-tag oct">${tag}</span><div class="T rs-mo-t">${t}</div><div class="rs-mo-p">${p}</div>
     <button class="rs-lien" data-rsvoir="${f.k}">Voir le combat ›</button></div>`,'height:100%')}</div>`;
   const moments=`<div class="rs-mos">
-    ${moment('or','La ceinture',`${esc(w0.nom)} prend la ceinture`,`Étranglement arrière au 4e round. ${esc(l0.nom)} menait sur une carte. Revanche de 2025 : Split a un nouveau champion des légers.`,m0,0)}
-    ${moment('','La finition',`${esc(w2.nom)} met ${esc(l2.nom)} KO`,`Un coup de pied à la tête, au 2e round, à 1:47. Il réclamait un top 3 : il prend la place de ${esc(l2.nom)}.`,m2,1)}
-    ${moment('','Le combat de la soirée','Trois rounds à fond',`${esc(w1.nom)} bat ${esc(l1.nom)} sur deux cartes sur trois. 43 frappes contre 41, le Forum debout.`,m1,2)}</div>`;
+    ${moment('or','Ceinture',`${esc(w0.nom)} prend la ceinture`,`Étranglement arrière au 4e round. ${esc(l0.nom)} menait sur une carte. Revanche de 2025 : Split a un nouveau champion des légers.`,m0,0)}
+    ${moment('','Finition',`${esc(w2.nom)} met ${esc(l2.nom)} KO`,`Un coup de pied à la tête, au 2e round, à 1:47. Il réclamait un top 3 : il prend la place de ${esc(l2.nom)}.`,m2,1)}
+    ${moment('','Combat de la soirée','3 rounds à fond',`${esc(w1.nom)} bat ${esc(l1.nom)} sur 2 cartes sur 3. 43 frappes contre 41.`,m1,2)}</div>`;
   /* Ce qui a bougé : la carte principale, puis les préliminaires qui gagnent ou perdent deux places ou plus. */
   const ids=[];s.combats.forEach((f,k)=>{[f.A,f.B].forEach(c=>{const a=c._rsAvant;if(!a||a.rang===c.rang)return;
     if(k<4||Math.abs(rsRangV(a.rang)-rsRangV(c.rang))>=2)ids.push(c);});});
@@ -389,28 +389,28 @@ function rsLendemainHtml(){
   const lignes=ids.map((c,i)=>`<div class="rs-cl" style="--i:${i}">
     <span class="rs-cl-n"><span class="rs-n">${lien(c)}</span><span class="sous">${esc(rsCatC(c.cat))} · ${phr(c)}${c.mondial!==c._rsAvant.mondial?` · n° ${c.mondial} mondial <span class="${c.mondial<c._rsAvant.mondial?'cl-up':'cl-down'}">${c.mondial<c._rsAvant.mondial?'▲':'▼'}</span>`:''}</span></span>
     ${rsRangs(c._rsAvant.rang,c.rang)}</div>`).join('');
-  const classement=pan(`<div class="pt"><h2>Le classement</h2></div><div class="rs-cls">${lignes}</div>
+  const classement=pan(`<div class="pt"><h2>Classement</h2></div><div class="rs-cls">${lignes}</div>
     <button class="rs-lien rs-bas" data-go="classements">${autres>0?`Et ${autres} autres mouvements · `:''}Ouvrir les classements ›</button>`,'height:100%');
   /* La presse et les vestiaires (À RELIRE). */
-  const presse=pan(`<div class="pt"><h2>On en parle</h2><span class="ment"><span class="relire" style="margin:0">À relire</span></span></div>
-    <div class="rs-une"><span class="etiq">Cage Hebdo · la une</span><div class="T rs-une-t">« ${esc(w0.nom)}, enfin »</div>
+  const presse=pan(`<div class="pt"><h2>Réactions</h2><span class="ment"><span class="relire" style="margin:0">À relire</span></span></div>
+    <div class="rs-une"><span class="etiq">Cage Hebdo · la une</span><div class="T rs-une-t">« ${esc(w0.nom)}, enfin »</div>
       <p>Battu par ${esc(l0.nom)} en 2025, il a attendu le 4e round pour lui prendre le dos.</p></div>
-    <div class="rs-cits"><div class="rs-cit"><p>« ${esc(w2.nom)} règle la question du top 3 en un coup de pied. »</p><span class="etiq">Tableau Noir</span></div>
-      <div class="rs-cit"><p>« ${esc(w1.nom)}–${esc(l1.nom)}, on veut la revanche, et à Lyon. »</p><span class="etiq">Forum</span></div></div>
-    <div class="rs-vest"><span class="etiq">Dans les vestiaires</span>
-      <div class="rs-q"><p>« Je l’avais dit : il fallait l’emmener au 4e. »</p><span class="rs-n">${lien(w0)}</span></div>
-      <div class="rs-q"><p>« Je veux la revanche. Pas dans un an : cet été. »</p><span class="rs-n">${lien(l0)}</span></div></div>`,'height:100%');
+    <div class="rs-cits"><div class="rs-cit"><p>« ${esc(w2.nom)} règle la question du top 3 en un coup de pied. »</p><span class="etiq">Tableau Noir</span></div>
+      <div class="rs-cit"><p>« ${esc(w1.nom)}–${esc(l1.nom)}, on veut la revanche, et à Lyon. »</p><span class="etiq">Forum</span></div></div>
+    <div class="rs-vest"><span class="etiq">Vestiaires</span>
+      <div class="rs-q"><p>« Je l’avais dit : il fallait l’emmener au 4e. »</p><span class="rs-n">${lien(w0)}</span></div>
+      <div class="rs-q"><p>« Je veux la revanche. Pas dans un an : cet été. »</p><span class="rs-n">${lien(l0)}</span></div></div>`,'height:100%');
   /* Les chiffres, à la fin seulement (R39). Primes : montants de l'organisation (fiche, onglet Contrat). */
   const pr=s.combats.reduce((t,f)=>t+Object.values(f.pr||{}).flat().reduce((a,p)=>a+primeDe(p,s.n),0),0);
   const recette=846000,dep=345000+120000+pr,reste=recette-dep,pct=Math.round(s.public[0]/s.public[1]*100);
-  const chiffres=pan(`<div class="pt"><h2>La soirée</h2></div>
-    <div class="rs-ch"><span>Le public</span><b class="T"><span data-rscompte="${s.public[0]}">0</span><small> / ${nb(s.public[1])}</small></b></div>
+  const chiffres=pan(`<div class="pt"><h2>Soirée</h2></div>
+    <div class="rs-ch"><span>Public</span><b class="T"><span data-rscompte="${s.public[0]}">0</span><small> / ${nb(s.public[1])}</small></b></div>
     <div class="rs-jauge"><i style="--p:${pct}%"></i></div>
     <div class="rs-ch"><span>Recette</span><b class="T"><span data-rscompte="${recette}">0</span> €</b></div>
     <div class="rs-ch"><span>Bourses, primes et salle</span><b class="T">− ${nb(dep)} €</b></div>
     <div class="rs-ch2"><span>bourses 345 000 €</span><span>primes ${nb(pr)} €</span><span>salle 120 000 €</span></div>
-    <div class="rs-ch rs-reste"><span>Ce qu’il te reste</span><b class="T ${reste>=0?'cl-up':'cl-down'}">${reste>=0?'+':'−'} <span data-rscompte="${Math.abs(reste)}">0</span> €</b></div>
-    <div class="rs-ch"><span>La popularité de Split</span><b class="T">40 → 43 <span class="cl-up">▲</span></b></div>
+    <div class="rs-ch rs-reste"><span>Reste</span><b class="T ${reste>=0?'cl-up':'cl-down'}">${reste>=0?'+':'−'} <span data-rscompte="${Math.abs(reste)}">0</span> €</b></div>
+    <div class="rs-ch"><span>Popularité de Split</span><b class="T">40 → 43 <span class="cl-up">▲</span></b></div>
     <div class="etiq rs-medt">Primes</div>
     ${[['soiree','Combat de la soirée'],['perf','Performance'],['fin','Finition']].map(([k,t])=>{const qui=s.combats.flatMap(f=>['a','b'].filter(sd=>((f.pr||{})[sd]||[]).includes(k)).map(sd=>sd==='a'?f.A:f.B));
       return qui.length?`<div class="rs-pl">${rsMedaille(k,30,s.n)}<span class="rs-pl-t">${t}</span><span class="rs-pl-n">${qui.slice(0,qui.length>3?2:3).map(c=>lien({...c,prenom:''}).replace('> ','>')).join(', ')}${qui.length>3?` <span class="sous">et ${qui.length-2} autres</span>`:''}</span><span class="sous">${nb(primeDe(k,s.n))} €</span></div>`:'';}).join('')}
@@ -422,7 +422,7 @@ function rsLendemainHtml(){
 /* ---- Rendu de l'écran ---- */
 function rsOnglets(){
   const o=(v,t,mq)=>`<button class="onglet oct ${S.rs.vue===v?'ouvert':''}" data-rsvue="${v}">${t}${mq?'<span class="onglet-mq octr"></span>':''}</button>`;
-  return `<div class="cl-haut">${o('resultats','Résultats')}${S.rs.apres?o('lendemain','Le lendemain',!S.rs.ldVu):''}</div>`;
+  return `<div class="cl-haut">${o('resultats','Résultats')}${S.rs.apres?o('lendemain','Lendemain',!S.rs.ldVu):''}</div>`;
 }
 function rsHtml(){
   if(S.rs.vue==='lendemain'&&S.rs.apres){S.rs.ldVu=true;return `<div class="rs">${rsOnglets()}${rsLendemainHtml()}</div>`;}
@@ -430,7 +430,7 @@ function rsHtml(){
 }
 function rsAlerte(){
   if(!S.rs.apres){$('#alerte').classList.remove('af-al');msAlerte();return;}
-  $('#alerte').innerHTML=`<span class="tag-j oct cj fin">Prochaine étape</span><span style="font-size:22px">Split Fight Night 64, le 3 avril à Bordeaux : la carte est vide.</span>`;
+  $('#alerte').innerHTML=`<span class="tag-j oct cj fin">Prochaine étape</span><span style="font-size:22px">Split Fight Night 64, le 3 avril à Bordeaux : la carte est vide.</span>`;
 }
 /** Mouvement discret : compteurs qui défilent, jauge qui se remplit (T3). Une seule fois par ouverture d'onglet. */
 function rsAnimer(){

@@ -13,14 +13,14 @@ const MN_JOUR=864e5;
 /* Les huit organisations du jeu (mgmt-organisations-data.js, textes de mgmt-nouvelle.js). La caisse
    de départ n'est pas reprise : 50 000 € dans le jeu, 952 200 € à l'Arrivée validée (écart signalé). */
 const MN_ORGS=[
-  {id:'split',nom:'Split',lieu:'Lyon · depuis 2004',t:'Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.',p:['Caisse saine'],m:['Peu connue'],eff:350,age:'27,9',pop:'moyenne',salle:9000,bou:'normales'},
-  {id:'garden-of-blood',nom:'Garden of Blood',lieu:'New York · depuis 1999',t:'La plus grande scène du monde. On y vient pour l’argent et pour la lumière.',p:['Très populaire','Grandes salles'],m:['Bourses lourdes'],eff:360,age:'27,9',pop:'très haute',salle:12600,bou:'lourdes'},
-  {id:'mma-korner',nom:'MMA Korner',lieu:'Rotterdam · depuis 2011',t:'Une petite maison sérieuse, où les champions apprennent avant de partir.',p:['Bourses modestes'],m:['Caisse modeste','Public à gagner'],eff:310,age:'27,9',pop:'basse',salle:7200,bou:'modestes'},
-  {id:'ultimate-rim',nom:'Ultimate Rim',lieu:'Melbourne · depuis 2020',t:'La jeune organisation de l’autre bout du monde, qui mise tout sur ses espoirs.',p:['Jeunes combattants'],m:['Peu connue','Petites salles'],eff:250,age:'24,9',pop:'moyenne',salle:6300,bou:'normales'},
+  {id:'split',nom:'Split',lieu:'Lyon · depuis 2004',t:'Au milieu des huit : ni la plus grosse, ni la plus petite.',p:['Caisse saine'],m:['Peu connue'],eff:350,age:'27,9',pop:'moyenne',salle:9000,bou:'normales'},
+  {id:'garden-of-blood',nom:'Garden of Blood',lieu:'New York · depuis 1999',t:'La plus grande scène du monde. Les plus grosses bourses.',p:['Très populaire','Grandes salles'],m:['Bourses lourdes'],eff:360,age:'27,9',pop:'très haute',salle:12600,bou:'lourdes'},
+  {id:'mma-korner',nom:'MMA Korner',lieu:'Rotterdam · depuis 2011',t:'Petite et sérieuse : on y forme des champions, qui partent ensuite.',p:['Bourses modestes'],m:['Caisse modeste','Public à gagner'],eff:310,age:'27,9',pop:'basse',salle:7200,bou:'modestes'},
+  {id:'ultimate-rim',nom:'Ultimate Rim',lieu:'Melbourne · depuis 2020',t:'La plus jeune des huit, qui mise sur ses espoirs.',p:['Jeunes combattants'],m:['Peu connue','Petites salles'],eff:250,age:'24,9',pop:'moyenne',salle:6300,bou:'normales'},
   {id:'fighting-pacific-championship',nom:'Fighting Pacific Championship',lieu:'Tokyo · depuis 1997',t:'La plus ancienne. Un public fidèle, et des champions qui règnent longtemps.',p:['Caisse confortable','Public acquis'],m:['Effectif vieillissant'],eff:390,age:'30,9',pop:'haute',salle:9000,bou:'normales'},
-  {id:'organisation-6',nom:'Knuckle Gate',lieu:'Manchester · depuis 2012',t:'La maison des meilleures combattantes du monde.',p:['Public acquis','Meilleures combattantes'],m:['Caisse modeste','Peu d’hommes classés'],eff:300,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
+  {id:'organisation-6',nom:'Knuckle Gate',lieu:'Manchester · depuis 2012',t:'Les meilleures combattantes du monde.',p:['Public acquis','Meilleures combattantes'],m:['Caisse modeste','Peu d’hommes classés'],eff:300,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
   {id:'organisation-7',nom:'Pure Impact',lieu:'Dubaï · depuis 2018',t:'Beaucoup d’argent, des noms célèbres, et des salles encore à remplir.',p:['Beaucoup d’argent','Grandes salles'],m:['Public à gagner'],eff:360,age:'27,9',pop:'basse',salle:10800,bou:'normales'},
-  {id:'organisation-8',nom:'Undisputed Cage',lieu:'São Paulo · depuis 2005',t:'Les poids lourds les plus durs du monde, et des catégories qui se cherchent.',p:['Caisse saine','Public acquis'],m:['Catégories dégarnies'],eff:320,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
+  {id:'organisation-8',nom:'Undisputed Cage',lieu:'São Paulo · depuis 2005',t:'Les meilleurs poids lourds du monde ; les autres catégories sont plus faibles.',p:['Caisse saine','Public acquis'],m:['Catégories dégarnies'],eff:320,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
 ];
 const mnOrg=id=>MN_ORGS.find(o=>o.id===id)||MN_ORGS[0];
 
@@ -57,7 +57,7 @@ const mnDateDe=x=>x.copie?new Date(...x.copie):x.neuve?new Date(2027,0,4):x.vive
 const mnCourt=d=>`${d.getDate()===1?'1er':d.getDate()} ${MN_MOIS[d.getMonth()]} ${d.getFullYear()}`;
 const mnLong=d=>`${d.getDate()===1?'1er':d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
 const mnPlaceSplit=()=>ogClasse().findIndex(o=>o.nom==='Split')+1;
-const mnOrd=n=>n===1?'1re':`${n}e`;
+const mnOrd=n=>`${n}/8`;
 /** Ce qu'un emplacement montre : les données partagées pour Split, la fiche inventée pour les autres. */
 function mnInfos(x){
   const split=x.vive||x.neuve;
@@ -180,7 +180,7 @@ function mnMenuHtml(){
   if(d){const x=mnSlot(d),i=mnInfos(x);rep=`<button class="bouton jaune cj oct mn-rep" data-mn="reprendre|${d}"><b class="T">${x.abimee?'Reprendre la copie':'Reprendre'}</b><span>${esc(i.nom)} · ${mnLong(i.date)}</span>${ico('avant',26,3)}</button>`;}
   return `<div class="mn-accueil"><i class="mn-oct"></i>${mnAffiche()}<div class="mn-g"><h1 class="mn-titre">Cage<br>Legacy</h1>
     <nav class="mn-liste" aria-label="Modes de jeu">${MN_MENU.map(mnBouton).join('')}</nav><div class="mn-sep"></div>
-    <nav class="mn-liste bas" aria-label="Autres">${mnBouton({t:'Options',s:'L’affichage, le son, les touches',act:'options',bas:1})}${mnBouton({t:'Quitter',bas:1})}</nav></div>${rep}</div>`;
+    <nav class="mn-liste bas" aria-label="Autres">${mnBouton({t:'Options',s:'Affichage, son, touches',act:'options',bas:1})}${mnBouton({t:'Quitter',bas:1})}</nav></div>${rep}</div>`;
 }
 
 /* ---- Mes parties : la dernière en grand, les deux autres à côté ---- */
@@ -205,7 +205,7 @@ function mnCarte(n,grand,jaune){
 }
 function mnPartiesHtml(){
   const F=S.mn,d=mnDernier(),h=d||mnLibres()[0]||1,aut=[1,2,3].filter(n=>n!==h),nomH=mnSlot(h)?mnOrg(mnSlot(h).org).nom:'Split';
-  const info=F.choix?`<div class="mn-info">Les trois emplacements sont pris. Choisis la partie à remplacer.<span class="relire">à relire</span></div>`:'';
+  const info=F.choix?`<div class="mn-info">Les 3 emplacements sont pris. Choisis la partie à remplacer.<span class="relire">à relire</span></div>`:'';
   const rempl=!F.choix&&!F.duo&&!mnLibres().length?'<button class="bb oct mn-rempl" data-mn="choix"><span class="oct">Nouvelle partie</span></button>':'';
   return `${mnTunHtml(nomH,'doux')}<div class="mn-voil-g"></div>${rempl}${info}<div class="mn-pg ${F.choix?'mn-remp':''}">${mnCarte(h,true,!F.conf&&!F.choix)}<div class="mn-pc">${aut.map(n=>mnCarte(n,false,false)).join('')}</div></div>`;
 }
@@ -270,15 +270,15 @@ function mnCreationHtml(){
       <div class="mn-gcs mn-g-a">${cpt('mnCs','Soirées')}${cpt('mnCc','Combats')}${cpt('mnCh','Ceintures')}</div>
       <div class="mn-fil mn-g-a"><div class="etiq">Changements de ceinture</div><div id="mnFil"></div></div></div>
     <div class="mn-ring"><svg viewBox="0 0 600 600" aria-hidden="true"><path d="${P}" class="fd"/><path d="${P}" class="tr" id="mnTr" pathLength="100"/></svg>
-      <div class="mn-rt" role="status" aria-live="off"><span class="etiq" id="mnRe">Six ans avant ton arrivée</span><b class="T" id="mnAn">2021</b><span class="mn-rs" id="mnRs">Split Fight Night 1</span></div></div>
-    <div class="mn-fr2"><div class="mn-bar" role="progressbar" aria-label="Les six ans" aria-valuemin="0" aria-valuemax="62" aria-valuenow="0" id="mnBar"><b id="mnBb"></b>${Array.from({length:5},(_,i)=>`<i style="left:${(i+1)/6*100}%"></i>`).join('')}</div>
+      <div class="mn-rt" role="status" aria-live="off"><span class="etiq" id="mnRe">6 ans avant ton arrivée</span><b class="T" id="mnAn">2021</b><span class="mn-rs" id="mnRs">Split Fight Night 1</span></div></div>
+    <div class="mn-fr2"><div class="mn-bar" role="progressbar" aria-label="6 ans" aria-valuemin="0" aria-valuemax="62" aria-valuenow="0" id="mnBar"><b id="mnBb"></b>${Array.from({length:5},(_,i)=>`<i style="left:${(i+1)/6*100}%"></i>`).join('')}</div>
       <div class="mn-ans">${MN_ANS.map(y=>`<span data-an="${y}">${y}</span>`).join('')}</div></div></div>`;
 }
 function mnGenMaj(p){
   const n=Math.min(62,Math.floor(p*62)+(p>=1?0:1)),d=mnGenDate(p),an=p>=1?2026:Math.floor(d),L=mnSacres(),vus=p>=1?L.length:L.filter(x=>x.an+x.mois/12<=d).length;
   const T=(s,v)=>{const e=$(s);if(e&&e.textContent!==v)e.textContent=v;};
   T('#mnCs',nb(n));T('#mnCc',nb(n*9));T('#mnCh',nb(vus));T('#mnAn',String(an));
-  T('#mnRs',p>=1?'62 soirées, de 2021 à 2026':`Split Fight Night ${n}`);T('#mnRe',p>=1?'Six ans sont écrits':'Six ans avant ton arrivée');
+  T('#mnRs',p>=1?'62 soirées, de 2021 à 2026':`Split Fight Night ${n}`);T('#mnRe',p>=1?'6 ans écrits':'6 ans avant ton arrivée');
   const tr=$('#mnTr');if(tr)tr.style.strokeDashoffset=String(100-p*100);
   const bb=$('#mnBb');if(bb)bb.style.width=(p*100).toFixed(2)+'%';
   const bar=$('#mnBar');if(bar)bar.setAttribute('aria-valuenow',n);
@@ -320,7 +320,7 @@ function mnConfirme(){
   const cases=c('Emplacement',F.slot)+c('Organisation',esc(i.nom))+(lisible?c('Date de jeu',mnCourt(i.date))+c('En caisse',`${nb(i.caisse)} €`):c('État','Illisible')+c('Copie','Aucune'));
   const apres=ef?'L’emplacement redevient libre. Sa copie de secours est effacée aussi. Cette partie ne pourra plus être reprise.'
     :`Une partie ${esc(mnOrg(F.org).nom)} commence le 4 janvier 2027 à la place. Sa copie de secours est effacée aussi. L’ancienne partie ne pourra plus être reprise.`;
-  return `<div class="mn-voile" data-mnvoile><div class="mn-dlg apparait" role="dialog" aria-modal="true" aria-labelledby="mnDt">${pan(`<div class="pt"><h2 id="mnDt">${ef?'Effacer cette partie ?':'Remplacer cette partie ?'}</h2></div>
+  return `<div class="mn-voile" data-mnvoile><div class="mn-dlg apparait" role="dialog" aria-modal="true" aria-labelledby="mnDt">${pan(`<div class="pt"><h2 id="mnDt">${ef?'Effacer cette partie ?':'Remplacer cette partie ?'}</h2></div>
     <div class="mn-cf">${cases}</div><p class="mn-cn2">${apres}<span class="relire">à relire</span></p>
     <div class="mn-cb"><button class="bb oct" id="mnRevenir" data-mn="revenir"><span class="oct">Revenir</span></button><button class="bouton jaune cj oct" data-mn="${ef?'okeffacer':'okecraser'}">${ef?'Effacer la partie':'Remplacer la partie'}</button></div>`)}</div></div>`;
 }
@@ -399,7 +399,7 @@ function mnEntrer(n){
 }
 function mnReprendre(n){
   const x=mnSlot(n);if(!mnLisible(x))return;
-  if(x.org!=='split'){toast('Cette maquette ne joue que Split : '+esc(mnOrg(x.org).nom)+' s’ouvrira dans le jeu.');return;}
+  if(x.org!=='split'){toast('Cette maquette ne joue que Split : '+esc(mnOrg(x.org).nom)+' s’ouvrira dans le jeu.');return;}
   if(mnCalme()){mnEntrer(n);return;}
   Object.assign(S.mn,{vue:'charge',slot:n,conf:null,anim:true});rendre();
   const b=$('#mnChb');if(b)b.animate([{width:'0%'},{width:'100%'}],{duration:680,easing:'cubic-bezier(.3,.7,.3,1)',fill:'forwards'});
@@ -422,13 +422,13 @@ function mnAction(a,v){
   if(a==='parties')return mnPas(()=>Object.assign(F,{vue:'parties',choix:false,duo:false}));
   if(a==='duo')return mnPas(()=>Object.assign(F,{vue:'parties',choix:false,duo:true}));
   if(a==='options'){if(S.op)S.op.sansPartie=true;return aller('options');}
-  if(a==='creer'){if(F.duo)return toast('La création à deux reste celle du jeu : les noms, puis deux organisations.');return mnNouvelle(+v,false);}
+  if(a==='creer'){if(F.duo)return toast('La création à deux reste celle du jeu : les noms, puis deux organisations.');return mnNouvelle(+v,false);}
   if(a==='choix')return mnPas(()=>{F.choix=true;});
   if(a==='remplacer')return mnNouvelle(+v,true);
   if(a==='effacer'){F.slot=+v;F.conf='effacer';return rendre();}
   if(a==='org')return mnChoisirOrg(v);
   if(a==='lancer'){
-    if(F.org!=='split')return toast('Cette maquette ne joue que Split : l’Arrivée des autres organisations n’existe pas encore.');
+    if(F.org!=='split')return toast('Cette maquette ne joue que Split : l’Arrivée des autres organisations n’existe pas encore.');
     if(F.ecrase&&mnSlot(F.slot)){F.conf='ecraser';return rendre();}
     return mnPas(()=>{F.vue='creation';});
   }

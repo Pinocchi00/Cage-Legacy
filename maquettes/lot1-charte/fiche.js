@@ -66,7 +66,7 @@ function cage(c){
 function banniere(c){
   const champ=c.rang==='C';
   return `<div class="ban-contenu" id="banC"><i class="fb-img ${champ?'or':''}"></i>
-    <div class="fb-nom"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
+    <div class="fb-nom"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
     <div class="fb-pal"><div style="display:flex;flex-direction:column;gap:14px"><span style="font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--texte2)">PALMARÈS</span>
       <b class="T" style="font-size:116px;line-height:.69">${bilan(c)}</b><div style="margin-top:4px">${serie(c.serie)}</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
@@ -96,13 +96,13 @@ function panneauCat(c){
   const l=memeCat(c).sort((a,b)=>(a.rang==='C'?0:a.rang)-(b.rang==='C'?0:b.rang));
   return `<div class="panneau-cat">${pan(titre(esc(pluriel(c.cat)),`${l.length} combattants à Split`)+`<div class="defile" style="padding-right:10px">${l.map(x=>`<div class="lc oct ${x.id===c.id?'cur':''}" data-lc="${x.id}">
       ${x.rang==='C'?'<span class="rang-c octr" style="width:44px;height:44px;padding:2px"><span class="octr" style="padding:2px"><b class="octr" style="font-size:26px">C</b></span></span>':`<span class="T" style="font-size:30px;color:${x.id===c.id?'var(--noir)':'var(--texte2)'}">${x.rang}</span>`}
-      <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;gap:4px"><span class="T" style="font-size:32px">${esc(x.prenom)} ${esc(x.nom)}</span><span style="font-size:19px;opacity:.75">${x.surnom?`« ${esc(x.surnom)} »`:'Sans surnom'}</span></span>
+      <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;gap:4px"><span class="T" style="font-size:32px">${esc(x.prenom)} ${esc(x.nom)}</span><span style="font-size:19px;opacity:.75">${x.surnom?`« ${esc(x.surnom)} »`:'Sans surnom'}</span></span>
       <span class="T" style="font-size:32px">${bilan(x)}</span><span class="sous">n° ${x.mondial} mondial</span><span>${serie(x.serie)}</span><span style="font-size:20px;line-height:1.15"><span class="sous" style="${x.id===S.fiche?'color:var(--noir)':''}">Dernier combat</span><br>il y a ${depuis(x.dernier)}</span><span style="font-size:20px">${x.id===c.id?'Fiche ouverte':etat(x)}</span></div>`).join('')}</div>`,'height:100%')}</div>`;
 }
 
 function apercu(c){
   const h=historique(c).slice(0,5),k=cage(c);
-  const traits=c.traits||[['+','Régulier','Jamais deux défaites de suite','Il revient toujours plus fort après un revers.']];
+  const traits=c.traits||[['+','Régulier','Jamais 2 défaites de suite','Il revient toujours plus fort après un revers.']];
   const fait=(l,v)=>`<div class="oct" style="--c:8px;background:var(--ligne);padding:10px 14px"><div class="sous">${l}</div><div class="T" style="font-size:34px;margin-top:4px;white-space:nowrap">${v}</div></div>`;
   return `<div style="display:grid;grid-template-columns:1.1fr .95fr 1.15fr;gap:20px;height:100%">
     ${pan(titre('Ce qui le distingue',`${traits.length} traits`)+traits.map(([s,n,d,t])=>`<div class="oct" style="--c:10px;background:var(--ligne);padding:12px 16px;display:flex;gap:16px;align-items:center;margin-bottom:10px">
@@ -166,10 +166,10 @@ function contratHtml(c){
 
 function onEnDit(c){
   const nana=c.id==='nana',st=stats(c);
-  const q=[['Cage Hebdo',nana?'« À 37 ans, Nana n’a jamais été aussi dangereux dans le troisième round. Ses adversaires le savent et ça ne change rien. »':`« ${c.prenom} ${c.nom} n’a pas encore eu de grand soir. Split aurait tort d’attendre trop longtemps. »`,'il y a 2 semaines'],
-    ['Tableau Noir',`« ${virg(st.enc)} frappes encaissées par minute, pour ${virg(st.fpm)} données. ${st.enc>st.fpm?'Il prend des coups pour en donner : ça marche, jusqu’au jour où ça ne marche plus.':'Il touche plus qu’il ne prend, et c’est rarement un hasard.'} »`,'il y a 1 mois'],
-    ['Le Forum',nana?'« Belkacem – Nana, j’y étais. Je n’ai jamais entendu le public de Lyon aussi fort. »':`« ${c.nom} ? Je l’ai vu une fois en préliminaires. J’attends de le revoir plus haut sur la carte. »`,'il y a 5 jours']];
-  const voix=nana?['<span class="nom" data-fiche="mezouar" style="text-transform:none;letter-spacing:0">Ilyas Mezouar</span>, qui l’a battu','« Il m’a obligé à aller le chercher au sol. Debout, personne ne veut de lui. »']:['son entraîneur','« Il travaille plus que les autres. Il lui manque un combat qui compte. »'];
+  const q=[['Cage Hebdo',nana?'« À 37 ans, Nana n’a jamais été aussi dangereux dans le troisième round. Ses adversaires le savent et ça ne change rien. »':`« ${c.prenom} ${c.nom} n’a pas encore eu de grand soir. Split aurait tort d’attendre trop longtemps. »`,'il y a 2 semaines'],
+    ['Tableau Noir',`« ${virg(st.enc)} frappes encaissées par minute, pour ${virg(st.fpm)} données. ${st.enc>st.fpm?'Il prend des coups pour en donner : ça marche, jusqu’au jour où ça ne marche plus.':'Il touche plus qu’il ne prend, et c’est rarement un hasard.'} »`,'il y a 1 mois'],
+    ['Le Forum',nana?'« Belkacem – Nana, j’y étais. Je n’ai jamais entendu le public de Lyon aussi fort. »':`« ${c.nom} ? Je l’ai vu une fois en préliminaires. J’attends de le revoir plus haut sur la carte. »`,'il y a 5 jours']];
+  const voix=nana?['<span class="nom" data-fiche="mezouar" style="text-transform:none;letter-spacing:0">Ilyas Mezouar</span>, qui l’a battu','« Il m’a obligé à aller le chercher au sol. Debout, personne ne veut de lui. »']:['son entraîneur','« Il travaille plus que les autres. Il lui manque un combat qui compte. »'];
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto 1fr;gap:20px;height:100%">
     ${q.map(([m,t,d])=>pan(`<div class="T" style="font-size:34px">${m}</div><p style="font-size:24px;line-height:1.4;font-style:italic;margin:14px 0 8px">${esc(t)}<span class="relire">à relire</span></p><div class="sous" style="margin-top:auto">${d}</div>`)).join('')}
     ${pan(`<div class="etiq">Ce qu’en dit ${voix[0]}</div><p class="T" style="font-size:44px;line-height:1;margin:16px 0 0;text-transform:none">${voix[1]}<span class="relire">à relire</span></p>`,'grid-column:span 2')}
@@ -178,7 +178,7 @@ function onEnDit(c){
 
 function luiHtml(c){
   return `<div style="display:grid;grid-template-columns:1.25fr 1fr;gap:20px;height:100%">
-    ${pan(titre('Ce qu’il pense de toi')+`<p class="T" style="font-size:52px;line-height:1;text-transform:none;margin:0">« On ne se connaît pas encore. Trouve-moi un nom et on parlera. »<span class="relire">à relire</span></p>`,'height:100%')}
+    ${pan(titre('Ce qu’il pense de toi')+`<p class="T" style="font-size:52px;line-height:1;text-transform:none;margin:0">« On ne se connaît pas encore. Trouve-moi un nom et on parlera. »<span class="relire">à relire</span></p>`,'height:100%')}
     ${pan(titre('Lui et Split')+`<div style="display:grid;grid-template-columns:auto 1fr;gap:12px 26px;font-size:24px"><span class="etiq">Arrivé</span><span>En ${c.depuis}, sous ton prédécesseur</span>
       <span class="etiq">Combats à Split</span><span>9</span>${c.rang==='C'?'<span class="etiq">Ceinture</span><span>Depuis mars 2026 · 1 défense</span>':''}</div>
       <div class="etiq" style="margin-top:26px">${esc(S.nomDemandes)} <span class="relire">nom à choisir</span></div><div style="font-size:22px;margin-top:8px;color:var(--texte2)">Aucune pour l’instant.</div>`,'height:100%')}</div>`;
@@ -219,7 +219,7 @@ const REGLAGES=[
   ['police','Police des titres',[['saira','Saira','actuelle'],['barlow','Barlow',''],['bigshoulders','Big Shoulders',''],['oswald','Oswald','']]],
   ['octo','Octogone de la fiche',[['cage','Dans la cage','rempli'],['radar','En chiffres','8 statistiques'],['fins','Comment il gagne','rempli par méthode']]],
   ['recruteur','Recruteur (accueil)',[['dispo','Disponible',''],['voyage','En voyage','']]],
-  ['nomDemandes','Nom des demandes (sans « promesse »)',[['Ses demandes','Ses demandes',''],['Engagements','Engagements',''],['Parole donnée','Parole donnée','']]],
+  ['nomDemandes','Nom des demandes (sans « promesse »)',[['Ses demandes','Ses demandes',''],['Engagements','Engagements',''],['Parole donnée','Parole donnée','']]],
 ];
 S.nomDemandes='Ses demandes';
 const reglagesHtml=()=>`<div class="oct"><div class="etiq" style="color:var(--jaune);margin-bottom:10px">Choix à faire sur cette maquette</div>${REGLAGES.map(([k,l,o])=>`<div class="sous">${l}</div><div class="choix">${o.map(([v,t,s])=>`<button class="oct ${S[k]===v?'cur':''}" style="--c:6px" data-reglage="${k}" data-val="${esc(v)}">${esc(t)}${s?`<small>${esc(s)}</small>`:''}</button>`).join('')}</div>`).join('')}</div>`;
@@ -242,7 +242,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-onglet]'))){S.onglet=el.dataset.onglet;rendreFiche();return;}
   if((el=t.closest('[data-tri]'))){const k=el.dataset.tri;S.tri=S.tri.col===k?{col:k,sens:-S.tri.sens}:{col:k,sens:1};rendre();return;}
   if((el=t.closest('[data-action]'))){const a=el.dataset.action;
-    if(a==='proposer')toast('Ouvre la carte avec lui déjà posé : écran Carte, hors de cette maquette.');
+    if(a==='proposer')toast('Ouvre la carte avec lui déjà posé : écran Carte, hors de cette maquette.');
     if(a==='recit')toast('Relire le récit et les temps forts (Q39b). L’arène n’existe que pour tes soirées.');return;}
   if((el=t.closest('[data-go]'))){aller(el.dataset.go);return;}
 });

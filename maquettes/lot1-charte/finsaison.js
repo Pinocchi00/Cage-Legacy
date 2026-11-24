@@ -55,8 +55,8 @@ function fdObjectifs(annee,issue){
     ?{type:'salle',lab:'Remplir le Forum de Lille',v:RS_SOIREES.find(x=>x.n===63).public[0],but:4000,det:'Fight Night 63, le 16 févr.',relire:true}
     :{type:'salle',lab:'Remplir le Palais des sports de Lyon',v:5240,but:5800,det:'Fight Night 69, le 8 avr.'};
   return [
-    {type:'rang',lab:`Finir dans le top ${but}`,v:place,but,avant:moi+1,liste:FD_CL[issue],det:place<=but?(passes.length?`Split passe ${fdListe(passes)}.`:`Split finit ${place}/8.`):`Devant Split : ${fdListe(devant)}.`},
-    {type:'mondial',lab:'Un poids lourd dans le top 5 mondial',v:mond,but:5,avant:dep,det:`${lien(faure)} : n° ${dep} en janvier, n° ${mond} aujourd’hui.`},
+    {type:'rang',lab:`Finir dans le top ${but}`,v:place,but,avant:moi+1,liste:FD_CL[issue],det:place<=but?(passes.length?`Split passe ${fdListe(passes)}.`:`Split finit ${place}/8.`):`Devant Split : ${fdListe(devant)}.`},
+    {type:'mondial',lab:'Un poids lourd dans le top 5 mondial',v:mond,but:5,avant:dep,det:`${lien(faure)} : n° ${dep} en janvier, n° ${mond} aujourd’hui.`},
     salle,
   ];
 }
@@ -65,15 +65,15 @@ function fdProchains(){
   const F=S.fd,a=fdAnnee()+1,pl=fdPlace(F.cas),but=Math.max(1,pl-1),faure=parId('gpoidslourdC'),mond=F.cas==='tenu'?5:9,cible=F.cas==='tenu'?3:5;
   const dev=FD_CL[F.cas].slice(but-1,pl-1).map(fdCourt);
   return [
-    {type:'rang',lab:`Finir dans le top ${but}`,v:pl,but,avant:pl,afaire:true,liste:FD_CL[F.cas],det:`À passer : ${fdListe(dev)}.`},
-    {type:'mondial',lab:`Un poids lourd dans le top ${cible} mondial`,v:mond,but:cible,avant:mond,afaire:true,det:`Meilleur : ${lien(faure)}.`},
+    {type:'rang',lab:`Finir dans le top ${but}`,v:pl,but,avant:pl,afaire:true,liste:FD_CL[F.cas],det:`À passer : ${fdListe(dev)}.`},
+    {type:'mondial',lab:`Un poids lourd dans le top ${cible} mondial`,v:mond,but:cible,avant:mond,afaire:true,det:`Meilleur : ${lien(faure)}.`},
     {type:'salle',lab:'Remplir le Palais des sports de Lyon',v:0,but:5800,afaire:true,det:`Fight Night 69, le 8 avr. ${a}.`},
   ];
 }
 const fdTenu=o=>o.type==='salle'?o.v>=o.but:o.v<=o.but;
 const FD_V={
   tenu:{mot:'Tu restes',tag:'',phrase:'1 saison de plus, +800 € par mois.',dit:'Je suis fier de ce que tu as construit.',fil:'brightness(1) saturate(1.05)'},
-  avert:{mot:'Tu restes',tag:'1er avertissement',phrase:'1 saison pour redresser. Manqués en 2028 : renvoi.',dit:'Je commence à douter.',fil:'brightness(.5) saturate(.5)'},
+  avert:{mot:'Tu restes',tag:'1er avertissement',phrase:'1 saison pour redresser. Manqués en 2028 : renvoi.',dit:'Je commence à douter.',fil:'brightness(.5) saturate(.5)'},
   renvoi:{mot:'Tu pars',tag:'2e échec de suite',phrase:'2 saisons d’objectifs manqués. Contrat terminé ce soir.',dit:'Tu as perdu ma confiance.',fil:'grayscale(1) brightness(.36)'},
 };
 const FD_MOTS={jeu:{tenu:'Prolongé',avert:'Sous condition',renvoi:'Remercié'},q34:{tenu:'Prolongé',avert:'Avertissement',renvoi:'Renvoyé'}};
@@ -241,8 +241,8 @@ const fdEtatDe=o=>fdTenu(o)?'ok':'ko';
 function fdBarCases(issue,annee){
   const fin=fdDate(fdD(31,11,annee+1)),act=fdDate(fdD(31,11,annee)),c=(l,v,s,x='')=>`<div class="fd-bc"><span class="etiq">${l}</span><span class="fd-bv"><b class="T">${v}</b>${x}</span><small>${s}</small></div>`;
   if(issue==='tenu')return c('Contrat','1 saison',`jusqu’au ${fin}`)+c('Salaire',fdEuro(4000),'par mois · <span class="cl-up">▲ 800 €</span>')+c('Avertissements','Aucun','compteur à zéro',fdMarques(0));
-  if(issue==='avert')return c('Contrat','1 saison',`jusqu’au ${fin}`)+c('Salaire',fdEuro(FD_SALAIRE),'par mois · inchangé')+c('Avertissements','1 sur 2','au prochain : le renvoi',fdMarques(1));
-  return c('Contrat','Terminé',`le ${act}`)+c('Combattants','Restent','chez Split')+c('Avertissements','2 sur 2','le renvoi',fdMarques(2));
+  if(issue==='avert')return c('Contrat','1 saison',`jusqu’au ${fin}`)+c('Salaire',fdEuro(FD_SALAIRE),'par mois · inchangé')+c('Avertissements','1/2','au prochain : le renvoi',fdMarques(1));
+  return c('Contrat','Terminé',`le ${act}`)+c('Combattants','Restent','chez Split')+c('Avertissements','2/2','le renvoi',fdMarques(2));
 }
 function fdActions(){
   const F=S.fd,res=fdRestantes(),n=res.length;
@@ -263,10 +263,10 @@ function fdVerdictHtml(rev){
       <div class="fd-vh">
         <div class="fd-att"><span class="T">Décision de ${FD_PATRON}</span><span class="fd-att-p"><i class="octr"></i><i class="octr"></i><i class="octr"></i></span></div>
         <div class="fd-vt">
-          <span class="fd-eye">Saison ${a} · la décision de ${FD_PATRON}</span>
+          <span class="fd-eye">Saison ${a} · décision de ${FD_PATRON}</span>
           <div class="fd-mot"><h1 class="T fd-verdict">${v.mot}</h1><span class="fd-tampon"><b class="T">${FD_MOTS[F.mots][i]}</b>${v.tag?`<small>${v.tag}</small>`:''}</span></div>
           <p class="fd-phrase">${v.phrase}</p>
-          <p class="fd-dit">« ${v.dit} »${FD_RELIRE}</p>
+          <p class="fd-dit">« ${v.dit} »${FD_RELIRE}</p>
         </div>
       </div>
       <div class="fd-cs">${os.map((o,k)=>fdCarteObj(o,fdEtatDe(o),k)).join('')}</div>
@@ -289,9 +289,9 @@ function fdOffresHtml(){
       <p class="mn-hp fd-prop">te propose le poste de matchmaker.</p><p class="fd-pt">${esc(cur.m.t)}</p>
       <div class="mn-chips">${cur.m.p.map(x=>`<span class="mn-ch"><b class="pl">+</b>${esc(x)}</span>`).join('')}${cur.m.m.map(x=>`<span class="mn-ch"><b class="mo">−</b>${esc(x)}</span>`).join('')}</div></div>
     <div class="mn-tg fd-tg4">${t('Place',cur.place+'/8','',`<div class="mn-b8" aria-hidden="true">${b8}</div><div class="fd-b8l"><span><i class="octr on"></i>${esc(fdCourt(cur.nom))}</span><span><i class="octr split"></i>Split, ${moi}/8</span></div>`)}
-      ${t('Salaire',fdEuro(cur.salaire),r?'par mois':'par mois, face à Split',`<div class="fd-tx">${r?`avant : ${fdEuro(FD_SALAIRE)}`:`Split : ${fdEuro(base)}`} ${dv}</div>`)}
+      ${t('Salaire',fdEuro(cur.salaire),r?'par mois':'par mois, face à Split',`<div class="fd-tx">${r?`avant : ${fdEuro(FD_SALAIRE)}`:`Split : ${fdEuro(base)}`} ${dv}</div>`)}
       ${t('Contrat','1 saison',`jusqu’au ${fdDate(fdD(31,11,fdAnnee()+1))}`,`<div class="fd-tx">Matchmaker</div>`)}
-      ${t('Spectateurs',nb(cur.o.pub),'par soirée',`<div class="fd-tx">Split : ${nb(moiO.pub)}</div>`)}</div>
+      ${t('Spectateurs',nb(cur.o.pub),'par soirée',`<div class="fd-tx">Split : ${nb(moiO.pub)}</div>`)}</div>
     <div class="fd-fa"><span class="etiq">Meilleur classé</span><b>${m?`${lien(m)}, n° ${m.mondial} mondial`:'—'}</b><span class="etiq">Salles</span><b>${esc(cur.o.salles)}</b></div></div>`;
   let bas;
   if(F.dec)bas=`<div class="fd-fait">${ico('fdCoche',28,3)}<span>${fdDecLabel()}</span></div>`;
@@ -306,7 +306,7 @@ function fdOffresHtml(){
 function fdNomsPrix(p){
   p.n.forEach(id=>{if(id==='fdferrand')fdFerrand();});
   if(p.n.length===2){const a=parId(p.n[0]),b=parId(p.n[1]);return {html:`<span class="nom" data-fiche="${a.id}">${esc(a.nom)}</span> <span class="fd-vs">contre</span> <span class="nom" data-fiche="${b.id}">${esc(b.nom)}</span>`,brut:`${a.nom} contre ${b.nom}`,haut:a.cat};}
-  const c=parId(p.n[0]);return {html:`<span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span>`,brut:c.nom,haut:`${c.prenom}${c.surnom?` « ${c.surnom} »`:''} · ${c.cat}`};
+  const c=parId(p.n[0]);return {html:`<span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span>`,brut:c.nom,haut:`${c.prenom}${c.surnom?` « ${c.surnom} »`:''} · ${c.cat}`};
 }
 const fdValeur=v=>{if(v[0]!=='@')return {h:esc(v),b:v};const c=parId(v.slice(1));return {h:`<span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span>`,b:c.nom};};
 function fdPrixRail(a,cur){
@@ -325,7 +325,7 @@ function fdPrixHtml(){
   return `<div class="fd-sc fd-prix ${F.anim?'fd-entre':''}">${fdTun(or?'brightness(.82)':'brightness(.62) saturate(.85)',`cote ${or?'or':''}`)}<i class="fd-voile-c"></i>
     <div class="mn-rail fd-rail"><div class="fd-rh"><span class="etiq">Saison ${a}</span><small>choisis par la presse</small></div>${fdPrixRail(a,i)}</div>
     <div class="mn-hero fd-hero">${fdPrixHero(a,p)}</div>
-    <div class="fd-cta">${p.n.length?`${fdNon(p.n.length>1?'Fiche de '+esc(parId(p.n[0]).nom):'Sa fiche',`data-fiche="${p.n[0]}"`)}${fdNon('Voir le combat',`data-fdcombat="${p.c}"`)}`:''}</div></div>`;
+    <div class="fd-cta">${p.n.length?`${fdNon(p.n.length>1?'Fiche de '+esc(parId(p.n[0]).nom):'Voir la fiche',`data-fiche="${p.n[0]}"`)}${fdNon('Voir le combat',`data-fdcombat="${p.c}"`)}`:''}</div></div>`;
 }
 
 /* ---- 4. Le classement : les huit glissent de leur place de janvier à leur place finale ---- */
@@ -352,8 +352,8 @@ function fdClassementHtml(){
 function fdSaisonSuivanteHtml(){
   const F=S.fd,a=fdAnnee()+1,os=fdProchains();
   return `<div class="fd-sc fd-${F.cas} fd-nv ${F.anim?'fd-entre':''}">${fdTun(F.cas==='tenu'?FD_V.tenu.fil:'brightness(.66) saturate(.75)')}<i class="fd-voile-v"></i>
-    <div class="fd-v"><div class="fd-vh fd-vh2"><div class="fd-vt"><span class="fd-eye">${fdDate(fdD(1,0,a))} · ce que ${FD_PATRON} attend de toi${FD_RELIRE}</span><h1 class="T fd-verdict">Saison ${a}</h1>
-      <p class="fd-phrase">${F.cas==='tenu'?'Objectif : une place de mieux.':'3 objectifs, jugés le 31 décembre. Manqués : renvoi.'}</p></div></div>
+    <div class="fd-v"><div class="fd-vh fd-vh2"><div class="fd-vt"><span class="fd-eye">${fdDate(fdD(1,0,a))} · objectifs de ${FD_PATRON}${FD_RELIRE}</span><h1 class="T fd-verdict">Saison ${a}</h1>
+      <p class="fd-phrase">${F.cas==='tenu'?'Objectif : une place de mieux.':'3 objectifs, jugés le 31 décembre. Manqués : renvoi.'}</p></div></div>
     <div class="fd-cs">${os.map((o,k)=>fdCarteObj(o,'cours',k)).join('')}</div>
     <div class="fd-bar">${fdBarCases(F.cas,a-1)}<div class="fd-act"><div class="fd-fait fd-neutre"><span>Jugés le 31 déc. ${a}</span></div>${fdNon('Ta carrière','data-fdcarriere')}</div></div></div></div>`;
 }
@@ -370,7 +370,7 @@ function fdSigneHtml(){
 const fdAttente=()=>{const d=fdD(1,0,2029);d.setDate(d.getDate()+S.fd.attente*7);return d;};
 function fdSansPosteHtml(){
   const F=S.fd,d=fdAttente(),refuse=F.tardive&&F.refus.includes(0);
-  const saison=([an,i])=>{const os=fdObjectifs(an,i),n=os.filter(fdTenu).length;return `<div class="fd-sa oct fd-${i}"><div class="fd-sai oct"><b class="T fd-saa">${an}</b><span class="fd-sat T">${FD_MOTS[F.mots][i]}</span><span class="fd-sam"><span><b class="T">${fdPlace(i)}/8</b><small>place</small></span><span><b class="T">${n} sur ${os.length}</b><small>objectifs</small></span><span><b class="T">5</b><small>soirées</small></span></span><div class="fd-sal">${os.map(o=>{const ok=fdTenu(o);return `<span class="${ok?'ok':'ko'}"><i class="octr">${ico(ok?'fdCoche':'fdCroix',17,3.4)}</i><em>${esc(o.lab)}</em><b>${o.type==="rang"?o.v+"/8":o.type==='mondial'?`n° ${o.v}`:nb(o.v)}</b></span>`;}).join('')}</div></div></div>`;};
+  const saison=([an,i])=>{const os=fdObjectifs(an,i),n=os.filter(fdTenu).length;return `<div class="fd-sa oct fd-${i}"><div class="fd-sai oct"><b class="T fd-saa">${an}</b><span class="fd-sat T">${FD_MOTS[F.mots][i]}</span><span class="fd-sam"><span><b class="T">${fdPlace(i)}/8</b><small>place</small></span><span><b class="T">${n}/${os.length}</b><small>objectifs</small></span><span><b class="T">5</b><small>soirées</small></span></span><div class="fd-sal">${os.map(o=>{const ok=fdTenu(o);return `<span class="${ok?'ok':'ko'}"><i class="octr">${ico(ok?'fdCoche':'fdCroix',17,3.4)}</i><em>${esc(o.lab)}</em><b>${o.type==="rang"?o.v+"/8":o.type==='mondial'?`n° ${o.v}`:nb(o.v)}</b></span>`;}).join('')}</div></div></div>`;};
   return `<div class="fd-sc fd-renvoi ${F.anim?'fd-entre':''}">${fdTun(FD_V.renvoi.fil)}<i class="fd-voile-v"></i>
     <div class="fd-v"><div class="fd-vh fd-vh2"><div class="fd-vt"><span class="fd-eye">Contrat terminé le 31 déc. 2028${FD_RELIRE}</span><h1 class="T fd-verdict">Sans poste</h1>
       <p class="fd-phrase">${refuse?'Offre de MMA Korner refusée.':F.attente?`Aucune offre au ${fdDate(d)}.`:'Aucune offre.'}</p></div></div>
@@ -378,7 +378,7 @@ function fdSansPosteHtml(){
     <div class="fd-bar"><div class="fd-bc"><span class="etiq">Sans poste</span><span class="fd-bv"><b class="T">${F.attente?`${F.attente*7} jours`:'Ce matin'}</b></span><small>depuis le 1er janv. 2029</small></div>
       <div class="fd-bc"><span class="etiq">Tu gardes</span><span class="fd-bv"><b class="T">Carnet</b></span><small>et ta réputation</small></div>
       <div class="fd-bc"><span class="etiq">Une offre</span><span class="fd-bv"><b class="T">Par message</b></span><small>Continuer s’y arrêtera${FD_RELIRE}</small></div>
-      <div class="fd-act">${fdNon('Tes saisons','data-fdgo="saisons"')}${fdNon('Finir ma carrière','data-fdconf="fin"')}</div></div></div></div>`;
+      <div class="fd-act">${fdNon('Tes saisons','data-fdgo="saisons"')}${fdNon('Finir la carrière','data-fdconf="fin"')}</div></div></div></div>`;
 }
 
 /* ---- Ce qui arrive par message : la forme de l'écran Messages, sans y toucher ---- */
@@ -428,7 +428,7 @@ const fdFace=(cat,c,b)=>{const ch=fdChampGob(cat),pris=new Set(b.map(x=>x.b));re
 /* ---- Négocier : tu choisis un de tes champions ou un classé, on regarde qui peut venir en face ---- */
 function fdNegCote(c,org,e,droite){
   return `<div class="fd-ndc ${droite?'d':''}"><span class="fd-ndo">${ogEmb(org,46)}<span>${esc(org==='Garden of Blood'?org:'Split')}</span></span>
-    <span class="fd-ndp" style="font-size:${Math.max(18,Math.min(22,Math.floor(255/(`${c.prenom} « ${c.surnom||''} »`.length*.42))))}px">${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>
+    <span class="fd-ndp" style="font-size:${Math.max(18,Math.min(22,Math.floor(255/(`${c.prenom} « ${c.surnom||''} »`.length*.42))))}px">${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>
     <span class="T fd-ndn" style="font-size:${mfCorps(c.nom.toUpperCase(),245,76,34)}px"><span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span></span>
     <span class="fd-nds"><b class="T">${bilan(c)}</b><span>n° ${c.mondial} mondial</span></span>
     <span class="fd-nde ${e?'ko':'ok'}"><i class="octr">${ico(e?'fdCroix':'fdCoche',15,3.4)}</i>${e?esc(e[1]):'Disponible'}</span></div>`;
@@ -437,18 +437,18 @@ function fdNegResultatClasse(cat){
   const A=fdPick(cat),b=fdBrouillon(),plein=b.length>=5,deja=b.some(x=>x.a===A.id),B=deja?null:fdFace(cat,A,b);
   const bloc=(cl,tt,tx,act='')=>`<div class="fd-nres oct ${cl}"><div class="oct"><div class="fd-nrt2"><b class="T">${tt}</b><span>${tx}</span></div>${act}</div></div>`;
   if(deja)return bloc('neutre','Déjà sur la carte',`${esc(A.nom)} combat déjà ce soir-là.`);
-  if(!B)return bloc('ko','Personne en face',`Garden of Blood : aucun classé libre.`);
-  return bloc('ok','Combat possible',plein?'Carte complète : retire un combat à droite.':`Entre classés, sans ceinture. Plus proche au mondial : ${lien(B)}.`,plein?'':fdNon('Ajouter à la carte',`data-fdnadd="${B.id}" data-fda="${A.id}"`));
+  if(!B)return bloc('ko','Personne en face',`Garden of Blood : aucun classé libre.`);
+  return bloc('ok','Combat possible',plein?'Carte complète : retire un combat à droite.':`Entre classés, sans ceinture. Plus proche au mondial : ${lien(B)}.`,plein?'':fdNon('Ajouter à la carte',`data-fdnadd="${B.id}" data-fda="${A.id}"`));
 }
 function fdNegResultat(cat){
   const A=fdChampSplit(cat),C=fdChampGob(cat),es=FD_DISPO.s[cat],eg=FD_DISPO.g[cat],b=fdBrouillon(),deja=b.some(x=>x.a===A.id),plein=b.length>=5;
   const bloc=(cl,tt,tx,act='')=>`<div class="fd-nres oct ${cl}"><div class="oct"><div class="fd-nrt2"><b class="T">${tt}</b><span>${tx}</span></div>${act}</div></div>`;
   const bouton=(id,l)=>plein?'':fdNon(l,`data-fdnadd="${id}"`);
-  if(es)return bloc('ko','Ton champion est indisponible',`${esc(A.nom)} : ${esc(es[1].toLowerCase().replace(/\.$/,''))}. La soirée a lieu le ${fdDate(FD_CHOC_DATE)}.`);
+  if(es)return bloc('ko','Champion indisponible',`${esc(A.nom)} : ${esc(es[1].toLowerCase().replace(/\.$/,''))}. La soirée a lieu le ${fdDate(FD_CHOC_DATE)}.`);
   if(deja)return bloc('neutre','Déjà sur la carte',`${esc(A.nom)} combat déjà ce soir-là.`);
-  if(!eg)return bloc('ok','Combat possible',plein?'Carte complète : retire un combat à droite.':'Champion contre champion, ceintures en place.',bouton(C.id,'Ajouter à la carte'));
+  if(!eg)return bloc('ok','Combat possible',plein?'Carte complète : retire un combat à droite.':'Champion contre champion, ceintures en place.',bouton(C.id,'Ajouter à la carte'));
   const alt=fdAlt(cat,b);
-  if(!alt)return bloc('ko','Leur champion est indisponible',`${esc(C.nom)} : ${esc(eg[1].toLowerCase().replace(/\.$/,''))}. Personne d’autre dans la catégorie.`);
+  if(!alt)return bloc('ko','Leur champion est indisponible',`${esc(C.nom)} : ${esc(eg[1].toLowerCase().replace(/\.$/,''))}. Personne d’autre dans la catégorie.`);
   return bloc('mixte','Leur champion est indisponible',`Ils proposent ${lien(alt)}, n° ${alt.mondial} mondial. ${plein?'Retire d’abord un combat à droite.':'Sans ceinture.'}`,bouton(alt.id,'Prendre ce combat'));
 }
 function fdNegocierHtml(){
@@ -460,13 +460,13 @@ function fdNegocierHtml(){
     if(!x)return `<div class="fd-nl vide oct"><div class="oct"><span class="fd-nlp">${FD_PLACES[i]}</span><span class="fd-nlv">Place libre</span></div></div>`;
     const P=parId(x.a),Q=parId(x.b),t=fdType(x);
     return `<div class="fd-nl oct fd-t-${t}"><div class="oct"><span class="fd-nlp">${FD_PLACES[i]}</span><span class="fd-nln">${lien(P)} <small>contre</small> ${lien(Q)}</span><span class="fd-nlt">${esc(x.c)} · ${FD_TYPES[t]}</span><button class="bb oct petit fd-nlx" data-fdnret="${i}" aria-label="Retirer ce combat" title="Retirer ce combat"><span class="oct">${ico('fdCroix',18,3)}</span></button></div></div>`;};
-  const pret=fdContrePrete(),raison=b.length<5?`Il manque ${5-b.length} combat${5-b.length>1?'s':''}.`:!fdNChamp(b)?'Au moins 1 combat entre champions.':pret?fdResume(b).replace(/^./,m=>m.toUpperCase())+'.':'Change au moins un combat.';
+  const pret=fdContrePrete(),raison=b.length<5?`Il manque ${5-b.length} combat${5-b.length>1?'s':''}.`:!fdNChamp(b)?'Au moins 1 combat entre champions.':pret?fdResume(b).replace(/^./,m=>m.toUpperCase())+'.':'Change au moins 1 combat.';
   const filtre=(v,l)=>`<button class="fd-nf oct ${F.negMode===v?'on':''}" data-fdnmode="${v}" aria-pressed="${F.negMode===v}"><span class="oct">${l}</span></button>`;
-  const g=pan(`${titre('Tes combattants')}<div class="fd-nfs">${filtre('champ','Champions')}${filtre('classe','Classés')}</div><div class="fd-nrs">${cats.map(ligne).join('')}</div>`,'','fd-ng');
+  const g=pan(`${titre('Combattants de Split')}<div class="fd-nfs">${filtre('champ','Champions')}${filtre('classe','Classés')}</div><div class="fd-nrs">${cats.map(ligne).join('')}</div>`,'','fd-ng');
   const autres=cl?`<div class="fd-nalt"><span class="etiq">Autre classé</span>${fdClassesSplit(sel).map(c=>{const pris=b.some(x=>x.a===c.id);return `<button class="fd-nac oct ${c===A?'on':''} ${pris?'pris':''}" data-fdnpick="${c.id}" aria-pressed="${c===A}" title="${pris?'Déjà sur la carte':''}"><span class="oct">${esc(c.nom)} <small>${pris?'sur la carte':`n° ${c.mondial}`}</small></span></button>`;}).join('')}</div>`:'';
   const face=C?fdNegCote(C,'Garden of Blood',cl?null:FD_DISPO.g[sel],true):`<div class="fd-ndc d"><span class="fd-ndo">${ogEmb('Garden of Blood',46)}<span>Garden of Blood</span></span><span class="T fd-ndn" style="font-size:44px">Personne</span></div>`;
   const m=pan(`<div class="fd-nh oct"><i></i><i class="d"></i>${fdNegCote(A,'Split',cl?null:FD_DISPO.s[sel],false)}<span class="fd-ndv"><em class="octr">VS</em><small>${esc(sel)}</small></span>${face}</div>${autres}${cl?fdNegResultatClasse(sel):fdNegResultat(sel)}`,'','fd-nm');
-  const d=pan(titre('Carte',`${b.length} sur 5`)+`<div class="fd-nls">${FD_PLACES.map((_,i)=>place(i)).join('')}</div><div class="fd-nbas"><span class="fd-nrai ${pret?'':'att'}">${raison}${FD_RELIRE}</span><div>${fdNon('Annuler','data-fdnann')}<button class="bouton jaune cj oct fd-nenv" data-fdconf="contre" ${pret?'':'disabled'}>Envoyer</button></div></div>`,'','fd-nd');
+  const d=pan(titre('Carte',`${b.length}/5`)+`<div class="fd-nls">${FD_PLACES.map((_,i)=>place(i)).join('')}</div><div class="fd-nbas"><span class="fd-nrai ${pret?'':'att'}">${raison}${FD_RELIRE}</span><div>${fdNon('Annuler','data-fdnann')}<button class="bouton jaune cj oct fd-nenv" data-fdconf="contre" ${pret?'':'disabled'}>Envoyer</button></div></div>`,'','fd-nd');
   return `<div class="fd fd-neg ${F.anim?'fd-anim':''}">${g}${m}${d}</div>`;
 }
 /* ---- Le message du 31 décembre : ce qui se passe, et ce qui va être jugé. Le résultat reste pour le verdict. ---- */
@@ -485,27 +485,27 @@ function fdMsgs(){
   const F=S.fd,a=fdAnnee(),l=[],d31=fdD(31,11,a);
   if(F.tardive&&F.etape==='message'){
     const o=fdOffres()[0],q=fdAttente();
-    l.push({id:'offre0',tag:'Organisation',qui:`La direction de ${fdCourt(o.nom)}`,role:'',date:q,t:`${esc(fdCourt(o.nom))} te propose un poste`,vif:!F.dec,txt:esc(o.m.t),
+    l.push({id:'offre0',tag:'Organisation',qui:fdCourt(o.nom),role:'direction',date:q,t:`${esc(fdCourt(o.nom))} te propose un poste`,vif:!F.dec,txt:esc(o.m.t),
       vue:()=>`<div class="fd-mo-b oct" style="--t:${ogTeinte(o.nom)[0]}"><i style="filter:${ogTeinte(o.nom)[1]||'none'} brightness(.8)"></i>${ogEmb(o.nom,92)}<span class="T">${esc(fdCourt(o.nom))}</span></div><div class="ms-cases g3">${msCase('Place',msGros(o.place+'/8',''))}${msCase('Salaire',msGros(nb(o.salaire)+' €','par mois'))}${msCase('Durée',msGros('1 saison',''))}</div>`,bas:()=>fdOuiM('Voir l’offre','data-fdgo="offres" data-fdi="0"')});
     return l;
   }
   if(F.etape==='mi'){
     const os=fdObjectifs(a,F.cas),place=F.cas==='tenu'?5:7,mond=F.cas==='tenu'?7:F.cas==='avert'?8:10;
-    const o0=Object.assign({},os[0],{v:place,liste:null,det:`${place}/8 au 1er juillet.`}),o1=Object.assign({},os[1],{v:mond,det:`${lien(parId('gpoidslourdC'))} : n° ${mond} au 1er juillet.`});
+    const o0=Object.assign({},os[0],{v:place,liste:null,det:`${place}/8 au 1er juillet.`}),o1=Object.assign({},os[1],{v:mond,det:`${lien(parId('gpoidslourdC'))} : n° ${mond} au 1er juillet.`});
     l.push({id:'mi',tag:'Organisation',qui:FD_PATRON,role:'patron',date:fdD(1,6,a),t:`Bilan de mi-saison ${a}`,vif:true,txt:FD_MI[F.cas],
       vue:()=>`<div class="fd-ls">${fdLigneObj(o0,'cours',0)}${fdLigneObj(o1,'cours',1)}${fdLigneObj(os[2],fdEtatDe(os[2]),2)}</div>`,bas:()=>`<div class="fd-mi-reg"><span class="etiq">Jugés le</span><b class="T">31 déc.</b><span>${F.cas==='renvoi'?'1 avertissement en cours':'aucun avertissement'}</span></div>${fdNon('Ta carrière','data-fdcarriere')}`});
     return l;
   }
   if(F.etape==='choc'){
     const att=F.choc==='recu',cl=fdCarte();
-    l.push({id:'choc',tag:'Organisation',qui:'Marcus Varela',role:'Matchmaker',date:fdD(8,0,2028),t:'Garden of Blood propose un choc',vif:att,txt:`« Split achète. Nous, on signe les vedettes. » 5 combats : ${fdResume(cl)}.`,vue:()=>fdChocVue(),
+    l.push({id:'choc',tag:'Organisation',qui:'Marcus Varela',role:'Matchmaker',date:fdD(8,0,2028),t:'Garden of Blood propose un choc',vif:att,txt:`« Split achète. Nous, on signe les vedettes. » 5 combats : ${fdResume(cl)}.`,vue:()=>fdChocVue(),
       bas:()=>att?`${fdOuiM('Accepter','data-fdconf="choc"')}${fdNon('Négocier','data-fdnego')}${fdNon('Refuser','data-fdconf="chocrefus"')}`
         :`<div class="ms-ok"><span style="color:${F.choc==='accepte'?'var(--vert)':'var(--neg)'};display:flex">${ico(F.choc==='accepte'?'fdCoche':'fdCroix',24,3)}</span>${fdChocEtat()}</div>${fdNon('Suivre dans Tes saisons','data-fdsuivre')}`});
     return l;
   }
   l.push({id:'bilan',tag:'Organisation',qui:FD_PATRON,role:'patron',date:d31,t:`Bilan de la saison ${a}`,vif:!F.dec,txt:'',
     vue:()=>fdMsgBilan(a),bas:()=>F.ordre==='prix'&&!F.dec?fdOuiM('Voir les prix','data-fdgo="prix"'):fdOuiM(F.dec?'Revoir la décision':'Voir la décision','data-fdgo="bilan"')});
-  fdOffres().forEach((o,i)=>{if(F.refus.includes(i))return;l.push({id:'offre'+i,tag:'Organisation',qui:`La direction de ${fdCourt(o.nom)}`,role:'',date:d31,t:`${esc(fdCourt(o.nom))} te propose un poste`,vif:!F.dec,txt:esc(o.m.t),
+  fdOffres().forEach((o,i)=>{if(F.refus.includes(i))return;l.push({id:'offre'+i,tag:'Organisation',qui:fdCourt(o.nom),role:'direction',date:d31,t:`${esc(fdCourt(o.nom))} te propose un poste`,vif:!F.dec,txt:esc(o.m.t),
     vue:()=>`<div class="fd-mo-b oct" style="--t:${ogTeinte(o.nom)[0]}"><i style="filter:${ogTeinte(o.nom)[1]||'none'} brightness(.8)"></i>${ogEmb(o.nom,92)}<span class="T">${esc(fdCourt(o.nom))}</span></div><div class="ms-cases g3">${msCase('Place',msGros(o.place+'/8',''))}${msCase('Salaire',msGros(nb(o.salaire)+' €','par mois'))}${msCase('Durée',msGros('1 saison',''))}</div>`,bas:()=>F.vu||F.dec?fdOuiM('Voir l’offre',`data-fdgo="offres" data-fdi="${i}"`):fdOuiM('Voir d’abord le bilan','data-fdgo="bilan"')});});
   l.push({id:'prix',tag:'Presse',qui:'Cage Hebdo',role:'',date:d31,t:`Prix ${a}`,vif:false,txt:'6 trophées.',
     vue:()=>`<div class="fd-mp">${FD_PRIX[a].map((p,i)=>`<button class="fd-mpl" data-fdgo="prix" data-fdpi="${i}"><span class="fd-med octr"><span class="octr">${ico(p.ic,22,2.2)}</span></span><span>${p.t}</span><b>${p.n.length?p.n.map(id=>{if(id==='fdferrand')fdFerrand();return esc(parId(id).nom);}).join(' et '):'Aucun candidat'}</b></button>`).join('')}</div>`,bas:()=>fdOuiM('Voir les prix','data-fdgo="prix"')});
@@ -535,9 +535,9 @@ function fdSaisonsListe(){
 function fdBandeSaison(s){
   const F=S.fd,v=FD_V[s.issue],os=fdObjectifs(s.annee,s.issue),n=os.filter(fdTenu).length,parti=s.annee===fdAnnee()?fdSigne():null;
   const c=(l,x,t)=>`<div class="fd-bc"><span class="etiq">${l}</span><span class="fd-bv"><b class="T">${x}</b></span><small>${t}</small></div>`;
-  const ph=parti?`Tu as quitté Split pour ${esc(fdCourt(parti.nom))}.`:s.issue==='tenu'?`Prolongé jusqu’au ${fdDate(fdD(31,11,s.annee+1))}.`:s.issue==='avert'?'Avertissement : 1 saison pour redresser.':'2 saisons manquées : contrat terminé.';
+  const ph=parti?`Tu as quitté Split pour ${esc(fdCourt(parti.nom))}.`:s.issue==='tenu'?`Prolongé jusqu’au ${fdDate(fdD(31,11,s.annee+1))}.`:s.issue==='avert'?'Avertissement : 1 saison pour redresser.':'2 saisons manquées : contrat terminé.';
   return `<div class="fd-sb oct fd-${s.issue}"><div class="fd-sbi oct">${fdTun(v.fil,'bande')}<div class="fd-sbt"><span class="fd-eye">Saison ${s.annee} · ${FD_PATRON}</span><div class="fd-mot"><b class="T fd-verdict">${v.mot}</b><span class="fd-tampon"><b class="T">${FD_MOTS[F.mots][s.issue]}</b></span></div><p class="fd-phrase">${ph}</p></div>
-    <div class="fd-sbc">${c('Objectifs',`${n} sur ${os.length}`,'tenus')}${c('Place',fdPlace(s.issue)+'/8','')}${parti?c('Salaire',fdEuro(parti.salaire),`chez ${esc(fdCourt(parti.nom))}`):c('Salaire',fdEuro(s.issue==='tenu'?4000:FD_SALAIRE),'par mois')}</div></div></div>`;
+    <div class="fd-sbc">${c('Objectifs',`${n}/${os.length}`,'tenus')}${c('Place',fdPlace(s.issue)+'/8','')}${parti?c('Salaire',fdEuro(parti.salaire),`chez ${esc(fdCourt(parti.nom))}`):c('Salaire',fdEuro(s.issue==='tenu'?4000:FD_SALAIRE),'par mois')}</div></div></div>`;
 }
 function fdPrixGrille(a){
   return `<div class="fd-pg">${FD_PRIX[a].map((p,i)=>{
@@ -548,13 +548,13 @@ function fdPrixGrille(a){
 function fdSaisonsHtml(){
   const F=S.fd,l=fdSaisonsListe();
   if(!l.length)return `<div class="fd fd-sais ${F.anim?'fd-anim':''}"><div class="fd-vide oct"><div class="oct">${fdTun('brightness(.55)','bande')}<span class="fd-eye">Tes saisons</span><span class="T">Aucune saison terminée</span><span class="fd-phrase">Ta première saison se termine le 31 déc. 2027.</span></div></div></div>`;
-  const s=l.find(x=>x.annee===F.saison)||l[0],dispo=s.enCours?['choc']:['bilan','prix','classement'],ong=dispo.includes(F.ong)?F.ong:dispo[0],noms={bilan:'Bilan',prix:'Les prix',classement:'Classement',choc:'Le choc'};
+  const s=l.find(x=>x.annee===F.saison)||l[0],dispo=s.enCours?['choc']:['bilan','prix','classement'],ong=dispo.includes(F.ong)?F.ong:dispo[0],noms={bilan:'Bilan',prix:'Prix',classement:'Classement',choc:'Choc'};
   const gauche=pan(titre('Saisons')+`<div class="fd-sl">${l.map(x=>{const os=x.enCours?null:fdObjectifs(x.annee,x.issue),n=os?os.filter(fdTenu).length:0;
     return `<button class="fd-si oct ${x.annee===s.annee?'sel':''}" data-fdsaison="${x.annee}"><span class="fd-sii oct"><b class="T">${x.annee}</b><span class="fd-sit"><span class="fd-sv ${x.enCours?'':x.issue}">${x.enCours?'En cours':FD_MOTS[F.mots][x.issue]}</span><span class="sous">${x.enCours?'Chez Split':`${fdPlace(x.issue)}/8 · objectifs ${n}/${os.length}`}</span></span></span></button>`;}).join('')}</div><div class="fd-sf"><span><b class="T">${l.filter(x=>!x.enCours).length}</b>saison${l.filter(x=>!x.enCours).length>1?'s':''}</span><span><b class="T">${l.filter(x=>!x.enCours).length*5}</b>soirées</span><span><b class="T">${F.cas==='tenu'?0:F.cas==='avert'?1:2}</b>avertiss.</span></div>`,'','fd-psg');
   let c;
   if(ong==='bilan')c=`${fdBandeSaison(s)}<div class="fd-ls">${fdObjectifs(s.annee,s.issue).map((o,k)=>fdLigneObj(o,fdEtatDe(o),k)).join('')}</div>`;
   else if(ong==='prix')c=fdPrixGrille(s.annee);
-  else if(ong==='classement')c=`<div class="fd-cols fd-cols-a">${fdClasse(s.annee,s.issue).map(x=>fdColonne(x,false)).join('')}</div><div class="fd-bar fd-bar-e fd-bar-a"><div class="fd-bc fd-bct"><span class="etiq">Ce que ça a changé</span><span class="fd-bv"><b class="T">En ${s.annee+1}</b></span></div>${fdEffets(s.annee,s.issue)}</div>`;
+  else if(ong==='classement')c=`<div class="fd-cols fd-cols-a">${fdClasse(s.annee,s.issue).map(x=>fdColonne(x,false)).join('')}</div><div class="fd-bar fd-bar-e fd-bar-a"><div class="fd-bc fd-bct"><span class="etiq">Changements</span><span class="fd-bv"><b class="T">En ${s.annee+1}</b></span></div>${fdEffets(s.annee,s.issue)}</div>`;
   else c=pan(`${titre('Choc des organisations',fdChocEtat())}${fdChocVue(true)}${F.choc==='recu'?`<div class="fd-chrep">${fdNon('Répondre','data-fdgo="choc" data-fdmsgc')}</div>`:''}`,'','fd-pchoc');
   return `<div class="fd fd-sais ${F.anim?'fd-anim':''}">${gauche}<div class="fd-sd"><div class="cl-haut fd-songs">${dispo.map(k=>`<button class="onglet oct ${k===ong?'ouvert':''}" data-fdong="${k}">${noms[k]}</button>`).join('')}</div><div class="fd-sc2">${c}</div></div></div>`;
 }
@@ -576,14 +576,14 @@ function fdConfData(){
   const F=S.fd,c=F.conf;if(!c)return null;
   const a=fdAnnee(),off=c.i!=null?fdOffres()[c.i]:null,res=fdRestantes();
   if(c.t==='rester'){const l=[['Poste','Matchmaker'],['Jusqu’au',fdDate(fdD(31,11,a+1))],['Salaire',F.cas==='tenu'?`${fdEuro(FD_SALAIRE)} → ${fdEuro(4000)} par mois`:`${fdEuro(FD_SALAIRE)} par mois, inchangé`]];
-    if(F.cas==='avert')l.push(['Objectifs 2028 manqués','le renvoi']);if(res.length)l.push([res.length>1?`${res.length} offres`:'L’offre',`refusée${res.length>1?'s':''} : ${res.map(o=>esc(fdCourt(o.nom))).join(', ')}`]);
+    if(F.cas==='avert')l.push(['Objectifs 2028 manqués','le renvoi']);if(res.length)l.push([res.length>1?`${res.length} offres`:'L’offre',`refusée${res.length>1?'s':''} : ${res.map(o=>esc(fdCourt(o.nom))).join(', ')}`]);
     return {t:F.cas==='tenu'?'Rester chez Split':'Accepter les conditions',l,ok:F.cas==='tenu'?'Rester chez Split':'Accepter les conditions'};}
-  if(c.t==='accepter'&&off)return {t:`Signer chez ${esc(fdCourt(off.nom))}`,l:[['Tu quittes',`Split, ${fdPlace(F.cas)}/8`],['Tu rejoins',`${esc(fdCourt(off.nom))}, ${off.place}/8`],['Salaire',`${fdEuro(off.salaire)} par mois`],['Durée',`1 saison, jusqu’au ${fdDate(fdD(31,11,a+1))}`],['Tes combattants','restent chez Split']],ok:`Signer chez ${esc(fdCourt(off.nom))}`};
+  if(c.t==='accepter'&&off)return {t:`Signer chez ${esc(fdCourt(off.nom))}`,l:[['Tu quittes',`Split, ${fdPlace(F.cas)}/8`],['Tu rejoins',`${esc(fdCourt(off.nom))}, ${off.place}/8`],['Salaire',`${fdEuro(off.salaire)} par mois`],['Durée',`1 saison, jusqu’au ${fdDate(fdD(31,11,a+1))}`],['Combattants de Split','restent chez Split']],ok:`Signer chez ${esc(fdCourt(off.nom))}`};
   if(c.t==='refuser'&&off){const der=fdRenvoi()&&res.length===1;return {t:`Refuser ${esc(fdCourt(off.nom))}`,l:[['Offre',`${esc(fdCourt(off.nom))}, ${off.place}/8`],['Salaire',`${fdEuro(off.salaire)} par mois`],['Durée','1 saison'],['Ensuite',der?(F.tardive?'tu restes sans poste':'sans poste au 1er janv. 2029'):'elle ne revient pas cette saison']],ok:'Refuser l’offre'};}
-  if(c.t==='fin')return {t:'Finir ta carrière',l:[['Saisons','2, de 2027 à 2028'],['Soirées','10 chez Split'],['Dernière place','7/8'],['Ensuite','retour au menu principal']],ok:'Finir ma carrière'};
-  if(c.t==='choc')return {t:'Accepter le choc',l:[['Contre','Garden of Blood, 1/8'],['Date',fdDate(FD_CHOC_DATE)],['Combats',`5 : ${fdResume(fdCarte())}`],['Recette','50/50']],ok:'Accepter le choc'};
-  if(c.t==='contre'){const l=fdBrouillon();return {t:'Envoyer ta proposition',l:[['À','Garden of Blood, 1/8'],['Carte',`5 combats : ${fdResume(l)}`],['Combat principal',`${esc(parId(l[0].a).nom)} contre ${esc(parId(l[0].b).nom)}`],['Date si accord',fdDate(FD_CHOC_DATE)],['Recette','50/50']],ok:'Envoyer'};}
-  if(c.t==='chocrefus')return {t:'Refuser le choc',l:[['Contre','Garden of Blood, 1/8'],['Combats',`5 : ${fdResume(fdCarte())}`],['Ensuite','plus de proposition en 2028']],ok:'Refuser le choc'};
+  if(c.t==='fin')return {t:'Finir ta carrière',l:[['Saisons','2, de 2027 à 2028'],['Soirées','10 chez Split'],['Dernière place','7/8'],['Ensuite','retour au menu principal']],ok:'Finir la carrière'};
+  if(c.t==='choc')return {t:'Accepter le choc',l:[['Contre','Garden of Blood, 1/8'],['Date',fdDate(FD_CHOC_DATE)],['Combats',`5 : ${fdResume(fdCarte())}`],['Recette','50/50']],ok:'Accepter le choc'};
+  if(c.t==='contre'){const l=fdBrouillon();return {t:'Envoyer ta proposition',l:[['À','Garden of Blood, 1/8'],['Carte',`5 combats : ${fdResume(l)}`],['Combat principal',`${esc(parId(l[0].a).nom)} contre ${esc(parId(l[0].b).nom)}`],['Date si accord',fdDate(FD_CHOC_DATE)],['Recette','50/50']],ok:'Envoyer'};}
+  if(c.t==='chocrefus')return {t:'Refuser le choc',l:[['Contre','Garden of Blood, 1/8'],['Combats',`5 : ${fdResume(fdCarte())}`],['Ensuite','plus de proposition en 2028']],ok:'Refuser le choc'};
   return null;
 }
 function fdConfHtml(){
@@ -619,7 +619,7 @@ const fdLibelle=()=>{const F=S.fd;
   if(F.etape==='prix')return 'Classement';
   if(F.etape==='classement')return F.dec?(fdSigne()?'Arrivée':fdSansPoste()?'Suite':`Saison ${fdAnnee()+1}`):'Bilan';
   if(F.tardive&&F.etape==='offres')return 'Suite';
-  if(F.etape==='bilan'||F.etape==='offres')return F.ordre==='prix'?'Suite':'Les prix';
+  if(F.etape==='bilan'||F.etape==='offres')return F.ordre==='prix'?'Suite':'Prix';
   return 'Continuer';};
 function fdEntete(){
   const F=S.fd,sc=fdEstScene(),pl={mi:'Messages',message:'Messages',choc:'Messages',negocier:'Négocier le choc',saisons:'Tes saisons',bilan:'Bilan de saison',offres:'Offres',prix:'Prix',classement:'Classement'}[F.etape]||(fdSigne()?'Arrivée':fdSansPoste()?'Fin de saison':`Saison ${fdAnnee()+1}`);

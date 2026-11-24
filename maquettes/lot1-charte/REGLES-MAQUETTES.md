@@ -141,6 +141,15 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
   - **Fonction** : seule, « Matchmaker » ou « patron », jamais « le patron ».
   - **Nombres** : en chiffres (« 3/5 », « 2 défenses »).
   - **Citations** : les paroles d'un personnage restent des phrases complètes.
+- **Rédaction de tous les écrans, appliquée et validée le 24/11** (T6, `REDACTION.md`) :
+  - **Fonction ou nom** : dans une ligne « auteur · date », la fonction seule (« Médecin · hier », « Marco Ferri · recruteur ») ; dans une phrase, le nom (« Dr Hélène Roux conseille… », « Gérard Vasseur fixe… »).
+  - **Une phrase, une idée**, sans image ni tournure de roman (« Garde son rythme quand l'autre fatigue »), sans consigne ni tutoriel (« Pesée le 15 février », pas « Continue jusqu'à la semaine du combat »), sans expliquer une mécanique cachée.
+  - **Un même fait, un même texte partout** : objectifs, « Gérard Vasseur fixe tes objectifs 2027 », « n° 1 chez Split », « Reste » (argent qui reste), « Changements ». `arrivee.js` et `messages.js` restent synchronisés.
+  - **Paroles et presse** : les paroles restent des phrases, courtes ; leurs nombres et ceux du corps des articles restent en lettres. Les titres de presse passent en chiffres (« Rachidi, 5 victoires de suite »).
+  - **Pas de doublon de cible** : une valeur ne répète pas la cible déjà écrite dans son libellé (« Finir dans le top 4 » : « 6/8 », sans « / 4e »).
+  - **Typographie** : apostrophe ’ ; espace insécable (U+00A0) avant « : ; ! ? », à l'intérieur de « » et entre un nom de soirée et son numéro (« Night 63 ») ; mois abrégés corrects. Posée par script dans le seul contenu des chaînes.
+  - **Liens et boutons** : sans article (« Carte › », « Soirées › », « Finances › ») ; un bouton commence par un verbe quand il agit (« Voir la fiche », « Voir le combat »).
+  - **Gardés tels quels** (choix ouvert, section 13) : les noms d'écran, d'étape et d'onglet qui servent de repère (Ton arrivée, Ton contrat, Tes espoirs, Les huit, La croissance, Ta carrière, Tes saisons, À la une, Les défis, Le fil, Les meilleurs, Mes parties, Tes soirées, Avant toi).
 
 ## 10. Écrans déjà validés (référence)
 
@@ -274,7 +283,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Retirés** : le carrousel, « S’ils se battent, ils le prennent mal », le tableau, l’onglet Entraîneurs, les « champions formés ». L’effet du camp sur la forme n’est pas affiché (donnée cachée).
 
 ### Écran Finances (R31, Q31, validé le 15/11)
-- **Trois onglets** : La caisse · Les bourses · Les primes (section « Les primes », validée le 21/11). Pas de budget imposé (Q31) : l’argent disponible dépend des soirées et des bourses.
+- **Trois onglets** : Caisse · Bourses · Primes (renommés le 24/11, section « Les primes », validée le 21/11). Pas de budget imposé (Q31) : l’argent disponible dépend des soirées et des bourses.
 - **Bandeau sur le tunnel** : En caisse, puis trois ou quatre chiffres (En 2026, Découvert autorisé, Préventes de la prochaine soirée avec leur jauge ; dans Les bourses : sous contrat, bourse moyenne, versé en 2026, la plus haute, fins de contrat). **Chaque bloc a la même structure et se centre dans la barre** : étiquette, chiffre, ligne du dessous, à égale distance, alignés d’un bloc à l’autre (retour du 15/11).
 - **Le solde** : une seule courbe, en escalier, une marche par soirée (verte si elle rapporte, rouge si elle coûte), sans prévision ; repère « aujourd’hui », la prochaine soirée en pointillé. Sous la courbe, une case par soirée (de la plus ancienne à la plus récente, dans le sens de la courbe) avec ce qu’il te reste ; la prochaine dit « dans 35 jours ».
 - **Le détail d’une soirée** : le tunnel rouge (doré pour un titre), ce qu’il te reste ; Recettes (billetterie, diffuseur, partenaires, bar, boutique, VIP) et Dépenses (bourses fixes, primes de victoire, primes de performance en médailles, salle et production), chacune avec sa jauge ; puis **ce qui a changé depuis la soirée d’avant** : les deux plus gros écarts, en effet sur ce qu’il te reste, avec leur raison (« 2 780 spectateurs de moins qu’à Lyon », « sans Parfait Nana, 120 000 € à la 56 »). « Voir les résultats › » ouvre la soirée dans les Résultats.
@@ -373,7 +382,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Ouvert** : Mezouar–Nana en 2025 (le vainqueur n'est pas affiché), 4 000 ou 4 200 places (4 200 des Résultats), la règle des primes « trop basses » (remplacée le 21/11, voir « Les primes »).
 
 ### Les primes, dans les Finances (Q39a, R39, ajout du 07/11, validé le 21/11)
-- **Troisième onglet des Finances** : La caisse · Les bourses · Les primes. « Modifier › » (soirée à venir) et « Montants : Finances › » (bilan) l'ouvrent. Les montants se fixent ici, avant ou après une soirée, **jamais au bilan**.
+- **Troisième onglet des Finances** : Caisse · Bourses · Primes. « Modifier › » (soirée à venir) et « Montants : Finances › » (bilan) l'ouvrent. Les montants se fixent ici, avant ou après une soirée, **jamais au bilan**.
 - **Trois primes pour toute l'organisation**, de 1 000 à 100 000 €, par pas de 1 000 € : Combat de la soirée, Performance de la soirée, Finition (victoire avant la limite). Chacune a son curseur, ses boutons − et +, et un repère blanc « Aujourd'hui ».
 - **Le bandeau** : Versé en primes, À ces montants, L'écart, Il t'est resté (ou « Il te serait resté » dès qu'un montant change).
 - **Le coût sur des faits, jamais une prévision** : soirée par soirée, les primes réellement données en médailles, le versé, le même nombre de primes aux montants choisis, ce qu'il serait resté, puis le total. Une soirée à venir dit « À venir, rien n'est encore versé ». Un clic sur une ligne ouvre ses Résultats.
@@ -446,7 +455,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Le verdict en un mot** : « Tu restes » ou « Tu pars » en très grand, en vert ou en rouge, avec le mot du jeu en tampon (Prolongé, Sous condition, Remercié). Dessous : une phrase en chiffres, puis une citation du patron. Viennent ensuite les trois objectifs, chacun avec sa valeur, sa cible (« 4/8 ou mieux », « n° 5 ou mieux », places) et son repère visuel, puis une barre Contrat, Salaire, Avertissements, Offres.
 - **Les trois cas** : tenus ; avertissement (1 sur 2, une saison pour redresser) ; second échec et renvoi, avec ou sans offre. Les mots du jeu restent ceux du tampon ; `fdmots=q34` montre Avertissement et Renvoyé. **Aucun seuil d'objectifs manqués n'est fixé.**
 - **Une offre ne change jamais l'organisation sans choix explicite.** Chaque offre a sa scène : organisation, place, salaire face à Split, durée, poste, atouts. Signer, refuser ou rester passe par une confirmation en chiffres, avec l'action en jaune et « Revenir » en noir. Seul Split se joue jusqu'au bout. Renvoyé sans offre : l'écran « Sans poste », puis une offre tardive arrive par message.
-- **Les six prix** : choisis par la presse. Pour chacun : le nom en très grand, une phrase, quatre cases chiffrées, « Sa fiche » et « Voir le combat ». Ils arrivent aussi par message.
+- **Les six prix** : choisis par la presse. Pour chacun : le nom en très grand, une phrase, quatre cases chiffrées, « Voir la fiche » et « Voir le combat ». Ils arrivent aussi par message.
 - **Mi-saison (1er juillet)** : un message plus léger, sans scène : la place et les objectifs en cours.
 - **Le choc des organisations** (R34) n'est jamais là à l'arrivée : un message de Garden of Blood le propose le 8 janvier suivant. Il compte 5 combats, 2 entre champions et 3 entre classés. Recette 50/50, victoire 3/5, les ceintures restent en place. Trois réponses : Accepter, **Négocier**, Refuser.
 - **Négocier** : tu choisis un de tes champions disponibles, ou un classé avec le filtre Classés. L'écran dit si leur champion de la même catégorie peut venir ; sinon, il propose leur meilleur classé libre. La carte garde au moins un duel entre champions. Le choc se suit ensuite dans Tes saisons.
@@ -530,7 +539,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Salles et camps | R27 | Validé (section 11, « Écran Camps »). |
 | Presse | R28 | Validé (section 11, « Écran Presse ») : À la une, Les défis, Le fil. Médias à renommer (Q10c). |
 | Calendrier, résultats, lendemain | R29, R30, R40, R41 | Validés (section 11, « Écran Calendrier » et « Écran Résultats et lendemain »). |
-| Finances, primes | R31, Q39a | Validé (section 11, « Écran Finances » et « Les primes ») : La caisse, Les bourses, Les primes. Un nouveau montant vaut dès la prochaine soirée et ne réécrit jamais une soirée jouée. |
+| Finances, primes | R31, Q39a | Validé (section 11, « Écran Finances » et « Les primes ») : Caisse, Bourses, Primes. Un nouveau montant vaut dès la prochaine soirée et ne réécrit jamais une soirée jouée. |
 | Organisation, croissance, carrière | R32 à R35 | Validé (section 11, « Écran Organisation » et « Ta carrière »). |
 | Soirée en direct, discours, temps forts, bilan | R36 à R39 | Validé (section 11, « Soirée en direct, temps forts, résultat, discours, bilan ») : temps forts dans l'arène lisibles d'un coup d'œil, résultat dévoilé pas à pas, discours en scène et interview, bilan avec « Revoir » au choix. Primes fixées par le joueur (1 000 € à 100 000 €) **dans les Finances** (section 11, « Les primes »). |
 | Options, aide | T1, T5 | Validé (section 11, « Écran Options ») : le vrai écran du jeu à la charte, tout simple ; les aides regroupées dans l'onglet Aide. |
@@ -539,6 +548,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Mouvement commun, tous les écrans | T3 | Validé (section 11, « Le mouvement commun à tous les écrans ») : barre, onglets, filtres, tris et survol, sans tunnel animé sur l'Accueil ni mode de fusion sur le texte. |
 | Barre latérale et navigation | T4, Q11 | Validé (section 11, « Barre latérale et navigation ») : les 12 écrans visibles sous quatre titres, chacun à un clic, aux mêmes hauteurs ouverte et repliée. |
 | Fin de saison, offres, prix, choc | Q34a, R33, R34, R35, T10 | Validé (section 11, « Fin de saison, verdict, offres, prix, choc des organisations ») : verdict en un mot et trois objectifs chiffrés, une scène par offre, six prix, choc par message avec Négocier, saisons retrouvées depuis Ta carrière et le Calendrier. |
+| Rédaction de tous les écrans | T5, T6, R10, R11, R29 | Validé (section 9, « Rédaction de tous les écrans ») : chaque texte de la maquette relu au style du 24/11, relevé dans `REDACTION.md`, avant / après dans `comparaison.html`. À reporter dans le jeu écran par écran, au lot de chaque écran. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
@@ -567,6 +577,9 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Composition du choc | 5 combats, au moins 1 entre champions ; un classé de Split affronte leur classé libre le plus proche au mondial (le jeu : 3 combats, tous entre champions) | R34, fin de saison 24/11 |
 | Recette et ceinture au choc | Recette 50/50 et ceintures en place, sans source réelle ; une vraie ceinture en jeu reste possible (Bellator x Rizin 2) | R34, `AMELIORATIONS-DONNEES.md` |
 | Patron de Split | Gérard Vasseur dans la maquette, Jean-Michel Delatour dans le jeu | Fin de saison 24/11 |
+| Noms d'écran, d'étape et d'onglet à possessif ou article | Gardés : Ton arrivée, Ton contrat, Tes espoirs ; Les huit, La croissance, Ta carrière, Tes saisons ; À la une, Les défis, Le fil ; Les meilleurs ; Mes parties ; Tes soirées, Avant toi. Proposition : Arrivée, Contrat, Espoirs ; Organisations, Croissance, Carrière, Saisons ; Une, Défis, Fil ; Meilleurs ; Parties | Rédaction 24/11 |
+| Blessure de Rizzo | L'Infirmerie dit « Élongation à la cuisse droite », le message du médecin « Entorse de la cheville gauche » : un fait à choisir | Rédaction 24/11 |
+| Aide des Options : le patron | « Gérard Vasseur fixe les objectifs… » suit le choix du nom du patron | Rédaction 24/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
 

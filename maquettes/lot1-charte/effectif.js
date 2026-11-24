@@ -41,10 +41,10 @@ const INFIRMERIE=[
   {id:'roussel',quoi:'Fracture de la main gauche',ou:'En combat, au premier round',debut:new Date(2026,11,8),fin:new Date(2027,1,15),
    phase:1,etape:'Rééducation de la main',avis:'Plâtre retiré. Elle frappe au sac à partir du 1er février.'},
   {id:'abiven',quoi:'Rupture du ligament croisé du genou',ou:'À l’entraînement, en lutte',debut:new Date(2026,10,20),fin:new Date(2027,8,15),
-   phase:1,etape:'Rééducation du genou',avis:'Opéré le 2 décembre. Saison presque terminée. Il reste payé jusqu’à la fin de son contrat.'},
+   phase:1,etape:'Rééducation du genou',avis:'Opéré le 2 décembre. Saison presque terminée. Payé jusqu’à la fin du contrat.'},
 ];
 const A_SURVEILLER=[
-  {id:'nana',t:'Trois combats durs en quatorze mois, à 37 ans.',s:'Le médecin conseille trois mois sans sparring dur après son prochain combat.'},
+  {id:'nana',t:'3 combats durs en 14 mois, à 37 ans.',s:'Dr Hélène Roux conseille 3 mois sans sparring dur après son prochain combat.'},
   {id:'bello',t:'Gêne à l’épaule gauche depuis la semaine dernière.',s:'Rien d’officiel. Examen prévu le 18 janvier.'},
 ];
 
@@ -135,7 +135,7 @@ function etatHtml(c){
 function cellule(c,k){
   switch(k){
     case 'rang':return rangHtml(c);
-    case 'nom':return `<div class="eff-nom">${lien(c)}<span class="sous">${c.surnom?`« ${esc(c.surnom)} »`:'&nbsp;'}</span></div>`;
+    case 'nom':return `<div class="eff-nom">${lien(c)}<span class="sous">${c.surnom?`« ${esc(c.surnom)} »`:'&nbsp;'}</span></div>`;
     case 'cat':return esc(courte(c.cat));
     case 'age':return c.age;
     case 'bilan':return `<span class="T" style="font-size:32px">${bilan(c)}</span>`;
@@ -170,7 +170,7 @@ function tableau(){
   const cols=colonnes(),l=liste();
   const th=k=>{const [t,w0]=COL_EFF[k],on=S.tri.col===k,w=S.eff.vue==='experte'&&W_EXP[k]||w0;
     return `<th data-tri="${k}" class="${on?'trie':''}" ${w?`style="width:${pct(w)}"`:''}>${t}${on?(S.tri.sens>0?' ▾':' ▴'):''}</th>`;};
-  const exp=S.eff.vue==='experte',vue=`<th class="th-vue"><button class="bb oct petit ${exp?'on':''}" data-evue title="${exp?'Revenir à la vue essentielle':'Voir le détail (vue experte)'}"><span class="oct">${ICO_VUE}</span></button></th>`;
+  const exp=S.eff.vue==='experte',vue=`<th class="th-vue"><button class="bb oct petit ${exp?'on':''}" data-evue title="${exp?'Vue essentielle':'Vue experte'}"><span class="oct">${ICO_VUE}</span></button></th>`;
   return `<div class="defile eff-defile"><table class="eff-t"><thead><tr>${cols.map(th).join('')}${vue}</tr></thead>
     <tbody>${l.map((c,i)=>`<tr class="apparait" style="animation-delay:${Math.min(i,12)*25}ms">${cols.map(k=>`<td class="c-${k}">${cellule(c,k)}</td>`).join('')}<td></td></tr>`).join('')}</tbody></table></div>`;
 }
@@ -206,7 +206,7 @@ document.addEventListener('click',e=>{
   /* Hommes ou Femmes : toutes les catégories du sexe choisi ; une catégorie : elle seule. */
   if((el=t.closest('[data-esexe]'))){S.eff.sexe=el.dataset.esexe;S.eff.cat='toutes';S.eff.onglet='combattants';rendre();return;}
   if((el=t.closest('[data-ecat]'))){S.eff.cat=el.dataset.ecat;S.eff.onglet='combattants';rendre();return;}
-  if((el=t.closest('[data-eaction]'))){toast(`Ouvre la négociation avec ${esc(parId(el.dataset.eaction).nom)} : écran Contrats, hors de cette maquette.`);return;}
+  if((el=t.closest('[data-eaction]'))){toast(`Ouvre la négociation avec ${esc(parId(el.dataset.eaction).nom)} : écran Recrutement, hors de cette maquette.`);return;}
 });
 window.addEventListener('DOMContentLoaded',()=>{
   const q=new URLSearchParams(location.search);

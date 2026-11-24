@@ -237,12 +237,12 @@ function cpPoints(s,max){
 const cpMini=(x,l,cls='')=>`<div class="cp-m ${cls}"><b class="T">${x}</b><span>${l}</span></div>`;
 /** Monté ou descendu d'une taille depuis un an. */
 function cpBouge(s){if(s.tailleAvant===s.taille)return '';const o=['club','salle','ecurie'],up=o.indexOf(s.taille)>o.indexOf(s.tailleAvant);
-  return `<span class="cp-bg ${up?'up':'down'}" title="${up?'Monté':'Descendu'} : ${esc(CP_TAILLE_MOT[s.tailleAvant].toLowerCase())} il y a un an">${up?'▲':'▼'} ${up?'monte':'descend'}</span>`;}
+  return `<span class="cp-bg ${up?'up':'down'}" title="${up?'Monté':'Descendu'} : ${esc(CP_TAILLE_MOT[s.tailleAvant].toLowerCase())} il y a un an">${up?'▲':'▼'} ${up?'monte':'descend'}</span>`;}
 const cpCoachLien=s=>`<span class="nom cp-col" data-cpcoach="${s.id}">${esc(s.coach)}</span>`;
 /** La petite fenêtre de la spécialité : le chiffre qui la montre dans la cage, face à la moyenne. */
 function cpPop(s){const [l,m,d,u]=CP_STAT[s.spec],k=s.spec==='Karaté'?m/s.stat:s.stat/m;
   return `<div class="cp-pop"><div class="cp-popv"><b class="T">${cpVal(s.stat,d)}${u}</b><span>${esc(l)}</span></div>
-    <div class="cp-popj"><i style="width:${Math.min(100,50*k)}%"></i><b style="left:50%"></b></div><span class="sous">moyenne mondiale : ${cpVal(m,d)}${u}${s.spec==='Karaté'?' (moins, c’est mieux)':''}</span></div>`;}
+    <div class="cp-popj"><i style="width:${Math.min(100,50*k)}%"></i><b style="left:50%"></b></div><span class="sous">moyenne mondiale : ${cpVal(m,d)}${u}${s.spec==='Karaté'?' (moins, c’est mieux)':''}</span></div>`;}
 function cpCarte(s,i,sel){
   const monde=S.cp.vue==='monde',t=s.taille,lieu=`${esc(s.ville)}${s.pays!=='France'||monde?', '+esc(s.pays):''}`;
   let corps;const pop=S.cp.pop===s.id;
@@ -268,7 +268,7 @@ function cpMur(){
     const z=l.filter(s=>s.taille===t);if(!z.length)return '';
     const nc=z.reduce((a,s)=>a+s.split.length,0);
     const mt=z.filter(x=>x.tailleAvant!==x.taille).length,bouge=mt?` · ${mt} changement${mt>1?'s':''} de taille en 2026`:'';
-    const info=(monde?`${z.length} dans le monde · ${def}`:`${z.length} · ${nc} de tes combattants`)+bouge;
+    const info=(monde?`${z.length} dans le monde · ${def}`:`${z.length} · ${nc} combattants de Split`)+bouge;
     return `<div class="cp-sec">${cpTaillePicto(t)}<span class="cp-st">${titre}</span><span class="sous">${info}</span></div>
       <div class="cp-grille g-${t}">${z.map(s=>cpCarte(s,i++,sel)).join('')}</div>`;}).join('');
   return `<div class="cp-mur defile">${h||'<div class="rc-vide">Aucune salle avec ce filtre.</div>'}</div>`;
@@ -310,17 +310,17 @@ const cpSalleLien=x=>`<button class="cp-sl" data-cpsalle="${x.id}">${esc(x.nom)}
 /** Une ligne de mouvement : arrivée, départ, nouvel entraîneur, changement de taille. */
 const cpMouvLigne=s=>([d,k,c,x])=>{
   const t=k==='arr'?`${lien(c)} arrive de ${cpSalleLien(x)}`:k==='dep'?`${lien(c)} part pour ${cpSalleLien(x)}`
-    :k==='coach'?`Nouvel entraîneur : ${esc(s.coach)}. ${esc(s.coachAvant.nom)} part adjoint à ${cpSalleLien(x)}`
+    :k==='coach'?`Nouvel entraîneur : ${esc(s.coach)}. ${esc(s.coachAvant.nom)} part adjoint à ${cpSalleLien(x)}`
     :cpTailleTexte(s);
   return `<div class="cp-mv"><span class="cp-mvd ${k}">${k==='taille'?'2026':cpMois(d)}</span><span>${t}</span></div>`;};
 /** « Devenue grande écurie : 21 combattants il y a un an, 25 aujourd'hui. » */
 function cpTailleTexte(s){const o=['club','salle','ecurie'],up=o.indexOf(s.taille)>o.indexOf(s.tailleAvant),m={club:'club',salle:'salle',ecurie:'grande écurie'}[s.taille],f=s.taille!=='club';
-  return `<span class="${up?'cp-up':'cp-down'}">${up?'▲':'▼'}</span> ${up?(f?'Devenue':'Devenu'):(f?'Redevenue':'Redevenu')} ${m} : ${s.prosAvant} combattants il y a un an, ${s.pros} aujourd’hui`;}
+  return `<span class="${up?'cp-up':'cp-down'}">${up?'▲':'▼'}</span> ${up?(f?'Devenue':'Devenu'):(f?'Redevenue':'Redevenu')} ${m} : ${s.prosAvant} combattants il y a un an, ${s.pros} aujourd’hui`;}
 /** L'entraîneur (retour du 15/11 : « en savoir plus sur lui », sans la liste des combattants) : qui il est, d'où il vient,
     ce que sa salle fait sous sa direction. */
 function cpPanneauCoach(s){
   const tous=[...s.ext,...s.split],ch=tous.filter(c=>c.ext?c.champOrg:c.rang==='C').length,fs=s.coach.length>18?48:56,[sl,sm,sd,su]=CP_STAT[s.spec];
-  const mma=s.coachMMA?`Combattant de MMA de ${s.coachMMA.de} à ${s.coachMMA.a} : ${s.coachMMA.v} victoires, ${s.coachMMA.d} défaites.`:'Pas de carrière en MMA.';
+  const mma=s.coachMMA?`Combattant de MMA de ${s.coachMMA.de} à ${s.coachMMA.a} : ${s.coachMMA.v} victoires, ${s.coachMMA.d} défaites.`:'Pas de carrière en MMA.';
   const pc=[...s.parcours].reverse().map(([a,r,id])=>`<div class="cp-mv"><span class="cp-mvd">${esc(a)}</span><span>${esc(r)} à ${cpSalleLien(cpSalle(id))}${r==='Entraîneur principal'&&s.fondee===s.depuis?' (il l’a fondée)':''}</span></div>`).join('');
   const av=s.coachAvant?`<div class="cp-mv"><span class="cp-mvd">${cpMois(s.coachAvant.date)}</span><span>Succède à ${esc(s.coachAvant.nom)}</span></div>`:'';
   const pct=Math.round(100*s.v/Math.max(1,s.v+s.d));
@@ -330,9 +330,9 @@ function cpPanneauCoach(s){
     <div class="rc-faits">${cpFait('Âge',`${s.coachAge} ans`,'')}${cpFait('Depuis',String(s.depuis),'à la tête de la salle')}${cpFait('Champions',`<span data-cpn="${ch}">${ch}</span>`,'en titre chez lui')}</div>
     <div class="cp-bloc"><div class="etiq">Avant d’entraîner</div><div class="cp-cv">${esc((s.ancien||CP_ANCIEN[s.spec]).replace(/^./,x=>x.toUpperCase()))}.</div><div class="sous cp-l2">${mma}</div></div>
     <div class="cp-bloc"><div class="etiq">Parcours</div>${pc}${av}</div>
-    <div class="cp-bloc"><div class="etiq">Équipe</div>${s.equipe.length?`<div class="cp-eq">${s.equipe.map(([r,n])=>`<div><span class="sous">${esc(r)}</span><b>${esc(n)}</b></div>`).join('')}</div>`:'<div class="cp-l2">Il entraîne seul : pas d’adjoint dans la salle.</div>'}</div>
+    <div class="cp-bloc"><div class="etiq">Équipe</div>${s.equipe.length?`<div class="cp-eq">${s.equipe.map(([r,n])=>`<div><span class="sous">${esc(r)}</span><b>${esc(n)}</b></div>`).join('')}</div>`:'<div class="cp-l2">Pas d’adjoint dans la salle.</div>'}</div>
     <div class="cp-bloc"><div class="etiq">Salle en 2026</div>
-      <div class="cp-kf n3 cp-pcf">${cpMini(`${s.v}-${s.d}`,`${pct} % de victoires`)}${cpMini(`n° ${s.rang}`,'au classement')}${cpMini(s.split.length||'—','de tes combattants')}</div>
+      <div class="cp-kf n3 cp-pcf">${cpMini(`${s.v}-${s.d}`,`${pct} % de victoires`)}${cpMini(`n° ${s.rang}`,'au classement')}${cpMini(s.split.length||'—','combattants de Split')}</div>
       <div class="cp-l2 cp-pcs"><b>${cpVal(s.stat,sd)}${su}</b> ${esc(sl)} <span class="sous">· moyenne mondiale ${cpVal(sm,sd)}${su}</span></div></div>
   </div>`,'height:100%');
 }
@@ -348,16 +348,16 @@ function cpPanneau(){
   const mv=cpMouvements(s),mouv=mv.length?`<div class="cp-bloc"><div class="etiq">En 2026</div>${mv.slice(0,3).map(cpMouvLigne(s)).join('')}</div>`:'';
   if(!monde){const [v,d]=cpBilanSplit(s),n=cpAffiche(s);
     return pan(`<div class="rt-p cp-p" data-cle="s${s.id}">${ban}
-      <div class="rc-faits">${cpFait('Tes combattants',`<span data-cpn="${s.split.length}">${s.split.length}</span>`,`sur ${s.pros} dans la salle`)}${cpFait('À l’affiche',`<span data-cpn="${n}">${n}</span>`,'le 16 février')}${cpFait('En 2026',v+d?`${v}-${d}`:'—','victoires-défaites')}</div>
+      <div class="rc-faits">${cpFait('Chez Split',`<span data-cpn="${s.split.length}">${s.split.length}</span>`,`sur ${s.pros} dans la salle`)}${cpFait('À l’affiche',`<span data-cpn="${n}">${n}</span>`,'le 16 février')}${cpFait('En 2026',v+d?`${v}-${d}`:'—','victoires-défaites')}</div>
       ${coach}${mouv}
-      <div class="cp-bloc cp-flex"><div class="etiq">Tes combattants ici</div>${cpSplitListe(s)}</div>
+      <div class="cp-bloc cp-flex"><div class="etiq">Combattants de Split</div>${cpSplitListe(s)}</div>
     </div>`,'height:100%');}
   const dest=cpDest(s);
   return pan(`<div class="rt-p cp-p" data-cle="m${s.id}">${ban}
     <div class="rc-faits">${cpFait('Rang',`n° <span data-cpn="${s.rang}">${s.rang}</span>`,cpTendMot(s.tend))}${cpFait('Champions',`<span data-cpn="${s.champions}">${s.champions}</span>`,'en titre')}${cpFait('Classés',`<span data-cpn="${s.classes}">${s.classes}</span>`,'top 15 mondial')}</div>
     ${coach}${mouv}
     <div class="cp-bloc cp-flex"><div class="etiq">Meilleurs combattants</div>${cpMondeListe(s)}</div>
-    ${dest?`<div class="cp-bas"><span class="sous cp-voy">7 jours sur place : ${nb(rtVoyage(dest,7,S.date).cout)} €</span><button class="bb oct petit" data-cpdest="${dest.id}"><span class="oct">Envoyer Marco ${esc(rtPrep(dest))} ›</span></button></div>`:''}
+    ${dest?`<div class="cp-bas"><span class="sous cp-voy">7 jours sur place : ${nb(rtVoyage(dest,7,S.date).cout)} €</span><button class="bb oct petit" data-cpdest="${dest.id}"><span class="oct">Envoyer Marco ${esc(rtPrep(dest))} ›</span></button></div>`:''}
   </div>`,'height:100%');
 }
 
@@ -371,7 +371,7 @@ function cpFiltres(){
   return `<div class="eff-filtres">${t('toutes','Toutes')}${CP_TAILLES.map(([v,l])=>t(v,l)).join('')}<i class="eff-sep"></i>
     <button class="bb oct petit" data-cprang title="${F.sens>0?'Du n° 1 au dernier':'Du dernier au n° 1'}"><span class="oct">Rang ${CP_SENS_ICO(F.sens)}</span></button>
     <span class="cp-spw"><button class="bb oct petit ${F.spec!=='toutes'||F.menu?'on':''}" data-cpmenu><span class="oct">${F.spec==='toutes'?'Spécialité':esc(F.spec)} <span class="cp-chev">${F.menu?'▴':'▾'}</span></span></button>${menu}</span>
-    <span style="margin-left:auto"></span>${vue('split','Split')}${vue('monde','Le monde')}</div>`;
+    <span style="margin-left:auto"></span>${vue('split','Split')}${vue('monde','Monde')}</div>`;
 }
 function cpHtml(){cpGarder();return `<div class="rc cp">${cpFiltres()}<div class="cp-g">${cpMur()}${cpPanneau()}</div></div>`;}
 

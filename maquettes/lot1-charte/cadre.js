@@ -47,7 +47,7 @@ const titre=(t,ment='')=>`<div class="pt"><h2>${t}</h2>${ment?`<span class="ment
 const COMBATTANTS=[
   {id:'nana',prenom:'Parfait',nom:'Nana',surnom:'Le Boucher',cat:'Poids léger',kg:70,age:37,v:14,d:8,n:0,rang:'C',mondial:17,tend:'=',serie:'ddvvv',statut:'dispo',dernier:new Date(2026,11,8),
    taille:'1,72 m',allonge:'1,77 m',garde:'Orthodoxe',depuis:'2019',contrat:[2,'120 000 €'],style:'Bagarreur, pression au centre',
-   traits:[['+','Diesel','3 victoires dans les derniers rounds','Monte en régime quand les autres s’éteignent.'],['+','Guerrier','Une guerre dont on parle encore','Ne recule jamais d’un échange.']]},
+   traits:[['+','Diesel','3 victoires dans les derniers rounds','Garde son rythme quand l’autre fatigue.'],['+','Guerrier','Sa guerre contre Belkacem','Ne recule jamais d’un échange.']]},
   {id:'labbe',surnomP:1,prenom:'Thomas',nom:'Labbé',surnom:'Le Notaire',cat:'Poids léger',kg:70,age:29,v:12,d:3,n:0,rang:2,mondial:24,tend:'+2',serie:'vvdvv',statut:'dispo',dernier:new Date(2026,10,14),taille:'1,78 m',allonge:'1,81 m',garde:'Orthodoxe',depuis:'2022',contrat:[3,'34 000 €'],style:'Lutteur de contrôle'},
   {id:'bello',surnomP:1,prenom:'Babatunde',nom:'Bello',surnom:'Baba',cat:'Poids léger',kg:70,age:27,v:11,d:2,n:0,rang:3,mondial:29,tend:'+1',serie:'vdvvv',statut:'dispo',dernier:new Date(2026,10,14),taille:'1,80 m',allonge:'1,86 m',garde:'Fausse garde',depuis:'2023',contrat:[2,'28 000 €'],style:'Frappeur de distance'},
   {id:'mezouar',surnomP:1,prenom:'Ilyas',nom:'Mezouar',surnom:'Le Faucon',cat:'Poids léger',kg:70,age:28,v:13,d:3,n:0,rang:1,mondial:19,tend:'+1',serie:'vvvdv',statut:'dispo',dernier:new Date(2026,11,8),taille:'1,76 m',allonge:'1,80 m',garde:'Orthodoxe',depuis:'2021',contrat:[1,'52 000 €'],style:'Grappler, finisseur'},
@@ -78,7 +78,7 @@ function parNom(nom,cat){
 /* Bilan « V-D » ou « V-D-N », en neutre (règle 6). */
 const rec=(v,d,n)=>`${v}-${d}${n===undefined?'':`-${n}`}`;
 const bilan=c=>rec(c.v,c.d,c.n);
-const lien=(c,surnom=false)=>`<span class="nom" data-fiche="${c.id}">${esc(c.prenom)} ${esc(c.nom)}</span>${surnom&&c.surnom?` <span class="surn">« ${esc(c.surnom)} »</span>`:''}`;
+const lien=(c,surnom=false)=>`<span class="nom" data-fiche="${c.id}">${esc(c.prenom)} ${esc(c.nom)}</span>${surnom&&c.surnom?` <span class="surn">« ${esc(c.surnom)} »</span>`:''}`;
 const serie=s=>`<span style="display:inline-flex;gap:6px;align-items:center" title="Du plus récent au plus ancien">${[...s].reverse().map(x=>`<span class="marque octr ${x}" style="width:28px;height:28px;font-size:20px">${x.toUpperCase()}</span>`).join('')}</span>`;
 const ETATS={dispo:['var(--vert)','ok','Disponible'],blesse:['var(--neg)','medical','Blessé'],pause:['var(--texte2)','alerte','En pause']};
 const etat=c=>{const [col,i,t]=ETATS[c.statut];return `<span style="color:${col};display:inline-flex;gap:8px;align-items:center;font-weight:700;white-space:nowrap">${ico(i,20)}${t}${c.retour?` · retour ${esc(c.retour)}`:''}</span>`;};
@@ -91,11 +91,11 @@ function depuis(d){const j=Math.max(0,Math.round((S.date-d)/864e5));let m=Math.f
 const dCourt=d=>`${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
 
 let MESSAGES=[
-  {id:1,lu:false,t:'Il manque deux combats pour <b>Split Fight Night 63</b>',de:'Leïla · aujourd’hui',tag:'Leïla',go:'carte'},
-  {id:2,lu:false,t:'<span class="nom" data-fiche="rizzo">Paolo Rizzo</span> s’est blessé au camp',de:'Le médecin · hier · retour estimé le 2 février',tag:'Médecin'},
-  {id:3,lu:true,t:'Palier franchi : les diffuseurs nationaux regardent Split',de:'Split · 10 janvier',tag:'Palier'},
-  {id:4,lu:true,t:'« Split a un nouveau matchmaker. Il a 35 jours pour remplir le Forum. »',de:'Cage Hebdo · 9 janvier',tag:'Presse'},
-  {id:5,lu:true,t:'Ton recruteur est disponible',de:'Lyon · 8 janvier',tag:'Recruteur'},
+  {id:1,lu:false,t:'Il manque 2 combats pour <b>Split Fight Night 63</b>',de:'Leïla · aujourd’hui',tag:'Leïla',go:'carte'},
+  {id:2,lu:false,t:'<span class="nom" data-fiche="rizzo">Paolo Rizzo</span> s’est blessé au camp',de:'Médecin · hier · retour estimé le 2 février',tag:'Médecin'},
+  {id:3,lu:true,t:'Palier franchi : Diffusion nationale',de:'Split · 10 janvier',tag:'Palier'},
+  {id:4,lu:true,t:'« Split a un nouveau matchmaker. Il a 35 jours pour remplir le Forum. »',de:'Cage Hebdo · 9 janvier',tag:'Presse'},
+  {id:5,lu:true,t:'Recruteur disponible',de:'Lyon · 8 janvier',tag:'Recruteur'},
 ];
 
 /* ---- État ---- */
@@ -142,7 +142,7 @@ function accueilHtml(){
         <span style="font-size:24px;white-space:nowrap">Lyon · depuis 2004</span></div>
       ${stat('Prochaine soirée',`Dans <span id="jours">${S.jours}</span> j`,'Split Fight Night 63')}
       ${stat('Lieu','Forum de Lille','Lille, 16 février')}
-      ${stat('Carte','<span style="color:var(--jaune)">2 / 4</span>','2 places à finir')}
+      ${stat('Carte','<span style="color:var(--jaune)">2 / 4</span>','2 places libres')}
       ${stat('Préventes',`<span id="preventes">${nb(S.preventes)}</span>`,'sur 4 000 places',`<div class="jauge" style="height:5px;width:180px"><i id="jPrev" style="width:${S.preventes/40}%;background:var(--blanc)"></i></div>`)}
     </div>
     <div style="flex:1;min-height:0;display:grid;grid-template-columns:1.12fr 1fr .9fr;gap:20px">
@@ -150,26 +150,26 @@ function accueilHtml(){
           <span class="point octr ${m.lu?'':'pulse'}" style="${m.lu?'background:transparent':''}"></span>
           <div style="flex:1;min-width:0"><div style="font-size:24px;${m.lu?'color:var(--texte2)':'font-weight:700'}">${m.t}</div><div class="sous">${esc(m.de)}</div></div>
           <span class="tag">${esc(m.tag)}</span></div>`).join('')}</div>`,'','apparait')}
-      ${pan(titre('Ce qui t’attend')+`<div class="defile">
+      ${pan(titre('Priorités')+`<div class="defile">
           <div class="oct cj" style="--c:16px;background:var(--jaune);color:var(--noir);padding:22px 24px">
-            <div style="font-weight:700;font-size:22px;letter-spacing:.07em;text-transform:uppercase">La prochaine chose à faire</div>
+            <div style="font-weight:700;font-size:22px;letter-spacing:.07em;text-transform:uppercase">Prochaine étape</div>
             <div class="T" style="font-size:54px;margin:8px 0 10px">Finir la carte</div>
             <div style="display:flex;align-items:center;gap:18px"><span style="font-size:22px;flex:1">Il manque 2 combats en carte principale.</span>
               <button class="bouton petit oct" style="background:var(--noir);color:var(--jaune)" data-go="carte">Ouvrir la carte</button></div></div>
 
           <div class="etiq" style="margin:20px 0 4px">À surveiller</div>
           <div class="ligne"><span style="color:var(--neg)">${ico('medical',22)}</span><span style="flex:1">${lien(rizzo)} · blessé au camp, retour le 2 février</span><span class="lecture">›</span></div>
-          <div class="ligne"><span style="color:var(--jaune)">${ico('contrats',22)}</span><span style="flex:1">${lien(parId('vanbelle'))} · dernier combat de son contrat</span><span class="lecture">›</span></div>
+          <div class="ligne"><span style="color:var(--jaune)">${ico('contrats',22)}</span><span style="flex:1">${lien(parId('vanbelle'))} · dernier combat du contrat</span><span class="lecture">›</span></div>
           <div style="display:flex;align-items:baseline;margin:22px 0 2px"><span class="etiq">Suivis</span><button class="etiq" style="margin-left:auto;color:var(--jaune);font-weight:700" data-go="effectif">Tout voir ›</button></div>
-          ${suivi(rizzo,'<span style="color:var(--neg)">Blessé, retour le 2 février</span>')}${suivi(musaev,'Cinq victoires sur sept par soumission')}${suivi(parId('rachidi'),'<span style="color:var(--vert)">Cinq victoires de suite</span>')}
+          ${suivi(rizzo,'<span style="color:var(--neg)">Blessé, retour le 2 février</span>')}${suivi(musaev,'5 victoires sur 7 par soumission')}${suivi(parId('rachidi'),'<span style="color:var(--vert)">5 victoires de suite</span>')}
         </div>`,'','apparait')}
-      ${pan(titre('Ta saison','2027')+`<div class="defile">
-          ${obj('Rester dans le top 2','2e, à garder',.92,'var(--vert)')}
-          ${obj('Un poids lourd dans le top 10 mondial','Meilleur : n° 14',.55,'var(--jaune)')}
+      ${pan(titre('Saison','2027')+`<div class="defile">
+          ${obj('Rester dans le top 2','2/8, à garder',.92,'var(--vert)')}
+          ${obj('Un poids lourd dans le top 10 mondial','Meilleur : n° 14',.55,'var(--jaune)')}
           ${obj('Remplir le Forum de Lille',`${Math.round(S.preventes/40)} %`,S.preventes/4000,'var(--blanc)')}
           <div class="etiq" style="margin:22px 0 6px">Patron</div>
           <div class="T" style="font-size:40px">Il attend de voir</div>
-          <div style="font-size:24px;color:var(--texte2);margin-top:6px;font-style:italic">« Je veux voir la suite. »</div>
+          <div style="font-size:24px;color:var(--texte2);margin-top:6px;font-style:italic">« Je veux voir la suite. »</div>
           <div class="etiq" style="margin:24px 0 6px">Recruteur</div>
           ${S.recruteur==='dispo'?`<div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:24px;color:var(--vert);font-weight:700">Disponible</span><button style="color:var(--jaune);font-size:24px;font-weight:600">Ouvrir ›</button></div>`
             :`<div style="font-size:24px">En voyage à Turin</div><div class="sous">Retour le 3 février</div>`}
@@ -202,7 +202,7 @@ function rendre(){
   z.classList.toggle('fiche-ouverte',!!S.fiche);
 }
 function aller(ecran){
-  if(!['accueil','effectif'].includes(ecran)){toast('Écran hors de cette maquette : seuls l’Accueil et la fiche (Effectif) sont travaillés.');return;}
+  if(!['accueil','effectif'].includes(ecran)){toast('Écran hors de cette maquette : seuls l’Accueil et la fiche (Effectif) sont travaillés.');return;}
   if(S.fiche)fermerFiche(false);
   if(ecran!==S.ecran){S.hist.push(S.ecran);S.futur=[];}
   S.ecran=ecran;rendre();
@@ -220,8 +220,8 @@ function continuer(){
     const p=$('#preventes');if(p){const t0=performance.now();const f=t=>{const k=Math.min(1,(t-t0)/380);p.textContent=nb(de+(S.preventes-de)*k);if(k<1)requestAnimationFrame(f);};requestAnimationFrame(f);}
     const jp=$('#jPrev');if(jp)jp.style.width=S.preventes/40+'%';
     if(n<2)setTimeout(tic,650);else{S._enCours=false;
-      MESSAGES.unshift({id:Date.now(),lu:false,nouveau:true,t:'<span class="nom" data-fiche="rizzo">Paolo Rizzo</span> reprend la course',de:`Le médecin · ${dLong(S.date).toLowerCase()} · retour toujours prévu le 2 février`,tag:'Médecin'});
+      MESSAGES.unshift({id:Date.now(),lu:false,nouveau:true,t:'<span class="nom" data-fiche="rizzo">Paolo Rizzo</span> reprend la course',de:`Médecin · ${dLong(S.date).toLowerCase()} · retour toujours prévu le 2 février`,tag:'Médecin'});
       if(S.ecran==='accueil'){$('#corps').innerHTML=accueilHtml();}
-      toast(`Le temps s’arrête : nouveau message, ${dLong(S.date).toLowerCase()}.`);}
+      toast(`Nouveau message, ${dLong(S.date).toLowerCase()}.`);}
   };tic();
 }

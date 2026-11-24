@@ -120,13 +120,13 @@ function pzProno(m,A,B){
   if(m==='lf'){const s=PZ_SONDAGE[pzCle(A.id,B.id)];if(!s)return null;const W=parId(s.pour);return {W,txt:`${s.p} % des ${nb(s.votes)} votes`,p:s.p};}
   if(m==='ch'){
     const W=afRangN(A)<=afRangN(B)?A:B,L=W===A?B:A;
-    const txt=pzCle(A.id,B.id)==='mezouar|nana'?'« Nana a gagné ses trois combats pour la ceinture depuis août 2025. Il la garde. »'
-      :`« ${W.nom} est ${pzRangTxt(W)}, ${L.nom} ${pzRangTxt(L)}. ${W.nom} reste sur ${pzSerieTxt(W)}. »`;
+    const txt=pzCle(A.id,B.id)==='mezouar|nana'?'« Nana a gagné ses trois combats pour la ceinture depuis août 2025. Il la garde. »'
+      :`« ${W.nom} est ${pzRangTxt(W)}, ${L.nom} ${pzRangTxt(L)}. ${W.nom} reste sur ${pzSerieTxt(W)}. »`;
     return {W,txt};
   }
   const s=c=>{const x=stats(c);return (x.fpm-x.enc)+.6*(x.am*x.amR/100)+.5*x.sub;};
   const W=s(A)>=s(B)?A:B,x=stats(W),fin=pzBilanFins(W).v,lim=(fin.ko+fin.sou+fin.med)/Math.max(1,W.v)>=.55;
-  return {W,meth:lim?'avant la limite':'aux points',txt:`« ${W.nom} : ${virg(x.fpm)} frappes significatives par minute, ${virg(x.enc)} encaissées. »`};
+  return {W,meth:lim?'avant la limite':'aux points',txt:`« ${W.nom} : ${virg(x.fpm)} frappes significatives par minute, ${virg(x.enc)} encaissées. »`};
 }
 /** Ce qu'un média a écrit d'eux depuis décembre (articles de la Presse, même source que le Fil). */
 function pzArticle(m,A,B){
@@ -138,7 +138,7 @@ function pzArticle(m,A,B){
    Le tunnel du jeu est centré sur le VS (centre de l'image mesuré : 1 234 × 535 px sur 1 920 × 1 080). */
 function pzHero(A,B){
   const k=pzPlaceDe(A.id,B.id),f={a:A.id,b:B.id},t=afTitre(f),r=k?afRounds(k,f):(t?5:3);
-  const cote=(c,s)=>`<div class="pz-hc ${s}"><div class="pz-hc1">${s==='a'?pzRang(c):''}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>${s==='b'?pzRang(c):''}</div>
+  const cote=(c,s)=>`<div class="pz-hc ${s}"><div class="pz-hc1">${s==='a'?pzRang(c):''}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>${s==='b'?pzRang(c):''}</div>
     <div class="T pz-hc-n" style="${afNomStyle(c.nom,afTaille(c.nom,124,560))}">${pzN(c)}</div>
     <div class="pz-hc3">${s==='a'?`<span class="T">${bilan(c)}</span>${serie(c.serie)}`:`${serie(c.serie)}<span class="T">${bilan(c)}</span>`}</div>
     <div class="pz-hc4">${(S.pz.vue==='face'?[`n° ${c.mondial} mondial`,`${c.taille}`,`allonge ${c.allonge}`]:[`n° ${c.mondial} mondial`,`${c.age} ans`,c.art||c.style]).map(x=>`<span class="oct">${esc(x)}</span>`).join('')}</div></div>`;
@@ -168,16 +168,16 @@ function pzTitre(A,B){
 }
 function pzHistoire(A,B){
   const deja=pzDeja(A,B),ev=[];
-  for(const f of deja){const w=f.res==='v'?A:B,l=w===A?B:A;ev.push({d:f.date,t:`${pzN(w)} bat ${pzN(l)} : ${esc(pzFin(f))}, ${esc(f.soiree)}.`});}
-  for(const x of PR_DEFIS)if(pzCle(x.de,x.vers)===pzCle(A.id,B.id)){const a=prArt(x.art);ev.push({d:a.d,t:`${pzN(parId(x.de))} réclame ${pzN(parId(x.vers))} dans ${esc(PR_MEDIAS[a.m].nom)} : <button class="pz-lien" data-prouvre="${a.id}">${esc(x.dit)}</button>`});}
+  for(const f of deja){const w=f.res==='v'?A:B,l=w===A?B:A;ev.push({d:f.date,t:`${pzN(w)} bat ${pzN(l)} : ${esc(pzFin(f))}, ${esc(f.soiree)}.`});}
+  for(const x of PR_DEFIS)if(pzCle(x.de,x.vers)===pzCle(A.id,B.id)){const a=prArt(x.art);ev.push({d:a.d,t:`${pzN(parId(x.de))} réclame ${pzN(parId(x.vers))} dans ${esc(PR_MEDIAS[a.m].nom)} : <button class="pz-lien" data-prouvre="${a.id}">${esc(x.dit)}</button>`});}
   const cm=pzCommuns(A,B)[0];
   if(cm){const r=(c,f)=>`${pzN(c)} ${f.res==='v'?'l’a battu':'a perdu'} (${esc(pzFin(f).replace(/, \d.*$/,''))}, ${pzMoisC(f.date)})`;
-    ev.push({d:new Date(Math.max(cm.fa.date,cm.fb.date)),t:`Adversaire commun, ${lien(parNom(cm.adv,A.cat))} : ${r(A,cm.fa)} ; ${r(B,cm.fb)}.`});}
+    ev.push({d:new Date(Math.max(cm.fa.date,cm.fb.date)),t:`Adversaire commun, ${lien(parNom(cm.adv,A.cat))} : ${r(A,cm.fa)} ; ${r(B,cm.fb)}.`});}
   const vus=new Set();
   for(const c of [A,B]){const a=PR_ART.filter(x=>new RegExp(c.nom).test(x.t)&&!PR_DEFIS.some(d=>d.art===x.id&&pzCle(d.de,d.vers)===pzCle(A.id,B.id))).sort((x,y)=>y.d-x.d)[0];
-    if(a&&!vus.has(a.id)){vus.add(a.id);ev.push({d:a.d,t:`${esc(PR_MEDIAS[a.m].nom)} : <button class="pz-lien" data-prouvre="${a.id}">${prT(a.t)}</button>`,p:1});}}
+    if(a&&!vus.has(a.id)){vus.add(a.id);ev.push({d:a.d,t:`${esc(PR_MEDIAS[a.m].nom)} : <button class="pz-lien" data-prouvre="${a.id}">${prT(a.t)}</button>`,p:1});}}
   for(const c of [A,B]){const f=historique(c)[0];if(f.adv===pzNomC(A)||f.adv===pzNomC(B)||(cm&&f.adv===cm.adv)||!pzFiable(c,f))continue;
-    ev.push({d:f.date,t:`${pzN(c)} ${f.res==='v'?'bat':'perd contre'} ${lien(parNom(f.adv,c.cat))} : ${esc(pzFin(f))}.`,p:2});}
+    ev.push({d:f.date,t:`${pzN(c)} ${f.res==='v'?'bat':'perd contre'} ${lien(parNom(f.adv,c.cat))} : ${esc(pzFin(f))}.`,p:2});}
   if(!ev.length)ev.push({d:S.date,t:'Premier combat entre eux, et aucun adversaire en commun.'});
   return ev.sort((x,y)=>(x.p||0)-(y.p||0)).slice(0,4).sort((x,y)=>y.d-x.d);
 }
@@ -190,7 +190,7 @@ function pzEnjeu(A,B){
       :['Bourses',`${nb(afBourse(A)+afBourse(B))} €`,'à eux deux']];
   const h=AF_HIST[pzCle(A.id,B.id)];
   return pan(`<div class="pz-ej-t T">${esc(pzTitre(A,B))}</div>
-    ${h?`<div class="pz-note">« ${esc(h)} » ${pzRelire}</div>`:''}
+    ${h?`<div class="pz-note">« ${esc(h)} » ${pzRelire}</div>`:''}
     <div class="etiq pz-h-t">Histoire</div>
     <div class="pz-tl">${pzHistoire(A,B).map((x,i)=>`<div class="pz-tli" style="--i:${i}"><span class="pz-tlm octr"></span><span class="pz-tld">${dMois(x.d)}</span><span class="pz-tlt">${x.t}</span></div>`).join('')}</div>
     <div class="etiq pz-h-t">Enjeux</div><div class="pz-rai">${afRaisons(pzPlaceDe(A.id,B.id)||S.pz.place,{a:A.id,b:B.id}).slice(0,3).map(afRl).join('')}</div>
@@ -223,8 +223,8 @@ function pzPresse(A,B){
         :'<div class="pz-mt sous">Rien écrit sur eux depuis décembre.</div>';}
     const p=k&&pzProno(m,A,B);
     const droite=k?(p?`<span class="pz-mp"><span class="etiq">Pronostic</span><span class="T">${pzN(p.W)}</span></span>`:''):'';
-    return `<div class="pz-m" style="--m:${PZ_MED_COUL[m]}"><div class="pz-mh"><span class="T">${esc(M.nom)}</span>${droite}</div><div class="pz-mq">${esc(M.quoi.split(',')[0].split(' :')[0])} · ${nb(M.n)} ${esc(M.u)}</div>${corps}</div>`;};
-  return pan(`<div class="pz-pr-h"><span class="etiq">${k?'La presse':'La presse · pas encore annoncé'}</span>${pzRelire}</div>${['ch','tn','lf'].map(med).join('')}`,'','pz-p3');
+    return `<div class="pz-m" style="--m:${PZ_MED_COUL[m]}"><div class="pz-mh"><span class="T">${esc(M.nom)}</span>${droite}</div><div class="pz-mq">${esc(M.quoi.split(',')[0].split(' :')[0])} · ${nb(M.n)} ${esc(M.u)}</div>${corps}</div>`;};
+  return pan(`<div class="pz-pr-h"><span class="etiq">${k?'Presse':'Presse · pas encore annoncé'}</span>${pzRelire}</div>${['ch','tn','lf'].map(med).join('')}`,'','pz-p3');
 }
 function pzPres(A,B){
   return `<div class="pz pz-combat pz-pres ${S.pz.anim?'anim':''}">${pzOnglets(A,B)}${pzHero(A,B)}<div class="pz-cols">${pzEnjeu(A,B)}${pzGagne(A,B)}${pzPresse(A,B)}</div></div>`;
@@ -241,7 +241,7 @@ function pzChiffres(A,B){
     const v=(x,b)=>`<span class="pz-sv ${b?'w':''} ${vert&&b?'vert':''}">${!vert&&b?pt:''}<b>${virg(x)}${u?' '+u:''}</b></span>`;
     const barre=(x,s)=>`<span class="pz-sb ${s}"><i style="width:${w(x)}%;animation-delay:${.15+i*.05}s"></i><u style="${s==='g'?'right':'left'}:${w(moy)}%"></u></span>`;
     return `<div class="pz-st" style="--i:${i}">${v(va,m>0)}${barre(va,'g')}<span class="pz-sl">${l}</span>${barre(vb,'d')}${v(vb,m<0)}</div>`;};
-  return pan(titre('Les chiffres',`<span class="pz-lgd">${vert?'<b style="color:var(--vert)">vert</b>':pt} le meilleur<i class="pz-moy"></i>moyenne de la catégorie</span>`)+
+  return pan(titre('Chiffres',`<span class="pz-lgd">${vert?'<b style="color:var(--vert)">vert</b>':pt} meilleur<i class="pz-moy"></i>moyenne de la catégorie</span>`)+
     `<div class="pz-sts">${STATS.map(ligne).join('')}</div>`,'','pz-f1');
 }
 function pzDerniers(A,B){
@@ -332,11 +332,11 @@ function pzVoirCombat(v,a,b){
 /** Placer : la paire va sur la carte, à la place choisie ; la Carte s'ouvre sur elle. */
 function pzPlacer(a,b){
   const k=S.pz.place,f=afFight(k),A=parId(a),B=parId(b);
-  if(!pzPeutPlacer(A,B)){toast(`Impossible : ${esc(afRole(k).toLowerCase())} n’accepte pas ce combat.`);return;}
+  if(!pzPeutPlacer(A,B)){toast(`Impossible : ${esc(afRole(k).toLowerCase())} n’accepte pas ce combat.`);return;}
   if(f.a===a||f.a===b){f.b=f.a===a?b:a;}else if(f.b===a||f.b===b){f.a=f.b===a?b:a;}else{f.a=a;f.b=b;}
   S.af.sel=k;S.af.tab='m';S.af.vue='detail';S.af.onglet='enjeu';
   aller('carte');
-  toast(`${esc(A.nom)} contre ${esc(B.nom)} : placé en ${esc(afRole(k).toLowerCase())}.`);
+  toast(`${esc(A.nom)} contre ${esc(B.nom)} : placé en ${esc(afRole(k).toLowerCase())}.`);
 }
 
 /* ---- Clics ---- */

@@ -276,12 +276,12 @@ function ceCarte(cat,i){
   const ch=ceEnCours(cat),l=ceLignee(cat);if(!ch)return '';
   const c=ch.c,sig=ceSigne(cat),dt=ceDernierTitre(cat),n1=ceN1(cat)[0];
   const def=sig?`<b>${ceJour(sig.date).replace(/ \d{4}$/,'')} · contre ${lien(sig.adv)}</b><span class="sous">Fight Night ${sig.n}, ${esc(sig.ville)}</span>`
-    :`<b class="ce-aprog">Rien de prévu</b><span class="sous">n° 1 : ${n1?lien(n1):'personne'}</span>`;
+    :`<b class="ce-aprog">Rien de prévu</b><span class="sous">n° 1 : ${n1?lien(n1):'personne'}</span>`;
   const der=dt?`<b>${ceQuand(dt.d)}</b><span class="sous">${ceIlYa(dt.d)}</span>`:'';
   return `<div class="ce-carte oct apparait" data-cecat="${esc(cat)}" style="animation-delay:${i*55}ms;--d:${i*55}ms"><div class="ce-ci oct">
     <div class="ce-haut"><i class="ce-img"></i>
       <div class="ce-cat"><span class="T">${esc(ceCourt(cat))}</span><span class="ce-kg">${ceKg(cat)} kg</span></div>
-      <div class="ce-champ">${CE_CB}<div class="ce-noms"><span class="ce-pre">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="ce-nom nom ${c.nom.length>8?'long':''}" data-fiche="${c.id}">${esc(c.nom)}</span><span class="ce-lg"><b>${bilan(c)}</b> · n° ${c.mondial} mondial</span><span class="ce-lg">${ch.n}<sup>e</sup> champion${/ F$/.test(cat)?'ne':''} de la lignée</span></div></div>
+      <div class="ce-champ">${CE_CB}<div class="ce-noms"><span class="ce-pre">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="ce-nom nom ${c.nom.length>8?'long':''}" data-fiche="${c.id}">${esc(c.nom)}</span><span class="ce-lg"><b>${bilan(c)}</b> · n° ${c.mondial} mondial</span><span class="ce-lg">${ch.n}<sup>e</sup> champion${/ F$/.test(cat)?'ne':''} de la lignée</span></div></div>
       </div>
     <div class="ce-bas">
       <div class="ce-l"><span class="etiq">Prochain défi</span>${def}</div>
@@ -312,7 +312,7 @@ function ceFrise(cat){
   const vides=[];l.filter(x=>!x.int&&x.a).forEach(x=>{const s=l.find(y=>!y.int&&y!==x&&ceDate(y.de)>=ceDate(x.a));
     if(s&&ceDate(s.de)>ceDate(x.a)){const g=X(ceDate(x.a)),d=X(ceDate(s.de));traits+=`<i class="ce-vac" style="left:${g}px;width:${Math.max(4,d-g-3)}px"></i>`;vides.push(1);}});
   /* Le prochain défi signé : un octogone doré sur la frise, à sa date. */
-  if(sig)traits+=`<i class="ce-futur octr pulse" style="left:${X(ceDate(sig.date))-9}px" title="Prochain défi : ${ceJour(sig.date)}"></i>`;
+  if(sig)traits+=`<i class="ce-futur octr pulse" style="left:${X(ceDate(sig.date))-9}px" title="Prochain défi : ${ceJour(sig.date)}"></i>`;
   /* Les noms : du plus récent au plus ancien, le règne en cours au-dessus ; placés après mesure (ceCaler), en alternance, sans se chevaucher.
      Quatre lignes : qui, quand, défenses (et intérim), comment le règne finit. Le règne en cours ne répète pas ses défenses (Classement). */
   const regnes=l.filter(x=>!x.int);let noms='';
@@ -334,13 +334,13 @@ function ceFrise(cat){
   const leg=[['tr','Un règne'],['cur',`Champion${fe} en titre`]].concat(l.some(x=>x.int)?[['int',`Champion${fe} intérimaire`]]:[]).concat(vides.length?[['vac','Ceinture vacante']]:[]).concat(sig?[['fut','Prochain défi']]:[]);
   const legende=`<span class="ce-leg">${leg.map(([k,t])=>`<span><i class="ce-lg-${k} ${k==='fut'?'octr':''}"></i>${t}</span>`).join('')}</span>`;
   const nInt=l.filter(x=>x.int).length;
-  return pan(`<div class="pt"><h2>La lignée</h2><span class="ment ce-ment"><span data-cecompte="${regnes.length}">${regnes.length}</span> champion${/ F$/.test(cat)?'ne':''}s depuis ${ceAn(l[0].de)}${nInt?` · ${nInt} intérim`:''}</span>${legende}</div>
+  return pan(`<div class="pt"><h2>Lignée</h2><span class="ment ce-ment"><span data-cecompte="${regnes.length}">${regnes.length}</span> champion${/ F$/.test(cat)?'ne':''}s depuis ${ceAn(l[0].de)}${nInt?` · ${nInt} intérim`:''}</span>${legende}</div>
     <div class="ce-frise">${ans}${traits}${noms}</div>`,'','ce-lig');
 }
 
 /* ---- Le prochain défi : le combat signé, ou le n° 1 qu'il reste à programmer ---- */
 function ceCote(c,s,rangTxt,etat){
-  return `<div class="ce-cote ${s}"><div class="ce-c1">${ceRangB(c)}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span></div>
+  return `<div class="ce-cote ${s}"><div class="ce-c1">${ceRangB(c)}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span></div>
     <div class="ce-c2"><span class="nom ${c.nom.length>8?'long':''}" data-fiche="${c.id}">${esc(c.nom)}</span></div>
     <div class="ce-c3"><span class="T">${bilan(c)}</span><span>${rangTxt}</span></div>
     ${etat?`<div class="ce-c4 ${etat.col?'ce-'+etat.col:''}">${etat.ico?ico(etat.ico,18):''}${etat.t}</div>`:''}</div>`;
@@ -357,19 +357,19 @@ function ceDefi(cat){
       ${ceCote(adv,'b',`n° ${adv.mondial} mondial`,sig?null:ceEtatCourt(adv))}</div>`;
   /* À droite : leur histoire (ou le dernier combat pour le titre), puis qui attend derrière le n° 1. */
   let fait1;
-  if(sig&&c.id==='nana'&&adv.id==='mezouar')fait1=['Leur dernier combat',`<b>${lien(adv)} gagne par soumission</b><span class="sous">étranglement arrière, 2e round · 4 août 2025</span>`];
-  else if(sig)fait1=['Leur dernier combat','<b>Jamais affrontés</b>'];
+  if(sig&&c.id==='nana'&&adv.id==='mezouar')fait1=['Dernier affrontement',`<b>${lien(adv)} gagne par soumission</b><span class="sous">étranglement arrière, 2e round · 4 août 2025</span>`];
+  else if(sig)fait1=['Dernier affrontement','<b>Jamais affrontés</b>'];
   else fait1=['Dernier combat pour le titre',`<b>${ceQuand(dt.d)}</b><span class="sous">${dt.prise?(dt.adv?`prend la ceinture à ${lien(parNom(dt.adv,cat))}`:'prend la ceinture vacante'):'défend sa ceinture'}</span><span class="sous">${ceIlYa(dt.d)}</span>`];
   const derriere=l1.filter(x=>x!==adv&&x.id!==c.id).slice(0,2);
   const ligneD=x=>{const e=ceEtatCourt(x);return `<div class="ce-dr"><span class="ce-rg octr">${x.rang}</span><div class="ce-drt"><span class="ce-drn">${lien(x)}</span><span class="ce-dre ${e.col?'ce-'+e.col:''}">${e.ico?ico(e.ico,16):''}${e.t}</span></div></div>`;};
   const bouton=sig?`<button class="bouton jaune cj ce-act" data-go="carte">Ouvrir la carte ›</button>`
     :`<button class="bouton jaune cj ce-act" data-ceprop="${esc(cat)}">Proposer le combat ›</button>`;
   const fait=([t,v])=>`<div class="ce-f"><span class="etiq">${t}</span>${v}</div>`;
-  const qui=adv.cat&&/ F$/.test(adv.cat)?'elle':'lui';
-  return pan(`<div class="pt"><h2>Le prochain défi</h2><span class="ment">${sig?`dans <span data-cecompte="${Math.round((ceDate(sig.date)-S.date)/864e5)}">${Math.round((ceDate(sig.date)-S.date)/864e5)}</span> jours`:'à programmer'}</span></div>
+
+  return pan(`<div class="pt"><h2>Prochain défi</h2><span class="ment">${sig?`dans <span data-cecompte="${Math.round((ceDate(sig.date)-S.date)/864e5)}">${Math.round((ceDate(sig.date)-S.date)/864e5)}</span> jours`:'à programmer'}</span></div>
     <div class="ce-defi">${bande}
       <div class="ce-droite">
-        <div class="ce-faits">${fait(fait1)}${fait([`Derrière ${qui}`,derriere.map(ligneD).join('')])}</div>
+        <div class="ce-faits">${fait(fait1)}${fait(['Prétendants',derriere.map(ligneD).join('')])}</div>
         ${bouton}</div></div>`,'','ce-pd');
 }
 function ceDetail(cat){return `<div class="ce-det">${ceFrise(cat)}${ceDefi(cat)}</div>`;}
@@ -422,7 +422,7 @@ function ceFicheHtml(c){
   if(c.role==='R'&&!R.some(y=>y.fin&&y.fin[0]==='retraite'))jal.push([+c.det,`Arrête le combat`]);
   if(c.role==='P'&&!R.some(y=>y.fin&&y.fin[0]==='part'))jal.push([Math.max(finAn,c.arr+1),`Part chez ${c.det}`]);
   return `<div class="banniere" style="height:260px"><div class="ban-contenu"><i class="fb-img cl-staff-img"></i>
-      <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
+      <div class="fb-nom ${accentHaut(c.nom)?'accent':''}"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
       <div class="fb-pal"><div style="display:flex;flex-direction:column;gap:14px"><span style="font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--texte2)">AUJOURD’HUI</span>
         <b class="T" style="font-size:${role.length>12?52:72}px;line-height:.8">${esc(role)}</b><span class="sous">Ancien${e} champion${f?'ne':''} de Split · ${bil}</span></div></div></div></div>
     <div class="cl-staff ce-anc">
@@ -507,7 +507,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-clcat]'))){e.stopImmediatePropagation();const v=el.dataset.clcat;if(v!==F.cats[F.sexe])cePas(()=>{F.cats[F.sexe]=v;});return;}
   if((el=t.closest('[data-cecat]'))){e.stopImmediatePropagation();const v=el.dataset.cecat;cePas(()=>{F.cats[F.sexe]=v;});return;}
   if((el=t.closest('[data-ceprop]'))){e.stopImmediatePropagation();const cat=el.dataset.ceprop,ch=ceEnCours(cat).c,n1=ceN1(cat)[0];
-    toast(`${esc(ch.nom)} – ${esc(n1.nom)} pour la ceinture des ${esc(cePl(cat))} : à placer sur la Fight Night 64 (3 avr., Bordeaux). Sa carte n’est pas dans cette maquette.`);return;}
+    toast(`${esc(ch.nom)} – ${esc(n1.nom)} pour la ceinture des ${esc(cePl(cat))} : à placer sur la Fight Night 64 (3 avr., Bordeaux). Sa carte n’est pas dans cette maquette.`);return;}
 },true);
 
 /* ---- Lancement : ?ecran=ceintures (ou ?ecran=classements&clvue=ceintures), options sexe=H|F, cecat=<catégorie|toutes>, apres=1 (la 63 jouée), fiche=<id> ---- */
