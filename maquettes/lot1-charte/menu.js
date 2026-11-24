@@ -13,14 +13,14 @@ const MN_JOUR=864e5;
 /* Les huit organisations du jeu (mgmt-organisations-data.js, textes de mgmt-nouvelle.js). La caisse
    de départ n'est pas reprise : 50 000 € dans le jeu, 952 200 € à l'Arrivée validée (écart signalé). */
 const MN_ORGS=[
-  {id:'split',nom:'Split',lieu:'Lyon · depuis 2004',t:'Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.',p:['Une caisse saine'],m:['Encore peu connue'],eff:350,age:'27,9',pop:'moyenne',salle:9000,bou:'normales'},
-  {id:'garden-of-blood',nom:'Garden of Blood',lieu:'New York · depuis 1999',t:'La plus grande scène du monde. On y vient pour l’argent et pour la lumière.',p:['Très populaire','De grandes salles'],m:['Des bourses lourdes'],eff:360,age:'27,9',pop:'très haute',salle:12600,bou:'lourdes'},
-  {id:'mma-korner',nom:'MMA Korner',lieu:'Rotterdam · depuis 2011',t:'Une petite maison sérieuse, où les champions apprennent avant de partir.',p:['Des bourses modestes'],m:['Une caisse modeste','Un public à gagner'],eff:310,age:'27,9',pop:'basse',salle:7200,bou:'modestes'},
-  {id:'ultimate-rim',nom:'Ultimate Rim',lieu:'Melbourne · depuis 2020',t:'La jeune organisation de l’autre bout du monde, qui mise tout sur ses espoirs.',p:['De jeunes combattants'],m:['Encore peu connue','De petites salles'],eff:250,age:'24,9',pop:'moyenne',salle:6300,bou:'normales'},
-  {id:'fighting-pacific-championship',nom:'Fighting Pacific Championship',lieu:'Tokyo · depuis 1997',t:'La plus ancienne. Un public fidèle, et des champions qui règnent longtemps.',p:['Une caisse confortable','Un public déjà acquis'],m:['Un effectif vieillissant'],eff:390,age:'30,9',pop:'haute',salle:9000,bou:'normales'},
-  {id:'organisation-6',nom:'Knuckle Gate',lieu:'Manchester · depuis 2012',t:'La maison des meilleures combattantes du monde.',p:['Un public déjà acquis','Les meilleures combattantes'],m:['Une caisse modeste','Peu d’hommes classés'],eff:300,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
-  {id:'organisation-7',nom:'Pure Impact',lieu:'Dubaï · depuis 2018',t:'Beaucoup d’argent, des noms célèbres, et des salles encore à remplir.',p:['Beaucoup d’argent','De grandes salles'],m:['Un public à gagner'],eff:360,age:'27,9',pop:'basse',salle:10800,bou:'normales'},
-  {id:'organisation-8',nom:'Undisputed Cage',lieu:'São Paulo · depuis 2005',t:'Les poids lourds les plus durs du monde, et des catégories qui se cherchent.',p:['Une caisse saine','Un public déjà acquis'],m:['Des catégories dégarnies'],eff:320,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
+  {id:'split',nom:'Split',lieu:'Lyon · depuis 2004',t:'Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.',p:['Caisse saine'],m:['Peu connue'],eff:350,age:'27,9',pop:'moyenne',salle:9000,bou:'normales'},
+  {id:'garden-of-blood',nom:'Garden of Blood',lieu:'New York · depuis 1999',t:'La plus grande scène du monde. On y vient pour l’argent et pour la lumière.',p:['Très populaire','Grandes salles'],m:['Bourses lourdes'],eff:360,age:'27,9',pop:'très haute',salle:12600,bou:'lourdes'},
+  {id:'mma-korner',nom:'MMA Korner',lieu:'Rotterdam · depuis 2011',t:'Une petite maison sérieuse, où les champions apprennent avant de partir.',p:['Bourses modestes'],m:['Caisse modeste','Public à gagner'],eff:310,age:'27,9',pop:'basse',salle:7200,bou:'modestes'},
+  {id:'ultimate-rim',nom:'Ultimate Rim',lieu:'Melbourne · depuis 2020',t:'La jeune organisation de l’autre bout du monde, qui mise tout sur ses espoirs.',p:['Jeunes combattants'],m:['Peu connue','Petites salles'],eff:250,age:'24,9',pop:'moyenne',salle:6300,bou:'normales'},
+  {id:'fighting-pacific-championship',nom:'Fighting Pacific Championship',lieu:'Tokyo · depuis 1997',t:'La plus ancienne. Un public fidèle, et des champions qui règnent longtemps.',p:['Caisse confortable','Public acquis'],m:['Effectif vieillissant'],eff:390,age:'30,9',pop:'haute',salle:9000,bou:'normales'},
+  {id:'organisation-6',nom:'Knuckle Gate',lieu:'Manchester · depuis 2012',t:'La maison des meilleures combattantes du monde.',p:['Public acquis','Meilleures combattantes'],m:['Caisse modeste','Peu d’hommes classés'],eff:300,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
+  {id:'organisation-7',nom:'Pure Impact',lieu:'Dubaï · depuis 2018',t:'Beaucoup d’argent, des noms célèbres, et des salles encore à remplir.',p:['Beaucoup d’argent','Grandes salles'],m:['Public à gagner'],eff:360,age:'27,9',pop:'basse',salle:10800,bou:'normales'},
+  {id:'organisation-8',nom:'Undisputed Cage',lieu:'São Paulo · depuis 2005',t:'Les poids lourds les plus durs du monde, et des catégories qui se cherchent.',p:['Caisse saine','Public acquis'],m:['Catégories dégarnies'],eff:320,age:'27,9',pop:'haute',salle:9000,bou:'normales'},
 ];
 const mnOrg=id=>MN_ORGS.find(o=>o.id===id)||MN_ORGS[0];
 
@@ -198,7 +198,7 @@ function mnCarte(n,grand,jaune){
   const der=n===mnDernier()&&!F.choix&&!x.abimee,i=mnInfos(x);
   const tag=x.abimee?`<span class="mn-abi">${ico('medical',22)} Sauvegarde abîmée</span>`:der?'<span class="mn-der">Dernière partie</span>':x.invente?'<span class="relire">à relire</span>':'';
   if(x.abimee&&!x.copie)return cadre(band(tag,true)+`<div class="mn-cm"><p>La sauvegarde ne se lit plus et il n’y a pas de copie de secours.<span class="relire">à relire</span></p></div><div class="mn-cp">${F.choix?mnBt('Remplacer cette partie',`remplacer|${n}`,false):`<span class="mn-pt">Effacer pour libérer l’emplacement</span>${corb}`}</div>`);
-  const faits=mnFait(x.abimee?'Copie du':'Date de jeu',mnCourt(i.date))+mnFait('Prochaine soirée',`Fight Night ${i.soiree}`)+mnFait('Place',`${mnOrd(i.place)} des huit`)+mnFait('En caisse',`${nb(i.caisse)} €`)
+  const faits=mnFait(x.abimee?'Copie du':'Date de jeu',mnCourt(i.date))+mnFait('Prochaine soirée',`Fight Night ${i.soiree}`)+mnFait('Place',`${i.place}/8`)+mnFait('En caisse',`${nb(i.caisse)} €`)
     +(x.abimee?`<div class="mn-fait large mn-nt"><span>La sauvegarde du ${mnCourt(S.date)} ne se lit plus.<span class="relire">à relire</span></span></div>`:mnFait('Sauvegardée',mnSauve(x.ts),'large'));
   const pied=F.choix?mnBt('Remplacer cette partie',`remplacer|${n}`,false):mnBt(x.abimee?'Reprendre la copie':'Reprendre',`reprendre|${n}`,jaune)+corb;
   return cadre(band(tag,true)+`<div class="mn-fg">${faits}</div><div class="mn-cp">${pied}</div>`);
@@ -223,7 +223,7 @@ function mnBande(k,o){
 function mnHero(o){
   const g=mnOgDe(o),c=ogTeinte(o.nom)[0];
   const t=([k,l,u])=>`<div class="mn-t"><span class="etiq">${l}</span><b class="T" data-v="${g[k]}">${nb(g[k])}</b><small>${u}</small>${mnBande(k,o)}</div>`;
-  const place=`<div class="mn-t place"><span class="etiq">Au classement</span><b class="T">${mnOrd(g.rang)}</b><small>des huit</small><div class="mn-b8" aria-hidden="true">${Array.from({length:8},(_,i)=>`<i class="octr ${i+1===g.rang?'on':''}"></i>`).join('')}</div></div>`;
+  const place=`<div class="mn-t place"><span class="etiq">Place</span><b class="T">${g.rang}/8</b><small></small><div class="mn-b8" aria-hidden="true">${Array.from({length:8},(_,i)=>`<i class="octr ${i+1===g.rang?'on':''}"></i>`).join('')}</div></div>`;
   const f=(l,v)=>`<div><span class="etiq">${l}</span><b>${v}</b></div>`;
   return `<div class="mn-hh" style="--t:${c}"><div class="mn-hl"><span class="mn-lieu">${esc(o.lieu)}</span><h2 class="T mn-hn" style="font-size:${mfCorps(o.nom,1290,186,80)}px">${esc(o.nom)}</h2><p class="mn-hp">${esc(o.t)}</p>
       <div class="mn-chips">${o.p.map(x=>`<span class="mn-ch"><b class="pl">+</b>${esc(x)}</span>`).join('')}${o.m.map(x=>`<span class="mn-ch"><b class="mo">−</b>${esc(x)}</span>`).join('')}</div></div>

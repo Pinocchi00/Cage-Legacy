@@ -31,10 +31,10 @@ function mcPaliers(){
   const f=l=>l.map(t=>({t,v:0,but:1}));
   return [
     {n:1,nom:'Tes débuts',d:p1},
-    {n:2,nom:'Installer Split',d:f(['Cinq soirées','Trois salles pleines','Une ceinture défendue','Signer un combattant du top 15','Dix finitions','Trois primes de la soirée','300 000 € de recette en une soirée','Un espoir dans le top 15','Gagner une place chez les huit'])},
-    {n:3,nom:'Les grandes soirées',d:f(['10 000 spectateurs','Remplir une grande salle (15 000 places ou plus)','Une soirée à l’étranger','1 M€ de recette en une soirée','Deux titres dans la même soirée','Le diffuseur européen','Un combattant dans le top 5','Finir la saison 4e ou mieux','Le combat de l’année'])},
-    {n:4,nom:'Les ceintures',d:f(['Un champion n° 1 mondial','Trois champions dans le top 5','Cinq défenses pour un champion','Couronner un combattant que tu as signé','Un règne de deux ans','Une revanche pour le titre','Un champion venu d’ailleurs','Cinq ceintures défendues en une saison','Deux catégories avec un top 3'])},
-    {n:5,nom:'Le sommet',d:f(['Finir une saison 1re des huit','19 000 spectateurs','Le diffuseur mondial','Dix combattants dans le top 5','Trois soirées à 15 000','3 M€ de recette en une soirée','Cent soirées pour Split','Dix saisons au poste','Cinq saisons sans avertissement'])},
+    {n:2,nom:'Installer Split',d:f(['5 soirées','3 salles pleines','Une ceinture défendue','Signer un combattant du top 15','10 finitions','3 primes de la soirée','300 000 € de recette en une soirée','Un espoir dans le top 15','Gagner une place au classement'])},
+    {n:3,nom:'Les grandes soirées',d:f(['10 000 spectateurs','Remplir une grande salle (15 000 places ou plus)','Une soirée à l’étranger','1 M€ de recette en une soirée','2 titres dans la même soirée','Le diffuseur européen','Un combattant dans le top 5','4/8 ou mieux en fin de saison','Le combat de l’année'])},
+    {n:4,nom:'Les ceintures',d:f(['Un champion n° 1 mondial','3 champions dans le top 5','5 défenses pour un champion','Couronner un combattant que tu as signé','Un règne de 2 ans','Une revanche pour le titre','Un champion venu d’ailleurs','5 ceintures défendues en une saison','2 catégories avec un top 3'])},
+    {n:5,nom:'Le sommet',d:f(['1/8 en fin de saison','19 000 spectateurs','Le diffuseur mondial','10 combattants dans le top 5','3 soirées à 15 000','3 M€ de recette en une soirée','100 soirées pour Split','10 saisons au poste','5 saisons sans avertissement'])},
   ];
 }
 const mcFini=p=>p.d.filter(x=>x.v>=x.but).length;
@@ -45,11 +45,11 @@ function mcBandeau(){
   const st=(lab,val,sous,plus='')=>`<div class="stat-b og-st"><span class="etiq">${lab}</span><span class="T og-stv">${val}</span>${plus}<span class="sous">${sous}</span></div>`;
   const rep=`<span class="mc-rep">${['En France','En Europe','Reconnu','Respecté','Une référence'].map(t=>`<i class="octr" title="${t}"></i>`).join('')}</span>`;
   return `<div class="bandeau og-band mc-band ${S.og.anim?'apparait':''}"><i class="bandeau-img"></i>
-    <div class="og-bt">${ogEmb('Split',86)}<div class="og-btt"><span class="etiq">Ton poste</span><span class="T mc-poste">Matchmaker</span><span class="sous">chez Split depuis le 4 janv. · ${j} jours</span></div></div>
-    ${st('Ton contrat','31 déc. 2027','1 saison · 3 200 € par mois')}
-    ${st('Ta réputation','Pas encore établie','elle se fait soirée après soirée',rep)}
-    ${st('Ta première soirée','16 févr.',`Forum de Lille · dans ${S.jours} jours`)}
-    ${st('Le patron','Il attend de voir','Gérard Vasseur · bilan le 1er juillet')}
+    <div class="og-bt">${ogEmb('Split',86)}<div class="og-btt"><span class="etiq">Poste</span><span class="T mc-poste">Matchmaker</span><span class="sous">chez Split depuis le 4 janv. · ${j} jours</span></div></div>
+    ${st('Contrat','31 déc. 2027','1 saison · 3 200 € par mois')}
+    ${st('Réputation','Pas encore établie','elle se fait soirée après soirée',rep)}
+    ${st('Première soirée','16 févr.',`Forum de Lille · dans ${S.jours} jours`)}
+    ${st('Patron','Il attend de voir','Gérard Vasseur · bilan le 1er juillet')}
   </div>`;
 }
 
@@ -67,8 +67,8 @@ function mcObjectifs(){
   const l=ogClasse(),sp=l.find(x=>x.nom==='Split'),dev=l.filter(x=>x.rang>=4&&x.rang<sp.rang).map(x=>esc(x.court||x.nom));
   const lourd=msMeilleur(c=>!c.ext&&c.cat==='Poids lourd');
   const os=[
-    {type:'rang',lab:'Finir la saison dans les quatre premières',v:sp.rang,but:4,det:dev.length?`Il faut passer ${dev.join(' et ')}.`:''},
-    {type:'mondial',lab:'Un poids lourd de Split dans le top 5 mondial',v:lourd.mondial,but:5,det:`Le mieux classé : ${lien(lourd)}.`},
+    {type:'rang',lab:'Finir dans le top 4',v:sp.rang,but:4,det:dev.length?`Il faut passer ${dev.join(' et ')}.`:''},
+    {type:'mondial',lab:'Un poids lourd dans le top 5 mondial',v:lourd.mondial,but:5,det:`Le mieux classé : ${lien(lourd)}.`},
     {type:'jauge',lab:'Remplir le Forum de Lille',v:S.preventes,but:4000,det:'Places vendues pour le 16 févr.'},
   ];
   return pan(`${titre('Objectifs 2027','jugés le 31 déc.')}
@@ -82,7 +82,7 @@ function mcParcours(){
   const r=(lab,v,s)=>`<div class="mc-av"><span class="etiq">${lab}</span><span class="sous">${s}</span><b class="T"><span data-ogn="${v}">0</span></b></div>`;
   const ev=[
     ['4 janv.','Arrivée chez Split, Leïla t’accueille','messages'],
-    ['5 janv.','Le patron fixe tes objectifs 2027','messages'],
+    ['5 janv.','Gérard Vasseur fixe tes objectifs 2027','messages'],
     ['8 janv.','Le recruteur rentre de Turin : 4 profils','recruteur'],
     ['12 janv.','2 combats placés pour le 16 févr.','carte'],
   ];

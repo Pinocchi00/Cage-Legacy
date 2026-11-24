@@ -91,7 +91,7 @@ function ogBandeau(l){
   const sp=l.find(x=>x.nom==='Split'),dev=l.find(x=>x.rang===sp.rang-1),der=l.find(x=>x.rang===sp.rang+1),v=ogPasser(l);
   const st=(lab,val,sous)=>`<div class="stat-b og-st"><span class="etiq">${lab}</span><span class="T og-stv">${val}</span><span class="sous">${sous}</span></div>`;
   return `<div class="bandeau og-band ${S.og.anim?'apparait':''}"><i class="bandeau-img"></i>
-    <div class="og-bt">${ogEmb('Split',86)}<div class="og-btt"><span class="etiq">Ta place</span><span class="T og-place-g">${ogOrd(sp.rang)}<small> des huit</small></span><span class="sous">${ogMv(sp)} · ${ogOrd(sp.avant)} le 12 décembre</span></div></div>
+    <div class="og-bt">${ogEmb('Split',86)}<div class="og-btt"><span class="etiq">Place</span><span class="T og-place-g">${sp.rang}<small>/8</small></span><span class="sous">${ogMv(sp)} · ${sp.avant}/8 le 12 décembre</span></div></div>
     ${dev?st('Juste devant',`<button class="og-nb" data-ogsel="${esc(dev.nom)}">${esc(dev.court||dev.nom)}</button>`,v?`${ogOrd(dev.rang)} · ${nb(v)} spectateurs par soirée suffisent`:`${ogOrd(dev.rang)}`):''}
     ${der?st('Juste derrière',`<button class="og-nb" data-ogsel="${esc(der.nom)}">${esc(der.court||der.nom)}</button>`,`${ogOrd(der.rang)} · ${nb(sp.pub-der.pub)} spectateurs de moins par soirée`):''}
     ${st('Fin de saison','31 déc. 2027','le rang fixe le diffuseur et les agents libres')}
@@ -122,12 +122,12 @@ function ogPanneau(l){
       <button class="og-fermer" data-ogfermer title="Fermer">${ico('croix',26,2.4)}</button></div>
     <div class="og-pc">
       <div class="og-pg">
-        <div class="og-bouge"><span class="etiq">Ce qui a bougé</span><p>${d?`${ogOrd(x.avant)} le 12 décembre, ${ogOrd(x.rang)} aujourd’hui. `:`${ogOrd(x.rang)} depuis le 12 décembre. `}${esc(x.bouge)}<span class="relire">à relire</span></p></div>
+        <div class="og-bouge"><span class="etiq">Évolution</span><p>${d?`${ogOrd(x.avant)} le 12 décembre, ${ogOrd(x.rang)} aujourd’hui. `:`${ogOrd(x.rang)} depuis le 12 décembre. `}${esc(x.bouge)}<span class="relire">à relire</span></p></div>
         <div class="og-tus">${tuile('ogPublic','Spectateurs',x.pub,'par soirée, en moyenne en 2026',sp.pub)}${tuile('ogSalle','Record',x.rec[0],`spectateurs · ${esc(x.rec[1])}, ${esc(x.rec[2])}`,sp.rec[0])}${tuile('ogEtoile','Top 5 mondial',x.v5,`${ogCb(x.v5)} dans le top 5 de ${x.v5>1?'leur':'sa'} catégorie`,sp.v5)}${tuile('ogDiese','Top 30 mondial',x.c30,`${ogCb(x.c30)} dans le top 30 de ${x.c30>1?'leur':'sa'} catégorie`,sp.c30)}</div>
       </div>
       <div class="og-pd">
         <div class="og-ou"><div><span class="og-mi">${ico('ogEcran',20,2)}</span><span class="etiq">Diffuseur</span><b>${esc(x.diff)}</b></div><div><span class="og-mi">${ico('ogSalle',20,2)}</span><span class="etiq">Salles</span><b>${esc(x.salles)}</b></div></div>
-        <div class="og-bh"><span class="etiq">Ses meilleurs classés</span><button class="og-lien" data-ogmonde>Classement mondial ›</button></div>
+        <div class="og-bh"><span class="etiq">Meilleurs classés</span><button class="og-lien" data-ogmonde>Classement mondial ›</button></div>
         <div class="og-bs">${best}</div>
       </div>
     </div></div>`,'','og-pan')}</div>`;

@@ -406,7 +406,7 @@ function rtMsgDepart(V){
     t:`Marco part ${rtPrep(d)}`,
     txt:`Je pars ${V.parti.getTime()===S.date.getTime()?'ce soir':'le '+rcJour(V.parti)} pour ${d.villes.join(', puis ')}. Je ferai les salles de ${d.spec.map(s=>s.toLowerCase()).join(', de ').replace(/, de ([^,]*)$/,' et de $1')}, et les galas du week-end. Je rentre le ${rtJourL(V.retour)}.<span class="relire">à relire</span>`,
     vue:()=>`<div class="ms-cases g2b">
-      ${msCase('Le voyage',`${msFaitH('Où',esc(d.villes.join(', ')))}${msFait('Départ',`${rtJourL(V.parti)}, de Lyon`)}${msFait('Retour',`<b>${rtJourL(V.retour)}</b>`)}
+      ${msCase('Voyage',`${msFaitH('Où',esc(d.villes.join(', ')))}${msFait('Départ',`${rtJourL(V.parti)}, de Lyon`)}${msFait('Retour',`<b>${rtJourL(V.retour)}</b>`)}
         ${msFait('Sur place',`${V.jours} jours${d.route?`, plus ${d.route} jours de route`:''}`)}${msFait('Profils attendus',`${V.profils}, toutes catégories`)}`)}
       ${msCase('Ce qu’il coûte',`${msGros(`<span data-mscompte="${V.cout}">${nb(V.cout)}</span> €`,'déjà payé')}
         ${msFait(`Billet aller-retour · ${nb(d.km)} km`,rtEu(d.billet))}${d.transfert?msFait(`${esc(d.villes[0])} → ${esc(d.villes[1])}`,rtEu(d.transfert)):''}
@@ -455,7 +455,7 @@ function rtMsgRapport(V){
   const dispo=msPar('recruteur');
   dispo.vue=()=>`<div class="ms-cases g2">
       ${msCase('Marco Ferri',`<div class="ms-dispo"><span class="point octr pulse" style="background:var(--vert)"></span><span class="T">Disponible</span></div>
-        ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Son dernier voyage','Turin, 7 jours, 4 profils')}${msFait('Trouvé par lui',`${lien(parId('musaev'))}, à Bichkek`)}`)}
+        ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Dernier voyage','Turin, 7 jours, 4 profils')}${msFait('Trouvé par lui',`${lien(parId('musaev'))}, à Bichkek`)}`)}
       ${msCase('Là où l’effectif est le plus faible',msFaibles())}
       ${msCase('Un voyage, selon sa durée',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
         <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Pendant le voyage, il n’est pas joignable.</div>`,'large')}
@@ -543,7 +543,7 @@ function rtFrise(V){
 /** Le panneau de droite : Marco disponible (la destination choisie) ou en voyage. */
 function rtPanneau(){
   const V=S.rt.voyage;
-  const tete=(etat)=>`<div class="rt-tete"><span class="etiq">Ton recruteur</span><span class="rt-qui">Marco Ferri</span><span class="rt-etat">${etat}</span></div>`;
+  const tete=(etat)=>`<div class="rt-tete"><span class="etiq">Recruteur</span><span class="rt-qui">Marco Ferri</span><span class="rt-etat">${etat}</span></div>`;
   const specs=d=>`<div class="rt-bloc"><div class="etiq">Ce qu’on y trouve</div><div class="rt-specs">${d.spec.map(s=>`<span class="rt-spc">${esc(s)}</span>`).join('')}</div></div>`;
   if(V){const d=rtDe(V.dest);
     return pan(`<div class="rt-p apparait">${tete(`<span style="color:var(--texte2)">En voyage</span>`)}
@@ -560,7 +560,7 @@ function rtPanneau(){
     <div class="rt-ban"><i class="rt-ban-img"></i><div class="rt-ban-t"><div class="T rt-grand">${esc(d.pays)}</div><div class="rt-ou">${esc(rtVilles(d))} <span class="sous">· ${nb(d.km)} km · ${rtTrajet(d)}</span></div></div></div>
       <div class="rt-scene">${esc(d.scene)}</div>
     ${specs(d)}
-    <div class="rc-faits">${rcFait('Le voyage',`<span data-rtcompte="${v.cout}">${nb(v.cout)}</span> €`,`billet et ${v.tot} jours`)}${rcFait('Bourse demandée',`${nb(rtSalMoy(d))} €`,'par combat, en moyenne')}${rcFait('Retour le',`${v.retour.getDate()===1?'1er':v.retour.getDate()} ${RC_MOIS[v.retour.getMonth()]}`,`<span data-rtprof>${v.profils} profils</span>`)}</div>
+    <div class="rc-faits">${rcFait('Voyage',`<span data-rtcompte="${v.cout}">${nb(v.cout)}</span> €`,`billet et ${v.tot} jours`)}${rcFait('Bourse demandée',`${nb(rtSalMoy(d))} €`,'par combat, en moyenne')}${rcFait('Retour le',`${v.retour.getDate()===1?'1er':v.retour.getDate()} ${RC_MOIS[v.retour.getMonth()]}`,`<span data-rtprof>${v.profils} profils</span>`)}</div>
     <div class="rt-bloc"><div class="etiq">Combien de temps sur place</div><div class="rt-durees">${RT_DUREES.map(duree).join('')}</div></div>
     <button class="bouton jaune cj rt-envoyer" data-rtenvoyer>Envoyer Marco ${esc(rtPrep(d))}</button>
   </div>`,'height:100%');
@@ -627,7 +627,7 @@ function rtAnalyse(V,p){
       <div><span class="etiq">Vu${f?'e':''} par Marco</span><b class="T">${p.fois} fois</b><span class="sous">${vus.length?vus.join(' et '):''}${lieu?' · '+esc(lieu):''}</span></div>
       <div><span class="etiq">Gabarit</span><b class="T">${esc(c.taille)}</b><span class="sous">allonge ${esc(c.allonge)}</span></div></div>
     <div class="rp-deux">
-      <div><div class="etiq">Ses points forts</div>${D.forts.length?liste(D.forts,'fort',ico('ok',20,3)):'<p class="sous">Rien qui ressorte vraiment.</p>'}</div>
+      <div><div class="etiq">Points forts</div>${D.forts.length?liste(D.forts,'fort',ico('ok',20,3)):'<p class="sous">Rien qui ressorte vraiment.</p>'}</div>
       <div><div class="etiq">À surveiller</div>${D.surveiller.length?liste(D.surveiller,'faible',ico('alerte',20)):'<p class="sous">Rien de particulier.</p>'}</div>
     </div>
     <div class="rp-act">${['signe','accord'].includes(x.etat)?rcEtatHtml(x):`<button class="bouton jaune cj rp-offre" data-rcoffre="${c.id}">${x.etat==='cours'?'Reprendre la négociation':'Faire une offre'}</button>`}

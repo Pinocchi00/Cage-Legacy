@@ -181,7 +181,7 @@ function pmGens(nq=3){
   return titre('Les combattants',pmRelire)+`<div class="pm-qs">${apaise?`<div class="pm-ok"><span class="fi-pos">▲</span>À ces montants, plus personne ne s’en plaindrait.</div>`:''}<span class="etiq">${apaise?'Ce qu’ils disaient':hypo?'Ce qu’ils pourraient dire':'Ce qu’ils ont dit'}</span>
       ${liste.length?liste.slice(0,nq).map(q).join(''):`<div class="pm-vide">${change?'À ces montants, personne n’aurait trouvé sa prime basse.':'Personne ne trouve sa prime basse.'}</div>`}${bilan}</div>
     <div class="pm-regle"><span class="etiq">Règle proposée</span><p>Une prime paraît basse sous la bourse du combattant et sous ${Math.round(PRIME_PART_SOIREE*100)} % de ce que la soirée a rapporté avant primes.</p></div>
-    <div class="pm-fin"><div class="pm-fh"><span class="pm-fm">${medaille('fin',30)}<span class="etiq">Les finitions</span></span><span class="pm-fc"><b class="T">${fins}</b><span class="sous">sur ${tot} combats</span></span></div>
+    <div class="pm-fin"><div class="pm-fh"><span class="pm-fm">${medaille('fin',30)}<span class="etiq">Finitions</span></span><span class="pm-fc"><b class="T">${fins}</b><span class="sous">sur ${tot} combats</span></span></div>
       <p>« ${esc(pmFinitionPhrase(br.fin,pmActuels().fin))} »</p><span class="pm-qn">${mercier?lien(mercier):'Clara Mercier'}</span></div>`;
 }
 function pmConfirme(){

@@ -136,9 +136,9 @@ function afARegler(){
 }
 function afStrip(){
   const c=afChiffres(),[dit,src]=afDit(),n=S.af.m.filter(afComplet).length,np=S.af.p.filter(afComplet).length;
-  return pan(`<div class="af-bc" style="width:150px"><span class="etiq">La carte</span><span class="T">${n} / 4</span><span class="sous">et ${np} / 6 préliminaires</span></div>
+  return pan(`<div class="af-bc" style="width:150px"><span class="etiq">Carte</span><span class="T">${n} / 4</span><span class="sous">et ${np} / 6 préliminaires</span></div>
     <div class="af-bc" style="width:340px"><span class="etiq">Recette estimée</span><span class="T" id="afRec">${nb(c.bas)} – ${nb(c.haut)} €</span><span class="sous">Forum de Lille plein à ${c.plein} % (prévision)</span></div>
-    <div class="af-bc" style="flex:1;flex-shrink:1"><span class="etiq">Ce qu’on en dit</span><div class="af-dit">« ${esc(dit)} » <b>${esc(src)}</b></div></div>
+    <div class="af-bc" style="flex:1;flex-shrink:1"><span class="etiq">Avis</span><div class="af-dit">« ${esc(dit)} » <b>${esc(src)}</b></div></div>
     <div class="af-bc af-dosc" style="width:480px">${afDossiersHtml()}</div>`,'height:100%','af-strip');
 }
 
@@ -228,7 +228,7 @@ function afDossiers(){
 }
 function afDossiersHtml(){
   const {k,rows}=afDossiers();
-  if(!k)return `<div class="af-dos-t"><span class="etiq">Les dossiers de Leïla</span></div><div class="af-reg" style="color:var(--vert)">${ico('ok',19,2.6)}<span>Rien à proposer : la carte est complète.</span></div>`;
+  if(!k)return `<div class="af-dos-t"><span class="etiq">Dossiers de Leïla</span></div><div class="af-reg" style="color:var(--vert)">${ico('ok',19,2.6)}<span>Rien à proposer : la carte est complète.</span></div>`;
   if(!rows.length)return `<div class="af-dos-t"><span class="etiq">Les dossiers de Leïla · ${esc(afCourtRole(k))}</span></div><span class="sous">Pas de dossier pour cette place.</span>`;
   const n=rows.length,i=((S.af.dos%n)+n)%n,[ids,w,ap]=rows[i];
   return `<div class="af-dos-t"><span class="etiq">Les dossiers de Leïla · ${esc(afCourtRole(k))}</span>
@@ -285,9 +285,9 @@ function afHistoire(A,B){
 function afEnjeu(k,f,A,B){
   const deja=[A.id,B.id].sort().join('|')==='mezouar|nana'?'Oui, en 2025':'Jamais';
   const risques=[A,B].map(c=>AF_RISQUES[c.id]).filter(r=>r&&r[1]==='neu').slice(0,1);
-  return `<span class="etiq">Ce qui fait le combat</span><div>${afRaisons(k,f).slice(0,4).map(afRl).join('')}</div>${afHistoire(A,B)}
+  return `<span class="etiq">Enjeux</span><div>${afRaisons(k,f).slice(0,4).map(afRl).join('')}</div>${afHistoire(A,B)}
     <div class="af-st3"><div><span class="etiq">Bourses</span><span class="T">${nb(afBourse(A)+afBourse(B))} €</span></div>
-      <div><span class="etiq">À la recette</span><span class="T">${afValeur(k,f)?'≈ '+nb(Math.round(afValeur(k,f)/1000)*1000)+' €':'—'}</span></div>
+      <div><span class="etiq">Recette</span><span class="T">${afValeur(k,f)?'≈ '+nb(Math.round(afValeur(k,f)/1000)*1000)+' €':'—'}</span></div>
       <div><span class="etiq">Déjà affrontés</span><span class="T">${deja}</span></div></div>
     ${risques.map(r=>`<div class="af-li" style="color:var(--texte2)">${ico(r[0],20)}<span>${esc(r[2])}</span></div>`).join('')}`;
 }
@@ -323,12 +323,12 @@ function afResume(){
     <div class="af-rs-corps">
       <div class="col"><div class="etiq">Carte principale · 21 h</div>${S.af.m.map((f,i)=>i?ligne(f,'m'+i):'').join('')}
         <div class="etiq" style="margin-top:18px">Préliminaires · 19 h</div>${S.af.p.map(ligneP).join('')}</div>
-      <div class="col bil"><div class="etiq">Le bilan</div>
+      <div class="col bil"><div class="etiq">Bilan</div>
         <div class="af-chif"><span class="etiq">Recette estimée</span><span class="T">${nb(c.bas)} – ${nb(c.haut)} €</span>
           <span class="etiq">Bourses à verser</span><span class="T">${nb(c.bourses)} €</span>
           <span class="etiq">Salle et soirée</span><span class="T">${nb(frais)} €</span>
-          <span class="etiq">Ce qu’il devrait te rester</span><span class="T" style="color:${marge>0?'var(--vert)':'var(--neg)'}">${marge>0?'+ ':'− '}${nb(Math.abs(marge))} €</span></div>
-        <div class="af-rs-rem"><span class="etiq">Le Forum de Lille</span><span>plein à ${c.plein} % (prévision)</span></div><div class="jauge"><i style="width:${c.plein}%;background:var(--blanc)"></i></div>
+          <span class="etiq">Reste estimé</span><span class="T" style="color:${marge>0?'var(--vert)':'var(--neg)'}">${marge>0?'+ ':'− '}${nb(Math.abs(marge))} €</span></div>
+        <div class="af-rs-rem"><span class="etiq">Forum de Lille</span><span>plein à ${c.plein} % (prévision)</span></div><div class="jauge"><i style="width:${c.plein}%;background:var(--blanc)"></i></div>
         <div class="af-dit" style="margin-top:14px">« ${esc(dit)} » <b>${esc(src)}</b></div>
         <div class="etiq" style="margin-top:16px">À surveiller</div>
         ${dem.map(([i,col,tx])=>`<div class="af-li" style="color:var(--${col})">${ico(i,20,2.4)}<span>${esc(tx)}</span></div>`).join('')}

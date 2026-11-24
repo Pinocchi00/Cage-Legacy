@@ -428,12 +428,12 @@ function ceFicheHtml(c){
     <div class="cl-staff ce-anc">
       ${pan(titre(esc(role),esc(lieu))+`<div class="cl-chez">${esc(fait)}<span class="relire">à relire</span></div>
         <div class="cl-sf">${faitB('Chez Split',`${c.arr} – ${c.role==='R'?c.det:c.role==='P'?Math.max(finAn,c.arr+1):finAn}`)}${faitB('Âge',age+' ans')}${faitB('Palmarès',bil)}</div>
-        <div class="etiq">Son parcours</div>
+        <div class="etiq">Parcours</div>
         <div class="cl-frise">${jal.map(([a,t],i)=>`<div class="apparait" style="animation-delay:${200+i*90}ms"><b class="T">${a}</b><i class="octr"></i><span>${esc(t)}</span></div>`).join('')}</div>`,'height:100%','apparait')}
       ${pan(titre(R.length>1?'Ses ceintures':'Sa ceinture',esc(R.map(y=>ceCourt(y.cat)).join(' · ')))+R.map(y=>{const fn=ceFin(y);return `<div class="cl-titre-c"><span style="color:var(--jaune);display:flex">${ico('ceintures',26)}</span><span>Champion${e} des ${esc(cePl(y.cat))}</span></div>
         <div class="cl-sf ce-sf">${faitB('Règne',`${ceAn(y.de)} – ${ceAn(y.a)}`)}${faitB('Défenses',y.def)}</div>
-        <div class="ce-anl"><span class="etiq">La prise · ${ceMois(y.de)}</span><span>${esc(prise(y))}</span></div>
-        <div class="ce-anl"><span class="etiq">La fin · ${ceMois(y.a)}</span><span>${fn?fn[0].replace(/^./,m=>m.toUpperCase())+(fn[1]?`, ${esc(fn[1])}`:''):''}</span></div>`;}).join('')
+        <div class="ce-anl"><span class="etiq">Prise · ${ceMois(y.de)}</span><span>${esc(prise(y))}</span></div>
+        <div class="ce-anl"><span class="etiq">Fin · ${ceMois(y.a)}</span><span>${fn?fn[0].replace(/^./,m=>m.toUpperCase())+(fn[1]?`, ${esc(fn[1])}`:''):''}</span></div>`;}).join('')
         +(I.length&&R.length===1?'':'' ),'height:100%','apparait')}
       ${pan(titre('Dans la lignée',`${x0.n}<sup>e</sup> sur ${l.filter(y=>!y.int).length}`)+`<div class="ce-ll">${l.filter(y=>!y.int).slice().reverse().map(y=>`<div class="ce-lli ${y.c===c?'moi oct':''}"><span class="ce-num octr ${!y.a?'cur':''}">${y.n}</span><span class="ce-lln">${y.c===c?`${esc(y.c.prenom)} ${esc(y.c.nom)}`:lien(y.c)}</span><span class="sous">${y.a?`${ceAn(y.de)} – ${ceAn(y.a)}`:`depuis ${ceAn(y.de)}`}</span></div>`).join('')}</div>
         <button class="bouton petit oct ce-voir" data-celignee="${esc(x0.cat)}" style="margin-top:auto;align-self:flex-start">Voir la lignée des ${esc(cePl(x0.cat))} ›</button>`,'height:100%','apparait')}

@@ -54,10 +54,10 @@ const MS_BOITE=[
    txt:'Lille, c’est dans 35 jours. Nana contre Mezouar et Rachidi contre Meziane sont prêts. Belkacem n’a pas encore d’adversaire, et le quatrième combat reste à construire. Tant que l’affiche n’est pas complète, la presse n’en parle pas.',
    vue:()=>`<div class="ms-cases g2b">
       ${msCase(`La carte principale · ${S.af.m.filter(f=>f.a&&f.b).length} / 4`,['m0','m1','m2','m3'].map(msCombat).join(''))}
-      ${msCase('Le Forum de Lille',`${msGros(`<span data-mscompte="${S.preventes}">${nb(S.preventes)}</span>`,'places vendues sur 4 000')}${msJauge(S.preventes/4000)}
-        ${msFait('Vendues cette semaine','<span style="color:var(--vert)">+ 412</span>')}${msFait('Le jour du combat','Mardi 16 février')}
+      ${msCase('Forum de Lille',`${msGros(`<span data-mscompte="${S.preventes}">${nb(S.preventes)}</span>`,'places vendues sur 4 000')}${msJauge(S.preventes/4000)}
+        ${msFait('Vendues cette semaine','<span style="color:var(--vert)">+ 412</span>')}${msFait('Jour du combat','Mardi 16 février')}
         <div class="ms-cite">« Nana–Mezouar fait parler, le reste attend. »<span class="sous">Cage Hebdo, 9 janvier</span></div>`)}
-      ${S.ms.idees?msCase('Les idées de Leïla',`
+      ${S.ms.idees?msCase('Idées de Leïla',`
         <div class="ms-idee" data-msidee="m2:bello"><span class="ms-cb-n">${lien(parId('belkacem'))}<span class="ms-vs">contre</span>${lien(parId('bello'))}</span><span class="sous">Belkacem veut un adversaire du top 3. Bello est n° 3.</span><span class="lecture">›</span></div>
         <div class="ms-idee" data-msidee="m3:labbe"><span class="ms-cb-n">${lien(parId('labbe'))}<span class="ms-vs">contre</span>${lien(parId('darras'))}</span><span class="sous">Darras est de Lille : la salle sera pour lui.</span><span class="lecture">›</span></div>`,'large apparait'):''}
       ${msCase('Ils attendent un combat',`<div class="ms-att3">${msAttente().map(c=>{
@@ -73,7 +73,7 @@ const MS_BOITE=[
       ${msCase('Retour',`${msGros('2 février',`dans ${msJours(msJ(2,1))} jours`)}${msFrise(msJ(11),msJ(2,1),'11 janvier','2 février')}`)}
       ${msCase('',`<div class="ms-qui">${lien(parId('rizzo'))}</div><div class="sous">Poids mouche · 23 ans</div><div class="sous">n° 4 Split · n° 30 mondial</div>
         <div class="ms-l2"><span class="T ms-bil">6-0-0</span>${serie('vvvvv')}</div>${msFaitH('Il peut combattre','à la soirée du 23 mars')}`)}
-      ${msCase('Les autres absents',COMBATTANTS.filter(c=>c.id!=='rizzo'&&/blesse|pause|susp/.test(c.statut)).slice(0,4).map(c=>
+      ${msCase('Autres absents',COMBATTANTS.filter(c=>c.id!=='rizzo'&&/blesse|pause|susp/.test(c.statut)).slice(0,4).map(c=>
         `<div class="ms-inf"><span class="ms-qui">${lien(c)}</span><span class="sous">${esc(c.cat)}</span>${etat(c)}</div>`).join(''),'large')}
     </div>`,
    act:msInfirmerie},
@@ -82,10 +82,10 @@ const MS_BOITE=[
    t:'Palier franchi : les diffuseurs nationaux regardent Split',
    txt:'Split atteint le palier « Diffusion nationale » : une chaîne nationale peut désormais retransmettre tes grandes soirées.',
    vue:()=>`<div class="ms-cases g2">
-      ${msCase('Les paliers de Split · 41 200 fans',`<div class="ms-paliers">${['Local','Régional','Diffusion nationale','Rayonnement européen','Référence mondiale'].map((p,i)=>
+      ${msCase('Paliers de Split · 41 200 fans',`<div class="ms-paliers">${['Local','Régional','Diffusion nationale','Rayonnement européen','Référence mondiale'].map((p,i)=>
         `<div class="ms-pal ${i<2?'fait':i===2?'neuf':''}"><i class="octr">${i<3?ico('ok',18,3):''}</i><span>${p}</span></div>`).join('')}</div>`,'large')}
-      ${msCase('Ce qui change',`${msFait('Part de la télé dans la recette','18 % → <b style="color:var(--vert)">26 %</b>')}${msFaitH('Soirées retransmises','Une sur trois → <b style="color:var(--vert)">toutes les grandes</b>')}${msFait('Ce que demandent les agents','<b style="color:var(--neg)">+ 10 % sur les cachets</b>')}`)}
-      ${msCase('Le prochain : Rayonnement européen',`
+      ${msCase('Changements',`${msFait('Part télé de la recette','18 % → <b style="color:var(--vert)">26 %</b>')}${msFaitH('Soirées retransmises','Une sur trois → <b style="color:var(--vert)">toutes les grandes</b>')}${msFait('Ce que demandent les agents','<b style="color:var(--neg)">+ 10 % sur les cachets</b>')}`)}
+      ${msCase('Prochain : Rayonnement européen',`
         ${msFait('Une soirée à guichets fermés','68 %, ton record')}${msJauge(.68)}
         ${(()=>{const m=msMeilleur(()=>true);return msFaitH('Un combattant dans le top 5 mondial',`Le meilleur : ${lien(m)}, n° ${m.mondial}`);})()}
         ${msFait('60 000 fans','41 200')}${msJauge(.69)}`)}
@@ -100,7 +100,7 @@ const MS_BOITE=[
       ${msCase('Depuis la parution',`${msFait('Lecteurs du numéro','18 400')}${msFait('Places vendues pour Lille','<span style="color:var(--vert)">+ 214</span>')}${msFaitH('Le ton de l’article','Curieux, pas encore convaincu')}`)}
       ${msCase('Ce qu’en disent les autres',`<div class="ms-echos">
         <div><span class="etiq">Tableau Noir</span><p>« Nana à 37 ans en tête d’affiche : courage ou entêtement ? »</p></div>
-        <div><span class="etiq">Les fans, en ligne</span><p>« Mezouar contre Nana, enfin. Le reste, on verra. »</p></div></div>`,'large')}
+        <div><span class="etiq">Fans en ligne</span><p>« Mezouar contre Nana, enfin. Le reste, on verra. »</p></div></div>`,'large')}
     </div>`,
    act:()=>msNon('Presse ›','data-prouvre="a09ch"')},
 
@@ -109,7 +109,7 @@ const MS_BOITE=[
    txt:'',
    vue:()=>`<div class="ms-cases g2">
       ${msCase('Marco Ferri',`<div class="ms-dispo"><span class="point octr pulse" style="background:var(--vert)"></span><span class="T">Disponible</span></div>
-        ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Son dernier voyage','Turin, 6 jours, 4 profils')+msFait('Signé après ce voyage',lien(parId('musaev')))}`)}
+        ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Dernier voyage','Turin, 6 jours, 4 profils')+msFait('Signé après ce voyage',lien(parId('musaev')))}`)}
       ${msCase('Là où l’effectif est le plus faible',msFaibles())}
       ${msCase('Un voyage, selon sa durée',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
         <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Pendant le voyage, il n’est pas joignable.</div>`,'large')}
@@ -120,7 +120,7 @@ const MS_BOITE=[
    t:'L’agent de <span class="nom" data-fiche="vanbelle">Jens Van Belle</span> veut prolonger',
    txt:'Il reste un combat à Jens. Il se plaît chez Split, mais d’autres organisations l’ont contacté. Voici sa demande pour prolonger.',
    vue:()=>`<div class="ms-cases g3b">
-      ${msCase('Le contrat',`<div class="ms-t"><span></span><span class="etiq">Aujourd’hui</span><span class="etiq">Demandé</span>
+      ${msCase('Contrat',`<div class="ms-t"><span></span><span class="etiq">Aujourd’hui</span><span class="etiq">Demandé</span>
         <span class="sous">Combats</span><span>1 restant</span><b>4</b>
         <span class="sous">Par combat</span><span>9 000 €</span><b>15 000 €</b>
         <span class="sous">Si victoire</span><span>+ 9 000 €</span><b>+ 15 000 €</b>
@@ -139,22 +139,22 @@ const MS_BOITE=[
         <div class="ms-l2 col"><span class="T ms-bil">${bilan(c)}</span>${serie(c.serie)}</div><div class="sous">${c.rang==='C'?'Championne':'n° '+c.rang+' Split'} · n° ${c.mondial} mondial</div></div>`;
      return `<div class="ms-cases g2b">
       ${msCase('Poids pailles',`<div class="ms-duo">${col(r,'Elle')}<span class="ms-duo-vs T">VS</span>${col(v,'La championne')}</div>`)}
-      ${msCase('Sa demande',`<div class="ms-dem">Un combat pour la ceinture <b>avant le 30 juin</b>, si elle bat ${lien(parId('meziane'))} le 16 février.</div>
+      ${msCase('Demande',`<div class="ms-dem">Un combat pour la ceinture <b>avant le 30 juin</b>, si elle bat ${lien(parId('meziane'))} le 16 février.</div>
         ${msFaitH('Si tu acceptes','C’est noté sur sa fiche, dans « Ses demandes »')}${msFait('Si tu tiens parole','Elle te fera confiance')}${msFait('Sinon','<span style="color:var(--neg)">Elle le prendra mal</span>')}`)}
-      ${msCase('Ses trois derniers combats',`<div class="ms-echos">${[['8 décembre','Soumission, étranglement arrière','R2 · 3:41'],['14 septembre','Décision unanime','30-27 ×3'],['22 juin','KO technique, coups au sol','R1 · 4:12']].map(([d,m,t])=>
+      ${msCase('3 derniers combats',`<div class="ms-echos">${[['8 décembre','Soumission, étranglement arrière','R2 · 3:41'],['14 septembre','Décision unanime','30-27 ×3'],['22 juin','KO technique, coups au sol','R1 · 4:12']].map(([d,m,t])=>
         `<div><span class="etiq">${d} · ${t}</span><p><b style="color:var(--vert)">Victoire</b> · ${m}</p></div>`).join('')}</div>`,'large')}
     </div>`;},
    rep:[['C’est d’accord','Noté sur sa fiche, dans « Ses demandes ». À tenir avant le 30 juin.'],['Pas maintenant','Elle n’insiste pas. Elle t’en reparlera si elle bat Meziane.']]},
 
-  {id:'patron',tag:'Organisation',qui:'Gérard Vasseur',role:'le patron de Split',date:msJ(5),lu:true,
-   t:'Ce que le patron attend de ta saison',
+  {id:'patron',tag:'Organisation',qui:'Gérard Vasseur',role:'patron de Split',date:msJ(5),lu:true,
+   t:'Ce que Gérard Vasseur attend de ta saison',
    txt:'« Je ne te demande pas de miracle. Je veux voir où tu emmènes Split. »',
    vue:()=>`<div class="ms-cases g2b">
-      ${msCase('Tes objectifs 2027',`
-        ${msFait('Rester dans les deux premières organisations','<b style="color:var(--vert)">2e, à garder</b>')}${msJauge(.92,'var(--vert)')}
-        ${(()=>{const m=msMeilleur(c=>c.cat==='Poids lourd');return msFait('Un poids lourd de Split dans le top 5 mondial',`<b style="color:var(--jaune)">meilleur : n° ${m.mondial}</b>`)+msJauge(Math.min(.95,5/m.mondial),'var(--jaune)');})()}
+      ${msCase('Objectifs 2027',`
+        ${msFait('Rester dans le top 2','<b style="color:var(--vert)">2e, à garder</b>')}${msJauge(.92,'var(--vert)')}
+        ${(()=>{const m=msMeilleur(c=>c.cat==='Poids lourd');return msFait('Un poids lourd dans le top 5 mondial',`<b style="color:var(--jaune)">meilleur : n° ${m.mondial}</b>`)+msJauge(Math.min(.95,5/m.mondial),'var(--jaune)');})()}
         ${msFait('Remplir le Forum de Lille',`${Math.round(S.preventes/40)} %`)}${msJauge(S.preventes/4000)}`)}
-      ${msCase('Le patron',`${msGros('Il attend de voir')}${msFait('Ce qu’il regarde en premier','Les préventes de Lille')}${msFait('Il a fondé Split','En 2004')}`)}
+      ${msCase('Patron',`${msGros('Il attend de voir')}${msFait('Ce qu’il regarde en premier','Les préventes de Lille')}${msFait('Il a fondé Split','En 2004')}`)}
       ${msCase('Ce qu’il surveille',`<div class="ms-chiffres q4">${msGros('13,4 M€','masse salariale par an')}${msGros('182 000 €','recette à Lille l’an dernier')}${msGros('1 830','places vendues l’an dernier')}${msGros('+ 6 %','abonnés télé en 2026')}</div>`,'large')}
     </div>`},
 
@@ -164,7 +164,7 @@ const MS_BOITE=[
    vue:()=>`<div class="ms-cases g2b">
       ${msCase('Split aujourd’hui',`<div class="ms-chiffres">${msGros(COMBATTANTS.length,'combattants')}${msGros(COMBATTANTS.filter(c=>c.rang==='C').length,'champions')}${msGros('62','soirées')}${msGros('<span style="text-transform:none">2e</span>','des 8 organisations')}</div>`)}
       ${msCase('Par où commencer',`<div class="ligne" data-go="effectif"><span style="flex:1">Connaître l’effectif</span><span class="lecture">›</span></div><div class="ligne" data-go="carte"><span style="flex:1">Finir la carte du 16 février</span><span class="lecture">›</span></div>`)}
-      ${msCase('Tes deux têtes d’affiche',`<div class="ms-echos">${['nana','mezouar'].map(id=>{const c=parId(id);
+      ${msCase('2 têtes d’affiche',`<div class="ms-echos">${['nana','mezouar'].map(id=>{const c=parId(id);
         return `<div><div class="ms-qui">${lien(c,true)}</div><div class="sous">${esc(c.cat)} · ${c.rang==='C'?'champion':'n° '+c.rang+' Split'} · n° ${c.mondial} mondial</div><div class="ms-l2"><span class="T ms-bil">${bilan(c)}</span>${serie(c.serie)}</div></div>`;}).join('')}</div>`,'large')}
     </div>`},
 ];
@@ -284,7 +284,7 @@ continuer=function(){
       txt:'Sofiane s’est ouvert l’arcade gauche à l’entraînement : six points de suture. S’il cicatrise bien, il pourra combattre. Je te donne mon avis définitif le 5 février.',
       vue:()=>`<div class="ms-cases g3">
         ${msCase('Diagnostic',`${msFaitH('Blessure','Coupure à l’arcade gauche, six points')}${msFait('Gravité',msGravite(2,'Moyenne'))}${msFaitH('Le risque','Que la plaie se rouvre en combat')}`)}
-        ${msCase('Avis définitif',`${msGros('5 février',`dans ${msJours(msJ(5,1))} jours`)}${msFrise(msJ(14),msJ(5,1),'14 janvier','5 février')}${msFait('Le combat','16 février')}`)}
+        ${msCase('Avis définitif',`${msGros('5 février',`dans ${msJours(msJ(5,1))} jours`)}${msFrise(msJ(14),msJ(5,1),'14 janvier','5 février')}${msFait('Combat','16 février')}`)}
         ${msCase('À l’affiche',`${msCombat('m2')}${msFait('Si tu le retires','sa place se libère')}${msFait('Combat dans','33 jours')}`,'etroit')}
       </div>`,
       act:msInfirmerie,

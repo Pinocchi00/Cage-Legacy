@@ -329,9 +329,9 @@ function cpPanneauCoach(s){
       <div class="T rt-grand cp-grand" style="--fs:${fs}px">${esc(s.coach)}</div><div class="rt-ou">${cpSalleLien(s)}, ${esc(s.ville)}</div></div></div>
     <div class="rc-faits">${cpFait('Âge',`${s.coachAge} ans`,'')}${cpFait('Depuis',String(s.depuis),'à la tête de la salle')}${cpFait('Champions',`<span data-cpn="${ch}">${ch}</span>`,'en titre chez lui')}</div>
     <div class="cp-bloc"><div class="etiq">Avant d’entraîner</div><div class="cp-cv">${esc((s.ancien||CP_ANCIEN[s.spec]).replace(/^./,x=>x.toUpperCase()))}.</div><div class="sous cp-l2">${mma}</div></div>
-    <div class="cp-bloc"><div class="etiq">Son parcours</div>${pc}${av}</div>
-    <div class="cp-bloc"><div class="etiq">Son équipe</div>${s.equipe.length?`<div class="cp-eq">${s.equipe.map(([r,n])=>`<div><span class="sous">${esc(r)}</span><b>${esc(n)}</b></div>`).join('')}</div>`:'<div class="cp-l2">Il entraîne seul : pas d’adjoint dans la salle.</div>'}</div>
-    <div class="cp-bloc"><div class="etiq">Sa salle en 2026</div>
+    <div class="cp-bloc"><div class="etiq">Parcours</div>${pc}${av}</div>
+    <div class="cp-bloc"><div class="etiq">Équipe</div>${s.equipe.length?`<div class="cp-eq">${s.equipe.map(([r,n])=>`<div><span class="sous">${esc(r)}</span><b>${esc(n)}</b></div>`).join('')}</div>`:'<div class="cp-l2">Il entraîne seul : pas d’adjoint dans la salle.</div>'}</div>
+    <div class="cp-bloc"><div class="etiq">Salle en 2026</div>
       <div class="cp-kf n3 cp-pcf">${cpMini(`${s.v}-${s.d}`,`${pct} % de victoires`)}${cpMini(`n° ${s.rang}`,'au classement')}${cpMini(s.split.length||'—','de tes combattants')}</div>
       <div class="cp-l2 cp-pcs"><b>${cpVal(s.stat,sd)}${su}</b> ${esc(sl)} <span class="sous">· moyenne mondiale ${cpVal(sm,sd)}${su}</span></div></div>
   </div>`,'height:100%');
@@ -356,7 +356,7 @@ function cpPanneau(){
   return pan(`<div class="rt-p cp-p" data-cle="m${s.id}">${ban}
     <div class="rc-faits">${cpFait('Rang',`n° <span data-cpn="${s.rang}">${s.rang}</span>`,cpTendMot(s.tend))}${cpFait('Champions',`<span data-cpn="${s.champions}">${s.champions}</span>`,'en titre')}${cpFait('Classés',`<span data-cpn="${s.classes}">${s.classes}</span>`,'top 15 mondial')}</div>
     ${coach}${mouv}
-    <div class="cp-bloc cp-flex"><div class="etiq">Ses meilleurs combattants</div>${cpMondeListe(s)}</div>
+    <div class="cp-bloc cp-flex"><div class="etiq">Meilleurs combattants</div>${cpMondeListe(s)}</div>
     ${dest?`<div class="cp-bas"><span class="sous cp-voy">7 jours sur place : ${nb(rtVoyage(dest,7,S.date).cout)} €</span><button class="bb oct petit" data-cpdest="${dest.id}"><span class="oct">Envoyer Marco ${esc(rtPrep(dest))} ›</span></button></div>`:''}
   </div>`,'height:100%');
 }
