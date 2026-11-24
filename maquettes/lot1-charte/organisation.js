@@ -20,17 +20,17 @@ const ogEtat=()=>JSON.stringify({onglet:S.og.onglet,sel:S.og.sel,piste:S.og.pist
    Oktagon 12 200 à Dortmund, 19 000 à Cologne ; PFL 18 000 à Riyad. Split, organisation française de second rang : 4 800. */
 const OG_ORGS=[
   {nom:'Garden of Blood',der:['20 déc.','New York',16900],ville:'New York',depuis:1999,pub:12600,rec:[19400,'New York','12 sept. 2026'],avant:1,diff:'Mondial',salles:'15 000 places et plus',
-   bouge:'Garde la tête : 16 900 spectateurs à New York le 20 déc.'},
+   bouge:'Garde la tête : 16 900 spectateurs à New York le 20 déc.'},
   {nom:'Undisputed Cage',der:['13 déc.','São Paulo',13500],ville:'São Paulo',depuis:2005,pub:7900,rec:[13500,'São Paulo','13 déc. 2026'],avant:3,diff:'Européen',salles:'15 000 places et plus',
-   bouge:'Passe devant Fighting Pacific : 13 500 spectateurs à São Paulo le 13 déc., son record.'},
+   bouge:'Passe devant Fighting Pacific : 13 500 spectateurs à São Paulo le 13 déc., son record.'},
   {nom:'Pure Impact',der:['3 janv.','Dubaï',4100],ville:'Dubaï',depuis:2018,pub:3400,rec:[7200,'Dubaï','21 nov. 2026'],avant:4,diff:'National',salles:'jusqu’à 10 000 places',
-   bouge:'A signé en décembre trois combattants classés qui venaient de Fighting Pacific.'},
+   bouge:'A signé en décembre 3 combattants classés venus de Fighting Pacific.'},
   {nom:'Fighting Pacific Championship',der:['18 oct.','Osaka',8700],court:'Fighting Pacific',ville:'Tokyo',depuis:1997,pub:9800,rec:[16000,'Saitama','3 mai 2026'],avant:2,diff:'Mondial',salles:'15 000 places et plus',
-   bouge:'Aucune soirée depuis le 18 oct. à Osaka, et trois combattants classés partis chez Pure Impact.'},
+   bouge:'Aucune soirée depuis le 18 oct. à Osaka, et 3 combattants classés partis chez Pure Impact.'},
   {nom:'Knuckle Gate',der:['19 déc.','Manchester',6200],ville:'Manchester',depuis:2012,pub:5300,rec:[8900,'Manchester','28 févr. 2026'],avant:5,diff:'Européen',salles:'jusqu’à 10 000 places',
    bouge:'6 200 spectateurs à Manchester le 19 déc., dans sa moyenne.'},
   {nom:'Split',der:['8 déc.','Lyon',5210],ville:'Lyon',depuis:2004,pub:4800,rec:[6340,'Marseille','14 nov. 2026'],avant:7,diff:'National',salles:'jusqu’à 6 000 places',
-   bouge:'5 210 spectateurs à Lyon le 8 déc. ; Ultimate Rim n’en a fait que 2 100 à Perth le 9 janv.'},
+   bouge:'5 210 spectateurs à Lyon le 8 déc. ; Ultimate Rim n’en a fait que 2 100 à Perth le 9 janv.'},
   {nom:'Ultimate Rim',der:['9 janv.','Perth',2100],ville:'Melbourne',depuis:2020,pub:3900,rec:[6100,'Melbourne','15 août 2026'],avant:6,diff:'National',salles:'jusqu’à 6 000 places',
    bouge:'2 100 spectateurs à Perth le 9 janv., sa plus faible affluence depuis 2023.'},
   {nom:'MMA Korner',der:['27 déc.','Rotterdam',3100],ville:'Rotterdam',depuis:2011,pub:2900,rec:[5000,'Rotterdam','7 juin 2026'],avant:8,diff:'Régional',salles:'jusqu’à 6 000 places',
@@ -113,7 +113,7 @@ function ogColonne(x,i,mx){
 function ogPanneau(l){
   const x=l.find(y=>y.nom===S.og.sel);if(!x)return '';
   const sp=l.find(y=>y.nom==='Split'),t=ogTeinte(x.nom),moi=x.nom==='Split',d=x.avant-x.rang;
-  const tuile=(ic,lab,v,s,vs)=>`<div class="og-tu oct"><div class="og-tuh"><span class="og-mi">${ico(ic,20,2)}</span><span class="etiq">${lab}</span></div><b class="T"><span data-ogn="${v}">0</span></b><span class="sous">${s}</span>${moi?'':`<span class="og-vs">Split : ${nb(vs)}</span>`}</div>`;
+  const tuile=(ic,lab,v,s,vs)=>`<div class="og-tu oct"><div class="og-tuh"><span class="og-mi">${ico(ic,20,2)}</span><span class="etiq">${lab}</span></div><b class="T"><span data-ogn="${v}">0</span></b><span class="sous">${s}</span>${moi?'':`<span class="og-vs">Split : ${nb(vs)}</span>`}</div>`;
   const best=x.meilleurs.slice(0,5).map((c,i)=>`<div class="og-b" style="animation-delay:${250+i*50}ms"><span class="T og-bm">${c.mondial}</span>${(c.ext&&c.mondial<=7)||c.rang==='C'?'<span class="marque octr og-c8">C</span>':'<span></span>'}<span class="og-bn">${lien(c)}</span><span class="sous">${esc(rsCatL(c.cat))}</span></div>`).join('');
   return `<div class="og-voile" data-ogfermer></div><div class="og-over">${pan(`<div class="og-p" data-cle="${esc(x.nom)}">
     <div class="og-pban" style="--teinte:${t[0]}"><i class="og-pimg" style="filter:${t[1]||'none'} brightness(.8)"></i>${ogEmb(x.nom,96)}
@@ -144,28 +144,28 @@ function ogHuit(){
 function ogPistes(){
   const l=ogClasse(),sp=l.find(x=>x.nom==='Split'),caisse=typeof fiCaisse==='function'?fiCaisse().c:952200;
   const best=COMBATTANTS.filter(c=>!c.ext).reduce((m,c)=>!m||c.mondial<m.mondial?c:m,null);
-  const rang={type:'rang',lab:'Finir la saison 4e ou mieux',v:sp.rang,but:4,det:`${ogOrd(sp.rang)} aujourd’hui, ${ogOrd(sp.avant)} le 12 décembre`};
-  const pub={type:'jauge',lab:'Un public moyen de 6 000',v:sp.pub,but:6000,det:'sur les sept soirées de 2026'};
-  const salle={type:'jauge',lab:'Une soirée à 8 000 spectateurs',v:6340,but:8000,det:'le record : Marseille, 14 nov.'};
+  const rang={type:'rang',lab:'4/8 ou mieux en fin de saison',v:sp.rang,but:4,det:`${ogOrd(sp.rang)} aujourd’hui, ${ogOrd(sp.avant)} le 12 décembre`};
+  const pub={type:'jauge',lab:'Un public moyen de 6 000',v:sp.pub,but:6000,det:'sur les 7 soirées de 2026'};
+  const salle={type:'jauge',lab:'Une soirée à 8 000 spectateurs',v:6340,but:8000,det:'le record : Marseille, 14 nov.'};
   return [
-    {id:'salles',ic:'ogSalle',t:'Les salles',m:['3 000','6 000','10 000','15 000 +'],u:'places',cur:1,
+    {id:'salles',ic:'ogSalle',t:'Salles',m:['3 000','6 000','10 000','15 000 +'],u:'places',cur:1,
      auj:'Split remplit les salles de 6 000 places',auj2:'5 800 au Palais des sports de Lyon, salle pleine',
-     cond:[{type:'jauge',lab:'Une salle de 8 000 remplie à 90 %',v:79,but:90,suf:' %',det:'Marseille, 14 nov. : 6 340 sur 8 000'},pub],
-     gain:'Des salles de 10 000 places',gain2:'Une grande salle, dans le MMA : 15 000 places (UFC Paris : 15 405)',go:['resultats','Les soirées']},
-    {id:'diffuseur',ic:'ogEcran',t:'Le diffuseur',m:['Régional','National','Européen','Mondial'],cur:1,
+     cond:[{type:'jauge',lab:'Une salle de 8 000 remplie à 90 %',v:79,but:90,suf:' %',det:'Marseille, 14 nov. : 6 340 sur 8 000'},pub],
+     gain:'Des salles de 10 000 places',gain2:'Une grande salle, dans le MMA : 15 000 places (UFC Paris : 15 405)',go:['resultats','Soirées']},
+    {id:'diffuseur',ic:'ogEcran',t:'Diffuseur',m:['Régional','National','Européen','Mondial'],cur:1,
      auj:'National depuis le 10 janvier',auj2:'380 000 € par soirée',
-     cond:[rang,pub],gain:'Diffusé dans huit pays d’Europe',gain2:'Le montant se négocie à la fin de la saison',go:['finances','La caisse']},
-    {id:'recruteur',ic:'ogLoupe',t:'Le recruteur',m:['L’Europe','Le monde','2 voyages','3 voyages'],cur:1,
+     cond:[rang,pub],gain:'Diffusé dans 8 pays d’Europe',gain2:'Le montant se négocie à la fin de la saison',go:['finances','Caisse']},
+    {id:'recruteur',ic:'ogLoupe',t:'Recruteur',m:['L’Europe','Le monde','2 voyages','3 voyages'],cur:1,
      auj:'Marco voyage partout dans le monde',auj2:'un voyage à la fois',
      cond:[{type:'jauge',lab:'1 000 000 € en caisse',v:caisse,but:1000000,suf:' €',det:`il manque ${nb(1000000-caisse)} €`}],
-     gain:'Un deuxième recruteur',gain2:'deux voyages en même temps',go:['recruteur','Le recruteur']},
-    {id:'agents',ic:'ogContrat',t:'Les agents libres',m:['Non classés','Classés 61 et +','Top 60','Top 30'],cur:1,
-     auj:'Te répondent : les classés au-delà du top 60',auj2:'et les non-classés, comme au Recrutement',
-     cond:[rang,{type:'mondial',lab:'Un combattant dans le top 5 mondial',v:best?best.mondial:99,but:5,det:best?`le mieux classé : ${lien(best)}`:''}],
-     gain:'Les classés du top 60 te répondent',gain2:'quand leur contrat finit',go:['contrats','Le recrutement']},
-    {id:'partenaires',ic:'ogEuro',t:'Les partenaires',m:['60 000 €','110 000 €','140 000 €','200 000 €'],u:'par soirée',cur:2,propose:true,
+     gain:'Un 2e recruteur',gain2:'2 voyages en même temps',go:['recruteur','Recruteur']},
+    {id:'agents',ic:'ogContrat',t:'Agents libres',m:['Non classés','Classés 61 et +','Top 60','Top 30'],cur:1,
+     auj:'Te répondent : les classés au-delà du top 60',auj2:'et les non-classés, comme au Recrutement',
+     cond:[rang,{type:'mondial',lab:'Un combattant dans le top 5 mondial',v:best?best.mondial:99,but:5,det:best?`le mieux classé : ${lien(best)}`:''}],
+     gain:'Les classés du top 60 te répondent',gain2:'quand leur contrat finit',go:['contrats','Recrutement']},
+    {id:'partenaires',ic:'ogEuro',t:'Partenaires',m:['60 000 €','110 000 €','140 000 €','200 000 €'],u:'par soirée',cur:2,propose:true,
      auj:'140 000 € par soirée',auj2:'depuis le palier du 10 janvier',
-     cond:[salle,pub],gain:'200 000 € par soirée',gain2:'',go:['finances','La caisse']},
+     cond:[salle,pub],gain:'200 000 € par soirée',gain2:'',go:['finances','Caisse']},
     {id:'etranger',ic:'ogMonde',t:'Hors de France',m:['La région','La France','L’Europe','Le monde'],cur:1,propose:true,
      auj:'Toutes les soirées en France',auj2:'Lyon, Bordeaux, Nice, Grenoble, Marseille, Lille',
      cond:[{type:'piste',lab:'Le diffuseur européen',piste:'diffuseur',det:''},salle],
@@ -190,15 +190,15 @@ function ogCroissance(){
   const tuile=(q,i)=>`<button class="og-pl oct ${q.id===cle?'sel':''} ${S.og.anim?'apparait':''}" style="animation-delay:${i*50}ms" data-ogpiste="${q.id}"><span class="og-pli oct">
     <span class="og-pli-i">${ico(q.ic,30,2)}</span>
     <span class="og-pli-t"><span class="T">${esc(q.t)}</span><span class="og-pli-m">${q.m.map((m,j)=>`<i class="octr ${j<q.cur?'fait':j===q.cur?'cur':''}"></i>`).join('')}<b>${esc(q.m[q.cur])}</b></span></span>
-    <span class="og-pli-p">${q===proche?'<span class="og-proche">la plus proche</span>':'<span class="etiq">avancée</span>'}<span class="T">${Math.round(prog(q)*100)} %</span></span>
+    <span class="og-pli-p">${q===proche?'<span class="og-proche">plus proche</span>':'<span class="etiq">avancée</span>'}<span class="T">${Math.round(prog(q)*100)} %</span></span>
   </span></button>`;
-  const marches=p.m.map((m,j)=>`<div class="og-st4 ${j<p.cur?'fait':j===p.cur?'cur':''}" style="--h:${34+j*22}%;animation-delay:${100+j*80}ms"><span class="og-st4-l">${j===p.cur?'<span class="og-ici">Tu es ici</span>':j===p.cur+1?'<span class="og-ici og-next">Prochaine marche</span>':''}<b class="T">${esc(m)}</b>${p.u&&j===p.m.length-1?`<span>${esc(p.u)}</span>`:''}</span><i class="oct"></i></div>`).join('');
+  const marches=p.m.map((m,j)=>`<div class="og-st4 ${j<p.cur?'fait':j===p.cur?'cur':''}" style="--h:${34+j*22}%;animation-delay:${100+j*80}ms"><span class="og-st4-l">${j===p.cur?'<span class="og-ici">Aujourd’hui</span>':j===p.cur+1?'<span class="og-ici og-next">Prochaine marche</span>':''}<b class="T">${esc(m)}</b>${p.u&&j===p.m.length-1?`<span>${esc(p.u)}</span>`:''}</span><i class="oct"></i></div>`).join('');
   const detail=pan(`<div class="og-pdt" data-cle="${p.id}">
     <div class="pt"><h2>${esc(p.t)}</h2>${p.propose?'<span class="ment">piste proposée</span>':''}</div>
     <div class="og-esc">${marches}</div>
     <div class="og-now"><span class="og-mi og-mi-g">${ico(p.ic,26,2)}</span><div><b>${esc(p.auj)}</b><span class="sous">${esc(p.auj2)}</span></div></div>
     <div class="og-pour"><span class="etiq">Pour monter</span><div class="og-conds n${p.cond.length}">${p.cond.map(ogCond).join('')}</div></div>
-    <div class="og-gain"><div><span class="etiq">Ce que ça donne</span><b>${esc(p.gain)}</b>${p.gain2?`<span class="sous">${esc(p.gain2)}</span>`:''}</div>${p.go?`<button class="bb oct" data-oggo="${p.go[0]}"><span class="oct">${esc(p.go[1])} ›</span></button>`:''}</div>
+    <div class="og-gain"><div><span class="etiq">À la clé</span><b>${esc(p.gain)}</b>${p.gain2?`<span class="sous">${esc(p.gain2)}</span>`:''}</div>${p.go?`<button class="bb oct" data-oggo="${p.go[0]}"><span class="oct">${esc(p.go[1])} ›</span></button>`:''}</div>
   </div>`,'height:100%','og-droite');
   return `<div class="og-g2"><div class="og-pls">${PS.map(tuile).join('')}</div>${detail}</div>`;
 }

@@ -36,7 +36,7 @@ const msMeilleur=f=>COMBATTANTS.filter(f).sort((a,b)=>a.mondial-b.mondial)[0];
 /** Les trois catégories où le meilleur challenger de Split est le plus loin au classement mondial. */
 function msFaibles(){
   const cats=[...new Set(COMBATTANTS.map(c=>c.cat))].map(cat=>({cat,m:msMeilleur(c=>c.cat===cat&&c.rang!=='C')})).filter(x=>x.m).sort((a,b)=>b.m.mondial-a.m.mondial).slice(0,3);
-  return cats.map(x=>msFait(esc(x.cat),`meilleur challenger : n° ${x.m.mondial} mondial`)).join('');
+  return cats.map(x=>msFait(esc(x.cat),`meilleur challenger : n° ${x.m.mondial} mondial`)).join('');
 }
 /** Les quatre combattants disponibles, hors carte, dont le dernier combat est le plus ancien. */
 function msAttente(){
@@ -49,121 +49,121 @@ const msJours=d=>Math.round((d-S.date)/864e5);
    txt : ce que dit l'auteur, court. vue() : les cases de données. rep : décisions [libellé, ce qui se passe] (première = jaune).
    act() : boutons qui mènent ailleurs, jamais obligatoires. attend : une décision est attendue (point jaune). */
 const MS_BOITE=[
-  {id:'leila-carte',tag:'Leïla',qui:'Leïla Malika',role:'ton adjointe',date:msJ(12),lu:false,
-   t:'Il manque deux combats pour <b>Split Fight Night 63</b>',
-   txt:'Lille, c’est dans 35 jours. Nana contre Mezouar et Rachidi contre Meziane sont prêts. Belkacem n’a pas encore d’adversaire, et le quatrième combat reste à construire. Tant que l’affiche n’est pas complète, la presse n’en parle pas.',
+  {id:'leila-carte',tag:'Leïla',qui:'Leïla Malika',role:'adjointe',date:msJ(12),lu:false,
+   t:'Il manque 2 combats pour <b>Split Fight Night 63</b>',
+   txt:'Lille, c’est dans 35 jours. Nana–Mezouar et Rachidi–Meziane sont prêts. Belkacem attend un adversaire, et le 4e combat reste à faire. Tant que la carte n’est pas complète, la presse n’en parle pas.',
    vue:()=>`<div class="ms-cases g2b">
-      ${msCase(`La carte principale · ${S.af.m.filter(f=>f.a&&f.b).length} / 4`,['m0','m1','m2','m3'].map(msCombat).join(''))}
+      ${msCase(`Carte principale · ${S.af.m.filter(f=>f.a&&f.b).length} / 4`,['m0','m1','m2','m3'].map(msCombat).join(''))}
       ${msCase('Forum de Lille',`${msGros(`<span data-mscompte="${S.preventes}">${nb(S.preventes)}</span>`,'places vendues sur 4 000')}${msJauge(S.preventes/4000)}
         ${msFait('Vendues cette semaine','<span style="color:var(--vert)">+ 412</span>')}${msFait('Jour du combat','Mardi 16 février')}
-        <div class="ms-cite">« Nana–Mezouar fait parler, le reste attend. »<span class="sous">Cage Hebdo, 9 janvier</span></div>`)}
+        <div class="ms-cite">« Nana–Mezouar fait parler, le reste attend. »<span class="sous">Cage Hebdo, 9 janvier</span></div>`)}
       ${S.ms.idees?msCase('Idées de Leïla',`
         <div class="ms-idee" data-msidee="m2:bello"><span class="ms-cb-n">${lien(parId('belkacem'))}<span class="ms-vs">contre</span>${lien(parId('bello'))}</span><span class="sous">Belkacem veut un adversaire du top 3. Bello est n° 3.</span><span class="lecture">›</span></div>
-        <div class="ms-idee" data-msidee="m3:labbe"><span class="ms-cb-n">${lien(parId('labbe'))}<span class="ms-vs">contre</span>${lien(parId('darras'))}</span><span class="sous">Darras est de Lille : la salle sera pour lui.</span><span class="lecture">›</span></div>`,'large apparait'):''}
-      ${msCase('Ils attendent un combat',`<div class="ms-att3">${msAttente().map(c=>{
+        <div class="ms-idee" data-msidee="m3:labbe"><span class="ms-cb-n">${lien(parId('labbe'))}<span class="ms-vs">contre</span>${lien(parId('darras'))}</span><span class="sous">Darras est de Lille : la salle sera pour lui.</span><span class="lecture">›</span></div>`,'large apparait'):''}
+      ${msCase('En attente d’un combat',`<div class="ms-att3">${msAttente().map(c=>{
           return `<div><div class="ms-qui">${lien(c)}</div><div class="sous">${esc(c.cat)} · ${bilan(c)}</div><div class="ms-dep">Dernier combat il y a <b>${msMois(c.dernier)}</b></div></div>`;}).join('')}</div>`,'large')}
     </div>`,
-   act:()=>msOui('Ouvrir la carte','data-msgo="carte"')+(S.ms.idees?'':msNon('Les idées de Leïla','data-msidees'))},
+   act:()=>msOui('Ouvrir la carte','data-msgo="carte"')+(S.ms.idees?'':msNon('Idées de Leïla','data-msidees'))},
 
   {id:'rizzo-blesse',tag:'Médecin',qui:'Dr Hélène Roux',role:'médecin de Split',date:msJ(11),lu:false,
    t:'<span class="nom" data-fiche="rizzo">Paolo Rizzo</span> s’est blessé au camp',
-   txt:'Paolo s’est tordu la cheville gauche à l’entraînement. Ce n’est pas grave, et il n’est pas à l’affiche du 16 février.',
+   txt:'Paolo s’est tordu la cheville gauche à l’entraînement. Rien de grave, et il n’est pas à l’affiche du 16 février.',
    vue:()=>`<div class="ms-cases g3">
-      ${msCase('Diagnostic',`${msFaitH('Blessure','Entorse de la cheville gauche')}${msFait('Gravité',msGravite(1,'Légère'))}${msFaitH('Soins','Repos, kiné trois fois par semaine')}`)}
+      ${msCase('Diagnostic',`${msFaitH('Blessure','Entorse de la cheville gauche')}${msFait('Gravité',msGravite(1,'Légère'))}${msFaitH('Soins','Repos, kiné 3 fois par semaine')}`)}
       ${msCase('Retour',`${msGros('2 février',`dans ${msJours(msJ(2,1))} jours`)}${msFrise(msJ(11),msJ(2,1),'11 janvier','2 février')}`)}
-      ${msCase('',`<div class="ms-qui">${lien(parId('rizzo'))}</div><div class="sous">Poids mouche · 23 ans</div><div class="sous">n° 4 Split · n° 30 mondial</div>
-        <div class="ms-l2"><span class="T ms-bil">6-0-0</span>${serie('vvvvv')}</div>${msFaitH('Il peut combattre','à la soirée du 23 mars')}`)}
+      ${msCase('',`<div class="ms-qui">${lien(parId('rizzo'))}</div><div class="sous">Poids mouche · 23 ans</div><div class="sous">n° 4 chez Split · n° 30 mondial</div>
+        <div class="ms-l2"><span class="T ms-bil">6-0-0</span>${serie('vvvvv')}</div>${msFaitH('Retour possible','à la soirée du 23 mars')}`)}
       ${msCase('Autres absents',COMBATTANTS.filter(c=>c.id!=='rizzo'&&/blesse|pause|susp/.test(c.statut)).slice(0,4).map(c=>
         `<div class="ms-inf"><span class="ms-qui">${lien(c)}</span><span class="sous">${esc(c.cat)}</span>${etat(c)}</div>`).join(''),'large')}
     </div>`,
    act:msInfirmerie},
 
   {id:'palier',tag:'Palier',qui:'Split',role:'',date:msJ(10),lu:true,
-   t:'Palier franchi : les diffuseurs nationaux regardent Split',
-   txt:'Split atteint le palier « Diffusion nationale » : une chaîne nationale peut désormais retransmettre tes grandes soirées.',
+   t:'Palier franchi : Diffusion nationale',
+   txt:'Split atteint le palier « Diffusion nationale ». Une chaîne nationale peut retransmettre les grandes soirées.',
    vue:()=>`<div class="ms-cases g2">
       ${msCase('Paliers de Split · 41 200 fans',`<div class="ms-paliers">${['Local','Régional','Diffusion nationale','Rayonnement européen','Référence mondiale'].map((p,i)=>
         `<div class="ms-pal ${i<2?'fait':i===2?'neuf':''}"><i class="octr">${i<3?ico('ok',18,3):''}</i><span>${p}</span></div>`).join('')}</div>`,'large')}
-      ${msCase('Changements',`${msFait('Part télé de la recette','18 % → <b style="color:var(--vert)">26 %</b>')}${msFaitH('Soirées retransmises','Une sur trois → <b style="color:var(--vert)">toutes les grandes</b>')}${msFait('Ce que demandent les agents','<b style="color:var(--neg)">+ 10 % sur les cachets</b>')}`)}
-      ${msCase('Prochain : Rayonnement européen',`
-        ${msFait('Une soirée à guichets fermés','68 %, ton record')}${msJauge(.68)}
-        ${(()=>{const m=msMeilleur(()=>true);return msFaitH('Un combattant dans le top 5 mondial',`Le meilleur : ${lien(m)}, n° ${m.mondial}`);})()}
+      ${msCase('Changements',`${msFait('Part télé de la recette','18 % → <b style="color:var(--vert)">26 %</b>')}${msFaitH('Soirées retransmises','1 sur 3 → <b style="color:var(--vert)">toutes les grandes</b>')}${msFait('Demandes des agents','<b style="color:var(--neg)">+ 10 % sur les cachets</b>')}`)}
+      ${msCase('Prochain : Rayonnement européen',`
+        ${msFait('Une soirée à guichets fermés','68 %, record actuel')}${msJauge(.68)}
+        ${(()=>{const m=msMeilleur(()=>true);return msFaitH('Un combattant dans le top 5 mondial',`Meilleur : ${lien(m)}, n° ${m.mondial}`);})()}
         ${msFait('60 000 fans','41 200')}${msJauge(.69)}`)}
     </div>`},
 
   {id:'presse',tag:'Presse',qui:'Cage Hebdo',role:'',date:msJ(9),lu:true,
-   t:'« Split a un nouveau matchmaker. Il a 38 jours pour remplir le Forum. »',
-   txt:'Cage Hebdo te consacre sa une cette semaine.',
+   t:'« Split a un nouveau matchmaker. Il a 38 jours pour remplir le Forum. »',
+   txt:'Cage Hebdo te consacre sa une.',
    vue:()=>`<div class="ms-cases g2b">
-      ${msCase('Ce qu’écrit Cage Hebdo',`<p class="ms-art">L’an dernier, Split n’a rempli que 46 % du Forum de Lille. Le nouveau matchmaker hérite d’un champion de 37 ans, <span class="nom" data-fiche="nana">Parfait Nana</span>, et d’une division des légers qui attend un vrai choc.</p>
-        <p class="ms-art">« Le 16 février dira s’il sait construire une soirée. »</p>`)}
-      ${msCase('Depuis la parution',`${msFait('Lecteurs du numéro','18 400')}${msFait('Places vendues pour Lille','<span style="color:var(--vert)">+ 214</span>')}${msFaitH('Le ton de l’article','Curieux, pas encore convaincu')}`)}
-      ${msCase('Ce qu’en disent les autres',`<div class="ms-echos">
-        <div><span class="etiq">Tableau Noir</span><p>« Nana à 37 ans en tête d’affiche : courage ou entêtement ? »</p></div>
-        <div><span class="etiq">Fans en ligne</span><p>« Mezouar contre Nana, enfin. Le reste, on verra. »</p></div></div>`,'large')}
+      ${msCase('Article',`<p class="ms-art">L’an dernier, Split n’a rempli que 46 % du Forum de Lille. Le nouveau matchmaker hérite d’un champion de 37 ans, <span class="nom" data-fiche="nana">Parfait Nana</span>, et d’une division des légers qui attend un vrai choc.</p>
+        <p class="ms-art">« Le 16 février dira s’il sait construire une soirée. »</p>`)}
+      ${msCase('Depuis la parution',`${msFait('Lecteurs du numéro','18 400')}${msFait('Places vendues pour Lille','<span style="color:var(--vert)">+ 214</span>')}${msFaitH('Ton de l’article','Curieux, pas encore convaincu')}`)}
+      ${msCase('Autres avis',`<div class="ms-echos">
+        <div><span class="etiq">Tableau Noir</span><p>« Nana à 37 ans en tête d’affiche : courage ou entêtement ? »</p></div>
+        <div><span class="etiq">Fans en ligne</span><p>« Mezouar contre Nana, enfin. Le reste, on verra. »</p></div></div>`,'large')}
     </div>`,
    act:()=>msNon('Presse ›','data-prouvre="a09ch"')},
 
-  {id:'recruteur',tag:'Recruteur',qui:'Marco Ferri',role:'ton recruteur',date:msJ(8),lu:true,
-   t:'Ton recruteur est disponible',
+  {id:'recruteur',tag:'Recruteur',qui:'Marco Ferri',role:'recruteur',date:msJ(8),lu:true,
+   t:'Recruteur disponible',
    txt:'',
    vue:()=>`<div class="ms-cases g2">
       ${msCase('Marco Ferri',`<div class="ms-dispo"><span class="point octr pulse" style="background:var(--vert)"></span><span class="T">Disponible</span></div>
         ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Dernier voyage','Turin, 6 jours, 4 profils')+msFait('Signé après ce voyage',lien(parId('musaev')))}`)}
-      ${msCase('Là où l’effectif est le plus faible',msFaibles())}
-      ${msCase('Un voyage, selon sa durée',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
-        <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Pendant le voyage, il n’est pas joignable.</div>`,'large')}
+      ${msCase('Catégories les plus faibles',msFaibles())}
+      ${msCase('Durée du voyage',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
+        <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Injoignable pendant le voyage.</div>`,'large')}
     </div>`,
    act:()=>msOui('Ouvrir le recrutement','data-mstoast="Écran Recrutement, hors de cette maquette."')},
 
   {id:'vanbelle',tag:'Agent',qui:'Luc Verhaegen',role:'agent de Jens Van Belle',date:msJ(7),lu:true,attend:true,
    t:'L’agent de <span class="nom" data-fiche="vanbelle">Jens Van Belle</span> veut prolonger',
-   txt:'Il reste un combat à Jens. Il se plaît chez Split, mais d’autres organisations l’ont contacté. Voici sa demande pour prolonger.',
+   txt:'Il reste 1 combat à Jens. Il se plaît chez Split, mais d’autres organisations l’ont contacté. Voici sa demande.',
    vue:()=>`<div class="ms-cases g3b">
       ${msCase('Contrat',`<div class="ms-t"><span></span><span class="etiq">Aujourd’hui</span><span class="etiq">Demandé</span>
         <span class="sous">Combats</span><span>1 restant</span><b>4</b>
         <span class="sous">Par combat</span><span>9 000 €</span><b>15 000 €</b>
         <span class="sous">Si victoire</span><span>+ 9 000 €</span><b>+ 15 000 €</b>
         <span class="sous">Au plus</span><span>18 000 €</span><b>120 000 €</b></div>`)}
-      ${msCase('',`<div class="ms-qui">${lien(parId('vanbelle'))}</div><div class="sous">Poids léger · 26 ans</div><div class="sous">n° 8 Split · n° 52 mondial</div>
+      ${msCase('',`<div class="ms-qui">${lien(parId('vanbelle'))}</div><div class="sous">Poids léger · 26 ans</div><div class="sous">n° 8 chez Split · n° 52 mondial</div>
         <div class="ms-l2"><span class="T ms-bil">9-2-0</span>${serie('vvdvv')}</div>${msFait('Dernier combat','3 octobre')}`)}
-      ${msCase('Ailleurs',`${msFaitH('Ils l’ont contacté','MMA Korner et Pure Impact')}${msFaitH('Son agent','Il négocie dur et fait jouer la concurrence')}`)}
-      ${msCase('Chez Split depuis 2023',`<div class="ms-chiffres q4">${msGros('5','combats')}${msGros('4','victoires')}${msGros('1','bonus de la soirée')}${msGros('2 400','places en moyenne')}</div>`,'large')}
+      ${msCase('Ailleurs',`${msFaitH('Contacté par','MMA Korner et Pure Impact')}${msFaitH('Agent','Il négocie dur et fait jouer la concurrence')}`)}
+      ${msCase('Chez Split depuis 2023',`<div class="ms-chiffres q4">${msGros('5','combats')}${msGros('4','victoires')}${msGros('1','prime de soirée')}${msGros('2 400','places en moyenne')}</div>`,'large')}
     </div>`,
-   rep:[['Négocier',null,'Écran Contrats, hors de cette maquette.'],['Après le 16 février','L’agent attendra. D’ici là, il écoutera les autres offres.']]},
+   rep:[['Négocier',null,'Négociation hors de cette maquette.'],['Après le 16 février','L’agent attendra. D’ici là, il écoutera les autres offres.']]},
 
   {id:'rachidi',tag:'Combattante',qui:'Hajar Rachidi',role:'',date:msJ(6),lu:true,attend:true,
    t:'<span class="nom" data-fiche="rachidi">Hajar Rachidi</span> veut une chance au titre',
-   txt:'« Cinq victoires de suite. Si je bats Meziane le 16 février, je veux ma chance pour la ceinture avant l’été. Je ne demande pas plus d’argent. Je veux juste savoir si Split croit en moi. »',
+   txt:'« Cinq victoires de suite. Si je bats Meziane le 16 février, je veux ma chance pour la ceinture avant l’été. Je ne demande pas plus d’argent. Je veux juste savoir si Split croit en moi. »',
    vue:()=>{const r=parId('rachidi'),v=msChamp('Poids paille F'),col=(c,t)=>`<div class="ms-duo-c"><span class="etiq">${t}</span><div class="ms-qui">${lien(c)}</div>
         <div class="ms-l2 col"><span class="T ms-bil">${bilan(c)}</span>${serie(c.serie)}</div><div class="sous">${c.rang==='C'?'Championne':'n° '+c.rang+' Split'} · n° ${c.mondial} mondial</div></div>`;
      return `<div class="ms-cases g2b">
-      ${msCase('Poids pailles',`<div class="ms-duo">${col(r,'Elle')}<span class="ms-duo-vs T">VS</span>${col(v,'La championne')}</div>`)}
+      ${msCase('Poids pailles',`<div class="ms-duo">${col(r,'Challenger')}<span class="ms-duo-vs T">VS</span>${col(v,'Championne')}</div>`)}
       ${msCase('Demande',`<div class="ms-dem">Un combat pour la ceinture <b>avant le 30 juin</b>, si elle bat ${lien(parId('meziane'))} le 16 février.</div>
-        ${msFaitH('Si tu acceptes','C’est noté sur sa fiche, dans « Ses demandes »')}${msFait('Si tu tiens parole','Elle te fera confiance')}${msFait('Sinon','<span style="color:var(--neg)">Elle le prendra mal</span>')}`)}
+        ${msFaitH('Si tu acceptes','Noté sur sa fiche, dans « Ses demandes »')}${msFait('Si tu tiens parole','Elle te fera confiance')}${msFait('Sinon','<span style="color:var(--neg)">Elle le prendra mal</span>')}`)}
       ${msCase('3 derniers combats',`<div class="ms-echos">${[['8 décembre','Soumission, étranglement arrière','R2 · 3:41'],['14 septembre','Décision unanime','30-27 ×3'],['22 juin','KO technique, coups au sol','R1 · 4:12']].map(([d,m,t])=>
         `<div><span class="etiq">${d} · ${t}</span><p><b style="color:var(--vert)">Victoire</b> · ${m}</p></div>`).join('')}</div>`,'large')}
     </div>`;},
-   rep:[['C’est d’accord','Noté sur sa fiche, dans « Ses demandes ». À tenir avant le 30 juin.'],['Pas maintenant','Elle n’insiste pas. Elle t’en reparlera si elle bat Meziane.']]},
+   rep:[['C’est d’accord','Noté sur sa fiche, dans « Ses demandes ». À tenir avant le 30 juin.'],['Pas maintenant','Elle n’insiste pas. Elle t’en reparlera si elle bat Meziane.']]},
 
   {id:'patron',tag:'Organisation',qui:'Gérard Vasseur',role:'patron de Split',date:msJ(5),lu:true,
-   t:'Ce que Gérard Vasseur attend de ta saison',
-   txt:'« Je ne te demande pas de miracle. Je veux voir où tu emmènes Split. »',
+   t:'Gérard Vasseur fixe tes objectifs 2027',
+   txt:'« Je ne te demande pas de miracle. Je veux voir où tu emmènes Split. »',
    vue:()=>`<div class="ms-cases g2b">
       ${msCase('Objectifs 2027',`
-        ${msFait('Rester dans le top 2','<b style="color:var(--vert)">2e, à garder</b>')}${msJauge(.92,'var(--vert)')}
-        ${(()=>{const m=msMeilleur(c=>c.cat==='Poids lourd');return msFait('Un poids lourd dans le top 5 mondial',`<b style="color:var(--jaune)">meilleur : n° ${m.mondial}</b>`)+msJauge(Math.min(.95,5/m.mondial),'var(--jaune)');})()}
+        ${msFait('Rester dans le top 2','<b style="color:var(--vert)">2/8, à garder</b>')}${msJauge(.92,'var(--vert)')}
+        ${(()=>{const m=msMeilleur(c=>c.cat==='Poids lourd');return msFait('Un poids lourd dans le top 5 mondial',`<b style="color:var(--jaune)">meilleur : n° ${m.mondial}</b>`)+msJauge(Math.min(.95,5/m.mondial),'var(--jaune)');})()}
         ${msFait('Remplir le Forum de Lille',`${Math.round(S.preventes/40)} %`)}${msJauge(S.preventes/4000)}`)}
-      ${msCase('Patron',`${msGros('Il attend de voir')}${msFait('Ce qu’il regarde en premier','Les préventes de Lille')}${msFait('Il a fondé Split','En 2004')}`)}
-      ${msCase('Ce qu’il surveille',`<div class="ms-chiffres q4">${msGros('13,4 M€','masse salariale par an')}${msGros('182 000 €','recette à Lille l’an dernier')}${msGros('1 830','places vendues l’an dernier')}${msGros('+ 6 %','abonnés télé en 2026')}</div>`,'large')}
+      ${msCase('Patron',`${msGros('Il attend de voir')}${msFait('Priorité','Les préventes de Lille')}${msFait('Fondateur de Split','2004')}`)}
+      ${msCase('Chiffres suivis',`<div class="ms-chiffres q4">${msGros('13,4 M€','masse salariale par an')}${msGros('182 000 €','recette à Lille l’an dernier')}${msGros('1 830','places vendues l’an dernier')}${msGros('+ 6 %','abonnés télé en 2026')}</div>`,'large')}
     </div>`},
 
-  {id:'bienvenue',tag:'Leïla',qui:'Leïla Malika',role:'ton adjointe',date:msJ(4),lu:true,
+  {id:'bienvenue',tag:'Leïla',qui:'Leïla Malika',role:'adjointe',date:msJ(4),lu:true,
    t:'Bienvenue chez Split',
-   txt:'Je suis Leïla, ton adjointe. Je connais les combattants, les agents et les salles de la région. Quand tu veux un avis, demande-moi : je ne choisis jamais à ta place.',
+   txt:'Je suis Leïla, ton adjointe. Je connais les combattants, les agents et les salles de la région. Quand tu veux un avis, demande-moi : je ne choisis jamais à ta place.',
    vue:()=>`<div class="ms-cases g2b">
-      ${msCase('Split aujourd’hui',`<div class="ms-chiffres">${msGros(COMBATTANTS.length,'combattants')}${msGros(COMBATTANTS.filter(c=>c.rang==='C').length,'champions')}${msGros('62','soirées')}${msGros('<span style="text-transform:none">2e</span>','des 8 organisations')}</div>`)}
-      ${msCase('Par où commencer',`<div class="ligne" data-go="effectif"><span style="flex:1">Connaître l’effectif</span><span class="lecture">›</span></div><div class="ligne" data-go="carte"><span style="flex:1">Finir la carte du 16 février</span><span class="lecture">›</span></div>`)}
+      ${msCase('Split aujourd’hui',`<div class="ms-chiffres">${msGros(COMBATTANTS.length,'combattants')}${msGros(COMBATTANTS.filter(c=>c.rang==='C').length,'champions')}${msGros('62','soirées')}${msGros('2/8','place')}</div>`)}
+      ${msCase('Priorités',`<div class="ligne" data-go="effectif"><span style="flex:1">Connaître l’effectif</span><span class="lecture">›</span></div><div class="ligne" data-go="carte"><span style="flex:1">Finir la carte du 16 février</span><span class="lecture">›</span></div>`)}
       ${msCase('2 têtes d’affiche',`<div class="ms-echos">${['nana','mezouar'].map(id=>{const c=parId(id);
         return `<div><div class="ms-qui">${lien(c,true)}</div><div class="sous">${esc(c.cat)} · ${c.rang==='C'?'champion':'n° '+c.rang+' Split'} · n° ${c.mondial} mondial</div><div class="ms-l2"><span class="T ms-bil">${bilan(c)}</span>${serie(c.serie)}</div></div>`;}).join('')}</div>`,'large')}
     </div>`},
@@ -209,7 +209,7 @@ function msBas(m){
 function msOuvert(){
   const m=msPar(S.ms.sel);
   if(!m)return pan(`<div class="ms-vide">Aucun message.</div>`,'','ms-g');
-  const avert=S.ms.suppr===m.id?`<div class="ms-avert oct apparait"><div class="oct"><span>${m.important?esc(m.alerte)+' Supprimer ce message laisse les choses en l’état.':'Ce message attend ta décision.'} Le supprimer quand même ?</span>
+  const avert=S.ms.suppr===m.id?`<div class="ms-avert oct apparait"><div class="oct"><span>${m.important?esc(m.alerte)+' Rien ne change si tu le supprimes.':'Décision en attente.'} Supprimer quand même ?</span>
       ${msOui('Supprimer','data-mssok')}${msNon('Garder','data-mssnon')}</div></div>`:'';
   return pan(`<div class="ms-tete">${msTag(m.tag)}<span class="ms-de">${esc(m.qui)}${m.role?`<span class="sous"> · ${esc(m.role)}</span>`:''}</span>
       <span class="sous" style="margin-left:auto">${dLong(m.date)}</span>
@@ -228,7 +228,7 @@ function msCompteurs(){
 /* ---- Branchement dans le cadre ---- */
 function msAlerte(){
   const b=msBloquant(),v=4-S.af.m.filter(x=>x.a&&x.b).length;
-  $('#alerte').innerHTML=`<span class="tag-j oct cj fin">Prochaine étape</span><span style="font-size:22px">${b?`Réponds au médecin : ${b.alerte}`:v?`Il manque ${v} combat${v>1?'s':''} en carte principale.`:'La carte est complète : tu peux la valider.'}</span>`;
+  $('#alerte').innerHTML=`<span class="tag-j oct cj fin">Prochaine étape</span><span style="font-size:22px">${b?`Réponds au médecin : ${b.alerte}`:v?`Il manque ${v} combat${v>1?'s':''} en carte principale.`:'Carte complète, prête à valider.'}</span>`;
 }
 const msRendreBase=rendre;
 rendre=function(){
@@ -270,7 +270,7 @@ function msSupprimer(id){
 const msContinuerBase=continuer;
 continuer=function(){
   const b=msBloquant();
-  if(b){toast(`Impossible de continuer : ${b.alerte} Choisis quoi faire.`);if(S.ecran!=='messages')aller('messages');msLire(b.id);rendre();return;}
+  if(b){toast(`Impossible de continuer : ${b.alerte} Réponds au message.`);if(S.ecran!=='messages')aller('messages');msLire(b.id);rendre();return;}
   if(S.ecran!=='messages'||S._msFait){msContinuerBase();if(S.ecran==='messages')setTimeout(()=>{if(S.ecran==='messages')rendre();},1000);return;}
   if(S._enCours)return;S._enCours=true;let n=0;
   const tic=()=>{S.date.setDate(S.date.getDate()+1);S.jours--;n++;S.preventes+=48+n*17;
@@ -279,20 +279,20 @@ continuer=function(){
     S._enCours=false;S._msFait=true;
     Object.assign(parId('belkacem'),{statut:'blesse',retour:'à confirmer le 5 février'});
     const m={id:'belkacem-blesse',tag:'Médecin',qui:'Dr Hélène Roux',role:'médecin de Split',date:new Date(S.date),lu:true,important:true,attend:true,
-      alerte:'Sofiane Belkacem est blessé et il est à l’affiche.',
-      t:'<span class="nom" data-fiche="belkacem">Sofiane Belkacem</span> est blessé, et il est à l’affiche',
-      txt:'Sofiane s’est ouvert l’arcade gauche à l’entraînement : six points de suture. S’il cicatrise bien, il pourra combattre. Je te donne mon avis définitif le 5 février.',
+      alerte:'Sofiane Belkacem est blessé et à l’affiche.',
+      t:'<span class="nom" data-fiche="belkacem">Sofiane Belkacem</span> est blessé et à l’affiche',
+      txt:'Sofiane s’est ouvert l’arcade gauche à l’entraînement : 6 points de suture. S’il cicatrise bien, il pourra combattre. Je te donne mon avis définitif le 5 février.',
       vue:()=>`<div class="ms-cases g3">
-        ${msCase('Diagnostic',`${msFaitH('Blessure','Coupure à l’arcade gauche, six points')}${msFait('Gravité',msGravite(2,'Moyenne'))}${msFaitH('Le risque','Que la plaie se rouvre en combat')}`)}
+        ${msCase('Diagnostic',`${msFaitH('Blessure','Coupure à l’arcade gauche, 6 points')}${msFait('Gravité',msGravite(2,'Moyenne'))}${msFaitH('Risque','Que la plaie se rouvre en combat')}`)}
         ${msCase('Avis définitif',`${msGros('5 février',`dans ${msJours(msJ(5,1))} jours`)}${msFrise(msJ(14),msJ(5,1),'14 janvier','5 février')}${msFait('Combat','16 février')}`)}
         ${msCase('À l’affiche',`${msCombat('m2')}${msFait('Si tu le retires','sa place se libère')}${msFait('Combat dans','33 jours')}`,'etroit')}
       </div>`,
       act:msInfirmerie,
-      rep:[['Le garder à l’affiche','Belkacem reste à l’affiche. Le médecin te répond le 5 février.'],
-        ['Le retirer de la carte','Belkacem quitte la carte : sa place est libre.',null,'belkacem']]};
-    MS_BOITE.unshift(m);MESSAGES.unshift({id:Date.now(),lu:true,t:m.t,de:`Le médecin · ${dLong(S.date).toLowerCase()}`,tag:'Médecin'});
+      rep:[['Le garder à l’affiche','Belkacem reste à l’affiche. Avis du médecin le 5 février.'],
+        ['Le retirer de la carte','Belkacem quitte la carte : sa place est libre.',null,'belkacem']]};
+    MS_BOITE.unshift(m);MESSAGES.unshift({id:Date.now(),lu:true,t:m.t,de:`Médecin · ${dLong(S.date).toLowerCase()}`,tag:'Médecin'});
     S.ms.sel=m.id;S.ms.nouveau=m.id;S.ms.anim=true;S.ms.suppr=null;rendre();
-    toast(`Le temps s’arrête, ${dLong(S.date).toLowerCase()} : message important du médecin.`);
+    toast(`Message important du médecin, ${dLong(S.date).toLowerCase()}.`);
   };tic();
 };
 

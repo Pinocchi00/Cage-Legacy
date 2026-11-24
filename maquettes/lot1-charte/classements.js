@@ -137,7 +137,7 @@ function clCarte(c,place,monde,rangAff){
     :`<span class="sous cl-l1">${toutes?esc(courte(c.cat))+' · ':c.rang==='C'?'':`n° ${c.rang} chez Split · `}n° ${c.mondial} mondial${toutes&&clChamp(c)?CL_C:''}</span>`;
   return `<div class="cl-c oct apparait ${ch?'or':''}" style="animation-delay:${place*60}ms"><div class="cl-ci oct"><i class="cl-img ${or?'or':''}" style="${or?'':`filter:${filtre} brightness(.8)`}"></i>
     <div class="cl-badge">${badge}${t?`<span class="cl-ct">${clTend(t)}</span>`:''}</div>
-    <div class="cl-noms"><span class="cl-pre">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="cl-nom nom ${c.nom.length>8?'long':''}" data-fiche="${c.id}">${esc(c.nom)}</span></div>
+    <div class="cl-noms"><span class="cl-pre">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="cl-nom nom ${c.nom.length>8?'long':''}" data-fiche="${c.id}">${esc(c.nom)}</span></div>
     <div class="cl-box"><span class="T cl-bil">${bilan(c)}</span>${serie5(c.serie)}${sous}</div>
   </div></div>`;
 }
@@ -151,7 +151,7 @@ function clCellule(c,k,r){
   const monde=S.cl.portee==='monde',toutes=clToutes();
   switch(k){
     case 'rang':return `<span class="eff-r"><span class="T eff-rang">${r}</span>${toutes?'':clTend(monde?c.tend:(c.tendS||'='))}</span>`;
-    case 'nom':return `<div class="eff-nom">${lien(c)}<span class="sous">${c.surnom?`« ${esc(c.surnom)} »`:'&nbsp;'}</span></div>`;
+    case 'nom':return `<div class="eff-nom">${lien(c)}<span class="sous">${c.surnom?`« ${esc(c.surnom)} »`:'&nbsp;'}</span></div>`;
     case 'org':return clOrg(c);
     case 'cat':return clCatCell(c);
     case 'bilan':return `<span class="T" style="font-size:32px">${bilan(c)}</span>`;
@@ -175,7 +175,7 @@ function clClassementHtml(){
   const monde=S.cl.portee==='monde',toutes=clToutes(),l=clListe(),tete=l.slice(0,3),reste=l.slice(3),cols=clColonnes();
   const th=k=>{const [t0,w]=CL_COLS[k],t=k==='rang'&&monde&&!toutes?'Rang mondial':t0;return `<th ${w?`style="width:${(w/1500*100).toFixed(2)}%"`:''}>${t}</th>`;};
   const leg='<span class="cl-leg">'+CL_C+' champion</span>';
-  const pied=toutes?`Les 30 meilleur${S.cl.sexe==='F'?'es':'s'} ${monde?'du monde':'de Split'}, toutes catégories, d’après leur rang mondial`:`▲ ▼ places gagnées ou perdues depuis la dernière soirée${monde?'':' de Split'}`;
+  const pied=toutes?`Top 30 ${monde?'mondial, toutes catégories':'de Split, toutes catégories, au rang mondial'}`:`▲ ▼ places gagnées ou perdues depuis la dernière soirée${monde?'':' de Split'}`;
   return `<div class="cl-podium">${tete.map(([c,r],i)=>clCarte(c,i,monde,r)).join('')}</div>
     <div class="cl-pan">${pan(`<div class="defile cl-defile"><table class="eff-t cl-t fixe"><thead><tr>${cols.map(th).join('')}</tr></thead>
       <tbody>${reste.map(([c,r],i)=>`<tr class="apparait ${monde&&!c.ext?'cl-nous':''}" style="animation-delay:${Math.min(i,10)*25}ms">${cols.map(k=>`<td class="c-${k}">${clCellule(c,k,r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
@@ -186,14 +186,14 @@ function clClassementHtml(){
 function clFinitions(c){return historique(c).filter(f=>f.res==='v'&&f.meth[0]!=='Décision').length;}
 function clMeilleureSerie(c){let m=0,n=0;for(const f of [...historique(c)].reverse()){n=f.res==='v'?n+1:0;m=Math.max(m,n);}return m;}
 const CL_STATS=[
-  ['fin','Le plus de finitions','Victoires par KO ou soumission chez Split','','Finitions',c=>clFinitions(c),0],
-  ['fpm','Le plus gros volume','Coups significatifs portés par minute','/ min','Coups par minute',c=>stats(c).fpm,2],
-  ['prec','Le plus précis','Part des coups significatifs qui touchent','%','Précision',c=>stats(c).prec,0],
-  ['defF','La meilleure défense','Part des coups adverses évités','%','Coups évités',c=>stats(c).defF,0],
-  ['am','Le lutteur','Amenées au sol réussies en 15 minutes','/ 15 min','Amenées en 15 min',c=>stats(c).am,2],
-  ['defA','Le mur','Part des amenées adverses stoppées','%','Amenées stoppées',c=>stats(c).defA,0],
-  ['sub','Le chasseur de soumission','Tentatives de soumission en 15 minutes','/ 15 min','Tentatives en 15 min',c=>stats(c).sub,2],
-  ['serie','La plus longue série','Victoires de suite, sur toute sa carrière','V','Victoires de suite',c=>clMeilleureSerie(c),0],
+  ['fin','Finitions','Victoires par KO ou soumission chez Split','','Finitions',c=>clFinitions(c),0],
+  ['fpm','Volume','Coups significatifs portés par minute','/ min','Coups par minute',c=>stats(c).fpm,2],
+  ['prec','Précision','Part des coups significatifs qui touchent','%','Précision',c=>stats(c).prec,0],
+  ['defF','Défense','Part des coups adverses évités','%','Coups évités',c=>stats(c).defF,0],
+  ['am','Amenées au sol','Amenées au sol réussies en 15 minutes','/ 15 min','Amenées en 15 min',c=>stats(c).am,2],
+  ['defA','Défense de lutte','Part des amenées adverses stoppées','%','Amenées stoppées',c=>stats(c).defA,0],
+  ['sub','Soumissions','Tentatives de soumission en 15 minutes','/ 15 min','Tentatives en 15 min',c=>stats(c).sub,2],
+  ['serie','Plus longue série','Victoires de suite, en carrière','V','Victoires de suite',c=>clMeilleureSerie(c),0],
 ];
 const clVal=(v,dec)=>dec?v.toFixed(dec).replace('.',','):String(v);
 /** Classement d'une statistique (la catégorie, ou toutes celles du sexe choisi) : au moins 5 combats, égalités départagées par le palmarès. */
@@ -229,33 +229,33 @@ function clStatHtml(){
 const CL_STAFF=[
   {id:'sgarciaroy',f:1,prenom:'Inès',nom:'Garcia-Roy',surnom:'La Reine',cat:'Poids paille F',age:38,role:'Consultante',chez:'Pour Cage Hebdo',depuis:2021,lieu:'Paris',
    bilanF:'17-3-0',titres:'Championne des poids pailles, de 2016 à 2020',
-   cite:'« Je juge Split comme j’aurais aimé qu’on me juge : sans cadeau. »',apport:'Elle signe la chronique du lundi. Quand elle aime une affiche, les fans suivent.',action:'L’inviter au bord de la cage le 16 février',rel:.7,relT:'Elle aime Split',
-   act:[['12 janv.','« Lille mérite mieux qu’une carte à moitié vide. »','d'],['5 janv.','Elle classe Hajar Rachidi n° 1 des espoirs français.','v'],['29 déc.','Son bilan 2026 : « Split a retrouvé des têtes d’affiche. »','v']],
-   avis:['rachidi','« Elle a ce que j’avais : la patience. Donnez-lui sa chance avant l’été. »'],
-   jalons:[[2014,'Arrive chez Split'],[2016,'Championne des poids pailles'],[2020,'Cinquième défense, puis la retraite'],[2021,'Consultante pour Cage Hebdo']]},
+   cite:'« Je juge Split comme j’aurais aimé qu’on me juge : sans cadeau. »',apport:'Elle signe la chronique du lundi. Quand elle aime une affiche, les fans suivent.',action:'L’inviter au bord de la cage le 16 février',rel:.7,relT:'Elle aime Split',
+   act:[['12 janv.','« Lille mérite mieux qu’une carte à moitié vide. »','d'],['5 janv.','Elle classe Hajar Rachidi n° 1 des espoirs français.','v'],['29 déc.','Son bilan 2026 : « Split a retrouvé des têtes d’affiche. »','v']],
+   avis:['rachidi','« Elle a ce que j’avais : la patience. Donnez-lui sa chance avant l’été. »'],
+   jalons:[[2014,'Arrive chez Split'],[2016,'Championne des poids pailles'],[2020,'5e défense, puis la retraite'],[2021,'Consultante pour Cage Hebdo']]},
   {id:'skerloch',prenom:'Bastien',nom:'Kerloc’h',surnom:'Le Phare',cat:'Poids moyen',age:41,role:'Entraîneur',chez:'Ar Men Fight Club, à Brest',depuis:2023,lieu:'Brest',
    bilanF:'19-6-0',titres:'Champion des poids moyens, de 2017 à 2019',
-   cite:'« Mes lutteurs sont prêts. Il leur manque une soirée. »',apport:'Son club forme des lutteurs. Deux de ses élèves cherchent une organisation.',action:'Voir ses deux élèves',rel:.85,relT:'Très attaché à Split',
-   act:[['10 janv.','Deux de ses élèves invaincus chez les amateurs, à 6-0 et 5-0.','v'],['20 déc.','Il accueille un stage de lutte ouvert aux pros.','n'],['2 déc.','« Split devrait regarder du côté de la Bretagne. »','n']],
-   avis:['kessler','« Anton est le plus dur que j’aie croisé. Il lui manque un vrai camp de lutte. »'],
+   cite:'« Mes lutteurs sont prêts. Il leur manque une soirée. »',apport:'Son club forme des lutteurs. 2 de ses élèves cherchent une organisation.',action:'Voir ses 2 élèves',rel:.85,relT:'Très attaché à Split',
+   act:[['10 janv.','2 de ses élèves invaincus chez les amateurs, à 6-0 et 5-0.','v'],['20 déc.','Il accueille un stage de lutte ouvert aux pros.','n'],['2 déc.','« Split devrait regarder du côté de la Bretagne. »','n']],
+   avis:['kessler','« Anton est le plus dur que j’aie croisé. Il lui manque un vrai camp de lutte. »'],
    jalons:[[2012,'Premier combat chez Split'],[2017,'Champion des poids moyens'],[2022,'Dernier combat, 19e victoire chez Split'],[2023,'Ouvre l’Ar Men Fight Club']]},
   {id:'sferhat',prenom:'Yacine',nom:'Ferhat',surnom:'Le Lynx',cat:'Poids plume',age:35,role:'Commentateur',chez:'Il commente les soirées de Split',depuis:2022,lieu:'Lyon',
-   bilanF:'15-4-0',titres:'Le record de finitions chez Split : 12',
-   cite:'« Une finition, ça se raconte. Une décision, ça s’explique. »',apport:'Ses phrases font les extraits qui tournent le lendemain. Un bon combat bien raconté attire plus de spectateurs à la soirée suivante.',action:'Lui parler avant la soirée',rel:.9,relT:'Il fait partie de la maison',
-   act:[['8 déc.','Il commente Split Fight Night 62.','n'],['9 déc.','Son « Nana ne recule jamais » a tourné partout.','v'],['14 nov.','Il regrette deux décisions serrées à Split Fight Night 61.','d']],
-   avis:['nana','« Le Boucher n’a plus vingt ans, mais personne ne le fait reculer. »'],
+   bilanF:'15-4-0',titres:'Le record de finitions chez Split : 12',
+   cite:'« Une finition, ça se raconte. Une décision, ça s’explique. »',apport:'Ses phrases font les extraits qui tournent le lendemain.',action:'Lui parler avant la soirée',rel:.9,relT:'Il fait partie de la maison',
+   act:[['8 déc.','Il commente Split Fight Night 62.','n'],['9 déc.','Son « Nana ne recule jamais » a tourné partout.','v'],['14 nov.','Il regrette 2 décisions serrées à Split Fight Night 61.','d']],
+   avis:['nana','« Le Boucher n’a plus vingt ans, mais personne ne le fait reculer. »'],
    jalons:[[2015,'Premier combat chez Split'],[2019,'12e finition, le record'],[2021,'Retraite'],[2022,'Commentateur des soirées de Split']]},
-  {id:'shaddou',prenom:'Samir',nom:'Haddou',surnom:'',cat:'Poids mi-moyen',age:39,role:'Agent',chez:'Il représente quatre combattants, dont Sofiane Belkacem',depuis:2023,lieu:'Marseille',
+  {id:'shaddou',prenom:'Samir',nom:'Haddou',surnom:'',cat:'Poids mi-moyen',age:39,role:'Agent',chez:'Il représente 4 combattants, dont Sofiane Belkacem',depuis:2023,lieu:'Marseille',
    bilanF:'21-5-0',titres:'9 victoires de suite, de 2017 à 2020',
-   cite:'« Mes combattants valent plus que ce que tu leur offres. Parlons-en. »',apport:'Il négocie dur. Un accord avec lui peut aussi t’ouvrir un espoir des poids plumes que d’autres organisations suivent.',action:'Voir les combattants qu’il représente',rel:.45,relT:'Méfiant',
-   act:[['10 janv.','Il a refusé une offre de MMA Korner pour un de ses combattants.','n'],['6 janv.','Il veut un adversaire du top 3 pour Sofiane Belkacem.','n'],['18 déc.','« Split paie moins que les autres. Ça va changer. »','d']],
-   avis:['belkacem','« Sofiane veut un adversaire du top 3. Donne-le-lui et il remplira ta salle. »'],
+   cite:'« Mes combattants valent plus que ce que tu leur offres. Parlons-en. »',apport:'Il négocie dur. Un accord avec lui peut aussi t’ouvrir un espoir des poids plumes que d’autres organisations suivent.',action:'Voir les combattants qu’il représente',rel:.45,relT:'Méfiant',
+   act:[['10 janv.','Il a refusé une offre de MMA Korner pour un de ses combattants.','n'],['6 janv.','Il veut un adversaire du top 3 pour Sofiane Belkacem.','n'],['18 déc.','« Split paie moins que les autres. Ça va changer. »','d']],
+   avis:['belkacem','« Sofiane veut un adversaire du top 3. Donne-le-lui et il remplira ta salle. »'],
    jalons:[[2013,'Premier combat chez Split'],[2017,'Début de la série de 9 victoires'],[2022,'Retraite'],[2023,'Devient agent']]},
   {id:'sbenyahia',prenom:'Farid',nom:'Benyahia',surnom:'Le Double',cat:'Poids léger',age:37,role:'Gérant de salle',chez:'Benyahia MMA, à Marseille',depuis:2022,lieu:'Marseille',
-   bilanF:'18-4-0',titres:'Double champion : poids légers en 2019, poids mi-moyens en 2020',
-   cite:'« À Marseille, tout le monde veut combattre pour Split. »',apport:'Sa salle accueille des camps, moins chers qu’à Lyon, avec de bons partenaires de lutte.',action:'Proposer un camp chez lui',rel:.75,relT:'Il garde un bon souvenir de Split',
-   act:[['9 janv.','Ilyas Mezouar fait son camp chez lui pour le 16 février.','v'],['22 déc.','Sa salle ouvre une section femmes.','n'],['1 déc.','Il cherche un deuxième entraîneur de lutte.','n']],
-   avis:['mezouar','« Ilyas s’entraîne chez moi depuis un mois. Il sera prêt pour Nana. »'],
+   bilanF:'18-4-0',titres:'Double champion : poids légers en 2019, poids mi-moyens en 2020',
+   cite:'« À Marseille, tout le monde veut combattre pour Split. »',apport:'Sa salle accueille des camps, moins chers qu’à Lyon, avec de bons partenaires de lutte.',action:'Proposer un camp chez lui',rel:.75,relT:'Il garde un bon souvenir de Split',
+   act:[['9 janv.','Ilyas Mezouar fait son camp chez lui pour le 16 février.','v'],['22 déc.','Sa salle ouvre une section femmes.','n'],['1 déc.','Il cherche un 2e entraîneur de lutte.','n']],
+   avis:['mezouar','« Ilyas s’entraîne chez moi depuis un mois. Il sera prêt pour Nana. »'],
    jalons:[[2014,'Premier combat chez Split'],[2019,'Champion des poids légers'],[2020,'Champion des poids mi-moyens'],[2022,'Retraite, ouvre Benyahia MMA']]},
 ];
 CL_STAFF.forEach(x=>EXT.push(Object.assign({staff:true,v:+x.bilanF.split('-')[0],d:+x.bilanF.split('-')[1],n:0,rang:'–',mondial:0,serie:'vvvvv',statut:'retraite',ext:true},x)));
@@ -267,21 +267,21 @@ function clStaffHtml(c){
   const recs=clRecords().flatMap(([,l])=>l).filter(x=>x.qui&&x.qui.id===c.id),av=parId(c.avis[0]),il=c.f?'elle':'il';
   const ton={v:'var(--vert)',d:'var(--neg)',n:'var(--texte2)'};
   return `<div class="banniere" style="height:260px"><div class="ban-contenu"><i class="fb-img cl-staff-img"></i>
-      <div class="fb-nom"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
+      <div class="fb-nom"><span style="font-size:64px">${esc(c.prenom)}${c.surnom?`<em class="s">« ${esc(c.surnom)} »</em>`:''}</span><span style="font-size:${c.nom.length>8?150:200}px">${esc(c.nom)}</span></div>
       <div class="fb-pal"><div style="display:flex;flex-direction:column;gap:14px"><span style="font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--texte2)">AUJOURD’HUI</span>
         <b class="T" style="font-size:72px;line-height:.8">${esc(c.role)}</b><span class="sous">Ancien${c.f?'ne':''} de Split · ${esc(c.bilanF)}</span></div></div></div></div>
     <div class="cl-staff">
       ${pan(titre(esc(c.role),esc(c.lieu))+`<div class="cl-chez">${esc(c.chez)}</div>
         <div class="cl-sf">${fait('Depuis',c.depuis)}${fait('Âge',c.age+' ans')}${fait('Relation',`<span style="color:${c.rel>=.6?'var(--vert)':'var(--jaune)'}">${c.rel>=.8?'Très bonne':c.rel>=.6?'Bonne':'Fragile'}</span>`)}</div>
-        <div class="etiq">Ces dernières semaines</div>
+        <div class="etiq">Dernières semaines</div>
         ${c.act.map(([d,t,k],i)=>`<div class="cl-act apparait" style="animation-delay:${200+i*90}ms"><i class="octr" style="background:${ton[k]}"></i><span class="sous">${d}</span><span>${esc(t)}</span></div>`).join('')}
         <div class="cl-cite">${esc(c.cite)}</div>`,'height:100%','apparait')}
-      ${pan(titre('Sa carrière',esc(c.bilanF))+`<div class="cl-titre-c"><span style="color:var(--jaune);display:flex">${ico('ceintures',26)}</span><span>${esc(c.titres)}</span></div>
+      ${pan(titre('Carrière',esc(c.bilanF))+`<div class="cl-titre-c"><span style="color:var(--jaune);display:flex">${ico('ceintures',26)}</span><span>${esc(c.titres)}</span></div>
         <div class="cl-frise">${c.jalons.map(([a,t],i)=>`<div class="apparait" style="animation-delay:${200+i*90}ms"><b class="T">${a}</b><i class="octr"></i><span>${esc(t)}</span></div>`).join('')}</div>
-        ${recs.length?`<div class="etiq" style="margin-top:auto">${recs.length>1?'Ses records chez Split':'Son record chez Split'}</div>${recs.map(r=>`<div class="cl-srec"><b class="T">${r.v}</b><span>${r.l}</span></div>`).join('')}`:''}`,'height:100%','apparait')}
+        ${recs.length?`<div class="etiq" style="margin-top:auto">${recs.length>1?'Records chez Split':'Record chez Split'}</div>${recs.map(r=>`<div class="cl-srec"><b class="T">${r.v}</b><span>${r.l}</span></div>`).join('')}`:''}`,'height:100%','apparait')}
       ${pan(titre('Avec Split')+`<div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:24px">${esc(c.relT)}</b><span class="sous">${Math.round(c.rel*100)} / 100</span></div>
         <div class="jauge cl-sj"><i style="width:${c.rel*100}%;background:${c.rel>=.6?'var(--vert)':'var(--jaune)'}"></i></div>
-        <div class="etiq">Ce qu’${il} pense de ${lien(av)}</div><div class="cl-avis">${esc(c.avis[1])}</div>
+        <div class="etiq">Avis sur ${lien(av)}</div><div class="cl-avis">${esc(c.avis[1])}</div>
         <div class="etiq" style="margin-top:20px">Ce qu’${il} peut t’apporter</div><div style="font-size:22px;line-height:1.3;margin-top:6px">${esc(c.apport)}</div>
         <button class="bouton petit oct" data-clstaff="${c.id}" style="margin-top:auto;align-self:flex-start">${esc(c.action)}</button>`,'height:100%','apparait')}
     </div>`;
@@ -313,9 +313,9 @@ const clPanneauBase=panneauCat;
 panneauCat=function(c){
   if(!S.clNavMonde||c.staff)return clPanneauBase(c);
   const l=clTrente(c),cur=x=>x.id===c.id,noir=x=>cur(x)?'color:var(--noir)':'';
-  return `<div class="panneau-cat">${pan(titre(esc(pluriel(c.cat)),'Classement mondial · les 30 premiers')+`<div class="defile" style="padding-right:10px">${l.map(x=>`<div class="lc oct ${cur(x)?'cur':''}" data-lc="${x.id}">
+  return `<div class="panneau-cat">${pan(titre(esc(pluriel(c.cat)),'Classement mondial · top 30')+`<div class="defile" style="padding-right:10px">${l.map(x=>`<div class="lc oct ${cur(x)?'cur':''}" data-lc="${x.id}">
       <span class="T" style="font-size:30px;color:${cur(x)?'var(--noir)':'var(--texte2)'}">${x.mondial}</span>
-      <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;gap:4px"><span class="T" style="font-size:32px">${esc(x.prenom)} ${esc(x.nom)}</span><span style="font-size:19px;opacity:.75">${x.surnom?`« ${esc(x.surnom)} »`:''}</span></span>
+      <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;gap:4px"><span class="T" style="font-size:32px">${esc(x.prenom)} ${esc(x.nom)}</span><span style="font-size:19px;opacity:.75">${x.surnom?`« ${esc(x.surnom)} »`:''}</span></span>
       <span class="T" style="font-size:32px">${bilan(x)}</span><span class="sous" style="${noir(x)}">${x.ext?esc(x.org):'Split'}</span><span>${serie(x.serie)}</span>
       <span style="font-size:20px;line-height:1.15"><span class="sous" style="${noir(x)}">Dernier combat</span><br>il y a ${depuis(x.dernier)}</span>
       <span style="font-size:20px">${cur(x)?'Fiche ouverte':x.ext?(x.prochain?`Combat le ${esc(x.prochain.date)}`:'<span class="sous">Rien de prévu</span>'):etat(x)}</span></div>`).join('')}</div>`,'height:100%')}</div>`;
@@ -348,9 +348,9 @@ contratHtml=function(c){
   const demande=Math.round(k.bourse*1.25/1000)*1000,place=split.filter(y=>y.s>demande).length+1;
   const fait=(l,v,s)=>`<div class="oct cl-fait"><div class="sous">${l}</div><div class="T">${v}</div>${s?`<div class="sous" style="font-size:17px">${s}</div>`:''}</div>`;
   return `<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px;height:100%">
-    ${pan(titre('Son contrat',esc(c.org))+`<div class="T" style="font-size:52px;line-height:.9">Sous contrat avec ${esc(c.org)}</div>
+    ${pan(titre('Contrat',esc(c.org))+`<div class="T" style="font-size:52px;line-height:.9">Sous contrat avec ${esc(c.org)}</div>
       <div class="cl-sf">${fait('Combats restants',`${k.reste} sur ${k.tot}`)}${fait('Bourse',`${nb(k.bourse)} €`,'estimée, par combat')}${fait('Fin prévue',k.fin)}</div>
-      <div class="sous" style="font-size:20px">Ces chiffres viennent de la presse : ${esc(c.org)} ne publie pas ses contrats.</div>
+      <div class="sous" style="font-size:20px">Ces chiffres viennent de la presse : ${esc(c.org)} ne publie pas ses contrats.</div>
       <div class="etiq" style="margin-top:24px">Pour le faire venir chez Split</div>
       <div style="font-size:23px;line-height:1.3;margin-top:8px">${c.depart?`Il est parti de Split en ${c.depart.getFullYear()}. `:''}Il faut attendre la fin de son contrat, en ${k.fin}. Tant qu’${il} est sous contrat, tu ne peux pas lui proposer de combat.</div>
       <button class="bouton petit oct" data-clsuivre="${c.id}" style="margin-top:auto;align-self:flex-start">Le suivre</button>`,'height:100%')}
@@ -367,7 +367,7 @@ echosDe=function(c){
   return [
     ['pos','Cage Hebdo','Presse',c.champOrg?`${c.nom}, champion de ${o}`:`${c.nom} monte chez ${o}`,c.depart?`Parti de Split en ${c.depart.getFullYear()}, il est aujourd’hui ${c.mondial}e mondial. À Lyon, certains le regrettent.`:`${c.mondial}e mondial, il est l’un des noms qui comptent chez ${o}.`,'il y a 2 semaines',0,'Julien Morel'],
     ['info','Tableau Noir','Statistiques',pr?'Il touche plus qu’il ne prend':'Il prend plus qu’il ne touche',`${virg(st.fpm)} frappes données par minute, ${virg(st.enc)} reçues.`,'il y a 1 mois',0,''],
-    [c.depart?'neg':'pos','Le Forum','Supporters','',c.depart?`Il est parti chez ${o} pour l’argent. Qu’il y reste.`:`${c.nom} contre un gars de Split ? Je paierais ma place.`,'il y a 5 jours',0,'Ring_Side'],
+    [c.depart?'neg':'pos','Le Forum','Supporters','',c.depart?`Il est parti chez ${o} pour l’argent. Qu’il y reste.`:`${c.nom} contre un gars de Split ? Je paierais ma place.`,'il y a 5 jours',0,'Ring_Side'],
     ['info','Le marché','Contrats','Son contrat',`Il lui reste ${k.reste} combat${k.reste>1?'s':''} chez ${o}. Son agent dit qu’il écoutera toutes les offres.`,'il y a 3 semaines',0,''],
     ['info','Hors de la cage','Portrait','Loin des micros','Discret hors de la salle, il ne donne presque jamais d’interview avant un combat.','',0,'']];
 };
@@ -376,7 +376,7 @@ relationDe=function(c){
   if(!clAutre(c))return clRelationDeBase(c);
   const r=graine(c.id+'rel'),pairs=clMonde(c.cat).filter(x=>x.ext&&x.org===c.org&&x!==c),pick=k=>pairs.length?`${pairs[k%pairs.length].prenom} ${pairs[k%pairs.length].nom}`:'—';
   const debut=2026-Math.floor((c.v+c.d)/2.5),m=c.mondial;
-  const moments=c.depart?[[String(debut),'Signe chez Split','Premier contrat, en préliminaires'],['2021','Le KO le plus rapide de Split','0:09, toujours le record'],[String(c.depart.getFullYear()),`Part chez ${c.org}`,'Fin de contrat, une meilleure offre'],['2026',`${m}e mondial`,'Son meilleur classement']]
+  const moments=c.depart?[[String(debut),'Signe chez Split','Premier contrat, en préliminaires'],['2021','KO le plus rapide de Split','0:09, toujours le record'],[String(c.depart.getFullYear()),`Part chez ${c.org}`,'Fin de contrat, une meilleure offre'],['2026',`${m}e mondial`,'Meilleur classement']]
     :[[String(debut),`Signe chez ${c.org}`,'Premier contrat'],[String(debut+2),'Entre dans le top 30 mondial',''],...(c.champOrg?[['2025',`Champion de ${c.org}`,'Sa ceinture']]:[]),['2026',`${m}e mondial`,'']];
   return {rapport:c.depart?1:2,moments,
     entourage:[['Agent',['Marco Bellini','Ana Duarte','Tom Reilly','Yusuf Kaya'][Math.floor(r()*4)],'Écoute les offres'],['Entraîneur',['Diego Alves','Lars Holm','Mehmet Arslan','Kenji Ito'][Math.floor(r()*4)],'Depuis ses débuts'],['Organisation',c.org,c.champOrg?'Champion':'Sous contrat'],['Salle',['Kings Gym','Nova Fight','Iron Temple','Blue Lion MMA'][Math.floor(r()*4)],'']],
@@ -394,7 +394,7 @@ function clApercuExt(c){
     const b=box.parentElement.querySelector('[data-action="proposer"]');if(b)b.outerHTML=`<button class="bouton petit oct" data-clsuivre="${c.id}">Le suivre</button>`;}
   const t=[...document.querySelectorAll('#fiche .pt h2')].find(e=>e.textContent==='Rapport avec l’organisation');if(t)t.textContent='Rapport avec Split';
 }
-document.addEventListener('click',e=>{const el=e.target.closest('[data-clsuivre]');if(el){toast(`Tu suis ${esc(parId(el.dataset.clsuivre).prenom)} ${esc(parId(el.dataset.clsuivre).nom)} : il apparaîtra dans « Tes suivis ».`);}});
+document.addEventListener('click',e=>{const el=e.target.closest('[data-clsuivre]');if(el){toast(`Tu suis ${esc(parId(el.dataset.clsuivre).prenom)} ${esc(parId(el.dataset.clsuivre).nom)} : il apparaîtra dans « Tes suivis ».`);}});
 
 /* ---- Records : un seul onglet, rangé par type (Q21a). Des valeurs crédibles, le détenteur et ce qu'il devient (R21). ---- */
 function clRecords(){
@@ -404,7 +404,7 @@ function clRecords(){
   const vues=new Set(),soir=(v,l,lieu,id,i)=>{const c=parId(id),h=historique(c);while(h[i+1]&&vues.has(h[i].soiree))i++;const f=h[i];vues.add(f.soiree);return {v,l,ou:`${f.soiree} · ${lieu}, ${clMois(f.date)}`,aff:{f,a:c,b:parNom(f.adv,c.cat)}};};
   return [
     ['En un combat',[
-      R('0:09','Le KO le plus rapide',parNom('Kamel Yahiaoui','Poids plume'),'Mars 2021 · Split Fight Night 41','Parti chez Pure Impact'),
+      R('0:09','KO le plus rapide',parNom('Kamel Yahiaoui','Poids plume'),'Mars 2021 · Split Fight Night 41','Parti chez Pure Impact'),
       R('187','Coups portés en un combat',P_('lecomte'),'Juin 2025 · Split Fight Night 55','Toujours chez Split',1),
       R('9','Amenées au sol en un combat',P_('kessler'),'Avril 2024 · Split Fight Night 49','Toujours chez Split',1),
       R('3','Knockdowns en un combat',P_('nana'),'Nov. 2024 · Split Fight Night 52','Champion des poids légers',1),
@@ -412,19 +412,19 @@ function clRecords(){
     ['En carrière',[
       R('19','Victoires chez Split',P_('skerloch'),'De 2012 à 2022','Entraîneur à Brest'),
       R('12','Finitions chez Split',P_('sferhat'),'8 KO et 4 soumissions','Commentateur des soirées de Split'),
-      R('22','Combats chez Split',P_('kessler'),'Depuis 2020','Record encore en cours',1),
+      R('22','Combats chez Split',P_('kessler'),'Depuis 2020','Record en cours',1),
       R('9','Victoires de suite',P_('shaddou'),'De 2017 à 2020','Agent de combattants'),
     ]],
     ['Ceintures',[
       R('5','Défenses de titre de suite',P_('sgarciaroy'),'Poids pailles, 2016 à 2020','Consultante pour Cage Hebdo'),
       R('40','Mois de règne, le plus long',parNom('Dmitri Zaïtsev','Poids lourd'),'Poids lourds, 2018 à 2021','Parti chez Garden of Blood'),
-      R(`${ch.age-1} ans`,'Le plus jeune champion',ch,'Poids mouches, 2026','Toujours champion',1),
+      R(`${ch.age-1} ans`,'Plus jeune champion',ch,'Poids mouches, 2026','Toujours champion',1),
       R('2','Ceintures, le seul double champion',P_('sbenyahia'),'Léger en 2019, mi-moyen en 2020','Gérant d’une salle à Marseille'),
     ]],
     ['Soirées',[
-      soir('7 812','Spectateurs, la salle la plus pleine','Lille','kessler',1),
-      soir('1,9 M€','La plus grosse recette','Paris','nana',2),
-      soir('1,4 M','Téléspectateurs, le record','Lyon','nana',3),
+      soir('7 812','Spectateurs en une soirée','Lille','kessler',1),
+      soir('1,9 M€','Plus grosse recette','Paris','nana',2),
+      soir('1,4 M','Téléspectateurs en une soirée','Lyon','nana',3),
       soir('8 / 10','Combats finis avant la limite','Grenoble','belkacem',1),
     ]],
   ];
@@ -487,7 +487,7 @@ ouvrirFiche=function(id,garderFutur=false){
 
 document.addEventListener('click',e=>{
   const t=e.target;let el;
-  if((el=t.closest('[data-clstaff]'))){const c=parId(el.dataset.clstaff);toast(`${esc(c.action)} : écran hors de cette maquette.`);return;}
+  if((el=t.closest('[data-clstaff]'))){const c=parId(el.dataset.clstaff);toast(`${esc(c.action)} : écran hors de cette maquette.`);return;}
   if(S.ecran!=='classements')return;
   if(t.closest('#fiche')||t.closest('[data-fiche]'))return;
   const F=S.cl;

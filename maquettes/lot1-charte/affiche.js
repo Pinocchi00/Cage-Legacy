@@ -18,25 +18,25 @@ const afTaille=(nom,base,largeur)=>Math.min(base,Math.floor(largeur/(nom.length*
 /* Les demandes des combattants (sans le mot « promesse », C4) et ce que le médecin surveille (effectif.js). */
 const AF_DEMANDES={belkacem:{t:'Un adversaire classé dans le top 3',court:'veut un top 3',tenue:c=>afRangN(c)<=3}};
 const AF_RISQUES={
-  bello:['alerte','att','Bello : gêne à l’épaule gauche, examen le 18 janvier.','Bello : épaule à surveiller'],
-  nana:['medical','neu','Nana, 37 ans : trois mois sans sparring dur conseillés après ce combat.'],
-  lecomte:['medical','att','Lecomte sort de suspension le 6 février : dix jours pour se préparer.','Lecomte sort de suspension le 6 févr.'],
-  labbe:['alerte','att','Labbé pourrait refuser : il ne veut que la ceinture.','Labbé pourrait refuser'],
-  vanbelle:['contrats','neu','Van Belle : dernier combat de son contrat.'],
+  bello:['alerte','att','Bello : gêne à l’épaule gauche, examen le 18 janvier.','Bello : épaule à surveiller'],
+  nana:['medical','neu','Nana, 37 ans : 3 mois sans sparring dur conseillés après ce combat.'],
+  lecomte:['medical','att','Lecomte sort de suspension le 6 février : 10 jours pour se préparer.','Lecomte sort de suspension le 6 févr.'],
+  labbe:['alerte','att','Labbé pourrait refuser : il ne veut que la ceinture.','Labbé pourrait refuser'],
+  vanbelle:['contrats','neu','Van Belle : dernier combat du contrat.'],
 };
 const AF_HIST={
   'mezouar|nana':'Mezouar a fait taper Nana en 2025. Nana n’a jamais eu sa revanche, et sa ceinture est en jeu.',
-  'meziane|rachidi':'Rachidi a gagné ses cinq derniers combats. Meziane est la seule à l’avoir emmenée jusqu’à la décision.',
+  'meziane|rachidi':'Rachidi a gagné ses 5 derniers combats. Meziane est la seule à l’avoir emmenée jusqu’à la décision.',
   'belkacem|bello':'Belkacem voulait un top 3. Bello est n° 3 et n’a perdu qu’une fois en deux ans.',
   'belkacem|labbe':'Labbé est n° 2 et ne veut que la ceinture. Il faudra le convaincre.',
-  'belkacem|darras':'Darras est de Lille : le Forum sera pour lui, et Belkacem aime ce genre de soirée.',
-  'carvalho|vanbelle':'Deux poids légers qui n’ont pas combattu depuis l’été. Leïla veut les relancer.',
+  'belkacem|darras':'Darras est de Lille : le Forum sera pour lui.',
+  'carvalho|vanbelle':'2 poids légers sans combat depuis l’été. Leïla veut les relancer.',
   'darras|labbe':'Le n° 2 contre l’enfant du pays. Labbé n’aime pas les salles qui sifflent.',
 };
 /* Ce que Leïla propose quand tu le lui demandes (Q7 : une aide, jamais imposée). */
 const AF_LEILA={
-  belkacem:[['bello','Le top 3 qu’il réclame'],['labbe','Le n° 2, mais il pourrait refuser'],['darras','À la maison : Darras est de Lille']],
-  vide:[['labbe','darras','Le n° 2 contre l’enfant du pays'],[afId('Poids coq F',1),afId('Poids coq F',4),'Les deux meilleures du classement, libres'],[afId('Poids mi-moyen',1),afId('Poids mi-moyen',3),'Les deux meilleurs mi-moyens libres']],
+  belkacem:[['bello','Le top 3 qu’il réclame'],['labbe','Le n° 2, mais il pourrait refuser'],['darras','À la maison : Darras est de Lille']],
+  vide:[['labbe','darras','Le n° 2 contre l’enfant du pays'],[afId('Poids coq F',1),afId('Poids coq F',4),'Les 2 meilleures du classement, libres'],[afId('Poids mi-moyen',1),afId('Poids mi-moyen',3),'Les 2 meilleurs mi-moyens libres']],
 };
 
 S.af={
@@ -71,7 +71,7 @@ function afEtat(c){
   if(k)return{ok:false,eng:k,txt:`À l’affiche · ${afRole(k).toLowerCase()}`};
   if(c.statut==='blesse')return{ok:false,txt:`Blessé · retour ${afRetour(c.retour)}`,col:'var(--neg)'};
   if(c.statut==='pause')return{ok:false,txt:'En pause · reprend en mars'};
-  if(c.statut==='refus')return{ok:false,txt:'Refuse : attend une prolongation',col:'var(--jaune)',act:'Proposer ›'};
+  if(c.statut==='refus')return{ok:false,txt:'Refuse : attend une prolongation',col:'var(--jaune)',act:'Proposer ›'};
   if(c.statut==='suspendu')return{ok:true,susp:c.retour};
   return{ok:true};
 }
@@ -86,14 +86,14 @@ function afRaisons(k,f){
   if([A.id,B.id].sort().join('|')==='mezouar|nana')l.push(['p','La revanche de 2025']);
   if(!t&&ra<=3&&rb<=3)l.push(['p','Le haut du classement']);
   for(const c of [A,B]){const d=AF_DEMANDES[c.id];if(d)l.push(d.tenue(c===A?B:A)?['p',`Demande de ${c.nom} tenue`]:['m',`${c.nom} voulait un top 3`]);}
-  if(afForme(A)&&afForme(B))l.push(['p','Deux séries de victoires']);
-  else if(afForme(A)||afForme(B))l.push(['p',`${(afForme(A)?A:B).nom} reste sur trois victoires`]);
-  if(afInactif(A)&&afInactif(B))l.push(['p','Relance deux inactifs']);
+  if(afForme(A)&&afForme(B))l.push(['p','2 séries de victoires']);
+  else if(afForme(A)||afForme(B))l.push(['p',`${(afForme(A)?A:B).nom} reste sur 3 victoires`]);
+  if(afInactif(A)&&afInactif(B))l.push(['p','Relance 2 inactifs']);
   if(A.id==='darras'||B.id==='darras')l.push(['p','Darras combat chez lui, à Lille']);
   const e=Math.abs(ra-rb);if(!t&&e>=5)l.push(['m',`${e} places d’écart au classement`]);
-  if(ra>8&&rb>8)l.push(['m','Deux noms peu connus du public']);
+  if(ra>8&&rb>8)l.push(['m','2 noms peu connus du public']);
   for(const c of [A,B]){const r=AF_RISQUES[c.id];if(r&&r[1]==='att')l.push(['a',r[3]]);}
-  if(A.id==='vanbelle'||B.id==='vanbelle')l.push(['a','Van Belle : fin de contrat']);
+  if(A.id==='vanbelle'||B.id==='vanbelle')l.push(['a','Van Belle : fin de contrat']);
   if(!l.some(x=>x[0]==='p')&&e<=3)l.unshift(['p','Un combat serré sur le papier']);
   return l;
 }
@@ -129,16 +129,16 @@ function afARegler(){
   if(pv.length)l.push(['att','prelims',`${pv.length} préliminaire${pv.length>1?'s':''} à compléter`,pv[0][1]]);
   const eng=afEngages(),kb=eng.get('belkacem'),fb=kb&&afFight(kb),adv=fb&&parId(fb.a==='belkacem'?fb.b:fb.a);
   if(!adv&&!S.af.engage)l.push(['att','messages','Belkacem attend une réponse à sa demande',kb||null]);
-  else if(adv&&afRangN(adv)>3)l.push(['att','messages','Belkacem voulait un top 3 : il le saura',kb]);
+  else if(adv&&afRangN(adv)>3)l.push(['att','messages','Belkacem voulait un top 3 : il le saura',kb]);
   for(const id of Object.keys(AF_RISQUES))if(eng.has(id)&&AF_RISQUES[id][1]==='att')l.push(['att',AF_RISQUES[id][0],AF_RISQUES[id][3],eng.get(id)]);
-  if(eng.has('vanbelle'))l.push(['neu','contrats','Van Belle : dernier combat du contrat',eng.get('vanbelle')]);
+  if(eng.has('vanbelle'))l.push(['neu','contrats','Van Belle : dernier combat du contrat',eng.get('vanbelle')]);
   return l;
 }
 function afStrip(){
   const c=afChiffres(),[dit,src]=afDit(),n=S.af.m.filter(afComplet).length,np=S.af.p.filter(afComplet).length;
   return pan(`<div class="af-bc" style="width:150px"><span class="etiq">Carte</span><span class="T">${n} / 4</span><span class="sous">et ${np} / 6 préliminaires</span></div>
     <div class="af-bc" style="width:340px"><span class="etiq">Recette estimée</span><span class="T" id="afRec">${nb(c.bas)} – ${nb(c.haut)} €</span><span class="sous">Forum de Lille plein à ${c.plein} % (prévision)</span></div>
-    <div class="af-bc" style="flex:1;flex-shrink:1"><span class="etiq">Avis</span><div class="af-dit">« ${esc(dit)} » <b>${esc(src)}</b></div></div>
+    <div class="af-bc" style="flex:1;flex-shrink:1"><span class="etiq">Avis</span><div class="af-dit">« ${esc(dit)} » <b>${esc(src)}</b></div></div>
     <div class="af-bc af-dosc" style="width:480px">${afDossiersHtml()}</div>`,'height:100%','af-strip');
 }
 
@@ -146,7 +146,7 @@ function afStrip(){
 const AF_POIGNEE='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="4" width="3.4" height="3.4"/><rect x="13.6" y="4" width="3.4" height="3.4"/><rect x="7" y="10.3" width="3.4" height="3.4"/><rect x="13.6" y="10.3" width="3.4" height="3.4"/><rect x="7" y="16.6" width="3.4" height="3.4"/><rect x="13.6" y="16.6" width="3.4" height="3.4"/></svg>';
 function afMarques(f){
   const ids=[f.a,f.b].filter(Boolean),out=[];
-  for(const id of ids){const d=AF_DEMANDES[id];if(d){const adv=parId(f.a===id?f.b:f.a);if(adv)out.push(d.tenue(adv)?`<span class="ok" title="Sa demande est tenue">${ico('ok',19,2.6)}</span>`:`<span class="att" title="Sa demande n’est pas tenue">${ico('messages',19)}</span>`);}}
+  for(const id of ids){const d=AF_DEMANDES[id];if(d){const adv=parId(f.a===id?f.b:f.a);if(adv)out.push(d.tenue(adv)?`<span class="ok" title="Demande tenue">${ico('ok',19,2.6)}</span>`:`<span class="att" title="Demande non tenue">${ico('messages',19)}</span>`);}}
   for(const id of ids){const r=AF_RISQUES[id];if(r)out.push(`<span class="${r[1]}" title="${esc(r[2])}">${ico(r[0],19)}</span>`);}
   return out.join('');
 }
@@ -164,7 +164,7 @@ function afCote(c,k,s,ap,niv){
   if(!c)return `<div class="af-cote ${s}" data-drop="${k}" data-cote="${s}">${AF_Q}</div>`;
   const rg=c.rang==='C'?AF_C:`<span class="af-rgb octr" title="n° ${c.rang} du classement">${c.rang}</span>`;
   return `<div class="af-cote ${s} ${ap?'af-ap':''}" data-drop="${k}" data-cote="${s}" ${ap?'':`data-glisse="c:${c.id}" data-de="${k}|${s}"`}>
-    <div class="l1">${ap?'<span class="tagap">Aperçu</span>':''}${rg}<span>${esc(c.prenom)}${c.surnom&&niv<2?` « ${esc(c.surnom)} »`:''}</span></div>
+    <div class="l1">${ap?'<span class="tagap">Aperçu</span>':''}${rg}<span>${esc(c.prenom)}${c.surnom&&niv<2?` « ${esc(c.surnom)} »`:''}</span></div>
     <div class="nm " style="${afNomStyle(c.nom,afTaille(c.nom,[112,64,44][niv],290))}"><span class="nom" data-fiche="${c.id}">${esc(c.nom)}</span></div>
     <div class="l3"><span class="T">${bilan(c)}</span>${serie(c.serie)}</div></div>`;
 }
@@ -228,15 +228,15 @@ function afDossiers(){
 }
 function afDossiersHtml(){
   const {k,rows}=afDossiers();
-  if(!k)return `<div class="af-dos-t"><span class="etiq">Dossiers de Leïla</span></div><div class="af-reg" style="color:var(--vert)">${ico('ok',19,2.6)}<span>Rien à proposer : la carte est complète.</span></div>`;
-  if(!rows.length)return `<div class="af-dos-t"><span class="etiq">Les dossiers de Leïla · ${esc(afCourtRole(k))}</span></div><span class="sous">Pas de dossier pour cette place.</span>`;
+  if(!k)return `<div class="af-dos-t"><span class="etiq">Dossiers de Leïla</span></div><div class="af-reg" style="color:var(--vert)">${ico('ok',19,2.6)}<span>Rien à proposer : la carte est complète.</span></div>`;
+  if(!rows.length)return `<div class="af-dos-t"><span class="etiq">Dossiers de Leïla · ${esc(afCourtRole(k))}</span></div><span class="sous">Pas de dossier pour cette place.</span>`;
   const n=rows.length,i=((S.af.dos%n)+n)%n,[ids,w,ap]=rows[i];
-  return `<div class="af-dos-t"><span class="etiq">Les dossiers de Leïla · ${esc(afCourtRole(k))}</span>
+  return `<div class="af-dos-t"><span class="etiq">Dossiers de Leïla · ${esc(afCourtRole(k))}</span>
       <span class="nav"><button class="af-b" data-afdosn="-1" title="Dossier précédent"><span class="oct">${ico('retour',16,3)}</span></button><span class="n">${i+1} / ${n}</span><button class="af-b" data-afdosn="1" title="Dossier suivant"><span class="oct">${ico('avant',16,3)}</span></button></span></div>
     <div class="af-dossier oct" ${ap&&k===S.af.sel?`data-afhover="${ap}"`:''}><div class="in oct">
       <div class="l1"><span class="T">${ids.map(id=>`<span class="nom" data-fiche="${id}">${esc(parId(id).nom)}</span>`).join('<small> contre </small>')}</span>
         <button class="af-b" data-afdos="${k}|${ids.join(',')}"><span class="oct">Placer</span></button></div>
-      <div class="l2">« ${esc(w)} »</div></div></div>`;
+      <div class="l2">« ${esc(w)} »</div></div></div>`;
 }
 function afLigneC(c){
   const st=afEtat(c),sv=afSerieV(c);
@@ -245,7 +245,7 @@ function afLigneC(c){
   return `<div class="af-r ${st.ok?'':'off'}" ${st.ok?`data-glisse="c:${c.id}" data-afplace="${c.id}" data-afhover="${c.id}"`:`data-afpourquoi="${c.id}"`}>
     <span class="af-rg">${c.rang==='C'?AF_C:c.rang}</span>
     <div class="af-rm"><div class="af-r1"><span class="nom T" data-fiche="${c.id}">${esc(c.nom)}</span><span class="af-pal T">${bilan(c)}</span></div>
-      <div class="af-r2"><span class="af-sn" ${st.col?`style="color:${st.col}"`:''}>${afLarge()?`${esc(afCourt(c.cat))} · `:''}${st.txt?esc(st.txt):esc(c.prenom)+(c.surnom?` « ${esc(c.surnom)} »`:'')}</span>${droite}</div></div></div>`;
+      <div class="af-r2"><span class="af-sn" ${st.col?`style="color:${st.col}"`:''}>${afLarge()?`${esc(afCourt(c.cat))} · `:''}${st.txt?esc(st.txt):esc(c.prenom)+(c.surnom?` « ${esc(c.surnom)} »`:'')}</span>${droite}</div></div></div>`;
 }
 function afVestiaire(){
   const l=afListe(),libres=l.filter(c=>afEtat(c).ok),indis=l.filter(c=>{const s=afEtat(c);return !s.ok&&!s.eng;});
@@ -274,13 +274,13 @@ function afDemande(A,B){
   const qui=[A,B].find(c=>c&&AF_DEMANDES[c.id]);if(!qui)return '';
   const d=AF_DEMANDES[qui.id],adv=qui===A?B:A;
   const r=d.tenue(adv)?`<span style="color:var(--vert)">${ico('ok',18,2.6)} Tenue</span>`:'<span style="color:var(--neg)">Pas tenue</span>';
-  return `<div class="af-dem oct"><span style="color:var(--jaune);display:flex">${ico('messages',20)}</span><span>Demande de ${esc(qui.nom)} : ${esc(d.t.toLowerCase())}</span><span class="af-dem-r">${r}</span></div>`;
+  return `<div class="af-dem oct"><span style="color:var(--jaune);display:flex">${ico('messages',20)}</span><span>Demande de ${esc(qui.nom)} : ${esc(d.t.toLowerCase())}</span><span class="af-dem-r">${r}</span></div>`;
 }
 function afHistoire(A,B){
   const h=AF_HIST[[A.id,B.id].sort().join('|')];
   if(h)return `<div class="af-hist">${esc(h)}</div>`;
   const e=Math.abs(afRangN(A)-afRangN(B));
-  return `<div class="af-hist" style="font-style:normal">${esc(A.nom)} est ${A.rang==='C'?'champion':`n° ${A.rang}`}, ${esc(B.nom)} ${B.rang==='C'?'champion':`n° ${B.rang}`} : ${e<=3?'un combat serré sur le papier.':'un écart net au classement.'}</div>`;
+  return `<div class="af-hist" style="font-style:normal">${esc(A.nom)} est ${A.rang==='C'?'champion':`n° ${A.rang}`}, ${esc(B.nom)} ${B.rang==='C'?'champion':`n° ${B.rang}`} : ${e<=3?'un combat serré sur le papier.':'un écart net au classement.'}</div>`;
 }
 function afEnjeu(k,f,A,B){
   const deja=[A.id,B.id].sort().join('|')==='mezouar|nana'?'Oui, en 2025':'Jamais';
@@ -297,7 +297,7 @@ function afDetail(){
     <span class="ss">${c.rang==='C'?'Champion':`n° ${c.rang}`} · ${bilan(c)}</span></div>`;
   return pan(`<div class="af-det-h"><button class="af-b af-ret" data-afvue="liste" title="Revenir aux combattants"><span class="oct">${ico('retour',18,3)}</span></button><span class="etiq">${esc(afRole(k))} · ${esc(afCourt(A.cat))} · ${afRounds(k,f)} rounds</span></div>
     <div class="af-face">${x(A,'a')}<div class="mil"><span class="vs octr">VS</span><button class="af-b af-coin" data-afcoin title="Changer de coin"><span class="oct"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><path d="M4 8h15M15 4l4 4-4 4"/><path d="M20 16H5M9 12l-4 4 4 4"/></svg></span></button></div>${x(B,'b')}</div>
-    <div class="af-ong">${[['enjeu','L’enjeu'],['comp','Comparaison']].map(([id,l])=>`<button class="onglet oct ${o===id?'ouvert':''}" data-afong="${id}">${l}</button>`).join('')}</div>
+    <div class="af-ong">${[['enjeu','Enjeu'],['comp','Comparaison']].map(([id,l])=>`<button class="onglet oct ${o===id?'ouvert':''}" data-afong="${id}">${l}</button>`).join('')}</div>
     <div class="af-ongc">${o==='comp'?afTape(A,B):afEnjeu(k,f,A,B)}</div>
     <div class="af-act"><button class="af-b" data-afpres><span class="oct">Présentation</span></button><button class="af-b" data-afface><span class="oct">Face-à-face</span></button>
       <button class="af-b droite" data-afretirer><span class="oct">Retirer</span></button></div>`,'height:100%','af-det af-entre');
@@ -308,14 +308,14 @@ const afDroite=()=>afComplet(afFight(S.af.sel))&&S.af.vue==='detail'?afDetail():
 function afResume(){
   const c=afChiffres(),m0=S.af.m[0],A=parId(m0.a),B=parId(m0.b),frais=120000,marge=Math.round((c.moy-c.bourses-frais)/1000)*1000,[dit,src]=afDit();
   const t=afTitre(m0),rg=x=>x.rang==='C'?AF_C:`<span class="af-rgb octr">${x.rang}</span>`;
-  const cote=(x,s)=>`<div class="af-rs-c ${s}"><div class="l1">${rg(x)}<span>${esc(x.prenom)}${x.surnom?` « ${esc(x.surnom)} »`:''}</span></div>
+  const cote=(x,s)=>`<div class="af-rs-c ${s}"><div class="l1">${rg(x)}<span>${esc(x.prenom)}${x.surnom?` « ${esc(x.surnom)} »`:''}</span></div>
     <div class="T nm " style="${afNomStyle(x.nom,afTaille(x.nom,104,420))}">${esc(x.nom)}</div><div class="l3"><span class="T">${bilan(x)}</span>${serie(x.serie)}</div></div>`;
   const ligne=(f,k)=>{const a=parId(f.a),b=parId(f.b);return `<div class="af-rs-l"><span class="n T">${+k.slice(1)+1}</span>
     <span class="x">${rg(a)}<span class="T">${esc(a.nom)}</span></span><span class="vs2">VS</span><span class="x d"><span class="T">${esc(b.nom)}</span>${rg(b)}</span>
     <span class="r">${afTitre(f)?'<b>Titre</b> · ':''}${esc(afCourt(afCat(f)))} · ${afRounds(k,f)} rounds</span></div>`;};
   const ligneP=(f,i)=>`<div class="af-rs-p"><span class="n">P${i+1}</span><span class="pp">${rg(parId(f.a))}${esc(parId(f.a).nom)} <i>contre</i> ${esc(parId(f.b).nom)}${rg(parId(f.b))}</span><span class="r">${esc(afCourt(afCat(f)))}</span></div>`;
   const risques=[];for(const [id] of afEngages())if(AF_RISQUES[id])risques.push(AF_RISQUES[id]);
-  const dem=[];for(const [id,k] of afEngages()){const d=AF_DEMANDES[id];if(d){const f=afFight(k),adv=parId(f.a===id?f.b:f.a);dem.push(adv&&d.tenue(adv)?['ok','vert',`Demande de ${parId(id).nom} tenue`]:['messages','neg',`Demande de ${parId(id).nom} non tenue : il le saura`]);}}
+  const dem=[];for(const [id,k] of afEngages()){const d=AF_DEMANDES[id];if(d){const f=afFight(k),adv=parId(f.a===id?f.b:f.a);dem.push(adv&&d.tenue(adv)?['ok','vert',`Demande de ${parId(id).nom} tenue`]:['messages','neg',`Demande de ${parId(id).nom} non tenue : il le saura`]);}}
   return `<div class="af-voile">${pan(`<div class="af-rs-ban ${t?'or':''} ${afCoins(A,B,t)}"><i class="tun"></i>
       <div class="haut etiq">Split Fight Night 63 · 16 février 2027 · Forum de Lille · 21 h</div>
       ${cote(A,'a')}<div class="mil"><div class="vsw octr"><div class="vsr octr"><div class="vs octr">VS</div></div></div>
@@ -329,11 +329,11 @@ function afResume(){
           <span class="etiq">Salle et soirée</span><span class="T">${nb(frais)} €</span>
           <span class="etiq">Reste estimé</span><span class="T" style="color:${marge>0?'var(--vert)':'var(--neg)'}">${marge>0?'+ ':'− '}${nb(Math.abs(marge))} €</span></div>
         <div class="af-rs-rem"><span class="etiq">Forum de Lille</span><span>plein à ${c.plein} % (prévision)</span></div><div class="jauge"><i style="width:${c.plein}%;background:var(--blanc)"></i></div>
-        <div class="af-dit" style="margin-top:14px">« ${esc(dit)} » <b>${esc(src)}</b></div>
+        <div class="af-dit" style="margin-top:14px">« ${esc(dit)} » <b>${esc(src)}</b></div>
         <div class="etiq" style="margin-top:16px">À surveiller</div>
         ${dem.map(([i,col,tx])=>`<div class="af-li" style="color:var(--${col})">${ico(i,20,2.4)}<span>${esc(tx)}</span></div>`).join('')}
         ${risques.slice(0,Math.max(0,3-dem.length)).map(r=>`<div class="af-li" style="color:${r[1]==='att'?'var(--jaune)':'var(--texte2)'}">${ico(r[0],20)}<span>${esc(r[2])}</span></div>`).join('')||(dem.length?'':'<div class="sous">Rien de signalé.</div>')}</div></div>
-    <div class="af-res-pied"><span class="sous">Les combattants et leurs camps seront prévenus dès la confirmation.</span>
+    <div class="af-res-pied"><span class="sous">Combattants et camps prévenus à la confirmation.</span>
       <button class="af-b grand" data-afrevenir><span class="oct">Revenir</span></button>
       <button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-afconfirmer>Confirmer la carte</button></div>`,'','af-res')}</div>`;
 }
@@ -343,7 +343,7 @@ function afHtml(){return `<div class="af st-${S.af.style||'tunnel'}">${afOnglets
 function afAlerte(){
   const al=$('#alerte');al.classList.add('af-al');
   const reg=afARegler(),vides=S.af.m.filter(f=>!afComplet(f)).length;
-  const phrase=S.af.valide?'Carte validée. Continue jusqu’à la semaine du combat.':vides?`Il manque ${vides} combat${vides>1?'s':''} en carte principale.`:reg.some(r=>r[0]==='att')?'La carte est complète : vérifie ce qu’il reste à régler, puis valide.':'La carte est complète : tu peux la valider.';
+  const phrase=S.af.valide?'Carte validée. Pesée le 15 février.':vides?`Il manque ${vides} combat${vides>1?'s':''} en carte principale.`:reg.some(r=>r[0]==='att')?'Carte complète. Des points restent à régler.':'Carte complète, prête à valider.';
   al.innerHTML=`<span class="tag-j oct cj fin" style="--c:7px;height:34px;padding:0 14px">Prochaine étape</span><span style="font-size:22px">${phrase}</span>
     ${S.fiche||S.af.valide||S.af.resume?'':'<button class="af-b af-valider" data-afvalider><span class="oct" style="height:40px;font-size:26px">Valider la carte</span></button>'}`;
 }
@@ -397,9 +397,9 @@ function afRefus(t,el){toast(t);if(el){el.classList.remove('af-non-anim');void e
 function afPoser(id,k,s,el){
   const f=afFight(k),c=parId(id);
   if(f.a===id||f.b===id){afSelect(k);return true;}
-  if(!s){if(f.a&&f.b)return afRefus(`${afRole(k)} est complet : lâche ${c.nom} sur le nom à remplacer.`,el);s=!f.a?'a':'b';}
+  if(!s){if(f.a&&f.b)return afRefus(`${afRole(k)} est complet : lâche ${c.nom} sur le nom à remplacer.`,el);s=!f.a?'a':'b';}
   const autre=parId(f[s==='a'?'b':'a']);
-  if(autre&&autre.cat!==c.cat)return afRefus(`${c.prenom} ${c.nom} est en ${afCatMin(c.cat)} : ce combat est en ${afCatMin(autre.cat)}.`,el);
+  if(autre&&autre.cat!==c.cat)return afRefus(`${c.prenom} ${c.nom} est en ${afCatMin(c.cat)} : ce combat est en ${afCatMin(autre.cat)}.`,el);
   const avant=afChiffres().moy,prev=afEngages().get(id);
   if(prev){const pf=afFight(prev);if(pf.a===id)pf.a=null;if(pf.b===id)pf.b=null;}
   f[s]=id;if(k[0]==='p')S.af.retouche=true;S.af.valide=false;
@@ -529,17 +529,17 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-afannuler]')){const u=S.af.annuler;if(u){const avant=afChiffres().moy;Object.assign(afFight(u.k),u.f);S.af.annuler=null;S.af.sel=u.k;S.af.tab=u.k[0];rendre();afSent(u.k,avant);}return;}
   if(t.closest('[data-afvalider]')){
     const k=afCles().find(x=>!afComplet(afFight(x)));
-    if(k){afSelect(k);toast(`Impossible de valider : ${afRole(k).toLowerCase()} n’est pas complet.`);return;}
+    if(k){afSelect(k);toast(`Impossible de valider : ${afRole(k).toLowerCase()} n’est pas complet.`);return;}
     S.af.resume=true;rendre();return;}
   if(t.closest('[data-afrevenir]')||(S.af.resume&&t.classList.contains('af-voile'))){S.af.resume=false;rendre();return;}
-  if(t.closest('[data-afconfirmer]')){S.af.resume=false;S.af.valide=true;rendre();toast('Carte validée. Les combattants et leurs camps sont prévenus.');return;}
+  if(t.closest('[data-afconfirmer]')){S.af.resume=false;S.af.valide=true;rendre();toast('Carte validée. Combattants et camps prévenus.');return;}
   if(t.closest('[data-afretirer]')){afRetirer();return;}
   if(t.closest('[data-afpres]')){toast('Ouvre la présentation du combat (R10), écran à part.');return;}
   if(t.closest('[data-afface]')){toast('Ouvre le face-à-face (R10), écran à part.');return;}
   if(t.closest('[data-afcoin]')){const f=afFight(S.af.sel);[f.a,f.b]=[f.b,f.a];rendre();afSent(S.af.sel,afChiffres().moy);return;}
   if((el=t.closest('[data-afong]'))){S.af.onglet=el.dataset.afong;rendre();return;}
   if((el=t.closest('[data-afvue]'))){S.af.vue=el.dataset.afvue;rendre();return;}
-  if(t.closest('[data-afeng]')){S.af.engage=true;rendre();toast('Tu t’engages : Belkacem aura un adversaire du top 3 avant l’été.');return;}
+  if(t.closest('[data-afeng]')){S.af.engage=true;rendre();toast('Engagement pris : un adversaire du top 3 pour Belkacem avant l’été.');return;}
   if((el=t.closest('[data-afleilaplace]'))){afSelect(el.dataset.afleilaplace,true);return;}
   if(t.closest('[data-afleila]')){S.af.leila=!S.af.leila;S.af.apercu=null;rendre();return;}
   if((el=t.closest('[data-aftab]'))){S.af.tab=el.dataset.aftab;rendre();return;}
@@ -548,7 +548,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-afcat]'))){S.af.cat=el.dataset.afcat;S.af.menu=false;rendre();const l=$('.af-list');if(l)l.scrollTop=0;return;}
   if((el=t.closest('[data-afseg]'))){S.af.tri=el.dataset.afseg;rendre();const l=$('.af-list');if(l)l.scrollTop=0;return;}
   if((el=t.closest('[data-afdosn]'))){S.af.dos+=+el.dataset.afdosn;S.af.apercu=null;rendre();return;}
-  if((el=t.closest('[data-afprop]'))){toast(`Ouvre la prolongation de ${esc(parId(el.dataset.afprop).nom)} : écran Contrats, hors de cette maquette.`);return;}
+  if((el=t.closest('[data-afprop]'))){toast(`Ouvre la prolongation de ${esc(parId(el.dataset.afprop).nom)} : écran Contrats, hors de cette maquette.`);return;}
   if((el=t.closest('[data-afdos]'))){const [k,l]=el.dataset.afdos.split('|'),ids=l.split(','),f=afFight(k),avant=afChiffres().moy;
     for(const id of ids){if(f.a===id||f.b===id)continue;const p=afEngages().get(id);if(p){const pf=afFight(p);if(pf.a===id)pf.a=null;if(pf.b===id)pf.b=null;}if(!f.a)f.a=id;else if(!f.b)f.b=id;}
     S.af.sel=k;S.af.tab=k[0];S.af.dos=0;if(!afLarge())S.af.cat=parId(ids[0]).cat;S.af.vue='liste';S.af.valide=false;if(k[0]==='p')S.af.retouche=true;rendre();afSent(k,avant);return;}
@@ -557,7 +557,7 @@ document.addEventListener('click',e=>{
       f.a=ids[0];f.b=ids[1];S.af.cat=parId(ids[0]).cat;S.af.leila=false;S.af.vue='liste';rendre();afSent(k,avant);}
     else afPoser(ids[0],k,null,row);return;}
   if((el=t.closest('[data-afpourquoi]'))){const c=parId(el.dataset.afpourquoi),st=afEtat(c);
-    toast(st.eng?`${c.nom} est déjà à l’affiche (${afRole(st.eng).toLowerCase()}). Glisse son combat pour le déplacer.`:`${c.prenom} ${c.nom} : ${st.txt.toLowerCase()}.`);return;}
+    toast(st.eng?`${c.nom} est déjà à l’affiche (${afRole(st.eng).toLowerCase()}). Glisse son combat pour le déplacer.`:`${c.prenom} ${c.nom} : ${st.txt.toLowerCase()}.`);return;}
   if((el=t.closest('[data-afplace]'))){const id=el.dataset.afplace,f=afFight(S.af.sel);
     if(f.a&&f.b){toast(`${afRole(S.af.sel)} est complet. Choisis une place libre sur la carte, ou glisse ${esc(parId(id).nom)} sur un nom pour le remplacer.`);return;}
     afPoser(id,S.af.sel,null,$(`.af-t[data-afsel="${S.af.sel}"]`));return;}

@@ -75,7 +75,7 @@ const PM_REPLIQUES={
   '56:gpoidscoqf9':'Je finis Elena Okafor au 3e round et on me donne {m}. Ce n’est pas sérieux.',
   '57:gpoidsmouchef16':'Deuxième finition de suite et toujours {m}. À un moment, il faut le reconnaître.',
   '57:gpoidscoqf17':'KO au 2e round à Bordeaux. {m}, pour les coups que j’ai pris avant, c’est léger.',
-  '57:gpoidsleger19':'Je gagne à 16 secondes de la fin et ça vaut {m} ? J’aurais pu rester sur la décision.',
+  '57:gpoidsleger19':'Je gagne à 16 secondes de la fin et ça vaut {m} ? J’aurais pu rester sur la décision.',
   '57:gpoidsmouchef9':'Trois rounds à aller la chercher au sol, pour {m}. Je voudrais en parler.',
   '57:gpoidsmoyen7':'Un KO au 3e round en préliminaires, et {m}. Ça ne donne pas envie de prendre des risques.',
   '57:gpoidsmilourd19':'À 22 ans, je veux bien attendre. Mais {m} pour une finition, c’est peu.',
@@ -130,18 +130,18 @@ function pmBandeau(){
   return `<div class="bandeau fi-band pm-band ${an?'apparait':''}"><i class="bandeau-img"></i>
     <div class="fi-bt"><span class="etiq">Versé en primes</span><span class="T fi-caisse"><span data-fin="${t.verse}">${nb(t.verse)}</span> €</span><span class="sous">${t.n} soirées, de la ${t.de} à la ${t.a}</span></div>
     ${st('Choix','À ces montants',pmE(t.choix),'sur les mêmes soirées')}
-    ${st('Ecart','L’écart',pmSigne(t.ecart),change?`${pmSigne(Math.round(t.ecart/t.n))} par soirée`:'aucun changement',t.ecart>0?'fi-neg':t.ecart<0?'fi-pos':'')}
-    ${st('Net',change?'Il te serait resté':'Il t’est resté',pmSigne(t.netChoix),change?`contre ${pmSigne(t.net)} en réalité`:`sur ces ${t.n} soirées`,t.netChoix>=0?'fi-pos':'fi-neg')}</div>`;
+    ${st('Ecart','Écart',pmSigne(t.ecart),change?`${pmSigne(Math.round(t.ecart/t.n))} par soirée`:'aucun changement',t.ecart>0?'fi-neg':t.ecart<0?'fi-pos':'')}
+    ${st('Net',change?'Reste, à ces montants':'Reste',pmSigne(t.netChoix),change?`contre ${pmSigne(t.net)} en réalité`:`sur ces ${t.n} soirées`,t.netChoix>=0?'fi-pos':'fi-neg')}</div>`;
 }
 function pmMontant(k,lab,i){
   const v=pmLiee()[k],auj=pmActuels()[k],pct=x=>(x-PM_MIN)/(PM_MAX-PM_MIN)*100;
   return `<div class="pm-m ${S.fi.anim?'apparait':''}" style="animation-delay:${80+i*70}ms" data-pmligne="${k}">
     <div class="pm-mh">${medaille(k,40)}<span class="pm-mn">${esc(lab)}</span><span class="T pm-mv" data-pmv="${k}">${pmE(v)}</span></div>
     <div class="pm-sl">
-      <button class="pm-b oct" data-pmpas="${k}:-1" aria-label="${esc(lab)} : baisser de 1 000 €" title="− 1 000 €"><span class="oct">−</span></button>
+      <button class="pm-b oct" data-pmpas="${k}:-1" aria-label="${esc(lab)} : baisser de 1 000 €" title="− 1 000 €"><span class="oct">−</span></button>
       <span class="pm-rail" style="--p:${pct(v)}%"><i class="pm-rep" style="left:${pct(auj)}%"></i>
         <input type="range" min="${PM_MIN}" max="${PM_MAX}" step="${PM_PAS}" value="${v}" data-pmr="${k}" aria-label="${esc(lab)}, en euros" aria-valuetext="${pmE(v)}"></span>
-      <button class="pm-b oct" data-pmpas="${k}:1" aria-label="${esc(lab)} : monter de 1 000 €" title="+ 1 000 €"><span class="oct">+</span></button>
+      <button class="pm-b oct" data-pmpas="${k}:1" aria-label="${esc(lab)} : monter de 1 000 €" title="+ 1 000 €"><span class="oct">+</span></button>
     </div>
     <div class="pm-mb"><span class="pm-auj"><i></i>Aujourd’hui ${pmE(auj)}</span><span class="pm-dif" data-pmd="${k}">${pmDif(v,auj)}</span></div>
   </div>`;
@@ -155,7 +155,7 @@ function pmPied(){
 function pmLigneSoiree(o,i){
   const an=S.fi.anim?'apparait':'',d=`style="animation-delay:${120+i*40}ms"`;
   const tete=`<span class="pm-sn"><b class="T">${o.n}</b><span>${esc(o.ville)}</span></span>`;
-  if(!o.joue)return `<div class="pm-l pm-venir ${an}" ${d}>${tete}<span class="pm-vt">À venir, rien n’est encore versé</span></div>`;
+  if(!o.joue)return `<div class="pm-l pm-venir ${an}" ${d}>${tete}<span class="pm-vt">À venir, rien de versé</span></div>`;
   const a=pmCoutDe(o,pmLiee()),r=o.net+o.dep.primes-a,diff=a!==o.dep.primes;
   const med=PERF_TYPES.filter(([k])=>o.pr[k]).map(([k])=>`<span class="pm-md">${medaille(k,26,o.n)}<b>${o.pr[k]}</b></span>`).join('');
   return `<button class="pm-l ${an}" ${d} data-pmres="${o.n}" title="Voir les résultats de la ${o.n}">${tete}<span class="pm-meds">${med}</span>
@@ -164,7 +164,7 @@ function pmLigneSoiree(o,i){
 }
 function pmCout(){
   const t=pmTotaux(pmLiee()),change=t.ecart!==0,nbp=pmJouees().reduce((s,o)=>s+o.pr.soiree+o.pr.perf+o.pr.fin,0);
-  return titre('Soirée par soirée')+`<div class="pm-th"><span>Soirée</span><span>Primes données</span><span class="pm-tn">Versé</span><span class="pm-tn">À ces montants</span><span class="pm-tn">${change?'Il serait resté':'Il est resté'}</span><span></span></div>
+  return titre('Soirée par soirée')+`<div class="pm-th"><span>Soirée</span><span>Primes données</span><span class="pm-tn">Versé</span><span class="pm-tn">À ces montants</span><span class="pm-tn">Reste</span><span></span></div>
     <div class="pm-ls">${fiNums().map(fiSoiree).map(pmLigneSoiree).join('')}</div>
     <div class="pm-l pm-tot"><span class="pm-sn"><b class="T">Total</b></span><span class="pm-meds pm-nb">${nbp} primes</span><span class="pm-c">${pmE(t.verse)}</span><span class="pm-c ${change?'pm-on':'pm-off'}">${pmE(t.choix)}</span><span class="pm-c pm-r ${t.netChoix>=0?'fi-pos':'fi-neg'}">${pmSigne(t.netChoix)}</span><span></span></div>`;
 }
@@ -178,7 +178,7 @@ function pmGens(nq=3){
   const bilan=aussi.length||(change&&!apaise&&calmes.length)?`<div class="pm-bil">${aussi.length?`<div><span class="pm-bt">Aussi</span><span>${pmNoms(aussi)}</span></div>`:''}${change&&!apaise&&calmes.length?`<div><span class="pm-bt fi-pos">▲ Plus de plainte</span><span>${pmNoms(calmes)}</span></div>`:''}</div>`:'';
   const l=pmJouees(),fins=l.reduce((t,o)=>t+rsSoiree(o.n).combats.filter(f=>f.meth!=='Décision').length,0),tot=l.reduce((t,o)=>t+o.combats,0);
   const mercier=COMBATTANTS.find(c=>c.id==='gpoidsmouchef16');
-  return titre('Les combattants',pmRelire)+`<div class="pm-qs">${apaise?`<div class="pm-ok"><span class="fi-pos">▲</span>À ces montants, plus personne ne s’en plaindrait.</div>`:''}<span class="etiq">${apaise?'Ce qu’ils disaient':hypo?'Ce qu’ils pourraient dire':'Ce qu’ils ont dit'}</span>
+  return titre('Combattants',pmRelire)+`<div class="pm-qs">${apaise?`<div class="pm-ok"><span class="fi-pos">▲</span>À ces montants, plus aucune plainte.</div>`:''}<span class="etiq">${apaise?'Réactions d’avant':hypo?'Réactions possibles':'Réactions'}</span>
       ${liste.length?liste.slice(0,nq).map(q).join(''):`<div class="pm-vide">${change?'À ces montants, personne n’aurait trouvé sa prime basse.':'Personne ne trouve sa prime basse.'}</div>`}${bilan}</div>
     <div class="pm-regle"><span class="etiq">Règle proposée</span><p>Une prime paraît basse sous la bourse du combattant et sous ${Math.round(PRIME_PART_SOIREE*100)} % de ce que la soirée a rapporté avant primes.</p></div>
     <div class="pm-fin"><div class="pm-fh"><span class="pm-fm">${medaille('fin',30)}<span class="etiq">Finitions</span></span><span class="pm-fc"><b class="T">${fins}</b><span class="sous">sur ${tot} combats</span></span></div>
@@ -187,7 +187,7 @@ function pmGens(nq=3){
 function pmConfirme(){
   const br=pmLiee(),auj=pmActuels(),t=pmTotaux(br);
   const l=PERF_TYPES.map(([k,lab])=>`<div class="pm-cl">${medaille(k,34)}<span>${esc(lab)}</span><span class="pm-ca">${pmE(auj[k])}</span><span class="pm-cf">›</span><b class="T">${pmE(br[k])}</b></div>`).join('');
-  return `<div class="pm-voile" data-pmvoile><div class="pm-dlg apparait" role="dialog" aria-modal="true" aria-labelledby="pmTitre">${pan(`<div class="pt"><h2 id="pmTitre">Fixer les primes ?</h2></div>${l}
+  return `<div class="pm-voile" data-pmvoile><div class="pm-dlg apparait" role="dialog" aria-modal="true" aria-labelledby="pmTitre">${pan(`<div class="pt"><h2 id="pmTitre">Fixer les primes ?</h2></div>${l}
     <div class="pm-cc"><div><span class="etiq">À partir de</span><b class="T">${esc(pmQuand())}</b></div>
       <div><span class="etiq">Coût sur les ${t.n} dernières soirées</span><b class="T ${t.ecart>0?'fi-neg':t.ecart<0?'fi-pos':''}">${pmSigne(t.ecart)}</b></div></div>
     <p class="pm-cn">Les soirées déjà jouées gardent leurs montants.</p>
@@ -196,7 +196,7 @@ function pmConfirme(){
 function pmHtml(){
   const conf=S.fi.pm.conf;
   return `${pmBandeau()}<div class="pm-g">
-    ${pan(titre('Les montants')+`<div class="pm-ms">${PERF_TYPES.map(([k,l],i)=>pmMontant(k,l,i)).join('')}</div><div class="pm-pied" id="pmPied">${pmPied()}</div>`,'height:100%','pm-gauche')}
+    ${pan(titre('Montants')+`<div class="pm-ms">${PERF_TYPES.map(([k,l],i)=>pmMontant(k,l,i)).join('')}</div><div class="pm-pied" id="pmPied">${pmPied()}</div>`,'height:100%','pm-gauche')}
     ${pan(`<div class="pm-cout" id="pmCout">${pmCout()}</div>`,'height:100%','pm-milieu')}
     ${pan(`<div class="pm-gens" id="pmGens">${pmGens()}</div>`,'height:100%','pm-droite')}
   </div>${conf?pmConfirme():''}`;
@@ -210,7 +210,7 @@ function pmMaj(){
     const a=document.querySelector(`[data-pmv="${k}"]`),d=document.querySelector(`[data-pmd="${k}"]`);if(a)a.textContent=pmE(v);if(d)d.textContent=pmDif(v,auj[k]);});
   const t=pmTotaux(br),ch=t.ecart!==0;
   set('pmChoixV',pmE(t.choix));set('pmEcartV',pmSigne(t.ecart));set('pmEcartS',ch?`${pmSigne(Math.round(t.ecart/t.n))} par soirée`:'aucun changement');
-  set('pmNetL',ch?'Il te serait resté':'Il t’est resté');set('pmNetV',pmSigne(t.netChoix));set('pmNetS',ch?`contre ${pmSigne(t.net)} en réalité`:`sur ces ${t.n} soirées`);
+  set('pmNetL',ch?'Reste, à ces montants':'Reste');set('pmNetV',pmSigne(t.netChoix));set('pmNetS',ch?`contre ${pmSigne(t.net)} en réalité`:`sur ces ${t.n} soirées`);
   const e=$('#pmEcartV');if(e)e.className=`T fi-stv ${t.ecart>0?'fi-neg':t.ecart<0?'fi-pos':''}`;
   const n=$('#pmNetV');if(n)n.className=`T fi-stv ${t.netChoix>=0?'fi-pos':'fi-neg'}`;
   const pied=$('#pmPied');if(pied)pied.innerHTML=pmPied();

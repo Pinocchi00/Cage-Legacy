@@ -42,7 +42,7 @@ const PE_FACE={
   m3:'Labbé reste les bras croisés. Darras lui parle, il ne répond pas.',
   m2:'Deux gardes hautes pour la photo, puis une poignée de main.',
   m1:'Regards fixes, pas un mot. Meziane détourne les yeux la première.',
-  m0:'Quinze secondes sans un geste. Mezouar sourit, Nana ne bouge pas.'
+  m0:'15 secondes sans un geste. Mezouar sourit, Nana ne bouge pas.'
 };
 const PE_FACE_RATE='Darras tend la main, Labbé ne la prend pas.';
 
@@ -85,7 +85,7 @@ function peEchelle(f){
   const wa=pePoids(f.a),wb=pePoids(f.b),lim=parId(f.a).kg,min=Math.floor(lim*.85),max=Math.max(wa,wb,lim)+(lim-min)*.14;
   return {lim,min,l:((lim-min)/(max-min)).toFixed(4),pc:v=>((v-min)/(max-min)).toFixed(4)};
 }
-const peJauge=(id,e)=>{const w=pePoids(id);return `<div class="pe-j oct pose ${w<=parId(id).kg?'ok':'trop'}" role="img" aria-label="${esc(parId(id).nom)} : ${peKg(w)} kg, limite ${peLim(parId(id).kg)} kg" data-pe="${id}" data-kg="${w}" data-bas="${e.min}"><i class="pe-jf" style="--p:${e.pc(w)}"></i></div>`;};
+const peJauge=(id,e)=>{const w=pePoids(id);return `<div class="pe-j oct pose ${w<=parId(id).kg?'ok':'trop'}" role="img" aria-label="${esc(parId(id).nom)} : ${peKg(w)} kg, limite ${peLim(parId(id).kg)} kg" data-pe="${id}" data-kg="${w}" data-bas="${e.min}"><i class="pe-jf" style="--p:${e.pc(w)}"></i></div>`;};
 const peVerdict=id=>{const w=pePoids(id),lim=parId(id).kg;
   return w<=lim?`<span class="pe-v ok pose" data-pe="${id}">${ico('ok',22,3)}Dans le poids</span>`:`<span class="pe-v trop pose" data-pe="${id}"><i>!</i>${peKg(w-lim)} kg de trop</span>`;};
 const peValeur=id=>`<span class="pe-val"><b class="T pe-kg pose" data-pe="${id}">${peKg(pePoids(id))}</b><span class="T">kg</span></span>`;
@@ -106,13 +106,13 @@ function peBas(k,f){
   const face=rate&&peRetire()?'':`<div class="pe-face"><span class="etiq">Face-à-face</span><p>${peNoms(texte)}</p><span class="relire">à relire</span></div>`;
   if(!rate)return pan(face,'','pe-pan pe-phrase');
   const r=peReponse();
-  return pan(`<div class="pe-rep"><div class="pe-rt"><b class="T"><span class="${r.ok?'pos':'neg'}">${r.ok?ico('ok',30,3):'<i>!</i>'}</span><span>${peNoms(r.t)}</span></b><p>${peNoms(r.p)}</p><p class="pe-dit">« ${peNoms(r.dit)} » <span class="relire">à relire</span></p></div>
+  return pan(`<div class="pe-rep"><div class="pe-rt"><b class="T"><span class="${r.ok?'pos':'neg'}">${r.ok?ico('ok',30,3):'<i>!</i>'}</span><span>${peNoms(r.t)}</span></b><p>${peNoms(r.p)}</p><p class="pe-dit">« ${peNoms(r.dit)} » <span class="relire">à relire</span></p></div>
     <div class="pe-cells">${r.l.map(([l,v,cl])=>`<div class="oct"><span class="etiq">${l}</span><b class="T ${cl}">${v}</b></div>`).join('')}</div></div>${face}`,'','pe-pan pe-phrase pe-bande');
 }
 function peDuel(k){
   const f=peFight(k),A=peAv(parId(f.a)),B=peAv(parId(f.b)),e=peEchelle(f),or=afTitre(f);
   const co=(c,cl)=>{const n=Math.round(Math.min(112,500/(c.nom.length*.44)));
-    return `<div class="pe-co ${cl}"><span class="pe-pr">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="pe-no T" style="font-size:${n}px">${peN(c.id)}</span>
+    return `<div class="pe-co ${cl}"><span class="pe-pr">${esc(c.prenom)}${c.surnom?` <i>« ${esc(c.surnom)} »</i>`:''}</span><span class="pe-no T" style="font-size:${n}px">${peN(c.id)}</span>
       <span class="pe-bi">${bilan(c)} · ${c.rang==='C'?'champion':'n° '+c.rang}</span>${peValeur(c.id)}${peVerdict(c.id)}</div>`;};
   return `<div class="pe-du"><div class="pe-fo oct ${or?'or':''}"><div class="pe-sc oct"><i class="pe-tun"></i>
       <span class="pe-role">${esc(afRole(k))} · ${esc(A.cat)} · ${afRounds(k,f)} rounds${or?' · ceinture en jeu':''}</span>
@@ -122,7 +122,7 @@ function peDuel(k){
 function peVueCarte(){
   const c=peCarte(),ligne=k=>{const f=c[k[0]][+k.slice(1)],h=peRetire()&&k==='m3';
     return `<div class="pe-c ${h?'hors':''}"><span class="pe-cn">${peN(f.a)}<i>contre</i>${peN(f.b)}</span>${h?'<b class="neg">Annulé</b>':`<span class="pe-cr">${afRounds(k,f)} rounds</span>`}</div>`;};
-  return pan(`${titre('La carte de la soirée','<button class="pe-lien" data-pecarte>Revenir ›</button>')}<div class="pe-ca"><div><span class="etiq">Carte principale</span>${c.m.map((_,i)=>ligne('m'+i)).join('')}</div><div><span class="etiq">Préliminaires</span>${c.p.map((_,i)=>ligne('p'+i)).join('')}</div></div>`,'height:100%','pe-pan');
+  return pan(`${titre('Carte de la soirée','<button class="pe-lien" data-pecarte>Revenir ›</button>')}<div class="pe-ca"><div><span class="etiq">Carte principale</span>${c.m.map((_,i)=>ligne('m'+i)).join('')}</div><div><span class="etiq">Préliminaires</span>${c.p.map((_,i)=>ligne('p'+i)).join('')}</div></div>`,'height:100%','pe-pan');
 }
 const peHtml=()=>{const F=S.pe;return `<div class="pe ${F.force?'pe-force':''} ${F.anim?'pe-anime':''} ${F.monte===F.vue&&!F.carte?'pe-monte':''}">${peOnglets()}<div class="pe-zone">${F.carte?peVueCarte():F.vue===0?pePrelims():peDuel(PE_ETAPES[F.vue])}</div></div>`;};
 function peEtiquette(){
@@ -188,7 +188,7 @@ rendre=function(){
   document.body.classList.remove('sd-mode','pp-mode');
   rendreBarre();const acc=$('#barre [data-go="accueil"]');if(acc)acc.classList.add('cur');
   $('#barre [data-go="carte"]')?.querySelectorAll('.mq').forEach(x=>x.remove()); /* le jour de la pesée, la carte est complète */
-  rendreEntete('La pesée');
+  rendreEntete('Pesée');
   const d=$('#dateH');if(d)d.textContent=`${PE_DATE.getDate()} ${MOIS[PE_DATE.getMonth()]} ${PE_DATE.getFullYear()}`;
   const b=$('#bContinuer');if(b)b.innerHTML=`${esc(peEtiquette())} ${ico('avant',30,3)}`;
   const a=$('#alerte');a.className='alerte-l';a.innerHTML='';
@@ -243,7 +243,7 @@ function peContinuer(){
   if(F.carte){pePas(()=>{F.carte=false;});return;}
   if(PE_MONTE&&peRate()&&PE_ETAPES[F.vue]==='m3'){F.anim=false;rendre();return;} /* le premier clic montre le verdict et la réponse */
   if(F.vue<4){const n=F.vue+1,neuf=n>F.max;pePas(()=>{F.vue=n;if(neuf){F.max=n;F.monte=n;}});return;}
-  if(peRetire()){toast('La Soirée de la maquette joue la carte fixe de la 63 : ce cas s’arrête ici.');return;}
+  if(peRetire()){toast('La Soirée de la maquette joue la carte fixe de la 63 : ce cas s’arrête ici.');return;}
   F.viaSoiree=true;pePoseCarte();
   S.sd.etat='direct';S.sd.n=0;S.sd.k=null;S.sd.anim=true;aller('soiree');
 }

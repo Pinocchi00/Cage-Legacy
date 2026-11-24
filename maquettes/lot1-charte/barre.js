@@ -46,7 +46,7 @@ function brLigne(id,cls=''){
 function brGroupe(g){
   const ouvert=BR.ouvert===g.id,dedans=g.ecrans.includes(brCourant()),mq=g.ecrans.some(brAFaire),noms=g.ecrans.map(brLibelle);
   const action=`${ouvert?'Replier':'Déplier'} ${g.nom}`;
-  return `<button class="item br-g ${ouvert?'br-ouvert':''} ${dedans&&!ouvert?'cur':''}" data-brg="${g.id}" title="${esc(g.nom)} : ${esc(noms.join(', '))}"${dedans&&!ouvert?' aria-current="true"':''}>
+  return `<button class="item br-g ${ouvert?'br-ouvert':''} ${dedans&&!ouvert?'cur':''}" data-brg="${g.id}" title="${esc(g.nom)} : ${esc(noms.join(', '))}"${dedans&&!ouvert?' aria-current="true"':''}>
       <span class="ic">${ico(g.ic,30)}${mq?BR_MQ_IC:''}</span>
       <span class="lib"><span class="br-nom">${esc(g.nom)}${g.relire?'<i class="br-relire">à relire</i>':''}</span>${ouvert?'':`<span class="br-sous">${esc(noms.join(' · '))}</span>`}</span>
       ${mq?BR_MQ_IC:''}<span class="br-fl" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="square"><path d="${ouvert?'M5 15l7-7 7 7':'M5 9l7 7 7-7'}"/></svg></span></button>

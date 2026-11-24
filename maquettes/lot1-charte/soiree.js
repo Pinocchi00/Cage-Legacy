@@ -37,15 +37,15 @@ const SD_MICRO='Marc Duval';
    « écris tous les dialogues »). Chaque phrase colle aux chiffres du combat (rounds, amenées, série, rang). À RELIRE.
    La dernière réponse porte le défi quand il y en a un (Q37c). */
 const SD_ITW={
-  m0:[['Ilyas, tu es le nouveau champion des légers. Qu’est-ce que cette ceinture représente ?','Des années de travail. Elle est autant à mon équipe de Marseille qu’à moi. Et respect à [[nana|Parfait]] : il m’a fait mal ce soir, c’est un vrai champion.'],
-      ['Il gagne nettement le 3e round, puis tu prends son dos au 4e. C’était le plan ?','Le plan, c’était de l’emmener dans les rounds de championnat. Au 3e, il me touche beaucoup, je le sens. Au 4e, il laisse une ouverture en se relevant : je passe dans le dos et je ne lâche plus.'],
-      ['Qui pour ta première défense ?','Ce n’est pas à moi de choisir. Je vais rentrer, soigner tout ça, et je défendrai contre celui que Split mettra en face.']],
-  m1:[['Deux juges sur trois. Tu pensais l’avoir gagné ?','Oui. Je prends le premier et le dernier round, et je touche plus sur l’ensemble. Mais c’était serré, je ne vais pas dire le contraire : [[meziane|Lynda]] est très forte au sol.'],
-      ['Elle t’amène deux fois au sol au 2e round. Qu’est-ce qui change au 3e ?','Mon coin m’a demandé de rester au centre et de punir ses entrées. Au 3e, je reste debout, là où je suis la plus forte.'],
-      ['Cinq victoires de suite. Et maintenant ?','Je suis numéro un. [[gpoidspaillefC|Julia Kovač]] a la ceinture, il ne me reste qu’elle. [[gpoidspaillefC|Julia]], je suis prête quand Split le voudra.']],
-  p5:[['Donné à 19 % par les lecteurs du Forum, KO en 1:12. Tu t’y attendais ?','Je ne lis pas les pronostics. Je savais qu’un crochet propre suffirait. Il est arrivé plus tôt que prévu.'],
-      ['Ce crochet du droit, vous l’aviez travaillé ?','Toute la préparation. Quand [[gpoidslourd10|Bertin]] lance son direct, sa main gauche descend. On l’a vu sur ses combats et on l’a répété chaque jour.'],
-      ['Et la suite ?','Je rentre dans le top 10. Je veux un classé, peu importe lequel. Je ne choisis pas mes adversaires.']],
+  m0:[['Ilyas, tu es le nouveau champion des légers. Qu’est-ce que cette ceinture représente ?','Des années de travail. Elle est autant à mon équipe de Marseille qu’à moi. Et respect à [[nana|Parfait]] : il m’a fait mal ce soir, c’est un vrai champion.'],
+      ['Il gagne nettement le 3e round, puis tu prends son dos au 4e. C’était le plan ?','Le plan, c’était les rounds de championnat. Au 3e, il me touche beaucoup. Au 4e, il se relève mal : je prends le dos et je ne lâche plus.'],
+      ['Qui pour ta première défense ?','Ce n’est pas à moi de choisir. Je vais rentrer, soigner tout ça, et je défendrai contre celui que Split mettra en face.']],
+  m1:[['Deux juges sur trois. Tu pensais l’avoir gagné ?','Oui. Je prends le premier et le dernier round, et je touche plus. Mais c’était serré : [[meziane|Lynda]] est très forte au sol.'],
+      ['Elle t’amène deux fois au sol au 2e round. Qu’est-ce qui change au 3e ?','Mon coin m’a demandé de rester au centre et de punir ses entrées. Au 3e, je reste debout, là où je suis la plus forte.'],
+      ['Cinq victoires de suite. Et maintenant ?','Je suis numéro un. [[gpoidspaillefC|Julia Kovač]] a la ceinture, il ne me reste qu’elle. [[gpoidspaillefC|Julia]], je suis prête quand Split le voudra.']],
+  p5:[['Donné à 19 % par les lecteurs du Forum, KO en 1:12. Tu t’y attendais ?','Je ne lis pas les pronostics. Je savais qu’un crochet propre suffirait. Il est arrivé plus tôt que prévu.'],
+      ['Ce crochet du droit, vous l’aviez travaillé ?','Toute la préparation. Quand [[gpoidslourd10|Bertin]] lance son direct, sa main gauche descend. On l’a vu sur ses combats et on l’a répété chaque jour.'],
+      ['Et la suite ?','Je rentre dans le top 10. Je veux un classé, peu importe lequel. Je ne choisis pas mes adversaires.']],
 };
 const SD_AMB=['Calme','Attentive','Ça monte','Bruyante','Debout'];
 /* Le médecin après les combats : les mêmes que rsJouer63 (Résultats), connus dès la sortie de la cage. */
@@ -174,7 +174,7 @@ function sdPlan(present,cap){
   const tot=pts.length,plein=Math.round(present/cap*tot);
   const ordre=[...pts].sort((a,b)=>a.k-b.k);ordre.forEach((p,i)=>p.on=i<plein);
   const oc=R=>{const o=[];for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4;o.push(`${(cx+R*Math.cos(a)).toFixed(1)},${(cy+R*Math.sin(a)).toFixed(1)}`);}return o.join(' ');};
-  return `<svg class="sd-plan" viewBox="0 0 460 300" role="img" aria-label="La salle vue du dessus : ${nb(present)} présents sur ${nb(cap)} places">
+  return `<svg class="sd-plan" viewBox="0 0 460 300" role="img" aria-label="La salle vue du dessus : ${nb(present)} présents sur ${nb(cap)} places">
     <polygon points="${oc(74)}" class="sd-plan-cage"/><polygon points="${oc(60)}" class="sd-plan-sol"/>
     ${ordre.map((p,i)=>`<rect x="${p.x-4}" y="${p.y-4}" width="8" height="8" class="${p.on?'on':''}" style="--d:${(i%40)*12}ms"/>`).join('')}</svg>`;
 }
@@ -184,7 +184,7 @@ function sdCoteHero(f,s,res){
   const c=sdCote(f,s),av=sdAv(c),g=f.d.g===s,ap=res?sdApres(f,s):av;
   const v=res&&g?'<span class="marque octr v sd-vm">V</span>':'';
   const cases=res?(g&&f.titre?[`<span class="oct sd-nc">${AF_C}<span>Nouveau champion</span></span>`]:[]):[`n° ${av.mondial} mondial`,`${c.age} ans`,c.art||c.style].map(x=>`<span class="oct">${esc(x)}</span>`);
-  return `<div class="pz-hc ${s} ${res?(g?'sd-gagne':'sd-perd'):''}"><div class="pz-hc1">${s==='a'?v+sdRang(av):''}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>${s==='b'?sdRang(av)+v:''}</div>
+  return `<div class="pz-hc ${s} ${res?(g?'sd-gagne':'sd-perd'):''}"><div class="pz-hc1">${s==='a'?v+sdRang(av):''}<span>${esc(c.prenom)}${c.surnom?` « ${esc(c.surnom)} »`:''}</span>${s==='b'?sdRang(av)+v:''}</div>
     <div class="T pz-hc-n" style="${afNomStyle(c.nom,afTaille(c.nom,124,560))}">${sdN(c)}</div>
     <div class="pz-hc3">${s==='a'?`<span class="T">${rec(ap.v,ap.d,c.n)}</span>${serie(ap.serie)}`:`${serie(ap.serie)}<span class="T">${rec(ap.v,ap.d,c.n)}</span>`}</div>
     ${cases.length?`<div class="pz-hc4">${cases.join('')}</div>`:''}</div>`;
@@ -205,14 +205,14 @@ function sdLigne(k,n){
     <span class="sd-l-m"><b>${esc(sdMeth(f.d))}</b><span>${esc(f.d.meth==='Décision'?`${f.d.n} rounds`:`${rsOrd(f.d.rd)} round · ${f.d.tps}`)}</span></span></div>`;
   const v=sdVue(k);
   return `<div class="sd-l ${prochain?'on oct':''}" style="--i:${i}">${no}${role}<span class="sd-l-f">${sdN(f.A)}<span class="sous">contre</span>${sdN(f.B)}</span>
-    <span class="sd-l-v" role="group" aria-label="Le regarder en">${SD_VUES.map(([id,l])=>`<button class="oct ${v===id?'ouvert':''}" data-sdvue="${k}|${id}" aria-pressed="${v===id}">${l}</button>`).join('')}</span></div>`;
+    <span class="sd-l-v" role="group" aria-label="Voir en">${SD_VUES.map(([id,l])=>`<button class="oct ${v===id?'ouvert':''}" data-sdvue="${k}|${id}" aria-pressed="${v===id}">${l}</button>`).join('')}</span></div>`;
 }
 function sdDirect(){
   const n=S.sd.n,f=sdF(SD_ORDRE[n]),cap=RS_SOIREES[0].public[1],pres=SD_SALLE[n],a=sdAmbiance(n);
-  const carte=pan(titre('La carte',`<span class="sd-ment">Le regarder en</span>`)+`<div class="sd-ls">${SD_ORDRE.map(k=>sdLigne(k,n)).join('')}</div>`,'flex:1','sd-carte');
-  const salle=pan(titre('La salle')+`<div class="sd-s-n"><span class="T" data-sdcompte="${pres}">${nb(pres)}</span><span class="sd-s-cap">/ ${nb(cap)}</span></div>
+  const carte=pan(titre('Carte',`<span class="sd-ment">Voir en</span>`)+`<div class="sd-ls">${SD_ORDRE.map(k=>sdLigne(k,n)).join('')}</div>`,'flex:1','sd-carte');
+  const salle=pan(titre('Salle')+`<div class="sd-s-n"><span class="T" data-sdcompte="${pres}">${nb(pres)}</span><span class="sd-s-cap">/ ${nb(cap)}</span></div>
     <div class="sous sd-s-s">présents</div>${sdPlan(pres,cap)}
-    <div class="sd-amb"><span class="etiq">L’ambiance</span><div class="sd-amb-l"><span class="sd-amb-o">${[1,2,3,4,5].map(x=>`<i class="octr ${x<=a.lv?'on':''}" style="--k:${x}"></i>`).join('')}</span><span class="T">${SD_AMB[a.lv-1]}</span></div>
+    <div class="sd-amb"><span class="etiq">Ambiance</span><div class="sd-amb-l"><span class="sd-amb-o">${[1,2,3,4,5].map(x=>`<i class="octr ${x<=a.lv?'on':''}" style="--k:${x}"></i>`).join('')}</span><span class="T">${SD_AMB[a.lv-1]}</span></div>
       <div class="sd-amb-r">${a.raison?`Depuis ${a.raison}.`:'Le public arrive.'} ${sdRelire}</div></div>`,'width:470px;flex:none','sd-salle');
   return `<div class="pz sd sd-direct ${S.sd.anim?'anim':''}">${sdHero(f)}<div class="sd-cols">${carte}${salle}</div></div>`;
 }
@@ -446,7 +446,7 @@ function sdFort(){
   const tab=(c,s)=>`<span class="sd-tb-c ${s}"><span class="sd-pt ${s}"></span>${sdN(c)}<span class="sd-tb-b">${rec(sdAv(c).v,sdAv(c).d,c.n)}</span></span>`;
   const haut=`<div class="sd-th"><div class="sd-th-g"><span class="etiq">${S.sd.revoir?'Revoir · l’arène':'Temps forts'}</span><span class="sd-th-r">${esc(f.role)} · ${esc(rsCatC(f.cat))} · ${f.rounds} rounds</span></div>
     <div class="sd-tb oct"><div class="sd-tb-i oct">${tab(f.A,'a')}<span class="sd-tb-h"><span class="etiq">Round ${m.rd}</span><span class="T" id="sd-clk">${esc(m.t)}</span></span>${tab(f.B,'b')}</div></div>
-    <div class="sd-th-d etiq">Moment ${S.sd.mo+1} sur ${mos.length}</div></div>`;
+    <div class="sd-th-d etiq">Moment ${S.sd.mo+1}/${mos.length}</div></div>`;
   /* le bandeau du moment, en bas à gauche : quand, quoi, et le chiffre du round */
   const fr=m.type==='decision'?[0,1,2].map(q=>rsCarteJuge(f.d,q).txt).join(' · '):`${sdN(f.A)} <b>${m.fa} – ${m.fb}</b> ${sdN(f.B)}`;
   const cap=`<div class="sd-cap oct"><span class="sd-cap-q etiq">${m.type==='decision'?'Fin du combat':`${rsOrd(m.rd)} round · ${esc(m.t)}`} ${sdRelire}</span>
@@ -458,7 +458,7 @@ function sdFort(){
   const frise=`<div class="sd-fzw"><button class="sd-nav oct" data-sdnav="-1" ${S.sd.mo?'':'disabled'} aria-label="Moment précédent">${ico('retour',30,3)}</button>
     <div class="sd-fz"><div class="sd-fz-r">${Array.from({length:R},(_,i)=>`<span class="${i+1>fini?'nd':''}" style="--w:${100/R}%"><b>R${i+1}</b>${i+1>fini?'<em>non disputé</em>':''}</span>`).join('')}
       ${f.d.meth!=='Décision'?`<i class="sd-fz-stop" style="left:${pos({rd:fini,t:f.d.tps})}%"></i>`:''}</div>
-    ${mos.map((x,i)=>`<button class="sd-fz-m octr ${i===S.sd.mo?'on':''} ${i<S.sd.mo?'vu':''}" style="left:${pos(x)}%;--i:${i}" data-sdmo="${i}" title="${esc(`${rsOrd(x.rd)} round, ${x.t} : ${sdMomentTxt(f,x).tt}`)}" aria-label="${esc(`Moment ${i+1} : ${sdMomentTxt(f,x).tt}`)}"><span class="octr">${sdIco(x.type,22)}</span></button>`).join('')}</div>
+    ${mos.map((x,i)=>`<button class="sd-fz-m octr ${i===S.sd.mo?'on':''} ${i<S.sd.mo?'vu':''}" style="left:${pos(x)}%;--i:${i}" data-sdmo="${i}" title="${esc(`${rsOrd(x.rd)} round, ${x.t} : ${sdMomentTxt(f,x).tt}`)}" aria-label="${esc(`Moment ${i+1} : ${sdMomentTxt(f,x).tt}`)}"><span class="octr">${sdIco(x.type,22)}</span></button>`).join('')}</div>
     <button class="sd-nav oct" data-sdnav="1" ${S.sd.mo<mos.length-1?'':'disabled'} aria-label="Moment suivant">${ico('avant',30,3)}</button></div>
     <div class="sd-fz-lg">${types.map(t=>`<span>${sdIco(t,18)}${SD_TYPES[t]}</span>`).join('')}<span class="sd-fz-lgf"><i></i>fin du combat</span></div>`;
   return `<div class="pz sd sd-fort ${S.sd.anim?'anim':''}"><canvas id="sd-cv" class="sd-cv" width="1920" height="1080" aria-label="L’arène vue du dessus"></canvas>${haut}${cap}${pan(frise,'','sd-fzp')}</div>`;
@@ -474,8 +474,8 @@ function sdCartesJuges(f,anim){
 }
 function sdPhraseJuges(f){
   const d=f.d,c=[0,1,2].map(q=>rsCarteJuge(d,q)),pw=c.filter(x=>x.gagne===d.g).length,pl=c.filter(x=>x.gagne&&x.gagne!==d.g).length;
-  if(d.meth==='Décision')return pw===3?`Les trois juges donnent la victoire à ${sdN(f.W)}.`:`${pw} juges sur 3 donnent la victoire à ${sdN(f.W)}.`;
-  if(!c[0].r.length)return 'Fin au 1er round : aucune carte rendue.';
+  if(d.meth==='Décision')return pw===3?`Les 3 juges donnent la victoire à ${sdN(f.W)}.`:`${pw} juges sur 3 donnent la victoire à ${sdN(f.W)}.`;
+  if(!c[0].r.length)return 'Fin au 1er round : aucune carte rendue.';
   return pl>pw?`Avant la fin, ${sdN(f.L)} menait sur ${pl} carte${pl>1?'s':''} sur 3.`:pw?`Avant la fin, ${sdN(f.W)} menait sur ${pw} carte${pw>1?'s':''} sur 3.`:'Avant la fin, les cartes étaient à égalité.';
 }
 
@@ -501,10 +501,10 @@ function sdResultat(){
   const rounds=Array.from({length:R},(_,x)=>{const fa=d.co[0][x],fb=d.co[1][x],w=fa===fb?null:fa>fb?f.A:f.B;
     return `<div class="sd-ro oct" style="--i:${x}"><span class="etiq">R${x+1}</span><span class="T">${fa} – ${fb}</span><span class="sous">${w?sdN(w):'égalité'}</span></div>`;}).join('');
   const tete=`<div class="sd-cp sd-cp-h"><span class="sd-cp-v w">${sdN(f.A)}</span><span></span><span></span><span></span><span class="sd-cp-v d w">${sdN(f.B)}</span></div>`;
-  const chiffres=pan(titre('Le combat en chiffres',`<span class="sd-lgd">${pt} le meilleur · durée ${sdMmss(dur)}</span>`)+`<div class="sd-cps">${tete}${cmp}</div>
+  const chiffres=pan(titre('Combat en chiffres',`<span class="sd-lgd">${pt} meilleur · durée ${sdMmss(dur)}</span>`)+`<div class="sd-cps">${tete}${cmp}</div>
     <div class="sd-ros"><span class="etiq">Frappes significatives par round</span><div class="sd-ros-l">${rounds}</div></div>
 `,'flex:1','sd-rc');
-  const juges=pan(titre('Les juges')+sdCartesJuges(f)+`<div class="sd-j-p">${sdPhraseJuges(f)}</div>`,'width:580px;flex:none','sd-rj');
+  const juges=pan(titre('Juges')+sdCartesJuges(f)+`<div class="sd-j-p">${sdPhraseJuges(f)}</div>`,'width:580px;flex:none','sd-rj');
   /* ce que ça change : avant → après, pour les deux */
   const ligne=s=>{const c=sdCote(f,s),av=sdAv(c),ap=sdApres(f,s),med=SD_MED[c.id],g=f.d.g===s;
     const box=v=>v==='C'?rsCb(30):`<span class="rs-rk">${esc(v)}</span>`;
@@ -516,7 +516,7 @@ function sdResultat(){
         <div class="sd-ch-c"><span class="etiq">Bilan</span><span class="sd-ch-v"><b>${rec(ap.v,ap.d,c.n)}</b></span></div>
         <div class="sd-ch-c"><span class="etiq">5 derniers</span>${serie(ap.serie)}</div></div>
       ${med?`<div class="sd-ch-m">${ico('medical',18)}${esc(med[0].replace(', suspendu 60 jours',''))} · retour le ${esc(med[1])}</div>`:''}</div>`;};
-  const change=pan(titre('Ce que ça change')+ligne(f.ws)+ligne(f.ls),'width:520px;flex:none','sd-rch');
+  const change=pan(titre('Changements')+ligne(f.ws)+ligne(f.ls),'width:520px;flex:none','sd-rch');
   return `<div class="pz sd sd-res-e ${dec?'dec':'fin'} ${S.sd.anim?'anim':''}">${ban}${phrase}<div class="sd-cols">${juges}${chiffres}${change}</div></div>`;
 }
 
@@ -527,14 +527,14 @@ function sdResultat(){
 /* La réaction de la salle après chaque réponse (null : rien de marquant). */
 const SD_REAC={
   m0:['La salle applaudit [[nana|Nana]]',null,'La salle scande son nom'],
-  m1:['Quelques sifflets : une partie de la salle voyait [[meziane|Meziane]] gagner',null,'La salle se lève'],
+  m1:['Quelques sifflets : une partie de la salle voyait [[meziane|Meziane]] gagner',null,'La salle se lève'],
   p5:['Rires dans la salle',null,'Applaudissements'],
 };
 /* Ce qui en reste pour la suite de l'histoire (faits tirés de la soirée). */
 const SD_RESTE={
-  m0:['Il ne réclame personne : son premier challenger reste à choisir.','[[nana|Nana]], coupé à l’arcade, ne combattra pas avant le 19 mars.'],
-  m1:['Elle réclame [[gpoidspaillefC|Julia Kovač]] en direct : la presse reprendra le défi.','[[meziane|Meziane]] reste n° 3 des pailles.'],
-  p5:['Il ne nomme personne : il veut un classé du top 10.','[[gpoidslourd10|Bertin]] est suspendu 60 jours, jusqu’au 18 avril.'],
+  m0:['Il ne réclame personne : son premier challenger reste à choisir.','[[nana|Nana]], coupé à l’arcade, ne combattra pas avant le 19 mars.'],
+  m1:['Elle réclame [[gpoidspaillefC|Julia Kovač]] en direct.','[[meziane|Meziane]] reste n° 3 des pailles.'],
+  p5:['Il ne nomme personne : il veut un classé du top 10.','[[gpoidslourd10|Bertin]] est suspendu 60 jours, jusqu’au 18 avril.'],
 };
 /** Ce que la victoire veut dire, en deux lignes : le gros titre et sa précision. */
 function sdTitreVictoire(f){
@@ -560,7 +560,7 @@ function sdDiscoursHtml(){
   const [h1,h2]=sdTitreVictoire(f),amb=sdAmbiance(f.i+1),champ=ap.rang==='C'&&av.rang!=='C';
   const ban=`<div class="sd-dv oct ${f.titre?'or':''}"><div class="sd-dv-i oct"><i class="sd-dv-img"></i><i class="sd-dv-spot"></i><i class="pz-reflet"></i>
     <div class="sd-dv-g"><div class="sd-dv-h"><span class="sd-dp oct">${f.titre?AF_C:''}${esc(pourquoi)}</span><span class="sd-dc">${esc(rsCatL(f.cat))}</span></div>
-      <div class="sd-dpre">${esc(W.prenom)}${W.surnom?` « ${esc(W.surnom)} »`:''}</div>
+      <div class="sd-dpre">${esc(W.prenom)}${W.surnom?` « ${esc(W.surnom)} »`:''}</div>
       <div class="T sd-dn" style="${afNomStyle(W.nom,afTaille(W.nom,150,760))}">${sdN(W)}</div>
       <div class="sd-dbt"><span class="marque octr v">V</span><span>bat ${sdN(L)} · ${esc(f.d.meth==='KO'?'KO':sdMeth(f.d).toLowerCase())}, ${esc(sdQuand(f.d))}</span></div></div>
     <div class="sd-dv-r"><span class="sd-live oct" style="--i:0"><i></i>En direct · dans la cage</span>
@@ -582,7 +582,7 @@ function sdDiscoursHtml(){
   const micro=pan(titre('Dans la cage',`${esc(SD_MICRO)}, commentateur de Split ${sdRelire}${passer}`)+`<div class="sd-echs">${ech}</div>`,'flex:1','sd-mic');
   /* à droite : ce qu'il gagne et ce qui en reste ; le défi seulement s'il y en a un (Q37c) */
   const dm=av.mondial-ap.mondial;
-  const gagne=pan(titre(`Ce qu’${e?'elle':'il'} gagne`)+`<div class="sd-gc">
+  const gagne=pan(titre('Progression')+`<div class="sd-gc">
       <div><span class="etiq">Bilan</span><span class="sd-gc-v">${rec(ap.v,ap.d,W.n)}</span>${serie(ap.serie)}</div>
       <div><span class="etiq">Chez Split</span><span class="rs-rgs">${sdBox(av.rang)}${sdFl(rsRangV(av.rang)-rsRangV(ap.rang))}${sdBox(ap.rang)}</span></div>
       <div><span class="etiq">Mondial</span><span class="sd-gc-v">${av.mondial} ${sdFl(dm)} <b>${ap.mondial}</b></span></div></div>
@@ -603,7 +603,7 @@ function sdDiscoursHtml(){
     const etat=med?`<span class="sd-de neg">${ico('medical',18)}${esc(med[0])} · retour le ${esc(med[1])}</span>`
       :cible.statut==='blesse'?`<span class="sd-de neg">${ico('medical',18)}Blessé${sdE(cible)}${cible.retour?` · retour le ${esc(cible.retour)}`:''}</span>`:`<span class="sd-de ok">${ico('ok',18)}Disponible</span>`;
     defi=pan(`<div class="sd-dd-ban oct or"><i class="sd-dd-img"></i><div class="sd-dd-in"><span class="etiq">Défi · prochain adversaire possible</span>
-        <div class="sd-dd-h">${sdRang(ac)}<span>${esc(cible.prenom)}${cible.surnom?` « ${esc(cible.surnom)} »`:''}</span></div><div class="T sd-dd-n">${sdN(cible)}</div>
+        <div class="sd-dd-h">${sdRang(ac)}<span>${esc(cible.prenom)}${cible.surnom?` « ${esc(cible.surnom)} »`:''}</span></div><div class="T sd-dd-n">${sdN(cible)}</div>
         <div class="sd-dd-l"><span class="T">${rec(ac.v,ac.d,cible.n)}</span>${serie(ac.serie)}</div></div></div>
       <div class="sd-dd-x"><span class="etiq">État</span>${etat}</div>
       <div class="sd-dd-x"><span class="etiq">Déjà affronté${sdE(cible)}s</span><span>${dej.length?dej.map(x=>`${MOIS_C[x.date.getMonth()]} ${x.date.getFullYear()}`).join(', '):'Jamais'}</span></div>
@@ -630,9 +630,9 @@ function sdBilan(){
   const ban=`<div class="sd-bb oct or"><div class="sd-bb-i oct"><i class="sd-bb-img"></i>
     <div class="sd-bb-g"><div class="T sd-bb-t">Split Fight Night <span style="color:var(--rouge-vif)">63</span></div><div class="sd-bb-l">16 février 2027 · ${esc(s.salle)}</div></div>
     ${cas('Public',`<span data-sdcompte="${s.public[0]}">${nb(s.public[0])}</span>`,`sur ${nb(s.public[1])} places`,0)}
-    ${cas('L’ambiance',SD_AMB[a.lv-1],`depuis ${a.raison} ${sdRelire}`,1)}
+    ${cas('Ambiance',SD_AMB[a.lv-1],`depuis ${a.raison} ${sdRelire}`,1)}
     ${cas('Recette',`<span data-sdcompte="${o.recette}">${nb(o.recette)}</span> €`,'billetterie, diffuseur, partenaires, bar',2)}
-    ${cas('Ce qu’il te reste',`<span class="${x.reste>=0?'cl-up':'cl-down'}">${x.reste>=0?'+':'−'} <span data-sdcompte="${Math.abs(x.reste)}">${nb(Math.abs(x.reste))}</span> €</span>`,'recette moins dépenses',3)}</div></div>`;
+    ${cas('Reste',`<span class="${x.reste>=0?'cl-up':'cl-down'}">${x.reste>=0?'+':'−'} <span data-sdcompte="${Math.abs(x.reste)}">${nb(Math.abs(x.reste))}</span> €</span>`,'recette moins dépenses',3)}</div></div>`;
   const ligne=(k,i)=>{const f=sdF(k),ap=sdApres(f,f.ws),av=sdAv(f.W),mv=rsMvt(av.rang,ap.rang);
     return `<div class="sd-v ${f.titre?'titre':''} ${i===4?'sep':''}" style="--i:${i}"><span class="marque octr v">V</span>
       <span class="sd-v-n">${lien(f.W)}<span class="sous">bat ${sdN(f.L)}</span></span>
@@ -640,7 +640,7 @@ function sdBilan(){
       <span class="sd-v-mv">${mv}</span>
       <span class="sd-v-r"><button class="sd-ic oct" data-sdrevoir="arene|${k}" title="Revoir dans l’arène" aria-label="Revoir ${esc(f.W.nom)} contre ${esc(f.L.nom)} dans l’arène">${ico('carte',24)}</button>
         <button class="sd-ic oct" data-sdrevoir="recit|${k}" title="Lire le récit" aria-label="Lire le récit de ${esc(f.W.nom)} contre ${esc(f.L.nom)}">${ico('presse',24)}</button></span></div>`;};
-  const vainq=pan(titre('Les vainqueurs',`<span class="sd-lg">${ico('carte',20)} l’arène <i></i>${ico('presse',20)} le récit</span>`)+
+  const vainq=pan(titre('Vainqueurs',`<span class="sd-lg">${ico('carte',20)} arène <i></i>${ico('presse',20)} récit</span>`)+
     `<div class="sd-vs">${[...SD_ORDRE].reverse().map(ligne).join('')}</div><button class="sd-lien sd-tout" data-sdtout="1">Tous les résultats ›</button>`,'flex:1','sd-vq');
   const ben=sdBenef();
   const prime=(p,i)=>{const l=ben.filter(b=>b.p===p);
@@ -648,14 +648,14 @@ function sdBilan(){
       <span class="sd-pb-q">${l.map(b=>sdN(b.c)).join(', ')}</span></div><span class="T sd-pb-v">${nb(primeDe(p,63))} €</span></div>`;};
   const plaintes=[...new Set(ben.map(b=>b.c))].filter(c=>sdPlainte(c,x.reste));
   /* Retour du 20/11 : les montants se fixent dans les Finances, avant ou après une soirée, pas au bilan. */
-  const primes=pan(titre('Les primes',`<button data-pmouvrir>Montants : Finances ›</button>`)+`${['soiree','perf','fin'].map(prime).join('')}
+  const primes=pan(titre('Primes',`<button data-pmouvrir>Montants : Finances ›</button>`)+`${['soiree','perf','fin'].map(prime).join('')}
     <div class="sd-pt-t"><span class="etiq">Ce soir</span><span class="T">${nb(x.primes)} €</span><span class="sous">${ben.length} primes</span></div>
     <div class="sd-pt-d">${plaintes.length?`<span class="cl-down">▼</span> ${plaintes.map(sdN).join(', ')} ${plaintes.length>1?'trouvent leur':'trouve sa'} prime basse`:`<span class="cl-up">●</span> Personne ne se plaint de sa prime`}</div>`,'width:440px;flex:none','sd-pr');
   const l=(t,v,max,neg)=>`<div class="sd-dt"><span>${t}</span><b>${neg?'− ':''}${nb(v)} €</b><span class="jauge"><i style="width:${v/max*100}%;background:${neg?'var(--texte2)':'var(--blanc)'}"></i></span></div>`;
   const m=Math.max(o.rec.diff,o.dep.fixe+o.dep.vict,x.primes);
   const detail=pan(titre('Détail')+`<div class="etiq sd-dt-h">Recettes</div>${l('Billetterie',o.rec.billet,m)}${l('Diffuseur',o.rec.diff,m)}${l('Partenaires',o.rec.part,m)}${l('Bar et boutique',o.rec.bar,m)}
     <div class="etiq sd-dt-h">Dépenses</div>${l('Bourses',o.dep.fixe+o.dep.vict,m,1)}${l('Primes',x.primes,m,1)}${l('Salle et production',o.dep.salle,m,1)}
-    <button class="sd-lien" data-go="finances">Les finances ›</button>`,'width:400px;flex:none','sd-det');
+    <button class="sd-lien" data-go="finances">Finances ›</button>`,'width:400px;flex:none','sd-det');
   return `<div class="pz sd sd-bilan ${S.sd.anim?'anim':''}">${ban}<div class="sd-cols">${vainq}${primes}${detail}</div>${S.sd.etat==='recit'?sdRecit():''}</div>`;
 }
 /* ---- Par-dessus le bilan : le récit d'un combat (Q39b), minute par minute puis round par round ---- */
@@ -677,18 +677,18 @@ function sdRecit(){
     ${mn.map((x,i)=>{const X=((x.rd-1)*5+x.mi)*bw+bw*.18,w=bw*.64,ha=x.a/max*(mid-14),hb=x.b/max*(mid-14);
       return `<rect x="${X}" y="${mid-ha}" width="${w}" height="${ha}" class="a" style="--i:${i}"/><rect x="${X}" y="${mid}" width="${w}" height="${hb}" class="b" style="--i:${i}"/>`;}).join('')}
     ${d.meth!=='Décision'?`<line x1="${((R-1)*5+sdSec(d.tps)/60)*bw}" x2="${((R-1)*5+sdSec(d.tps)/60)*bw}" y1="0" y2="${H}" class="sd-mn-fin"/>`:''}
-    ${mos.map((m,i)=>{const x=((m.rd-1)*5+Math.min(5,sdSec(m.t)/60))*bw;return `<g class="sd-mn-m" transform="translate(${Math.min(W-22,Math.max(22,x))},24)"><title>${esc(`${rsOrd(m.rd)} round, ${m.t} : ${sdMomentTxt(f,m).tt}`)}</title><polygon points="${sdOct(20,0,0)}"/><g transform="translate(-10,-10) scale(.833)" class="sd-mn-i">${SD_ICO[m.type]}</g></g>`;}).join('')}
+    ${mos.map((m,i)=>{const x=((m.rd-1)*5+Math.min(5,sdSec(m.t)/60))*bw;return `<g class="sd-mn-m" transform="translate(${Math.min(W-22,Math.max(22,x))},24)"><title>${esc(`${rsOrd(m.rd)} round, ${m.t} : ${sdMomentTxt(f,m).tt}`)}</title><polygon points="${sdOct(20,0,0)}"/><g transform="translate(-10,-10) scale(.833)" class="sd-mn-i">${SD_ICO[m.type]}</g></g>`;}).join('')}
   </svg>`;
   const col=x=>{const j=d.j.map(t=>t[x]||null),ms=mos.filter(m=>m.rd===x+1);
     return `<div class="sd-rc-c" style="--i:${x}"><div class="sd-rc-h"><span class="T">${rsOrd(x+1)} round</span><span class="sd-rc-js">${j.map(w=>w?`<i class="${w}" title="${esc(sdCote(f,w).nom)}"></i>`:'<i class="nn" title="non noté"></i>').join('')}</span></div>
       <div class="sd-rc-f"><b class="T">${d.co[0][x]}</b><span class="sd-fb"><i style="width:${d.co[0][x]/Math.max(1,d.co[0][x]+d.co[1][x])*100}%"></i></span><b class="T">${d.co[1][x]}</b></div>
       ${ms.length?ms.map(m=>{const i=mos.indexOf(m),t=sdMomentTxt(f,m);return `<div class="sd-rc-m"><span class="sd-rc-n octr">${sdIco(m.type,18)}</span><div><b>${esc(m.t)} · ${t.t}</b><p>${esc(t.g)} · ${esc(t.s)}</p></div></div>`;}).join('')
-        :`<div class="sd-rc-m vide">Pas de temps fort : ${d.co[0][x]>d.co[1][x]?sdN(f.A):sdN(f.B)} touche plus (${Math.max(d.co[0][x],d.co[1][x])} contre ${Math.min(d.co[0][x],d.co[1][x])}).</div>`}</div>`;};
-  return `<div class="sd-over">${pan(titre(`${sdN(f.A)} contre ${sdN(f.B)}`,`${sdRelire}<button data-sdrevoir="arene|${f.k}">L’arène ›</button>`)+
+        :`<div class="sd-rc-m vide">Pas de temps fort : ${d.co[0][x]>d.co[1][x]?sdN(f.A):sdN(f.B)} touche plus (${Math.max(d.co[0][x],d.co[1][x])} contre ${Math.min(d.co[0][x],d.co[1][x])}).</div>`}</div>`;};
+  return `<div class="sd-over">${pan(titre(`${sdN(f.A)} contre ${sdN(f.B)}`,`${sdRelire}<button data-sdrevoir="arene|${f.k}">Arène ›</button>`)+
     `<div class="sd-rc-s"><span class="marque octr v">V</span><span>${rsPhrase(sdRs(f)).replace(f.W.prenom+' '+f.W.nom,`${esc(f.W.prenom)} ${sdN(f.W)}`)}</span></div>
      <div class="sd-mn-h"><span class="etiq">Frappes significatives, minute par minute</span><span class="sd-lgd"><i class="sd-k a"></i>${sdN(f.A)} en haut <i class="sd-k b"></i>${sdN(f.B)} en bas · ${[...new Set(mos.map(x=>x.type))].map(t=>`${sdIco(t,18)} ${SD_TYPES[t]}`).join(' · ')}</span></div>${svg}
      <div class="sd-rc-cs" style="--n:${R}">${Array.from({length:R},(_,x)=>col(x)).join('')}</div>
-     <div class="sous sd-rc-lg"><i class="sd-k a"></i><i class="sd-k b"></i> les trois juges, round par round (vide : non noté)</div>`,'height:100%')}</div>`;
+     <div class="sous sd-rc-lg"><i class="sd-k a"></i><i class="sd-k b"></i> les 3 juges, round par round (vide : non noté)</div>`,'height:100%')}</div>`;
 }
 const sdOct=(R,cx,cy)=>{const o=[];for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4;o.push(`${(cx+R*Math.cos(a)).toFixed(1)},${(cy+R*Math.sin(a)).toFixed(1)}`);}return o.join(' ');};
 
@@ -705,11 +705,11 @@ function sdHtml(){
 function sdBouton(){
   const e=S.sd.etat;
   if(e==='direct')return sdVue(SD_ORDRE[S.sd.n])==='resultat'?'Voir le résultat':'Regarder';
-  if(e==='fort'||e==='combat')return S.sd.revoir?'Le bilan':'Le résultat';
+  if(e==='fort'||e==='combat')return S.sd.revoir?'Bilan':'Résultat';
   const der=SD_ORDRE.indexOf(S.sd.k)===SD_ORDRE.length-1;
-  if(e==='resultat')return sdDiscours(S.sd.k)?'Le discours':der?'Fin de la soirée':'Combat suivant';
+  if(e==='resultat')return sdDiscours(S.sd.k)?'Discours':der?'Fin de la soirée':'Combat suivant';
   if(e==='discours')return der?'Fin de la soirée':'Combat suivant';
-  return 'Le lendemain';
+  return 'Lendemain';
 }
 const sdPlein=()=>['fort','combat','resultat','discours'].includes(S.sd.etat);
 const sdRendreBase=rendre;

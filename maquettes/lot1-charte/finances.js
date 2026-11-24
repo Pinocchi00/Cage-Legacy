@@ -74,7 +74,7 @@ function fiHaut(){
   const F=S.fi,o=(v,t)=>`<button class="onglet oct ${F.onglet===v?'ouvert':''}" data-fiong="${v}">${t}</button>`;
   const b=(k,v,l)=>`<button class="bb oct petit ${F[k]===v?'on':''}" data-fif="${k}:${v}"><span class="oct">${l}</span></button>`;
   const fl=F.onglet==='bourses'?`<span style="margin-left:auto"></span>${b('sexe','H','Hommes')}${b('sexe','F','Femmes')}`:'';
-  return `<div class="cl-haut fi-haut">${o('caisse','La caisse')}${o('bourses','Les bourses')}${o('primes','Les primes')}${fl}</div>`;
+  return `<div class="cl-haut fi-haut">${o('caisse','Caisse')}${o('bourses','Bourses')}${o('primes','Primes')}${fl}</div>`;
 }
 
 /* ---- La caisse : le bandeau ---- */
@@ -100,7 +100,7 @@ function fiSolde(){
       <span class="fi-sh"><span class="T fi-sn">${n}</span><span class="fi-sv">${esc(o.ville)}</span><span class="sous">${fiDc(o.date)}</span></span>
       ${o.joue?`<span class="T fi-sr ${cl}">${fiSigne(o.net)}</span>`:`<span class="fi-sr fi-avenir">dans ${S.jours} jours</span>`}</span></button>`;};
   const best=fiJouees().reduce((m,o)=>!m||o.net>m.net?o:m,null);
-  return pan(titre('Le solde',`depuis janvier 2026 · la meilleure soirée : la ${best.n}, ${esc(best.ville)}`)+`
+  return pan(titre('Solde',`depuis janvier 2026 · meilleure soirée : la ${best.n}, ${esc(best.ville)}`)+`
     <div class="fi-courbe" id="fiCourbe"></div>
     <div class="fi-puces">${fiNums().map(puce).join('')}</div>`,'height:100%','fi-gauche');
 }
@@ -150,10 +150,10 @@ function fiChangements(o){
   add('Partenaires',o.rec.part-p.rec.part,'nouveaux partenaires depuis le palier du 10 janvier');
   const b=o.dep.fixe+o.dep.vict,bp=p.dep.fixe+p.dep.vict;
   const sans=o.top&&p.top&&p.top.b>o.top.b*1.5&&!fiAvec(o,p.top.c);
-  add('Bourses',-(b-bp),sans?`sans ${lien(p.top.c)}, ${fiE(p.top.b)} à la ${p.n}`:`plus grosse bourse : ${lien(o.top.c)}, ${fiE(o.top.b)}`);
+  add('Bourses',-(b-bp),sans?`sans ${lien(p.top.c)}, ${fiE(p.top.b)} à la ${p.n}`:`plus grosse bourse : ${lien(o.top.c)}, ${fiE(o.top.b)}`);
   const PL={soiree:'combat de la soirée',perf:'performance',fin:'finition'};
   const kx=Object.keys(PL).sort((a,z)=>Math.abs((o.pr[z]-p.pr[z])*primeDe(z,o.n))-Math.abs((o.pr[a]-p.pr[a])*primeDe(a,o.n)))[0],dk=o.pr[kx]-p.pr[kx];
-  add('Primes',-(o.dep.primes-p.dep.primes),dk?`${Math.abs(dk)} prime${Math.abs(dk)>1?'s':''} « ${PL[kx]} » de ${dk>0?'plus':'moins'}, ${fiE(primeDe(kx,o.n))} chacune`:'mêmes primes');
+  add('Primes',-(o.dep.primes-p.dep.primes),dk?`${Math.abs(dk)} prime${Math.abs(dk)>1?'s':''} « ${PL[kx]} » de ${dk>0?'plus':'moins'}, ${fiE(primeDe(kx,o.n))} chacune`:'mêmes primes');
   add('Salle et production',-(o.dep.salle-p.dep.salle),`${esc(o.salle)} contre ${esc(p.salle)}`);
   const l=ch.sort((x,y)=>Math.abs(y.eff)-Math.abs(x.eff)).slice(0,2);
   return `<div class="fi-chg"><div class="fi-ct"><span class="etiq">Depuis la ${p.n}</span><span class="T fi-ctn ${o.net-p.net>=0?'fi-pos':'fi-neg'}">${fiSigne(o.net-p.net)}</span><button class="fi-lien" data-firesu="${o.n}">Voir les résultats ›</button></div>
@@ -202,7 +202,7 @@ function fiBourses(){
       <span class="fi-kh"><span class="T fi-kn">${esc(x.court)}</span><span class="sous">${x.kg} kg · ${x.l.length} sous contrat</span></span>
       <span class="fi-kc"><span class="T fi-kv"><span data-fin="${x.moy}">0</span> €</span><span class="sous">en moyenne par combat</span></span>
       <span class="fi-kj"><i style="--p:${x.moy/max*100}%;animation-delay:${200+i*45}ms"></i></span>
-      <span class="fi-kb"><span class="fi-kr"><span class="sous">Versé en 2026</span><b>${fiE(x.an.v)}</b></span><span class="fi-kr fi-kr2"><span class="sous">La plus haute</span><b>${fiE(euros(x.haut.contrat[1]))}</b></span><span class="fi-kt2">${lien(x.haut)}</span></span></span></button>`;
+      <span class="fi-kb"><span class="fi-kr"><span class="sous">Versé en 2026</span><b>${fiE(x.an.v)}</b></span><span class="fi-kr fi-kr2"><span class="sous">Plus haute</span><b>${fiE(euros(x.haut.contrat[1]))}</b></span><span class="fi-kt2">${lien(x.haut)}</span></span></span></button>`;
   return `${fiBandeauB()}<div class="fi-g"><div class="fi-mur fi-mur-${F.sexe}">${l.map(carte).join('')}</div>${fiCatPanneau(cats.find(x=>x.cat===F.cat))}</div>`;
 }
 /** Le bandeau des bourses : tout l'effectif sous contrat, ce qui a été versé en 2026, la plus haute bourse. */
@@ -232,7 +232,7 @@ function fiCatPanneau(x){
   return pan(`<div class="fi-d" data-cle="${esc(x.cat)}">
     <div class="rt-ban fi-ban"><i class="rt-ban-img fi-ban-img"></i><div class="rt-ban-t"><div class="T fi-bn">${esc(x.cat.replace(/ F$/,''))}</div><div class="fi-bl">${S.fi.sexe==='F'?'Femmes':'Hommes'} · ${x.kg} kg</div></div></div>
     <div class="rc-faits fi-faits">${fait('Combats en 2026',`<span data-fin="${x.an.n}">0</span>`,`${x.l.length} combattants sous contrat`)}${fait('Fins de contrat',`<span data-fin="${x.fins.length}">0</span>`,'dernier combat à venir')}</div>
-    <div class="etiq fi-sect">Bourses les plus hautes</div><div class="fi-hauts">${haut}</div>
+    <div class="etiq fi-sect">Plus hautes bourses</div><div class="fi-hauts">${haut}</div>
     <div class="etiq fi-sect">Dernier combat sous contrat</div><div class="fi-fins">${fins||'<div class="sous">Aucun contrat ne finit dans cette catégorie.</div>'}</div>
   </div>`,'height:100%','fi-droite');
 }

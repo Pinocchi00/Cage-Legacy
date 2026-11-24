@@ -51,13 +51,13 @@ function rcDemandes(c,x){
      de l'activité garantie, une porte de sortie, ses sponsors, son équipe, le droit de boxer ailleurs. */
   const r=graine(c.id+'demandes'),pf=x.profil,m=c.nonClasse?999:c.mondial,l=[],pays=origineDe(c)[1];
   if(m<=10)l.push({id:'titre',t:'Une chance au titre avant fin 2028',p:'fort'});
-  else if(pf==='ancien')l.push({id:'titre',t:'Une chance au titre s’il gagne ses deux premiers combats',p:'moyen'});
+  else if(pf==='ancien')l.push({id:'titre',t:'Une chance au titre s’il gagne ses 2 premiers combats',p:'moyen'});
   const opt=[];
   if(m<=15)opt.push({id:'principal',t:'Être en tête d’affiche d’une soirée dans l’année',p:'moyen'});
-  if(['espoir','regional','ex'].includes(pf))opt.push({id:'activite',t:'Au moins trois combats par an',p:'moyen'});
-  if(['veteran','ex','ancien'].includes(pf)||m<=30)opt.push({id:'sortie',t:'Pouvoir partir s’il reste six mois sans combat',p:'moyen'});
+  if(['espoir','regional','ex'].includes(pf))opt.push({id:'activite',t:'Au moins 3 combats par an',p:'moyen'});
+  if(['veteran','ex','ancien'].includes(pf)||m<=30)opt.push({id:'sortie',t:'Pouvoir partir s’il reste 6 mois sans combat',p:'moyen'});
   if(m<=60||pf==='ancien')opt.push({id:'sponsors',t:'Garder ses propres sponsors',p:'leger'});
-  opt.push({id:'equipe',t:'Le voyage et l’hôtel pour trois personnes de son équipe',p:'leger'});
+  opt.push({id:'equipe',t:'Le voyage et l’hôtel pour 3 personnes de son équipe',p:'leger'});
   opt.push({id:'salle',t:'Ne jamais affronter un combattant de sa salle',p:'leger'});
   if(c.style==='Frappeur'||c.style==='Kickboxeur')opt.push({id:'boxe',t:'Pouvoir faire un combat de boxe anglaise ailleurs',p:'leger'});
   if(pays!=='France')opt.push({id:'pays',t:`Combattre une fois dans son pays (${pays})`,p:'leger'});
@@ -121,7 +121,7 @@ const rcAgent=(r)=>RC_AGENTS[Math.floor(r()*RC_AGENTS.length)];
       const tag={ex:`ex-${P2.org}`,regional:`champion${e} de ${reg}`,veteran:`ex-n° ${meilleur} mondial`,espoir:`invaincu${e}, ${v}-0`,ancien:`ancien${e} champion${e}`}[pf];
       const raison={ex:nd?`${P2.org} ne l’a pas prolongé${e} après ${nd>1?'deux défaites':'une défaite'}.`:`Pas d’accord avec ${P2.org} sur son salaire.`,
         regional:`Champion${e} de ${reg}, ${il} veut une grande organisation.`,veteran:`Ancien${e} n° ${meilleur} mondial, ${il} cherche un dernier contrat.`,
-        espoir:`Pro depuis deux ans, personne ne l’a encore signé${e}.`,ancien:`Ancien${e} champion${e} de ${big}, ${il} veut finir sur une belle soirée.`}[pf];
+        espoir:`Pro depuis 2 ans, jamais signé${e}.`,ancien:`Ancien${e} champion${e} de ${big}, ${il} veut finir sur une belle soirée.`}[pf];
       RC.push({id:c.id,type:'libre',profil:pf,tag,raison,dem:rcDemande(c,pf),agent:rcAgent(r),vu:null,etat:null});
     });
   }
@@ -129,13 +129,13 @@ const rcAgent=(r)=>RC_AGENTS[Math.floor(r()*RC_AGENTS.length)];
   const t=parId('rpoidsleger0');
   Object.assign(t,{prenom:'Tiago',nom:'Ferraz',surnom:'O Martelo',age:29,v:14,d:3,serie:'vvvdd',mondial:64,nonClasse:false,org:'Pure Impact',libre:new Date(2026,10,18),style:'Kickboxeur',art:'Muay-thaï',
     dernier:new Date(2026,9,24),taille:'1,78 m',allonge:'1,83 m',garde:'Orthodoxe'});
-  Object.assign(rcDe(t.id),{dem:{bourse:24000,combats:4,vic:24000,sig:10000,dmd:[{id:'activite',t:'Au moins trois combats par an',p:'moyen'},{id:'sponsors',t:'Garder ses propres sponsors',p:'leger'}]},agent:RC_AGENTS[1],tag:'ex-Pure Impact',
-    raison:'Pure Impact ne l’a pas prolongé après deux défaites.',veut:['Être payé comme un titulaire','Combattre souvent : quatre combats par an']});
+  Object.assign(rcDe(t.id),{dem:{bourse:24000,combats:4,vic:24000,sig:10000,dmd:[{id:'activite',t:'Au moins 3 combats par an',p:'moyen'},{id:'sponsors',t:'Garder ses propres sponsors',p:'leger'}]},agent:RC_AGENTS[1],tag:'ex-Pure Impact',
+    raison:'Pure Impact ne l’a pas prolongé après 2 défaites.',veut:['Être payé comme un titulaire','Combattre souvent : 4 combats par an']});
   const fin=RC.find(x=>x.type==='fin'&&parId(x.id).cat==='Poids léger');
   if(fin){Object.assign(fin,{vu:new Date(2027,0,4),agent:RC_AGENTS[0],
-    avis:'Très propre debout, il ne se fatigue pas. Il n’aime pas qu’on le mette dos à la cage : c’est là qu’on le bat.',
-    veut:['Une chance au titre avant la fin 2028','Rester au-dessus de 35 000 € par combat']});
-    Object.assign(fin.dem,{bourse:38000,combats:4,vic:38000,sig:15000,dmd:[{id:'titre',t:'Une chance au titre avant fin 2028',p:'fort'},{id:'principal',t:'Être en tête d’affiche d’une soirée dans l’année',p:'leger'},{id:'equipe',t:'Le voyage et l’hôtel pour trois personnes de son équipe',p:'leger'}]});}
+    avis:'Très propre debout, il ne se fatigue pas. Son point faible : dos à la cage.',
+    veut:['Une chance au titre avant fin 2028','Rester au-dessus de 35 000 € par combat']});
+    Object.assign(fin.dem,{bourse:38000,combats:4,vic:38000,sig:15000,dmd:[{id:'titre',t:'Une chance au titre avant fin 2028',p:'fort'},{id:'principal',t:'Être en tête d’affiche d’une soirée dans l’année',p:'leger'},{id:'equipe',t:'Le voyage et l’hôtel pour 3 personnes de son équipe',p:'leger'}]});}
   RC.forEach(x=>{x.patience=x.agent[2];if(!x.dem.dmd)x.dem.dmd=rcDemandes(parId(x.id),x);x.nouveau=x.type==='libre'&&(S.date-parId(x.id).libre)<864e5*10;});
 })();
 
@@ -167,7 +167,7 @@ const RC_COL={
   mondial:['Mondial','120px',x=>parId(x.id).mondial],
   serie:['5 derniers combats','184px',x=>[...parId(x.id).serie].reverse().reduce((a,v,i)=>a+(v==='v'?5-i:0),0)],
   situation:['Situation','minmax(0,1.3fr)',x=>x.type==='libre'?0:1],
-  demande:['Il demande','122px',x=>x.dem.bourse],
+  demande:['Demande','122px',x=>x.dem.bourse],
 };
 const rcCols=()=>S.rc.cat==='toutes'?['nom','cat','age','bilan','mondial','serie','situation','demande']:['nom','age','bilan','mondial','serie','situation','demande'];
 const rcGrille=()=>rcCols().map(k=>RC_COL[k][1]).join(' ');
@@ -179,7 +179,7 @@ function rcEtatHtml(x){
     case 'accord':return '<span style="color:var(--vert);font-weight:700">Accord trouvé</span>';
     case 'signe':return '<span style="color:var(--vert);font-weight:700">Signé chez Split</span>';
     case 'refus':return `<span style="color:var(--neg);font-weight:700">Pas d’accord</span>`;
-    case 'recruteur':return '<span>Ton recruteur y va</span>';
+    case 'recruteur':return '<span>Recruteur en route</span>';
   }
   return '';
 }
@@ -192,7 +192,7 @@ function rcSituation(x){
 function rcCellule(x,k){
   const c=parId(x.id);
   switch(k){
-    case 'nom':return `<div class="rc-nomc"><div class="eff-nom">${lien(c)}<span class="sous">« ${esc(c.surnom)} »${x.nouveau&&!x.etat?' <span class="rc-neuf">Nouveau</span>':''}${x.vu?` <span class="rc-vu" title="Rapport de ton recruteur, ${rcJour(x.vu)}">${ico('oeil',18)}</span>`:''}</span></div></div>`;
+    case 'nom':return `<div class="rc-nomc"><div class="eff-nom">${lien(c)}<span class="sous">« ${esc(c.surnom)} »${x.nouveau&&!x.etat?' <span class="rc-neuf">Nouveau</span>':''}${x.vu?` <span class="rc-vu" title="Rapport du recruteur, ${rcJour(x.vu)}">${ico('oeil',18)}</span>`:''}</span></div></div>`;
     case 'cat':return esc(courte(c.cat));
     case 'age':return c.age;
     case 'bilan':return `<span class="T" style="font-size:30px">${bilan(c)}</span>`;
@@ -206,7 +206,7 @@ function rcTableau(){
   const l=rcListe(),F=S.rc;
   if(!F.sel||!l.some(x=>x.id===F.sel))F.sel=l[0]&&l[0].id;
   const th=k=>{const on=F.tri.col===k;return `<button class="rc-th ${on?'trie':''}" data-rctri="${k}">${RC_COL[k][0]}${on?(F.tri.sens>0?' ▾':' ▴'):''}</button>`;};
-  const vide=`<div class="rc-vide">Personne dans cette catégorie pour l’instant.</div>`;
+  const vide=`<div class="rc-vide">Personne dans cette catégorie.</div>`;
   return pan(`<div class="rc-tete" style="grid-template-columns:${rcGrille()}">${rcCols().map(th).join('')}</div>
     <div class="defile rc-liste">${l.length?l.map((x,i)=>`<div class="rc-l oct ${x.id===F.sel?'sel':''} apparait" data-rcsel="${x.id}" style="animation-delay:${Math.min(i,10)*25}ms">
       <div class="rc-li oct" style="grid-template-columns:${rcGrille()}">${rcCols().map(k=>`<div class="rc-c c-${k}">${rcCellule(x,k)}</div>`).join('')}</div></div>`).join(''):vide}</div>`,'height:100%');
@@ -225,22 +225,22 @@ function rcFicheCourte(){
   const situ=x.type==='libre'?`Libre depuis le ${rcJour(c.libre)} · <span class="sous">${esc(x.tag)}</span>`:`${esc(c.org)} · libre ${esc(x.fin)}`;
   const style=x.vu?`<div class="rc-bloc"><div class="etiq">Style <span class="rc-date">rapport du ${rcJour(x.vu)}</span></div>
       <div style="font-size:23px;margin-top:6px"><b>${esc(c.art)}</b> · ${esc(RC_STYLES[c.style]||c.style)}</div></div>`
-    :x.etat==='recruteur'?`<div class="rc-bloc"><div class="etiq">Style</div><div style="font-size:22px;margin-top:6px">Ton recruteur part le voir. Rapport vers le ${rcJour(x.rapport)}.</div></div>`
+    :x.etat==='recruteur'?`<div class="rc-bloc"><div class="etiq">Style</div><div style="font-size:22px;margin-top:6px">Recruteur en route. Rapport vers le ${rcJour(x.rapport)}.</div></div>`
     :`<div class="rc-bloc"><div class="etiq">Style</div><div class="rc-cache"><span class="sous">Personne ne l’a encore vu de près.</span>
       <button class="bb oct petit" data-rcenvoyer="${c.id}"><span class="oct">${ico('oeil',20)}Envoyer le recruteur</span></button></div></div>`;
-  const act=x.etat==='signe'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Signé : ${il} rejoint l’effectif.</div>`
-    :x.etat==='accord'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Accord : ${il} signe ${esc(x.fin)}.</div>`
+  const act=x.etat==='signe'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Signé : ${il} rejoint l’effectif.</div>`
+    :x.etat==='accord'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Accord : ${il} signe ${esc(x.fin)}.</div>`
     :x.etat==='refus'?`<div class="rc-fin" style="color:var(--neg)">Pas d’accord. Son agent ne reprendra pas avant le ${rcJour(x.retour)}.</div>`
     :`<button class="bouton jaune cj" style="--c:14px;height:58px;font-size:32px" data-rcoffre="${c.id}">${x.etat==='cours'?'Reprendre la négociation':'Faire une offre'}</button>`;
   return pan(`<div class="rc-fc apparait" data-cle="${c.id}">
-    <div class="rc-fc-h"><div style="min-width:0"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div>
+    <div class="rc-fc-h"><div style="min-width:0"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div>
       <div class="T rc-grand nom" data-fiche="${c.id}">${esc(c.nom)}</div>
       <div class="sous" style="margin-top:6px">${esc(courte(c.cat))} · ${c.age} ans · ${esc(o[0])}, ${esc(o[1])}</div></div></div>
     <div class="rc-sit">${situ}</div>
     <div class="rc-mil"><div class="rc-faits">${rcFait('Palmarès',bilan(c))}${rcFait('Mondial',`<span style="text-transform:none">${rcRang(c)}</span>`)}${rcFait('Gabarit',esc(c.taille),`allonge ${esc(c.allonge)}`)}</div>
     <div class="rc-bloc"><div class="etiq">Dernières victoires</div>${rcVictoires(c)}</div>
     ${style}</div>
-    <div class="rc-dem"><div><div class="etiq">Il demande</div><div class="T" style="font-size:46px;margin-top:6px">${nb(x.dem.bourse)} €</div>
+    <div class="rc-dem"><div><div class="etiq">Demande</div><div class="T" style="font-size:46px;margin-top:6px">${nb(x.dem.bourse)} €</div>
       <div class="sous">par combat · ${x.dem.combats} combats · ${x.dem.dmd.length} demande${x.dem.dmd.length>1?'s':''}</div></div>
       <div style="text-align:right"><div class="etiq">Agent</div><div style="font-size:23px;font-weight:700;margin-top:6px">${esc(x.agent[0])}</div><div class="sous" style="font-size:18px">${esc(x.agent[1])}</div></div></div>
     <div class="rc-actions">${act}<button class="bb oct petit ${suivi?'on':''}" data-rcsuivre="${c.id}"><span class="oct">${suivi?'Suivi':'Suivre'}</span></button></div>
@@ -263,7 +263,7 @@ function rcPhrase(x,cas,o){
     case 'ouverture':return `${p} veut ${nb(d.bourse)} € par combat sur ${d.combats} combats, autant à la victoire, et ${nb(d.sig)} € à la signature.${d.dmd.length?` ${IL} a aussi ${d.dmd.length>1?d.dmd.length+' demandes':'une demande'}.`:''}`;
     case 'proche':return `On y est presque. Encore un effort et on signe.`;
     case 'moyen':return `Ce n’est pas assez pour ${il==='elle'?'une combattante':'un combattant'} de son niveau. Voilà où on peut descendre.`;
-    case 'fort':{const f=d.dmd.find(z=>z.p==='fort'&&!(o.eng||[]).includes(z.id));return `Pour ${p}, un point n’est pas négociable : ${f?f.t.charAt(0).toLowerCase()+f.t.slice(1):''}. Le reste peut se discuter.`;}
+    case 'fort':{const f=d.dmd.find(z=>z.p==='fort'&&!(o.eng||[]).includes(z.id));return `Pour ${p}, un point n’est pas négociable : ${f?f.t.charAt(0).toLowerCase()+f.t.slice(1):''}. Le reste peut se discuter.`;}
     case 'combats':return `Sur l’argent, on est d’accord. ${p} veut ${d.combats} combats, pas ${o.combats}.`;
     case 'compromis':return `On fait un pas vers vous. Voilà ce qu’on peut accepter.`;
     case 'meme':return `C’est la même offre. Si vous ne bougez pas, on ne bouge pas.`;
@@ -302,7 +302,7 @@ function rcProposer(direct=false){
       /* Les combats aussi se discutent : il fait un pas vers ton nombre. */
       if(o.combats!==d.combats&&sc>=.8)d.combats+=Math.sign(o.combats-d.combats)*Math.max(1,Math.floor(Math.abs(o.combats-d.combats)/2));
       const reste=rcEcarts(o,d),cas=d.dmd.some(z=>z.p==='fort'&&!o.eng.includes(z.id))?'fort':reste.length===1&&reste[0]==='combats'?'combats':sc>=.93?'proche':N.ech>1?'compromis':'moyen';
-      N.log.push({qui:'lui',t:rcPhrase(x,cas,o)+(lache?` ${parId(x.id).prenom} peut renoncer à « ${lache.t.toLowerCase()} ».`:''),dem:{...d,dmd:[...d.dmd]},o,avant:N.demPrev});
+      N.log.push({qui:'lui',t:rcPhrase(x,cas,o)+(lache?` ${parId(x.id).prenom} peut renoncer à « ${lache.t.toLowerCase()} ».`:''),dem:{...d,dmd:[...d.dmd]},o,avant:N.demPrev});
     }
     N.avant=o;
     if(!N.fini&&N.ech===x.patience-1){N.dernier=true;N.log.push({qui:'lui',t:rcPhrase(x,'dernier'),alerte:true});}
@@ -317,28 +317,28 @@ function rcDefiler(){const j=$('.rc-log');if(j)j.scrollTo({top:j.scrollHeight,be
 const rcPos=s=>s==null?0:Math.max(0,Math.min(1,(s-.62)/.375));
 function rcJauge(x){
   const N=x.nego,fini=N.fini,s=N.score;
-  const mot=fini==='accord'?'Accord':fini==='refus'?'Rompu':s==null?'En attente de ton offre':s<.72?'Loin':s<.9?'À discuter':'Proche';
+  const mot=fini==='accord'?'Accord':fini==='refus'?'Rompu':s==null?'En attente d’une offre':s<.72?'Loin':s<.9?'À discuter':'Proche';
   const col=fini==='accord'?'var(--vert)':fini==='refus'?'var(--neg)':s==null?'var(--texte2)':s<.72?'var(--neg)':s<.9?'var(--blanc)':'var(--vert)';
   const pos=fini==='accord'?1:fini==='refus'?0:rcPos(s),avant=fini?rcPos(N.prev):rcPos(N.prev);
   const offres=Array.from({length:N.ech},(_,i)=>`<i class="octr fait" title="Offre ${i+1}"></i>`).join('')+(fini?'':`<i class="octr ${N.dernier?'derniere':''}" title="${N.dernier?'Dernière offre':'Prochaine offre'}"></i>`);
   return `<div class="rc-ou">
-    <div class="rc-ou-h"><span class="etiq">Où vous en êtes</span><span class="T rc-mot" style="color:${col}">${mot}</span></div>
+    <div class="rc-ou-h"><span class="etiq">Négociation</span><span class="T rc-mot" style="color:${col}">${mot}</span></div>
     <div class="rc-regle ${fini||''}"><div class="rc-zones"><span>Loin</span><span>À discuter</span><span>Proche</span><span>Accord</span></div>
       <div class="rc-piste"><i class="rc-rempli" data-vers="${pos}" style="width:${(S.rc.anim?avant:pos)*100}%;background:${col}"></i>
         ${s==null&&!fini?'':`<span class="rc-cur octr" data-vers="${pos}" style="left:${(S.rc.anim?avant:pos)*100}%;background:${col}"></span>`}</div></div>
-    <div class="rc-offres"><span class="etiq">Tes offres</span>${offres}${N.dernier&&!fini?'<span class="rc-der">Dernière offre</span>':''}</div></div>`;
+    <div class="rc-offres"><span class="etiq">Offres</span>${offres}${N.dernier&&!fini?'<span class="rc-der">Dernière offre</span>':''}</div></div>`;
 }
 /* Un levier : ce qu'il demande (repère blanc) et ton offre (la barre), le bouton − / + à droite. */
 function rcLevier([k,t,s],x){
   const N=x.nego,o=N.offre[k],d=N.dem[k],fini=!!N.fini||S.rc.attente,av=N.demPrev&&N.demPrev[k];
   const baisse=av!=null&&typeof d==='number'&&d<av?`<span class="rc-baisse">▼ ${nb(av-d)} €</span>`:'';
   if(k==='combats'){
-    const nbs=[1,2,3,4,5,6,7,8].map(n=>`<button class="rc-nb octr ${n===o?'on':''} ${n===d?'veut':''}" ${fini?'disabled':''} data-rcnb="${n}" title="${n===d?'Ce qu’il veut':''}"><span class="octr">${n}</span></button>`).join('');
+    const nbs=[1,2,3,4,5,6,7,8].map(n=>`<button class="rc-nb octr ${n===o?'on':''} ${n===d?'veut':''}" ${fini?'disabled':''} data-rcnb="${n}" title="${n===d?'Sa demande':''}"><span class="octr">${n}</span></button>`).join('');
     return `<div class="rc-lev"><div><div class="rc-lev-t">${t}</div><div class="rc-lev-d">il en veut <b>${d}</b></div></div><div class="rc-nbs">${nbs}</div></div>`;
   }
   const max=d*1.25,ok=o>=d,proche=o>=d*.9,col=ok?'var(--vert)':proche?'var(--blanc)':'rgba(233,230,225,.45)';
   return `<div class="rc-lev"><div><div class="rc-lev-t">${t} <span class="sous">${s}</span></div><div class="rc-lev-d">il demande <b class="${baisse?'rc-chg':''}">${nb(d)} €</b> ${baisse}</div></div>
-    <div class="rc-barre"><i style="width:${Math.min(100,o/max*100)}%;background:${col}"></i><span class="rc-rep" style="left:80%" title="Ce qu’il demande"></span></div>
+    <div class="rc-barre"><i style="width:${Math.min(100,o/max*100)}%;background:${col}"></i><span class="rc-rep" style="left:80%" title="Sa demande"></span></div>
     <div class="rc-pas">${fini?'':`<button class="bb oct petit" data-rcpas="${k}" data-v="-1000" title="Moins"><span class="oct">−</span></button>`}
       <span class="T rc-val" style="${ok?'color:var(--vert)':''}">${nb(o)} €</span>
       ${fini?'':`<button class="bb oct petit" data-rcpas="${k}" data-v="1000" title="Plus"><span class="oct">+</span></button>`}</div></div>`;
@@ -366,25 +366,25 @@ function rcNegoHtml(){
   const LIB={bourse:['Bourse',v=>`${nb(v)} €`],combats:['Combats',v=>`${v}`],vic:['Prime de victoire',v=>`${nb(v)} €`],sig:['Signature',v=>`${nb(v)} €`]};
   const tDm=(r,id)=>{const z=(r.dmd||[]).concat(N.lache||[],x.dem.dmd).find(q=>q.id===id);return z?z.t:id;};
   const ligne=r=>[u(`${nb(r.bourse)} € par combat`),u(`${r.combats} combats`),u(`${nb(r.vic)} € à la victoire`),u(`${nb(r.sig)} € à la signature`)].join(' · ')
-    +(r.eng&&r.eng.length?`<div class="sous" style="font-size:18px;margin-top:2px">Tu t’engages : ${r.eng.map(id=>esc(tDm(r,id).toLowerCase())).join(' ; ')}</div>`:'');
+    +(r.eng&&r.eng.length?`<div class="sous" style="font-size:18px;margin-top:2px">Engagements : ${r.eng.map(id=>esc(tDm(r,id).toLowerCase())).join(' ; ')}</div>`:'');
   const reponse=e=>{const ec=rcEcarts(e.o,e.dem),ok=['bourse','combats','vic','sig'].filter(k=>!ec.includes(k)),okd=(e.dem.dmd||[]).filter(z=>e.o.eng.includes(z.id)).length;
     const okL=ok.map(k=>LIB[k][0].toLowerCase()).concat(okd?[okd>1?okd+' de ses demandes':'une de ses demandes']:[]);
-    return `${okL.length?`<div class="rc-dac">${ico('ok',18)} D’accord sur : ${okL.join(', ')}</div>`:''}
-      ${ec.length?`<div class="rc-ecarts"><span></span><span class="etiq">Il veut</span><span class="etiq">Tu proposais</span>${ec.map(k=>k.startsWith('dm:')?`<span>${esc(tDm(e.dem,k.slice(3)))}</span><b>oui</b><span class="sous">non</span>`:`<span>${LIB[k][0]}</span><b>${LIB[k][1](e.dem[k])}</b><span class="sous">${LIB[k][1](e.o[k])}</span>`).join('')}</div>`:''}`;};
+    return `${okL.length?`<div class="rc-dac">${ico('ok',18)} D’accord sur : ${okL.join(', ')}</div>`:''}
+      ${ec.length?`<div class="rc-ecarts"><span></span><span class="etiq">Demande</span><span class="etiq">Offre</span>${ec.map(k=>k.startsWith('dm:')?`<span>${esc(tDm(e.dem,k.slice(3)))}</span><b>oui</b><span class="sous">non</span>`:`<span>${LIB[k][0]}</span><b>${LIB[k][1](e.dem[k])}</b><span class="sous">${LIB[k][1](e.o[k])}</span>`).join('')}</div>`:''}`;};
   const log=N.log.map((e,i)=>{const neuf=i>=N.log.length-2&&S.rc.anim?'entre':'';
     return e.qui==='toi'?`<div class="rc-bul toi ${neuf}"><div><div class="etiq">Toi · offre ${e.ech}</div><div class="rc-ligne">${ligne(e.o)}</div></div></div>`
     :`<div class="rc-bul lui ${neuf} ${e.ok?'ok':''} ${e.non?'non':''} ${e.alerte?'alerte':''}"><span class="rc-av octr">${ini}</span><div>
-      <div class="etiq">${esc(agent)}</div><div class="rc-dit">« ${esc(e.t)} »<span class="relire">à relire</span></div>${e.dem&&e.o?reponse(e):''}</div></div>`;}).join('')
+      <div class="etiq">${esc(agent)}</div><div class="rc-dit">« ${esc(e.t)} »<span class="relire">à relire</span></div>${e.dem&&e.o?reponse(e):''}</div></div>`;}).join('')
     +(S.rc.attente?`<div class="rc-bul lui entre"><span class="rc-av octr">${ini}</span><div class="rc-pense"><i></i><i></i><i></i></div></div>`:'');
   const derniere=N.log.slice().reverse().find(e=>e.dem);
   const pied=fini==='accord'?`<span class="rc-accord">${ico('ok',26)} Accord trouvé</span><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px;margin-left:auto" data-rcsigner>${x.type==='fin'?'Conclure l’accord':'Signer le contrat'}</button>`
     :fini==='refus'?`<span class="rc-rompu">Pas d’accord. Pas de nouvelle offre avant le ${rcJour(x.retour)}.</span><button class="bb oct" data-rcfermer style="margin-left:auto"><span class="oct">Revenir à la liste</span></button>`
     :`<button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-rcproposer ${S.rc.attente?'disabled':''}>${N.dernier?'Dernière offre':'Faire cette offre'}</button>
-      ${derniere?`<button class="bb oct" data-rcreprendre title="Mettre dans ton offre ce qu’il veut"><span class="oct">Prendre ses chiffres</span></button>`:''}
+      ${derniere?`<button class="bb oct" data-rcreprendre title="Reprendre ses chiffres dans l’offre"><span class="oct">Prendre ses chiffres</span></button>`:''}
       <button class="bb oct" data-rcfermer style="margin-left:auto" title="La négociation reste ouverte"><span class="oct">Plus tard</span></button>`;
   return `<div class="rc-nego ${fini?'fini-'+fini:''}">
     ${pan(`<div class="rc-band">
-      <div class="rc-qui"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div><div class="T rc-grand nom" data-fiche="${c.id}">${esc(c.nom)}</div>
+      <div class="rc-qui"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div><div class="T rc-grand nom" data-fiche="${c.id}">${esc(c.nom)}</div>
         <div class="sous">${esc(courte(c.cat))} · ${c.age} ans · ${bilan(c)} · ${rcRang(c)}</div>
         <div class="rc-sit2">${x.type==='libre'?`Libre · ${esc(x.tag)}`:`${esc(c.org)} · libre ${esc(x.fin)}`}</div></div>
       ${rcJauge(x)}
@@ -396,7 +396,7 @@ function rcNegoHtml(){
         <div class="rc-cout"><div><span class="etiq">Plafond sur le contrat</span> <span class="T rc-total">${nb(total)} €</span></div>
           <div class="sous" style="font-size:20px">${place===1?'Le plus gros salaire':`Le ${place}<sup>e</sup> salaire`} des ${esc(pluriel(c.cat).toLowerCase())} de Split</div></div>
         <div class="rc-pied">${pied}</div></div>`,'height:100%','apparait')}
-      ${pan(titre('La discussion')+`<div class="defile rc-log">${log}</div>`,'height:100%','apparait')}
+      ${pan(titre('Discussion')+`<div class="defile rc-log">${log}</div>`,'height:100%','apparait')}
     </div>
   </div>${S.rc.confirmer?rcConfirmerHtml(x):''}`;
 }
@@ -407,7 +407,7 @@ function rcConfirmerHtml(x){
   return `<div class="rc-voile">${pan(titre(x.type==='fin'?'Conclure l’accord':'Signer le contrat',`${esc(c.prenom)} ${esc(c.nom)}`)+`
     ${l('Combats',`${o.combats}`)}${l('Bourse par combat',`${nb(o.bourse)} €`)}${l('Prime de victoire',`${nb(o.vic)} €`)}${l('Prime de signature',`${nb(o.sig)} €`)}
     ${o.eng.map(id=>l('Tu t’engages',esc(((x.nego.dem.dmd||[]).concat(x.dem.dmd).find(z=>z.id===id)||{t:id}).t))).join('')}${l('Au plus, sur tout le contrat',`${nb(total)} €`)}
-    <div style="font-size:21px;margin:16px 0 4px">${x.type==='fin'?`${rcIL(c)} signe chez Split ${esc(x.fin)}. Jusque-là, ${rcIl(c)} reste chez ${esc(c.org)}.`:`${rcIL(c)} rejoint l’effectif aujourd’hui. La prime de signature est versée tout de suite.`}</div>
+    <div style="font-size:21px;margin:16px 0 4px">${x.type==='fin'?`${rcIL(c)} signe chez Split ${esc(x.fin)}. Jusque-là, ${rcIl(c)} reste chez ${esc(c.org)}.`:`${rcIL(c)} rejoint l’effectif aujourd’hui. Prime de signature versée aujourd’hui.`}</div>
     <div class="rc-pied"><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-rcok>${x.type==='fin'?'Conclure':'Signer'}</button>
       <button class="bb oct" data-rcrevenir><span class="oct">Revenir</span></button></div>`,'width:760px','rc-conf')}</div>`;
 }
@@ -478,18 +478,18 @@ statsHtml=function(c){
   const x=rcDe(c.id);
   if(!x||x.vu||x.etat==='signe')return rcStatsBase(c);
   return pan(`<div class="rc-cachee"><div class="T" style="font-size:44px">Pas encore vu de près</div>
-    <div style="font-size:23px;max-width:640px;line-height:1.35">On connaît son palmarès et ses combats. Ses statistiques et son style se sauront à la signature, ou quand ton recruteur l’aura vu.</div>
-    ${x.etat==='recruteur'?`<div style="font-size:22px">Ton recruteur part le voir. Rapport vers le ${rcJour(x.rapport)}.</div>`:`<button class="bb oct" data-rcenvoyer="${c.id}"><span class="oct">${ico('oeil',22)}Envoyer le recruteur</span></button>`}</div>`,'height:100%');
+    <div style="font-size:23px;max-width:640px;line-height:1.35">Palmarès et combats connus. Statistiques et style après le rapport du recruteur, ou à la signature.</div>
+    ${x.etat==='recruteur'?`<div style="font-size:22px">Recruteur en route. Rapport vers le ${rcJour(x.rapport)}.</div>`:`<button class="bb oct" data-rcenvoyer="${c.id}"><span class="oct">${ico('oeil',22)}Envoyer le recruteur</span></button>`}</div>`,'height:100%');
 };
 const rcContratBase=contratHtml;
 contratHtml=function(c){
   const x=rcDe(c.id);if(!x)return rcContratBase(c);
   const d=x.dem,il=rcIl(c);
   return `<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px;height:100%">
-    ${pan(titre('Sa situation',x.type==='libre'?'Libre':esc(c.org))+`<div class="T" style="font-size:52px;line-height:.9">${x.type==='libre'?`Libre depuis le ${rcJour(c.libre)}`:`Libre ${esc(x.fin)}`}</div>
-      <div style="font-size:23px;line-height:1.3;margin-top:14px">${x.type==='libre'?`${esc(x.raison||'')} ${rcIL(c)} peut signer tout de suite.`:`Dernier combat de son contrat chez ${esc(c.org)}. Tu peux trouver un accord maintenant : ${il} signera chez Split après.`}</div>
+    ${pan(titre('Situation',x.type==='libre'?'Libre':esc(c.org))+`<div class="T" style="font-size:52px;line-height:.9">${x.type==='libre'?`Libre depuis le ${rcJour(c.libre)}`:`Libre ${esc(x.fin)}`}</div>
+      <div style="font-size:23px;line-height:1.3;margin-top:14px">${x.type==='libre'?`${esc(x.raison||'')} ${rcIL(c)} peut signer tout de suite.`:`Dernier combat du contrat chez ${esc(c.org)}. Accord possible maintenant : ${il} signera chez Split ensuite.`}</div>
       <div style="margin-top:auto;display:flex;gap:14px;align-items:center">${['signe','refus','accord'].includes(x.etat)?rcEtatHtml(x):`<button class="bouton jaune cj" style="--c:12px;height:52px;font-size:28px" data-rcoffre="${c.id}">${x.etat==='cours'?'Reprendre la négociation':'Faire une offre'}</button>`}</div>`,'height:100%')}
-    ${pan(titre('Ce qu’il demande',`agent : ${esc(x.agent[0])}`)+`<div class="T" style="font-size:64px;line-height:.9">${nb(d.bourse)} €</div>
+    ${pan(titre('Demande',`agent : ${esc(x.agent[0])}`)+`<div class="T" style="font-size:64px;line-height:.9">${nb(d.bourse)} €</div>
       <div class="sous" style="font-size:20px;margin-top:6px">par combat, sur ${d.combats} combats</div>
       <div class="cl-sf" style="margin-top:18px">${rcFait('Prime de victoire',`${nb(d.vic)} €`)}${rcFait('Signature',`${nb(d.sig)} €`)}${rcFait('Demandes',`${d.dmd.length}`)}</div>
       <div class="rc-bloc" style="margin-top:14px">${d.dmd.map(z=>`<div class="rc-dmd"><span class="rc-dmd-t">${esc(z.t)}</span><span class="rc-poids ${z.p}">${RC_POIDS[z.p][0]}</span><span></span></div>`).join('')}</div>`,'height:100%')}
@@ -513,7 +513,7 @@ document.addEventListener('click',e=>{
   const t=e.target;let el;
   if((el=t.closest('[data-rcoffre]'))){e.stopPropagation();const id=el.dataset.rcoffre;if(S.fiche)fermerFiche(false);if(S.ecran!=='contrats')aller('contrats');rcOuvrirNego(id);return;}
   if((el=t.closest('[data-rcenvoyer]'))){const x=rcDe(el.dataset.rcenvoyer),c=parId(x.id);x.etat='recruteur';x.rapport=new Date(S.date.getTime()+864e5*9);
-    toast(`Ton recruteur part voir ${esc(c.prenom)} ${esc(c.nom)}. Son rapport arrivera dans tes messages vers le ${rcJour(x.rapport)}.`);rendre();if(S.fiche)rendreFiche();return;}
+    toast(`Marco Ferri part voir ${esc(c.prenom)} ${esc(c.nom)}. Rapport dans les Messages vers le ${rcJour(x.rapport)}.`);rendre();if(S.fiche)rendreFiche();return;}
   if(S.ecran!=='contrats')return;
   if(t.closest('#fiche')||t.closest('[data-fiche]'))return;
   const F=S.rc,x=F.nego&&rcDe(F.nego);
@@ -537,7 +537,7 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-rcsigner]')){F.confirmer=true;rendre();return;}
   if(t.closest('[data-rcrevenir]')||(F.confirmer&&t.classList.contains('rc-voile'))){F.confirmer=false;rendre();return;}
   if(t.closest('[data-rcok]')){const c=parId(x.id);x.etat=x.type==='fin'?'accord':'signe';F.confirmer=false;F.nego=null;rendre();
-    toast(x.etat==='signe'?`${esc(c.prenom)} ${esc(c.nom)} signe chez Split. ${rcIL(c)} rejoint l’effectif des ${esc(pluriel(c.cat).toLowerCase())}.`:`Accord avec ${esc(c.prenom)} ${esc(c.nom)} : ${rcIl(c)} signe ${esc(x.fin)}.`);return;}
+    toast(x.etat==='signe'?`${esc(c.prenom)} ${esc(c.nom)} signe chez Split. ${rcIL(c)} rejoint l’effectif des ${esc(pluriel(c.cat).toLowerCase())}.`:`Accord avec ${esc(c.prenom)} ${esc(c.nom)} : ${rcIl(c)} signe ${esc(x.fin)}.`);return;}
 });
 
 /* ---- Lancement : ?ecran=recrutement, options statut=libres|fins, rccat=<catégorie|toutes>, sexe=F, sel=<id>, nego=<id>, offres=<n>,

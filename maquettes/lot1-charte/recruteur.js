@@ -18,12 +18,12 @@ const RT_STYLES={
   'Lutte':['Lutteur','Lutte','Amenées au sol et contrôle.'],
   'Judo':['Grappler','Judo','Projections, puis contrôle au sol.'],
   'Sambo':['Lutteur','Sambo','Lutte, projections et clés.'],
-  'Jiu-jitsu brésilien':['Grappler','Jiu-jitsu brésilien','Le sol : étranglements et clés.'],
+  'Jiu-jitsu brésilien':['Grappler','Jiu-jitsu brésilien','Le sol : étranglements et clés.'],
   /* Les spécialités propres à un pays (À RELIRE). */
-  'Boxe française':['Kickboxeur','Kickboxing','La savate : pieds et poings.'],
+  'Boxe française':['Kickboxeur','Kickboxing','La savate : pieds et poings.'],
   'Lutte sénégalaise':['Lutteur','Lutte','La lutte avec frappe.'],
-  'Lutte mongole':['Lutteur','Lutte','Le bökh : projections.'],
-  'Sanda':['Kickboxeur','Kickboxing','La boxe chinoise : frappes et projections.'],
+  'Lutte mongole':['Lutteur','Lutte','Le bökh : projections.'],
+  'Sanda':['Kickboxeur','Kickboxing','La boxe chinoise : frappes et projections.'],
   'Lutte universitaire':['Lutteur','Lutte','La lutte des universités américaines.'],
   'Karaté Kyokushin':['Kickboxeur','Karaté','Le karaté au contact.'],
   'Lutte gréco-romaine':['Lutteur','Lutte','Le corps à corps, sans saisir les jambes.'],
@@ -111,33 +111,33 @@ const rtVilles=d=>d.villes.length>1?`${d.villes[0]}, puis ${d.villes[1]}`:d.vill
    en France) · semaines de visa de travail avant un premier combat en France · trajet entre ses deux villes ·
    deux salles du coin (inventées) · la scène locale en une phrase. La chance de trouver une pépite, elle, ne change pas. ---- */
 const RT_PLUS={
-  croatie:['croate',1,.65,0,40,['Zagreb Fight Club','Rijeka Kickboxing'],'Une grande école de kickboxing ; les galas de MMA se multiplient.'],
+  croatie:['croate',1,.65,0,40,['Zagreb Fight Club','Rijeka Kickboxing'],'Une grande école de kickboxing ; les galas de MMA se multiplient.'],
   australie:['anglais',0,1.15,4,180,['Bondi Combat','Southside MMA'],'Une scène professionnelle bien installée, des salles de très bon niveau.'],
   cameroun:['français',0,.5,8,30,['Douala Boxing Club','Yaoundé Fight'],'Des boxeurs et des lutteurs, encore très peu de galas de MMA.'],
-  france:['français',0,1,0,60,['Saint-Ouen Combat','Team Vieux-Port'],'Beaucoup de clubs, peu de galas pros : les bons partent tôt.'],
-  italie:['italien',0,.9,0,40,['Palestra Dora','Milano Fight Lab'],'Une vieille école de kickboxing ; le MMA pousse dans les salles de muay-thaï.'],
+  france:['français',0,1,0,60,['Saint-Ouen Combat','Team Vieux-Port'],'Beaucoup de clubs, peu de galas pros : les bons partent tôt.'],
+  italie:['italien',0,.9,0,40,['Palestra Dora','Milano Fight Lab'],'Une vieille école de kickboxing ; le MMA pousse dans les salles de muay-thaï.'],
   paysbas:['néerlandais, anglais',0,1,0,30,['Mokum Gym','Breda Vechtsport'],'Les meilleures salles de kickboxing d’Europe. Tout le monde frappe, peu luttent.'],
   royaumeuni:['anglais',0,1.15,4,40,['Dockside MMA','Northern Grit'],'Des galas tous les week-ends, un public énorme, des agents partout.'],
-  irlande:['anglais',0,1.1,0,0,['Liffey Combat Club','Westside Grappling'],'Petite scène très soudée : tout le monde se connaît.'],
+  irlande:['anglais',0,1.1,0,0,['Liffey Combat Club','Westside Grappling'],'Petite scène très soudée : tout le monde se connaît.'],
   suede:['suédois, anglais',0,1.1,0,60,['Södra Brottning','Göta Fight Center'],'Des lutteurs gréco solides, quelques salles de très haut niveau.'],
-  pologne:['polonais',1,.8,0,70,['Klub Wisła','Gdańsk Fight Team'],'Une grosse ligue nationale ; les jeunes y font leurs armes.'],
-  georgie:['géorgien',1,.6,4,30,['Didube Wrestling','Kutaisi Fight Club'],'Des lutteurs et des judokas partout ; le MMA arrive à peine.'],
+  pologne:['polonais',1,.8,0,70,['Klub Wisła','Gdańsk Fight Team'],'Une grosse ligue nationale ; les jeunes y font leurs armes.'],
+  georgie:['géorgien',1,.6,4,30,['Didube Wrestling','Kutaisi Fight Club'],'Des lutteurs et des judokas partout ; le MMA arrive à peine.'],
   daghestan:['russe, avar',1,.55,10,20,['École Eagle des montagnes','Club Sulak'],'La lutte dès six ans, des salles pleines, des combattants qui ne lâchent rien.'],
   russie:['russe',1,.7,10,60,['Nevsky Sambo','Krasnaya Fight'],'Le sambo à chaque coin de rue, des galas tous les mois.'],
-  kazakhstan:['kazakh, russe',1,.6,6,90,['Almaty Boxing Academy','Steppe Fight'],'Une école de boxe énorme ; le MMA prend de l’ampleur.'],
+  kazakhstan:['kazakh, russe',1,.6,6,90,['Almaty Boxing Academy','Steppe Fight'],'Une école de boxe énorme ; le MMA prend de l’ampleur.'],
   kirghizistan:['kirghiz, russe',1,.5,6,50,['Ala-Too Fight','Club Manas'],'Des lutteurs durs au mal, peu payés, peu vus.'],
-  mongolie:['mongol',1,.5,8,0,['Tuul Wrestling','Khan Fight Club'],'La lutte dans chaque village ; presque personne ne vient y chercher.'],
-  thailande:['thaï',1,.5,6,80,['Sor Kiatpet','Chalong Muay Thai'],'Des camps de muay-thaï partout, beaucoup d’étrangers : il faut trier.'],
-  japon:['japonais',1,1,4,120,['Kanda Grappling','Osaka Shootfighters'],'Une longue histoire du MMA ; des combattants techniques, souvent légers.'],
+  mongolie:['mongol',1,.5,8,0,['Tuul Wrestling','Khan Fight Club'],'La lutte dans chaque village ; presque personne ne vient y chercher.'],
+  thailande:['thaï',1,.5,6,80,['Sor Kiatpet','Chalong Muay Thai'],'Des camps de muay-thaï partout, beaucoup d’étrangers : il faut trier.'],
+  japon:['japonais',1,1,4,120,['Kanda Grappling','Osaka Shootfighters'],'Une longue histoire du MMA ; des combattants techniques, souvent légers.'],
   coree:['coréen',1,.9,4,60,['Gangnam Taekwondo','Busan Combat'],'Des taekwondoïstes qui passent au MMA, rapides et légers.'],
   chine:['chinois',1,.7,8,150,['Shichahai Sanda','Chengdu Fight Club'],'Une scène qui grandit vite, des écoles de sanda dans chaque province.'],
   bresil:['portugais',0,.6,4,150,['Academia Serra Verde','Curitiba Combate'],'Des académies à chaque coin de rue, des galas chaque week-end dans l’intérieur.'],
-  etatsunis:['anglais',0,1.4,4,200,['Sandia Fight Club','Desert Wolves'],'La plus grande scène du monde ; les bons ont déjà un agent.'],
-  mexique:['espagnol',0,.7,4,120,['Gimnasio Tepito','Tijuana Combat'],'Une culture de la boxe ; le MMA monte dans le nord.'],
+  etatsunis:['anglais',0,1.4,4,200,['Sandia Fight Club','Desert Wolves'],'La plus grande scène du monde ; les bons ont déjà un agent.'],
+  mexique:['espagnol',0,.7,4,120,['Gimnasio Tepito','Tijuana Combat'],'Une culture de la boxe ; le MMA monte dans le nord.'],
   canada:['français, anglais',0,1.1,4,0,['Club Mont-Royal','Hochelaga Fight'],'Une scène solide au Québec, où l’on parle français.'],
   cuba:['espagnol',0,.5,12,0,['Gimnasio Rafael Trejo','Club Cerro'],'Des boxeurs et des lutteurs de niveau olympique, très difficiles à faire sortir.'],
-  maroc:['arabe, français',0,.6,6,50,['Casa Fight Academy','Tanger Boxing'],'Une grande école de kickboxing ; beaucoup ont de la famille en France.'],
-  senegal:['wolof, français',0,.5,8,0,['Écurie Fass','Pikine Lutte'],'La lutte est le premier sport du pays ; quelques lutteurs passent au MMA.'],
+  maroc:['arabe, français',0,.6,6,50,['Casa Fight Academy','Tanger Boxing'],'Une grande école de kickboxing ; beaucoup ont de la famille en France.'],
+  senegal:['wolof, français',0,.5,8,0,['Écurie Fass','Pikine Lutte'],'La lutte est le premier sport du pays ; quelques lutteurs passent au MMA.'],
   nigeria:['anglais',0,.55,10,0,['Lagos Wrestling Hub','Surulere Fight'],'Des lutteurs puissants, très peu de galas.'],
   afriquedusud:['anglais',0,.8,6,30,['Soweto Fight','Highveld MMA'],'Une ligue nationale bien installée, des kickboxeurs costauds.'],
   nouvellezelande:['anglais',0,1.1,4,0,['Kingsland Strikers','Waikato Fight'],'Peu de salles, mais une des meilleures écoles de frappe au monde.'],
@@ -242,7 +242,7 @@ const RT_AVIS={
 const RT_NOTES={
   debout:{bon:['Bon volume, {il} frappe juste.','Précis{e}, {il} choisit bien ses moments.','Frappe lourde, {il} avance sans se découvrir.'],
     moyen:['Correct. Peu de combinaisons.','Un jab propre, mais {il} tente peu de choses.'],
-    faible:['Limité{e}. {Il} recule en ligne droite.','Encore débutant{e} : {il} garde les mains basses.']},
+    faible:['Limité{e}. {Il} recule en ligne droite.','Encore débutant{e} : {il} garde les mains basses.']},
   lutte:{bon:['Amène au sol facilement, surtout contre la cage.','Très difficile à amener au sol.'],
     moyen:['Défense d’amenée correcte.','Peu d’amenées, mais {il} se relève vite.'],
     faible:['Se fait amener au sol trop facilement.','Ne cherche jamais la lutte.']},
@@ -250,17 +250,17 @@ const RT_NOTES={
     moyen:['Contrôle correct, peu de soumissions.','Solide, sans prendre de risques.'],
     faible:['Mal à l’aise sur le dos.','Peu vu{e} au sol.']}};
 const RT_PHYSIQUE={pro:'Bon cardio sur trois rounds.',pep:'Bon cardio sur trois rounds, {il} finit plus fort qu’{il} ne commence.',
-  gonfle:'Ses combats ont tous été courts : son cardio est inconnu.',circuit:'Solide sur trois rounds.',
-  transfuge:'Très solide physiquement : un passé d’athlète.',vieux:'Récupère moins vite. Beaucoup de combats derrière lui.',
+  gonfle:'Ses combats ont tous été courts : son cardio est inconnu.',circuit:'Solide sur trois rounds.',
+  transfuge:'Très solide physiquement : un passé d’athlète.',vieux:'Récupère moins vite. Beaucoup de combats derrière lui.',
   underground:'Puissant{e}, mais {il} n’a fait que des combats courts.'};
 const RT_RISQUES={
   pro:['A raté le poids à son avant-dernier combat.','Un seul adversaire sérieux dans son bilan.'],
   gonfle:['Je ne l’ai vu{e} qu’une fois, et le combat a duré moins d’une minute.','La plupart de ses adversaires ont plus de défaites que de victoires.'],
   circuit:['N’a jamais combattu hors de son pays.'],
-  transfuge:['Encore débutant{e} debout : {il} prend des coups.'],
+  transfuge:['Encore débutant{e} debout : {il} prend des coups.'],
   transfugeF:['Encore débutant{e} en lutte et au sol.'],
-  vieux:['{age} ans : deux ou trois ans de carrière devant {lui}.','Récupère moins vite, d’après son entraîneur.'],
-  underground:['Peu de combats officiels : difficile de juger son niveau.','A combattu sans licence : son dossier médical est à vérifier.'],
+  vieux:['{age} ans : deux ou trois ans de carrière devant {lui}.','Récupère moins vite, d’après son entraîneur.'],
+  underground:['Peu de combats officiels : difficile de juger son niveau.','A combattu sans licence : son dossier médical est à vérifier.'],
   tous:['Blessure au genou en 2025, d’après son entraîneur.','Son équipe demande à être prise en charge pour chaque combat.']};
 
 /** Un tirage qui évite ce que les autres profils du voyage ont déjà eu. */
@@ -287,8 +287,8 @@ function rtDossier(c,p,d,r,used){
   const lv=[up(deb),up(lut),up(so)],forts=[],surveiller=[];
   notes.slice(0,3).forEach(([,t],i)=>{if(lv[i]==='bon')forts.push(t);else if(lv[i]==='faible')surveiller.push(t);});
   if(['pro','circuit','transfuge'].includes(p.type)||p.pep)forts.push(notes[3][1]);else if(['vieux','gonfle','underground'].includes(p.type))surveiller.push(notes[3][1]);
-  if(c.d===0&&c.v>=5)forts.unshift(g(`Invaincu{e} : ${c.v} victoires en ${c.v} combats.`));
-  else if(fin>=c.v*.6)forts.unshift(g(`Finit ses combats : ${fin} victoires sur ${c.v} avant la limite.`));
+  if(c.d===0&&c.v>=5)forts.unshift(g(`Invaincu{e} : ${c.v} victoires en ${c.v} combats.`));
+  else if(fin>=c.v*.6)forts.unshift(g(`Finit ses combats : ${fin} victoires sur ${c.v} avant la limite.`));
   risques.forEach(t=>surveiller.push(t));
   return {notes,vus,risques,forts:forts.slice(0,3),surveiller:surveiller.slice(0,3),avis:g(RT_AVIS[p.verdict]),debut:`Pro depuis ${debut}. ${c.v} victoire${c.v>1?'s':''}, dont ${fin} avant la limite.`};
 }
@@ -358,7 +358,7 @@ function rtProfils(d,n,cle,V){
       if(!T.length)T.push(['+','En progrès',`${c.v} victoires`,'Encore jeune chez les pros.']);c.traits=T.slice(0,2);}
     const dur=type==='vieux'||type==='gonfle';
     const x={id,type:'libre',profil:type==='vieux'?'veteran':['circuit','underground','gonfle'].includes(type)?'regional':'espoir',tag:`vu${f?'e':''} à ${ville}, ${rcJour(jour)}`,
-      raison:`Ton recruteur l’a vu${f?'e':''} à ${ville} le ${rcJour(jour)}.`,agent:[p.coach,dur?'Dur en affaires':'Arrangeant',dur?3:4,dur?.25:.45],
+      raison:`Vu${f?'e':''} par Marco Ferri à ${ville} le ${rcJour(jour)}.`,agent:[p.coach,dur?'Dur en affaires':'Arrangeant',dur?3:4,dur?.25:.45],
       vu,etat:null,rt:true,nouveau:true};
     x.dem=rcDemande(c,x.profil);if(type==='gonfle')x.dem.bourse*=1.6;['bourse','vic'].forEach(k=>x.dem[k]=rtSal(d,x.dem[k]));x.dem.sig=rtSal(d,x.dem.sig);
     x.patience=x.agent[2];x.dem.dmd=rcDemandes(c,x);
@@ -402,16 +402,16 @@ function rtClore(V){V.prof=rtProfils(rtDe(V.dest),V.profils,V.cle,V);V.carnet=rt
 /* ---- Les messages : le départ, puis un condensé du rapport (T10). Le rapport complet a son écran. ---- */
 function rtMsgDepart(V){
   const d=rtDe(V.dest);
-  return {id:'rt-depart-'+V.cle,tag:'Recruteur',qui:'Marco Ferri',role:'ton recruteur',date:new Date(V.parti),lu:false,
+  return {id:'rt-depart-'+V.cle,tag:'Recruteur',qui:'Marco Ferri',role:'recruteur',date:new Date(V.parti),lu:false,
     t:`Marco part ${rtPrep(d)}`,
     txt:`Je pars ${V.parti.getTime()===S.date.getTime()?'ce soir':'le '+rcJour(V.parti)} pour ${d.villes.join(', puis ')}. Je ferai les salles de ${d.spec.map(s=>s.toLowerCase()).join(', de ').replace(/, de ([^,]*)$/,' et de $1')}, et les galas du week-end. Je rentre le ${rtJourL(V.retour)}.<span class="relire">à relire</span>`,
     vue:()=>`<div class="ms-cases g2b">
       ${msCase('Voyage',`${msFaitH('Où',esc(d.villes.join(', ')))}${msFait('Départ',`${rtJourL(V.parti)}, de Lyon`)}${msFait('Retour',`<b>${rtJourL(V.retour)}</b>`)}
         ${msFait('Sur place',`${V.jours} jours${d.route?`, plus ${d.route} jours de route`:''}`)}${msFait('Profils attendus',`${V.profils}, toutes catégories`)}`)}
-      ${msCase('Ce qu’il coûte',`${msGros(`<span data-mscompte="${V.cout}">${nb(V.cout)}</span> €`,'déjà payé')}
+      ${msCase('Coût',`${msGros(`<span data-mscompte="${V.cout}">${nb(V.cout)}</span> €`,'déjà payé')}
         ${msFait(`Billet aller-retour · ${nb(d.km)} km`,rtEu(d.billet))}${d.transfert?msFait(`${esc(d.villes[0])} → ${esc(d.villes[1])}`,rtEu(d.transfert)):''}
         ${msFait(`${V.tot} jours × ${rtEu(RT_JOUR)}`,rtEu(V.sejour))}${V.interp?msFait(`Interprète · ${V.jours} jours`,rtEu(V.interp)):''}`)}
-      ${msCase('Ce qu’il va chercher',`<div class="rt-ms-spec">${d.spec.map(s=>`<div><b>${esc(s)}</b><span class="sous">${esc(RT_STYLES[s][2])}</span></div>`).join('')}</div>
+      ${msCase('Spécialités',`<div class="rt-ms-spec">${d.spec.map(s=>`<div><b>${esc(s)}</b><span class="sous">${esc(RT_STYLES[s][2])}</span></div>`).join('')}</div>
         <div class="sous" style="margin-top:8px">${esc(d.scene)}</div>`,'large')}
       ${msCase('',`<div class="rt-mfr">${msFrise(V.parti,V.retour,`${rcJour(V.parti)} · Lyon`,`${rcJour(V.retour)} · retour`)}</div>`,'large')}
     </div>`,
@@ -438,16 +438,16 @@ const rtCoutCombat=p=>rcDe(p.id).dem.bourse+rtDe(p.dest).parCombat;
 function rtMsgRapport(V){
   const d=rtDe(V.dest),l=rtOrdre(V),n=rtASigner(V),un=l[0],c0=parId(un.id);
   const intro=`${rtNombre(l.length).replace(/^./,x=>x.toUpperCase())} profils${n?`, ${rtNombre(n)} que je signerais`:', aucun que je signerais tout de suite'}. `
-    +(n?`En premier : ${esc(c0.prenom)} ${esc(c0.nom)}. `:'')+'Le détail est dans mon rapport.<span class="relire">à relire</span>';
-  return {id:V.msg,tag:'Recruteur',qui:'Marco Ferri',role:'ton recruteur',date:new Date(V.retour),lu:!!V.lu,
-    t:`Le rapport de Marco : ${rtNombre(l.length)} profils ${d.a==='à'?'à':d.a==='aux'?'aux':d.a==='au'?'au':'en'} ${esc(d.pays)}`,
+    +(n?`En premier : ${esc(c0.prenom)} ${esc(c0.nom)}. `:'')+'Le détail est dans mon rapport.<span class="relire">à relire</span>';
+  return {id:V.msg,tag:'Recruteur',qui:'Marco Ferri',role:'recruteur',date:new Date(V.retour),lu:!!V.lu,
+    t:`Rapport de Marco Ferri : ${l.length} profils ${d.a==='à'?'à':d.a==='aux'?'aux':d.a==='au'?'au':'en'} ${esc(d.pays)}`,
     txt:intro,
-    vue:()=>`<div class="ms-cases rt-g1">${msCase(`Ce qu’il recommande · ${esc(d.villes.join(', '))} · ${rtEu(V.cout)}`,`<div class="rt-mc"><div class="rt-mch"><span>Profil</span><span>Son avis</span><span>Il demande</span></div>${l.map((p,i)=>{const c=parId(p.id);
+    vue:()=>`<div class="ms-cases rt-g1">${msCase(`Recommandés · ${esc(d.villes.join(', '))} · ${rtEu(V.cout)}`,`<div class="rt-mc"><div class="rt-mch"><span>Profil</span><span>Avis</span><span>Demande</span></div>${l.map((p,i)=>{const c=parId(p.id);
       return `<div class="rt-mcl apparait" style="animation-delay:${120+i*90}ms"><div class="rt-mcn"><span class="ms-qui">${lien(c)}</span><span class="sous">${esc(courte(c.cat))}${/ F$/.test(c.cat)?' F':''} · ${c.age} ans · ${bilan(c)} · ${esc(p.styleReel)}</span></div>
         ${rtVerdict(p,'petit')}<span class="T rt-mcd">${nb(rcDe(p.id).dem.bourse)} €</span></div>`;}).join('')}</div>`,'large')}</div>`,
     act:()=>msOui('Lire le rapport',`data-rtrap="${V.cle}"`)};
 }
-/* Le rapport de Turin, arrivé le 8 janvier (déjà lu), juste sous « Ton recruteur est disponible ». */
+/* Le rapport de Turin, arrivé le 8 janvier (déjà lu), juste sous « Recruteur disponible ». */
 (function(){
   const m=rtMsgRapport(S.rt.passe);m.date=new Date(2027,0,8);
   const i=MS_BOITE.findIndex(x=>x.id==='recruteur');MS_BOITE.splice(i+1,0,m);
@@ -456,9 +456,9 @@ function rtMsgRapport(V){
   dispo.vue=()=>`<div class="ms-cases g2">
       ${msCase('Marco Ferri',`<div class="ms-dispo"><span class="point octr pulse" style="background:var(--vert)"></span><span class="T">Disponible</span></div>
         ${msFait('Où il est','À Lyon, depuis le 8 janvier')}${msFait('Dernier voyage','Turin, 7 jours, 4 profils')}${msFait('Trouvé par lui',`${lien(parId('musaev'))}, à Bichkek`)}`)}
-      ${msCase('Là où l’effectif est le plus faible',msFaibles())}
-      ${msCase('Un voyage, selon sa durée',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
-        <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Pendant le voyage, il n’est pas joignable.</div>`,'large')}
+      ${msCase('Catégories les plus faibles',msFaibles())}
+      ${msCase('Durée du voyage',`<div class="ms-chiffres q3">${msGros('2','profils en 3 jours')}${msGros('4','profils en 7 jours')}${msGros('6','profils en 14 jours')}</div>
+        <div class="sous" style="margin-top:4px">Il part de Lyon et cherche dans toutes les catégories. Injoignable pendant le voyage.</div>`,'large')}
     </div>`;
   dispo.act=()=>msOui('Envoyer le recruteur','data-msgo="recruteur"');
 })();
@@ -471,7 +471,7 @@ function rtEnvoyer(silence){
   MS_BOITE.unshift(m);MESSAGES.unshift({id:Date.now(),lu:false,nouveau:true,t:m.t,de:`Marco Ferri · aujourd’hui · retour le ${rcJour(V.retour)}`,tag:'Recruteur'});
   S.recruteur='voyage';
   rendre();
-  if(!silence)toast(`Marco part ${rtPrep(d)} : retour le ${rtJourL(V.retour)}. Son message de départ est dans tes messages.`);
+  if(!silence)toast(`Marco part ${rtPrep(d)} : retour le ${rtJourL(V.retour)}. Message de départ dans les Messages.`);
 }
 function rtRetour(){
   const V=S.rt.voyage;if(!V)return;
@@ -494,7 +494,7 @@ continuer=function(){
     S._enCours=false;const m=rtRetour();
     S.ms.sel=m.id;S.ms.nouveau=m.id;S.ms.anim=true;
     if(S.ecran==='messages'){msLire(m.id);rendre();}else aller('messages');
-    toast(`Le temps s’arrête, ${dLong(S.date).toLowerCase()} : Marco est rentré ${rtDu(rtDe(V.dest))}.`);
+    toast(`Marco Ferri est rentré ${rtDu(rtDe(V.dest))}, ${dLong(S.date).toLowerCase()}.`);
   };tic();
 };
 
@@ -544,15 +544,15 @@ function rtFrise(V){
 function rtPanneau(){
   const V=S.rt.voyage;
   const tete=(etat)=>`<div class="rt-tete"><span class="etiq">Recruteur</span><span class="rt-qui">Marco Ferri</span><span class="rt-etat">${etat}</span></div>`;
-  const specs=d=>`<div class="rt-bloc"><div class="etiq">Ce qu’on y trouve</div><div class="rt-specs">${d.spec.map(s=>`<span class="rt-spc">${esc(s)}</span>`).join('')}</div></div>`;
+  const specs=d=>`<div class="rt-bloc"><div class="etiq">Spécialités</div><div class="rt-specs">${d.spec.map(s=>`<span class="rt-spc">${esc(s)}</span>`).join('')}</div></div>`;
   if(V){const d=rtDe(V.dest);
     return pan(`<div class="rt-p apparait">${tete(`<span style="color:var(--texte2)">En voyage</span>`)}
       <div class="rt-ban"><i class="rt-ban-img"></i><div class="rt-ban-t"><div class="T rt-grand">${esc(d.pays)}</div><div class="rt-ou">${esc(rtVilles(d))}</div></div></div>
       ${rtFrise(V)}
       <div class="rc-faits">${rcFait('Retour',rtJourL(V.retour).replace(/^\S+ /,''),JOURS[V.retour.getDay()].toLowerCase())}${rcFait('Profils',V.profils,'toutes catégories')}${rcFait('Coût',rtEu(V.cout),'déjà payé')}</div>
       ${specs(d)}
-      <div class="rt-info">Pendant le voyage, il n’est pas joignable. Son rapport arrivera le ${rtJourL(V.retour)}.</div>
-      <div class="rt-bas"><button class="bb oct petit" data-rtmsg="${V.msgDepart}"><span class="oct">Son message de départ</span></button></div>
+      <div class="rt-info">Injoignable pendant le voyage. Rapport le ${rtJourL(V.retour)}.</div>
+      <div class="rt-bas"><button class="bb oct petit" data-rtmsg="${V.msgDepart}"><span class="oct">Message de départ</span></button></div>
     </div>`,'height:100%');}
   const d=rtDe(S.rt.dest),v=rtVoyage(d,S.rt.jours,S.date);
   const duree=([j,n])=>`<button class="bb oct rt-duree ${S.rt.jours===j?'on':''}" data-rtjours="${j}"><span class="oct"><b class="T">${j} jours</b><span class="sous">${n} profils</span></span></button>`;
@@ -561,7 +561,7 @@ function rtPanneau(){
       <div class="rt-scene">${esc(d.scene)}</div>
     ${specs(d)}
     <div class="rc-faits">${rcFait('Voyage',`<span data-rtcompte="${v.cout}">${nb(v.cout)}</span> €`,`billet et ${v.tot} jours`)}${rcFait('Bourse demandée',`${nb(rtSalMoy(d))} €`,'par combat, en moyenne')}${rcFait('Retour le',`${v.retour.getDate()===1?'1er':v.retour.getDate()} ${RC_MOIS[v.retour.getMonth()]}`,`<span data-rtprof>${v.profils} profils</span>`)}</div>
-    <div class="rt-bloc"><div class="etiq">Combien de temps sur place</div><div class="rt-durees">${RT_DUREES.map(duree).join('')}</div></div>
+    <div class="rt-bloc"><div class="etiq">Durée sur place</div><div class="rt-durees">${RT_DUREES.map(duree).join('')}</div></div>
     <button class="bouton jaune cj rt-envoyer" data-rtenvoyer>Envoyer Marco ${esc(rtPrep(d))}</button>
   </div>`,'height:100%');
 }
@@ -617,11 +617,11 @@ function rtAnalyse(V,p){
   const liste=(l,cls,icone)=>l.map((t,i)=>`<div class="rp-pt ${cls}" style="animation-delay:${350+i*90}ms"><span class="rp-pti">${icone}</span><span>${esc(t)}</span></div>`).join('');
   return pan(`<div class="rp-an" data-cle="${p.id}">
     <div class="rp-tete rp-a"><i class="rt-ban-img"></i>
-      <div style="min-width:0;position:relative"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div>
+      <div style="min-width:0;position:relative"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div>
         <div class="T rp-nom nom" data-fiche="${c.id}">${esc(c.nom)}</div>
         <div class="rp-id">${esc(c.cat.replace(/ F$/,' féminin'))} · ${c.age} ans · ${esc(p.styleReel)} · ${esc(p.ville)}</div></div>
       <div class="rp-bil" style="position:relative"><span class="T">${bilan(c)}</span>${serie5(c.serie)}</div></div>
-    <div class="rp-avisb rp-a">${rtVerdict(p)}<p>« ${esc(D.avis)} »</p></div>
+    <div class="rp-avisb rp-a">${rtVerdict(p)}<p>« ${esc(D.avis)} »</p></div>
     <div class="rp-faits rp-a">
       <div><span class="etiq">${f?'Elle':'Il'} demande</span><b class="T"><span data-rpcompte="${x.dem.bourse}">${nb(x.dem.bourse)}</span> €</b><span class="sous">par combat</span></div>
       <div><span class="etiq">Vu${f?'e':''} par Marco</span><b class="T">${p.fois} fois</b><span class="sous">${vus.length?vus.join(' et '):''}${lieu?' · '+esc(lieu):''}</span></div>
@@ -642,14 +642,14 @@ function rtArchives(){
     return `<div class="rp-al oct ${V===V0?'sel':''} rp-in" data-rtrap="${V.cle}" style="animation-delay:${120+i*110}ms"><div class="oct">
       <div class="rp-ah"><span class="T">${esc(d.pays)}</span><span class="sous">${rcJour(V.retour)} ${V.retour.getFullYear()}</span></div>
       <div class="sous">${esc(d.villes.join(', '))} · ${V.jours} jours · ${rtEu(V.cout)}</div>
-      <div class="rp-ac"><span><b class="T">${l.length}</b> profils</span><span><b class="T">${rtASigner(V)}</b> à signer</span>${sig.length?`<span class="rt-pos">Signé : ${sig.map(c=>lien(c)).join(', ')}</span>`:''}</div></div></div>`;}).join('');
+      <div class="rp-ac"><span><b class="T">${l.length}</b> profils</span><span><b class="T">${rtASigner(V)}</b> à signer</span>${sig.length?`<span class="rt-pos">Signé : ${sig.map(c=>lien(c)).join(', ')}</span>`:''}</div></div></div>`;}).join('');
 }
 function rtRapHtml(){
   const V=rtRapSel();if(!V)return `<div class="rc rt">${rtOnglets('rapports')}${pan('<div class="rc-vide">Aucun rapport pour l’instant.</div>')}</div>`;
   V.lu=true;const m=msPar(V.msg);if(m)m.lu=true;
   const d=rtDe(V.dest),l=rtOrdre(V);if(!l.some(p=>p.id===S.rt.sel))S.rt.sel=l[0].id;
   const p=l.find(z=>z.id===S.rt.sel),A=S.rt.archives;
-  const gauche=A?`<div class="pt"><h2>Ses rapports</h2><span class="ment">${S.rt.rapports.length} voyages</span></div><div class="rp-arch">${rtArchives()}</div>`
+  const gauche=A?`<div class="pt"><h2>Rapports</h2><span class="ment">${S.rt.rapports.length} voyages</span></div><div class="rp-arch">${rtArchives()}</div>`
     :`<div class="pt"><h2>${esc(d.pays)}</h2><span class="ment">${rcJour(V.retour)}</span></div>
         <div class="rp-voy">${esc(rtVilles(d))} · ${V.jours} jours · ${rtEu(V.cout)}</div>
         <div class="rp-liste">${l.map(rtLigneRap).join('')}</div>
@@ -730,20 +730,20 @@ relation=function(c){
   const moments=[[String(first.date.getFullYear()),'Premier combat pro',first.soiree]];
   if(p.type==='circuit')moments.push([String(h[Math.min(2,h.length-1)].date.getFullYear()),`Champion${f?'ne':''} ${rtDuCircuit(p.circuit).replace(/^d(e la|u|e l’) /,'')}`,'']);
   if(p.type==='transfuge')moments.unshift([String(first.date.getFullYear()-2),`Champion${f?'ne':''} ${rtDu(d)} de ${rtMin(p.styleReel)}`,'chez les espoirs']);
-  moments.push([String(h[0].date.getFullYear()),`Dernier combat : ${h[0].res==='v'?'victoire':'défaite'}`,h[0].soiree]);
+  moments.push([String(h[0].date.getFullYear()),`Dernier combat : ${h[0].res==='v'?'victoire':'défaite'}`,h[0].soiree]);
   moments.push(['2027','Vu'+e+' par Marco Ferri',`${p.ville}, ${rcJour(p.jour)}`]);
   const ligne=(r,n,t)=>`<div class="rl-e"><span class="etiq">${r}</span><div><b>${n}</b><span class="sous">${esc(t)}</span></div></div>`;
   const parAn={};h.forEach(x=>{const y=x.date.getFullYear();parAn[y]=parAn[y]||[0,0];parAn[y][x.res==='v'?0:1]++;});
-  const obj=p.type==='vieux'?[['Faire encore deux ou trois combats','cours'],['Signer dans une organisation plus grande','cours']]
+  const obj=p.type==='vieux'?[['Faire encore 2 ou 3 combats','cours'],['Signer dans une organisation plus grande','cours']]
     :[['Signer dans une organisation plus grande','cours'],...(c.d===0?[['Rester invaincu'+e,'cours',bilan(c)]]:[]),...(p.type==='circuit'?[['Champion'+(f?'ne':'')+' de son circuit','atteint']]:[])];
   const ETAT={atteint:['Atteint','var(--blanc)',ico('ok',16)],cours:['En cours','var(--jaune)','']};
   return `<div style="display:grid;grid-template-columns:1fr .95fr 1.15fr;gap:20px;height:100%">
-    ${pan(titre('Sa carrière')+`<div class="rl-st" style="margin-top:0">Moments marquants</div>
+    ${pan(titre('Carrière')+`<div class="rl-st" style="margin-top:0">Moments marquants</div>
       <div class="rl-tl2 defile ct7-defile">${[...moments].reverse().map(([a,t,s])=>`<div class="rl-mm"><span class="rl-md">${esc(a)}</span><i class="octr"></i><div><b>${esc(t)}</b>${s?`<span class="sous">${esc(s)}</span>`:''}</div></div>`).join('')}</div>`,'height:100%')}
-    ${pan(titre('Son entourage')+`<div class="rl-col">${ligne('Entraîneur',esc(p.coach),'négocie pour '+(f?'elle':'lui'))}${ligne('Salle',esc(p.salle),p.ville)}${ligne('Organisation','Aucune','libre, combat dans les galas du coin')}${ligne('Agent','Aucun','')}</div>`,'height:100%')}
-    ${pan(titre('Ses objectifs')+`${obj.map(([t,e2,n])=>`<div class="rl-o ${e2}"><span>${esc(t)}</span><span class="rl-oe" style="color:${ETAT[e2][1]}">${ETAT[e2][2]}${ETAT[e2][0]}${n?` <span class="sous">· ${esc(n)}</span>`:''}</span></div>`).join('')}
+    ${pan(titre('Entourage')+`<div class="rl-col">${ligne('Entraîneur',esc(p.coach),'négocie pour '+(f?'elle':'lui'))}${ligne('Salle',esc(p.salle),p.ville)}${ligne('Organisation','Aucune','libre, combat dans les galas du coin')}${ligne('Agent','Aucun','')}</div>`,'height:100%')}
+    ${pan(titre('Objectifs')+`${obj.map(([t,e2,n])=>`<div class="rl-o ${e2}"><span>${esc(t)}</span><span class="rl-oe" style="color:${ETAT[e2][1]}">${ETAT[e2][2]}${ETAT[e2][0]}${n?` <span class="sous">· ${esc(n)}</span>`:''}</span></div>`).join('')}
       <div class="rl-st">Classement mondial <span class="rl-v">non classé${e}</span></div>
-      <div class="rl-st">Son bilan, année par année</div>
+      <div class="rl-st">Bilan par année</div>
       ${Object.keys(parAn).sort().reverse().map(y=>`<div class="rl-o"><span>${y}</span><span>${parAn[y][0]} victoire${parAn[y][0]>1?'s':''} · ${parAn[y][1]} défaite${parAn[y][1]>1?'s':''}</span></div>`).join('')}`,'height:100%')}
   </div>`;
 };
@@ -764,7 +764,7 @@ document.addEventListener('click',e=>{
     if(v==='contrats'){if(S.ecran!=='contrats')aller('contrats');}else aller(v);return;}
   /* « Envoyer le recruteur » sur un combattant du marché, pendant un voyage : il n'est pas là. */
   if((el=t.closest('[data-rcenvoyer]'))&&S.rt.voyage){e.stopImmediatePropagation();const d=rtDe(S.rt.voyage.dest);
-    toast(`Impossible : Marco est ${rtPrep(d)} jusqu’au ${rtJourL(S.rt.voyage.retour)}. Il pourra le voir à son retour.`);return;}
+    toast(`Impossible : Marco est ${rtPrep(d)} jusqu’au ${rtJourL(S.rt.voyage.retour)}. Il pourra le voir à son retour.`);return;}
   /* « Lire le rapport » (message, Recruteur) et les messages du recruteur. */
   if((el=t.closest('[data-rtrap]'))){e.stopImmediatePropagation();const neuf=S.rt.rap!==el.dataset.rtrap||S.ecran!=='rapports';S.rt.rap=el.dataset.rtrap;S.rt.sel=null;S.rt.archives=false;if(!neuf){rendre();return;}
     if(S.ecran==='rapports'){if(neuf){S.rt.anim=true;rendre();}}else aller('rapports');return;}
