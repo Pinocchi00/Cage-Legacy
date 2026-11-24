@@ -97,7 +97,7 @@ const OP_ARTICLES=[
   {id:'huit',f:'orga',t:'Les huit organisations',x:'Le rang additionne les places sur quatre mesures : spectateurs, record, top 5 mondial et top 30 mondial. Le public départage. Il est revu chaque mois.'},
   {id:'croissance',f:'orga',t:'La croissance',x:'Split grandit sur plusieurs pistes. Chaque marche a ses conditions et ce qu’elle apporte.',
    c:[['Pistes','6','à suivre'],['Marches','4','par piste']]},
-  {id:'objectifs',f:'orga',t:'Les objectifs',x:'Le patron fixe les objectifs de la saison et les juge à la fin. Manqués, ils valent un avertissement. Manqués encore la saison suivante, ils valent le renvoi.',
+  {id:'objectifs',f:'orga',t:'Les objectifs',x:'Ton patron fixe les objectifs de la saison et les juge à la fin. Manqués, ils valent un avertissement. Manqués encore la saison suivante, ils valent le renvoi.',
    c:[['Bilan de mi-saison','1er juil.','chaque année'],['Fin de saison','31 déc.','objectifs jugés']]},
   {id:'calendrier',f:'orga',t:'Le calendrier',x:'Une soirée se pose ou se retire au moins 10 semaines avant. La retirer coûte une part de la location : rien au-delà de 180 jours, 20 % de 91 à 180, 50 % de 70 à 90.',
    c:[['Délai','10','semaines au moins'],['Entre deux soirées','3','semaines au moins']]},

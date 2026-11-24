@@ -108,7 +108,7 @@ function caRdv(){
     {d:new Date(2027,0,4),t:'Ton arrivée chez Split',go:['carriere','Ta carrière']},
     {d:new Date(2027,0,10),t:'Palier franchi : les diffuseurs nationaux regardent Split',go:['messages','Le message']},
     {d:new Date(2027,1,2),t:`Retour de blessure prévu pour ${lien(parId('rizzo'))}`},
-    {d:new Date(2027,6,1),t:'Bilan de mi-saison avec Gérard Vasseur, le patron',go:['carriere','Ta carrière']},
+    {d:new Date(2027,6,1),t:'Bilan de mi-saison avec Gérard Vasseur, patron',go:['carriere','Ta carrière']},
     {d:new Date(2027,11,31),t:'Fin de saison : objectifs jugés, place parmi les huit',go:['carriere','Ta carrière']},
   ];
   caAvenir().forEach(s=>{
@@ -178,9 +178,9 @@ function caGauche(){
     ${caLegende(a,m0)}
     <div class="ca-mur">${(()=>{const nb=m=>caToutes().filter(s=>s.date.getFullYear()===a&&s.date.getMonth()===m).length,r1=Math.max(nb(m0),nb(m0+1),nb(m0+2)),r2=Math.max(nb(m0+3),nb(m0+4),nb(m0+5));
       return Array.from({length:6},(_,k)=>caMois(a,m0+k,k,k<3?r1:r2)).join('');})()}</div>
-    <div class="ca-faits">${fait('Tes soirées en 2027',`${av.length} posée${av.length>1?'s':''}`,pro?`la prochaine ${caDans(pro.date)}`:'aucune à venir')}
+    <div class="ca-faits">${fait('Soirées 2027',`${av.length} posée${av.length>1?'s':''}`,pro?`la prochaine ${caDans(pro.date)}`:'aucune à venir')}
       ${(()=>{const p=caPremiere(),t=p&&caTropPres(caPlus(p,-1));return fait('Première date libre',p?caDc(p):'—',p&&+p!==+caLimite()&&t?`3 semaines après le ${caDc(t.date)}`:'10 semaines pour vendre');})()}
-      ${fait('Bilan de mi-saison','1er juil.','avec Gérard Vasseur, le patron')}
+      ${fait('Bilan de mi-saison','1er juil.','avec Gérard Vasseur, patron')}
       ${fait('Fin de saison','31 déc.','objectifs jugés')}</div>`,'height:100%','ca-g');
 }
 
@@ -221,7 +221,7 @@ function caAvenirHtml(s){
     ${caSec('Carte principale',`<b class="${nc<4?'ca-jaune':''}">${nc} / 4</b>`)}
     <div class="ca-cls">${S.af.m.map(caCombat).join('')}</div>
     ${caSec('Préliminaires',`${S.af.p.filter(f=>f.a&&f.b).length} / 6 composés`)}
-    ${caSec('La semaine du combat','<span class="relire">à relire</span>')}
+    ${caSec('Semaine du combat','<span class="relire">à relire</span>')}
     <div class="ca-prog"><span><b class="T">${caDc(s.presse)}</b>Conférence de presse</span><span><b class="T">${caDc(s.pesee)}</b>Pesée officielle</span><span><b class="T">${caDc(s.date)}</b>Début à 21 h</span></div>
     ${caRetraitHtml(s)}`;
     return h;
@@ -234,13 +234,13 @@ function caAvenirHtml(s){
   h+=`<div class="ca-ks">${caCase('Places',`<span data-can="${s.places}">0</span>`,'capacité de la salle')}
       ${caCase('Billetterie',ouv?'Ouverte':caDc(b),ouv?'places en vente':`ouvre ${caDans(b)}`)}
       ${caCase('Location',`${nb(s.loc)} €`,'payée à la salle')}</div>
-    ${caSec('La carte','vide')}
+    ${caSec('Carte','vide')}
     <div class="ca-rien">${prec?`Elle se compose une fois la soirée du ${caDl(prec.date)} jouée.`:'Elle se compose dans l’écran Carte.'}${s.genre==='phare'?' Une ceinture au moins doit y être en jeu.':''}</div>
     ${caAilJour(caCle(s.date)).map(x=>`<div class="ca-meme"><span class="ca-sm2">Le même soir</span>${caAilTxt(x)}</div>`).join('')}
     ${(()=>{const der=caDerniere(s);if(!der)return '';const pc=Math.round(der.public/der.places*100);
       return `${caSec(`${esc(s.salle)}, la dernière fois`,`<button class="ca-a" data-caresu="${der.n}">Les résultats ›</button>`)}
       <div class="ca-salle"><span><b class="T">${nb(der.public)}</b> spectateurs sur ${nb(der.places)}</span><span class="ca-jg"><i style="--p:${pc}%"></i></span><span class="sous">Fight Night ${der.n}, le ${caDa(der.date)} · ${pc} % de la salle</span></div>`;})()}
-    ${caSec('Les plus longtemps sans combat',(()=>{const c=caAvenir().find(x=>x.carte);return c?`hors carte du ${caDc(c.date)}`:'';})())}
+    ${caSec('Plus longues absences',(()=>{const c=caAvenir().find(x=>x.carte);return c?`hors carte du ${caDc(c.date)}`:'';})())}
     <div class="ca-lib">${libres.map(c=>`<div class="ca-li"><span class="ca-ln"><span class="ca-cn">${lien(c)}</span><span class="ca-lc">${esc(rsCatC(c.cat))} · ${bilan(c)}</span></span><span class="ca-ld">${depuis(c.dernier)}</span><span class="ca-le">${etat(c)}</span></div>`).join('')}</div>
     ${caRetraitHtml(s)}`;
   return h;
@@ -267,7 +267,7 @@ function caPrimes(r){
   if(!r||!r.combats)return '';const g={};
   r.combats.forEach(x=>['a','b'].forEach(sd=>((x.pr||{})[sd]||[]).forEach(p=>{(g[p]=g[p]||[]).push(sd==='a'?x.A:x.B);})));
   const l=Object.keys(RS_PR).filter(p=>g[p]);if(!l.length)return '';
-  return `${caSec('Les primes')}<div class="ca-cls">${l.map(p=>`<div class="ca-cl">${rsMedaille(p,26,r.n)}<span class="ca-pn">${esc(RS_PR[p])}</span><span class="ca-cc ca-pq"><span>${g[p].slice(0,2).map(c=>lien(c)).join(', ')}${g[p].length>2?` <span class="ca-vs">et ${g[p].length-2} autre${g[p].length>3?'s':''}</span>`:''}</span></span></div>`).join('')}</div>`;
+  return `${caSec('Primes')}<div class="ca-cls">${l.map(p=>`<div class="ca-cl">${rsMedaille(p,26,r.n)}<span class="ca-pn">${esc(RS_PR[p])}</span><span class="ca-cc ca-pq"><span>${g[p].slice(0,2).map(c=>lien(c)).join(', ')}${g[p].length>2?` <span class="ca-vs">et ${g[p].length-2} autre${g[p].length>3?'s':''}</span>`:''}</span></span></div>`).join('')}</div>`;
 }
 const caMeth=f=>f.meth==='Décision'?`Décision ${esc(f.det)}`:`${f.meth==='KO'?'KO':'Soumission'} · ${rsOrd(f.rd)} round`;
 
@@ -303,9 +303,9 @@ function caJourHtml(k){
       <span><b>${nb(x.places)}</b><span class="sous">places</span></span>
       <span>${der?`<b>${nb(der.public)}</b><span class="sous">${der.public===CA_RECORD?'ton record · ':'le '}${caDa(der.date)}</span>`:x.id==='lille'?'<b>—</b><span class="sous">première le 16 févr.</span>':'<b>—</b><span class="sous">jamais</span>'}</span>
       <span><b>${nb(x.loc)} €</b></span></span></button>`;};
-  h+=`${caSec('Le genre')}
+  h+=`${caSec('Genre')}
     <div class="ca-tys ${rdv.length?'serre':''}">${genre('fn','Fight Night','nommée par son combat principal')}${genre('phare','Soirée phare',`« Split ${nph} » · un titre en jeu`)}</div>
-    ${caSec('La salle')}
+    ${caSec('Salle')}
     <div class="ca-sh"><span>Salle</span><span>Places</span><span>Dernière soirée</span><span>Location</span></div>
     <div class="ca-sls ${rdv.length?'serre':''}">${CA_SALLES.map(ligne).join('')}</div>
     <div class="ca-pied">${conflit?`<span class="ca-note">${ico('alerte',18)}<span><b>Impossible : ${esc(conflit.court)} est déjà le ${caDl(conflit.date)}.</b> Une soirée phare par mois : choisis un autre mois, ou une fight night.</span></span>`

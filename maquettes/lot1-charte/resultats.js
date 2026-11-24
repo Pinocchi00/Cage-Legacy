@@ -245,7 +245,7 @@ function rsBandeau(s){
       <div class="rs-ban-l">${s.date.getDate()} ${MOIS[s.date.getMonth()]} ${s.date.getFullYear()} · ${esc(s.salle)}, ${esc(s.ville)}</div></div>
     <div class="rs-case"><span class="etiq">L’enjeu</span><span class="rs-case-t">${esc(s.enjeu)}</span>
       ${s.titre?`<span class="rs-c1">${rsCb(26)}<span>${s.ceinture==='change de mains'?`<b>${esc(w.nom)}</b> devient champion`:`<b>${esc(w.nom)}</b> garde sa ceinture`}</span></span>`:''}</div>
-    <div class="rs-case rs-case-p"><span class="etiq">Le public</span><span class="T rs-case-n">${nb(s.public[0])}</span><span class="sous">${s.public[0]>=s.public[1]?'à guichets fermés':`salle pleine à ${Math.round(s.public[0]/s.public[1]*100)} %`}</span></div>
+    <div class="rs-case rs-case-p"><span class="etiq">Public</span><span class="T rs-case-n">${nb(s.public[0])}</span><span class="sous">${s.public[0]>=s.public[1]?'à guichets fermés':`salle pleine à ${Math.round(s.public[0]/s.public[1]*100)} %`}</span></div>
   </div>`;
 }
 function rsResultatsHtml(){
@@ -294,7 +294,7 @@ function rsPerfHtml(f,w,l,W,L,dur){
   const zones=zl.map((t,k)=>`<div class="rs-zo"><b>${W.zones[k]}</b><span class="rs-zb g"><i style="--p:${W.zones[k]/zm*100}%"></i></span><span class="rs-zl">${t}</span><span class="rs-zb d"><i style="--p:${L.zones[k]/zm*100}%"></i></span><b>${L.zones[k]}</b></div>`).join('');
   const pc=x=>Math.round(x.fs/x.tent*100),pw=W.ctrl/dur*100,pl=L.ctrl/dur*100;
   const ligne=(t,a,b,ta,tb)=>`<div class="rs-tile"><span class="etiq">${t}</span><div class="rs-pr2"><span class="g">${a}</span><b class="T g">${ta}</b></div><div class="rs-pr2"><span class="d">${b}</span><b class="T d">${tb}</b></div></div>`;
-  return `<div class="rs-dsec rs-perf"><div class="rs-dt"><span class="etiq">Les statistiques</span><span class="rs-leg"><b>${esc(w.nom)}</b><span>${esc(l.nom)}</span></span></div>
+  return `<div class="rs-dsec rs-perf"><div class="rs-dt"><span class="etiq">Statistiques</span><span class="rs-leg"><b>${esc(w.nom)}</b><span>${esc(l.nom)}</span></span></div>
     <div class="rs-tile rs-fs">
       <div class="rs-fs-s"><b class="T g">${W.fs}</b><span>sur ${W.tent}</span></div>
       <div class="rs-fs-m"><span class="etiq">Frappes significatives</span>${zones}</div>
@@ -330,7 +330,7 @@ function rsDetailHtml(s){
     else lignes+=`<div class="rs-jl rs-jvide"><span class="rs-jn">R${r}</span><span class="rs-jfin">pas disputé</span></div>`;
   }
   const scores=cartes.map(c=>c.r.length?`<span class="rs-js"><b class="T">${c.txt}</b> ${esc((c.gagne===ws?w:l).nom)}</span>`:'<span class="rs-js">–</span>').join('');
-  const juges=`<div class="rs-dsec"><div class="rs-dt"><span class="etiq">Les juges · qui gagne chaque round</span><span class="rs-leg"><b>${esc(w.nom)}</b><span>${esc(l.nom)}</span></span></div>
+  const juges=`<div class="rs-dsec"><div class="rs-dt"><span class="etiq">Juges · round par round</span><span class="rs-leg"><b>${esc(w.nom)}</b><span>${esc(l.nom)}</span></span></div>
     <div class="rs-jg"><div class="rs-jl rs-jh"><span class="rs-jn"></span>${RS_JUGES.map(j=>`<span>${esc(j)}</span>`).join('')}</div>${lignes}
       <div class="rs-jl rs-jtot"><span class="rs-jn">Score</span>${scores}</div></div>
     <div class="rs-verdict">${verdict}</div></div>`;
@@ -396,7 +396,7 @@ function rsLendemainHtml(){
     <div class="rs-une"><span class="etiq">Cage Hebdo · la une</span><div class="T rs-une-t">« ${esc(w0.nom)}, enfin »</div>
       <p>Battu par ${esc(l0.nom)} en 2025, il a attendu le 4e round pour lui prendre le dos.</p></div>
     <div class="rs-cits"><div class="rs-cit"><p>« ${esc(w2.nom)} règle la question du top 3 en un coup de pied. »</p><span class="etiq">Tableau Noir</span></div>
-      <div class="rs-cit"><p>« ${esc(w1.nom)}–${esc(l1.nom)}, on veut la revanche, et à Lyon. »</p><span class="etiq">Le Forum</span></div></div>
+      <div class="rs-cit"><p>« ${esc(w1.nom)}–${esc(l1.nom)}, on veut la revanche, et à Lyon. »</p><span class="etiq">Forum</span></div></div>
     <div class="rs-vest"><span class="etiq">Dans les vestiaires</span>
       <div class="rs-q"><p>« Je l’avais dit : il fallait l’emmener au 4e. »</p><span class="rs-n">${lien(w0)}</span></div>
       <div class="rs-q"><p>« Je veux la revanche. Pas dans un an : cet été. »</p><span class="rs-n">${lien(l0)}</span></div></div>`,'height:100%');
@@ -406,15 +406,15 @@ function rsLendemainHtml(){
   const chiffres=pan(`<div class="pt"><h2>La soirée</h2></div>
     <div class="rs-ch"><span>Le public</span><b class="T"><span data-rscompte="${s.public[0]}">0</span><small> / ${nb(s.public[1])}</small></b></div>
     <div class="rs-jauge"><i style="--p:${pct}%"></i></div>
-    <div class="rs-ch"><span>La recette</span><b class="T"><span data-rscompte="${recette}">0</span> €</b></div>
+    <div class="rs-ch"><span>Recette</span><b class="T"><span data-rscompte="${recette}">0</span> €</b></div>
     <div class="rs-ch"><span>Bourses, primes et salle</span><b class="T">− ${nb(dep)} €</b></div>
     <div class="rs-ch2"><span>bourses 345 000 €</span><span>primes ${nb(pr)} €</span><span>salle 120 000 €</span></div>
     <div class="rs-ch rs-reste"><span>Ce qu’il te reste</span><b class="T ${reste>=0?'cl-up':'cl-down'}">${reste>=0?'+':'−'} <span data-rscompte="${Math.abs(reste)}">0</span> €</b></div>
     <div class="rs-ch"><span>La popularité de Split</span><b class="T">40 → 43 <span class="cl-up">▲</span></b></div>
-    <div class="etiq rs-medt">Les primes</div>
+    <div class="etiq rs-medt">Primes</div>
     ${[['soiree','Combat de la soirée'],['perf','Performance'],['fin','Finition']].map(([k,t])=>{const qui=s.combats.flatMap(f=>['a','b'].filter(sd=>((f.pr||{})[sd]||[]).includes(k)).map(sd=>sd==='a'?f.A:f.B));
       return qui.length?`<div class="rs-pl">${rsMedaille(k,30,s.n)}<span class="rs-pl-t">${t}</span><span class="rs-pl-n">${qui.slice(0,qui.length>3?2:3).map(c=>lien({...c,prenom:''}).replace('> ','>')).join(', ')}${qui.length>3?` <span class="sous">et ${qui.length-2} autres</span>`:''}</span><span class="sous">${nb(primeDe(k,s.n))} €</span></div>`:'';}).join('')}
-    <div class="etiq rs-medt">Tes blessés</div>
+    <div class="etiq rs-medt">Blessés</div>
     ${s.combats.flatMap(f=>[f.A,f.B]).filter(c=>c._rsMed).map(c=>`<div class="rs-med"><span class="rs-med-i">${ico('medical',20)}</span><span class="rs-n">${lien(c)}</span><span class="sous">${esc(c._rsMed.replace(', suspendu 60 jours',''))} · retour le ${esc(c.retour)}</span></div>`).join('')}`,'height:100%');
   return `<div class="rs-ld">${moments}<div class="rs-ld2">${classement}${presse}${chiffres}</div></div>`;
 }

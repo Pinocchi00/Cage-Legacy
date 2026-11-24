@@ -133,7 +133,14 @@ Base : décision T11 (vert = positif, rouge = négatif, jaune = important).
 - **Combats en 5 rounds** : un combat pour le titre, une défense de titre et un combat principal se jouent en 5 rounds (cartes des juges sur 50, par exemple 48-47). Les autres en 3 rounds (décision du 08/11).
 - **Dates courtes** : « 8 déc. 2026 ». Mois abrégés corrects : janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc.
 - **Pas de doublon** : une info déjà visible sur l'écran n'est pas répétée à côté (le lieu sous la soirée, « 2e des huit », la date sous « Split »).
-- **Une info par ligne** dans les listes courtes de l'accueil (« Tes suivis »), avec « Tout voir › » pour aller plus loin.
+- **Une info par ligne** dans les listes courtes de l'accueil (« Suivis »), avec « Tout voir › » pour aller plus loin.
+- **Rédaction resserrée, sur chaque mot de chaque écran** (24/11) :
+  - **Étiquettes** sans article ni possessif : « Contrat », « Place », « Prime ».
+  - **Rang parmi les huit** : « 4/8 » ou « 4/8 ou mieux », jamais « 4e des huit ».
+  - **Recette** : « Recette · 50/50 ».
+  - **Fonction** : seule, « Matchmaker » ou « patron », jamais « le patron ».
+  - **Nombres** : en chiffres (« 3/5 », « 2 défenses »).
+  - **Citations** : les paroles d'un personnage restent des phrases complètes.
 
 ## 10. Écrans déjà validés (référence)
 
@@ -434,6 +441,22 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Ouvert** : une fin de contrat allume « Contrats » dans le jeu ; la maquette n'allume pas Recrutement, car ces contrats se gèrent dans la fiche et par message.
 - **Écarts pour le code** : les touches A et E devront suivre le nouvel ordre ; l'octogone des Préliminaires devra allumer la Carte ; la Pesée éclaire l'Accueil alors qu'on y arrive par le Calendrier.
 
+### Fin de saison, verdict, offres, prix, choc des organisations (Q34a, R33, R34, R35, T10, validé le 24/11)
+- **Le déroulé du 31 décembre** : Continuer apporte le message de Gérard Vasseur, qui ouvre la scène du bilan. Puis viennent les offres s'il y en a, les prix, le classement final et la suite (saison suivante, arrivée ailleurs ou sans poste). Ces scènes cachent la barre latérale ; une fiche ouverte la rend.
+- **Le verdict en un mot** : « Tu restes » ou « Tu pars » en très grand, en vert ou en rouge, avec le mot du jeu en tampon (Prolongé, Sous condition, Remercié). Dessous : une phrase en chiffres, puis une citation du patron. Viennent ensuite les trois objectifs, chacun avec sa valeur, sa cible (« 4/8 ou mieux », « n° 5 ou mieux », places) et son repère visuel, puis une barre Contrat, Salaire, Avertissements, Offres.
+- **Les trois cas** : tenus ; avertissement (1 sur 2, une saison pour redresser) ; second échec et renvoi, avec ou sans offre. Les mots du jeu restent ceux du tampon ; `fdmots=q34` montre Avertissement et Renvoyé. **Aucun seuil d'objectifs manqués n'est fixé.**
+- **Une offre ne change jamais l'organisation sans choix explicite.** Chaque offre a sa scène : organisation, place, salaire face à Split, durée, poste, atouts. Signer, refuser ou rester passe par une confirmation en chiffres, avec l'action en jaune et « Revenir » en noir. Seul Split se joue jusqu'au bout. Renvoyé sans offre : l'écran « Sans poste », puis une offre tardive arrive par message.
+- **Les six prix** : choisis par la presse. Pour chacun : le nom en très grand, une phrase, quatre cases chiffrées, « Sa fiche » et « Voir le combat ». Ils arrivent aussi par message.
+- **Mi-saison (1er juillet)** : un message plus léger, sans scène : la place et les objectifs en cours.
+- **Le choc des organisations** (R34) n'est jamais là à l'arrivée : un message de Garden of Blood le propose le 8 janvier suivant. Il compte 5 combats, 2 entre champions et 3 entre classés. Recette 50/50, victoire 3/5, les ceintures restent en place. Trois réponses : Accepter, **Négocier**, Refuser.
+- **Négocier** : tu choisis un de tes champions disponibles, ou un classé avec le filtre Classés. L'écran dit si leur champion de la même catégorie peut venir ; sinon, il propose leur meilleur classé libre. La carte garde au moins un duel entre champions. Le choc se suit ensuite dans Tes saisons.
+- **Retrouver chaque saison sans nouvelle entrée de barre** : « Tes saisons › » dans Ta carrière, et « Voir › » dans le Calendrier. Chaque saison y garde son bilan, ses prix, son classement et le choc.
+- **Écrans validés inchangés** : la fin de saison n'y ajoute que ces deux entrées et les messages.
+- **Maquette** : `finsaison.js`, `finsaison.css`, préfixe `fd-`, chargés avant `barre.js`. Seule la clé `maquette-finsaison-3` est écrite ; une adresse de démonstration n'écrit rien. Adresses : `?ecran=finsaison&fdetape=mi|message|bilan|offres|prix|classement|suite|choc|negocier|saisons&fdcas=tenu|avert|renvoi`, plus `fdoffre=sans`, `fddec`, `fdconf`, `fdchoc`, `fdcontre=1`, `fdnch=0..11`, `fdnmode=classe`, `fdprix`, `fdsaison`, `fdong`, `fdcombat`, `fdmots=q34`, `fdordre=prix`, `fdvide=1`, `fdrev=0`.
+- **Inventé, à relire** : les citations du patron, les phrases des prix, les soirées 64 à 72, les offres, le message de Garden of Blood, les disponibilités des champions.
+- **Sources** : vraies soirées entre organisations (Bellator contre Rizin, PFL contre Bellator, Bellator x Rizin 2), notées dans `AMELIORATIONS-DONNEES.md`.
+- **Écarts avec le jeu** : le jeu limite le choc à 3 combats entre champions et tire au sort la réponse à une contre-proposition ; la maquette accepte toujours.
+
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
 - Ils gardent le cadre du jeu : panneau à double bord octogonal, titre avec la barre rouge.
@@ -515,6 +538,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Menu, Mes parties, Nouvelle partie, création | T1, T2, T3, T5, T6, R1 | Validé (section 11, « Menu principal, Mes parties, Nouvelle partie, création ») : l'accueil du jeu avec « Reprendre » à la place des touches ; la dernière partie en grand ; une scène par organisation ; six ans qui défilent, puis l'Arrivée. |
 | Mouvement commun, tous les écrans | T3 | Validé (section 11, « Le mouvement commun à tous les écrans ») : barre, onglets, filtres, tris et survol, sans tunnel animé sur l'Accueil ni mode de fusion sur le texte. |
 | Barre latérale et navigation | T4, Q11 | Validé (section 11, « Barre latérale et navigation ») : les 12 écrans visibles sous quatre titres, chacun à un clic, aux mêmes hauteurs ouverte et repliée. |
+| Fin de saison, offres, prix, choc | Q34a, R33, R34, R35, T10 | Validé (section 11, « Fin de saison, verdict, offres, prix, choc des organisations ») : verdict en un mot et trois objectifs chiffrés, une scène par offre, six prix, choc par message avec Négocier, saisons retrouvées depuis Ta carrière et le Calendrier. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
 
@@ -539,6 +563,10 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Date de l'en-tête | La date du jour (le 16 février reste la date de la soirée) | Retour du 05/11 |
 | Accompagnement de Leïla | Gardé et activé, comme dans le jeu ; il ressemble au tutoriel que T5 retire | T5, Options |
 | Choix de l'organisation à la création | Gardé comme dans le jeu, Split par défaut ; seul Split va jusqu'à l'Arrivée dans la maquette | Menu, 22/11 |
+| Seuil des objectifs manqués | Aucun seuil : les cas montrés (3/3, 1/3, 0/3) ne le fixent pas ; Prolongé, Sous condition, Remercié du jeu face à avertissement puis renvoi | Q34a, fin de saison 24/11 |
+| Composition du choc | 5 combats, au moins 1 entre champions ; un classé de Split affronte leur classé libre le plus proche au mondial (le jeu : 3 combats, tous entre champions) | R34, fin de saison 24/11 |
+| Recette et ceinture au choc | Recette 50/50 et ceintures en place, sans source réelle ; une vraie ceinture en jeu reste possible (Bellator x Rizin 2) | R34, `AMELIORATIONS-DONNEES.md` |
+| Patron de Split | Gérard Vasseur dans la maquette, Jean-Michel Delatour dans le jeu | Fin de saison 24/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
 

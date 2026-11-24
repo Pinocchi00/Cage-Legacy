@@ -223,10 +223,10 @@ function rcFicheCourte(){
   const x=rcDe(S.rc.sel);if(!x)return pan('<div class="rc-vide">Choisis un combattant.</div>','height:100%');
   const c=parId(x.id),il=rcIl(c),o=origineDe(c),suivi=S.rc.suivis.includes(c.id);
   const situ=x.type==='libre'?`Libre depuis le ${rcJour(c.libre)} · <span class="sous">${esc(x.tag)}</span>`:`${esc(c.org)} · libre ${esc(x.fin)}`;
-  const style=x.vu?`<div class="rc-bloc"><div class="etiq">Son style <span class="rc-date">rapport du ${rcJour(x.vu)}</span></div>
+  const style=x.vu?`<div class="rc-bloc"><div class="etiq">Style <span class="rc-date">rapport du ${rcJour(x.vu)}</span></div>
       <div style="font-size:23px;margin-top:6px"><b>${esc(c.art)}</b> · ${esc(RC_STYLES[c.style]||c.style)}</div></div>`
-    :x.etat==='recruteur'?`<div class="rc-bloc"><div class="etiq">Son style</div><div style="font-size:22px;margin-top:6px">Ton recruteur part le voir. Rapport vers le ${rcJour(x.rapport)}.</div></div>`
-    :`<div class="rc-bloc"><div class="etiq">Son style</div><div class="rc-cache"><span class="sous">Personne ne l’a encore vu de près.</span>
+    :x.etat==='recruteur'?`<div class="rc-bloc"><div class="etiq">Style</div><div style="font-size:22px;margin-top:6px">Ton recruteur part le voir. Rapport vers le ${rcJour(x.rapport)}.</div></div>`
+    :`<div class="rc-bloc"><div class="etiq">Style</div><div class="rc-cache"><span class="sous">Personne ne l’a encore vu de près.</span>
       <button class="bb oct petit" data-rcenvoyer="${c.id}"><span class="oct">${ico('oeil',20)}Envoyer le recruteur</span></button></div></div>`;
   const act=x.etat==='signe'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Signé : ${il} rejoint l’effectif.</div>`
     :x.etat==='accord'?`<div class="rc-fin" style="color:var(--vert)">${ico('ok',22)} Accord : ${il} signe ${esc(x.fin)}.</div>`
@@ -238,11 +238,11 @@ function rcFicheCourte(){
       <div class="sous" style="margin-top:6px">${esc(courte(c.cat))} · ${c.age} ans · ${esc(o[0])}, ${esc(o[1])}</div></div></div>
     <div class="rc-sit">${situ}</div>
     <div class="rc-mil"><div class="rc-faits">${rcFait('Palmarès',bilan(c))}${rcFait('Mondial',`<span style="text-transform:none">${rcRang(c)}</span>`)}${rcFait('Gabarit',esc(c.taille),`allonge ${esc(c.allonge)}`)}</div>
-    <div class="rc-bloc"><div class="etiq">Ses dernières victoires</div>${rcVictoires(c)}</div>
+    <div class="rc-bloc"><div class="etiq">Dernières victoires</div>${rcVictoires(c)}</div>
     ${style}</div>
     <div class="rc-dem"><div><div class="etiq">Il demande</div><div class="T" style="font-size:46px;margin-top:6px">${nb(x.dem.bourse)} €</div>
       <div class="sous">par combat · ${x.dem.combats} combats · ${x.dem.dmd.length} demande${x.dem.dmd.length>1?'s':''}</div></div>
-      <div style="text-align:right"><div class="etiq">Son agent</div><div style="font-size:23px;font-weight:700;margin-top:6px">${esc(x.agent[0])}</div><div class="sous" style="font-size:18px">${esc(x.agent[1])}</div></div></div>
+      <div style="text-align:right"><div class="etiq">Agent</div><div style="font-size:23px;font-weight:700;margin-top:6px">${esc(x.agent[0])}</div><div class="sous" style="font-size:18px">${esc(x.agent[1])}</div></div></div>
     <div class="rc-actions">${act}<button class="bb oct petit ${suivi?'on':''}" data-rcsuivre="${c.id}"><span class="oct">${suivi?'Suivi':'Suivre'}</span></button></div>
   </div>`,'height:100%');
 }
@@ -388,12 +388,12 @@ function rcNegoHtml(){
         <div class="sous">${esc(courte(c.cat))} · ${c.age} ans · ${bilan(c)} · ${rcRang(c)}</div>
         <div class="rc-sit2">${x.type==='libre'?`Libre · ${esc(x.tag)}`:`${esc(c.org)} · libre ${esc(x.fin)}`}</div></div>
       ${rcJauge(x)}
-      <div class="rc-agent"><span class="rc-av grand octr">${ini}</span><div><div class="etiq">Son agent</div><div class="rc-ag-nom">${esc(agent)}</div>
+      <div class="rc-agent"><span class="rc-av grand octr">${ini}</span><div><div class="etiq">Agent</div><div class="rc-ag-nom">${esc(agent)}</div>
         <div class="sous" style="font-size:19px">${esc(trait)}<span class="relire">à relire</span></div><div class="rc-hum" style="color:${hcol}">${humeur}</div></div></div>
     </div>`,'','rc-pband apparait')}
     <div class="rc-bas">
       ${pan(`<div class="rc-offre">${RC_LEV.map(l=>rcLevier(l,x)).join('')}${rcDemandesHtml(x)}
-        <div class="rc-cout"><div><span class="etiq">Au plus, sur tout le contrat</span> <span class="T rc-total">${nb(total)} €</span></div>
+        <div class="rc-cout"><div><span class="etiq">Plafond sur le contrat</span> <span class="T rc-total">${nb(total)} €</span></div>
           <div class="sous" style="font-size:20px">${place===1?'Le plus gros salaire':`Le ${place}<sup>e</sup> salaire`} des ${esc(pluriel(c.cat).toLowerCase())} de Split</div></div>
         <div class="rc-pied">${pied}</div></div>`,'height:100%','apparait')}
       ${pan(titre('La discussion')+`<div class="defile rc-log">${log}</div>`,'height:100%','apparait')}

@@ -565,7 +565,7 @@ function sdDiscoursHtml(){
       <div class="sd-dbt"><span class="marque octr v">V</span><span>bat ${sdN(L)} · ${esc(f.d.meth==='KO'?'KO':sdMeth(f.d).toLowerCase())}, ${esc(sdQuand(f.d))}</span></div></div>
     <div class="sd-dv-r"><span class="sd-live oct" style="--i:0"><i></i>En direct · dans la cage</span>
       <div class="sd-dv-big" style="--i:1">${champ?`<span class="sd-dv-c">${rsCb(76)}</span>`:''}<div><span class="T">${esc(h1)}</span><span class="sd-dv-s">${esc(h2)}</span></div></div>
-      <div class="sd-dv-amb" style="--i:2"><span class="etiq">Le Forum</span><span class="sd-amb-o">${[1,2,3,4,5].map(x=>`<i class="octr ${x<=amb.lv?'on':''}"></i>`).join('')}</span><b class="T">${SD_AMB[amb.lv-1]}</b></div></div></div></div>`;
+      <div class="sd-dv-amb" style="--i:2"><span class="etiq">Forum</span><span class="sd-amb-o">${[1,2,3,4,5].map(x=>`<i class="octr ${x<=amb.lv?'on':''}"></i>`).join('')}</span><b class="T">${SD_AMB[amb.lv-1]}</b></div></div></div></div>`;
   /* l'interview, qui se déroule : la question, puis la réponse mot à mot (la voix bouge), puis la salle réagit */
   const itw=SD_ITW[f.k]||[],reac=SD_REAC[f.k]||[];let t=1.4;
   const ech=itw.map(([q,r],i)=>{
@@ -586,11 +586,11 @@ function sdDiscoursHtml(){
       <div><span class="etiq">Bilan</span><span class="sd-gc-v">${rec(ap.v,ap.d,W.n)}</span>${serie(ap.serie)}</div>
       <div><span class="etiq">Chez Split</span><span class="rs-rgs">${sdBox(av.rang)}${sdFl(rsRangV(av.rang)-rsRangV(ap.rang))}${sdBox(ap.rang)}</span></div>
       <div><span class="etiq">Mondial</span><span class="sd-gc-v">${av.mondial} ${sdFl(dm)} <b>${ap.mondial}</b></span></div></div>
-    <div class="etiq sd-reste-t">Ce qui en reste ${sdRelire}</div>
+    <div class="etiq sd-reste-t">Reste ${sdRelire}</div>
     <ul class="sd-reste">${(SD_RESTE[f.k]||[]).map(x=>`<li>${sdParole(x)}</li>`).join('')}</ul>`,'','sd-gagne');
   /* sans défi : le bilan du combat (Q37c), la fin, les frappes, le pronostic, puis chaque round */
   const tot=s2=>f.d.co[s2].reduce((x,y)=>x+y,0),R=f.d.meth==='Décision'?f.d.n:f.d.rd;
-  const combat=cible?'':pan(`<div class="etiq sd-combat-t">Son combat</div><div class="sd-gc">
+  const combat=cible?'':pan(`<div class="etiq sd-combat-t">Combat</div><div class="sd-gc">
       <div><span class="etiq">Fin</span><span class="sd-gc-v"><b>${esc(f.d.meth==='Décision'?'Décision':f.d.meth)}</b></span><span class="sous">${esc(f.d.meth==='Décision'?f.d.det:`${rsOrd(f.d.rd)} round · ${f.d.tps}`)}</span></div>
       <div><span class="etiq">Frappes</span><span class="sd-gc-v"><b>${tot(f.ws==='a'?0:1)}</b> – ${tot(f.ls==='a'?0:1)}</span><span class="sous">${sdN(W)} – ${sdN(L)}</span></div>
       <div><span class="etiq">Donné${e} à</span><span class="sd-gc-v"><b>${dc.ch} %</b></span><span class="sous">lecteurs du Forum</span></div></div>
@@ -602,12 +602,12 @@ function sdDiscoursHtml(){
     const avant=x=>x.date<SD_DATE,dej=pzDeja(W,cible).filter(avant),dernier=historique(cible).filter(avant)[0];
     const etat=med?`<span class="sd-de neg">${ico('medical',18)}${esc(med[0])} · retour le ${esc(med[1])}</span>`
       :cible.statut==='blesse'?`<span class="sd-de neg">${ico('medical',18)}Blessé${sdE(cible)}${cible.retour?` · retour le ${esc(cible.retour)}`:''}</span>`:`<span class="sd-de ok">${ico('ok',18)}Disponible</span>`;
-    defi=pan(`<div class="sd-dd-ban oct or"><i class="sd-dd-img"></i><div class="sd-dd-in"><span class="etiq">Le défi · le prochain adversaire possible</span>
+    defi=pan(`<div class="sd-dd-ban oct or"><i class="sd-dd-img"></i><div class="sd-dd-in"><span class="etiq">Défi · prochain adversaire possible</span>
         <div class="sd-dd-h">${sdRang(ac)}<span>${esc(cible.prenom)}${cible.surnom?` « ${esc(cible.surnom)} »`:''}</span></div><div class="T sd-dd-n">${sdN(cible)}</div>
         <div class="sd-dd-l"><span class="T">${rec(ac.v,ac.d,cible.n)}</span>${serie(ac.serie)}</div></div></div>
-      <div class="sd-dd-x"><span class="etiq">Son état</span>${etat}</div>
+      <div class="sd-dd-x"><span class="etiq">État</span>${etat}</div>
       <div class="sd-dd-x"><span class="etiq">Déjà affronté${sdE(cible)}s</span><span>${dej.length?dej.map(x=>`${MOIS_C[x.date.getMonth()]} ${x.date.getFullYear()}`).join(', '):'Jamais'}</span></div>
-      ${dernier?`<div class="sd-dd-x"><span class="etiq">Son dernier combat</span><span>${dernier.res==='v'?'bat':'perd contre'} ${lien(parNom(dernier.adv,cible.cat))} · ${MOIS_C[dernier.date.getMonth()]} ${dernier.date.getFullYear()}</span></div>`:''}`,'','sd-dd1');
+      ${dernier?`<div class="sd-dd-x"><span class="etiq">Dernier combat</span><span>${dernier.res==='v'?'bat':'perd contre'} ${lien(parNom(dernier.adv,cible.cat))} · ${MOIS_C[dernier.date.getMonth()]} ${dernier.date.getFullYear()}</span></div>`:''}`,'','sd-dd1');
   }
   return `<div class="pz sd sd-disc ${S.sd.anim?'anim':''}">${ban}<div class="sd-cols">${micro}<div class="sd-dr">${gagne}${defi}${combat}</div></div></div>`;
 }
@@ -629,10 +629,10 @@ function sdBilan(){
   const cas=(e,v,sous,i)=>`<div class="sd-bc" style="--i:${i}"><span class="etiq">${e}</span><span class="T">${v}</span><span class="sous">${sous}</span></div>`;
   const ban=`<div class="sd-bb oct or"><div class="sd-bb-i oct"><i class="sd-bb-img"></i>
     <div class="sd-bb-g"><div class="T sd-bb-t">Split Fight Night <span style="color:var(--rouge-vif)">63</span></div><div class="sd-bb-l">16 février 2027 · ${esc(s.salle)}</div></div>
-    ${cas('Le public',`<span data-sdcompte="${s.public[0]}">${nb(s.public[0])}</span>`,`sur ${nb(s.public[1])} places`,0)}
+    ${cas('Public',`<span data-sdcompte="${s.public[0]}">${nb(s.public[0])}</span>`,`sur ${nb(s.public[1])} places`,0)}
     ${cas('L’ambiance',SD_AMB[a.lv-1],`depuis ${a.raison} ${sdRelire}`,1)}
-    ${cas('La recette',`<span data-sdcompte="${o.recette}">${nb(o.recette)}</span> €`,'billetterie, diffuseur, partenaires, bar',2)}
-    ${cas('Ce qu’il te reste',`<span class="${x.reste>=0?'cl-up':'cl-down'}">${x.reste>=0?'+':'−'} <span data-sdcompte="${Math.abs(x.reste)}">${nb(Math.abs(x.reste))}</span> €</span>`,'recette moins les dépenses',3)}</div></div>`;
+    ${cas('Recette',`<span data-sdcompte="${o.recette}">${nb(o.recette)}</span> €`,'billetterie, diffuseur, partenaires, bar',2)}
+    ${cas('Ce qu’il te reste',`<span class="${x.reste>=0?'cl-up':'cl-down'}">${x.reste>=0?'+':'−'} <span data-sdcompte="${Math.abs(x.reste)}">${nb(Math.abs(x.reste))}</span> €</span>`,'recette moins dépenses',3)}</div></div>`;
   const ligne=(k,i)=>{const f=sdF(k),ap=sdApres(f,f.ws),av=sdAv(f.W),mv=rsMvt(av.rang,ap.rang);
     return `<div class="sd-v ${f.titre?'titre':''} ${i===4?'sep':''}" style="--i:${i}"><span class="marque octr v">V</span>
       <span class="sd-v-n">${lien(f.W)}<span class="sous">bat ${sdN(f.L)}</span></span>
@@ -653,7 +653,7 @@ function sdBilan(){
     <div class="sd-pt-d">${plaintes.length?`<span class="cl-down">▼</span> ${plaintes.map(sdN).join(', ')} ${plaintes.length>1?'trouvent leur':'trouve sa'} prime basse`:`<span class="cl-up">●</span> Personne ne se plaint de sa prime`}</div>`,'width:440px;flex:none','sd-pr');
   const l=(t,v,max,neg)=>`<div class="sd-dt"><span>${t}</span><b>${neg?'− ':''}${nb(v)} €</b><span class="jauge"><i style="width:${v/max*100}%;background:${neg?'var(--texte2)':'var(--blanc)'}"></i></span></div>`;
   const m=Math.max(o.rec.diff,o.dep.fixe+o.dep.vict,x.primes);
-  const detail=pan(titre('Le détail')+`<div class="etiq sd-dt-h">Recettes</div>${l('Billetterie',o.rec.billet,m)}${l('Diffuseur',o.rec.diff,m)}${l('Partenaires',o.rec.part,m)}${l('Bar et boutique',o.rec.bar,m)}
+  const detail=pan(titre('Détail')+`<div class="etiq sd-dt-h">Recettes</div>${l('Billetterie',o.rec.billet,m)}${l('Diffuseur',o.rec.diff,m)}${l('Partenaires',o.rec.part,m)}${l('Bar et boutique',o.rec.bar,m)}
     <div class="etiq sd-dt-h">Dépenses</div>${l('Bourses',o.dep.fixe+o.dep.vict,m,1)}${l('Primes',x.primes,m,1)}${l('Salle et production',o.dep.salle,m,1)}
     <button class="sd-lien" data-go="finances">Les finances ›</button>`,'width:400px;flex:none','sd-det');
   return `<div class="pz sd sd-bilan ${S.sd.anim?'anim':''}">${ban}<div class="sd-cols">${vainq}${primes}${detail}</div>${S.sd.etat==='recit'?sdRecit():''}</div>`;

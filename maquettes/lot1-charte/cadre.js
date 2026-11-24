@@ -141,9 +141,9 @@ function accueilHtml(){
         <span class="T" style="font-size:96px;line-height:.75">Split</span>
         <span style="font-size:24px;white-space:nowrap">Lyon · depuis 2004</span></div>
       ${stat('Prochaine soirée',`Dans <span id="jours">${S.jours}</span> j`,'Split Fight Night 63')}
-      ${stat('Le lieu','Forum de Lille','Lille, 16 février')}
-      ${stat('La carte','<span style="color:var(--jaune)">2 / 4</span>','2 places à finir')}
-      ${stat('Les préventes',`<span id="preventes">${nb(S.preventes)}</span>`,'sur 4 000 places',`<div class="jauge" style="height:5px;width:180px"><i id="jPrev" style="width:${S.preventes/40}%;background:var(--blanc)"></i></div>`)}
+      ${stat('Lieu','Forum de Lille','Lille, 16 février')}
+      ${stat('Carte','<span style="color:var(--jaune)">2 / 4</span>','2 places à finir')}
+      ${stat('Préventes',`<span id="preventes">${nb(S.preventes)}</span>`,'sur 4 000 places',`<div class="jauge" style="height:5px;width:180px"><i id="jPrev" style="width:${S.preventes/40}%;background:var(--blanc)"></i></div>`)}
     </div>
     <div style="flex:1;min-height:0;display:grid;grid-template-columns:1.12fr 1fr .9fr;gap:20px">
       ${pan(titre('Derniers messages',`${nonlus} non lus · <button data-go="messages">Tout voir ›</button>`)+`<div class="defile" id="msgs">${MESSAGES.map(m=>`<div class="ligne ${m.nouveau?'apparait':''}" data-go="${m.go||'messages'}">
@@ -160,17 +160,17 @@ function accueilHtml(){
           <div class="etiq" style="margin:20px 0 4px">À surveiller</div>
           <div class="ligne"><span style="color:var(--neg)">${ico('medical',22)}</span><span style="flex:1">${lien(rizzo)} · blessé au camp, retour le 2 février</span><span class="lecture">›</span></div>
           <div class="ligne"><span style="color:var(--jaune)">${ico('contrats',22)}</span><span style="flex:1">${lien(parId('vanbelle'))} · dernier combat de son contrat</span><span class="lecture">›</span></div>
-          <div style="display:flex;align-items:baseline;margin:22px 0 2px"><span class="etiq">Tes suivis</span><button class="etiq" style="margin-left:auto;color:var(--jaune);font-weight:700" data-go="effectif">Tout voir ›</button></div>
+          <div style="display:flex;align-items:baseline;margin:22px 0 2px"><span class="etiq">Suivis</span><button class="etiq" style="margin-left:auto;color:var(--jaune);font-weight:700" data-go="effectif">Tout voir ›</button></div>
           ${suivi(rizzo,'<span style="color:var(--neg)">Blessé, retour le 2 février</span>')}${suivi(musaev,'Cinq victoires sur sept par soumission')}${suivi(parId('rachidi'),'<span style="color:var(--vert)">Cinq victoires de suite</span>')}
         </div>`,'','apparait')}
       ${pan(titre('Ta saison','2027')+`<div class="defile">
-          ${obj('Rester dans les deux premières organisations','2e, à garder',.92,'var(--vert)')}
-          ${obj('Un poids lourd de Split dans le top 10 mondial','Meilleur : n° 14',.55,'var(--jaune)')}
+          ${obj('Rester dans le top 2','2e, à garder',.92,'var(--vert)')}
+          ${obj('Un poids lourd dans le top 10 mondial','Meilleur : n° 14',.55,'var(--jaune)')}
           ${obj('Remplir le Forum de Lille',`${Math.round(S.preventes/40)} %`,S.preventes/4000,'var(--blanc)')}
-          <div class="etiq" style="margin:22px 0 6px">Le patron</div>
+          <div class="etiq" style="margin:22px 0 6px">Patron</div>
           <div class="T" style="font-size:40px">Il attend de voir</div>
           <div style="font-size:24px;color:var(--texte2);margin-top:6px;font-style:italic">« Je veux voir la suite. »</div>
-          <div class="etiq" style="margin:24px 0 6px">Ton recruteur</div>
+          <div class="etiq" style="margin:24px 0 6px">Recruteur</div>
           ${S.recruteur==='dispo'?`<div style="display:flex;align-items:baseline;gap:18px"><span style="font-size:24px;color:var(--vert);font-weight:700">Disponible</span><button style="color:var(--jaune);font-size:24px;font-weight:600">Ouvrir ›</button></div>`
             :`<div style="font-size:24px">En voyage à Turin</div><div class="sous">Retour le 3 février</div>`}
         </div>`,'','apparait')}

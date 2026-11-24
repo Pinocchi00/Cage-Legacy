@@ -150,7 +150,7 @@ const PR_ART=[
    p:()=>[`À 37 ans, ${prN('nana')} gagne encore quand les autres faiblissent. Ses trois dernières victoires se sont jouées après le deuxième round.`],
    f:()=>[['Âge','37 ans',''],['Bilan','14-8',''],['Série','3 victoires','']],cite:['nana','salue','Les derniers rounds lui appartiennent']},
   {id:'a20tn',d:prJ(20,11,2026),m:'tn',s:['ailleurs'],t:'Garden of Blood : 16 900 spectateurs à New York',par:'La rédaction',
-   ch:'La plus grosse affluence des huit organisations en décembre.',
+   ch:'Plus grosse affluence des 8 organisations en décembre.',
    p:()=>[`Garden of Blood a réuni 16 900 spectateurs à New York le 20 décembre, la plus grosse affluence du mois. Son record reste 19 400, le 12 septembre.`,
      `Combat principal : ${prX('Andre Whitfield','Poids moyen')} garde sa ceinture des poids moyens contre ${prX('Mateo Ruiz','Poids moyen')}, par décision unanime (49-46, 49-46, 48-47).`],
    f:()=>[['Spectateurs','16 900','New York'],['Record','19 400','12 sept. 2026']],act:[['Les huit organisations','data-prgo="organisation"']]},
@@ -305,7 +305,7 @@ function prEnvie(){
   return pan(titre('Le public réclame',`${prRelire}${prLienJ('Le sujet','data-prart="a02lf"')}`)+`<div class="pr-ev oct"><i class="fb-img or pr-ev-img"></i>
       ${cote(A,70,'g')}<span class="T pr-ev-vs">VS</span>${cote(B,77,'d')}</div>
     ${f('Sondage du Forum, 2 janv.',`<b class="T pr-ev-pc"><span data-prn="38">38</span>&nbsp;%</b> des 4 210 votes`)}
-    ${f('Le 2e du sondage',`${prNomL(parId('rachidi'))} – ${prNomL(parId('gpoidspaillefC'))}, 11&nbsp;%`)}
+    ${f('2e du sondage',`${prNomL(parId('rachidi'))} – ${prNomL(parId('gpoidspaillefC'))}, 11&nbsp;%`)}
     ${f('Possible','après le 16 févr., si Nana garde sa ceinture')}`,'','pr-p-ev');
 }
 function prCarte(){
@@ -348,7 +348,7 @@ function prArticle(a){
     <div class="pr-ar-par sous">${par}${prRelire}</div>
     <div class="pr-ar-c">${a.p().map(x=>`<p>${prTy(x)}</p>`).join('')}</div>
     <div class="pr-fas">${a.f().map(cas).join('')}</div>
-    ${aut.length?`<div class="pr-aut"><span class="etiq">Les autres médias sur le sujet</span>${aut.map(x=>`<button class="pr-aut-l" data-prsel="${x.id}">
+    ${aut.length?`<div class="pr-aut"><span class="etiq">Autres médias sur le sujet</span>${aut.map(x=>`<button class="pr-aut-l" data-prsel="${x.id}">
       <span class="pr-aut-m">${PR_MEDIAS[x.m].nom}</span><span class="pr-aut-t">${prT(x.t)}</span><span class="sous">${prDc(x.d)}</span></button>`).join('')}</div>`:''}
     ${a.act?`<div class="pr-ar-b">${a.act.map(bt).join('')}</div>`:''}</div>`,'','pr-p-ar');
 }

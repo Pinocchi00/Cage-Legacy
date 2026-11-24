@@ -191,9 +191,9 @@ function pzEnjeu(A,B){
   const h=AF_HIST[pzCle(A.id,B.id)];
   return pan(`<div class="pz-ej-t T">${esc(pzTitre(A,B))}</div>
     ${h?`<div class="pz-note">« ${esc(h)} » ${pzRelire}</div>`:''}
-    <div class="etiq pz-h-t">Leur histoire</div>
+    <div class="etiq pz-h-t">Histoire</div>
     <div class="pz-tl">${pzHistoire(A,B).map((x,i)=>`<div class="pz-tli" style="--i:${i}"><span class="pz-tlm octr"></span><span class="pz-tld">${dMois(x.d)}</span><span class="pz-tlt">${x.t}</span></div>`).join('')}</div>
-    <div class="etiq pz-h-t">Ce qui fait le combat</div><div class="pz-rai">${afRaisons(pzPlaceDe(A.id,B.id)||S.pz.place,{a:A.id,b:B.id}).slice(0,3).map(afRl).join('')}</div>
+    <div class="etiq pz-h-t">Enjeux</div><div class="pz-rai">${afRaisons(pzPlaceDe(A.id,B.id)||S.pz.place,{a:A.id,b:B.id}).slice(0,3).map(afRl).join('')}</div>
     <div class="pz-cases">${cases.map(([e,v,s],i)=>`<div class="pz-cs" style="--i:${i}"><span class="etiq">${e}</span><span class="T">${v}</span><span class="sous">${s}</span></div>`).join('')}</div>`,'','pz-p1');
 }
 /** Comment ils gagnent et perdent : un papillon, A à gauche, B à droite ; victoires en vert, défaites en rouge (le sens). */

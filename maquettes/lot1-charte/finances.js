@@ -176,7 +176,7 @@ function fiDetail(){
         <div class="fi-tes">${PERF_TYPES.map(([k])=>`<span class="fi-med">${medaille(k,22,o.n)}<span>${fiE(primeDe(k,o.n))}</span></span>`).join('')}</div></div>`,
       fiLigne('Salle et production',esc(o.salle),D.salle,max,'fi-jd',7)].join('');
   const tete=o.joue
-    ?`<div class="fi-res"><span class="etiq">Ce qu’il te reste</span><span class="T ${o.net>=0?'fi-pos':'fi-neg'}">${o.net>=0?'+':'−'} <span data-fin="${Math.abs(o.net)}">0</span> €</span></div>`
+    ?`<div class="fi-res"><span class="etiq">Reste</span><span class="T ${o.net>=0?'fi-pos':'fi-neg'}">${o.net>=0?'+':'−'} <span data-fin="${Math.abs(o.net)}">0</span> €</span></div>`
     :`<div class="fi-res"><span class="etiq">Déjà signé ou vendu</span><span class="T ${o.sur>=0?'fi-pos':'fi-neg'}">${o.sur>=0?'+':'−'} <span data-fin="${Math.abs(o.sur)}">0</span> €</span></div>`;
   const recT=o.joue?o.recette:null,depT=o.joue?o.depense:null;
   return pan(`<div class="fi-d" data-cle="${o.n}${o.joue?'j':''}">
@@ -186,7 +186,7 @@ function fiDetail(){
       <div class="fi-col"><div class="fi-colt"><span class="etiq">Recettes</span>${o.joue?`<b class="T">${fiE(recT)}</b>`:''}</div>${recettes}</div>
       <div class="fi-col"><div class="fi-colt"><span class="etiq">Dépenses</span>${o.joue?`<b class="T">${fiE(depT)}</b>`:''}</div>${depenses}</div>
     </div>
-    ${o.joue?fiChangements(o):`<div class="fi-chg"><div class="fi-ct"><span class="etiq">Ce qui change pour cette soirée</span><button class="fi-lien" data-figo="carte">Ouvrir la carte ›</button></div>
+    ${o.joue?fiChangements(o):`<div class="fi-chg"><div class="fi-ct"><span class="etiq">Changements pour cette soirée</span><button class="fi-lien" data-figo="carte">Ouvrir la carte ›</button></div>
       <div class="fi-c"><span class="fi-cf fi-pos">▲</span><span class="fi-cl"><b>Diffuseur et partenaires</b><span class="sous">nouveaux contrats depuis le palier du 10 janvier</span></span><span class="T fi-ce fi-pos">${fiSigne(FI_DIFF.apres-FI_DIFF.avant+FI_PART.apres-FI_PART.avant)}</span></div></div>`}
   </div>`,'height:100%','fi-droite');
 }
@@ -215,7 +215,7 @@ function fiBandeauB(){
     <div class="fi-bt"><span class="etiq">Sous contrat</span><span class="T fi-caisse"><span data-fin="${tous.length}">0</span></span><span class="sous">combattants, hommes et femmes</span></div>
     ${st('Bourse moyenne',`<span data-fin="${moy}">0</span> €`,'par combat, victoire comprise')}
     ${st('Versé en 2026',`<span data-fin="${verse}">0</span> €`,'bourses et primes, 7 soirées')}
-    <div class="stat-b fi-st"><span class="etiq">La plus haute</span><span class="T fi-stv">${fiE(euros(haut.contrat[1]))}</span><span class="sous fi-sth">${lien(haut)}</span></div>
+    <div class="stat-b fi-st"><span class="etiq">Plus haute</span><span class="T fi-stv">${fiE(euros(haut.contrat[1]))}</span><span class="sous fi-sth">${lien(haut)}</span></div>
     ${st('Fins de contrat',`<span data-fin="${fins}">0</span>`,'dernier combat à venir')}</div>`;
 }
 const fiAffiche=id=>!S.rs.apres&&S.af.m.concat(S.af.p).some(f=>f.a===id||f.b===id);
@@ -232,8 +232,8 @@ function fiCatPanneau(x){
   return pan(`<div class="fi-d" data-cle="${esc(x.cat)}">
     <div class="rt-ban fi-ban"><i class="rt-ban-img fi-ban-img"></i><div class="rt-ban-t"><div class="T fi-bn">${esc(x.cat.replace(/ F$/,''))}</div><div class="fi-bl">${S.fi.sexe==='F'?'Femmes':'Hommes'} · ${x.kg} kg</div></div></div>
     <div class="rc-faits fi-faits">${fait('Combats en 2026',`<span data-fin="${x.an.n}">0</span>`,`${x.l.length} combattants sous contrat`)}${fait('Fins de contrat',`<span data-fin="${x.fins.length}">0</span>`,'dernier combat à venir')}</div>
-    <div class="etiq fi-sect">Les bourses les plus hautes</div><div class="fi-hauts">${haut}</div>
-    <div class="etiq fi-sect">Leur dernier combat sous contrat</div><div class="fi-fins">${fins||'<div class="sous">Aucun contrat ne finit dans cette catégorie.</div>'}</div>
+    <div class="etiq fi-sect">Bourses les plus hautes</div><div class="fi-hauts">${haut}</div>
+    <div class="etiq fi-sect">Dernier combat sous contrat</div><div class="fi-fins">${fins||'<div class="sous">Aucun contrat ne finit dans cette catégorie.</div>'}</div>
   </div>`,'height:100%','fi-droite');
 }
 
