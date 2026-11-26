@@ -76,18 +76,51 @@ Prévoir pour chaque salle **la capacité en configuration MMA**, souvent infér
 | Diffuseur, partenaires, bar, VIP | Hypothèses | Aucune source | À sourcer |
 | Part des combattants dans le revenu | 58 à 83 % avec les primes | Aucune part publique fiable (Agent MMA) | Le niveau actuel paraît trop haut : à recalculer après les bourses |
 
-## 6. Encore à vérifier, écran par écran
+## 6. Prolonger ou libérer un combattant (maquette validée le 26/11)
+
+### Ce que disent les sources
+
+| Point | Repère réel | Statut | Source |
+|---|---|---|---|
+| Forme du contrat | Une bourse fixe, et une prime de victoire du même ordre ; sous six chiffres, la victoire double en général la bourse | Explicatif de presse (2022) | [Boardroom](https://boardroom.tv/ufc-fight-contract-explainer/) |
+| Hausse d'un contrat | La bourse monte par palier à chaque victoire : Khabib Nurmagomedov de 21 000 $ + 21 000 $, puis +3 000 $ par victoire ; l'UFC a envisagé de passer l'entrée de gamme de 10 000 $ + 10 000 $ à 14 000 $ + 14 000 $ | Déclaré (pièces du procès Le c. Zuffa) | [Sherdog](https://www.sherdog.com/news/articles/New-UFC-Antitrust-Filings-Give-Further-Insight-into-Fighter-Negotiations-Compensation-163437) |
+| Prolonger avant le dernier combat | L'UFC renégocie souvent quand il reste un combat, mais laisse parfois le combattant finir son contrat (Chookagian 2022, Larkin) | Témoignages de combattants | [MMA News](https://www.mmanews.com/article/katlyn-chookagian-becomes-a-free-agent-after-ufc-vegas-46-win), [ESPN](https://www.espn.com/blog/mma/post/_/id/23423/larkin-talks-free-agency-slap-in-the-face-ufc-fight) |
+| Refuser de jouer son dernier combat sans garantie | Paulo Costa : « le combat prévu, plus d'argent, ou la libération » | Presse | [LowKick MMA](https://www.lowkickmma.com/paulo-costa-ufc-ultimatum-contract-hunter-campbell/) |
+| Après la fin du contrat | 60 jours de négociation exclusive, puis un droit d'aligner une offre pendant un an ; un champion voit son contrat prolongé d'un an ou de 3 combats | Contrat type Zuffa de 2007, revu depuis | [Sherdog](https://www.sherdog.com/news/articles/Inside-the-Standard-Zuffa-Contract-9734) |
+| Libérer | Le promoteur peut mettre fin au contrat après une défaite ; en cas de rupture, ce qui reste dû se paie « hors primes de victoire » ; une blessure prolonge la durée du contrat | Contrat type Zuffa de 2007 | [Sherdog](https://www.sherdog.com/news/articles/Inside-the-Standard-Zuffa-Contract-9734) |
+| Libérés ou non prolongés | Des combattants partent après 2 ou 3 défaites, d'autres ne sont pas prolongés à la fin du contrat, sans raison donnée | Presse | [Deadspin](https://deadspin.com/why-the-ufc-released-undefeated-bantamweight-farid-basharat/) |
+| Organisation de second rang | Cage Warriors prolonge ses combattants pour « plusieurs combats » ; un champion, pour 3 combats | Communiqués et presse | [Fightful](https://www.fightful.com/mma/cage-warriors-resigns-two-champions) |
+
+### Ce que fait la maquette
+
+- **Van Belle** (7 000 € + 7 000 €, 1 combat restant, contrat de la fiche) demande **9 000 € + 9 000 € sur 4 combats et 4 000 € à la signature**. La hausse de 29 % vient des offres de MMA Korner et Pure Impact : **hypothèse**, plus forte que le palier de Khabib (+14 % par victoire).
+- **Kessler** (9 000 € + 9 000 €, 2 défaites de suite) demande **le même prix sur 3 combats** et 3 000 € à la signature : il cherche la sécurité, pas une hausse. Hypothèse.
+- **Les autres combattants de Split** : hausse de 0 à 25 % selon leurs 3 derniers combats (+10 % par victoire au-delà de la première, sur les 3 derniers combats, 25 % pour un champion), 2 combats à 33 ans et plus, 5 à 24 ans et moins, 4 sinon. **Hypothèse.**
+- **Prime de signature** : 10 % du contrat, règle du jeu (`MGMT_CT_PRIME_PART`).
+- **Un accord remplace le combat restant** : le nouveau contrat commence aujourd'hui (le combat du 16 février en est le 1er). Comme une renégociation réelle avant le dernier combat.
+- **Libérer** paie la **bourse fixe** de ce qui reste, sans la prime de victoire (Kessler : 9 000 €). Proche de la clause Zuffa « hors primes de victoire ».
+- **Refus** : à l'affiche (règle du jeu, `mgmtContratLiberer` refuse « carte ») ; blessé (hypothèse, d'après la clause Zuffa qui prolonge le contrat d'un blessé) ; négociation rompue, 2 mois sans nouvelle offre (règle du Recrutement, validée le 09/11).
+- **Une soirée jouée garde le contrat de son jour** : la caisse ne recalcule pas les soirées passées avec la nouvelle bourse.
+
+### Écarts avec le jeu
+
+- Le jeu **ajoute** les combats prolongés aux combats restants (`mgmtContratRenouveler`) ; la maquette les **remplace**.
+- Le jeu paie à la libération **toute la bourse** des combats restants (`mgmtContratIndemnite` : « Libérer · 52 000 € » pour 4 combats à 13 000 €) ; la maquette paie la bourse fixe seule.
+- Le jeu majore la demande de 10 % au renouvellement (`MGMT_CT_RENOUV_MAJORATION`) ; la section 4 notait « + 25 % » sans source.
+- Le jeu ne refuse pas de libérer un blessé.
+
+## 7. Encore à vérifier, écran par écran
 
 - [ ] Spectateurs, records et top 30 des huit organisations.
 - [ ] Nombre de soirées par an et écart entre deux soirées.
 - [ ] Nombre de combats par combattant et par an.
 - [ ] Âge des champions, durée des règnes et nombre de défenses.
-- [ ] Durée et nombre de combats des contrats.
+- [ ] Durée et nombre de combats des contrats (prolongation : repères en section 6, chiffres de la maquette encore hypothèses).
 - [ ] Coût du recruteur, de l'interprète et des voyages.
 - [ ] Salaires de l'équipe (Leïla, Marco, Dr Roux).
 - [ ] Caisse de départ : 50 000 € dans le jeu, 952 200 € à l'Arrivée.
 
-## 7. Méthode pour chaque valeur
+## 8. Méthode pour chaque valeur
 
 1. Noter la valeur actuelle et l'écran où elle apparaît.
 2. Chercher un repère réel à la bonne échelle : une organisation de second rang ne se compare pas à l'UFC.

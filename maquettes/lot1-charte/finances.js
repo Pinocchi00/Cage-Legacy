@@ -30,7 +30,8 @@ const fiE=v=>`${nb(Math.abs(v))} €`;
 const fiSigne=v=>`${v>=0?'+':'−'} ${nb(Math.abs(v))} €`;
 
 /** La bourse d'un combat (fixe + victoire) d'après le contrat ; un adversaire hors de Split reçoit une bourse d'un combat. */
-function fiBourse(c,principal){const b=euros(c&&c.contrat?c.contrat[1]:'');return b||(principal?30000:14000);}
+/** La bourse d'un combat. Une soirée jouée garde le contrat de son jour : une prolongation ou un départ (prolongation.js) ne la réécrit jamais. */
+function fiBourse(c,principal,le){const k=c&&(le&&c.contratAvant&&le<c.contratDepuis?c.contratAvant:c.contrat);const b=euros(k?k[1]:'');return b||(principal?30000:14000);}
 
 const FI_CACHE={};
 /** Une soirée : recettes, dépenses, primes, ce qu'il reste. Mise en cache (les soirées passées ne bougent plus). */
@@ -48,7 +49,7 @@ function fiSoiree(n){
     return o;
   }
   const r=rsSoiree(n),pr={soiree:0,perf:0,fin:0};let fixe=0,vict=0,top=null;
-  r.combats.forEach((f,i)=>{['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0);fixe+=b/2;if(f.g===sd)vict+=b/2;
+  r.combats.forEach((f,i)=>{['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0,o.date);fixe+=b/2;if(f.g===sd)vict+=b/2;
     if(!top||b>top.b)top={c,b};((f.pr||{})[sd]||[]).forEach(p=>pr[p]++);});});
   const primes=Object.entries(pr).reduce((t,[k,q])=>t+q*primeDe(k,n),0);
   if(n===63){ /* les chiffres du Lendemain */
@@ -65,7 +66,10 @@ const fiNums=()=>[56,57,58,59,60,61,62,63];
 const fiJouees=()=>fiNums().map(fiSoiree).filter(o=>o.joue);
 const fiSel=()=>{const l=fiNums();return l.includes(S.fi.sel)?S.fi.sel:fiJouees().slice(-1)[0].n;};
 /** La caisse : départ au 1er janvier 2026, puis chaque soirée, en une fois (règle du jeu : la recette tombe le soir même). */
-function fiCaisse(){let c=FI_CAISSE0;const pts=[{d:FI_DEBUT,c}];fiJouees().forEach(o=>{pts.push({d:o.date,c,o,avant:true});c+=o.net;pts.push({d:o.date,c,o});});return {c,pts};}
+function fiCaisse(){let c=FI_CAISSE0;const pts=[{d:FI_DEBUT,c}];fiJouees().forEach(o=>{pts.push({d:o.date,c,o,avant:true});c+=o.net;pts.push({d:o.date,c,o});});
+  /* Hors soirées : primes de signature et restes dus d'une prolongation ou d'un départ (prolongation.js). */
+  (typeof plVersements==='function'?plVersements():[]).forEach(v=>{pts.push({d:v.d,c});c-=v.m;pts.push({d:v.d,c});});
+  return {c,pts};}
 /** Découvert autorisé (règle du jeu) : la dernière recette nette, lissée sur deux soirées, jamais négative. */
 function fiDecouvert(){const l=fiJouees().slice(-2);return Math.max(0,Math.round(l.reduce((t,o)=>t+o.net,0)/l.length/1000)*1000);}
 
@@ -221,7 +225,7 @@ function fiBandeauB(){
 const fiAffiche=id=>!S.rs.apres&&S.af.m.concat(S.af.p).some(f=>f.a===id||f.b===id);
 /** Ce que la catégorie a coûté en 2026 : bourses et primes de ses combattants, soirée par soirée (les mêmes que dans « La caisse »). */
 function fiVerseCat(cat){let v=0,n=0;fiJouees().filter(o=>o.date.getFullYear()===2026).forEach(o=>rsSoiree(o.n).combats.forEach((f,i)=>{if(f.cat!==cat)return;n++;
-  ['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0);v+=b/2+(f.g===sd?b/2:0)+((f.pr||{})[sd]||[]).reduce((t,p)=>t+primeDe(p,o.n),0);});}));return {v,n};}
+  ['a','b'].forEach(sd=>{const c=sd==='a'?f.A:f.B,b=fiBourse(c,i===0,o.date);v+=b/2+(f.g===sd?b/2:0)+((f.pr||{})[sd]||[]).reduce((t,p)=>t+primeDe(p,o.n),0);});}));return {v,n};}
 function fiCatPanneau(x){
   const tri=[...x.l].sort((a,b)=>euros(b.contrat[1])-euros(a.contrat[1])),max=euros(tri[0].contrat[1]),tot=x.l.reduce((t,c)=>t+euros(c.contrat[1]),0);
   const rang=c=>c.rang==='C'?`<span class="marque octr fi-c8">C</span>`:`<span class="fi-rg">n° ${c.rang}</span>`;

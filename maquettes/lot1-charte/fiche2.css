@@ -418,3 +418,11 @@
 .m8{--t:28px;width:var(--t);height:var(--t);flex:none;display:inline-grid;padding:2px;background:var(--jaune);vertical-align:middle}
 .m8>span{display:grid;place-items:center;background:#1a1414;color:var(--jaune)}
 .m8+.m8{margin-left:-2px}
+
+/* Contrat : les trois primes tiennent dans le panneau, la dernière n'est plus coupée (retour du 25/11). */
+.ct8-types{gap:6px}
+.ct8-types .ct8-ty{padding:6px 14px 6px 18px}
+.ct8-tyl{gap:10px;white-space:nowrap}
+.ct8-ty>span:first-child{font-size:18px}
+.ct8-types .ct8-ty .T{font-size:36px}
+.ct8-ty .ct8-m{font-size:17px}

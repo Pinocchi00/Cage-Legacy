@@ -579,7 +579,7 @@ Un « … » marque une valeur qui change selon la partie (nom, date, nombre). �
 
 ## 4. Cas limites (choix faits, à relire)
 
-- **Noms d'écran, d'onglet et d'étape gardés tels quels**, parce qu'ils servent de repère d'un écran à l'autre et que les noms d'écran restent un choix ouvert : Ton arrivée, Ton contrat, Tes espoirs (Arrivée) ; Les huit, La croissance, Ta carrière, Tes saisons (Organisation) ; À la une, Les défis, Le fil (Presse) ; Les meilleurs (Classements) ; Mes parties (Menu) ; Tes soirées, Avant toi (Résultats). Proposition si tu veux appliquer la règle jusque-là : Arrivée, Contrat, Espoirs ; Organisations, Croissance, Carrière, Saisons ; Une, Défis, Fil ; Meilleurs ; Parties ; Depuis ton arrivée, Avant ton arrivée.
+- **Noms d'écran, d'onglet et d'étape : tranchés le 26/11** (`REGLES-MAQUETTES.md`, section 9). Arrivée, Contrat, Espoirs ; Concurrence, Croissance, Carrière, Saisons ; À la une (gardé), Défis, Articles ; Statistiques ; Parties ; « Depuis le 4 janv. 2027 » et « Avant le 4 janv. 2027 ». Avant : Ton arrivée, Ton contrat, Tes espoirs ; Les huit, La croissance, Ta carrière, Tes saisons ; Les défis, Le fil ; Les meilleurs ; Mes parties ; Tes soirées, Avant toi.
 - **Onglets changés**, parce que le nom seul reste clair : Caisse, Bourses, Primes (Finances) ; Lendemain (Résultats) ; titres des Options et familles de l'Aide.
 - **Paroles et presse** : les nombres restent en lettres dans les paroles d'un personnage et le corps des articles (« Cinq victoires de suite. Et maintenant ? »), comme à l'oral et dans un journal. Les titres de presse passent en chiffres.
 - **« n° 1 chez Split »** est la forme gardée partout ; les deux « n° 4 Split » de Messages s'alignent dessus.
@@ -598,7 +598,7 @@ Rien n'a changé sur : Split 6e ou 2e (« Rester dans le top 2 » reste, seul «
 
 1. **Blessure de Rizzo** : l'Infirmerie dit « Élongation à la cuisse droite », le message du médecin « Entorse de la cheville gauche ». Un même fait, deux textes : non corrigé, c'est un fait à choisir.
 2. **Patron dans l'aide des Options** : « Ton patron fixe les objectifs… » devient « Gérard Vasseur fixe les objectifs… », comme partout dans la maquette. Si le patron devient Jean-Michel Delatour, ce texte suit.
-3. **Noms d'écran à possessif** (section 4) : les garder, ou appliquer la règle jusqu'aux onglets.
+3. **Noms d'écran à possessif** (section 4) : tranché le 26/11, voir section 4.
 
 ## 6. Vérification
 

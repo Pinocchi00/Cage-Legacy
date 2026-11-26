@@ -105,11 +105,11 @@ const caSel=()=>S.ca.jour?null:(S.ca.sel&&caParId(S.ca.sel))||caAvenir()[0];
 /* ---- Les rendez-vous (un petit carré sous le jour, détaillés à droite) ---- */
 function caRdv(){
   const l=[
-    {d:new Date(2027,0,4),t:'Arrivée chez Split',go:['carriere','Ta carrière']},
+    {d:new Date(2027,0,4),t:'Arrivée chez Split',go:['carriere','Carrière']},
     {d:new Date(2027,0,10),t:'Palier franchi : Diffusion nationale',go:['messages','Message']},
     {d:new Date(2027,1,2),t:`Retour de blessure prévu pour ${lien(parId('rizzo'))}`},
-    {d:new Date(2027,6,1),t:'Bilan de mi-saison avec Gérard Vasseur, patron',go:['carriere','Ta carrière']},
-    {d:new Date(2027,11,31),t:'Fin de saison : objectifs jugés, place parmi les huit',go:['carriere','Ta carrière']},
+    {d:new Date(2027,6,1),t:'Bilan de mi-saison avec Gérard Vasseur, patron',go:['carriere','Carrière']},
+    {d:new Date(2027,11,31),t:'Fin de saison : objectifs jugés, place parmi les huit',go:['carriere','Carrière']},
   ];
   caAvenir().forEach(s=>{
     if(s.presse)l.push({d:s.presse,t:`Conférence de presse ${caDeLa(s)}, à ${esc(s.ville)}`,soiree:s.id});

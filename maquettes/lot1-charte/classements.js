@@ -216,7 +216,7 @@ function clCompteurs(){document.querySelectorAll('[data-clcompte]').forEach((e,i
 function clStatHtml(){
   const [k,t,expl,u,court,,dec]=CL_STATS.find(x=>x[0]===S.cl.stat),l=clStatListe(k),m=l[0].v||1;
   return `<div class="cl-pan">${pan(`<div class="pt"><h2>${t}</h2><span class="ment">${clToutes()?(S.cl.sexe==='F'?'Toutes les femmes':'Tous les hommes'):esc(clCat())} · ${expl}</span>
-      <button class="bb oct petit" data-clstatfermer style="margin-left:24px"><span class="oct">‹ Les meilleurs</span></button></div>
+      <button class="bb oct petit" data-clstatfermer style="margin-left:24px"><span class="oct">‹ Statistiques</span></button></div>
     <div class="defile cl-defile"><table class="eff-t cl-t"><thead><tr><th style="width:8%">Rang</th><th>Combattant</th><th style="width:12%">Palmarès</th><th style="width:40%">${esc(court)}</th><th style="width:12%">Combats</th></tr></thead>
     <tbody>${l.map((x,i)=>`<tr class="apparait ${i===0?'cl-tete':''}" style="animation-delay:${Math.min(i,10)*25}ms"><td><span class="T eff-rang">${i+1}</span></td>
       <td><div class="eff-nom">${lien(x.c)}<span class="sous">${clQui(x.c).replace(/^./,m=>m.toUpperCase())}</span></div></td>
@@ -412,7 +412,7 @@ function clRecords(){
     ['En carrière',[
       R('19','Victoires chez Split',P_('skerloch'),'De 2012 à 2022','Entraîneur à Brest'),
       R('12','Finitions chez Split',P_('sferhat'),'8 KO et 4 soumissions','Commentateur des soirées de Split'),
-      R('22','Combats chez Split',P_('kessler'),'Depuis 2020','Record en cours',1),
+      R('22','Combats chez Split',P_('kessler'),'Depuis 2020',parId('kessler').libereSplit?`Libéré le ${dMois(parId('kessler').libre)}`:'Record en cours',parId('kessler').libereSplit?0:1),
       R('9','Victoires de suite',P_('shaddou'),'De 2017 à 2020','Agent de combattants'),
     ]],
     ['Ceintures',[
@@ -444,7 +444,7 @@ function clRecordsHtml(){
 /* ---- L'écran ---- */
 function clOnglets(){
   const o=(v,t,on)=>`<button class="onglet oct ${on?'ouvert':''}" data-clvue="${v}">${t}</button>`,F=S.cl;
-  const liste=[['classement','Classement',F.vue==='classement'],['meilleurs','Les meilleurs',F.vue==='meilleurs'],['records','Records',F.vue==='records']];
+  const liste=[['classement','Classement',F.vue==='classement'],['meilleurs','Statistiques',F.vue==='meilleurs'],['records','Records',F.vue==='records']];
   return `<div class="cl-haut">${liste.map(x=>o(...x)).join('')}</div>`;
 }
 function clFiltres(){

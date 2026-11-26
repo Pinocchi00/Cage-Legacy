@@ -527,3 +527,6 @@ body.fd-mode .fd-voile{left:0;right:0;top:96px;bottom:0}
 .fd-anim .fd-c,.fd-anim .fd-pc,.fd-anim .fd-col{animation:fd-monte .36s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*.05s)}
 .ms-anim .fd-mt,.ms-anim .fd-pa{animation:fd-monte .36s ease-out both;animation-delay:calc(var(--i)*.06s)}
 @media (prefers-reduced-motion:reduce){.fd-sc *,.fd-sc,.fd-anim *{animation:none!important}.fd-rev .fd-att{display:none}}
+
+/* Organisation : le bouton des saisons, à droite de la ligne des onglets (retour du 25/11) */
+.fd-osais{margin-left:auto}

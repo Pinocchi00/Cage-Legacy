@@ -120,17 +120,13 @@ const MS_BOITE=[
    t:'L’agent de <span class="nom" data-fiche="vanbelle">Jens Van Belle</span> veut prolonger',
    txt:'Il reste 1 combat à Jens. Il se plaît chez Split, mais d’autres organisations l’ont contacté. Voici sa demande.',
    vue:()=>`<div class="ms-cases g3b">
-      ${msCase('Contrat',`<div class="ms-t"><span></span><span class="etiq">Aujourd’hui</span><span class="etiq">Demandé</span>
-        <span class="sous">Combats</span><span>1 restant</span><b>4</b>
-        <span class="sous">Par combat</span><span>9 000 €</span><b>15 000 €</b>
-        <span class="sous">Si victoire</span><span>+ 9 000 €</span><b>+ 15 000 €</b>
-        <span class="sous">Au plus</span><span>18 000 €</span><b>120 000 €</b></div>`)}
+      ${msCase('Contrat',msVbContrat())}
       ${msCase('',`<div class="ms-qui">${lien(parId('vanbelle'))}</div><div class="sous">Poids léger · 26 ans</div><div class="sous">n° 8 chez Split · n° 52 mondial</div>
         <div class="ms-l2"><span class="T ms-bil">9-2-0</span>${serie('vvdvv')}</div>${msFait('Dernier combat','3 octobre')}`)}
       ${msCase('Ailleurs',`${msFaitH('Contacté par','MMA Korner et Pure Impact')}${msFaitH('Agent','Il négocie dur et fait jouer la concurrence')}`)}
-      ${msCase('Chez Split depuis 2023',`<div class="ms-chiffres q4">${msGros('5','combats')}${msGros('4','victoires')}${msGros('1','prime de soirée')}${msGros('2 400','places en moyenne')}</div>`,'large')}
+      ${msVbSplit()}
     </div>`,
-   rep:[['Négocier',null,'Négociation hors de cette maquette.'],['Après le 16 février','L’agent attendra. D’ici là, il écoutera les autres offres.']]},
+   rep:[['Négocier',null,'',null,()=>plOuvrir('vanbelle')],['Après le 16 février','L’agent attendra. D’ici là, il écoutera les autres offres.']]},
 
   {id:'rachidi',tag:'Combattante',qui:'Hajar Rachidi',role:'',date:msJ(6),lu:true,attend:true,
    t:'<span class="nom" data-fiche="rachidi">Hajar Rachidi</span> veut une chance au titre',
@@ -172,6 +168,22 @@ S.ms={sel:'leila-carte',suppr:null,idees:false};
 
 /* L'Accueil reprend le titre de la une, daté du 9 janvier. */
 MESSAGES.forEach(a=>{a.t=a.t.replace('Il a 35 jours','Il a 38 jours');});
+
+/* ---- Van Belle : le contrat face à la demande, puis face au contrat signé (prolongation.js) ; mêmes chiffres que la fiche ---- */
+function msVbContrat(){
+  const c=parId('vanbelle'),x=typeof plDe==='function'&&rcDe('vanbelle');if(!c||!x)return '';
+  const signe=x.etat==='prolonge'&&x.signe,a=signe?x.avant:plActuel(c.libereSplit?{...c,contrat:c.contratAvant}:c),d=signe||x.main.dem,e=v=>`${nb(v)} €`;
+  return `<div class="ms-t ${signe?'pl-signe':''}"><span></span><span class="etiq">${signe?'Avant':'Aujourd’hui'}</span><span class="etiq">${signe?'Signé':'Demandé'}</span>
+        <span class="sous">Combats</span><span>${a.reste} restant${a.reste>1?'s':''}</span><b>${d.combats}</b>
+        <span class="sous">Par combat</span><span>${e(a.fixe)}</span><b>${e(d.bourse)}</b>
+        <span class="sous">Si victoire</span><span>+ ${e(a.vic)}</span><b>+ ${e(d.vic)}</b>
+        <span class="sous">Signature</span><span>—</span><b>${e(d.sig)}</b>
+        <span class="sous">Au plus</span><span>${e(a.reste*(a.fixe+a.vic))}</span><b>${e(d.combats*(d.bourse+d.vic)+d.sig)}</b></div>`;
+}
+function msVbSplit(){
+  const c=parId('vanbelle');if(!c||typeof plChezSplit!=='function')return '';const h=plChezSplit(c);
+  return msCase(`Chez Split depuis ${esc(c.depuis)}`,`<div class="ms-chiffres q4">${msGros(h.n,'combats')}${msGros(h.v,'victoires')}${msGros(h.primes,h.primes>1?'primes de performance':'prime de performance')}${msGros('2 400','places en moyenne')}</div>`,'large');
+}
 
 /* ---- Outils ---- */
 const msPar=id=>MS_BOITE.find(m=>m.id===id);
@@ -314,7 +326,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-msidee]'))){stop();const [k,id]=el.dataset.msidee.split(':');
     Object.assign(S.af,{sel:k,tab:'m',vue:'liste',cat:parId(id).cat,apercu:id,leila:false});aller('carte');return;}
   if((el=t.closest('[data-msrep]'))){stop();const m=msPar(S.ms.sel),r=m.rep[+el.dataset.msrep];
-    if(r[1]==null){toast(r[2]);return;}
+    if(r[1]==null){if(r[4])r[4]();else toast(r[2]);return;}
     m.choisi=+el.dataset.msrep;S.ms.juste=true;
     if(r[3]){const f=S.af.m.find(x=>x.a===r[3]||x.b===r[3]);if(f){f.a===r[3]?f.a=null:f.b=null;Object.assign(S.af,{sel:'m'+S.af.m.indexOf(f),tab:'m',vue:'liste',cat:parId(r[3]).cat});}}
     rendre();return;}

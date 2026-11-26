@@ -1,0 +1,48 @@
+/* Maquette lot 1 — Prolonger ou libérer (prolongation.js). Préfixe pl-. La négociation reprend les pièces du Recrutement (rc-). */
+
+/* La couche par-dessus l'écran courant : même place que le corps, l'écran derrière s'efface (comme la fiche). */
+.pl-couche{position:absolute;left:0;right:0;top:152px;bottom:36px;z-index:6}
+.pl-couche.pl-seul{top:136px}
+.zone.pl-ouvert>.corps,.zone.pl-ouvert>.fiche{opacity:0;filter:blur(3px);pointer-events:none;transition:opacity .35s,filter .35s}
+.pl-couche .rc.pl{animation:apparait .3s both}
+.pl-couche.pl-calme .rc.pl,.pl-couche.pl-calme .apparait{animation:none}
+.zone.pl-ouvert.pl-fiche>.fiche{opacity:1;filter:none;pointer-events:auto;z-index:7}
+.zone.pl-fiche>.pl-couche:not(.pl-voile-on){opacity:0;pointer-events:none}
+.zone.pl-fiche>.pl-couche.pl-voile-on{z-index:8}
+.zone.pl-fiche>.pl-couche.pl-voile-on>.rc.pl{opacity:0;pointer-events:none}
+
+/* Le contrat en cours, l'historique chez Split, les autres offres : une ligne à la place des onglets. */
+.pl-haut{display:flex;align-items:center;height:56px;flex:none;gap:0}
+.pl-f{display:flex;align-items:baseline;gap:14px;padding:0 30px;border-left:2px solid var(--sep);white-space:nowrap}
+.pl-f:first-child{padding-left:4px;border-left:0}
+.pl-fv{font-size:22px;font-weight:600}
+
+/* Levier : le contrat en cours à côté de la demande */
+.pl-auj{margin-left:14px;color:var(--texte2)}
+
+/* Confirmation et refus : le cadre de la confirmation du Recrutement */
+.pl-voile{z-index:9}
+.pl-couche.pl-seul .pl-voile{inset:-16px -40px -36px -40px}
+.rc-cl .pl-cls{display:block;font-size:18px;font-weight:500;color:var(--texte2);text-align:right;margin-top:2px}
+.pl-refus{font-size:26px;font-weight:600;line-height:1.3;margin:6px 0 10px}
+.pl-refus .nom{font-weight:700}
+.pl-quoi{font-size:21px;line-height:1.35;margin:14px 0 4px;color:var(--blanc)}
+.pl-conf .rc-pied{display:flex;gap:14px;align-items:center;margin-top:18px}
+.pl-conf [data-pldefaut]:focus-visible{outline:none}
+
+/* Sous la négociation, les actions de l'écran derrière ne sont plus là */
+.zone.pl-ouvert #alerte button{visibility:hidden}
+
+/* Message de l'agent : le contrat signé n'est plus une action à faire (pas de jaune) */
+.ms-t.pl-signe b{color:var(--blanc)}
+
+/* Fiche, onglet Contrat : la prolongation faite remplace le bouton ; la signature et les engagements sous les chiffres */
+/* Elle prend la place des marges : la hauteur du panneau ne bouge presque pas. */
+.ct8-chiffres:has(+.pl-eng){padding-bottom:0;border-bottom:0}
+.pl-eng{display:flex;align-items:baseline;gap:14px;font-size:19px;line-height:1.15;padding:2px 0 8px;border-bottom:2px solid var(--sep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-eng+.ct8-perf{padding-top:4px}
+.pl-eng .etiq{font-size:17px}
+.pl-eng .etiq+span,.pl-eng b{margin-right:14px}
+.ct8-prol{display:inline-flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--vert);height:52px}
+
+@media (prefers-reduced-motion:reduce){.pl-couche .rc.pl{animation:none}.zone.pl-ouvert>.corps,.zone.pl-ouvert>.fiche{transition:none}}

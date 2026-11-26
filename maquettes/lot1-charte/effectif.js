@@ -206,7 +206,7 @@ document.addEventListener('click',e=>{
   /* Hommes ou Femmes : toutes les catégories du sexe choisi ; une catégorie : elle seule. */
   if((el=t.closest('[data-esexe]'))){S.eff.sexe=el.dataset.esexe;S.eff.cat='toutes';S.eff.onglet='combattants';rendre();return;}
   if((el=t.closest('[data-ecat]'))){S.eff.cat=el.dataset.ecat;S.eff.onglet='combattants';rendre();return;}
-  if((el=t.closest('[data-eaction]'))){toast(`Ouvre la négociation avec ${esc(parId(el.dataset.eaction).nom)} : écran Recrutement, hors de cette maquette.`);return;}
+  if((el=t.closest('[data-eaction]'))){plOuvrir(el.dataset.eaction);return;}
 });
 window.addEventListener('DOMContentLoaded',()=>{
   const q=new URLSearchParams(location.search);

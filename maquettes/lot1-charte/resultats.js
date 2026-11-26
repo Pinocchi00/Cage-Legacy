@@ -233,8 +233,8 @@ function rsSoireesHtml(){
       <span class="rs-so3">${s.titre?rsCb(24):''}<span>${esc(w.nom)} bat ${esc(lo.nom)}</span></span></button>`;};
   const toi=l.filter(s=>s.n===63),avant=l.filter(s=>s.n!==63);
   return pan(`<div class="pt"><h2>Soirées</h2></div>
-    <div class="rs-sol">${toi.length?`<div class="etiq rs-grp">Tes soirées</div>${toi.map(it).join('')}`:''}
-    <div class="etiq rs-grp">Avant toi</div>${avant.map(it).join('')}
+    <div class="rs-sol">${toi.length?`<div class="etiq rs-grp">Depuis le 4 janv. 2027</div>${toi.map(it).join('')}`:''}
+    <div class="etiq rs-grp">Avant le 4 janv. 2027</div>${avant.map(it).join('')}
     <div class="sous rs-plus">Et 55 soirées plus anciennes, depuis 2004.</div></div>`,'width:380px;flex:none','rs-gauche');
 }
 function rsBandeau(s){

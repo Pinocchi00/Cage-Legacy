@@ -155,7 +155,7 @@ function rcGarder(){try{const {statut,sexe,cat,tri}=S.rc;localStorage.setItem(RC
 const rcCats=()=>CATS[S.rc.sexe].map(x=>x[0]);
 function rcListe(){
   const cats=rcCats(),F=S.rc;
-  const l=RC.filter(x=>{const c=parId(x.id);return (F.cat==='toutes'?cats.includes(c.cat):c.cat===F.cat)&&(F.statut==='tous'||(F.statut==='libres'?x.type==='libre':x.type==='fin'));});
+  const l=RC.filter(x=>{const c=parId(x.id);return x.type!=='prol'&&(F.cat==='toutes'?cats.includes(c.cat):c.cat===F.cat)&&(F.statut==='tous'||(F.statut==='libres'?x.type==='libre':x.type==='fin'));});
   const col=RC_COL[F.tri.col]?F.tri.col:'mondial',f=RC_COL[col][2];
   return l.sort((a,b)=>{const x=f(a),y=f(b);return ((x>y?1:x<y?-1:0)||(parId(a.id).mondial-parId(b.id).mondial))*F.tri.sens;});
 }
@@ -259,6 +259,12 @@ function rcOuvrirNego(id){
 }
 function rcPhrase(x,cas,o){
   const c=parId(x.id),p=c.prenom,d=x.nego?x.nego.dem:x.dem,il=rcIl(c),IL=rcIL(c),e=rcE(c);
+  /* Prolongation d'un combattant de Split : mêmes échanges, autres mots (À RELIRE). */
+  if(x.type==='prol')switch(cas){
+    case 'ouverture':return x.main?x.main.ouverture:`${p} veut rester. Pour prolonger : ${nb(d.bourse)} € par combat sur ${d.combats} combats, autant à la victoire, et ${nb(d.sig)} € à la signature.${d.dmd.length?` ${IL} a aussi ${d.dmd.length>1?d.dmd.length+' demandes':'une demande'}.`:''}`;
+    case 'accord':return `Ça nous va. ${p} reste chez Split.`;
+    case 'refus':return `On s’arrête là. ${p} finit son contrat et écoutera les autres.`;
+  }
   switch(cas){
     case 'ouverture':return `${p} veut ${nb(d.bourse)} € par combat sur ${d.combats} combats, autant à la victoire, et ${nb(d.sig)} € à la signature.${d.dmd.length?` ${IL} a aussi ${d.dmd.length>1?d.dmd.length+' demandes':'une demande'}.`:''}`;
     case 'proche':return `On y est presque. Encore un effort et on signe.`;
@@ -288,7 +294,8 @@ function rcProposer(direct=false){
   const repondre=()=>{
     const d=N.dem,sc=rcScore(o,d);N.prev=N.score;N.score=sc;N.demPrev={...d};
     if(sc>=.97){N.fini='accord';N.log.push({qui:'lui',t:rcPhrase(x,'accord'),ok:true});}
-    else if(N.ech>=x.patience){N.fini='refus';x.etat='refus';x.retour=new Date(S.date.getTime()+864e5*60);N.log.push({qui:'lui',t:rcPhrase(x,'refus'),non:true});}
+    else if(N.ech>=x.patience){N.fini='refus';x.etat='refus';x.rompu=new Date(S.date);x.retour=new Date(S.date.getTime()+864e5*60);N.log.push({qui:'lui',t:rcPhrase(x,'refus'),non:true});
+      if(x.type==='prol'&&typeof plMessage==='function')plMessage(x);}
     /* « Pas sérieux » ne juge que l'argent : refuser une demande se discute, sans l'agacer. */
     else if(rcScore({...o,eng:d.dmd.map(z=>z.id)},d)<.72){N.log.push({qui:'lui',t:rcPhrase(x,'loin')});x.patience=Math.max(N.ech+1,x.patience-1);}
     else if(N.avant&&rcScore(o,d)<=rcScore(N.avant,d)+.005){N.log.push({qui:'lui',t:rcPhrase(x,'meme')});}
@@ -332,12 +339,15 @@ function rcJauge(x){
 function rcLevier([k,t,s],x){
   const N=x.nego,o=N.offre[k],d=N.dem[k],fini=!!N.fini||S.rc.attente,av=N.demPrev&&N.demPrev[k];
   const baisse=av!=null&&typeof d==='number'&&d<av?`<span class="rc-baisse">▼ ${nb(av-d)} €</span>`:'';
+  /* Prolongation : le contrat en cours à côté de ce qu'il demande. */
+  const auj=x.type==='prol'&&typeof plActuel==='function'?plActuel(parId(x.id)):null,ajv=auj&&{bourse:auj.fixe,vic:auj.vic,combats:auj.reste}[k];
+  const ajH=ajv!=null?`<span class="pl-auj">aujourd’hui ${k==='combats'?ajv+' restant'+(ajv>1?'s':''):nb(ajv)+' €'}</span>`:'';
   if(k==='combats'){
     const nbs=[1,2,3,4,5,6,7,8].map(n=>`<button class="rc-nb octr ${n===o?'on':''} ${n===d?'veut':''}" ${fini?'disabled':''} data-rcnb="${n}" title="${n===d?'Sa demande':''}"><span class="octr">${n}</span></button>`).join('');
-    return `<div class="rc-lev"><div><div class="rc-lev-t">${t}</div><div class="rc-lev-d">il en veut <b>${d}</b></div></div><div class="rc-nbs">${nbs}</div></div>`;
+    return `<div class="rc-lev"><div><div class="rc-lev-t">${t}</div><div class="rc-lev-d">il en veut <b>${d}</b>${ajH}</div></div><div class="rc-nbs">${nbs}</div></div>`;
   }
   const max=d*1.25,ok=o>=d,proche=o>=d*.9,col=ok?'var(--vert)':proche?'var(--blanc)':'rgba(233,230,225,.45)';
-  return `<div class="rc-lev"><div><div class="rc-lev-t">${t} <span class="sous">${s}</span></div><div class="rc-lev-d">il demande <b class="${baisse?'rc-chg':''}">${nb(d)} €</b> ${baisse}</div></div>
+  return `<div class="rc-lev"><div><div class="rc-lev-t">${t} <span class="sous">${s}</span></div><div class="rc-lev-d">il demande <b class="${baisse?'rc-chg':''}">${nb(d)} €</b> ${baisse}${ajH}</div></div>
     <div class="rc-barre"><i style="width:${Math.min(100,o/max*100)}%;background:${col}"></i><span class="rc-rep" style="left:80%" title="Sa demande"></span></div>
     <div class="rc-pas">${fini?'':`<button class="bb oct petit" data-rcpas="${k}" data-v="-1000" title="Moins"><span class="oct">−</span></button>`}
       <span class="T rc-val" style="${ok?'color:var(--vert)':''}">${nb(o)} €</span>
@@ -354,7 +364,7 @@ function rcDemandesHtml(x){
 function rcNegoHtml(){
   const x=rcDe(S.rc.nego),c=parId(x.id),N=x.nego,o=N.offre,fini=N.fini,[agent,trait]=x.agent;
   const total=o.combats*(o.bourse+o.vic)+o.sig;
-  const split=COMBATTANTS.filter(y=>y.cat===c.cat).map(y=>+y.contrat[1].replace(/\D/g,'')).sort((a,b)=>b-a),place=split.filter(s=>s>o.bourse).length+1;
+  const prol=x.type==='prol',split=COMBATTANTS.filter(y=>y.cat===c.cat&&y.id!==c.id).map(y=>+y.contrat[1].replace(/\D/g,'')).sort((a,b)=>b-a),place=split.filter(s=>s>(prol?o.bourse+o.vic:o.bourse)).length+1;
   const humeur=fini==='accord'?'Content de l’accord.':fini==='refus'?'Il est passé à autre chose.':S.rc.attente?'Il lit ton offre…':N.dernier?'Il n’attendra plus.':N.ech===0?'Il attend ton offre.':'Il veut aller vite.';
   const hcol=fini==='accord'?'var(--vert)':fini==='refus'||N.dernier?'var(--neg)':'var(--blanc)';
   const ini=agent.split(' ').map(m=>m[0]).join('');
@@ -377,8 +387,8 @@ function rcNegoHtml(){
       <div class="etiq">${esc(agent)}</div><div class="rc-dit">« ${esc(e.t)} »<span class="relire">à relire</span></div>${e.dem&&e.o?reponse(e):''}</div></div>`;}).join('')
     +(S.rc.attente?`<div class="rc-bul lui entre"><span class="rc-av octr">${ini}</span><div class="rc-pense"><i></i><i></i><i></i></div></div>`:'');
   const derniere=N.log.slice().reverse().find(e=>e.dem);
-  const pied=fini==='accord'?`<span class="rc-accord">${ico('ok',26)} Accord trouvé</span><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px;margin-left:auto" data-rcsigner>${x.type==='fin'?'Conclure l’accord':'Signer le contrat'}</button>`
-    :fini==='refus'?`<span class="rc-rompu">Pas d’accord. Pas de nouvelle offre avant le ${rcJour(x.retour)}.</span><button class="bb oct" data-rcfermer style="margin-left:auto"><span class="oct">Revenir à la liste</span></button>`
+  const pied=fini==='accord'?`<span class="rc-accord">${ico('ok',26)} Accord trouvé</span><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px;margin-left:auto" data-rcsigner>${prol?'Prolonger le contrat':x.type==='fin'?'Conclure l’accord':'Signer le contrat'}</button>`
+    :fini==='refus'?`<span class="rc-rompu">Pas d’accord. Pas de nouvelle offre avant le ${rcJour(x.retour)}.</span><button class="bb oct" data-rcfermer style="margin-left:auto"><span class="oct">${prol?'Revenir':'Revenir à la liste'}</span></button>`
     :`<button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-rcproposer ${S.rc.attente?'disabled':''}>${N.dernier?'Dernière offre':'Faire cette offre'}</button>
       ${derniere?`<button class="bb oct" data-rcreprendre title="Reprendre ses chiffres dans l’offre"><span class="oct">Prendre ses chiffres</span></button>`:''}
       <button class="bb oct" data-rcfermer style="margin-left:auto" title="La négociation reste ouverte"><span class="oct">Plus tard</span></button>`;
@@ -386,7 +396,7 @@ function rcNegoHtml(){
     ${pan(`<div class="rc-band">
       <div class="rc-qui"><div class="rc-pre">${esc(c.prenom)} <span>« ${esc(c.surnom)} »</span></div><div class="T rc-grand nom" data-fiche="${c.id}">${esc(c.nom)}</div>
         <div class="sous">${esc(courte(c.cat))} · ${c.age} ans · ${bilan(c)} · ${rcRang(c)}</div>
-        <div class="rc-sit2">${x.type==='libre'?`Libre · ${esc(x.tag)}`:`${esc(c.org)} · libre ${esc(x.fin)}`}</div></div>
+        <div class="rc-sit2">${prol?(c.rang==='C'?(rcE(c)?'Championne':'Champion')+' de Split':`n° ${c.rang} chez Split`):x.type==='libre'?`Libre · ${esc(x.tag)}`:`${esc(c.org)} · libre ${esc(x.fin)}`}</div></div>
       ${rcJauge(x)}
       <div class="rc-agent"><span class="rc-av grand octr">${ini}</span><div><div class="etiq">Agent</div><div class="rc-ag-nom">${esc(agent)}</div>
         <div class="sous" style="font-size:19px">${esc(trait)}<span class="relire">à relire</span></div><div class="rc-hum" style="color:${hcol}">${humeur}</div></div></div>
@@ -404,11 +414,12 @@ function rcNegoHtml(){
 function rcConfirmerHtml(x){
   const c=parId(x.id),o=x.nego.offre,total=o.combats*(o.bourse+o.vic)+o.sig;
   const l=(t,v)=>`<div class="rc-cl"><span>${t}</span><b>${v}</b></div>`;
-  return `<div class="rc-voile">${pan(titre(x.type==='fin'?'Conclure l’accord':'Signer le contrat',`${esc(c.prenom)} ${esc(c.nom)}`)+`
+  const prol=x.type==='prol',eng=typeof plAffiche==='function'&&plAffiche(x.id);
+  return `<div class="rc-voile">${pan(titre(prol?'Prolonger le contrat':x.type==='fin'?'Conclure l’accord':'Signer le contrat',`${esc(c.prenom)} ${esc(c.nom)}`)+`
     ${l('Combats',`${o.combats}`)}${l('Bourse par combat',`${nb(o.bourse)} €`)}${l('Prime de victoire',`${nb(o.vic)} €`)}${l('Prime de signature',`${nb(o.sig)} €`)}
     ${o.eng.map(id=>l('Tu t’engages',esc(((x.nego.dem.dmd||[]).concat(x.dem.dmd).find(z=>z.id===id)||{t:id}).t))).join('')}${l('Au plus, sur tout le contrat',`${nb(total)} €`)}
-    <div style="font-size:21px;margin:16px 0 4px">${x.type==='fin'?`${rcIL(c)} signe chez Split ${esc(x.fin)}. Jusque-là, ${rcIl(c)} reste chez ${esc(c.org)}.`:`${rcIL(c)} rejoint l’effectif aujourd’hui. Prime de signature versée aujourd’hui.`}</div>
-    <div class="rc-pied"><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-rcok>${x.type==='fin'?'Conclure':'Signer'}</button>
+    <div style="font-size:21px;margin:16px 0 4px">${prol?`Le nouveau contrat remplace le combat restant${eng?` : le 16 février est le 1<sup>er</sup> des ${o.combats}`:''}. Prime de signature versée aujourd’hui.`:x.type==='fin'?`${rcIL(c)} signe chez Split ${esc(x.fin)}. Jusque-là, ${rcIl(c)} reste chez ${esc(c.org)}.`:`${rcIL(c)} rejoint l’effectif aujourd’hui. Prime de signature versée aujourd’hui.`}</div>
+    <div class="rc-pied"><button class="bouton jaune cj" style="--c:14px;height:56px;font-size:30px" data-rcok>${prol?'Prolonger':x.type==='fin'?'Conclure':'Signer'}</button>
       <button class="bb oct" data-rcrevenir><span class="oct">Revenir</span></button></div>`,'width:760px','rc-conf')}</div>`;
 }
 /* Après l'affichage : le curseur et la barre glissent de l'ancienne position à la nouvelle. */
@@ -433,7 +444,7 @@ function rcFiltres(){
 }
 function rcHtml(){
   rcGarder();rcSauver();const F=S.rc;
-  if(F.nego)return `<div class="rc">${rcOnglets()}${rcNegoHtml()}</div>`;
+  if(F.nego&&!(typeof plActif==='function'&&plActif()))return `<div class="rc">${rcOnglets()}${rcNegoHtml()}</div>`;
   return `<div class="rc">${rcOnglets()}${rcFiltres()}<div class="rc-g">${rcTableau()}${rcFicheCourte()}</div></div>`;
 }
 
@@ -476,14 +487,15 @@ ouvrirFiche=function(id,garderFutur=false){
 const rcStatsBase=statsHtml;
 statsHtml=function(c){
   const x=rcDe(c.id);
-  if(!x||x.vu||x.etat==='signe')return rcStatsBase(c);
+  /* Un combattant de Split, ou libéré par Split, est connu : ses statistiques restent visibles (prolongation.js). */
+  if(!x||x.connu||x.vu||x.etat==='signe')return rcStatsBase(c);
   return pan(`<div class="rc-cachee"><div class="T" style="font-size:44px">Pas encore vu de près</div>
     <div style="font-size:23px;max-width:640px;line-height:1.35">Palmarès et combats connus. Statistiques et style après le rapport du recruteur, ou à la signature.</div>
     ${x.etat==='recruteur'?`<div style="font-size:22px">Recruteur en route. Rapport vers le ${rcJour(x.rapport)}.</div>`:`<button class="bb oct" data-rcenvoyer="${c.id}"><span class="oct">${ico('oeil',22)}Envoyer le recruteur</span></button>`}</div>`,'height:100%');
 };
 const rcContratBase=contratHtml;
 contratHtml=function(c){
-  const x=rcDe(c.id);if(!x)return rcContratBase(c);
+  const x=rcDe(c.id);if(!x||x.type==='prol')return rcContratBase(c);
   const d=x.dem,il=rcIl(c);
   return `<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px;height:100%">
     ${pan(titre('Situation',x.type==='libre'?'Libre':esc(c.org))+`<div class="T" style="font-size:52px;line-height:.9">${x.type==='libre'?`Libre depuis le ${rcJour(c.libre)}`:`Libre ${esc(x.fin)}`}</div>
@@ -514,8 +526,11 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-rcoffre]'))){e.stopPropagation();const id=el.dataset.rcoffre;if(S.fiche)fermerFiche(false);if(S.ecran!=='contrats')aller('contrats');rcOuvrirNego(id);return;}
   if((el=t.closest('[data-rcenvoyer]'))){const x=rcDe(el.dataset.rcenvoyer),c=parId(x.id);x.etat='recruteur';x.rapport=new Date(S.date.getTime()+864e5*9);
     toast(`Marco Ferri part voir ${esc(c.prenom)} ${esc(c.nom)}. Rapport dans les Messages vers le ${rcJour(x.rapport)}.`);rendre();if(S.fiche)rendreFiche();return;}
-  if(S.ecran!=='contrats')return;
+  /* Une prolongation (prolongation.js) s'ouvre par-dessus n'importe quel écran : ses clics passent ici aussi. */
+  const plOn=typeof plActif==='function'&&plActif();
+  if(S.ecran!=='contrats'&&!plOn)return;
   if(t.closest('#fiche')||t.closest('[data-fiche]'))return;
+  if(plOn&&!t.closest('#plCouche'))return;
   const F=S.rc,x=F.nego&&rcDe(F.nego);
   if((el=t.closest('[data-rcvue]'))){if(el.dataset.rcvue==='recruteur'){toast('L’écran du recruteur est la prochaine maquette (R26).');return;}F.nego=null;rendre();return;}
   if((el=t.closest('[data-rcsexe]'))){F.sexe=el.dataset.rcsexe;F.cat='toutes';F.sel=null;rendre();return;}
@@ -533,9 +548,10 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-rceng]'))){const id=el.dataset.rceng,e2=N.offre.eng;e2.includes(id)?e2.splice(e2.indexOf(id),1):e2.push(id);rendre();return;}
   if(t.closest('[data-rcproposer]')){rcProposer();return;}
   if(t.closest('[data-rcreprendre]')){Object.assign(N.offre,{bourse:N.dem.bourse,vic:N.dem.vic,sig:N.dem.sig,combats:N.dem.combats,eng:N.dem.dmd.map(z=>z.id)});rendre();return;}
-  if(t.closest('[data-rcfermer]')){F.nego=null;rendre();return;}
+  if(t.closest('[data-rcfermer]')){if(plOn){plFermer();return;}F.nego=null;rendre();return;}
   if(t.closest('[data-rcsigner]')){F.confirmer=true;rendre();return;}
   if(t.closest('[data-rcrevenir]')||(F.confirmer&&t.classList.contains('rc-voile'))){F.confirmer=false;rendre();return;}
+  if(t.closest('[data-rcok]')&&plOn){plConclure(x);return;}
   if(t.closest('[data-rcok]')){const c=parId(x.id);x.etat=x.type==='fin'?'accord':'signe';F.confirmer=false;F.nego=null;rendre();
     toast(x.etat==='signe'?`${esc(c.prenom)} ${esc(c.nom)} signe chez Split. ${rcIL(c)} rejoint l’effectif des ${esc(pluriel(c.cat).toLowerCase())}.`:`Accord avec ${esc(c.prenom)} ${esc(c.nom)} : ${rcIl(c)} signe ${esc(x.fin)}.`);return;}
 });

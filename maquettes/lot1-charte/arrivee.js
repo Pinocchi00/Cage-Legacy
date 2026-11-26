@@ -13,7 +13,7 @@
    Marco à Turin (retour le 8), Rizzo blessé depuis le 28 décembre (Infirmerie). */
 
 const PP_CLE='maquette-arrivee-1';
-const PP_ETAPES=['split','contrat','espoirs'],PP_NOMS=['Split','Ton contrat','Tes espoirs'],PP_SUITE=['Ton contrat','Tes espoirs','Entrer chez Split'];
+const PP_ETAPES=['split','contrat','espoirs'],PP_NOMS=['Split','Contrat','Espoirs'],PP_SUITE=['Contrat','Espoirs','Entrer chez Split'];
 const PP_JOUR=new Date(2027,0,4),PP_PREV=2140,PP_PLACES=4000;
 const ppCalme=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* Six espoirs de Split, une particularité chacun, vérifiée dans les données (Classements, Effectif). */
@@ -111,7 +111,7 @@ function ppBande(){
       <div class="pp-fil"><span class="pp-filt">Split en bref</span><div class="pp-filv"><div class="pp-fild"><span class="pp-fc">${fil}</span><span class="pp-fc pp-fc2" aria-hidden="true">${fil}</span></div></div></div>`;
   }else if(e==='contrat'){
     const f=(l,v,s,i)=>`<div class="pp-bf" style="animation-delay:${250+i*90}ms"><span class="etiq">${l}</span><b class="T">${v}</b><span class="sous">${s}</span></div>`;
-    c=`<div class="pp-btit"><span class="T">Ton contrat</span><span class="pp-bphr">Contrat et objectifs 2027.</span></div>
+    c=`<div class="pp-btit"><span class="T">Contrat</span><span class="pp-bphr">Contrat et objectifs 2027.</span></div>
       <div class="pp-bfs">${f('Durée','1 saison','jusqu’au 31 déc. 2027',0)}${f('Salaire','3 200 €','par mois',1)}${f('Bilan de mi-saison','Juillet','le 1er, avec Gérard Vasseur',2)}
         <div class="pp-bf" style="animation-delay:520ms"><span class="etiq">Réputation</span><span class="pp-rep">${['En France','En Europe','Reconnu','Respecté','Une référence'].map(t=>`<i class="octr" title="${t}"></i>`).join('')}</span><span class="sous">pas encore établie</span></div></div>`;
   }else{
@@ -119,7 +119,7 @@ function ppBande(){
       return `<div class="pp-slot oct ${x?'plein':''} ${S.pp.vol===id&&x?'arrive':''}" data-slot="${i}"><div class="oct">
         <span class="etiq">Espoir ${i+1}</span>${x?`<b class="T pp-slotn"><span class="nom" data-fiche="${x.id}">${esc(x.nom)}</span></b><span class="sous">${esc(x.cat.replace(/ F$/,' féminin'))} · ${x.age} ans</span>`
           :'<b class="T pp-slotn vide">À choisir</b><span class="sous">parmi les 6 ci-dessous</span>'}</div></div>`;};
-    c=`<div class="pp-btit"><span class="T">Tes espoirs</span><span class="pp-bphr">Choisis-en 2. Leïla donne de leurs nouvelles chaque semaine.</span></div>
+    c=`<div class="pp-btit"><span class="T">Espoirs</span><span class="pp-bphr">Choisis-en 2. Leïla donne de leurs nouvelles chaque semaine.</span></div>
       <div class="pp-slots">${slot(0)}${slot(1)}</div>`;
   }
   return `<div class="pp-band pp-band-${e}">${e==='split'?'<span class="pp-tunc"><i class="pp-tun"></i></span>':'<i class="pp-tun"></i>'}<i class="pp-reflet"></i><span class="pp-emb">${LOGO}</span>${c}</div>`;
@@ -186,7 +186,7 @@ function ppObj(o,i){
 function ppContrat(){
   const li=(l,v,s)=>`<div class="pp2-cl"><span class="etiq">${l}</span><span class="pp2-clv"><b class="T">${v}</b><span class="sous">${s}</span></span></div>`;
   return `<div class="pp2">
-    ${pan(`${titre('Ton contrat','signé le 4 janv.')}
+    ${pan(`${titre('Contrat','signé le 4 janv.')}
       <div class="pp2-cls">${li('Poste','Matchmaker','chez Split')}${li('Durée','1 saison','du 4 janv. au 31 déc. 2027')}${li('Salaire','3 200 €','par mois')}${li('Bilan de mi-saison','1<span style="text-transform:none">er</span> juillet','avec Gérard Vasseur')}
         ${li('Réputation',`<span class="pp-rep">${['En France','En Europe','Reconnu','Respecté','Une référence'].map(t=>`<i class="octr" title="${t}"></i>`).join('')}</span>`,'pas encore établie')}</div>
       <div class="pp2-patron"><span class="pp-ini octr">GV</span><div><b>Gérard Vasseur</b><span class="sous">patron et fondateur de Split, en 2004</span>
@@ -225,7 +225,7 @@ function ppEntete(){
   const i=PP_ETAPES.indexOf(S.pp.etape),pret=i===2&&S.pp.choix.length===2;
   $('#entete').innerHTML=`<button class="retour" id="bRetour" title="Retour" ${S.hist.length||S.fiche?'':'disabled'}>${ico('retour',28)}</button>
     <button class="retour" id="bAvant" title="Avancer" ${S.futur.length?'':'disabled'}>${ico('avant',28)}</button>
-    <div class="plaque">Ton arrivée</div><span style="margin-left:auto"></span>
+    <div class="plaque">Arrivée</div><span style="margin-left:auto"></span>
     <div class="boite"><span class="T" id="dateH">${S.date.getDate()} ${MOIS[S.date.getMonth()]} ${S.date.getFullYear()}</span></div>
     <div class="boite"><span class="T">Split Fight Night <span style="color:var(--rouge-vif)">63</span></span></div>
     <button class="bouton jaune cj cont-carre pp-suite ${pret?'pret':''}" id="ppSuite" style="height:64px;font-size:40px">${PP_SUITE[i]} ${ico('avant',30,3)}</button>`;

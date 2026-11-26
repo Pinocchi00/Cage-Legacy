@@ -24,7 +24,7 @@ function mcPaliers(){
     {t:'Une finition dans la soirée',v:0,but:1,det:'un KO ou une soumission'},
     {t:'Une prime de la soirée',v:0,but:1,det:'montant fixé dans les Finances'},
     {t:'Signer un combattant',v:0,but:1,det:'',go:['contrats','Recrutement']},
-    {t:'Prolonger un contrat qui finit',v:0,but:1,det:`${lien(parId('vanbelle'))} : dernier combat`},
+    {t:'Prolonger un contrat qui finit',v:typeof plNbProlonges==='function'?Math.min(1,plNbProlonges()):0,but:1,det:(p=>p?`${lien(parId(p))} : prolongé`:`${lien(parId('vanbelle'))} : dernier combat`)(typeof plDernierProlonge==='function'&&plDernierProlonge())},
     {t:'Un rapport du recruteur',v:0,but:1,det:'',go:['recruteur','Recruteur']},
     {t:'Un combattant qui monte au mondial',v:0,but:1,det:'après la soirée'},
   ];

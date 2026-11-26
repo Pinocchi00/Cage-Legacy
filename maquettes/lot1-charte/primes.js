@@ -58,7 +58,7 @@ function pmPlaintes(m){
   [...pmJouees()].reverse().forEach(o=>{
     const avant=o.net+o.dep.primes,prix=k=>m?m[k]:primeDe(k,o.n),tous=PERF_TYPES.reduce((t,[k])=>t+o.pr[k]*prix(k),0),reste=avant-tous,ici=[];
     rsSoiree(o.n).combats.forEach((f,i)=>['a','b'].forEach(sd=>{const l=(f.pr||{})[sd]||[];if(!l.length)return;
-      const c=sd==='a'?f.A:f.B,total=l.reduce((t,k)=>t+prix(k),0),bourse=fiBourse(c,i===0);
+      const c=sd==='a'?f.A:f.B,total=l.reduce((t,k)=>t+prix(k),0),bourse=fiBourse(c,i===0,o.date);
       if(primeBasse(total,bourse,avant,reste))ici.push({c,n:o.n,total,bourse});}));
     ici.sort((a,b)=>b.bourse-a.bourse).forEach(x=>{if(!vus.has(x.c.id)){vus.add(x.c.id);out.push(x);}});
   });

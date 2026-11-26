@@ -292,9 +292,9 @@ function perfDe(c,faits){
   return out;
 }
 function contratHtml(c){
-  const [n,bs]=c.contrat,b=euros(bs),total=n+2;
+  const [n,bs]=c.contrat,b=euros(bs),total=c.prolonge?n:n+2;
   const l=memeCat(c).map(x=>({x,e:euros(x.contrat[1])})).sort((a,z)=>z.e-a.e),pos=l.findIndex(o=>o.x.id===c.id),max=l[0].e;
-  const faits=historique(c).filter(f=>!f.soiree||/^Split/.test(f.soiree)).slice(0,total-n).reverse();
+  const faits=c.prolonge?[]:historique(c).filter(f=>!f.soiree||/^Split/.test(f.soiree)).slice(0,total-n).reverse();
   const perf=perfDe(c,faits),perfTot=perf.reduce((t,x)=>t+x[3],0);
   const pips=faits.map(f=>`<i class="octr ${f.res}">${f.res==='v'?'V':'D'}</i>`).join('')+Array.from({length:n},()=>'<i class="octr reste"></i>').join('');
   const fr=v=>String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+'\u00a0€';
@@ -305,16 +305,17 @@ function contratHtml(c){
   const moyNb=k=>cat.reduce((t,q)=>t+q.filter(x=>x[0]===k).length,0)/nb;
   const ecart=(v,m)=>v>m?`<span class="ct8-up">▲</span>`:v<m?`<span class="ct8-down">▼</span>`:'';
   const chiffre=(lab,val,extra='')=>`<div class="ct8-c"><div class="etiq">${lab}</div><div class="T">${val}</div>${extra}</div>`;
-  const gauche=pan(`<div class="pt"><h2>Contrat</h2><div class="ct8-bts"><button class="bouton jaune oct cj ct7-bt">Prolonger</button><button class="bouton oct ct7-bt">Libérer</button></div></div>
+  const gauche=pan(`<div class="pt"><h2>Contrat</h2><div class="ct8-bts">${c.prolonge?`<span class="ct8-prol">${ico('ok',22,3)}Prolongé le ${dMois(c.prolonge)}</span>`:`<button class="bouton jaune oct cj ct7-bt" data-plprol="${c.id}">Prolonger</button>`}<button class="bouton oct ct7-bt" data-plliberer="${c.id}">Libérer</button></div></div>
     <div class="ct8-chiffres">
       ${chiffre('Combats restants',`${n} <span class="ct8-sur">sur ${total}</span>`,`<div class="ct7-pips">${pips}</div>`)}
-      ${chiffre('Bourse fixe',fr(b/2),'<div class="sous">par combat</div>')}
-      ${chiffre('Prime de victoire',fr(b/2),'<div class="sous">par victoire</div>')}
+      ${chiffre('Bourse fixe',fr(c.fixe!=null?c.fixe:b/2),'<div class="sous">par combat</div>')}
+      ${chiffre('Prime de victoire',fr(c.vicB!=null?c.vicB:b/2),'<div class="sous">par victoire</div>')}
     </div>
+    ${c.prolonge?`<div class="pl-eng"><span class="etiq">Signature</span><b>${fr(c.sigB||0)}</b>${(c.engagements||[]).length?`<span class="etiq">Tu t’engages</span><span>${c.engagements.map(esc).join(' · ')}</span>`:''}</div>`:''}
     <div class="ct8-perf">
       <div class="ct8-ph"><h3>Primes de performance</h3>${perf.length?`<span class="sous">depuis ${esc(c.depuis)}</span><span class="ct8-moy">moyenne des ${esc(pluriel(c.cat).toLowerCase())} : <b>${fr(moyTot)}</b></span><b class="T">${ecart(perfTot,moyTot)} ${fr(perfTot)}</b>`:''}</div>
       ${perf.length?`<div class="ct8-corps">
-        <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span class="ct8-tyl">${medaille(k,32)}${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
+        <div class="ct8-types">${PERF_TYPES.map(([k,lab])=>{const q=perf.filter(x=>x[0]===k);return `<div class="ct8-ty ${q.length?'':'vide'}"><span class="ct8-tyl">${medaille(k,26)}${lab}</span><b class="T">${ecart(q.length,moyNb(k))} ${q.length}</b><span class="ct8-m">${q.length?fr(q.reduce((t,x)=>t+x[3],0)):'aucune'}<span class="ct8-mc">moyenne ${virg(moyNb(k))}</span></span></div>`;}).join('')}</div>
         <div class="defile ct7-defile ct8-liste ct8-fondu">${perf.map(([k,adv,dt,m])=>`<div class="ct8-li"><span class="ct8-d">${esc(dt)}</span><span class="ct8-tag">${medaille(k,24)}${COURT[k]}</span><span class="ct8-adv">${lien(parNom(adv,c.cat))}</span><b>${fr(m)}</b></div>`).join('')}</div>
       </div>`:'<div class="ct8-aucune">Aucune prime de performance.</div>'}
     </div>`,'height:100%');
