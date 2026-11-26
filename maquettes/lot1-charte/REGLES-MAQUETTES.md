@@ -462,6 +462,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Nouvelle partie** : les huit organisations en liste à gauche ; à droite une scène par organisation : ville, nom en très grand, phrase, atouts (+ vert, − rouge), classement et quatre mesures de l'écran Organisation avec **huit octogones qui montrent sa place**, puis effectif, âge, popularité, salle, bourses. On change à la liste, à la molette ou en tirant la scène.
 - **La création** : l'année au centre d'un octogone qui se trace en six ans, les soirées, combats et ceintures qui montent, les vrais changements de ceinture (lignée des Ceintures), la frise de 2021 à 2026. Elle dure 9,5 s dans la maquette, un clic la passe, Retour abandonne sans rien écrire, puis **on entre seul sur l'Arrivée validée**. Les cinq cartons de lecture du jeu sont retirés (T5).
 - **Reprendre une partie** : 0,7 s dans le tunnel de l'organisation, un clic la passe, rien en mouvement réduit.
+- **L'accueil en mouvement** (validé le 26/11) : le tunnel du jeu avance doucement derrière l'affiche (cycle de 20 s, zoom de 1 à 1,3, fondu de 2 s entre ses deux couches) et s'efface avant la colonne du menu. L'affiche se monte en 1 s environ : les noms glissent l'un vers l'autre, le VS frappe, les encadrés se posent, le menu arrive en cascade. Un reflet passe sur « Reprendre » toutes les 5 s, la pastille de l'entrée choisie bat. Rien ne bouge en mouvement réduit. Essais écartés : onde de lumière, projecteurs et brume, profondeur à la souris.
 - **Maquette** : seule la clé `maquette-menu-1` est écrite, jamais une sauvegarde du jeu. Seul Split se joue jusqu'au bout. Options › « Changer de partie » ouvre Mes parties. Adresses : `?ecran=menu&mnvue=menu|parties|nouvelle|creation&mnetat=aucune|une|libre|pleines|abimee|illisible&mnconf=effacer|ecraser&mnslot=1..3&mnorg=<id>&mnduo=1&mnchoix=1&mngen=0..1&mnmouv=1` (`mnmouv=1` montre le mouvement même si l'ordinateur en demande moins).
 - **Inventé, à relire** : les parties Garden of Blood et MMA Korner, les phrases de sauvegarde abîmée et de remplacement.
 - **Ouvert** : garder ou non le choix de l'organisation ; « À venir » reste jaune comme dans le jeu alors que le jaune est réservé à l'action ; la durée réelle de la création dépendra du calcul.
@@ -496,6 +497,31 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Inventé, à relire** : les citations du patron, les phrases des prix, les soirées 64 à 72, les offres, le message de Garden of Blood, les disponibilités des champions.
 - **Sources** : vraies soirées entre organisations (Bellator contre Rizin, PFL contre Bellator, Bellator x Rizin 2), notées dans `AMELIORATIONS-DONNEES.md`.
 - **Écarts avec le jeu** : le jeu limite le choc à 3 combats entre champions et tire au sort la réponse à une contre-proposition ; la maquette accepte toujours.
+
+### Duo : entrée et tableau de bord à deux (partie A, validée le 26/11)
+- **L'entrée** : depuis l'entrée Duo du menu, Parties validées puis « Nouvelle partie à deux ». « Qui joue ? » demande les deux prénoms (16 caractères au plus, deux noms identiques refusés avec la raison), puis chaque joueur choisit son organisation sur la scène validée de Nouvelle partie, Joueur 1 d'abord. Pour Joueur 2, l'organisation déjà prise reste grisée, au nom de son joueur ; flèches et molette la sautent. Puis la création validée.
+- **À qui c'est** : chaque joueur garde partout la couleur de son organisation (`CL_TEINTES`) **et** son nom. Le tour en cours se lit sans tutoriel.
+- **Le tableau de bord** : les deux organisations face à face (place /8, caisse, effectif, saison), la saison au centre (4 super cartes, score), la date de la prochaine super carte. Pas de Continuer jour par jour : le bouton jaune de l'en-tête dit « Avancer jusqu'au … ». L'avance fait défiler les jours ; les soirées jouées par les adjoints arrivent de chaque côté, **une info par ligne** (résultat, champion, blessure, rang). Un clic la passe.
+- **Sortir** : quitter le Duo recharge la page des Parties, pour que rien de la partie à deux ne reste dans la partie de Split.
+- **Maquette** : `duo.js`, `duo.css`, préfixe `du-`. Adresses : `?ecran=duo&duvue=noms|qg`, `?ecran=menu&mnvue=parties&mnduo=1`, `?ecran=menu&mnduo=1&duetape=a|b`, plus `dunum`, `duj1`, `duj2`, `duorg1`, `duorg2`. Une adresse de démonstration n'écrit rien.
+- **Inventé, à relire** : les caisses de départ des sept autres organisations, leurs soirées entre deux super cartes.
+- **Écart connu** : à la création, les changements de ceinture affichés restent ceux de Split, quelle que soit l'organisation.
+
+### Duo : enchères et carte « je place, tu réponds » (partie B, validée le 26/11)
+- **Les enchères** : avant chaque super carte, 3 agents libres sont mis aux enchères, le mieux classé au mondial de chaque catégorie (pièces du Recrutement). Elles sont ouvertes et se jouent à tour de rôle, sous les yeux de l'autre joueur. À chaque tour, deux choix : **Surenchérir** (+10 %, arrondi au millier, 1 000 € au moins) ou **Abandonner**.
+- **Lisible d'un coup d'œil** : le prix, la caisse qui reste à chacun et le meneur, à sa couleur et à son nom. Une ligne de coût donne le contrat (3 combats), la bourse ensuite et la caisse du joueur s'il signe à ce prix, en rouge si elle passe sous zéro. Une mise au-delà de la caisse est refusée, avec la raison écrite.
+- **Ouverture** : 3 fois la bourse demandée (un contrat de 3 combats). Commence le perdant de la carte précédente ; Joueur 2 à la première carte et après un nul. Le gagnant signe après une confirmation en chiffres ; un lot abandonné par les deux reste libre.
+- **La carte « je place, tu réponds »** : 6 combats, 3 placements chacun. Celui qui place choisit un combattant ; l'autre répond dans la même catégorie. Les lignes sont celles de la Carte validée (VS, catégorie, rangs). Un combattant indisponible reste visible, grisé, avec sa raison : déjà sur la carte, blessé, suspendu, refuse de combattre. Une catégorie épuisée passe d'elle-même à la suivante.
+- **Retour annule le dernier choix** tant que la carte n'est pas validée ; Avant le rejoue. **Valider** ouvre un résumé des 6 combats avant de confirmer.
+- **Maquette** : `duo.js`, `duo.css`, préfixe `du-`. Adresses : `?ecran=duo&duvue=encheres|draft`, plus `duphase=carte`, `dunum`, `dulot`, `dumise`, `ducas=gagne|personne|caisse`, `dupicks`, `duresume`, `durefus`, `duc`.
+- **Inventé, à relire** : l'ouverture à 3 bourses et le palier de 10 % (inspirés des enchères de bourse WBC et IBF), l'ordre de départ, les phrases de refus.
+
+### Duo : la super carte et son bilan (partie C, validée le 26/11)
+- **La soirée reprend les scènes validées** de la Soirée (présentation, temps forts, résultat), avec au-dessus un score Joueur 1 – Joueur 2 qui monte combat après combat, à la couleur et au nom de chacun. Les noms identiques sur une même carte prennent l'initiale du prénom (« D. Wojcik »).
+- **Le bilan** : le vainqueur, le score, l'argent (200 000 € au vainqueur, 50 000 € au perdant, 125 000 € chacun sur un nul), puis ce que les combats changent dans chaque organisation : bilans, rangs dans l'organisation et au mondial (le vainqueur échange sa place), suspensions après KO. Une suspension compte pour la carte suivante.
+- **La saison** : 4 super cartes, une tous les 91 jours, et « Prochaine super carte le … » pour finir. Les soirées jouées par les adjoints entre deux cartes passent par le tableau de bord, jamais par cette scène.
+- **Maquette** : adresses `?ecran=duo&duvue=soiree|bilan`, plus `dusoiree`, `dures=a|b|egal` (victoire de J1, de J2, nul).
+- **Inventé, à relire** : les gains (montants du brief, sans source réelle de partage), les soirées des autres organisations.
 
 ### Panneaux par-dessus (fiche, liste de la catégorie, détail d'un combat)
 - Ils s'ouvrent **par-dessus l'écran courant, sans le quitter**. L'écran derrière s'efface et se retrouve intact au Retour.
@@ -580,6 +606,9 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Mouvement commun, tous les écrans | T3 | Validé (section 11, « Le mouvement commun à tous les écrans ») : barre, onglets, filtres, tris et survol, sans tunnel animé sur l'Accueil ni mode de fusion sur le texte. |
 | Barre latérale et navigation | T4, Q11 | Validé (section 11, « Barre latérale et navigation ») : les 12 écrans visibles sous quatre titres, chacun à un clic, aux mêmes hauteurs ouverte et repliée. |
 | Fin de saison, offres, prix, choc | Q34a, R33, R34, R35, T10 | Validé (section 11, « Fin de saison, verdict, offres, prix, choc des organisations ») : verdict en un mot et trois objectifs chiffrés, une scène par offre, six prix, choc par message avec Négocier, saisons retrouvées depuis Ta carrière et le Calendrier. |
+| Duo : entrée et tableau de bord | Brief Duo, partie A | Validé (section 11, « Duo : entrée et tableau de bord ») : deux prénoms, une organisation chacun sur la scène de Nouvelle partie, les deux organisations face à face et « Avancer jusqu'au … ». |
+| Duo : enchères et carte | Brief Duo, partie B | Validé (section 11, « Duo : enchères et carte ») : enchères ouvertes à tour de rôle (+10 % ou abandon), signature confirmée en chiffres, 6 combats placés à tour de rôle, réponse dans la même catégorie, résumé avant de valider. |
+| Duo : super carte et bilan | Brief Duo, partie C | Validé (section 11, « Duo : la super carte et son bilan ») : les scènes de la Soirée avec le score J1 – J2, le bilan en argent et en rangs, 4 super cartes par saison. |
 | Rédaction de tous les écrans | T5, T6, R10, R11, R29 | Validé (section 9, « Rédaction de tous les écrans » ; noms d'écran tranchés le 26/11) : chaque texte de la maquette relu au style du 24/11, relevé dans `REDACTION.md`, avant / après dans `comparaison.html`. À reporter dans le jeu écran par écran, au lot de chaque écran. |
 
 ## 13. Choix encore ouverts (à trancher sur une prochaine maquette)
@@ -610,6 +639,9 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Patron de Split | Gérard Vasseur dans la maquette, Jean-Michel Delatour dans le jeu | Fin de saison 24/11 |
 | Blessure de Rizzo | L'Infirmerie dit « Élongation à la cuisse droite », le message du médecin « Entorse de la cheville gauche » : un fait à choisir | Rédaction 24/11 |
 | Aide des Options : le patron | « Gérard Vasseur fixe les objectifs… » suit le choix du nom du patron | Rédaction 24/11 |
+| Enchères du Duo | Ouverture à 3 bourses, palier de 10 %, le perdant de la carte précédente commence. La caisse de départ du jeu (50 000 €) reste sous la première ouverture (105 000 €) | Duo B, 26/11 |
+| Caisses du Duo | Caisses de départ des sept autres organisations inventées (Split garde la sienne) | Duo A, 26/11 |
+| Gains d'une super carte | 200 000 € / 50 000 € / 125 000 € (montants du brief, sans source réelle) | Duo C, 26/11 |
 
 ## 14. Méthode pour chaque nouvelle maquette
 

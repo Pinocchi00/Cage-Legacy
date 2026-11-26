@@ -1,0 +1,350 @@
+/* Maquette lot 1 — le mode Duo (brief du 18/10, DUO-T3 et DUO-T4). Préfixe du-. Mesures en pixels de la scène 1920 × 1080.
+   Deux joueurs sur un même écran : chaque élément porte la couleur de l'organisation de son joueur (--j, CL_TEINTES)
+   ET son nom. Le jaune reste l'action principale, jamais un joueur. Sans barre latérale (comme le jeu). */
+
+body.du-mode{--barre:0px}
+body.du-mode .barre{display:none}
+body.du-mode .zone{transition:none}
+
+/* ---- La marque d'un joueur : octogone à sa couleur, son nom, son organisation ---- */
+.du-qui{display:inline-flex;align-items:center;gap:10px;min-width:0;white-space:nowrap}
+.du-qui i{width:20px;height:20px;flex:none;background:var(--j)}
+.du-qui b{font-weight:700;font-size:22px}
+.du-qui span{font-size:19px;color:var(--texte2);overflow:hidden;text-overflow:ellipsis}
+.du-nj{font-weight:700;color:var(--blanc);border-bottom:3px solid var(--j);padding-bottom:1px}
+.du-pt{display:inline-block;width:14px;height:14px;flex:none;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.du-sur{font-size:26px;color:var(--texte2);margin-left:2px}
+.du-vide{font-size:21px;color:var(--texte2);padding:14px 0}
+.du-vide.grand{padding:80px;text-align:center}
+.du-lien{color:var(--jaune);font-weight:700;font-size:19px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.du-lien:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* ---- Le bandeau du tour : à qui c'est, en grand ---- */
+.du-tour{--c:14px;position:relative;height:92px;flex:none;display:flex;align-items:center;gap:20px;padding:0 26px 0 20px;background:linear-gradient(90deg,color-mix(in srgb,var(--j) 30%,#121010) 0,#121010 62%);
+  clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)),0 var(--c));box-shadow:inset 8px 0 0 var(--j)}
+.du-tour.fini{--j:var(--blanc);background:#121010;box-shadow:inset 8px 0 0 var(--bord)}
+.du-tour-e{flex:none;display:grid;place-items:center}
+.du-tour-t{display:flex;flex-direction:column;gap:6px;min-width:0}
+.du-tour-t .T{font-size:58px;line-height:.82;white-space:nowrap}
+.du-tour-o{font-size:20px;color:var(--texte2);letter-spacing:.05em;text-transform:uppercase}
+.du-tour-d{margin-left:auto;display:flex;align-items:center;gap:20px}
+
+/* ==== A. Les noms ==== */
+/* Centré sans transform : l'animation d'entrée anime transform et ne doit pas décaler le panneau. */
+.du-noms{position:absolute;left:0;right:0;top:40px;bottom:0;margin:auto;width:1000px;height:max-content}
+.du-noms .pan>.p2>.p3{padding:30px 40px 30px}
+.du-ch2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.du-champ{display:flex;flex-direction:column;gap:10px}
+.du-champ{min-width:0}
+/* Le contour suit les angles coupés : deux couches (règle 4), jamais border + clip-path. */
+.du-in{--c:12px;display:block;padding:2px;background:var(--bord);transition:background .15s}
+.du-in:focus-within{background:var(--blanc)}
+.du-champ input{--c:11px;display:block;width:100%;min-width:0;height:80px;padding:0 22px;border:0;outline:0;background:#0b0a0a;color:var(--blanc);font-family:var(--titre);font-weight:800;font-size:52px;text-transform:uppercase}
+.du-champ input::placeholder{color:rgba(233,230,225,.32)}
+.du-noms-p{font-size:22px;color:var(--texte2);margin:26px 0 0;line-height:1.35}
+.du-noms-err{min-height:30px;margin-top:10px;font-size:22px;font-weight:700;color:var(--neg)}
+.du-noms-b{display:flex;justify-content:flex-end;margin-top:6px}
+.du-noms-b .bouton{height:72px;padding:0 30px;font-size:44px;--c:14px}
+
+/* ==== A. La scène de Nouvelle partie à deux ==== */
+.du-choix{position:absolute;right:620px;bottom:32px;height:80px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:4px;z-index:3;text-align:right}
+.du-choix-n{font-family:var(--titre);font-weight:800;font-size:44px;line-height:.9;text-transform:uppercase;border-bottom:4px solid var(--j);padding-bottom:2px}
+.du-choix .etiq{font-size:18px}
+.du-choix-t{font-size:21px;color:var(--texte2)}
+.mn-r.du-pris{opacity:.5;cursor:not-allowed}
+.mn-r.du-pris:hover{transform:none;background:rgba(37,33,33,.82)}
+.du-pris-j{display:inline-block;font-size:20px;color:var(--blanc);border-bottom:3px solid var(--j);text-transform:none}
+
+/* ==== A. Le tableau de bord ==== */
+.du-qg{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 480px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:18px}
+.du-col,.du-ctr,.du-je,.du-dr-d{min-height:0;height:100%}
+.du-col>.pan,.du-ctr>.pan{height:100%}
+.du-col .pan>.p2>.p3{padding:0 0 18px;display:flex;flex-direction:column}
+.du-band{position:relative;height:200px;flex:none;overflow:hidden;border-bottom:6px solid var(--j)}
+.du-bi{position:absolute;inset:0;background:url('../../images/accueil-octogones.jpg') no-repeat;background-size:1728px 972px;background-position:-466px -356px}
+.du-band::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,11,11,.85),rgba(13,11,11,.35) 70%,rgba(13,11,11,.1))}
+.du-col.b .du-band::after{background:linear-gradient(270deg,rgba(13,11,11,.85),rgba(13,11,11,.35) 70%,rgba(13,11,11,.1))}
+.du-band>*:not(.du-bi){z-index:1}
+.du-bh{position:absolute;left:28px;right:28px;top:20px;display:flex;align-items:baseline;gap:14px}
+.du-bj{font-family:var(--titre);font-weight:800;font-size:40px;line-height:.9;text-transform:uppercase;text-shadow:0 2px 10px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-bn{position:absolute;left:24px;right:24px;bottom:22px;display:flex;align-items:center;gap:18px}
+.du-bn .T{white-space:nowrap;text-shadow:0 2px 14px #000;line-height:.8}
+.du-col.b .du-bh,.du-col.b .du-bn{flex-direction:row-reverse;text-align:right}
+.du-sts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:2px solid var(--sep);flex:none}
+.du-st{padding:16px 20px 14px;display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--sep);min-width:0}
+.du-st:first-child{border-left:0}
+.du-st .T{font-size:42px;white-space:nowrap}
+.du-st small{font-size:18px;color:var(--texte2)}
+.du-evh{display:flex;align-items:baseline;justify-content:space-between;padding:18px 24px 6px;flex:none}
+.du-evn{font-size:19px;color:var(--texte2)}
+.du-evl{flex:1;min-height:0;padding:0 24px}
+.du-ev{display:grid;grid-template-columns:78px minmax(0,1fr) auto;align-items:baseline;gap:2px 12px;padding:8px 0;border-bottom:2px solid var(--sep);font-size:21px}
+.du-ev.soi{padding:16px 0 6px;border-bottom:0}
+.du-evd{font-size:19px;color:var(--texte2);white-space:nowrap}
+.du-evs{font-weight:700;font-size:21px;letter-spacing:.05em;text-transform:uppercase;grid-column:2/4;display:flex;align-items:baseline;gap:6px}
+.du-ev.soi .relire{align-self:center;grid-column:3;grid-row:1}
+.du-ev.soi .du-evs{grid-column:2}
+.du-evt{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-weight:600}
+.du-evt.neg svg{color:var(--neg)}
+.du-evt .cl-cb{margin-right:2px}
+.du-evm{grid-column:2/4;font-size:19px;color:var(--texte2);white-space:nowrap}
+.du-ev .relire{grid-column:3;grid-row:1;justify-self:end}
+.du-ctr .pan>.p2>.p3{padding:20px 26px 22px;display:flex;flex-direction:column}
+.du-sc{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin-top:4px}
+.du-sc-j{font-weight:700;font-size:24px;border-bottom:4px solid var(--j);padding-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-sc-j.b{text-align:right}
+.du-sc-n{font-size:104px;display:flex;align-items:center;gap:14px;line-height:.8}
+.du-sc-n i{font-style:normal;color:var(--texte2);font-size:60px}
+.du-ocs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:26px 0 6px}
+.du-oc{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.du-oc-o{width:72px;height:72px;background:var(--bord);padding:2px;display:block}
+.du-oc-o>span{display:grid;place-items:center;width:100%;height:100%;background:var(--noir)}
+.du-oc-o b{font-size:38px;color:var(--texte2)}
+.du-oc.joue .du-oc-o{background:var(--j,var(--blanc))}
+.du-oc.joue .du-oc-o>span{background:color-mix(in srgb,var(--j,#555) 32%,#0D0B0B)}
+.du-oc.joue .du-oc-o b{color:var(--blanc)}
+.du-oc.proch .du-oc-o{background:var(--blanc)}
+.du-oc.proch .du-oc-o b{color:var(--blanc)}
+.du-oc-d{font-size:19px;color:var(--texte2);white-space:nowrap}
+.du-oc-r{font-size:18px;line-height:1.15;color:var(--texte2)}
+.du-oc-r b{color:var(--blanc);font-weight:700}
+.du-oc.proch .du-oc-r{color:var(--blanc);font-weight:700}
+.du-pr{margin-top:auto;padding-top:22px;border-top:2px solid var(--sep);display:flex;flex-direction:column;gap:8px}
+.du-pr>.T{font-size:58px}
+.du-pr-q{font-size:24px;color:var(--texte2)}
+.du-pr-q.auj{color:var(--blanc);font-weight:700}
+.du-pr-t{font-size:22px;margin-top:6px}
+.du-av{height:8px;background:var(--ligne);margin-top:6px}
+.du-av i{display:block;height:100%;background:var(--blanc)}
+.du-av-d{font-family:var(--titre);font-weight:800;font-size:30px;text-transform:uppercase}
+
+/* ==== B1. Les enchères ==== */
+.du-enc{height:100%;display:flex;flex-direction:column;gap:16px}
+.du-lots{display:flex;align-items:center;gap:10px}
+.du-lots>.etiq{margin-right:6px;white-space:nowrap}
+.du-lt{--c:8px;display:flex;flex-direction:column;justify-content:center;gap:2px;height:62px;padding:0 16px;background:rgba(13,11,11,.7);border-left:4px solid transparent;min-width:170px;font-weight:700;font-size:20px;white-space:nowrap}
+.du-lt b{display:none}
+.du-lt small{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:600;color:var(--texte2)}
+.du-lt small i{width:12px;height:12px;flex:none}
+.du-lt.on{background:var(--blanc);color:var(--noir);border-left-color:var(--blanc)}
+.du-lt.on small{color:#3a3434}
+.du-enc-g{flex:1;min-height:0;display:grid;grid-template-columns:360px minmax(0,1fr) 360px;grid-template-rows:minmax(0,1fr);gap:18px}
+.du-je .pan>.p2>.p3{padding:22px 24px;display:flex;flex-direction:column;gap:22px}
+.du-je .pan,.du-je{height:100%}
+.du-je.tour>.pan{background:var(--j)}
+.du-je-h{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:5px solid var(--j)}
+.du-je-h>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.du-je-n{font-family:var(--titre);font-weight:800;font-size:44px;line-height:.9;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-je-h span{font-size:20px;color:var(--texte2)}
+.du-je-c{display:flex;flex-direction:column;gap:6px}
+.du-je-c .T{font-size:52px;white-space:nowrap}
+.du-pe{font-size:24px;font-weight:700;color:var(--texte2)}
+.du-pe.v{color:var(--vert)}
+.du-pe.j{color:var(--blanc)}
+.du-je-r{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.du-je-rl{display:flex;justify-content:space-between;gap:12px;font-size:21px;font-weight:600;padding:6px 0;border-bottom:2px solid var(--sep);white-space:nowrap}
+.du-enc-c{display:flex;flex-direction:column;gap:14px;min-width:0}
+.du-lf .pan>.p2>.p3{padding:0}
+.du-lf-ban{position:relative;height:300px;overflow:hidden;padding:30px 36px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+/* Un libre a le tunnel gris (Recrutement, validé le 09/11) */
+.du-lf-img{position:absolute;inset:0;background:url('../../images/accueil-octogones.jpg') no-repeat;background-size:1728px 972px;background-position:-150.6px -356px;filter:grayscale(1) brightness(.5)}
+.du-lf-ban>*:not(.du-lf-img){position:relative}
+.du-lf-l1{font-size:28px;font-weight:600}
+.du-lf-n{line-height:.8;white-space:nowrap}
+.du-lf-n .nom{text-decoration-thickness:4px}
+.du-lf-l3{display:flex;align-items:center;gap:16px}
+.du-lf-l3 .T{font-size:40px}
+.du-lf-g{display:grid;grid-template-columns:.8fr .8fr .7fr 1.5fr 1.5fr;border-top:2px solid var(--sep)}
+.du-lf-g>div{padding:14px 18px;display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--sep);min-width:0}
+.du-lf-g>div:first-child{border-left:0}
+.du-lf-g b{font-size:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-enc-p{display:grid;grid-template-columns:auto minmax(0,1fr);gap:26px;align-items:center;padding:4px 8px}
+.du-prix{display:flex;flex-direction:column;gap:6px}
+.du-prix .T{font-size:96px;line-height:.8;white-space:nowrap}
+.du-prix-m{font-size:22px;color:var(--texte2);white-space:nowrap}
+.du-mi{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;align-self:end;justify-content:flex-end}
+.du-mi-p{display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:600;white-space:nowrap;padding:6px 12px;background:var(--ligne)}
+.du-mi-p i{width:14px;height:14px;background:var(--j);flex:none;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.du-mi-f{color:var(--texte2)}
+.du-act{margin-top:auto;display:flex;align-items:center;justify-content:flex-end;gap:18px;min-height:84px}
+.du-miser{height:84px;padding:0 36px;font-size:46px;--c:16px;white-space:nowrap}
+.du-aband>span{height:64px;font-size:34px;padding:0 26px}
+.du-refus{flex:1;display:flex;align-items:center;gap:12px;font-size:23px;font-weight:600;color:var(--neg);line-height:1.25}
+.du-refus svg{flex:none}
+.du-fin{flex:1;min-height:0;max-width:1100px;width:100%;align-self:center}
+.du-fin .pan>.p2>.p3{padding:24px 30px}
+.du-fin-l{display:grid;grid-template-columns:minmax(0,1fr) 140px 300px 180px;align-items:center;gap:20px;padding:14px 0;border-bottom:2px solid var(--sep);font-size:24px;font-weight:600}
+.du-fin-l .T{font-size:34px;text-align:right}
+
+/* ---- Voile et confirmation en chiffres (charte S6) ---- */
+.du-voile{position:absolute;left:-40px;right:-40px;top:-108px;bottom:-36px;z-index:20;background:rgba(13,11,11,.72);display:grid;place-items:center}
+.du-adj{width:1100px}
+.du-adj .pan>.p2>.p3{padding:28px 36px 26px}
+.du-adj-q{display:flex;align-items:center;gap:24px;margin-bottom:22px}
+.du-adj-q .du-qui b{font-size:28px}
+.du-adj-c{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:2px solid var(--sep)}
+.du-adj-c>div{padding:16px 20px;display:flex;flex-direction:column;gap:8px;border-left:2px solid var(--sep);min-width:0}
+.du-adj-c>div:first-child{border-left:0}
+.du-adj-c .T{font-size:38px;white-space:nowrap}
+.du-adj-c>div:last-child .T{font-size:30px}
+.du-adj-p{font-size:22px;color:var(--texte2);margin:18px 0 0}
+.du-adj-b{display:flex;justify-content:flex-end;margin-top:22px}
+.du-adj-b .bouton{height:64px;padding:0 28px;font-size:36px;--c:12px}
+
+/* ==== B2. Le draft ==== */
+.du-dr{height:100%;display:flex;flex-direction:column;gap:14px}
+.du-cpt{display:flex;flex-direction:column;gap:6px}
+.du-cpt span{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:600;white-space:nowrap}
+.du-cpt i{width:16px;height:16px;background:var(--j);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.du-cpt b{font-family:var(--titre);font-size:28px}
+.du-dr-g{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 640px;grid-template-rows:minmax(0,1fr);gap:18px}
+.du-carte{display:flex;flex-direction:column;gap:8px;min-width:0}
+.du-carte .af-sec{margin-bottom:4px}
+.du-leg{display:inline-flex;align-items:center;gap:6px;margin-left:12px;color:var(--blanc)}
+.du-leg i{width:14px;height:14px;display:inline-block;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.du-row{height:107px;cursor:default}
+.du-row>.in{grid-template-columns:64px minmax(0,1fr) 250px}
+.du-row .af-sc .rouge,.du-row .af-sc .fil{display:none}
+/* La diagonale du jeu, à la couleur de chaque joueur (décor ; le nom dit toujours à qui) */
+.du-row .du-ja,.du-row .du-jb{position:absolute;inset:0}
+.du-row .du-ja{background:linear-gradient(90deg,color-mix(in srgb,var(--ja) 34%,#0D0B0B),#0D0B0B 58%);clip-path:polygon(0 0,59% 0,41% 100%,0 100%)}
+.du-row .du-jb{background:linear-gradient(270deg,color-mix(in srgb,var(--jb) 34%,#0D0B0B),#0D0B0B 58%);clip-path:polygon(59% 0,100% 0,100% 100%,41% 100%)}
+.du-row .du-ja::after,.du-row .du-jb::after{content:"";position:absolute;top:0;bottom:0;width:6px}
+.du-row .du-ja::after{left:0;background:var(--ja)}
+.du-row .du-jb::after{right:0;background:var(--jb)}
+.du-row.vide .du-ja,.du-row.vide .du-jb{opacity:.45}
+.du-row .af-numc .T{font-size:44px;color:var(--blanc)}
+.du-row.du-m0 .af-numc .T{color:var(--blanc)}
+.du-row .af-ctr .vs{width:54px;height:54px;font-size:28px}
+.du-row .af-q{width:60px;height:60px;font-size:44px}
+.du-cv{flex-direction:row!important;align-items:center!important;gap:14px!important}
+.du-cv.b{flex-direction:row-reverse!important}
+.du-cv-t{font-size:20px;font-weight:700;white-space:nowrap}
+.du-rai{gap:6px}
+.du-rai-r{font-family:var(--titre);font-weight:800;font-size:26px;text-transform:uppercase;line-height:.9}
+.du-rai-l{font-size:19px;white-space:nowrap}
+.du-rai-t{font-size:20px;font-weight:700}
+.du-ann{display:flex;align-items:center;gap:18px;margin-top:auto;padding-top:6px}
+.du-ann .bb>span{height:48px;font-size:26px}
+.du-lp .pan>.p2>.p3{padding:16px 20px 12px;display:flex;flex-direction:column}
+.du-lh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:5px solid var(--j);flex:none}
+.du-lh .du-qui b{font-size:28px}
+.du-cats{display:flex;flex-direction:column;gap:6px;padding:12px 0 6px;flex:none}
+.du-cats-l{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.du-cats-l .etiq{width:76px;flex:none;font-size:17px}
+.du-cat{--c:7px;height:40px;padding:0 10px;background:var(--ligne);display:flex;align-items:center;gap:6px;font-weight:600;font-size:18px;white-space:nowrap}
+.du-cat small{font-size:16px;color:var(--texte2)}
+.du-cat.ouvert{background:var(--blanc);color:var(--noir)}
+.du-cat.ouvert small{color:#3a3434}
+.du-cat.zero{color:var(--texte2)}
+.du-cat:hover:not(.ouvert){background:#3a3434}
+.du-lc-r{display:flex;align-items:baseline;gap:14px;padding:14px 0 6px;flex:none}
+.du-lc-r .T{font-size:38px}
+.du-list{flex:1;min-height:0;overflow-y:auto}
+.du-r{cursor:pointer}
+.du-r.off{cursor:not-allowed}
+.du-r:focus-visible{outline:2px solid var(--blanc);outline-offset:-2px}
+.du-enjeu{display:flex;flex-direction:column;gap:12px}
+.du-ej{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:2px solid var(--sep)}
+.du-ej>div{font-family:var(--titre);font-weight:800;font-size:36px;text-transform:uppercase}
+.du-ej-p{margin-top:10px;line-height:1.35}
+
+/* ---- Résumé avant de confirmer : la pièce validée de la Carte ---- */
+.du-rs-ban .tun{filter:grayscale(.2) brightness(.5)}
+.du-rs-ban .af-rs-c .du-qui{margin-top:8px}
+.du-rs-ban .af-rs-c.b .du-qui{flex-direction:row-reverse}
+.du-rs-ban::before,.du-rs-ban::after{content:"";position:absolute;top:0;bottom:0;width:8px;z-index:2}
+.du-rs-ban::before{left:0;background:var(--ja)}
+.du-rs-ban::after{right:0;background:var(--jb)}
+.du-rs-l .x{display:inline-flex;align-items:center;gap:8px}
+
+/* ==== C1. La soirée ==== */
+.du-bs{flex:none;height:64px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:24px}
+.du-bs-j{display:flex;align-items:center;gap:12px;min-width:0;white-space:nowrap}
+.du-bs-j.b{justify-content:flex-end}
+.du-bs-j b{font-family:var(--titre);font-weight:800;font-size:36px;text-transform:uppercase;line-height:.9}
+.du-bs-j span{font-size:20px;color:var(--texte2)}
+.du-bs-j.a b{border-bottom:4px solid var(--ja)}
+.du-bs-j.b b{border-bottom:4px solid var(--jb)}
+.du-bs-s{display:flex;align-items:center;gap:16px;font-size:64px;line-height:.8;padding:0 26px;height:64px;background:rgba(13,11,11,.86)}
+.du-bs-s i{font-style:normal;color:var(--texte2);font-size:44px}
+.du-bs-s .monte{display:inline-block;animation:du-monte 1s .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes du-monte{0%{transform:scale(1);color:var(--blanc)}35%{transform:scale(1.5);color:var(--jaune)}100%{transform:scale(1);color:var(--blanc)}}
+.du-dir{gap:12px}
+.du-dir .pz-banw{flex:none}
+.du-sl .sd-l-f{gap:8px}
+.du-scp .pan>.p2>.p3{display:flex;flex-direction:column}
+.du-sp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.du-sp-l{display:flex;flex-direction:column;gap:6px;padding:10px 0 12px;border-bottom:5px solid var(--j)}
+.du-sp-l b{font-size:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-sp-l .T{font-size:92px;line-height:.8}
+.du-sp-r{font-size:22px;color:var(--texte2);margin-top:14px}
+.du-sp-o{display:flex;gap:8px;margin-top:12px}
+.du-sp-o i{width:34px;height:34px;background:var(--ligne)}
+.du-sp-a{margin-top:auto;display:flex;flex-direction:column;gap:6px;font-size:20px;line-height:1.3}
+/* Résultat et temps forts : les scènes validées, le score posé par-dessus en haut */
+.du-sw{height:100%;position:relative}
+.du-res{display:flex;flex-direction:column;gap:8px}
+.du-res>.sd{flex:1;min-height:0}
+body.du-plein .du-res .du-bs{position:relative;z-index:2}
+
+/* ==== C2. Le bilan ==== */
+.du-bil{height:100%;display:flex;flex-direction:column;gap:14px}
+.du-bb{--c:16px;position:relative;height:188px;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:6px solid var(--j);
+  clip-path:polygon(var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% 100%,0 100%,0 var(--c))}
+.du-bb-img{position:absolute;inset:0;background:url('../../images/accueil-octogones.jpg') no-repeat;background-size:1920px auto;background-position:center 46%}
+.du-bb::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,11,11,.8),rgba(13,11,11,.3) 60%,rgba(13,11,11,.15))}
+.du-bb>*:not(.du-bb-img){z-index:1}
+.du-bb>*:not(.du-bb-img){position:relative}
+.du-bb-t{display:flex;align-items:center;gap:24px;min-width:0}
+.du-bb-t>div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.du-bb-t h2{margin:0;font-size:84px;line-height:.82;text-shadow:0 2px 16px #000;white-space:nowrap}
+.du-bb-s{display:flex;align-items:center;gap:22px;padding:14px 28px;background:rgba(13,11,11,.86)}
+.du-bb-s>span{display:flex;align-items:center;gap:16px}
+.du-bb-s b{font-size:26px;font-weight:700;border-bottom:4px solid var(--j);padding-bottom:2px}
+.du-bb-s .T{font-size:96px;line-height:.8}
+.du-bb-s>i{font-style:normal;font-size:60px;color:var(--texte2)}
+.du-bil-g{flex:1;min-height:0;display:flex;gap:16px}
+.du-bil-g .pan>.p2>.p3{padding:18px 22px 16px;display:flex;flex-direction:column}
+.du-bl{display:flex;flex-direction:column}
+.du-blc{display:grid;grid-template-columns:118px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:14px;row-gap:2px;padding:9px 0;border-bottom:2px solid var(--sep);align-items:center}
+.du-blc-r{grid-row:1/3;font-family:var(--titre);font-weight:800;font-size:24px;text-transform:uppercase;line-height:.95;color:var(--texte2)}
+.du-blc-w{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:600;white-space:nowrap;overflow:hidden}
+.du-blc-w .marque{width:26px;height:26px;font-size:18px}
+.du-blc-m{grid-column:2;font-size:19px;color:var(--texte2);white-space:nowrap}
+.du-blc .du-lien{grid-row:1/3;grid-column:3}
+.du-ar{display:flex;flex-direction:column;gap:8px;padding:12px 0 14px;border-bottom:2px solid var(--sep)}
+.du-ar:last-child{border-bottom:0}
+.du-ar-g{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.du-ar-g .T{font-size:34px;white-space:nowrap}
+.du-cgs{display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:0}
+.du-cgo-h{padding-bottom:8px;border-bottom:5px solid var(--j);margin-bottom:4px}
+.du-cg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:10px;row-gap:2px;align-items:center;padding:7px 0;border-bottom:2px solid var(--sep);font-size:21px;font-weight:600}
+.du-cg .marque{width:24px;height:24px;font-size:16px}
+.du-cg .nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.du-cg-b{font-size:24px}
+.du-cg-r{grid-column:2/4;font-size:18px;color:var(--texte2);font-weight:500;display:flex;gap:6px;align-items:center}
+.du-cg-m{grid-column:2/4;font-size:18px;color:var(--neg);display:flex;gap:6px;align-items:center}
+.du-sa{flex:none}
+.du-sa .pan>.p2>.p3{padding:14px 26px;display:grid;grid-template-columns:minmax(0,1fr) 560px minmax(0,1fr);align-items:center;gap:24px}
+.du-sa-g,.du-sa-p{display:flex;flex-direction:column;gap:6px}
+.du-sa-g .T,.du-sa-p .T{font-size:40px;white-space:nowrap}
+.du-sa-p{align-items:flex-end;text-align:right}
+.du-ocs.l{margin:0}
+.du-ocs.l .du-oc-o{width:52px;height:52px}
+.du-ocs.l .du-oc-o b{font-size:28px}
+
+@media (prefers-reduced-motion:reduce){body:not(.mv-force) .du-bs-s .monte{animation:none}}
+
+.du-mi-n{font-size:19px;color:var(--texte2)}
+.du-bil-g>.pan{min-width:0}
+.du-cgs,.du-bl{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin}
+.du-cg{padding:5px 0}
+.du-ctr-a{display:flex;flex-direction:column;gap:2px;margin-top:22px}
+.du-ctr-a>div{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:2px solid var(--sep);font-size:21px}
+.du-ctr-a b{font-family:var(--titre);font-weight:800;font-size:30px;text-transform:uppercase}
+.du-cout{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:0;border-top:2px solid var(--sep);border-bottom:2px solid var(--sep);margin:0 8px}
+.du-cout>div{display:flex;flex-direction:column;gap:6px;padding:14px 22px;border-left:2px solid var(--sep)}
+.du-cout>div:first-child{border-left:0;padding-left:0}
+.du-cout b{font-size:26px;font-weight:700;white-space:nowrap}
+.du-cout b.neg{color:var(--neg)}

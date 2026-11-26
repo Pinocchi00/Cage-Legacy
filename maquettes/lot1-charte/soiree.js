@@ -33,6 +33,8 @@ const SD_SONDAGE={p0:['musaev',68],p1:['gpoidscoqf3',59],p2:['gpoidsmimoyen6',63
    Rachidi, n° 1, réclame la championne Kovač (qui n'a pas combattu ce soir). */
 const SD_DEFI={m1:'gpoidspaillefC'};
 const SD_MICRO='Marc Duval';
+/* Le texte du tapis : la soirée de Split par défaut ; une autre soirée (super carte du Duo) le remplace. */
+let SD_TAPIS=()=>null;
 /* L'interview (R37) : les questions du commentateur et les réponses, écrites sur ce combat précis (retour du 21/11 :
    « écris tous les dialogues »). Chaque phrase colle aux chiffres du combat (rounds, amenées, série, rang). À RELIRE.
    La dernière réponse porte le défi quand il y en a un (Q37c). */
@@ -349,8 +351,8 @@ function sdDessinerArene(){
   ctx.fillStyle='rgba(233,230,225,.55)';ctx.font=T(22);ctx.textAlign='center';ctx.fillText('MÉDECIN',X(1.12),Y(1.05)+24);
   /* le tapis, ses lignes, le logo */
   oct(1.0,'#1C1818');[.74,.5,.27].forEach(r=>oct(r,null,'rgba(233,230,225,.06)',2));
-  ctx.fillStyle='rgba(233,230,225,.08)';ctx.font=T(34*cam.z);ctx.fillText('SPLIT FIGHT NIGHT',X(0),Y(-.1));
-  ctx.font=T(110*cam.z);ctx.fillText('63',X(0),Y(.26));
+  const tp=SD_TAPIS()||['SPLIT FIGHT NIGHT','63'];ctx.fillStyle='rgba(233,230,225,.08)';ctx.font=T(34*cam.z);ctx.fillText(tp[0],X(0),Y(-.1));
+  ctx.font=T(110*cam.z);ctx.fillText(tp[1],X(0),Y(.26));
   /* les traces au sol */
   if(A.st-A.trT>.09){A.trT=A.st;A.trA.push([P.A.x,P.A.y]);A.trB.push([P.B.x,P.B.y]);if(A.trA.length>24){A.trA.shift();A.trB.shift();}}
   ctx.lineCap='round';ctx.setLineDash([3,12]);ctx.lineWidth=5;

@@ -109,7 +109,32 @@ Prévoir pour chaque salle **la capacité en configuration MMA**, souvent infér
 - Le jeu majore la demande de 10 % au renouvellement (`MGMT_CT_RENOUV_MAJORATION`) ; la section 4 notait « + 25 % » sans source.
 - Le jeu ne refuse pas de libérer un blessé.
 
-## 7. Encore à vérifier, écran par écran
+## 7. Le mode Duo (maquette du 26/11, validée)
+
+### Ce que disent les sources
+
+| Point | Repère réel | Statut | Source |
+|---|---|---|---|
+| Enchère sur un combat (boxe) | Quand les deux camps ne s'entendent pas, la fédération ouvre une enchère : chaque promoteur fait **une offre**, la plus haute gagne et verse une part d'avance | Encyclopédie | [Wikipédia](https://en.wikipedia.org/wiki/Purse_bid) |
+| Montants réels | WBC, Sandoval–Yafai (13 mars 2026) : 625 000 $ contre 411 000 $ ; 10 % de la bourse au vainqueur du combat | Officiel (WBC) | [WBC](https://wbcboxing.com/en/matchroom-boxing-wins-purse-bid-for-wbc-flyweight-unification-bout-between-ricardo-sandoval-and-galal-yafai) |
+| Montants réels | IBF, Ennis–Crowley (déc. 2024) : 3 910 000 $ contre 2 000 000 $ ; partage 85/15 (règle 10.E) | Presse | [The Ring](https://www.ringmagazine.com/news/jaron-ennis-cody-crowley-matchroom-boxing-outbids-tgb-promotions-to-land-ibf-title-fight-3cy94q4m4V60U9mN0m7fqU) |
+| Ordre d'un draft | En serpent : l'ordre s'inverse à chaque tour (1-10, 10-1, 1-10…) | Officiel (ESPN) | [ESPN](https://support.espn.com/hc/en-us/articles/360000067532-Live-Online-Snake-Drafts) |
+| Soirée entre organisations | Bellator contre Rizin, 31 déc. 2022, 23 661 spectateurs ; PFL contre Bellator, 24 févr. 2024, 4 duels de champions prévus, 2 changés | Encyclopédie | [Rizin 40](https://en.wikipedia.org/wiki/Rizin_40), [PFL vs. Bellator](https://en.wikipedia.org/wiki/PFL_vs._Bellator) |
+
+### Ce que fait la maquette
+
+- **Enchères ouvertes, à tour de rôle** (décision du 18/10), alors que les vraies enchères sur un combat sont **sous pli, en une offre**. Ouverture à 3 × la bourse demandée, palier de 10 % de l'ouverture : règle du jeu, sans repère réel.
+- **Draft « je place, tu réponds »** : J2, J1, J1, J2, J2, J1… C'est l'ordre en serpent à deux joueurs.
+- **200 000 € / 50 000 € / 125 000 €** : décision du 18/10, **hypothèse** (aucun partage publié entre deux organisations, section 2).
+- **Caisse stable hors super carte** (décision du 18/10) : la caisse de Split est celle du 4 janvier (952 200 €, Finances) ; les soirées des adjoints ne la font pas bouger.
+- **Caisses de départ des sept autres** : Garden of Blood 1 384 500 € et MMA Korner 212 400 € (parties inventées de l'écran Parties), les cinq autres **inventées** (Ultimate Rim 318 000, Fighting Pacific 1 120 000, Knuckle Gate 236 000, Pure Impact 2 450 000, Undisputed Cage 905 000 €).
+
+### Écarts avec le jeu
+
+- Le jeu commence Split à 50 000 € et MMA Korner à 20 000 € : la première ouverture (105 000 € dans la capture du jeu) est hors de portée des deux joueurs. Il faut choisir : caisses de départ plus hautes, ou ouverture plus basse.
+- Le jeu met aux enchères des libres que la maquette ne retrouve pas (le marché du Recrutement validé n'est pas celui du jeu).
+
+## 8. Encore à vérifier, écran par écran
 
 - [ ] Spectateurs, records et top 30 des huit organisations.
 - [ ] Nombre de soirées par an et écart entre deux soirées.
@@ -120,7 +145,7 @@ Prévoir pour chaque salle **la capacité en configuration MMA**, souvent infér
 - [ ] Salaires de l'équipe (Leïla, Marco, Dr Roux).
 - [ ] Caisse de départ : 50 000 € dans le jeu, 952 200 € à l'Arrivée.
 
-## 8. Méthode pour chaque valeur
+## 9. Méthode pour chaque valeur
 
 1. Noter la valeur actuelle et l'écran où elle apparaît.
 2. Chercher un repère réel à la bonne échelle : une organisation de second rang ne se compare pas à l'UFC.

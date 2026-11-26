@@ -143,8 +143,40 @@ function mnCompte(el,v,suf=''){
 }
 function mnEntrees(){
   if(!S.mn.anim)return;S.mn.anim=false;if(mnCalme())return;
+  if(S.mn.vue==='menu'){mnEntreeAccueil();return;}
   document.querySelectorAll('#corps .mn-a').forEach((e,i)=>e.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'none'}],{duration:480,delay:Math.min(i,12)*38,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'}));
   document.querySelectorAll('#corps .mn-g-a').forEach((e,i)=>e.animate([{opacity:0,transform:'translateX(-26px)'},{opacity:1,transform:'none'}],{duration:420,delay:i*34,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'}));
+}
+
+/* ---- L'accueil en mouvement (retour du 26/11) : le tunnel du jeu avance doucement derrière l'affiche, l'affiche se monte pièce par pièce ---- */
+const MN_TUN_ACC={duree:20000,zoom:1.3};
+/** Le tunnel de l'accueil : celui du jeu, en plus lent et moins profond (zoom de 1 à 1,3 au lieu de 1,95),
+    pour rester proche de l'image fixe validée. La couche du dessus couvre l'autre : les deux ne se mêlent que pendant un fondu de 2 s, une fois toutes les 10 s. */
+function mnTunAccueil(){
+  mnTunStop();const c=$('#mnTun');if(!c||mnCalme())return;const {duree,zoom}=MN_TUN_ACC;
+  [...c.children].forEach((e,i)=>{const a=e.animate([{scale:1,opacity:0},{scale:1+(zoom-1)*.1,opacity:1,offset:.1},{scale:1+(zoom-1)*.9,opacity:1,offset:.9},{scale:zoom,opacity:0}],{duration:duree,iterations:Infinity,easing:'linear'});
+    a.currentTime=duree*(.1+(i?0:.5));MN_TUN.push(a);});
+}
+/** L'entrée de l'accueil : les noms glissent l'un vers l'autre, le VS frappe, les encadrés se posent, le menu arrive en cascade.
+    Seules les propriétés translate, scale et opacity bougent : la rotation du second nom (transform) reste intacte. */
+function mnEntreeAccueil(){
+  const c=$('#corps'),ease='cubic-bezier(.16,1,.3,1)';if(!c)return;
+  /* Le déplacement s'ajoute (composite « add ») à celui de la profondeur : l'entrée se termine pile où le plan se trouve. */
+  const go=(sel,k,o)=>c.querySelectorAll(sel).forEach((e,i)=>{const t=Object.assign({duration:520,easing:ease,fill:'backwards'},o,{delay:(o.delay||0)+i*(o.pas||0)});
+    const op=k.map(x=>({opacity:x.opacity??1,offset:x.offset})),mv=k.map(({opacity,...x})=>x);
+    if(k.some(x=>'opacity' in x))e.animate(op.map(x=>x.offset===undefined?{opacity:x.opacity}:x),t);
+    if(mv.some(x=>'translate' in x||'scale' in x))e.animate(mv,Object.assign({},t,{composite:'add'}));});
+  go('.mn-titre',[{opacity:0,translate:'-40px 0'},{opacity:1,translate:'0 0'}],{duration:480});
+  go('.mn-liste .mn-mb',[{opacity:0,translate:'-30px 0'},{opacity:1,translate:'0 0'}],{delay:90,pas:45,duration:440});
+  go('.mn-sep',[{scale:'0 1'},{scale:'1 1'}],{delay:260,duration:420});
+  go('.mn-rep',[{opacity:0,translate:'0 24px'},{opacity:1,translate:'0 0'}],{delay:520,duration:460});
+  go('.mn-nom:not(.bas)',[{opacity:0,translate:'0 -160px'},{opacity:1,translate:'0 0'}],{delay:80,duration:760});
+  go('.mn-nom.bas',[{opacity:0,translate:'0 160px'},{opacity:1,translate:'0 0'}],{delay:80,duration:760});
+  go('.mn-vs',[{opacity:0,scale:'1.7'},{opacity:1,scale:'.94',offset:.7},{opacity:1,scale:'1'}],{delay:520,duration:420,easing:'ease-out'});
+  go('.mn-f.g',[{opacity:0,translate:'-48px 0'},{opacity:1,translate:'0 0'}],{delay:340,duration:560});
+  go('.mn-f.d',[{opacity:0,translate:'48px 0'},{opacity:1,translate:'0 0'}],{delay:340,duration:560});
+  go('.mn-soiree,.mn-poids,.mn-aussi,.mn-date',[{opacity:0,translate:'0 18px'},{opacity:1,translate:'0 0'}],{delay:460,pas:70,duration:460});
+  go('.mn-ff .marque',[{opacity:0,scale:'.2'},{opacity:1,scale:'1.25',offset:.7},{opacity:1,scale:'1'}],{delay:780,pas:60,duration:360,easing:'ease-out'});
 }
 
 /* ---- L'accueil : celui du jeu, mesure pour mesure ; « Reprendre » prend la place de la barre de touches (T1) ---- */
@@ -178,7 +210,7 @@ function mnAffiche(){
 function mnMenuHtml(){
   const d=mnDernier();let rep='';
   if(d){const x=mnSlot(d),i=mnInfos(x);rep=`<button class="bouton jaune cj oct mn-rep" data-mn="reprendre|${d}"><b class="T">${x.abimee?'Reprendre la copie':'Reprendre'}</b><span>${esc(i.nom)} · ${mnLong(i.date)}</span>${ico('avant',26,3)}</button>`;}
-  return `<div class="mn-accueil"><i class="mn-oct"></i>${mnAffiche()}<div class="mn-g"><h1 class="mn-titre">Cage<br>Legacy</h1>
+  return `<div class="mn-accueil">${mnTunHtml('Split','acc')}${mnAffiche()}<div class="mn-g"><h1 class="mn-titre">Cage<br>Legacy</h1>
     <nav class="mn-liste" aria-label="Modes de jeu">${MN_MENU.map(mnBouton).join('')}</nav><div class="mn-sep"></div>
     <nav class="mn-liste bas" aria-label="Autres">${mnBouton({t:'Options',s:'Affichage, son, touches',act:'options',bas:1})}${mnBouton({t:'Quitter',bas:1})}</nav></div>${rep}</div>`;
 }
@@ -342,6 +374,7 @@ rendre=function(){
   const h=F.vue==='menu'?mnMenuHtml():F.vue==='parties'?mnPartiesHtml():F.vue==='nouvelle'?mnNouvelleHtml():F.vue==='creation'?mnCreationHtml():mnChargeHtml(F.slot);
   $('#corps').innerHTML=h+(F.conf?mnConfirme():'');
   $('#zone').classList.toggle('fiche-ouverte',false);
+  if(F.vue==='menu')mnTunAccueil();
   if(F.vue==='parties')mnTunLancer(16000);
   if(F.vue==='nouvelle'){mnTunLancer(11000);if(F.anim)document.querySelectorAll('#mnHero .mn-t b[data-v]').forEach(e=>mnCompte(e,+e.dataset.v));}
   if(F.vue==='creation')mnGenLancer();
