@@ -1,0 +1,12 @@
+/* Maquette lot 1 — Les Suivis, dans l'Effectif (suivis.js, validé le 25/11). Préfixe su-. Le tableau reprend celui des Classements (eff-t cl-t). */
+
+.su-t td{height:66px}
+.su-t .c-change .cl-l1{font-weight:600}
+.su-ch.neg{color:var(--neg)}
+.su-ch.pos{color:var(--vert)}
+.su-ch.neu{color:var(--blanc)}
+.su-vide{flex:1;display:grid;place-items:center;font-size:26px;color:var(--texte2);min-height:200px}
+.su .eff-pan>.pan .p3{display:flex;flex-direction:column}
+
+/* Accueil : aucun suivi */
+.su-acc-vide{color:var(--texte2);font-size:21px}
