@@ -203,7 +203,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Chaque message montre ses données** dans des cases : chiffres, frise, bilans, série… Les cases vides se remplissent d'éléments utiles, jamais de décor. Mouvement léger à l'ouverture (apparition, jauges, compteurs).
 - **Un message se supprime** (corbeille en haut à droite), **seulement une fois la décision prise** : tant qu'il attend une réponse, la corbeille n'est pas là.
 - **Pas de barre de défilement visible** dans les listes et le message ; une jauge prend la place du trait de sa ligne, jamais un trait puis une jauge décalée.
-- « Le fil » et « Tes suivis » ne sont pas dans les Messages. Le fil va dans Presse et les suivis dans Recrutement, sauf si tu décides autrement (choix ouvert).
+- « Le fil » et « Tes suivis » ne sont pas dans les Messages : le fil est dans la Presse (validé le 18/11), les suivis dans l'Effectif (validé le 25/11, « Suivis » ci-dessous).
 
 ### Continuer (T10)
 - Toujours au même endroit : en haut à droite, en bouton jaune.
@@ -229,7 +229,7 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 
 ### Écran Recrutement (R23 à R25, Q24, Q25a, Q25b, validé le 09/11)
 - **Un seul écran**, à la place de « Contrats » dans la barre (hypothèse : les contrats de Split se gèrent dans la fiche et par le message de fin de contrat, Q23b, Q23c). Onglets : Combattants · Recruteur · Rapports (R26, validé le 15/11).
-- **Pas de « Tes suivis » ici** (retour du 09/11) : « Suivre » reste sur la fiche courte ; leur place est à décider (aperçu de l'Accueil).
+- **Pas de « Tes suivis » ici** (retour du 09/11) : « Suivre » reste sur la fiche courte ; la liste est dans l'Effectif (validé le 25/11, « Suivis » ci-dessous).
 - **Filtres** : Hommes / Femmes et catégories à gauche, **Libres / Fin de contrat / Tous** à droite (Q24). Gardés au retour.
 - **Un marché varié** (retour du 09/11 : « toujours les mêmes ») : fins de contrat tirées du classement mondial, libérés après des défaites, vétérans (ex-n° X mondial), anciens champions, champions de petites organisations, espoirs invaincus non classés. Jamais deux fois le même nom ; la série colle au palmarès. Arrivé sur le marché depuis moins de dix jours : le mot « Nouveau », petit et gris, après le surnom (pas de point jaune, réservé à « non lu » et « à toi d'agir », 09/11).
 - **Tableau** en lignes octogonales triables ; la ligne choisie porte son encadré. **Fiche courte à droite** : situation, palmarès, rang, gabarit, trois dernières victoires, style seulement s'il a été vu (sinon « Envoyer le recruteur »), ce qu'il demande, son agent et son caractère.
@@ -241,6 +241,17 @@ Ces règles viennent de tes décisions dans le plan (`docs/PLAN-CORRECTIONS-01-1
 - **Ses demandes (retour du 09/11 : « tout le monde veut sa place pour le titre »)** : 1 à 3 par combattant, selon son profil, parmi ce qu'un combattant négocie vraiment (retour du 09/11 : « pas réaliste ») — chance au titre (seulement le top 10, ou un ancien champion), tête d'affiche d'une soirée dans l'année (top 15), au moins trois combats par an, pouvoir partir après six mois sans combat, garder ses propres sponsors, le voyage et l'hôtel pour trois personnes de son équipe, ne jamais affronter un combattant de sa salle, pouvoir faire un combat de boxe anglaise ailleurs, combattre une fois dans son pays, pouvoir changer de catégorie. Chacune a un poids : **Il y tient** (non négociable, sauf à payer très cher), **Ça compte**, **Un souhait**. Tu t'engages ou non (« T'engager »). L'agent peut **renoncer** à un souhait, puis à ce qui compte (barré, « Il y renonce » en vert) ; jamais à ce à quoi il tient. Le mot « promesse » n'apparaît jamais.
 - **Règles des échanges** : le caractère de l'agent fixe le nombre d'offres (2 à 4) et la taille de ses pas ; il ne bouge pas si tu refais la même offre ; il ne descend jamais sous un plancher ; il prévient avant la dernière offre. **Une négociation rompue reste close deux mois**, même après « Plus tard » ou en rechargeant. Accord = **confirmation en chiffres** (charte S6).
 - **Fiche d'un combattant du marché** : Contrat = sa situation et ce qu'il demande ; Statistiques cachées tant que personne ne l'a vu (Q25b) ; un libre a le tunnel gris et « Libre » dans la case Organisation.
+
+### Suivis (Q13, validé le 25/11)
+- **Dans l'Effectif** : un bouton « Suivis » avec leur nombre, à droite de la ligne des filtres, à côté de l'Infirmerie et au même style. Ouvert, il a le bord blanc et les filtres de catégorie ne sont plus actifs ; un filtre ou l'Infirmerie le referme. Aucune nouvelle entrée de barre. Écartés le 25/11 : un onglet des Classements, un panneau par-dessus l'Accueil.
+- **Accueil** : « Suivis », une info par suivi (les 3 premiers de la liste, textes validés gardés), « Tout voir › » ouvre la liste dans l'Effectif ; « Aucun suivi » quand elle est vide.
+- **Une ligne** : nom souligné et surnom, organisation et catégorie (avec le n° chez Split pour un combattant de Split), palmarès, rang mondial avec ▲ / ▼, 5 derniers combats, dernier combat, puis **ce qui a changé depuis le suivi**, daté, avec « suivi depuis le … » (« Rien de nouveau » sinon ; rouge pour une blessure). Trait jaune pour un combattant de Split, comme au mondial. Colonnes triables, le changement le plus récent en tête par défaut.
+- **Suivre et ne plus suivre** depuis la fiche : « Suivre » devient « Suivi » (bord blanc), « Le suivre » des fiches d'ailleurs aussi. Une seule liste, partagée avec Recrutement et Rapports. Pas de croix dans la liste (la fiche s'en charge).
+- **État vide** : « Aucun suivi. », sans pied de tableau.
+- **Maquette** : `suivis.js`, `suivis.css`, préfixe `su-`, chargés avant `barre.js`. Seule la clé `maquette-suivis-1` est écrite ; une adresse de démonstration n'écrit rien. Adresses : `&suvoir=1` (la liste), `&suvide=1` (aucun suivi), `&suneuf=1` (efface la clé).
+- **Inventé, à relire** : les changements datés de la liste de départ (Rizzo blessé, Rachidi et sa demande, Brennan libre en juin, Szabó, Musaev).
+- **Sources** : Football Manager range sa liste de suivi dans Recruitment (FM26) ; ses nouvelles inondent la boîte de messages (FM Scout) : d'où « ce qui a changé » dans la liste, pas en message. Ici le Recrutement est écarté (09/11) et l'Effectif retenu.
+- **Écarts déjà présents, non touchés** : le dernier combat d'un combattant d'ailleurs diffère entre le tableau des Classements (repris ici) et sa fiche ; Rizzo a un surnom aux Classements, aucun dans l'Effectif.
 
 ### Écran Résultats et lendemain (R29, R30, R40, R41, Q30, Q40, Q41, validé le 10/11)
 - **Un seul écran, deux onglets** : Résultats · Le lendemain. Le lendemain reste consultable ici (R41) ; il porte l'octogone jaune qui pulse tant qu'il n'a pas été ouvert. Il n'existe que pour la dernière soirée.
@@ -531,6 +542,7 @@ Pour chaque nouvelle maquette, **lire d'abord les remarques de l'écran dans le 
 | Carte, préliminaires | R12, R14 | Validé (section 11, « La carte d'une soirée »). |
 | Messages | R13, R17 | Section 11, « Écran Messages » et « Continuer ». |
 | Effectif, Infirmerie | R15, Q12b | Validé (section 11, « Grands tableaux »). **Infirmerie = un onglet de l'Effectif.** Peu de refus au départ, toujours avec une raison et une solution. |
+| Suivis | Q13, R13 | Validé (section 11, « Suivis ») : un bouton de l'Effectif à côté de l'Infirmerie, l'aperçu sur l'Accueil avec « Tout voir › ». |
 | Fiche | R16 | Validé (section 10). |
 | Classements | R18 à R21 | **Logo du jeu sur le n° 1 et le n° 2.** Tunnel rouge. Victoire et défaite, montée et descente en vert / rouge. Sous-menus moins hauts. « Les meilleurs » en vitrine colorée, où un clic ouvre la liste complète de la statistique. Records regroupés et séparés par type. |
 | Ceintures | R22 | Validé (section 11, « Écran Ceintures ») : un onglet des Classements. Défenses et durée du règne restent à ajouter au Classement. |
@@ -561,7 +573,6 @@ Chaque maquette part de l'hypothèse notée ici et le signale. Rien n'est tranch
 | Octogone « Dans la cage » | Version « rempli » (il impose / il subit). Deux autres versions existent : « en chiffres » et « comment il gagne » | Q16c |
 | Nom des demandes des combattants | « Ses demandes » (autres pistes : « Engagements », « Parole donnée ») | Point tranché n° 1 |
 | Barre latérale | Structure validée le 22/11 : 12 écrans visibles sous quatre titres. Restent à relire les noms Soirées, Combattants, Le monde et Direction ; reste à trancher si une fin de contrat allume Recrutement | T4, Q11 |
-| Place du « Fil » et des « Suivis » | Fil dans Presse (validé le 18/11) ; Suivis **pas** dans Recrutement (retour du 09/11), place à décider (aperçu sur l'Accueil) | Q13 |
 | Logo sur le n° 1 et le n° 2 | Le rang écrit dans le logo du jeu, sur le tunnel rouge | Q18b |
 | Couleurs des organisations | Une couleur par organisation (contour, tunnel, pastille) ; palette proposée | 09/11 |
 | Écran Ceintures | Gardé, en onglet des Classements (validé le 18/11) | Point tranché n° 2 |
