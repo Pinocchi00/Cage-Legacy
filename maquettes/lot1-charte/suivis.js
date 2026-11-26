@@ -3,7 +3,7 @@
    Retenu le 25/11 : dans l'Effectif, un bouton « Suivis » à côté de l'Infirmerie, comme elle. Aucune nouvelle entrée de barre.
    L'Accueil en garde l'aperçu (une info par suivi) ; « Tout voir › » ouvre la liste.
    Une seule liste : S.rc.suivis, déjà utilisée par Recrutement et Rapports ; la fiche suit et ne suit plus (bouton « Suivre » existant).
-   Chargé après finsaison.js, avant barre.js. Préfixe su. Seule la clé maquette-suivis-1 est écrite. */
+   Chargé après finsaison.js (et prolongation.js), avant barre.js. Préfixe su. Seule la clé maquette-suivis-1 est écrite. */
 
 const SU_CLE='maquette-suivis-1';
 S.su={tri:{col:'change',sens:-1},demo:false};

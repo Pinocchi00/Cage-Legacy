@@ -76,7 +76,7 @@ Object.assign(P,{
 /* ---- Onglets ---- */
 function ogHaut(){
   const o=(v,t)=>`<button class="onglet oct ${S.og.onglet===v?'ouvert':''}" data-ogong="${v}">${t}</button>`;
-  return `<div class="cl-haut og-haut">${o('huit','Les huit')}${o('croissance','La croissance')}${typeof mcHtml==='function'?o('carriere','Ta carrière'):''}</div>`;
+  return `<div class="cl-haut og-haut">${o('huit','Concurrence')}${o('croissance','Croissance')}${typeof mcHtml==='function'?o('carriere','Carrière'):''}</div>`;
 }
 
 /* ---- Les huit : le bandeau de Split, puis les huit en colonnes ---- */

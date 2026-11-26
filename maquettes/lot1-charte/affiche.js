@@ -63,6 +63,8 @@ const afComplet=f=>!!(f.a&&f.b);
 const afTitre=f=>{const A=parId(f.a),B=parId(f.b);return !!(A&&B&&A.cat===B.cat&&(A.rang==='C'||B.rang==='C'));};
 const afRole=k=>k[0]==='p'?`Préliminaire ${+k.slice(1)+1}`:['Combat principal','Co-principal','Combat 3','Combat 4'][+k.slice(1)];
 const afRounds=(k,f)=>k==='m0'||afTitre(f)?5:3;
+/** Dernier combat du contrat : la mention disparaît dès qu'il a prolongé (prolongation.js). */
+const afFinContrat=id=>{const c=parId(id);return !!(c&&c.contrat&&c.contrat[0]===1);};
 function afEngages(){const m=new Map();for(const k of afCles()){const f=afFight(k);if(f.a)m.set(f.a,k);if(f.b)m.set(f.b,k);}return m;}
 const afRetour=r=>/^\d/.test(r)?`le ${r}`:`en ${r}`;
 /** Pourquoi un combattant est libre ou non : toujours une raison écrite (R12, point 11). */
@@ -93,7 +95,7 @@ function afRaisons(k,f){
   const e=Math.abs(ra-rb);if(!t&&e>=5)l.push(['m',`${e} places d’écart au classement`]);
   if(ra>8&&rb>8)l.push(['m','2 noms peu connus du public']);
   for(const c of [A,B]){const r=AF_RISQUES[c.id];if(r&&r[1]==='att')l.push(['a',r[3]]);}
-  if(A.id==='vanbelle'||B.id==='vanbelle')l.push(['a','Van Belle : fin de contrat']);
+  if((A.id==='vanbelle'||B.id==='vanbelle')&&afFinContrat('vanbelle'))l.push(['a','Van Belle : fin de contrat']);
   if(!l.some(x=>x[0]==='p')&&e<=3)l.unshift(['p','Un combat serré sur le papier']);
   return l;
 }
@@ -131,7 +133,7 @@ function afARegler(){
   if(!adv&&!S.af.engage)l.push(['att','messages','Belkacem attend une réponse à sa demande',kb||null]);
   else if(adv&&afRangN(adv)>3)l.push(['att','messages','Belkacem voulait un top 3 : il le saura',kb]);
   for(const id of Object.keys(AF_RISQUES))if(eng.has(id)&&AF_RISQUES[id][1]==='att')l.push(['att',AF_RISQUES[id][0],AF_RISQUES[id][3],eng.get(id)]);
-  if(eng.has('vanbelle'))l.push(['neu','contrats','Van Belle : dernier combat du contrat',eng.get('vanbelle')]);
+  if(eng.has('vanbelle')&&afFinContrat('vanbelle'))l.push(['neu','contrats','Van Belle : dernier combat du contrat',eng.get('vanbelle')]);
   return l;
 }
 function afStrip(){
@@ -548,7 +550,7 @@ document.addEventListener('click',e=>{
   if((el=t.closest('[data-afcat]'))){S.af.cat=el.dataset.afcat;S.af.menu=false;rendre();const l=$('.af-list');if(l)l.scrollTop=0;return;}
   if((el=t.closest('[data-afseg]'))){S.af.tri=el.dataset.afseg;rendre();const l=$('.af-list');if(l)l.scrollTop=0;return;}
   if((el=t.closest('[data-afdosn]'))){S.af.dos+=+el.dataset.afdosn;S.af.apercu=null;rendre();return;}
-  if((el=t.closest('[data-afprop]'))){toast(`Ouvre la prolongation de ${esc(parId(el.dataset.afprop).nom)} : écran Contrats, hors de cette maquette.`);return;}
+  if((el=t.closest('[data-afprop]'))){plOuvrir(el.dataset.afprop);return;}
   if((el=t.closest('[data-afdos]'))){const [k,l]=el.dataset.afdos.split('|'),ids=l.split(','),f=afFight(k),avant=afChiffres().moy;
     for(const id of ids){if(f.a===id||f.b===id)continue;const p=afEngages().get(id);if(p){const pf=afFight(p);if(pf.a===id)pf.a=null;if(pf.b===id)pf.b=null;}if(!f.a)f.a=id;else if(!f.b)f.b=id;}
     S.af.sel=k;S.af.tab=k[0];S.af.dos=0;if(!afLarge())S.af.cat=parId(ids[0]).cat;S.af.vue='liste';S.af.valide=false;if(k[0]==='p')S.af.retouche=true;rendre();afSent(k,avant);return;}

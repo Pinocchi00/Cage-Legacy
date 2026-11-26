@@ -355,7 +355,7 @@ function fdSaisonSuivanteHtml(){
     <div class="fd-v"><div class="fd-vh fd-vh2"><div class="fd-vt"><span class="fd-eye">${fdDate(fdD(1,0,a))} · objectifs de ${FD_PATRON}${FD_RELIRE}</span><h1 class="T fd-verdict">Saison ${a}</h1>
       <p class="fd-phrase">${F.cas==='tenu'?'Objectif : une place de mieux.':'3 objectifs, jugés le 31 décembre. Manqués : renvoi.'}</p></div></div>
     <div class="fd-cs">${os.map((o,k)=>fdCarteObj(o,'cours',k)).join('')}</div>
-    <div class="fd-bar">${fdBarCases(F.cas,a-1)}<div class="fd-act"><div class="fd-fait fd-neutre"><span>Jugés le 31 déc. ${a}</span></div>${fdNon('Ta carrière','data-fdcarriere')}</div></div></div></div>`;
+    <div class="fd-bar">${fdBarCases(F.cas,a-1)}<div class="fd-act"><div class="fd-fait fd-neutre"><span>Jugés le 31 déc. ${a}</span></div>${fdNon('Carrière','data-fdcarriere')}</div></div></div></div>`;
 }
 function fdSigneHtml(){
   const F=S.fd,o=fdSigne(),t=ogTeinte(o.nom),a=fdAnnee()+1,m=o.o.meilleurs&&o.o.meilleurs[0],k=(l,v,s)=>`<div class="mn-t"><span class="etiq">${l}</span><b class="T" style="font-size:${fdTaille(v.replace(/<[^>]+>/g,''),380,76)}px">${v}</b><small>${s}</small></div>`;
@@ -378,7 +378,7 @@ function fdSansPosteHtml(){
     <div class="fd-bar"><div class="fd-bc"><span class="etiq">Sans poste</span><span class="fd-bv"><b class="T">${F.attente?`${F.attente*7} jours`:'Ce matin'}</b></span><small>depuis le 1er janv. 2029</small></div>
       <div class="fd-bc"><span class="etiq">Tu gardes</span><span class="fd-bv"><b class="T">Carnet</b></span><small>et ta réputation</small></div>
       <div class="fd-bc"><span class="etiq">Une offre</span><span class="fd-bv"><b class="T">Par message</b></span><small>Continuer s’y arrêtera${FD_RELIRE}</small></div>
-      <div class="fd-act">${fdNon('Tes saisons','data-fdgo="saisons"')}${fdNon('Finir la carrière','data-fdconf="fin"')}</div></div></div></div>`;
+      <div class="fd-act">${fdNon('Saisons','data-fdgo="saisons"')}${fdNon('Finir la carrière','data-fdconf="fin"')}</div></div></div></div>`;
 }
 
 /* ---- Ce qui arrive par message : la forme de l'écran Messages, sans y toucher ---- */
@@ -493,14 +493,14 @@ function fdMsgs(){
     const os=fdObjectifs(a,F.cas),place=F.cas==='tenu'?5:7,mond=F.cas==='tenu'?7:F.cas==='avert'?8:10;
     const o0=Object.assign({},os[0],{v:place,liste:null,det:`${place}/8 au 1er juillet.`}),o1=Object.assign({},os[1],{v:mond,det:`${lien(parId('gpoidslourdC'))} : n° ${mond} au 1er juillet.`});
     l.push({id:'mi',tag:'Organisation',qui:FD_PATRON,role:'patron',date:fdD(1,6,a),t:`Bilan de mi-saison ${a}`,vif:true,txt:FD_MI[F.cas],
-      vue:()=>`<div class="fd-ls">${fdLigneObj(o0,'cours',0)}${fdLigneObj(o1,'cours',1)}${fdLigneObj(os[2],fdEtatDe(os[2]),2)}</div>`,bas:()=>`<div class="fd-mi-reg"><span class="etiq">Jugés le</span><b class="T">31 déc.</b><span>${F.cas==='renvoi'?'1 avertissement en cours':'aucun avertissement'}</span></div>${fdNon('Ta carrière','data-fdcarriere')}`});
+      vue:()=>`<div class="fd-ls">${fdLigneObj(o0,'cours',0)}${fdLigneObj(o1,'cours',1)}${fdLigneObj(os[2],fdEtatDe(os[2]),2)}</div>`,bas:()=>`<div class="fd-mi-reg"><span class="etiq">Jugés le</span><b class="T">31 déc.</b><span>${F.cas==='renvoi'?'1 avertissement en cours':'aucun avertissement'}</span></div>${fdNon('Carrière','data-fdcarriere')}`});
     return l;
   }
   if(F.etape==='choc'){
     const att=F.choc==='recu',cl=fdCarte();
     l.push({id:'choc',tag:'Organisation',qui:'Marcus Varela',role:'Matchmaker',date:fdD(8,0,2028),t:'Garden of Blood propose un choc',vif:att,txt:`« Split achète. Nous, on signe les vedettes. » 5 combats : ${fdResume(cl)}.`,vue:()=>fdChocVue(),
       bas:()=>att?`${fdOuiM('Accepter','data-fdconf="choc"')}${fdNon('Négocier','data-fdnego')}${fdNon('Refuser','data-fdconf="chocrefus"')}`
-        :`<div class="ms-ok"><span style="color:${F.choc==='accepte'?'var(--vert)':'var(--neg)'};display:flex">${ico(F.choc==='accepte'?'fdCoche':'fdCroix',24,3)}</span>${fdChocEtat()}</div>${fdNon('Suivre dans Tes saisons','data-fdsuivre')}`});
+        :`<div class="ms-ok"><span style="color:${F.choc==='accepte'?'var(--vert)':'var(--neg)'};display:flex">${ico(F.choc==='accepte'?'fdCoche':'fdCroix',24,3)}</span>${fdChocEtat()}</div>${fdNon('Voir les saisons','data-fdsuivre')}`});
     return l;
   }
   l.push({id:'bilan',tag:'Organisation',qui:FD_PATRON,role:'patron',date:d31,t:`Bilan de la saison ${a}`,vif:!F.dec,txt:'',
@@ -547,7 +547,7 @@ function fdPrixGrille(a){
 }
 function fdSaisonsHtml(){
   const F=S.fd,l=fdSaisonsListe();
-  if(!l.length)return `<div class="fd fd-sais ${F.anim?'fd-anim':''}"><div class="fd-vide oct"><div class="oct">${fdTun('brightness(.55)','bande')}<span class="fd-eye">Tes saisons</span><span class="T">Aucune saison terminée</span><span class="fd-phrase">Ta première saison se termine le 31 déc. 2027.</span></div></div></div>`;
+  if(!l.length)return `<div class="fd fd-sais ${F.anim?'fd-anim':''}"><div class="fd-vide oct"><div class="oct">${fdTun('brightness(.55)','bande')}<span class="fd-eye">Saisons</span><span class="T">Aucune saison terminée</span><span class="fd-phrase">Ta première saison se termine le 31 déc. 2027.</span></div></div></div>`;
   const s=l.find(x=>x.annee===F.saison)||l[0],dispo=s.enCours?['choc']:['bilan','prix','classement'],ong=dispo.includes(F.ong)?F.ong:dispo[0],noms={bilan:'Bilan',prix:'Prix',classement:'Classement',choc:'Choc'};
   const gauche=pan(titre('Saisons')+`<div class="fd-sl">${l.map(x=>{const os=x.enCours?null:fdObjectifs(x.annee,x.issue),n=os?os.filter(fdTenu).length:0;
     return `<button class="fd-si oct ${x.annee===s.annee?'sel':''}" data-fdsaison="${x.annee}"><span class="fd-sii oct"><b class="T">${x.annee}</b><span class="fd-sit"><span class="fd-sv ${x.enCours?'':x.issue}">${x.enCours?'En cours':FD_MOTS[F.mots][x.issue]}</span><span class="sous">${x.enCours?'Chez Split':`${fdPlace(x.issue)}/8 · objectifs ${n}/${os.length}`}</span></span></span></button>`;}).join('')}</div><div class="fd-sf"><span><b class="T">${l.filter(x=>!x.enCours).length}</b>saison${l.filter(x=>!x.enCours).length>1?'s':''}</span><span><b class="T">${l.filter(x=>!x.enCours).length*5}</b>soirées</span><span><b class="T">${F.cas==='tenu'?0:F.cas==='avert'?1:2}</b>avertiss.</span></div>`,'','fd-psg');
@@ -615,14 +615,14 @@ const fdDateCourante=()=>{const F=S.fd,a=fdAnnee();
 /* La décision est dans l'écran : Continuer laisse la place au seul bouton jaune. */
 const fdDecisionIci=()=>{const F=S.fd;return (F.etape==='bilan'||F.etape==='offres')&&!F.dec||F.etape==='suite'&&!!fdSigne();};
 const fdLibelle=()=>{const F=S.fd;
-  if(F.etape==='saisons')return 'Ta carrière';
+  if(F.etape==='saisons')return 'Carrière';
   if(F.etape==='prix')return 'Classement';
   if(F.etape==='classement')return F.dec?(fdSigne()?'Arrivée':fdSansPoste()?'Suite':`Saison ${fdAnnee()+1}`):'Bilan';
   if(F.tardive&&F.etape==='offres')return 'Suite';
   if(F.etape==='bilan'||F.etape==='offres')return F.ordre==='prix'?'Suite':'Prix';
   return 'Continuer';};
 function fdEntete(){
-  const F=S.fd,sc=fdEstScene(),pl={mi:'Messages',message:'Messages',choc:'Messages',negocier:'Négocier le choc',saisons:'Tes saisons',bilan:'Bilan de saison',offres:'Offres',prix:'Prix',classement:'Classement'}[F.etape]||(fdSigne()?'Arrivée':fdSansPoste()?'Fin de saison':`Saison ${fdAnnee()+1}`);
+  const F=S.fd,sc=fdEstScene(),pl={mi:'Messages',message:'Messages',choc:'Messages',negocier:'Négocier le choc',saisons:'Saisons',bilan:'Bilan de saison',offres:'Offres',prix:'Prix',classement:'Classement'}[F.etape]||(fdSigne()?'Arrivée':fdSansPoste()?'Fin de saison':`Saison ${fdAnnee()+1}`);
   rendreEntete(pl);
   const d=fdDateCourante(),e=$('#dateH');if(e)e.innerHTML=`${fdJour(d)} ${MOIS[d.getMonth()]} ${d.getFullYear()}`;
   const bo=document.querySelectorAll('#entete .boite')[1];
@@ -654,8 +654,9 @@ function fdHtml(rev){
 
 /* ---- Les deux points d'entrée ajoutés aux écrans validés, sans les redessiner ---- */
 function fdPoints(){
-  if(S.ecran==='organisation'&&S.og.onglet==='carriere'){
-    const t=$('.mc-col2 .pt');if(t&&!t.querySelector('[data-fdsaisons]'))t.insertAdjacentHTML('beforeend','<button class="og-lien fd-lmc" data-fdsaisons>Tes saisons ›</button>');
+  /* Retour du 25/11 : un bouton dans la ligne des onglets de l'Organisation, sur chaque onglet ; il remplace le lien de Ta carrière (pas de doublon). */
+  if(S.ecran==='organisation'){
+    const t=$('.og-haut');if(t&&!t.querySelector('[data-fdsaisons]'))t.insertAdjacentHTML('beforeend','<button class="bb oct petit fd-osais" data-fdsaisons><span class="oct">Saisons ›</span></button>');
   }
   if(S.ecran==='calendrier'){
     document.querySelectorAll('.ca-faits .ca-f').forEach(f=>{const l=f.querySelector('.etiq');if(!l||f.querySelector('[data-fdouvrir]'))return;

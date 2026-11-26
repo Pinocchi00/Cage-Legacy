@@ -328,7 +328,7 @@ function mnConfirme(){
 /* ---- Rendu ---- */
 const mnEtat=()=>JSON.stringify({vue:S.mn.vue,slot:S.mn.slot,org:S.mn.org,duo:S.mn.duo,choix:S.mn.choix,ecrase:S.mn.ecrase});
 const mnRestaurer=j=>Object.assign(S.mn,JSON.parse(j),{conf:null,anim:true});
-const MN_PLAQUES={parties:()=>S.mn.duo?'Duo':'Mes parties',nouvelle:()=>'Nouvelle partie',creation:()=>'Nouvelle partie'};
+const MN_PLAQUES={parties:()=>S.mn.duo?'Duo':'Parties',nouvelle:()=>'Nouvelle partie',creation:()=>'Nouvelle partie'};
 const mnRendreBase=rendre;
 rendre=function(){
   const b=document.body;

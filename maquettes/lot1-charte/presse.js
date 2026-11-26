@@ -117,7 +117,7 @@ const PR_ART=[
   {id:'a04ch',d:prJ(4),m:'ch',s:['split'],t:'Split nomme un nouveau matchmaker',par:'La rédaction',
    ch:'Il prend en main la Fight Night 63, le 16 février à Lille.',
    p:()=>[`Split a annoncé lundi l’arrivée de son nouveau matchmaker. Sa première soirée sera Split Fight Night 63, le 16 février au Forum de Lille, avec ${prN('nana')} contre ${prN('mezouar')} en combat principal.`],
-   f:()=>[['Arrivée','4 janv.','lundi'],['Première soirée','16 févr.','Forum de Lille']],act:[['Ta carrière','data-prgo="carriere"']]},
+   f:()=>[['Arrivée','4 janv.','lundi'],['Première soirée','16 févr.','Forum de Lille']],act:[['Carrière','data-prgo="carriere"']]},
   {id:'a03lf',d:prJ(3),m:'lf',s:['combattants'],t:'« Le Notaire porte bien son nom »',par:'Sujet ouvert par Gones69',
    ch:'Un sujet sur les combats de Thomas Labbé.',
    p:()=>[`Le sujet compte les décisions de ${prN('labbe')} : cinq sur ses six derniers combats.`,
@@ -129,7 +129,7 @@ const PR_ART=[
    p:()=>[`Le combat principal de Pure Impact, dimanche à Dubaï, a duré 50 secondes. ${prX('Yusuf Demir','Poids mi-moyen')} a amené ${prX('Lucas Brandão','Poids mi-moyen')} au sol au premier échange, puis l’a arrêté d’un coude, à 0:50 du 1er round.`,
      `4 100 spectateurs, loin du record de 7 200 du 21 novembre. En décembre, Pure Impact a signé trois combattants classés venus de Fighting Pacific.`],
    f:()=>[['Durée','0:50','1er round'],['Spectateurs','4 100','record : 7 200'],['Classés signés','3','en décembre']],
-   act:[['Les huit organisations','data-prgo="organisation"']]},
+   act:[['Organisation','data-prgo="organisation"']]},
   {id:'a02lf',d:prJ(2),m:'lf',s:['split','combattants'],t:'Le combat que vous voulez en 2027 : Nana–Mercier, loin devant',par:'Sondage du Forum',
    ch:'Champion contre champion : le léger contre le mi-moyen.',
    p:()=>[`Sur 4 210 votes, 38 % choisissent ${prN('nana')} contre ${prN('gpoidsmimoyenC')}, les deux champions de Split. ${prN('rachidi')} contre ${prN('gpoidspaillefC')} est 2e, avec 11 %.`,
@@ -153,7 +153,7 @@ const PR_ART=[
    ch:'Plus grosse affluence des 8 organisations en décembre.',
    p:()=>[`Garden of Blood a réuni 16 900 spectateurs à New York le 20 décembre, la plus grosse affluence du mois. Son record reste 19 400, le 12 septembre.`,
      `Combat principal : ${prX('Andre Whitfield','Poids moyen')} garde sa ceinture des poids moyens contre ${prX('Mateo Ruiz','Poids moyen')}, par décision unanime (49-46, 49-46, 48-47).`],
-   f:()=>[['Spectateurs','16 900','New York'],['Record','19 400','12 sept. 2026']],act:[['Les huit organisations','data-prgo="organisation"']]},
+   f:()=>[['Spectateurs','16 900','New York'],['Record','19 400','12 sept. 2026']],act:[['Organisation','data-prgo="organisation"']]},
   {id:'a18ch',d:prJ(18,11,2026),m:'ch',s:['soiree'],t:'C’est officiel : Nana–Mezouar 2 le 16 février à Lille',par:'La rédaction',
    ch:'Le combat principal de la Fight Night 63.',
    p:()=>[`Split a confirmé le combat principal de sa Fight Night 63 : ${prN('nana')} défend sa ceinture des légers contre ${prN('mezouar')}, le 16 février au Forum de Lille, en cinq rounds.`],
@@ -218,7 +218,7 @@ const prSel=()=>{const l=prListe();return l.find(a=>a.id===S.pr.art)||l[0]||null
 /* ---- Haut de l'écran ---- */
 function prOnglets(){
   const o=(v,t)=>`<button class="onglet oct ${S.pr.vue===v?'ouvert':''}" data-prvue="${v}">${t}</button>`;
-  return `<div class="cl-haut">${o('une','À la une')}${o('defis','Les défis')}${o('fil','Le fil')}</div>`;
+  return `<div class="cl-haut">${o('une','À la une')}${o('defis','Défis')}${o('fil','Articles')}</div>`;
 }
 function prFiltres(){
   const b=(attr,v,t,on)=>`<button class="bb oct petit ${on?'on':''}" ${attr}="${v}"><span class="oct">${t}</span></button>`;

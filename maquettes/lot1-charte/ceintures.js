@@ -447,7 +447,7 @@ function ceHtml(){return ceToutes()?ceMur():ceDetail(clCat());}
 /* ---- Branchement dans les Classements : l'onglet, le rendu, Retour et Avant, la fiche ---- */
 clOnglets=function(){
   const o=(v,t)=>`<button class="onglet oct ${S.cl.vue===v?'ouvert':''}" data-clvue="${v}">${t}</button>`;
-  return `<div class="cl-haut">${o('classement','Classement')}${o('ceintures','Ceintures')}${o('meilleurs','Les meilleurs')}${o('records','Records')}</div>`;
+  return `<div class="cl-haut">${o('classement','Classement')}${o('ceintures','Ceintures')}${o('meilleurs','Statistiques')}${o('records','Records')}</div>`;
 };
 const ceClHtmlBase=clHtml;
 clHtml=function(){
