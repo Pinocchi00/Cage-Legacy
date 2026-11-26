@@ -364,7 +364,8 @@ function rcDemandesHtml(x){
 function rcNegoHtml(){
   const x=rcDe(S.rc.nego),c=parId(x.id),N=x.nego,o=N.offre,fini=N.fini,[agent,trait]=x.agent;
   const total=o.combats*(o.bourse+o.vic)+o.sig;
-  const prol=x.type==='prol',split=COMBATTANTS.filter(y=>y.cat===c.cat&&y.id!==c.id).map(y=>+y.contrat[1].replace(/\D/g,'')).sort((a,b)=>b-a),place=split.filter(s=>s>(prol?o.bourse+o.vic:o.bourse)).length+1;
+  /* Les bourses de Split sont des totaux (fixe + victoire) : on compare l'offre totale, sans le combattant lui-même. */
+  const prol=x.type==='prol',split=COMBATTANTS.filter(y=>y.cat===c.cat&&y.id!==c.id).map(y=>+y.contrat[1].replace(/\D/g,'')).sort((a,b)=>b-a),place=split.filter(s=>s>o.bourse+o.vic).length+1;
   const humeur=fini==='accord'?'Content de l’accord.':fini==='refus'?'Il est passé à autre chose.':S.rc.attente?'Il lit ton offre…':N.dernier?'Il n’attendra plus.':N.ech===0?'Il attend ton offre.':'Il veut aller vite.';
   const hcol=fini==='accord'?'var(--vert)':fini==='refus'||N.dernier?'var(--neg)':'var(--blanc)';
   const ini=agent.split(' ').map(m=>m[0]).join('');

@@ -412,7 +412,8 @@ function clRecords(){
     ['En carrière',[
       R('19','Victoires chez Split',P_('skerloch'),'De 2012 à 2022','Entraîneur à Brest'),
       R('12','Finitions chez Split',P_('sferhat'),'8 KO et 4 soumissions','Commentateur des soirées de Split'),
-      R('22','Combats chez Split',P_('kessler'),'Depuis 2020',parId('kessler').libereSplit?`Libéré le ${dMois(parId('kessler').libre)}`:'Record en cours',parId('kessler').libereSplit?0:1),
+      /* Kerloc'h, 19-6-0 chez Split de 2012 à 2022 : 25 combats. Le plus fidèle en activité, Nana, en compte 17 (sa fiche). */
+      R('25','Combats chez Split',P_('skerloch'),'De 2012 à 2022','Entraîneur à Brest'),
       R('9','Victoires de suite',P_('shaddou'),'De 2017 à 2020','Agent de combattants'),
     ]],
     ['Ceintures',[
